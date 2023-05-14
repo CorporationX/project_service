@@ -20,7 +20,7 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
-    @Value("${spring.data.redis.channel}")
+    @Value("${spring.data.redis.channels.calculations_channel.name}")
     private String channel;
 
     /**
