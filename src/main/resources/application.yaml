@@ -31,3 +31,6 @@ server:
 logging:
   level:
     root: info
+
+calculations_messages_processing:
+  enabled: true

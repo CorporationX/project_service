@@ -9,6 +9,7 @@ import faang.school.projectservice.model.CalculationRequest;
 import faang.school.projectservice.service.worker.CalculationWorker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,16 @@ public class RedisCalculationSubscriber implements MessageListener {
 
     private final CalculationWorker calculationWorker;
 
+    private final boolean processingEnabled;
+
+
     @Autowired
-    public RedisCalculationSubscriber(CalculationWorker calculationWorker) {
+    public RedisCalculationSubscriber(
+            CalculationWorker calculationWorker,
+            @Value("${calculations_messages_processing.enabled}") boolean processingEnabled
+    ) {
         this.calculationWorker = calculationWorker;
+        this.processingEnabled = processingEnabled;
     }
 
     public List<CalculationRequest> receivedRequests = new ArrayList<>();
@@ -33,7 +41,9 @@ public class RedisCalculationSubscriber implements MessageListener {
         try {
             var calculationRequest = objectMapper.readValue(message.getBody(), CalculationRequest.class);
             receivedRequests.add(calculationRequest);
-            calculationWorker.processCalculationAsync(calculationRequest);
+            if (processingEnabled) {
+                calculationWorker.processCalculationAsync(calculationRequest);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

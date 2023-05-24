@@ -32,7 +32,6 @@ public class CalculatorController {
 
         List<Integer> results =
                 Stream.of(CalculationType.ADD, CalculationType.SUB, CalculationType.MUL, CalculationType.DIV)
-                        .parallel()
                         .map(it -> new CalculationRequest(a, b, it))
                         .map(calculatorService::calculate)
                         .toList();

@@ -2,7 +2,6 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
-
 }
 
 group = "faang.school"
@@ -21,6 +20,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
@@ -38,6 +39,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.6")
     implementation("org.projectlombok:lombok:1.18.26")
     annotationProcessor("org.projectlombok:lombok:1.18.26")
+    implementation("org.mapstruct:mapstruct:1.5.3.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
 
     /**
      * Test containers
@@ -45,6 +48,7 @@ dependencies {
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
+    testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
 
     /**
      * Tests
@@ -59,3 +63,7 @@ tasks.withType<Test> {
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
+
+tasks.bootJar {
+    archiveFileName.set("service.jar")
+}

@@ -89,7 +89,7 @@ public class CalculatorService {
 
     private void bigCalculationImitation() {
         try {
-            Thread.sleep(300);
+            Thread.sleep(50);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
