@@ -26,7 +26,7 @@ spring:
           name: calculations_channel
 
 server:
-  port: 8087
+  port: 8082
 
 logging:
   level:
