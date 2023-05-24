@@ -26,8 +26,11 @@ spring:
           name: calculations_channel
 
 server:
-  port: 8080
+  port: 8082
 
 logging:
   level:
     root: info
+
+calculations_messages_processing:
+  enabled: true

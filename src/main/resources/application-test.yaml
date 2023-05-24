@@ -1,7 +1,2 @@
-spring:
-  jpa:
-    show-sql: true
-    generate-ddl: true
-    hibernate:
-      ddl-auto: create-drop
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+calculations_messages_processing:
+  enabled: false
