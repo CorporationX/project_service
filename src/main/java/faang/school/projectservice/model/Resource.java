@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,7 +37,9 @@ public class Resource {
     @Column(name = "name", nullable = false)
     private String name;
 
-    private String link;
+    private String key;
+
+    private BigInteger size;
 
     @ElementCollection(targetClass = TeamRole.class)
     @CollectionTable(name = "resource_allowed_roles",

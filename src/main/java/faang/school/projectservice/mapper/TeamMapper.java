@@ -1,13 +1,13 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.dto.TeamDto;
+import faang.school.projectservice.model.Team;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ProjectMapper {
-    ProjectDto toDto(Project entity);
-    Project toEntity(ProjectDto dto);
+public interface TeamMapper {
+    TeamDto toDto(Team entity);
+    Team toEntity(TeamDto dto);
 }

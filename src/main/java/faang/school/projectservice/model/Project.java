@@ -14,12 +14,15 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 @Entity
 @Table(name = "project")
 public class Project {
@@ -33,6 +36,12 @@ public class Project {
 
     @Column(name = "description", length = 4096)
     private String description;
+
+    @Column(name = "storage_size")
+    private BigInteger storageSize;
+
+    @Column(name = "max_storage_size")
+    private BigInteger maxStorageSize;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)

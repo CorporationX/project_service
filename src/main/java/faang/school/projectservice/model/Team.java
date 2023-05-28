@@ -26,11 +26,7 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
-    @JoinTable(
-            name = "team_team_member",
-            joinColumns = @JoinColumn(name = "team_id"),
-            inverseJoinColumns = @JoinColumn(name = "team_member_id"))
+    @OneToMany(mappedBy = "team")
     private List<TeamMember> teamMembers;
 
     @OneToOne

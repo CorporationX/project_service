@@ -1,11 +1,13 @@
 CREATE TABLE IF NOT EXISTS team_member (
     id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL
+    user_id BIGINT NOT NULL,
+    team_id BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS team (
     id BIGSERIAL PRIMARY KEY,
     team_member_id BIGINT,
+    project_id BIGINT NOT NULL,
     CONSTRAINT fk_team_member
         FOREIGN KEY (team_member_id) REFERENCES team_member (id)
 );
@@ -14,6 +16,8 @@ CREATE TABLE IF NOT EXISTS project (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(128) NOT NULL,
     description VARCHAR(4096),
+    storage_size BIGINT,
+    max_storage_size BIGINT,
     owner_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -35,6 +39,7 @@ CREATE TABLE IF NOT EXISTS resource (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     project_id BIGINT,
+    size BIGINT,
     CONSTRAINT fk_project
         FOREIGN KEY (project_id) REFERENCES project(id)
 );
