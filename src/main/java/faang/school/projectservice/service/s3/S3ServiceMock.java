@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.s3;
 
-import faang.school.projectservice.dto.ResourceDto;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +21,14 @@ import java.time.ZonedDateTime;
 public class S3ServiceMock implements S3Service {
 
     @Override
-    public ResourceDto uploadFile(MultipartFile file, String folder) {
+    public Resource uploadFile(MultipartFile file, String folder) {
         String key = String.format("%s/%s_%d",
                 folder,
                 file.getOriginalFilename(),
                 ZonedDateTime.now().toInstant().toEpochMilli()
         );
 
-        ResourceDto resource = new ResourceDto();
+        Resource resource = new Resource();
         resource.setKey(key);
         resource.setSize(BigInteger.valueOf(file.getSize()));
         resource.setCreatedAt(LocalDateTime.now());

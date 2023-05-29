@@ -1,11 +1,13 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.TaskDto;
+import faang.school.projectservice.dto.filter.FilterDto;
 import faang.school.projectservice.mapper.TaskMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.service.filter.TaskFilter;
+import faang.school.projectservice.service.filter.Filter;
+import faang.school.projectservice.service.filter.NameFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,13 +20,13 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
-    private final TaskMapper taskMapper;
-    private final TaskFilter filter;
+    private final TaskMapper mapper;
+    private final List<Filter<Project>> filters;
 
     @Transactional(readOnly = true)
     public List<TaskDto> getTasksByProjectId(Long projectId) {
         return taskRepository.findAllByProjectId(projectId).stream()
-                .map(taskMapper::toDto)
+                .map(mapper::toDto)
                 .toList();
     }
 
@@ -34,9 +36,15 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public List<TaskDto> getTasksByFilter(ProjectFilterDto filterDto) {
+    public List<TaskDto> getTasksByFilter(FilterDto filterDto) {
         Stream<Task> tasks = taskRepository.findAll().stream();
-        return filter.applyFilter(tasks, filterDto).map(taskMapper::toDto).collect(Collectors.toList());
-    }
 
+        for (Filter filter : filters) {
+            if (filter instanceof NameFilter) {
+                tasks = filter.applyFilter(tasks.map(Task::getName), filterDto);
+            }
+        }
+
+        return tasks.map(mapper::toDto).collect(Collectors.toList());
+    }
 }

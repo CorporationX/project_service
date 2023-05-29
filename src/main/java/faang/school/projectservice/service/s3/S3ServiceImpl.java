@@ -4,9 +4,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.FileException;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class S3ServiceImpl implements S3Service {
     private final String bucketName;
 
     @Override
-    public ResourceDto uploadFile(MultipartFile file, String folder) {
+    public Resource uploadFile(MultipartFile file, String folder) {
         long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
@@ -52,7 +52,7 @@ public class S3ServiceImpl implements S3Service {
             throw new FileException(ErrorMessage.FILE_EXCEPTION);
         }
 
-        ResourceDto resource = new ResourceDto();
+        Resource resource = new Resource();
         resource.setKey(key);
         resource.setSize(BigInteger.valueOf(fileSize));
         resource.setCreatedAt(LocalDateTime.now());

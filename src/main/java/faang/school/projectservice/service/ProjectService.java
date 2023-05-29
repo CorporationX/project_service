@@ -1,13 +1,14 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.dto.filter.FilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.filter.ProjectFilter;
+import faang.school.projectservice.service.filter.Filter;
+import faang.school.projectservice.service.filter.NameFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ import static java.util.Objects.nonNull;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
-    private final ProjectFilter filter;
+    private final List<Filter<Project>> filters;
 
     @Transactional(readOnly = true)
     public List<ProjectDto> getProjectsByIds(List<Long> ids) {
@@ -37,7 +38,7 @@ public class ProjectService {
     @Transactional
     public ProjectDto create(ProjectDto projectDto) {
         if (!projectRepository.existsByOwnerIdAndName(projectDto.getOwner().getId(), projectDto.getName())) {
-            Project entity = projectRepository.save(mapper.toEntity(projectDto));
+            Project entity = save(mapper.toEntity(projectDto));
             return mapper.toDto(entity);
         }
         throw new DataValidationException(ErrorMessage.PROJECT_ALREADY_EXISTS, projectDto.getName());
@@ -58,14 +59,19 @@ public class ProjectService {
         }
         entity.setUpdatedAt(LocalDateTime.now());
 
-        return mapper.toDto(projectRepository.save(entity));
+        return mapper.toDto(save(entity));
+    }
+
+    @Transactional
+    public Project save(Project project) {
+        return projectRepository.save(project);
     }
 
 
     @Transactional(readOnly = true)
-    public ProjectDto getProject(long id) {
-        return mapper.toDto(projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Couldn't find a user with id " + id)));
+    public Project getProjectById(long id) {
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Couldn't find a project with id " + id));
     }
 
     @Transactional(readOnly = true)
@@ -75,8 +81,15 @@ public class ProjectService {
 
 
     @Transactional(readOnly = true)
-    public List<ProjectDto> getProjectsByFilter(ProjectFilterDto filterDto) {
+    public List<ProjectDto> getProjectsByFilter(FilterDto filterDto) {
         Stream<Project> projects = projectRepository.findAll().stream();
-        return filter.applyFilter(projects, filterDto).map(mapper::toDto).collect(Collectors.toList());
+
+        for (Filter filter : filters) {
+            if (filter instanceof NameFilter) {
+                projects = filter.applyFilter(projects.map(Project::getName), filterDto);
+            }
+        }
+
+        return projects.map(mapper::toDto).collect(Collectors.toList());
     }
 }

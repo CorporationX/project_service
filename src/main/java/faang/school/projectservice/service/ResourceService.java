@@ -8,7 +8,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.s3.S3Service;
@@ -29,20 +28,15 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class ResourceService {
     private final S3Service s3Service;
-    private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final ResourceMapper resourceMapper;
 
     @Transactional(readOnly = true)
     public List<ResourceDto> getAvailableResources(Long projectId, Long userId) {
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(projectId, userId);
-        if(isNull(teamMember)) {
-            throw new EntityNotFoundException("Couldn't find a team member with id " + userId);
-        }
-
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Couldn't find a project with id " + projectId));
+        TeamMember teamMember = getTeamMemberByProjectId(userId, projectId);
+        Project project = projectService.getProjectById(projectId);
 
         return getAllAvailable(project, teamMember);
     }
@@ -53,26 +47,20 @@ public class ResourceService {
     }
 
     public ResourceDto addResource(Long projectId, Long userId, MultipartFile file) {
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-        if(isNull(teamMember)) {
-            throw new EntityNotFoundException("Couldn't find a team member with id " + userId);
-        }
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Couldn't find a project with id " + projectId));
+        TeamMember teamMember = getTeamMemberByProjectId(userId, projectId);
+        Project project = projectService.getProjectById(projectId);
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
-        ResourceDto resourceDto = s3Service.uploadFile(file, folder);
-
-        Resource resource = resourceMapper.toEntity(resourceDto);
+        Resource resource = s3Service.uploadFile(file, folder);
         resource.setAllowedRoles(teamMember.getRoles());
         resource.setProject(project);
         resource = resourceRepository.save(resource);
 
         project.setStorageSize(newStorageSize);
-        projectRepository.save(project);
+        projectService.save(project);
 
         return resourceMapper.toDto(resource);
     }
@@ -88,16 +76,16 @@ public class ResourceService {
 
         String folder = project.getId() + project.getName();
         s3Service.deleteFile(resourceFromDB.getKey());
-        ResourceDto resourceDto = s3Service.uploadFile(file, folder);
-        resourceFromDB.setKey(resourceDto.getKey());
-        resourceFromDB.setSize(resourceDto.getSize());
-        resourceFromDB.setUpdatedAt(resourceDto.getUpdatedAt());
-        resourceFromDB.setName(resourceDto.getName());
-        resourceFromDB.setType(resourceDto.getType());
+        Resource resource = s3Service.uploadFile(file, folder);
+        resourceFromDB.setKey(resource.getKey());
+        resourceFromDB.setSize(resource.getSize());
+        resourceFromDB.setUpdatedAt(resource.getUpdatedAt());
+        resourceFromDB.setName(resource.getName());
+        resourceFromDB.setType(resource.getType());
         resourceRepository.save(resourceFromDB);
 
         project.setStorageSize(newStorageSize);
-        projectRepository.save(project);
+        projectService.save(project);
 
         return resourceMapper.toDto(resourceFromDB);
     }
@@ -106,6 +94,11 @@ public class ResourceService {
         Resource resource = getResourceWithCheckedPermissions(resourceId, userId);
         s3Service.deleteFile(resource.getKey());
         resourceRepository.deleteById(resource.getId());
+    }
+
+    public Resource getResourceById(Long resourceId) {
+        return resourceRepository.findById(resourceId).orElseThrow
+                (() -> new EntityNotFoundException("Couldn't find a resource with id " + resourceId));
     }
 
     private List<ResourceDto> getAllAvailable(Project project, TeamMember teamMember) {
@@ -127,18 +120,21 @@ public class ResourceService {
     }
 
     private Resource getResourceWithCheckedPermissions(Long resourceId, Long userId) {
-        Resource resource = resourceRepository.findById(resourceId).orElseThrow
-                (() -> new EntityNotFoundException("Couldn't find a resource with id " + resourceId));
-
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, resource.getProject().getId());
-        if(isNull(teamMember)) {
-            throw new EntityNotFoundException("Couldn't find a team member with id " + userId);
-        }
+        Resource resource = getResourceById(resourceId);
+        TeamMember teamMember = getTeamMemberByProjectId(userId, resource.getProject().getId());
 
         if(!filterWithRoles(resource.getAllowedRoles(), teamMember.getRoles())) {
             throw new EntityNotFoundException("Couldn't find a resource with id " + resourceId);
         }
 
         return resource;
+    }
+
+    private TeamMember getTeamMemberByProjectId(Long userId, Long projectId) {
+        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+        if(isNull(teamMember)) {
+            throw new EntityNotFoundException("Couldn't find a team member with id " + userId);
+        }
+        return teamMember;
     }
 }

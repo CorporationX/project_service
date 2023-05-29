@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.dto.filter.FilterDto;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/list")
-    public List<ProjectDto> getProjectsByFilter(@RequestBody ProjectFilterDto filter) {
+    public List<ProjectDto> getProjectsByFilter(@RequestBody FilterDto filter) {
         return projectService.getProjectsByFilter(filter);
     }
 
