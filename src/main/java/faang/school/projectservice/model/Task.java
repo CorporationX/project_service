@@ -31,6 +31,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "task")
+@Builder
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -79,5 +80,9 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    @ManyToOne
+    @JoinColumn(name = "stage_id")
+    private Stage stage;
 }
 

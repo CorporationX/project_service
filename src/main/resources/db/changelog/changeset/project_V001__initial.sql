@@ -56,10 +56,13 @@ CREATE TABLE IF NOT EXISTS task (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     parent_task_id BIGINT,
     project_id BIGINT,
+    stage_id BIGINT,
     CONSTRAINT fk_parent_task
         FOREIGN KEY (parent_task_id) REFERENCES task(id),
     CONSTRAINT fk_project
-        FOREIGN KEY (project_id) REFERENCES project(id)
+        FOREIGN KEY (project_id) REFERENCES project(id),
+    CONSTRAINT fk_stage
+        FOREIGN KEY (stage_id) references project_stage(project_stage_id)
 );
 
 CREATE TABLE IF NOT EXISTS schedule (
