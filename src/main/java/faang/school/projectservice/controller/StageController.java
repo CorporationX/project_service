@@ -20,7 +20,7 @@ public class StageController {
         return stageService.createStage(stageDto);
     }
 
-    @GetMapping
+    @PostMapping("/find")
     public List<StageDto> findStageByFilter(@RequestBody StageFilterDto stageFilterDto) {
         return stageService.findStageByFilter(stageFilterDto);
     }

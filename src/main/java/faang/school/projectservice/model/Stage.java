@@ -20,7 +20,7 @@ public class Stage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long stageId;
 
-    @Column(name = "project_stage_name")
+    @Column(name = "project_stage_name", nullable = false)
     private String stageName;
 
     @ManyToOne

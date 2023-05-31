@@ -19,11 +19,11 @@ public class StageRoles {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private TeamRole teamRole;
 
-    @Column(name = "count")
+    @Column(name = "count", nullable = false)
     private Integer count;
 
     @ManyToOne
