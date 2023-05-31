@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.stage;
 
 import faang.school.projectservice.model.TeamRole;
 import lombok.AllArgsConstructor;

@@ -30,6 +30,6 @@ public class Stage {
     @OneToMany(mappedBy = "stage", cascade = CascadeType.REMOVE)
     private List<StageRoles> stageRoles;
 
-    @OneToMany(mappedBy = "stage", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
     private List<Task> tasks;
 }
