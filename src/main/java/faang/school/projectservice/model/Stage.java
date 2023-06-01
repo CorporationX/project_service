@@ -27,9 +27,10 @@ public class Stage {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @OneToMany(mappedBy = "stage", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
     private List<StageRoles> stageRoles;
 
-    @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "stage_id")
     private List<Task> tasks;
 }

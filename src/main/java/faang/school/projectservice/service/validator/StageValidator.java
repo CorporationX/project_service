@@ -34,7 +34,7 @@ public class StageValidator {
         final Map<TeamRole, Integer> teamsMap = new EnumMap<>(TeamRole.class);
         for (StageRolesDto stageRolesDto : stageRolesDtos) {
             TeamRole teamRole = stageRolesDto.getTeamRole();
-            teamsMap.put(teamRole, teamsMap.getOrDefault(teamRole, 0) + 1);
+            teamsMap.put(teamRole, teamsMap.getOrDefault(teamRole, 0) + stageRolesDto.getCount());
         }
         for (TeamMember teamMember : teamMembers) {
             List<TeamRole> teamRoles = teamMember.getRoles();

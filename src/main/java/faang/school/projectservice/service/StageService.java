@@ -1,17 +1,16 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.StageFilterDto;
-import faang.school.projectservice.dto.stage.Actions;
-import faang.school.projectservice.dto.stage.RemoveStageDto;
+import faang.school.projectservice.dto.stage.ForwardStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.StageRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Stage;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +29,10 @@ public class StageService {
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
-        Project project = projectRepository.findById(stageDto.getProjectId()).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Project not found by id: %s", stageDto.getProjectId()))
-        );
+        Project project = projectRepository.getProjectById(stageDto.getProjectId());
         stageValidator.validateStageDto(stageDto, project);
         Stage stage = mapper.toEntity(stageDto);
-        stage.setProject(project);
+        stage.getStageRoles().forEach(i -> i.setStage(stage));
         return mapper.toDto(stageRepository.save(stage));
     }
 
@@ -44,9 +41,9 @@ public class StageService {
         List<Project> projects = projectRepository.findAll();
         return projects.stream()
                 .filter(f -> f.getStatus() == filter.getProjectStatus())
+                .flatMap(p -> p.getStages().stream())
                 .skip((long) filter.getSize() * filter.getPage())
                 .limit(filter.getSize())
-                .flatMap(p -> p.getStages().stream())
                 .map(mapper::toDto)
                 .toList();
     }
@@ -57,33 +54,8 @@ public class StageService {
     }
 
     @Transactional
-    public void removeStageById(RemoveStageDto removeStageDto) {
-        Long stageId = removeStageDto.getId();
-        Actions action = removeStageDto.getActions();
-        if (action.equals(Actions.CLOSE)) {
-            Stage stage = getById(stageId);
-            List<Task> tasks = stage.getTasks();
-            //Не нашел статус "CLOSED", наиболее близкие к нему статусы "DONE"/"CANCELLED"
-            tasks.forEach(i -> i.setStatus(TaskStatus.CANCELLED));
-            stage.setTasks(tasks);
-            stageRepository.save(stage);
-        } else if (action.equals(Actions.FORWARD)) {
-            if (removeStageDto.getForwardId() == null) {
-                throw new DataValidationException("Specify the stage ID for the forward");
-            }
-            Stage currentStage = getById(stageId);
-            Stage forwardStage = getById(removeStageDto.getForwardId());
-            List<Task> tasks = currentStage.getTasks().stream().filter(
-                    i -> i.getStatus() != TaskStatus.CANCELLED && i.getStatus() != TaskStatus.DONE
-            ).peek(i -> i.setStage(forwardStage)
-            ).toList();
-            forwardStage.getTasks().addAll(tasks);
-            //Возможно удалятся таски каскадно
-            stageRepository.delete(currentStage);
-            stageRepository.save(forwardStage);
-        } else {
-            stageRepository.delete(getById(stageId));
-        }
+    public void removeStageById(Long stageId) {
+        stageRepository.delete(getById(stageId));
     }
 
     @Transactional(readOnly = true)
@@ -91,6 +63,36 @@ public class StageService {
         return stageRepository.findAll().stream().map(mapper::toDto).toList();
     }
 
+    @Transactional
+    public void closeStageById(Long stageId) {
+        Stage stage = getById(stageId);
+        List<Task> tasks = stage.getTasks();
+        //Не нашел статус "CLOSED", наиболее близкие к нему статусы "DONE"/"CANCELLED"
+        tasks.forEach(i -> i.setStatus(TaskStatus.CANCELLED));
+        stage.setTasks(tasks);
+        stageRepository.save(stage);
+    }
+
+    @Transactional
+    public void forwardStage(ForwardStageDto forwardStageDto) {
+        if (forwardStageDto.getForwardId() == null) {
+            throw new DataValidationException("Specify the stage ID for the forward");
+        }
+        Stage currentStage = getById(forwardStageDto.getId());
+        Stage forwardStage = getById(forwardStageDto.getForwardId());
+        List<Task> tasks = currentStage.getTasks().stream().filter(
+                i -> i.getStatus() != TaskStatus.CANCELLED && i.getStatus() != TaskStatus.DONE
+        ).peek(i -> i.setStage(forwardStage)
+        ).toList();
+        if (!tasks.isEmpty()) {
+            forwardStage.getTasks().addAll(tasks);
+            //Возможно удалятся таски каскадно
+            stageRepository.delete(currentStage);
+            stageRepository.save(forwardStage);
+        } else {
+            throw new DataValidationException("There is nothing to forward");
+        }
+    }
 
     private Stage getById(Long id) {
         return stageRepository.findById(id).orElseThrow(

@@ -57,7 +57,6 @@ public class Project {
     private String coverImageId;
 
     @OneToOne(mappedBy = "project")
-    @JoinColumn(name = "team_id")
     private Team team;
 
     @OneToOne(mappedBy = "project")

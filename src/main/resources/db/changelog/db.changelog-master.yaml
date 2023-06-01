@@ -1,5 +1,5 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/changeset/project_V001__initial.sql
+      file: db/changelog/changeset/project_V002__initial.sql
   - include:
       file: db/changelog/changeset/project_stage_V001__initial.sql

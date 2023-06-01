@@ -3,6 +3,11 @@ CREATE TABLE IF NOT EXISTS team_member (
     user_id BIGINT NOT NULL,
     team_id BIGINT NOT NULL
 );
+create table team_member_roles
+(
+    team_member_id bigserial,
+    role varchar(20)
+);
 
 CREATE TABLE IF NOT EXISTS team (
     id BIGSERIAL PRIMARY KEY,

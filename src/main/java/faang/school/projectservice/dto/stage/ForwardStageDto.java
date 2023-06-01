@@ -4,10 +4,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class RemoveStageDto {
+public class ForwardStageDto {
     @NotNull
     private Long id;
     @NotNull
-    private Actions actions;
     private Long forwardId;
 }

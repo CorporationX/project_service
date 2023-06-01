@@ -9,7 +9,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.Filter;
 import faang.school.projectservice.service.filter.NameFilter;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,14 +29,14 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public List<ProjectDto> getProjectsByIds(List<Long> ids) {
-        return projectRepository.findAllById(ids).stream()
+        return projectRepository.findAllByIds(ids).stream()
                 .map(mapper::toDto)
                 .toList();
     }
 
     @Transactional
     public ProjectDto create(ProjectDto projectDto) {
-        if (!projectRepository.existsByOwnerIdAndName(projectDto.getOwner().getId(), projectDto.getName())) {
+        if (!projectRepository.existsByOwnerIdAndName(projectDto.getOwner(), projectDto.getName())) {
             Project entity = save(mapper.toEntity(projectDto));
             return mapper.toDto(entity);
         }
@@ -45,8 +44,7 @@ public class ProjectService {
     }
 
     public ProjectDto update(ProjectDto projectDto) {
-        Project entity = projectRepository.findById(projectDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Couldn't find a project with id " + projectDto.getId()));
+        Project entity = projectRepository.getProjectById(projectDto.getId());
         if (nonNull(projectDto.getName())
                 && !projectRepository.existsByOwnerIdAndName(entity.getOwner().getId(), projectDto.getName())) {
             entity.setName(projectDto.getName());
@@ -70,8 +68,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public Project getProjectById(long id) {
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Couldn't find a project with id " + id));
+        return projectRepository.getProjectById(id);
     }
 
     @Transactional(readOnly = true)
