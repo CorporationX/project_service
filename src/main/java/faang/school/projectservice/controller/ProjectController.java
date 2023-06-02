@@ -28,7 +28,7 @@ public class ProjectController {
         return projectService.getProjectsByFilter(filter);
     }
 
-    @PutMapping
+    @PostMapping
     public ProjectDto createProject(@RequestBody ProjectDto project) {
         if(nonNull(project.getId())) {
             log.warn("Id field must be null");
@@ -37,7 +37,7 @@ public class ProjectController {
         return projectService.create(project);
     }
 
-    @PostMapping
+    @PutMapping
     public ProjectDto updateProject(@RequestBody ProjectDto project) {
         if(isNull(project.getId())) {
             log.warn("Id field must not be null");

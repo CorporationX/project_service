@@ -3,6 +3,11 @@ CREATE TABLE IF NOT EXISTS team_member (
     user_id BIGINT NOT NULL,
     team_id BIGINT NOT NULL
 );
+create table team_member_roles
+(
+    team_member_id bigserial,
+    role varchar(20)
+);
 
 CREATE TABLE IF NOT EXISTS team (
     id BIGSERIAL PRIMARY KEY,
@@ -56,10 +61,13 @@ CREATE TABLE IF NOT EXISTS task (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     parent_task_id BIGINT,
     project_id BIGINT,
+    stage_id BIGINT,
     CONSTRAINT fk_parent_task
         FOREIGN KEY (parent_task_id) REFERENCES task(id),
     CONSTRAINT fk_project
-        FOREIGN KEY (project_id) REFERENCES project(id)
+        FOREIGN KEY (project_id) REFERENCES project(id),
+    CONSTRAINT fk_stage
+        FOREIGN KEY (stage_id) references project_stage(project_stage_id)
 );
 
 CREATE TABLE IF NOT EXISTS schedule (

@@ -19,11 +19,11 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleRuntimeExceptions(RuntimeException e) {
-        return new ErrorResponse(e.getMessage());
-    }
+//    @ExceptionHandler(RuntimeException.class)
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    public ErrorResponse handleRuntimeExceptions(RuntimeException e) {
+//        return new ErrorResponse(e.getMessage());
+//    }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Error> handleBusinessException(BusinessException e) {

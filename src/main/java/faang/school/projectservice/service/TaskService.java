@@ -5,7 +5,7 @@ import faang.school.projectservice.dto.filter.FilterDto;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
-import faang.school.projectservice.repository.TaskRepository;
+import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.service.filter.Filter;
 import faang.school.projectservice.service.filter.NameFilter;
 import lombok.RequiredArgsConstructor;
