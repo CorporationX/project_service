@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 @Slf4j
 @Service
@@ -28,8 +27,8 @@ import java.time.ZonedDateTime;
 public class S3ServiceImpl implements S3Service {
     private final AmazonS3 s3Client;
 
-    @Value("${services.s3.bucket-name}")
-    private final String bucketName;
+    @Value("${services.s3.bucketName}")
+    private String bucketName;
 
     @Override
     public Resource uploadFile(MultipartFile file, String folder) {
@@ -37,12 +36,7 @@ public class S3ServiceImpl implements S3Service {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
         objectMetadata.setContentType(file.getContentType());
-        String key = String.format("%s/%s_%d",
-                folder,
-                file.getOriginalFilename(),
-                ZonedDateTime.now().toInstant().toEpochMilli()
-        );
-
+        String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucketName, key, file.getInputStream(), objectMetadata);

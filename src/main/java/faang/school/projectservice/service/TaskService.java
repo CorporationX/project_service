@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,14 +36,14 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public List<TaskDto> getTasksByFilter(FilterDto filterDto) {
-        Stream<Task> tasks = taskRepository.findAll().stream();
+        List<Task> tasks = taskRepository.findAll();
 
         for (Filter filter : filters) {
             if (filter instanceof NameFilter) {
-                tasks = filter.applyFilter(tasks.map(Task::getName), filterDto);
+                tasks = filter.applyFilter(tasks.stream().map(Task::getName), filterDto);
             }
         }
 
-        return tasks.map(mapper::toDto).collect(Collectors.toList());
+        return tasks.stream().map(mapper::toDto).collect(Collectors.toList());
     }
 }

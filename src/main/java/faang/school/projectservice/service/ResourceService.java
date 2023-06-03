@@ -46,6 +46,7 @@ public class ResourceService {
         return s3Service.downloadFile(resource.getKey());
     }
 
+    @Transactional
     public ResourceDto addResource(Long projectId, Long userId, MultipartFile file) {
         TeamMember teamMember = getTeamMemberByProjectId(userId, projectId);
         Project project = projectService.getProjectById(projectId);
@@ -65,6 +66,7 @@ public class ResourceService {
         return resourceMapper.toDto(resource);
     }
 
+    @Transactional
     public ResourceDto updateResource(Long resourceId, Long userId, MultipartFile file) {
         Resource resourceFromDB = getResourceWithCheckedPermissions(resourceId, userId);
         Project project = resourceFromDB.getProject();
@@ -90,6 +92,7 @@ public class ResourceService {
         return resourceMapper.toDto(resourceFromDB);
     }
 
+    @Transactional
     public void deleteResource(Long resourceId, Long userId) {
         Resource resource = getResourceWithCheckedPermissions(resourceId, userId);
         s3Service.deleteFile(resource.getKey());
