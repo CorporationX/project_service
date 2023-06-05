@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
 
@@ -43,6 +42,7 @@ public class ProjectService {
         throw new DataValidationException(ErrorMessage.PROJECT_ALREADY_EXISTS, projectDto.getName());
     }
 
+    @Transactional
     public ProjectDto update(ProjectDto projectDto) {
         Project entity = projectRepository.getProjectById(projectDto.getId());
         if (nonNull(projectDto.getName())
@@ -65,7 +65,6 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-
     @Transactional(readOnly = true)
     public Project getProjectById(long id) {
         return projectRepository.getProjectById(id);
@@ -76,17 +75,16 @@ public class ProjectService {
         return projectRepository.existsById(id);
     }
 
-
     @Transactional(readOnly = true)
     public List<ProjectDto> getProjectsByFilter(FilterDto filterDto) {
-        Stream<Project> projects = projectRepository.findAll().stream();
+        List<Project> projects = projectRepository.findAll();
 
         for (Filter filter : filters) {
             if (filter instanceof NameFilter) {
-                projects = filter.applyFilter(projects.map(Project::getName), filterDto);
+                projects = filter.applyFilter(projects.stream().map(Project::getName), filterDto);
             }
         }
 
-        return projects.map(mapper::toDto).collect(Collectors.toList());
+        return projects.stream().map(mapper::toDto).collect(Collectors.toList());
     }
 }

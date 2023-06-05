@@ -32,7 +32,7 @@ public class ResourceController {
         return resourceService.getAvailableResources(projectId, userContext.getUserId());
     }
 
-    @GetMapping(name = "/{resourceId}", produces = "application/octet-stream")
+    @GetMapping(path = "/{resourceId}", produces = "application/octet-stream")
     public InputStream downloadResource(@PathVariable Long resourceId) {
         return resourceService.downloadResource(resourceId, userContext.getUserId());
     }
@@ -49,7 +49,7 @@ public class ResourceController {
     }
 
     @PutMapping("/{projectId}/add")
-    public ResourceDto addResource(@PathVariable Long resourceId, @RequestBody MultipartFile file) {
-        return resourceService.addResource(resourceId, userContext.getUserId(), file);
+    public ResourceDto addResource(@PathVariable Long projectId, @RequestBody MultipartFile file) {
+        return resourceService.addResource(projectId, userContext.getUserId(), file);
     }
 }
