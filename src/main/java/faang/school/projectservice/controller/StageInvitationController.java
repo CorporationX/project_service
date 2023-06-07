@@ -21,12 +21,12 @@ public class StageInvitationController {
     private final StageInvitationService service;
 
     @PostMapping
-    public StageInvitationDto sendInvite(@RequestBody StageInvitationDto request) {
+    public StageInvitationDto sendInvite(@Valid @RequestBody StageInvitationDto request) {
         return service.sendInvite(request);
     }
 
     @PostMapping("/accept")
-    public StageInvitationDto acceptInvite(@RequestBody AcceptInviteDto request) {
+    public StageInvitationDto acceptInvite(@Valid @RequestBody AcceptInviteDto request) {
         return service.acceptInvite(request);
     }
 
