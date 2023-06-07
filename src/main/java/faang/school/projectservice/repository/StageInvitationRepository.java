@@ -6,8 +6,10 @@ import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.service.filter.StageInvitationSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 public class StageInvitationRepository {
     private final StageInvitationJpaRepository repository;
     private final TeamMemberRepository teamMemberRepository;
+    private final StageInvitationSpecification specification;
 
     public StageInvitation save(StageInvitation stageInvitation) {
         return repository.save(stageInvitation);
@@ -29,8 +32,12 @@ public class StageInvitationRepository {
     }
 
     public List<StageInvitation> findByFilter(StageInvitationFilterDto filterDto) {
-        return repository.findByStage_StageIdAndAuthor_IdAndStatusAndId(filterDto.getStageId(), filterDto.getAuthorId(),
-                filterDto.getStatus(), filterDto.getId());
+        Specification<StageInvitation> stageInvitationSpecification = specification.findByFilter(filterDto);
+        return repository.findAll(stageInvitationSpecification)
+                .stream()
+                .skip((long) filterDto.getPage() * (long) filterDto.getPageSize())
+                .limit(filterDto.getPageSize())
+                .toList();
     }
 
     public boolean isInvitationExist(StageInvitationDto stageInvitationDto, Stage stage) {

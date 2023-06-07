@@ -9,4 +9,6 @@ public class StageInvitationFilterDto {
     private Long stageId;
     private Long authorId;
     private StageInvitationStatus status;
+    private int page;
+    private int pageSize;
 }
