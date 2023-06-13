@@ -32,7 +32,7 @@ public class StageInvitationService {
         Stage stage = stageRepository.getById(request.getStageId());
         validateSendInvite(request, stage);
         StageInvitation entity = mapper.toEntity(request);
-        entity.setStatus(StageInvitationStatus.AWAIT_A_RESPONSE);
+        entity.setStatus(StageInvitationStatus.PENDING);
         return mapper.toDto(repository.save(entity));
     }
 
