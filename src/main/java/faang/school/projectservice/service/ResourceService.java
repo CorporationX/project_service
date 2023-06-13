@@ -9,7 +9,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.jpa.TeamMemberRepository;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class ResourceService {
     private final S3Service s3Service;
     private final ProjectService projectService;
     private final ResourceRepository resourceRepository;
-    private final TeamMemberRepository teamMemberRepository;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final ResourceMapper resourceMapper;
 
     @Transactional(readOnly = true)
@@ -134,7 +134,7 @@ public class ResourceService {
     }
 
     private TeamMember getTeamMemberByProjectId(Long userId, Long projectId) {
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+        TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, projectId);
         if(isNull(teamMember)) {
             throw new EntityNotFoundException("Couldn't find a team member with id " + userId);
         }

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
+public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long> {
     @Query(
         "SELECT tm FROM TeamMember tm JOIN tm.team t " +
         "WHERE tm.userId = :userId " +

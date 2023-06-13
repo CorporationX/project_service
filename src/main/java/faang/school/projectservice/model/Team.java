@@ -19,6 +19,7 @@ public class Team {
     private Long id;
 
     @OneToMany(mappedBy = "team")
+    @Column(name = "team_member_id")
     private List<TeamMember> teamMembers;
 
     @OneToOne(cascade = CascadeType.ALL)

@@ -1,5 +1,6 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.stage;
 
+import faang.school.projectservice.model.TeamRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

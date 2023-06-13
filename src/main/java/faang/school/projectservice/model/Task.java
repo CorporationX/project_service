@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
