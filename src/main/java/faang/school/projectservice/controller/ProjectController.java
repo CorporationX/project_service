@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.filter.FilterDto;
 import faang.school.projectservice.service.ProjectService;
@@ -22,6 +23,7 @@ import static java.util.Objects.nonNull;
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
+    private final UserContext userContext;
 
     @PostMapping("/list")
     public List<ProjectDto> getProjectsByFilter(@RequestBody FilterDto filter) {
@@ -34,7 +36,7 @@ public class ProjectController {
             log.warn("Id field must be null");
             return null;
         }
-        return projectService.create(project);
+        return projectService.create(project, userContext.getUserId());
     }
 
     @PutMapping
@@ -43,6 +45,6 @@ public class ProjectController {
             log.warn("Id field must not be null");
             return null;
         }
-        return projectService.update(project);
+        return projectService.update(project, userContext.getUserId());
     }
 }

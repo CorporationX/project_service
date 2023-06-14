@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS team_member (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    team_id BIGINT NOT NULL
+    team_id BIGINT
 );
 create table if not exists team_member_roles
 (

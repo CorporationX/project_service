@@ -31,7 +31,7 @@ public class Project {
     @Column(name = "max_storage_size")
     private BigInteger maxStorageSize;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private TeamMember owner;
 

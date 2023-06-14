@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_stage_V002__initial.sql
   - include:
       file: db/changelog/changeset/stage_invitation_V001__initial.sql
+  - include:
+      file: db/changelog/changeset/project_V003__create_campaign.sql

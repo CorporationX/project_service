@@ -6,6 +6,10 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.Filter;
 import faang.school.projectservice.service.filter.NameFilter;
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +28,8 @@ import static java.util.Objects.nonNull;
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final TeamMemberService teamMemberService;
+    private final TeamService teamService;
     private final ProjectMapper mapper;
     private final List<Filter<Project>> filters;
 
@@ -33,20 +40,42 @@ public class ProjectService {
                 .toList();
     }
 
+    //TODO: probably should be refactored
     @Transactional
-    public ProjectDto create(ProjectDto projectDto) {
-        if (!projectRepository.existsByOwnerIdAndName(projectDto.getOwner(), projectDto.getName())) {
-            Project entity = save(mapper.toEntity(projectDto));
-            return mapper.toDto(entity);
+    public ProjectDto create(ProjectDto projectDto, Long userId) {
+        if (projectRepository.existsByOwnerUserIdAndName(userId, projectDto.getName())) {
+            throw new DataValidationException(ErrorMessage.PROJECT_ALREADY_EXISTS, projectDto.getName());
         }
-        throw new DataValidationException(ErrorMessage.PROJECT_ALREADY_EXISTS, projectDto.getName());
+
+        var owner = new TeamMember();
+        owner.setRoles(TeamRole.getAll());
+        owner.setUserId(userId);
+        teamMemberService.create(owner);
+
+        var entity = mapper.toEntity(projectDto);
+        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setStatus(ProjectStatus.CREATED);
+        entity.setOwner(owner);
+        save(entity);
+
+
+        var team = new Team();
+        team.setProject(entity);
+        team.setTeamMembers(new ArrayList<>(List.of(owner)));
+        teamService.create(team);
+
+        owner.setTeam(team);
+        entity.setTeam(team);
+
+        return mapper.toDto(entity);
     }
 
     @Transactional
-    public ProjectDto update(ProjectDto projectDto) {
+    public ProjectDto update(ProjectDto projectDto, Long userId) {
         Project entity = projectRepository.getProjectById(projectDto.getId());
         if (nonNull(projectDto.getName())
-                && !projectRepository.existsByOwnerIdAndName(entity.getOwner().getId(), projectDto.getName())) {
+                && !projectRepository.existsByOwnerUserIdAndName(userId, projectDto.getName())) {
             entity.setName(projectDto.getName());
         }
         if (nonNull(projectDto.getDescription())) {
