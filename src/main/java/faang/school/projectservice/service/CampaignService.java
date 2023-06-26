@@ -1,18 +1,12 @@
 package faang.school.projectservice.service;
-import faang.school.projectservice.client.PaymentServiceClient;
-import faang.school.projectservice.dto.CampaignCreateDto;
+
 import faang.school.projectservice.dto.CampaignDto;
-import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.filter.CampaignFilterDto;
-import faang.school.projectservice.mapper.CampaignCreateMapper;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
-import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
-import faang.school.projectservice.repository.DonationRepository;
-import faang.school.projectservice.service.util.CurrencyConverter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -22,74 +16,38 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
 public class CampaignService {
     private final CampaignRepository campaignRepository;
-    private final PaymentServiceClient paymentServiceClient;
-    private final CampaignCreateMapper campaignCreateMapper;
     private final CampaignMapper campaignMapper;
     private final TeamMemberService teamMemberService;
     private final ProjectService projectService;
-    private final DonationRepository donationRepository;
 
     @Transactional
-    public CampaignDto createCampaign(CampaignCreateDto campaignCreateDto, Long userId) {
-        validateUserToManipulateCampaign(userId, campaignCreateDto.getProjectId());
-        campaignRepository.findByTitleAndProjectId(campaignCreateDto.getTitle(), campaignCreateDto.getProjectId())
+    public CampaignDto createCampaign(CampaignDto campaignDto, Long userId) {
+        if (nonNull(campaignDto.getId())) {
+            throw new RuntimeException("Campaign id must be null");
+        }
+        validateUserToManipulateCampaign(userId, campaignDto.getProjectId());
+        campaignRepository.findByTitleAndProjectId(campaignDto.getTitle(), campaignDto.getProjectId())
                 .ifPresent(campaign -> { throw new RuntimeException("Campaign already exists"); });
-        var campaign = campaignCreateMapper.toEntity(campaignCreateDto);
+        var campaign = campaignMapper.toEntity(campaignDto);
         campaign.setCreatedBy(userId);
         campaign.setStatus(CampaignStatus.ACTIVE);
         campaign.setAmountRaised(new BigDecimal(0));
         campaign.setUpdatedBy(userId);
-        campaign.setProject(projectService.getProjectById(campaignCreateDto.getProjectId()));
+        campaign.setProject(projectService.getProjectById(campaignDto.getProjectId()));
         return campaignMapper.toDto(campaignRepository.save(campaign));
     }
 
     @Transactional
-    public CampaignDto donateToCampaign(Long campaignId, PaymentRequest paymentRequest, long userId) {
-        var campaign = getById(campaignId);
-        if (!campaign.getStatus().equals(CampaignStatus.ACTIVE)) {
-            throw new RuntimeException("Campaign is not active");
-        }
-        var amount = CurrencyConverter.convert(paymentRequest.amount(),
-                paymentRequest.currency(),
-                campaign.getCurrency());
-
-        var request = new PaymentRequest(new Random().nextLong(1000, 9000), amount,
-                paymentRequest.currency());
-        var paymentResponse = paymentServiceClient.sendPayment(request);
-        if (!paymentResponse.status().equals("SUCCESS")) {
-            throw new RuntimeException("Payment failed");
-        }
-
-        campaign.setAmountRaised(campaign.getAmountRaised().add(paymentResponse.amount()));
-        if (campaign.getAmountRaised().compareTo(campaign.getGoal()) >= 0) {
-            campaign.setStatus(CampaignStatus.COMPLETED);
-        }
-        var donation = Donation.builder()
-                .amount(paymentResponse.amount())
-                .donationTime(LocalDateTime.now())
-                .paymentNumber(paymentResponse.paymentNumber())
-                .userId(userId)
-                .campaign(campaign)
-                .build();
-
-        donationRepository.save(donation);
-        campaign.setUpdatedBy(userId);
-
-        return campaignMapper.toDto(campaign);
-    }
-
-    @Transactional
-    public CampaignDto updateCampaign(Long campaignId, CampaignCreateDto campaignCreateDto, Long userId) {
+    public CampaignDto updateCampaign(Long campaignId, CampaignDto campaignCreateDto, Long userId) {
         var campaign = getById(campaignId);
         validateUserToManipulateCampaign(userId, campaign.getProject().getId());
         if (!campaignCreateDto.getProjectId().equals(campaign.getProject().getId())) {
@@ -101,11 +59,13 @@ public class CampaignService {
     }
 
     @Transactional
-    public void deleteCampaign(Long campaignId, Long userId) {
+    public void donateToCampaign(Long campaignId, BigDecimal amount) {
         var campaign = getById(campaignId);
-        validateUserToManipulateCampaign(userId, campaign.getProject().getId());
-
-        campaignRepository.delete(campaign);
+        campaign.setAmountRaised(campaign.getAmountRaised().add(amount));
+        if (campaign.getAmountRaised().compareTo(campaign.getGoal()) >= 0) {
+            campaign.setStatus(CampaignStatus.COMPLETED);
+        }
+        campaignRepository.save(campaign);
     }
 
     public CampaignDto getCampaign(Long id) {
@@ -136,7 +96,7 @@ public class CampaignService {
         }
     }
 
-    private Campaign getById(Long id) {
+    public Campaign getById(Long id) {
         return campaignRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Campaign not found"));
     }
