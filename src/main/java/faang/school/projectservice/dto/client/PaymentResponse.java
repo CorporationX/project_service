@@ -7,7 +7,8 @@ public record PaymentResponse(
         int verificationCode,
         long paymentNumber,
         BigDecimal amount,
-        Currency currency,
+        Currency paymentCurrency,
+        Currency targetCurrency,
         String message
 ) {
 }

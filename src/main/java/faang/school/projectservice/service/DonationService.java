@@ -33,7 +33,7 @@ public class DonationService {
         }
 
         var request = new PaymentRequest(new Random().nextLong(1000, 9000), paymentRequest.amount(),
-                paymentRequest.actualCurrency(), campaign.getCurrency());
+                paymentRequest.paymentCurrency(), campaign.getCurrency());
         var paymentResponse = paymentServiceClient.sendPayment(request);
         if (!paymentResponse.status().equals("SUCCESS")) {
             throw new RuntimeException("Payment failed");
