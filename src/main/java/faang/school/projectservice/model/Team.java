@@ -2,12 +2,12 @@ package faang.school.projectservice.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 
-
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +22,7 @@ public class Team {
     @Column(name = "team_member_id")
     private List<TeamMember> teamMembers;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "project_id", referencedColumnName = "id")
+    @OneToOne
+    @JoinColumn(name = "project_id")
     private Project project;
 }

@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import java.util.List;
 
 public enum TeamRole {
     OWNER,
@@ -7,5 +8,9 @@ public enum TeamRole {
     DEVELOPER,
     DESIGNER,
     TESTER,
-    ANALYST
+    ANALYST;
+
+    public static List<TeamRole> getAll() {
+        return List.of(TeamRole.values());
+    }
 }

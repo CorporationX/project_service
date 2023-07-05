@@ -27,8 +27,8 @@ public class ProjectRepository {
         return projectJpaRepository.findAllById(ids);
     }
 
-    public boolean existsByOwnerIdAndName(Long ownerId, String name) {
-        return projectJpaRepository.existsByOwnerIdAndName(ownerId, name);
+    public boolean existsByOwnerUserIdAndName(Long userId, String name) {
+        return projectJpaRepository.existsByOwnerUserIdAndName(userId, name);
     }
 
     public Project save(Project project){

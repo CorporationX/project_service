@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS team_member (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    team_id BIGINT NOT NULL
+    team_id BIGINT
 );
 create table if not exists team_member_roles
 (
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS project (
 CREATE TABLE IF NOT EXISTS resource (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    link VARCHAR(255),
+    key VARCHAR(255),
     type VARCHAR(255),
     status VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
