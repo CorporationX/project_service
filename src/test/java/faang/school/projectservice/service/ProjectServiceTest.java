@@ -27,9 +27,11 @@ class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
     ProjectDto projectDto;
+    Project project;
     @BeforeEach
     public void init() {
        projectDto = ProjectDto.builder().id(1L).privateProject(true).createdAt(LocalDateTime.now()).description("s").name("q").ownerId(1L).build();
+       project = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("q").build();
     }
     @Test
     public void testCreateProjectThrowsException() {
@@ -39,12 +41,20 @@ class ProjectServiceTest {
 
     @Test
     public void testCreateProject() {
-        Project project = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("q").build();
         ProjectDto projectDto1 = ProjectDto.builder().id(1L).privateProject(true).createdAt(LocalDateTime.now()).description("s").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
         Mockito.when(projectRepository.save(Mockito.any(Project.class))).thenReturn(project);
         Mockito.when(projectMapper.toProject(projectDto)).thenReturn(project);
         Mockito.when(projectMapper.toProjectDto(project)).thenReturn(projectDto1);
         assertEquals(ProjectStatus.CREATED, projectService.createProject(projectDto).getStatus());
+    }
+
+    @Test
+    public void testUpdateProject() {
+        ProjectDto projectDtoForUpdate = ProjectDto.builder().id(1L).privateProject(true).createdAt(LocalDateTime.now()).description("new description").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
+        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
+        Mockito.when(projectMapper.toProjectDto(project)).thenReturn(projectDto);
+        projectService.updateProject(1L, projectDtoForUpdate);
+        assertEquals("new description", projectDto.getDescription());
     }
 }

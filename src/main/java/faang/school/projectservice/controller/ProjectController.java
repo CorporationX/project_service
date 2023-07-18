@@ -4,7 +4,9 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +23,13 @@ public class ProjectController {
         return projectService.createProject(projectDto);
     }
 
+    @PutMapping("/project/{id}")
+    public ProjectDto updateProject(@PathVariable Long id,@RequestBody ProjectDto projectDto) {
+        idValidate(id);
+        validate(projectDto);
+        return projectService.updateProject(id, projectDto);
+    }
+
     private void validate(ProjectDto projectDto) {
         if(projectDto == null) {
             throw new DataValidationException("ProjectDto cannot be null");
@@ -30,6 +39,12 @@ public class ProjectController {
         }
         if(projectDto.getDescription() == null || projectDto.getDescription().isBlank()) {
             throw new DataValidationException("ProjectDto description cannot be null or empty");
+        }
+    }
+
+    private void idValidate(Long id) {
+        if ( id == null || id < 0) {
+            throw new DataValidationException("Id cannot be negative");
         }
     }
 }

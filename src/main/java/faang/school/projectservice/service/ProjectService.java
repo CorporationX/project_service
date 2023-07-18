@@ -6,6 +6,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,22 @@ public class ProjectService {
         projectDto.setStatus(ProjectStatus.CREATED);
         Project project = projectRepository.save(projectMapper.toProject(projectDto));
         return projectMapper.toProjectDto(project);
+    }
 
+    public ProjectDto updateProject(Long id, ProjectDto projectDto) {
+        Project projectToUpdate = projectRepository.getProjectById(id);
+        ProjectDto projectDtoToUpdate = projectMapper.toProjectDto(projectToUpdate);
+        updateProject(projectDtoToUpdate, projectDto);
+        return projectDtoToUpdate;
+    }
+
+    private void updateProject(ProjectDto projectDtoToUpdate, ProjectDto projectDto) {
+        if(!(projectDto.getDescription() == null)) {
+            projectDtoToUpdate.setDescription(projectDto.getDescription());
+        }
+        if(!(projectDto.getStatus() == null)) {
+            projectDtoToUpdate.setStatus(projectDto.getStatus());
+        }
+        projectRepository.save(projectMapper.toProject(projectDtoToUpdate));
     }
 }
