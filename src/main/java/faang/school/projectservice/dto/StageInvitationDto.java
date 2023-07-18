@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class StageInvitationDto {
-  Long stageId;
-  Long authorId;
-  Long invitedPersonId;
+  private Long stageId;
+  private Long authorId;
+  private Long invitedPersonId;
 }

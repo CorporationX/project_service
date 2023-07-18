@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class StageInvitationService {
-  private StageInvitationRepository stageInvitationRepository;
-  private StageInvitationMapper stageInvitationMapper;
+  private final StageInvitationRepository stageInvitationRepository;
+  private final StageInvitationMapper stageInvitationMapper;
 
   public StageInvitationDto create(StageInvitationDto invitationDto) {
     StageInvitation stageInvitation = stageInvitationRepository.save(stageInvitationMapper.toEntity(invitationDto));
