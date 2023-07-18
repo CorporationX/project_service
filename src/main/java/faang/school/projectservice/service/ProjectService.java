@@ -4,22 +4,17 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
-import faang.school.projectservice.filter.project.ProjectTitleFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +24,7 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
 
     public ProjectDto createProject(ProjectDto projectDto) {
-        if(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("You can't create project with the same name");
         }
         projectDto.setCreatedAt(LocalDateTime.now());
@@ -57,11 +52,15 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    public ProjectDto getProjectById(Long id) {
+        return projectMapper.toProjectDto(projectRepository.getProjectById(id));
+    }
+
     private void updateProject(ProjectDto projectDtoToUpdate, ProjectDto projectDto) {
-        if(!(projectDto.getDescription() == null)) {
+        if (!(projectDto.getDescription() == null)) {
             projectDtoToUpdate.setDescription(projectDto.getDescription());
         }
-        if(!(projectDto.getStatus() == null)) {
+        if (!(projectDto.getStatus() == null)) {
             projectDtoToUpdate.setStatus(projectDto.getStatus());
         }
         projectRepository.save(projectMapper.toProject(projectDtoToUpdate));

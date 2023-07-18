@@ -28,7 +28,7 @@ public class ProjectController {
     }
 
     @PutMapping("/project/{id}")
-    public ProjectDto updateProject(@PathVariable Long id,@RequestBody ProjectDto projectDto) {
+    public ProjectDto updateProject(@PathVariable Long id, @RequestBody ProjectDto projectDto) {
         idValidate(id);
         validate(projectDto);
         return projectService.updateProject(id, projectDto);
@@ -38,25 +38,31 @@ public class ProjectController {
     public List<ProjectDto> getProjectByFilter(@RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getProjectByFilter(projectFilterDto);
     }
+
     @GetMapping("/project/all")
-    public List<ProjectDto> getAllProjects(){
+    public List<ProjectDto> getAllProjects() {
         return projectService.getAllProjects();
     }
 
+    @GetMapping("/project/{id}")
+    public ProjectDto getProjectById(@PathVariable Long id) {
+        return projectService.getProjectById(id);
+    }
+
     private void validate(ProjectDto projectDto) {
-        if(projectDto == null) {
+        if (projectDto == null) {
             throw new DataValidationException("ProjectDto cannot be null");
         }
-        if(projectDto.getName() == null || projectDto.getName().isBlank()) {
+        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new DataValidationException("ProjectDto name cannot be null or empty");
         }
-        if(projectDto.getDescription() == null || projectDto.getDescription().isBlank()) {
+        if (projectDto.getDescription() == null || projectDto.getDescription().isBlank()) {
             throw new DataValidationException("ProjectDto description cannot be null or empty");
         }
     }
 
     private void idValidate(Long id) {
-        if ( id == null || id < 0) {
+        if (id == null || id < 0) {
             throw new DataValidationException("Id cannot be negative");
         }
     }

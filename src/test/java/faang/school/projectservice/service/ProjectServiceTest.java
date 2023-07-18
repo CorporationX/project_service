@@ -11,6 +11,7 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +47,7 @@ class ProjectServiceTest {
         ProjectFilterStatus projectFilterStatus = new ProjectFilterStatus();
         List<ProjectFilter> projectFilters = List.of(projectTitleFilter, projectFilterStatus);
         projectService = new ProjectService(projectRepository, projectMapper, projectFilters);
-        projectDto = ProjectDto.builder().id(1L).privateProject(true).createdAt(LocalDateTime.now()).description("s").name("q").ownerId(1L).build();
+        projectDto = ProjectDto.builder().id(1L).privateProject(false).createdAt(LocalDateTime.now()).description("s").name("q").ownerId(1L).build();
         project = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("q").build();
 
         project1 = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("CorporationX").status(ProjectStatus.CREATED).build();
@@ -104,5 +105,17 @@ class ProjectServiceTest {
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
         List<ProjectDto> projectDtoList = projectService.getAllProjects();
         assertEquals(3, projectDtoList.size());
+    }
+
+    @Test
+    public void testGetProjectById() {
+        Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
+        assertEquals(projectMapper.toProjectDto(project), projectService.getProjectById(1L));
+    }
+
+    @Test
+    public void testGetProjectByIdThrowsException() {
+        Mockito.when(projectRepository.getProjectById(-1L)).thenThrow(EntityNotFoundException.class);
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(-1L));
     }
 }
