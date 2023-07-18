@@ -18,9 +18,9 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
 
-    public ProjectDto create(ProjectDto projectDto){
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(),projectDto.getName())){
-            throw new DataValidationException(String.format("Project %s already exist",projectDto.getName()));
+    public ProjectDto create(ProjectDto projectDto) {
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+            throw new DataValidationException(String.format("Project %s already exist", projectDto.getName()));
         }
         Project project = projectMapper.toModel(projectDto);
         project.setCreatedAt(LocalDateTime.now());
@@ -30,4 +30,18 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
+    public ProjectDto update(ProjectDto projectDto, long projectId) {
+        Project updatedProject = projectRepository.getProjectById(projectId);
+        Project project = projectMapper.toModel(projectDto);
+        if (project.getDescription() != null) {
+            updatedProject.setDescription(project.getDescription());
+            updatedProject.setUpdatedAt(LocalDateTime.now());
+        }
+        if (project.getStatus() != null) {
+            updatedProject.setStatus(project.getStatus());
+            updatedProject.setUpdatedAt(LocalDateTime.now());
+        }
+        projectRepository.save(updatedProject);
+        return projectMapper.toDto(updatedProject);
+    }
 }

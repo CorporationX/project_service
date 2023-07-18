@@ -11,22 +11,26 @@ import org.springframework.stereotype.Controller;
 public class ProjectController {
     private final ProjectService projectService;
 
-    public ProjectDto create(ProjectDto projectDto){
+    public ProjectDto create(ProjectDto projectDto) {
         validateProject(projectDto);
         return projectService.create(projectDto);
+    }
+
+    public ProjectDto update(ProjectDto projectDto, long projectId) {
+        return projectService.update(projectDto, projectId);
     }
 
     private void validateProject(ProjectDto projectDto) {
         if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new DataValidationException("Project can't be created with empty name");
         }
-        if (projectDto.getName().length() > 128){
+        if (projectDto.getName().length() > 128) {
             throw new DataValidationException("Project's name length can't be more than 128 symbols");
         }
         if (projectDto.getDescription() == null || projectDto.getDescription().isBlank()) {
             throw new DataValidationException("Project can't be created with empty description");
         }
-        if (projectDto.getDescription().length() > 4096){
+        if (projectDto.getDescription().length() > 4096) {
             throw new DataValidationException("Project's description length can't be more than 4096 symbols");
         }
     }
