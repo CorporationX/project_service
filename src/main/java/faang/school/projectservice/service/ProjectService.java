@@ -1,22 +1,32 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.filter.project.ProjectTitleFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final List<ProjectFilter> projectFilters;
 
     public ProjectDto createProject(ProjectDto projectDto) {
         if(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
@@ -35,6 +45,11 @@ public class ProjectService {
         return projectDtoToUpdate;
     }
 
+    public List<ProjectDto> getProjectByFilter(ProjectFilterDto projectFilterDto) {
+        Stream<Project> stream = projectRepository.findAll().stream();
+        return filterProjects(projectFilterDto, stream);
+    }
+
     private void updateProject(ProjectDto projectDtoToUpdate, ProjectDto projectDto) {
         if(!(projectDto.getDescription() == null)) {
             projectDtoToUpdate.setDescription(projectDto.getDescription());
@@ -43,5 +58,13 @@ public class ProjectService {
             projectDtoToUpdate.setStatus(projectDto.getStatus());
         }
         projectRepository.save(projectMapper.toProject(projectDtoToUpdate));
+    }
+
+    private List<ProjectDto> filterProjects(ProjectFilterDto projectFilterDto, Stream<Project> projects) {
+        return projectFilters.stream()
+                .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
+                .flatMap(projectFilter -> projectFilter.applyFilter(projects, projectFilterDto))
+                .map(projectMapper::toProjectDto)
+                .toList();
     }
 }
