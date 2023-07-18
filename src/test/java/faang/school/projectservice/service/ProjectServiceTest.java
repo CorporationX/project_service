@@ -36,6 +36,9 @@ class ProjectServiceTest {
     private ProjectService projectService;
     ProjectDto projectDto;
     Project project;
+    Project project1;
+    Project project2;
+    Project project3;
 
     @BeforeEach
     public void init() {
@@ -45,6 +48,10 @@ class ProjectServiceTest {
         projectService = new ProjectService(projectRepository, projectMapper, projectFilters);
         projectDto = ProjectDto.builder().id(1L).privateProject(true).createdAt(LocalDateTime.now()).description("s").name("q").ownerId(1L).build();
         project = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("q").build();
+
+        project1 = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("CorporationX").status(ProjectStatus.CREATED).build();
+        project2 = Project.builder().id(2L).createdAt(LocalDateTime.now()).description("b").name("CorporationX").status(ProjectStatus.ON_HOLD).build();
+        project3 = Project.builder().id(3L).createdAt(LocalDateTime.now()).description("a").name("Facebook").status(ProjectStatus.CREATED).build();
     }
 
     @Test
@@ -74,10 +81,6 @@ class ProjectServiceTest {
 
     @Test
     public void testGetFilteredProjectsByTitle() {
-        Project project1 = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("CorporationX").build();
-        Project project2 = Project.builder().id(2L).createdAt(LocalDateTime.now()).description("b").name("CorporationX").build();
-        Project project3 = Project.builder().id(3L).createdAt(LocalDateTime.now()).description("a").name("Facebook").build();
-
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
 
         ProjectFilterDto projectFilterDto = ProjectFilterDto.builder().name("CorporationX").build();
@@ -88,15 +91,18 @@ class ProjectServiceTest {
 
     @Test
     public void testGetFilteredProjectsByStatus() {
-        Project project1 = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("CorporationX").status(ProjectStatus.CREATED).build();
-        Project project2 = Project.builder().id(2L).createdAt(LocalDateTime.now()).description("b").name("CorporationX").status(ProjectStatus.ON_HOLD).build();
-        Project project3 = Project.builder().id(3L).createdAt(LocalDateTime.now()).description("a").name("Facebook").status(ProjectStatus.CREATED).build();
-
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
 
         ProjectFilterDto projectFilterDto = ProjectFilterDto.builder().status(ProjectStatus.CREATED).build();
 
         List<ProjectDto> projectDtoList = projectService.getProjectByFilter(projectFilterDto);
         assertEquals(2, projectDtoList.size());
+    }
+
+    @Test
+    public void testGetAllProjects() {
+        Mockito.when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
+        List<ProjectDto> projectDtoList = projectService.getAllProjects();
+        assertEquals(3, projectDtoList.size());
     }
 }

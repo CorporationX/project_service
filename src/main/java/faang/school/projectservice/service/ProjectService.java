@@ -50,6 +50,13 @@ public class ProjectService {
         return filterProjects(projectFilterDto, stream);
     }
 
+    public List<ProjectDto> getAllProjects() {
+        return projectRepository.findAll()
+                .stream()
+                .map(projectMapper::toProjectDto)
+                .collect(Collectors.toList());
+    }
+
     private void updateProject(ProjectDto projectDtoToUpdate, ProjectDto projectDto) {
         if(!(projectDto.getDescription() == null)) {
             projectDtoToUpdate.setDescription(projectDto.getDescription());
