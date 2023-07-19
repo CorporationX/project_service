@@ -1,7 +1,9 @@
 package faang.school.projectservice.model;
 
-/*import faang.school.projectservice.dto.client.Currency;*/
+import faang.school.projectservice.dto.client.Currency;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,7 +34,7 @@ public class Donation {
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
-/*    @Enumerated(EnumType.STRING)
-    private Currency currency;*/
+    @Enumerated(EnumType.STRING)
+    private Currency currency;
     private Long userId;
 }

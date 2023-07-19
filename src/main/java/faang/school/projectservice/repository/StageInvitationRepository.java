@@ -1,4 +1,3 @@
-/*
 package faang.school.projectservice.repository;
 
 import java.util.List;
@@ -29,4 +28,3 @@ public class StageInvitationRepository {
         return repository.findAll();
     }
 }
-*/
