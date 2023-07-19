@@ -1,16 +1,21 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.MethodDeletingStageDto;
 import faang.school.projectservice.dto.ProjectStatusFilterDto;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.projectstatusfilter.ProjectStatusFilter;
+import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -19,6 +24,8 @@ import java.util.stream.Stream;
 public class StageService {
 
     private final StageRepository stageRepository;
+
+    private final TaskRepository taskRepository;
 
     private final StageMapper stageMapper;
 
@@ -41,6 +48,25 @@ public class StageService {
         return allStages.map(stageMapper::toDto).toList();
     }
 
+    public void deleteStage(Long id, MethodDeletingStageDto methodDeletingStageDto, Long stageId) {
+        Stage stageById = stageRepository.getById(id);
+        List<Task> tasks = stageById.getTasks();
+        if (MethodDeletingStageDto.CASCADE.equals(methodDeletingStageDto)) {
+            taskRepository.deleteAll(tasks);
+        } else if (MethodDeletingStageDto.CLOSE.equals(methodDeletingStageDto)) {
+            tasks.forEach(task -> task.setStatus(TaskStatus.DONE));
+        } else if (MethodDeletingStageDto.MOVE_TO_NEXT_STAGE.equals(methodDeletingStageDto)) {
+            stageById.setTasks(List.of());
+            Stage stageByIdForAddTasks = stageRepository.getById(stageId);
+            if (stageByIdForAddTasks.getTasks() == null) {
+                stageByIdForAddTasks.setTasks(new ArrayList<>());
+            }
+            stageByIdForAddTasks.getTasks().addAll(tasks);
+            stageRepository.save(stageByIdForAddTasks);
+        }
+        stageRepository.delete(stageById);
+    }
+
     private void validationStageDto(StageDto stageDto) {
         if (stageDto.getProject().getStatus().equals(ProjectStatus.COMPLETED) ||
                 stageDto.getProject().getStatus().equals(ProjectStatus.CANCELLED)) {
@@ -48,5 +74,4 @@ public class StageService {
         }
 
     }
-
 }
