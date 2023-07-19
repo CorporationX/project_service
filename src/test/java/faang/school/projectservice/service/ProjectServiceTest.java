@@ -75,19 +75,17 @@ class ProjectServiceTest {
     public void testUpdateProject() {
         ProjectDto projectDtoForUpdate = ProjectDto.builder().id(1L).privateProject(true).createdAt(LocalDateTime.now()).description("new description").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
-        Mockito.when(projectMapper.toProjectDto(project)).thenReturn(projectDto);
         projectService.updateProject(1L, projectDtoForUpdate);
-        assertEquals("new description", projectDto.getDescription());
+        Mockito.verify(projectRepository, Mockito.times(1)).save(projectMapper.toProject(projectDtoForUpdate));
     }
 
     @Test
     public void testGetFilteredProjectsByTitle() {
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
 
-        ProjectFilterDto projectFilterDto = ProjectFilterDto.builder().name("CorporationX").build();
-
+        ProjectFilterDto projectFilterDto = ProjectFilterDto.builder().name("CorporationX").status(ProjectStatus.CREATED).build();
         List<ProjectDto> projectDtoList = projectService.getProjectByFilter(projectFilterDto);
-        assertEquals(2, projectDtoList.size());
+        assertEquals(1, projectDtoList.size());
     }
 
     @Test

@@ -21,7 +21,7 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/project")
+    @PostMapping()
     public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
         validate(projectDto);
         return projectService.createProject(projectDto);
@@ -34,7 +34,7 @@ public class ProjectController {
         return projectService.updateProject(id, projectDto);
     }
 
-    @PostMapping("/project/list")
+    @GetMapping("/project/list")
     public List<ProjectDto> getProjectByFilter(@RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getProjectByFilter(projectFilterDto);
     }
@@ -46,6 +46,7 @@ public class ProjectController {
 
     @GetMapping("/project/{id}")
     public ProjectDto getProjectById(@PathVariable Long id) {
+        idValidate(id);
         return projectService.getProjectById(id);
     }
 

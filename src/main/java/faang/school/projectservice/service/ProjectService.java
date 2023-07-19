@@ -34,10 +34,9 @@ public class ProjectService {
     }
 
     public ProjectDto updateProject(Long id, ProjectDto projectDto) {
-        Project projectToUpdate = projectRepository.getProjectById(id);
-        ProjectDto projectDtoToUpdate = projectMapper.toProjectDto(projectToUpdate);
-        updateProject(projectDtoToUpdate, projectDto);
-        return projectDtoToUpdate;
+        projectRepository.getProjectById(id);
+        Project projectUpdate = projectRepository.save(projectMapper.toProject(projectDto));
+        return projectMapper.toProjectDto(projectUpdate);
     }
 
     public List<ProjectDto> getProjectByFilter(ProjectFilterDto projectFilterDto) {
@@ -56,20 +55,13 @@ public class ProjectService {
         return projectMapper.toProjectDto(projectRepository.getProjectById(id));
     }
 
-    private void updateProject(ProjectDto projectDtoToUpdate, ProjectDto projectDto) {
-        if (!(projectDto.getDescription() == null)) {
-            projectDtoToUpdate.setDescription(projectDto.getDescription());
-        }
-        if (!(projectDto.getStatus() == null)) {
-            projectDtoToUpdate.setStatus(projectDto.getStatus());
-        }
-        projectRepository.save(projectMapper.toProject(projectDtoToUpdate));
-    }
-
     private List<ProjectDto> filterProjects(ProjectFilterDto projectFilterDto, Stream<Project> projects) {
-        return projectFilters.stream()
-                .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
-                .flatMap(projectFilter -> projectFilter.applyFilter(projects, projectFilterDto))
+        List<ProjectFilter> stream = projectFilters.stream()
+                .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto)).toList();
+        for (ProjectFilter projectFilter : stream) {
+            projects = projectFilter.applyFilter(projects, projectFilterDto);
+        }
+        return projects
                 .map(projectMapper::toProjectDto)
                 .toList();
     }
