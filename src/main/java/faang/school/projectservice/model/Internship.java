@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
@@ -39,6 +40,7 @@ public class Internship {
 
     @ManyToOne
     @JoinColumn(name = "team_member_id")
+    @NotNull
     private TeamMember mentorId;
 
     @ManyToMany
@@ -50,14 +52,17 @@ public class Internship {
     private List<TeamMember> interns;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @NotNull
     private LocalDateTime startDate;
 
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
+    @NotNull
     private InternshipStatus status;
 
+    @NotBlank
     private String description;
 
     @NotBlank
@@ -73,6 +78,7 @@ public class Internship {
     private LocalDateTime updatedAt;
 
     @CreatedBy
+    @NotNull
     private Long createdBy;
 
     @LastModifiedBy

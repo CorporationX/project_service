@@ -2,10 +2,10 @@ CREATE TABLE moment (
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR(255),
   description TEXT,
-  date TIMESTAMP,
+  date TIMESTAMP NOT NULL,
   image_id VARCHAR(255),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP,
   created_by BIGINT NOT NULL,
   updated_by BIGINT NOT NULL
 );
