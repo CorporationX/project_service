@@ -1,3 +1,4 @@
+/*
 package faang.school.projectservice.repository;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
@@ -47,3 +48,4 @@ public class StageInvitationRepository {
                 repository.existsByInvitedAndStage(invited, stage);
     }
 }
+*/

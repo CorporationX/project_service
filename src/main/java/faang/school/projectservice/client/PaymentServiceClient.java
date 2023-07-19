@@ -1,3 +1,4 @@
+/*
 package faang.school.projectservice.client;
 
 import faang.school.projectservice.dto.client.PaymentRequest;
@@ -12,3 +13,4 @@ public interface PaymentServiceClient {
     @PostMapping("/api/payment")
     PaymentResponse sendPayment(@RequestBody PaymentRequest paymentRequest);
 }
+*/
