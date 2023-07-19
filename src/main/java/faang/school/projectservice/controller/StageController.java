@@ -14,6 +14,10 @@ public class StageController {
 
     private final StageService stageService;
 
+    public void createStage(StageDto stageDto){
+        stageService.createStage(stageDto);
+    }
+
     public List<StageDto> getAllStagesByStatus(StageFilterDto stageFilterDto) {
         return stageService.getAllStagesByStatus(stageFilterDto);
     }

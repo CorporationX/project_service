@@ -19,6 +19,10 @@ public class StageService {
     private final StageMapper stageMapper;
     private final List<StageFilterDto> stageFilters;
 
+    @Transactional
+    public void createStage(StageDto stageDto) {
+        stageRepository.save(stageMapper.toEntity(stageDto));}
+
     @Transactional(readOnly = true)
     public List<StageDto> getAllStagesByStatus(StageFilterDto filters) {
         List<Stage> stages = stageRepository.findAll();
@@ -31,12 +35,16 @@ public class StageService {
         stageRepository.delete(stageMapper.toEntity(stageDto));
     }
 
+    @Transactional(readOnly = true)
     public List<StageDto> getAllStages() {
         List<Stage> stages = stageRepository.findAll();
         return stages.stream().map(stageMapper::toDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public StageDto getStageById(Long stageId) {
         return stageMapper.toDto(stageRepository.getById(stageId));
     }
+
+
 }

@@ -8,5 +8,6 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class StageFilterDto {
+    private String status;
 
 }
