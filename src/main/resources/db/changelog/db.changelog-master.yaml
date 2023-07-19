@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V003__create_campaign.sql
   - include:
       file: db/changelog/changeset/project_V005__create_moment.sql
+  - include:
+      file: db/changelog/changeset/project_V006__create_vacancy.sql
