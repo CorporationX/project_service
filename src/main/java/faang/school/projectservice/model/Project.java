@@ -15,7 +15,10 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,7 +28,10 @@ import java.util.List;
 
 @Data
 @Entity
+@Builder
 @Table(name = "project")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Project {
 
     @Id
