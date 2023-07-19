@@ -8,14 +8,15 @@ CREATE TABLE candidate (
 CREATE TABLE vacancy (
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  description TEXT NOT NULL,
+  description TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP,
   created_by BIGINT,
   updated_by BIGINT,
-  status VARCHAR(50) NOT NULL,
+  closed BOOLEAN,
   salary DECIMAL,
-  work_schedule VARCHAR(255)
+  work_schedule VARCHAR(255),
+  required_experience_years INTEGER
 );
 
 CREATE TABLE vacancy_skills (

@@ -19,7 +19,7 @@ public class Candidate {
     private Long id;
     @NotNull
     private Long userId;
-    private String resumeDocKey;
+    private String resumeDoc_key;
     private String coverLetter;
 
     @ManyToOne

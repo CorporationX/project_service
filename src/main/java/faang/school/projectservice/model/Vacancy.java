@@ -15,7 +15,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
@@ -36,7 +35,6 @@ public class Vacancy {
     @NotBlank
     private String name;
 
-    @NotBlank
     private String description;
 
     @OneToMany
@@ -58,14 +56,14 @@ public class Vacancy {
     @LastModifiedBy
     private Long updatedBy;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private VacancyStatus status;
+    private Boolean closed;
 
     private Double salary;
 
     @Enumerated(EnumType.STRING)
     private WorkSchedule workSchedule;
+
+    private Integer requiredExperienceYears;
 
     @ElementCollection
     @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
