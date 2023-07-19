@@ -26,7 +26,7 @@ public class StageInvitationServiceTest {
   StageInvitationDto stageInvitationDto;
 
   @BeforeEach
-  private void init() {
+  public void init() {
     stageInvitationDto = new StageInvitationDto();
     stageInvitationDto.setInvitedPersonId(1L);
     stageInvitationDto.setStageId(1L);
