@@ -7,5 +7,5 @@ public class ProjectDto {
     private Long id;
     private String name;
     private String description;
-    private TeamMemberDto owner;
+    private int ownerId;
 }
