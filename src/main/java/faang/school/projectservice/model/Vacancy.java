@@ -1,59 +1,47 @@
 package faang.school.projectservice.model;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 
-@Data
 @Entity
-@Table(name = "moment")
-public class Moment {
+@Table(name = "vacancy")
+@Data
+public class Vacancy {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     private String name;
 
+    @NotBlank
     private String description;
 
-    private LocalDateTime date;
-
-    @ManyToMany
-    @JoinTable(
-            name = "moment_resource",
-            joinColumns = @JoinColumn(name = "moment_id"),
-            inverseJoinColumns = @JoinColumn(name = "resource_id")
-    )
-    private List<Resource> resource;
-
-    @ManyToMany
-    @JoinTable(
-            name = "moment_project",
-            joinColumns = @JoinColumn(name = "moment_id"),
-            inverseJoinColumns = @JoinColumn(name = "project_id")
-    )
-    private List<Project> project;
-
-    @ElementCollection
-    private List<Long> userIds;
-
-    @Column(name = "image_id")
-    private String imageId;
+    @OneToMany
+    @JoinColumn(name = "vacancy")
+    private List<Candidate> candidates;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -64,9 +52,24 @@ public class Moment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @NotNull
+    @CreatedBy
     private Long createdBy;
 
-    @NotNull
+    @LastModifiedBy
     private Long updatedBy;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private VacancyStatus status;
+
+    private Double salary;
+
+    @Enumerated(EnumType.STRING)
+    private WorkSchedule workSchedule;
+
+    @ElementCollection
+    @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
+    @Column(name = "skill_id")
+    private List<Long> requiredSkillIds;
 }
+
