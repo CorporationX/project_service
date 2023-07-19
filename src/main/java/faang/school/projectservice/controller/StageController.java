@@ -1,13 +1,17 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.ProjectStatusFilterDto;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/stage")
@@ -20,6 +24,18 @@ public class StageController {
     public StageDto createStage(@RequestBody StageDto stageDto) {
         validateStage(stageDto);
         return stageService.createStage(stageDto);
+    }
+
+    @GetMapping("/filter")
+    public List<StageDto> getStagesByProjectStatus(@RequestBody ProjectStatusFilterDto filter) {
+        validateProjectStatusFilterDto(filter);
+        return stageService.getStagesByProjectStatus(filter);
+    }
+
+    private void validateProjectStatusFilterDto(ProjectStatusFilterDto filter) {
+        if (filter.getStatus() == null) {
+            throw new DataValidationException("Status cannot be null");
+        }
     }
 
     private void validateStage(StageDto stageDto) {

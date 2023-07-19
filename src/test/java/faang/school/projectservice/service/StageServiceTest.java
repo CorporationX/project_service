@@ -1,7 +1,10 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.ProjectStatusFilterDto;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.projectstatusfilter.ProjectStatusFilterImpl;
+import faang.school.projectservice.filter.projectstatusfilter.ProjectStatusFilter;
 import faang.school.projectservice.mapper.StageMapperImpl;
 import faang.school.projectservice.mapper.StageRolesMapperImpl;
 import faang.school.projectservice.model.Project;
@@ -21,7 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +45,8 @@ class StageServiceTest {
     private StageMapperImpl stageMapper;
 
     private Stage stage1;
+    private Stage stage2;
+    private Stage stage3;
 
     private StageDto stageDto1;
 
@@ -47,6 +54,30 @@ class StageServiceTest {
     void setUp() {
         ReflectionTestUtils.setField(stageMapper, "stageRolesMapper", stageRolesMapper);
         stage1 = Stage
+                .builder()
+                .stageId(1L)
+                .stageName("stage")
+                .project(Project.builder().id(1L).status(ProjectStatus.CREATED).build())
+                .stageRoles(List.of(StageRoles
+                        .builder()
+                        .id(1L)
+                        .teamRole(TeamRole.ANALYST)
+                        .count(1)
+                        .build()))
+                .build();
+        stage2 = Stage
+                .builder()
+                .stageId(1L)
+                .stageName("stage")
+                .project(Project.builder().id(1L).status(ProjectStatus.CANCELLED).build())
+                .stageRoles(List.of(StageRoles
+                        .builder()
+                        .id(1L)
+                        .teamRole(TeamRole.ANALYST)
+                        .count(1)
+                        .build()))
+                .build();
+        stage3 = Stage
                 .builder()
                 .stageId(1L)
                 .stageName("stage")
@@ -71,5 +102,24 @@ class StageServiceTest {
     void testCreateStageNegativeProjectByCancelled() {
         stageDto1.getProject().setStatus(ProjectStatus.CANCELLED);
         assertThrows(DataValidationException.class, () -> stageService.createStage(stageDto1));
+    }
+
+    @Test
+    void testGetStagesByProjectStatus() {
+        Mockito.when(stageRepository.findAll()).thenReturn(List.of(stage1, stage2, stage3));
+        List<ProjectStatusFilter> projectStatusFilters = List.of(
+                new ProjectStatusFilterImpl()
+        );
+        ProjectStatusFilterDto filter = ProjectStatusFilterDto.builder()
+                .status(ProjectStatus.CREATED)
+                .build();
+        stageService = new StageService(stageRepository, stageMapper, projectStatusFilters);
+
+        List<StageDto> actual = stageService.getStagesByProjectStatus(filter);
+        List<StageDto> expected = Stream.of(stage1, stage3)
+                .map(stageMapper::toDto)
+                .toList();
+
+        assertEquals(expected, actual);
     }
 }

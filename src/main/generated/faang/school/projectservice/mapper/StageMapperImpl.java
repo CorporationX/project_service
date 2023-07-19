@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-07-19T09:17:06+0300",
+    date = "2023-07-19T11:40:02+0300",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.5 (Oracle Corporation)"
 )
 @Component
@@ -90,16 +90,16 @@ public class StageMapperImpl implements StageMapper {
             return null;
         }
 
-        Project project = new Project();
+        Project.ProjectBuilder project = Project.builder();
 
-        project.setId( projectDto.getId() );
-        project.setName( projectDto.getName() );
-        project.setDescription( projectDto.getDescription() );
-        project.setCreatedAt( projectDto.getCreatedAt() );
-        project.setUpdatedAt( projectDto.getUpdatedAt() );
-        project.setStatus( projectDto.getStatus() );
+        project.id( projectDto.getId() );
+        project.name( projectDto.getName() );
+        project.description( projectDto.getDescription() );
+        project.createdAt( projectDto.getCreatedAt() );
+        project.updatedAt( projectDto.getUpdatedAt() );
+        project.status( projectDto.getStatus() );
 
-        return project;
+        return project.build();
     }
 
     protected List<StageRoles> stageRolesDtoListToStageRolesList(List<StageRolesDto> list) {
