@@ -1,6 +1,7 @@
 package faang.school.projectservice.model.stage;
 
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.*;
@@ -42,4 +43,8 @@ public class Stage {
             joinColumns = @JoinColumn(name = "stage_id"),
             inverseJoinColumns = @JoinColumn(name = "executor_id"))
     private List<TeamMember> executors;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StageStatus status;
 }

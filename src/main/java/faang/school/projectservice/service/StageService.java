@@ -15,13 +15,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StageService {
     private final StageRepository stageRepository;
-
     private final StageMapper stageMapper;
     private final List<StageFilterDto> stageFilters;
 
     @Transactional
-    public void createStage(StageDto stageDto) {
-        stageRepository.save(stageMapper.toEntity(stageDto));}
+    public StageDto createStage(StageDto stageDto) {
+        Stage stage = stageRepository.save(stageMapper.toEntity(stageDto));
+        return stageMapper.toDto(stage);
+    }
 
     @Transactional(readOnly = true)
     public List<StageDto> getAllStagesByStatus(StageFilterDto filters) {
@@ -46,5 +47,9 @@ public class StageService {
         return stageMapper.toDto(stageRepository.getById(stageId));
     }
 
-
+    @Transactional
+    public StageDto updateStage(StageDto stageDto) {
+        Stage stage = stageRepository.save(stageMapper.toEntity(stageDto));
+        return stageMapper.toDto(stage);
+    }
 }
