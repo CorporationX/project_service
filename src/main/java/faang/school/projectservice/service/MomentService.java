@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -36,24 +37,14 @@ public class MomentService {
 
     @Transactional(readOnly = true)
     public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto) {
-        List<Moment> allMoments = momentRepository.findAll();
-        List<List<Moment>> afterFilters = momentFilter.stream()
+        Stream<Moment> allMoments = momentRepository.findAll().stream();
+        List<MomentFilter> requiredFilters = momentFilter.stream()
                 .filter(filter -> filter.isApplicable(filterMomentDto))
-                .map(filter -> filter.apply(allMoments.stream(), filterMomentDto).toList())
                 .toList();
-        List<Moment> result = afterFilters.get(0);
-        if(result.size() == 0){
-            throw new RuntimeException(ErrorMessages.NO_SUCH_MOMENTS);
+        for(MomentFilter requiredFilter : requiredFilters){
+            allMoments = requiredFilter.apply(allMoments, filterMomentDto);
         }
-        if(afterFilters.size() == 1){
-            return momentMapper.listMomentToDto(result);
-        }
-        for (int i = 1; i < afterFilters.size(); i++) {
-            result = result.stream()
-                    .filter(afterFilters.get(i)::contains)
-                    .toList();
-        }
-        return momentMapper.listMomentToDto(result);
+        return allMoments.map(momentMapper::momentToDto).toList();
     }
 
     public List<MomentDto> getAllMoments() {
