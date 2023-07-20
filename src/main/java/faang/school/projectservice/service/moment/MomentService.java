@@ -16,12 +16,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@RequiredArgsConstructor
+
 @Service
+@RequiredArgsConstructor
 public class MomentService {
-    private MomentRepository momentRepository;
-    private MomentMapper momentMapper;
-    private ProjectRepository projectRepository;
+    private final MomentRepository momentRepository;
+    private final MomentMapper momentMapper;
+    private final ProjectRepository projectRepository;
 
     public MomentDto create(MomentDto momentDto) {
         validateMomentDto(momentDto);
@@ -34,7 +35,7 @@ public class MomentService {
                 || projectDto.getStatus().equals(ProjectStatus.COMPLETED))) {
             throw new DataValidException("Unable to create moment with closed project");
         }
-        if (checkMembersOfProjectsTeam(momentDto)) {
+        if (!checkMembersOfProjectsTeam(momentDto)) {
             throw new DataValidException("Some users are not in projects team");
         }
     }
