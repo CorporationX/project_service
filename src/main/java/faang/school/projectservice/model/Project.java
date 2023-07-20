@@ -44,9 +44,8 @@ public class Project {
     @Column(name = "max_storage_size")
     private BigInteger maxStorageSize;
 
-    @OneToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private TeamMember owner;
+    @Column(name = "owner_id", nullable = false)
+    private long ownerId;
 
     @OneToMany(mappedBy = "project")
     private List<Task> tasks;

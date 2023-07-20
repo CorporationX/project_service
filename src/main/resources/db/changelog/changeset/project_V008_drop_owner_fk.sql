@@ -1,0 +1,1 @@
+ALTER TABLE project DROP CONSTRAINT IF EXISTS fk_owner;
