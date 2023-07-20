@@ -50,8 +50,8 @@ public class MomentController {
         }
     }
 
-    private void validateId(long id){
-        if(id <= 0){
+    private void validateId(long id) {
+        if (id <= 0) {
             throw new IllegalArgumentException(ErrorMessages.INVALID_ID);
         }
     }
