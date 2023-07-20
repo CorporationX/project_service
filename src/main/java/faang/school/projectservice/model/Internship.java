@@ -41,7 +41,7 @@ public class Internship {
     @ManyToOne
     @JoinColumn(name = "team_member_id")
     @NotNull
-    private TeamMember mentorId;
+    private TeamMember mentor;
 
     @ManyToMany
     @JoinTable(
@@ -61,6 +61,10 @@ public class Internship {
     @Enumerated(EnumType.STRING)
     @NotNull
     private InternshipStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private TeamRole internshipRole;
 
     @NotBlank
     private String description;

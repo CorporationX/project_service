@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -36,4 +37,18 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
+
+    public void addRole(TeamRole teamRole){
+        if (this.roles == null){
+            this.roles = new ArrayList<>();
+        }
+        this.roles.add(teamRole);
+    }
+
+    public void deleteRole(TeamRole teamRole){
+        if (this.roles == null){
+            this.roles = new ArrayList<>();
+        }
+        this.roles.removeIf(role -> role.equals(teamRole));
+    }
 }
