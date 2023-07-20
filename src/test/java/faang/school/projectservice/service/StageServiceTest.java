@@ -4,15 +4,18 @@ import faang.school.projectservice.dto.MethodDeletingStageDto;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectStatusFilterDto;
 import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.projectstatusfilter.ProjectStatusFilter;
 import faang.school.projectservice.filter.projectstatusfilter.ProjectStatusFilterImpl;
 import faang.school.projectservice.jpa.TaskRepository;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.StageMapperImpl;
 import faang.school.projectservice.mapper.StageRolesMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
@@ -46,6 +49,9 @@ class StageServiceTest {
     @Mock
     private TaskRepository taskRepository;
 
+    @Mock
+    private TeamMemberJpaRepository teamMemberJpaRepository;
+
     @Spy
     private StageRolesMapperImpl stageRolesMapper;
 
@@ -60,24 +66,35 @@ class StageServiceTest {
 
     private StageDto stageDto1;
 
+    private StageRolesDto stageRolesDto;
+
+    private TeamMember teamMember1;
+    private TeamMember teamMember2;
+    private TeamMember teamMember3;
+
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(stageMapper, "stageRolesMapper", stageRolesMapper);
+        Project project = Project
+                .builder()
+                .id(1L)
+                .status(ProjectStatus.CREATED)
+                .build();
         stage1 = Stage
                 .builder()
                 .stageId(1L)
                 .stageName("stage")
-                .project(Project.builder().id(1L).status(ProjectStatus.CREATED).build())
+                .project(project)
                 .stageRoles(List.of(StageRoles
                         .builder()
                         .id(1L)
-                        .teamRole(TeamRole.ANALYST)
+                        .teamRole(TeamRole.DEVELOPER)
                         .count(1)
                         .build()))
                 .build();
         stage2 = Stage
                 .builder()
-                .stageId(1L)
+                .stageId(2L)
                 .stageName("stage")
                 .project(Project.builder().id(1L).status(ProjectStatus.CANCELLED).build())
                 .stageRoles(List.of(StageRoles
@@ -89,7 +106,7 @@ class StageServiceTest {
                 .build();
         stage3 = Stage
                 .builder()
-                .stageId(1L)
+                .stageId(3L)
                 .stageName("stage")
                 .project(Project.builder().id(1L).status(ProjectStatus.CREATED).build())
                 .stageRoles(List.of(StageRoles
@@ -106,13 +123,44 @@ class StageServiceTest {
         tasks.add(task);
         stage4 = Stage
                 .builder()
-                .stageId(1L)
+                .stageId(4L)
                 .stageName("stage")
                 .project(Project.builder().id(1L).status(ProjectStatus.CREATED).build())
                 .stageRoles(List.of())
                 .tasks(tasks)
                 .build();
         stageDto1 = stageMapper.toDto(stage1);
+        stageRolesDto = StageRolesDto.builder()
+                .id(1L)
+                .teamRole(TeamRole.DEVELOPER)
+                .count(2)
+                .build();
+        List<Stage> stages1 = new ArrayList<>();
+        stages1.add(stage1);
+        List<Stage> stages2 = new ArrayList<>();
+        stages2.add(stage2);
+        teamMember1 = TeamMember.builder()
+                .id(1L)
+                .roles(List.of(
+                        TeamRole.DEVELOPER,
+                        TeamRole.ANALYST
+                ))
+                .stages(stages1)
+                .build();
+        teamMember2 = TeamMember.builder()
+                .id(1L)
+                .roles(List.of(
+                        TeamRole.MANAGER
+                ))
+                .stages(stages2)
+                .build();
+        teamMember3 = TeamMember.builder()
+                .id(1L)
+                .roles(List.of(
+                        TeamRole.DEVELOPER
+                ))
+                .stages(stages2)
+                .build();
     }
 
     @Test
@@ -136,7 +184,7 @@ class StageServiceTest {
         ProjectStatusFilterDto filter = ProjectStatusFilterDto.builder()
                 .status(ProjectStatus.CREATED)
                 .build();
-        stageService = new StageService(stageRepository, taskRepository, stageMapper, projectStatusFilters);
+        stageService = new StageService(stageRepository, taskRepository, stageMapper, projectStatusFilters, teamMemberJpaRepository);
 
         List<StageDto> actual = stageService.getStagesByProjectStatus(filter);
         List<StageDto> expected = Stream.of(stage1, stage3)
@@ -184,5 +232,33 @@ class StageServiceTest {
         Mockito.verify(stageRepository, Mockito.times(1)).save(stageNew);
         stage.setTasks(new ArrayList<>());
         Mockito.verify(stageRepository, Mockito.times(1)).delete(stage);
+    }
+
+    @Test
+    void testUpdateStageRolesNegative() {
+        stage1 = Stage
+                .builder()
+                .stageRoles(List.of(StageRoles
+                        .builder()
+                        .teamRole(TeamRole.DEVELOPER)
+                        .count(3)
+                        .build()))
+                .build();
+        Mockito.when(stageRepository.getById(1L)).thenReturn(stage1);
+        assertThrows(DataValidationException.class, () -> stageService.updateStageRoles(1L, stageRolesDto));
+    }
+
+    @Test
+    void testUpdateStageRoles() {
+        Mockito.when(stageRepository.getById(1L)).thenReturn(stage1);
+        Mockito.when(teamMemberJpaRepository.findByProjectId(1L)).thenReturn(List.of(teamMember1, teamMember2, teamMember3));
+        stageRolesDto.setCount(2);
+
+        stageService.updateStageRoles(1L, stageRolesDto);
+        Mockito.verify(teamMemberJpaRepository, Mockito.times(1))
+                .saveAll(List.of(teamMember1, teamMember2, teamMember3));
+        stage1.getStageRoles().get(0).setCount(2);
+        Mockito.verify(stageRepository, Mockito.times(1)).save(stage1);
+
     }
 }
