@@ -70,6 +70,10 @@ public class Project {
     @Column(nullable = false)
     private ProjectStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProjectVisibility visibility;
+
     @Column(name = "cover_image_id")
     private String coverImageId;
 
