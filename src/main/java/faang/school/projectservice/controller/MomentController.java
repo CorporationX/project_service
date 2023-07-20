@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.filters.FilterMomentDto;
 import faang.school.projectservice.messages.ErrorMessages;
 import faang.school.projectservice.service.MomentService;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +14,9 @@ import java.util.List;
 public class MomentController {
     public final MomentService momentService;
 
-    public MomentDto createMoment(String name) {
-        validateName(name);
-        return momentService.createMoment(name);
+    public void createMoment(MomentDto momentDto) {
+        validateDtoMoment(momentDto);
+        momentService.createMoment(momentDto);
     }
 
     public void updateMoment(MomentDto momentDto) {
@@ -43,8 +44,8 @@ public class MomentController {
     }
 
     private void validateDtoMoment(MomentDto momentDto) {
-        if (momentDto == null || momentDto.getDtoId() <= 0 || momentDto.getDtoDate() == null
-                || momentDto.getDtoName().isEmpty()) {
+        if (momentDto == null || momentDto.getId() <= 0 || momentDto.getDate() == null
+                || momentDto.getName().isEmpty()) {
             throw new IllegalArgumentException(ErrorMessages.INVALID_DTO);
         }
     }
