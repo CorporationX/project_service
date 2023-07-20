@@ -259,6 +259,11 @@ class StageServiceTest {
                 .saveAll(List.of(teamMember1, teamMember2, teamMember3));
         stage1.getStageRoles().get(0).setCount(2);
         Mockito.verify(stageRepository, Mockito.times(1)).save(stage1);
+    }
 
+    @Test
+    void testGetAllStages() {
+        stageService.getAllStages();
+        Mockito.verify(stageRepository, Mockito.times(1)).findAll();
     }
 }

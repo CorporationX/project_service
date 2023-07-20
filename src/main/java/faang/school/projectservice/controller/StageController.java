@@ -52,6 +52,11 @@ public class StageController {
         stageService.updateStageRoles(id, stageRoles);
     }
 
+    @GetMapping
+    public List<StageDto> getAllStages() {
+        return stageService.getAllStages();
+    }
+
     private void validationId(Long id) {
         if (id == null) {
             throw new DataValidationException("Id cannot be null");

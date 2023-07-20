@@ -117,4 +117,11 @@ public class StageService {
         }
 
     }
+
+    public List<StageDto> getAllStages() {
+        return stageRepository.findAll()
+                .stream()
+                .map(stageMapper::toDto)
+                .toList();
+    }
 }
