@@ -50,9 +50,3 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
-
-### VS Code ###
-.vscode/
-.vscode/
-testing-cherry-pick
-.vscode/
