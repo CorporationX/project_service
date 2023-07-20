@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 @Service
@@ -36,6 +38,21 @@ public class MomentService {
         }
         if (checkMembersOfProjectsTeam(momentDto)) {
             throw new DataValidException("Some users are not in projects team");
+        }
+    }
+
+    private void update(MomentDto momentDto) {
+        validateMomentDto(momentDto);
+
+        Moment moment = momentRepository.findById(momentDto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        updateField(momentDto.getName(), moment.getName(), moment::setName);
+        updateField(momentDto.getDescription(), moment.getDescription(), moment::setDescription);
+    }
+
+    private <T> void updateField(T newValue, T oldValue, Consumer<T> updateFunction) {
+        if (newValue != null && !Objects.equals(newValue, oldValue)) {
+            updateFunction.accept(newValue);
         }
     }
 
