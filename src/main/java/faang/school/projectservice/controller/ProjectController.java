@@ -16,6 +16,12 @@ public class ProjectController {
         return projectService.create(projectDto);
     }
 
+    public ProjectDto changeStatus(ProjectDto projectDto, Long id) {
+        validateData(projectDto == null || id == null || projectDto.getStatus() == null ||projectDto.getDescription().isEmpty(),
+                "Status or id doesn't exist");
+        return projectService.updateStatusAndDescription(projectDto, id);
+    }
+
     private void validateData(boolean condition, String exception) {
         if (condition) {
             throw new DataValidationException(exception);

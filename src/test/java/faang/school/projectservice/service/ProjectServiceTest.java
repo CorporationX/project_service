@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.Assert;
@@ -54,5 +55,18 @@ class ProjectServiceTest {
                 .thenReturn(true);
 
         Assert.assertThrows(DataValidationException.class, () -> projectService.create(projectDto));
+    }
+
+    @Test
+    void updateStatusAndDescription() {
+        ProjectDto projectDto = new ProjectDto();
+        projectDto.setId(1L);
+
+        Mockito.when(projectRepository.getProjectById(projectDto.getId()))
+                .thenReturn(Project.builder().build());
+        projectService.updateStatusAndDescription(projectDto, projectDto.getId());
+
+        Mockito.verify(projectRepository, Mockito.times(1))
+                .save(projectMapper.toEntity(projectDto));
     }
 }
