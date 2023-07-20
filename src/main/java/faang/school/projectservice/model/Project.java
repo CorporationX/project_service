@@ -78,4 +78,7 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Stage> stages;
+
+    @OneToMany(mappedBy = "project")
+    private List<Vacancy> vacancies;
 }
