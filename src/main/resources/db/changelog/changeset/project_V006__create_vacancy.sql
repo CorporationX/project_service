@@ -9,13 +9,15 @@ CREATE TABLE vacancy (
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
+  project_id BIGINT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP,
   created_by BIGINT,
   updated_by BIGINT,
   status VARCHAR(50) NOT NULL,
   salary DECIMAL,
-  work_schedule VARCHAR(255)
+  work_schedule VARCHAR(255),
+  CONSTRAINT vacancy_project_fk FOREIGN KEY (project_id) REFERENCES project (id) ON DELETE CASCADE
 );
 
 CREATE TABLE vacancy_skills (

@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -38,6 +39,10 @@ public class Vacancy {
 
     @NotBlank
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 
     @OneToMany
     @JoinColumn(name = "vacancy")
@@ -72,4 +77,3 @@ public class Vacancy {
     @Column(name = "skill_id")
     private List<Long> requiredSkillIds;
 }
-
