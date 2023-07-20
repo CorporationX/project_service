@@ -15,5 +15,6 @@ public class ProjectDto {
     private long ownerId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private boolean isPrivate;
     private ProjectStatus status;
 }

@@ -1,15 +1,19 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filters.ProjectFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -17,6 +21,7 @@ public class ProjectService {
 
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
+    private final List<ProjectFilter> filters;
 
     public ProjectDto create(ProjectDto projectDto) {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
@@ -43,5 +48,17 @@ public class ProjectService {
         }
         projectRepository.save(updatedProject);
         return projectMapper.toDto(updatedProject);
+    }
+
+    public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto){
+        List<Project> projects = projectRepository.findAll();
+        if (projects.isEmpty()){
+            return new ArrayList<>();
+        }
+        filters.stream()
+                .filter(filter -> filter.iaApplicable(projectFilterDto))
+                .forEach(filter -> filter.apply(projects.stream(),projectFilterDto));
+
+        return projects.stream().map(projectMapper::toDto).toList();
     }
 }
