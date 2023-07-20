@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS project
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status           VARCHAR(255) NOT NULL,
+    visibility       VARCHAR(255) NOT NULL,
     cover_image_id   VARCHAR(255)
 );
 
