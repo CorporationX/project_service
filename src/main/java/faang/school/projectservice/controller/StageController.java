@@ -57,6 +57,12 @@ public class StageController {
         return stageService.getAllStages();
     }
 
+    @GetMapping("/{id}")
+    public StageDto getStageById(@PathVariable Long id) {
+        validationId(id);
+        return stageService.getStageById(id);
+    }
+
     private void validationId(Long id) {
         if (id == null) {
             throw new DataValidationException("Id cannot be null");

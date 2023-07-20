@@ -266,4 +266,10 @@ class StageServiceTest {
         stageService.getAllStages();
         Mockito.verify(stageRepository, Mockito.times(1)).findAll();
     }
+
+    @Test
+    void testGetByStage() {
+        stageService.getStageById(1L);
+        Mockito.verify(stageRepository, Mockito.times(1)).getById(1L);
+    }
 }

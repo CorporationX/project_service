@@ -124,4 +124,8 @@ public class StageService {
                 .map(stageMapper::toDto)
                 .toList();
     }
+
+    public StageDto getStageById(Long id) {
+        return stageMapper.toDto(stageRepository.getById(id));
+    }
 }
