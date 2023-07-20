@@ -39,6 +39,17 @@ public class MomentService {
         }
     }
 
+    public MomentDto getMomentById(long momentId) {
+        Moment moment = momentRepository.findById(momentId)
+                .orElseThrow(() -> new IllegalArgumentException("Moment not found"));
+        return momentMapper.toDto(moment);
+    }
+
+    public List<MomentDto> getAllMoments() {
+        List<Moment> moments = momentRepository.findAll();
+        return moments.stream().map(momentMapper::toDto).toList();
+    }
+
     private boolean checkMembersOfProjectsTeam(MomentDto momentDto) {
         return getMembersOfProjectsTeam(momentDto).equals(momentDto.getUserIds());
     }
