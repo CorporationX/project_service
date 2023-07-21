@@ -18,7 +18,11 @@ public class VacancyController {
 
     private void validateVacancy(VacancyDto vacancyDto) {
         if (vacancyDto.getName() == null || vacancyDto.getName().isBlank()) {
-            throw new DataValidationException("Vacancy can't be create with empty name");
+            throw new DataValidationException("Vacancy can't have create an empty name");
+        } else if (vacancyDto.getProjectId() == null || vacancyDto.getProjectId() < 0) {
+            throw new DataValidationException("Vacancy should have correct project id");
+        } else if (vacancyDto.getCreatedBy() == null || vacancyDto.getCreatedBy() < 0) {
+            throw new DataValidationException("Vacancy should have correct creator id");
         }
     }
 }
