@@ -11,11 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageInvitationMapper {
-
-    //@Mapping(source = "stages", target = "stageIds", qualifiedByName = "map")
     StageInvitationDto toDto(StageInvitation entity);
 
     //@Mapping(target = "users", ignore = true)
     StageInvitation toEntity(StageInvitationDto dto);
-
 }
