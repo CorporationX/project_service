@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
@@ -178,5 +179,20 @@ class ProjectServiceTest {
 
         List<ProjectDto> projectsWithFilter = projectService.getAllProjects(List.of(team));
         Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
+    }
+
+    @Test
+    void getProjectById() {
+        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
+        Assertions.assertEquals(mockProjectMapper.toDto(project),
+                projectService.getProjectById(1L, List.of(team)));
+    }
+
+    @Test
+    void getProjectByIdThrowsPrivateAccessException() {
+        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project3);
+        PrivateAccessException exception = Assertions.assertThrows(PrivateAccessException.class,
+                () -> projectService.getProjectById(1L, List.of(team)));
+        Assertions.assertEquals("This project is private", exception.getMessage());
     }
 }

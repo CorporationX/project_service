@@ -33,6 +33,13 @@ public class ProjectController {
         return projectService.getAllProjects(userTeams);
     }
 
+    public ProjectDto getProjectById(long projectId, List<Team> userTeams) {
+        if (projectId <= 0) {
+            throw new DataValidationException("Id can't be negative or zero");
+        }
+        return projectService.getProjectById(projectId, userTeams);
+    }
+
     private void validateCreateProject(ProjectDto projectDto) {
         if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new DataValidationException("Project can't be created with empty name");

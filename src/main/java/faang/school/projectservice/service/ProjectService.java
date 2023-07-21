@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -72,6 +73,15 @@ public class ProjectService {
         return projects.map(projectMapper::toDto).toList();
     }
 
+    public ProjectDto getProjectById(long projectId, List<Team> userTeams) {
+        Project projectById = projectRepository.getProjectById(projectId);
+        if (projectById.getVisibility() == ProjectVisibility.PRIVATE
+                && !(isUserInPrivateProjectTeam(projectById, userTeams))) {
+            throw new PrivateAccessException("This project is private");
+        }
+        return projectMapper.toDto(projectById);
+    }
+
     private List<Project> getAvailableProjectsForCurrentUser(List<Team> userTeams) {
         List<Project> projects = projectRepository.findAll();
         List<Project> availableProjects = new ArrayList<>(projects.stream()
@@ -81,11 +91,15 @@ public class ProjectService {
         if (userTeams != null) {
             privateProjects = projects.stream()
                     .filter(project -> project.getVisibility() == ProjectVisibility.PRIVATE)
-                    .filter(project -> project.getTeams().stream()
-                            .anyMatch(team -> userTeams.stream().anyMatch(userTeam -> userTeam == team)))
+                    .filter(project -> isUserInPrivateProjectTeam(project, userTeams))
                     .toList();
         }
         availableProjects.addAll(privateProjects);
         return availableProjects;
+    }
+
+    private boolean isUserInPrivateProjectTeam(Project project, List<Team> userTeams) {
+        return project.getTeams().stream()
+                .anyMatch(team -> userTeams.stream().anyMatch(userTeam -> userTeam == team));
     }
 }
