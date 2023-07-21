@@ -22,9 +22,12 @@ public class ProjectControllerTest {
     @Test
     public void shouldReturnProjectsList() {
         List<ProjectDto> desiredProjects = List.of(new ProjectDto());
-        Mockito.when(projectService.getAllProjects()).thenReturn(desiredProjects);
 
+        Mockito.when(projectService.getAllProjects())
+                .thenReturn(desiredProjects);
         List<ProjectDto> receivedProject = projectController.getAllProjects();
+
         Assertions.assertEquals(desiredProjects, receivedProject);
+        Mockito.verify(projectService).getAllProjects();
     }
 }
