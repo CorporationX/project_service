@@ -190,4 +190,9 @@ public class InternshipServiceTest {
 
         assertNotNull(result);
     }
+
+    @Test
+    public void failed(){
+        assertNotNull(null);
+    }
 }
