@@ -28,4 +28,5 @@ public class InternshipController {
                 internshipDto.getProjectId() != null &&
                 internshipDto.getStatus() != null;
     }
+
 }
