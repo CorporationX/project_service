@@ -21,10 +21,9 @@ import java.util.List;
 @RequestMapping("/stage")
 @Validated
 public class StageController {
-
     private final StageService stageService;
 
-    @PostMapping("/{createStage}")
+    @PostMapping("/createStage")
     public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.createStage(stageDto);
     }

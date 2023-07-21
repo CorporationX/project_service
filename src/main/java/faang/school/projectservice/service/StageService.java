@@ -27,7 +27,7 @@ public class StageService {
     @Transactional(readOnly = true)
     public List<StageDto> getAllStagesByStatus(StageFilterDto filters) {
         List<Stage> stages = stageRepository.findAll();
-        stageFilters.forEach(filter -> filter.apply(stages, filters));      /* нужно придумать фильтр*/
+//        stageFilters.forEach(filter -> filter.apply(stages, filters));      /* нужно придумать фильтр*/
         return stages.stream().map(stageMapper::toDto).toList();
     }
 
