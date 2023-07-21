@@ -6,6 +6,8 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.ProjectFilter;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,9 @@ public class ProjectService {
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
         project.setStatus(ProjectStatus.CREATED);
+        if (projectDto.getVisibility() == null) {
+            project.setVisibility(ProjectVisibility.PUBLIC);
+        }
         projectRepository.save(project);
         return projectMapper.toDto(project);
     }
@@ -51,13 +56,31 @@ public class ProjectService {
         return projectMapper.toDto(updatedProject);
     }
 
-    public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto){
-        Stream<Project> projects = projectRepository.findAll().stream();
+    public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto, List<Team> userTeams) {
+        Stream<Project> projects = getAvailableProjectsForCurrentUser(userTeams).stream();
+
         List<ProjectFilter> listApplicableFilters = filters.stream()
                 .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto)).toList();
         for (ProjectFilter listApplicableFilter : listApplicableFilters) {
-            projects = listApplicableFilter.apply(projects,projectFilterDto);
+            projects = listApplicableFilter.apply(projects, projectFilterDto);
         }
         return projects.map(projectMapper::toDto).toList();
+    }
+
+    private List<Project> getAvailableProjectsForCurrentUser(List<Team> userTeams) {
+        List<Project> projects = projectRepository.findAll();
+        List<Project> availableProjects = new ArrayList<>(projects.stream()
+                .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC)
+                .toList());
+        List<Project> privateProjects = new ArrayList<>();
+        if (userTeams != null) {
+            privateProjects = projects.stream()
+                    .filter(project -> project.getVisibility() == ProjectVisibility.PRIVATE)
+                    .filter(project -> project.getTeams().stream()
+                            .anyMatch(team -> userTeams.stream().anyMatch(userTeam -> userTeam == team)))
+                    .toList();
+        }
+        availableProjects.addAll(privateProjects);
+        return availableProjects;
     }
 }

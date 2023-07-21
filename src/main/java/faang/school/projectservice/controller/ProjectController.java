@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -24,8 +25,8 @@ public class ProjectController {
         return projectService.update(projectDto, projectId);
     }
 
-    public List<ProjectDto> getProjectWithFilters(ProjectFilterDto projectFilterDto){
-        return projectService.getProjectsWithFilter(projectFilterDto);
+    public List<ProjectDto> getProjectWithFilters(ProjectFilterDto projectFilterDto, List<Team> userTeams){
+        return projectService.getProjectsWithFilter(projectFilterDto, userTeams);
     }
 
     private void validateCreateProject(ProjectDto projectDto) {

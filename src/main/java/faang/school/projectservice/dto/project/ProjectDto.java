@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,6 +16,6 @@ public class ProjectDto {
     private long ownerId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private boolean isPrivate;
+    private ProjectVisibility visibility;
     private ProjectStatus status;
 }
