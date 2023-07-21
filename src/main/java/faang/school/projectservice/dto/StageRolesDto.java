@@ -14,9 +14,12 @@ import lombok.NoArgsConstructor;
 public class StageRolesDto {
     @NotNull
     private Long id;
+
+    @NotEmpty
+    private String teamRole;
+
     @NotNull
     private Integer count;
-    @NotEmpty
-    private String role;
+
     private Long stageId;
 }

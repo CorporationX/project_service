@@ -1,31 +1,28 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.StageRolesDto;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = StageMapper.class)
 public interface StageRolesMapper {
-    @Mapping(target = "stageId", source = "stage.id")
-    @Mapping(target = "role", source = "teamRole.role", qualifiedByName = "mapTeamRoleToString")
+    //    @Mapping(target = "teamRole", source = "teamRole", qualifiedByName = "mapTeamRoleToString")
+    @Mapping(target = "stageId", source = "stage.stageId")
     StageRolesDto toDto(StageRoles stageRoles);
 
-    @Mapping(target = "stage.id", source = "stageId")
-    @Mapping(target = "teamRole.role", source = "role", qualifiedByName = "mapStringToTeamRole")
+    //    @Mapping(target = "teamRole", source = "teamRole", qualifiedByName = "mapStringToTeamRole")
+    @Mapping(target = "stage.stageId", source = "stageId")
     StageRoles toEntity(StageRolesDto stageRolesDto);
 
-    @Named("mapTeamRoleToString")
-    default String mapFromRequestStatus(TeamRole role) {
-        return role.toString().toUpperCase();
-    }
-
-    @Named("mapStringToTeamRole")
-    default TeamRole mapToRequestStatus(String role) {
-        return TeamRole.valueOf(role.toUpperCase());
-
-    }
+//    @Named("mapTeamRoleToString")
+//    default String mapFromRequestStatus(TeamRole role) {
+//        return role.toString().toUpperCase();
+//    }
+//
+//    @Named("mapStringToTeamRole")
+//    default TeamRole mapToRequestStatus(String role) {
+//        return TeamRole.valueOf(role.toUpperCase());
+//    }
 }

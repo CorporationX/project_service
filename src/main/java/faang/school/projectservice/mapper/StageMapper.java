@@ -11,20 +11,20 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = StageRolesMapper.class)
 public interface StageMapper {
     @Mapping(target = "projectId", source = "project.id")
-    @Mapping(target = "status", source = "status", qualifiedByName = "mapRequestStatusToString")
+//    @Mapping(target = "status", source = "status", qualifiedByName = "mapRequestStatusToString")
     StageDto toDto(Stage stage);
 
     @Mapping(target = "project.id", source = "projectId")
-    @Mapping(target = "status", source = "status", qualifiedByName = "mapStringToRequestStatus")
+//    @Mapping(target = "status", source = "status", qualifiedByName = "mapStringToRequestStatus")
     Stage toEntity(StageDto stageDto);
 
-    @Named("mapStringToRequestStatus")
-    default StageStatus mapToRequestStatus(String status) {
-        return StageStatus.valueOf(status.toUpperCase());
-    }
-
-    @Named("mapRequestStatusToString")
-    default String mapFromRequestStatus(StageStatus status) {
-        return status.toString().toUpperCase();
-    }
+//    @Named("mapStringToRequestStatus")
+//    default StageStatus mapToRequestStatus(String status) {
+//        return StageStatus.valueOf(status.toUpperCase());
+//    }
+//
+//    @Named("mapRequestStatusToString")
+//    default String mapFromRequestStatus(StageStatus status) {
+//        return status.toString().toUpperCase();
+//    }
 }
