@@ -39,10 +39,9 @@ public class InternshipService {
         return internshipMapper.toInternshipDto(internshipRepository.save(internshipMapper.toInternship(internshipDto)));
     }
 
-    private updateInternship(InternshipDto internshipDto) {
+    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
         if (internshipValidation(internshipDto)) {
             teamMemberRepository.updateInternship(internshipDto);
-
             internshipDto.getId() == internshipDto.getProjectId().getPerformerUserId;
         }
     }

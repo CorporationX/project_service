@@ -18,6 +18,10 @@ public class InternshipController {
         return internshipService.internshipCreation(internshipDto);
     }
 
+    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
+        return internshipService.internshipUpdate(internshipDto);
+    }
+
     private boolean internshipValidation(InternshipDto internshipDto) {
         return internshipDto.getName() != null &&
                 internshipDto.getStartDate() != null &&
@@ -28,5 +32,4 @@ public class InternshipController {
                 internshipDto.getProjectId() != null &&
                 internshipDto.getStatus() != null;
     }
-
 }
