@@ -73,7 +73,7 @@ public class StageInvitationService {
         Long currentUserId = userContext.getUserId();
         TeamMember currentUser = teamMemberRepository.findById(currentUserId);
         if (currentUser == null) {
-            throw new RuntimeException("Current user is null.");
+            throw new RuntimeException("Current user is null");
         }
         validator.validateTeamMemberId(teamMemberId);
 

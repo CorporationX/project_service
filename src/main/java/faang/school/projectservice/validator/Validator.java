@@ -8,9 +8,10 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import java.nio.file.AccessDeniedException;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.stream.Stream;
 
 @Component
@@ -23,17 +24,13 @@ public class Validator {
         this.userContext = userContext;
     }
     public void validateStageInvitationDto(@NotNull StageInvitationDto stageInvitationDto) {
-        if (stageInvitationDto.getStage() == null) {
-            throw new IllegalArgumentException("Stage must not be null.");
-        }
-
-        if (stageInvitationDto.getAuthor() == null) {
-            throw new IllegalArgumentException("Author must not be null.");
+        if (stageInvitationDto.getStage() == null || stageInvitationDto.getAuthor() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Stage and Author must not be null");
         }
 
         StageInvitationStatus status = stageInvitationDto.getStatus();
         if (status != null && !isValidStageInvitationStatus(status)) {
-            throw new IllegalArgumentException("Invalid status value for StageInvitationDto.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status value for StageInvitationDto");
         }
     }
 
@@ -47,7 +44,7 @@ public class Validator {
         try {
             teamMemberRepository.findById(teamMemberId);
         } catch (EntityNotFoundException e) {
-            throw new IllegalArgumentException("Team member with the provided id does not exist.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team member with the provided id does not exist");
         }
     }
 
@@ -55,7 +52,7 @@ public class Validator {
         try {
             teamMemberRepository.findById(authorId);
         } catch (EntityNotFoundException e) {
-            throw new IllegalArgumentException("Author with the provided id does not exist.");
+            throw new IllegalArgumentException("Author with the provided id does not exist");
         }
     }
 
@@ -67,19 +64,19 @@ public class Validator {
         TeamMember currentUser = teamMemberRepository.findById(currentUserId);
 
         if (!currentUser.getId().equals(teamMemberId)) {
-            try {
-                throw new AccessDeniedException("You don't have permission to view invitations for this team member.");
-            } catch (AccessDeniedException e) {
-                throw new RuntimeException(e);
-            }
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to view invitations for this team member");
         }
 
         if (StringUtils.hasText(status) && !isValidStatus(status)) {
-            throw new IllegalArgumentException("Invalid status");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status");
         }
 
-        if (authorId != null && teamMemberRepository.findById(authorId) == null) {
-            throw new IllegalArgumentException("Invalid authorId");
+        if (authorId != null) {
+            try {
+                teamMemberRepository.findById(authorId);
+            } catch (EntityNotFoundException e) {
+                throw new IllegalArgumentException("Invalid authorId");
+            }
         }
     }
 
