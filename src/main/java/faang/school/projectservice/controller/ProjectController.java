@@ -15,8 +15,8 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
 
-/*    @GetMapping
+    @GetMapping
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProjects();
-    }*/
+    }
 }
