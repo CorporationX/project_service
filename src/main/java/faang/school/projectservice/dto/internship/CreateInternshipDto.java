@@ -19,4 +19,5 @@ public class CreateInternshipDto {
     private LocalDateTime endDate;
     private String name;
     private TeamRole internshipRole;
+    private Long createdBy;
 }

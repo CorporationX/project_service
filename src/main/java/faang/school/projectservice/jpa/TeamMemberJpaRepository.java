@@ -11,11 +11,11 @@ import java.util.List;
 @Repository
 public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long> {
     @Query(
-        "SELECT tm FROM TeamMember tm JOIN tm.team t " +
-        "WHERE tm.userId = :userId " +
-        "AND t.project.id = :projectId"
+            "SELECT tm FROM TeamMember tm JOIN tm.team t " +
+                    "WHERE tm.userId = :userId " +
+                    "AND t.project.id = :projectId"
     )
-    TeamMember findByUserIdAndProjectId(long userId, long projectId);
+    TeamMember findByIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
 }

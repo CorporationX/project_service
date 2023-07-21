@@ -21,7 +21,6 @@ public class ResponseInternshipDto {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private InternshipStatus status;
-    private TeamRole internshipRole;
     private String description;
     private String name;
     private LocalDateTime createdAt;

@@ -6,8 +6,6 @@ import faang.school.projectservice.dto.internship.ResponseInternshipDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
 import faang.school.projectservice.service.internship.InternshipService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -17,15 +15,15 @@ import java.util.List;
 public class InternshipController {
     private final InternshipService internshipService;
 
-    public ResponseInternshipDto create(@RequestBody CreateInternshipDto dto) {
+    public ResponseInternshipDto create(CreateInternshipDto dto) {
         return internshipService.create(dto);
     }
 
-    public ResponseInternshipDto update(@RequestBody UpdateInternshipDto dto) {
+    public ResponseInternshipDto update(UpdateInternshipDto dto) {
         return internshipService.update(dto);
     }
 
-    public List<ResponseInternshipDto> getAllByFilter(@RequestBody InternshipFilterDto internshipFilterDto) {
+    public List<ResponseInternshipDto> getAllByFilter(InternshipFilterDto internshipFilterDto) {
         return internshipService.findByFilter(internshipFilterDto);
     }
 
@@ -33,7 +31,7 @@ public class InternshipController {
         return internshipService.findAll();
     }
 
-    public ResponseInternshipDto getById(@PathVariable Long id) {
+    public ResponseInternshipDto getById(Long id) {
         return internshipService.findById(id);
     }
 }

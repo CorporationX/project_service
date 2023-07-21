@@ -15,11 +15,10 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -38,9 +37,11 @@ public class InternshipService {
 
     @Transactional
     public ResponseInternshipDto create(CreateInternshipDto dto) {
-        TeamMember mentor = teamMemberRepository.findByUserIdAndProjectId(dto.getMentorId(), dto.getProjectId());
-        Project project = projectRepository.findById(dto.getProjectId()).orElseThrow(() -> new IllegalArgumentException("Project not found"));
+        Project project = projectRepository.findById(dto.getProjectId())
+                .orElseThrow(() -> new IllegalArgumentException("Project is not found"));
+        TeamMember mentor = teamMemberRepository.findByIdAndProjectId(dto.getMentorId(), dto.getProjectId());
         List<TeamMember> interns = teamMemberRepository.findAllById(dto.getInternIds());
+        interns.forEach(intern -> intern.addRole(dto.getInternshipRole()));
 
         if (dto.getName().isBlank()) {
             throw new IllegalArgumentException("Name shouldn't be blank");
@@ -59,38 +60,33 @@ public class InternshipService {
         internship.setProject(project);
         internship.setMentor(mentor);
         internship.setInterns(interns);
+        internship.setCreatedAt(LocalDateTime.now());
 
         return internshipMapper.entityToResponseDto(internshipRepository.save(internship));
     }
 
     @Transactional
     public ResponseInternshipDto update(UpdateInternshipDto dto) {
-        Internship internship = internshipRepository.findById(dto.getId()).orElseThrow(() -> new IllegalArgumentException("The internship not found"));
+        Internship internship = internshipRepository.findById(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("The internship not found"));
         Project project = internship.getProject();
 
         if (dto.getStatus().equals(InternshipStatus.COMPLETED) && internship.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
             List<TeamMember> interns = internship.getInterns();
-            interns.forEach(intern -> {
-                List<TaskStatus> taskOfIntern = taskRepository.findAllByProjectIdAndPerformerUserId(internship.getProject().getId(), intern.getId())
-                        .stream()
-                        .map(Task::getStatus)
-                        .toList();
+            for (TeamMember intern : interns) {
+                List<TaskStatus> taskOfIntern =
+                        taskRepository.findAllByProjectIdAndPerformerUserId(internship.getProject().getId(), intern.getId())
+                                .stream()
+                                .map(Task::getStatus)
+                                .toList();
                 if (taskOfIntern.stream().allMatch(task -> task.equals(TaskStatus.DONE))) {
-                    intern.addRole(internship.getInternshipRole());
-                    intern.deleteRole(TeamRole.INTERN);
+                    intern.finishInternship();
                 } else {
-                    project.getTeam().getTeamMembers().remove(intern);
+                    project.getTeams().forEach(team -> team.getTeamMembers().remove(intern));
                 }
-            });
-        }
-
-        if (dto.getMentorId() != null) {
-            TeamMember newMentor = teamMemberRepository.findById(dto.getMentorId()).orElseThrow(() -> new IllegalArgumentException("Mentor is not found"));
-            if (newMentor.getRoles().contains(internship.getInternshipRole())) {
-                internship.setMentor(newMentor);
             }
         }
-
+        internship.setStatus(dto.getStatus());
         internship.setUpdatedAt(LocalDateTime.now());
         internship.setName(dto.getName());
         internship.setUpdatedBy(dto.getUpdatedBy());
@@ -98,8 +94,11 @@ public class InternshipService {
         return internshipMapper.entityToResponseDto(internship);
     }
 
+    @Transactional(readOnly = true)
     public List<ResponseInternshipDto> findByFilter(InternshipFilterDto internshipFilterDto) {
-        Stream<Internship> internships = internshipRepository.findAllByProjectId(internshipFilterDto.getProjectId()).stream();
+        Stream<Internship> internships =
+                internshipRepository.findAllByProjectId(internshipFilterDto.getProjectId()).stream();
+
         for (InternshipFilter filter : internshipFilters) {
             if (filter.isApplicable(internshipFilterDto)) {
                 internships = filter.apply(internships, internshipFilterDto);
@@ -109,13 +108,16 @@ public class InternshipService {
         return internshipMapper.entityListToDtoList(internships.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ResponseInternshipDto> findAll() {
         return internshipMapper.entityListToDtoList(internshipRepository.findAll());
     }
 
+    @Transactional(readOnly = true)
     public ResponseInternshipDto findById(Long id) {
         return internshipMapper.entityToResponseDto(
-                internshipRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("The internship not found")));
+                internshipRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("The internship not found")));
     }
 
 }

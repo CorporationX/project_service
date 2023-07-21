@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Builder
 public class UpdateInternshipDto {
     private Long id;
-    private Long mentorId;
     private InternshipStatus status;
     private String name;
     private LocalDateTime updatedAt;

@@ -39,16 +39,45 @@ public class TeamMember {
     private List<Stage> stages;
 
     public void addRole(TeamRole teamRole){
-        if (this.roles == null){
-            this.roles = new ArrayList<>();
+        if (roles == null){
+            roles = new ArrayList<>();
         }
-        this.roles.add(teamRole);
+        roles.add(teamRole);
     }
 
-    public void deleteRole(TeamRole teamRole){
-        if (this.roles == null){
-            this.roles = new ArrayList<>();
+    public void finishInternship() {
+        TeamRole role = roles.stream()
+                .filter(r ->
+                        r.equals(TeamRole.INTERNANALYST) ||
+                                r.equals(TeamRole.INTERNDESIGNER) ||
+                                r.equals(TeamRole.INTERNDEVELOPER) ||
+                                r.equals(TeamRole.INTERNMANAGER) ||
+                                r.equals(TeamRole.INTERNTESTER)
+                )
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Team member doesn't has intern role"));
+
+        switch (role) {
+            case INTERNANALYST -> {
+                roles.remove(TeamRole.INTERNANALYST);
+                roles.add(TeamRole.ANALYST);
+            }
+            case INTERNDESIGNER -> {
+                roles.remove(TeamRole.INTERNDESIGNER);
+                roles.add(TeamRole.DESIGNER);
+            }
+            case INTERNDEVELOPER -> {
+                roles.remove(TeamRole.INTERNDEVELOPER);
+                roles.add(TeamRole.DEVELOPER);
+            }
+            case INTERNMANAGER -> {
+                roles.remove(TeamRole.INTERNMANAGER);
+                roles.add(TeamRole.MANAGER);
+            }
+            case INTERNTESTER -> {
+                roles.remove(TeamRole.INTERNTESTER);
+                roles.add(TeamRole.TESTER);
+            }
         }
-        this.roles.removeIf(role -> role.equals(teamRole));
     }
 }
