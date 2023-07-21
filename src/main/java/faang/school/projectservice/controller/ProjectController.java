@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,5 +19,10 @@ public class ProjectController {
     @GetMapping
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProjects();
+    }
+
+    @GetMapping("/{id}")
+    public ProjectDto getProject(@PathVariable("id") long projectId) {
+        return projectService.getProject(projectId);
     }
 }
