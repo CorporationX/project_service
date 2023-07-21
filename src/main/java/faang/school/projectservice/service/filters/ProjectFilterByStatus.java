@@ -10,13 +10,13 @@ import java.util.stream.Stream;
 @Component
 public class ProjectFilterByStatus implements ProjectFilter {
     @Override
-    public boolean iaApplicable(ProjectFilterDto filterDto) {
+    public boolean isApplicable(ProjectFilterDto filterDto) {
         return filterDto.getStatus() != null;
     }
 
     @Override
-    public List<Project> apply(Stream<Project> projectStream, ProjectFilterDto filterDto) {
-        return projectStream.filter(project ->
-                project.getStatus().equals(filterDto.getStatus())).toList();
+    public Stream<Project> apply(Stream<Project> projectStream, ProjectFilterDto filterDto) {
+         return projectStream.filter(project ->
+                project.getStatus().equals(filterDto.getStatus()));
     }
 }

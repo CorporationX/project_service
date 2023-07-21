@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -8,6 +9,9 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filters.ProjectFilter;
+import faang.school.projectservice.service.filters.ProjectFilterByName;
+import faang.school.projectservice.service.filters.ProjectFilterByStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +23,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -30,6 +37,7 @@ class ProjectServiceTest {
     private ProjectMapper mockProjectMapper = new ProjectMapperImpl();
     @Mock
     private ProjectRepository projectRepository;
+
 
     ProjectDto projectDto;
     Project project;
@@ -87,5 +95,31 @@ class ProjectServiceTest {
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
         Assertions.assertEquals("New Description", projectService.update(projectDto,projectId).getDescription());
         Mockito.verify(projectRepository).save(any());
+    }
+
+    @Test
+    void testGetProjectsWithFilter() {
+        Project project1 = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .description("new Project")
+                .owner(TeamMember.builder().id(1L).build())
+                .status(ProjectStatus.IN_PROGRESS)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        List<Project> projects = List.of(project,project1);
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        List<ProjectFilter> filters = List.of(new ProjectFilterByName(),new ProjectFilterByStatus());
+        ProjectFilterDto projectFilterDto = ProjectFilterDto.builder()
+                .projectNamePattern("Proj")
+                .status(ProjectStatus.CREATED)
+                .build();
+        projectService = new ProjectService(mockProjectMapper,projectRepository,filters);
+        List<ProjectDto> filteredProjectsResult = List.of(mockProjectMapper.toDto(project));
+
+        List<ProjectDto> projectsWithFilter = projectService.getProjectsWithFilter(projectFilterDto);
+        Assertions.assertEquals(filteredProjectsResult,projectsWithFilter);
     }
 }

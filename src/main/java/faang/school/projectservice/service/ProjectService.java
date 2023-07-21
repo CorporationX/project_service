@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
@@ -51,14 +52,12 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto){
-        List<Project> projects = projectRepository.findAll();
-        if (projects.isEmpty()){
-            return new ArrayList<>();
+        Stream<Project> projects = projectRepository.findAll().stream();
+        List<ProjectFilter> listApplicableFilters = filters.stream()
+                .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto)).toList();
+        for (ProjectFilter listApplicableFilter : listApplicableFilters) {
+            projects = listApplicableFilter.apply(projects,projectFilterDto);
         }
-        filters.stream()
-                .filter(filter -> filter.iaApplicable(projectFilterDto))
-                .forEach(filter -> filter.apply(projects.stream(),projectFilterDto));
-
-        return projects.stream().map(projectMapper::toDto).toList();
+        return projects.map(projectMapper::toDto).toList();
     }
 }
