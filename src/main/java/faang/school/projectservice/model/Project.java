@@ -1,31 +1,39 @@
 package faang.school.projectservice.model;
 
-import faang.school.projectservice.model.stage.Stage;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
 
+import faang.school.projectservice.model.stage.Stage;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-
-@Data
 @Entity
 @Table(name = "project")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Project {
 
     @Id
@@ -44,8 +52,15 @@ public class Project {
     @Column(name = "max_storage_size")
     private BigInteger maxStorageSize;
 
-    @Column(name = "owner_id", nullable = false)
-    private long ownerId;
+    @Column(name = "owner_id")
+    private Long ownerId;
+
+    @ManyToOne(cascade={CascadeType.ALL})
+    @JoinColumn(name="parent_project_id")
+    private Project parentProject;
+
+    @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
+    private List<Project> children;
 
     @OneToMany(mappedBy = "project")
     private List<Task> tasks;
@@ -66,15 +81,22 @@ public class Project {
     @Column(nullable = false)
     private ProjectStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProjectVisibility visibility;
+
     @Column(name = "cover_image_id")
     private String coverImageId;
 
-    @OneToOne(mappedBy = "project")
-    private Team team;
+    @OneToMany(mappedBy = "project")
+    private List<Team> teams;
 
     @OneToOne(mappedBy = "project")
     private Schedule schedule;
 
     @OneToMany(mappedBy = "project")
     private List<Stage> stages;
+
+    @OneToMany(mappedBy = "project")
+    private List<Vacancy> vacancies;
 }
