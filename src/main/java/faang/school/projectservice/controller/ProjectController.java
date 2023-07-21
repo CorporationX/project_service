@@ -21,12 +21,16 @@ public class ProjectController {
     }
 
     public ProjectDto update(ProjectDto projectDto, long projectId) {
-        validateUpdateProject(projectDto,projectId);
+        validateUpdateProject(projectDto, projectId);
         return projectService.update(projectDto, projectId);
     }
 
-    public List<ProjectDto> getProjectWithFilters(ProjectFilterDto projectFilterDto, List<Team> userTeams){
+    public List<ProjectDto> getProjectWithFilters(ProjectFilterDto projectFilterDto, List<Team> userTeams) {
         return projectService.getProjectsWithFilter(projectFilterDto, userTeams);
+    }
+
+    public List<ProjectDto> getAllProjects(List<Team> userTeams) {
+        return projectService.getAllProjects(userTeams);
     }
 
     private void validateCreateProject(ProjectDto projectDto) {
@@ -45,7 +49,7 @@ public class ProjectController {
     }
 
     private void validateUpdateProject(ProjectDto projectDto, long projectId) {
-        if (projectId <= 0){
+        if (projectId <= 0) {
             throw new DataValidationException("Id can't be negative or zero");
         }
         if (projectDto.getName().isBlank()) {

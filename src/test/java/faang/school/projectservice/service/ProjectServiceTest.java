@@ -40,6 +40,9 @@ class ProjectServiceTest {
 
     ProjectDto projectDto;
     Project project;
+    Project project1;
+    Project project2;
+    Project project3;
     Team team = new Team();
 
     @BeforeEach
@@ -58,6 +61,39 @@ class ProjectServiceTest {
                 .visibility(ProjectVisibility.PRIVATE)
                 .teams(List.of(team))
                 .status(ProjectStatus.CREATED)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        project1 = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(new Team()))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        project2 = Project.builder()
+                .id(2L)
+                .name("Project2")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .teams(List.of(new Team()))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        project3 = Project.builder()
+                .id(3L)
+                .name("Project3")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(new Team()))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -116,39 +152,6 @@ class ProjectServiceTest {
 
     @Test
     void testGetProjectsWithFilter() {
-        Project project1 = Project.builder()
-                .id(1L)
-                .name("Project1")
-                .description("new Project")
-                .ownerId(1L)
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PRIVATE)
-                .teams(List.of(new Team()))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        Project project2 = Project.builder()
-                .id(2L)
-                .name("Project2")
-                .description("new Project")
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .teams(List.of(new Team()))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        Project project3 = Project.builder()
-                .id(3L)
-                .name("Project3")
-                .description("new Project")
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PRIVATE)
-                .teams(List.of(new Team()))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
         List<Project> projects = List.of(project, project1, project2, project3);
 
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
@@ -162,6 +165,18 @@ class ProjectServiceTest {
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
         List<ProjectDto> projectsWithFilter = projectService.getProjectsWithFilter(projectFilterDto, List.of(team));
+        Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
+    }
+
+    @Test
+    void testGetAllProjects() {
+        List<Project> projects = List.of(project, project1, project2, project3);
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        List<ProjectDto> filteredProjectsResult =
+                List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
+
+        List<ProjectDto> projectsWithFilter = projectService.getAllProjects(List.of(team));
         Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
     }
 }

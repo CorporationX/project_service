@@ -67,6 +67,11 @@ public class ProjectService {
         return projects.map(projectMapper::toDto).toList();
     }
 
+    public List<ProjectDto> getAllProjects(List<Team> userTeams) {
+        Stream<Project> projects = getAvailableProjectsForCurrentUser(userTeams).stream();
+        return projects.map(projectMapper::toDto).toList();
+    }
+
     private List<Project> getAvailableProjectsForCurrentUser(List<Team> userTeams) {
         List<Project> projects = projectRepository.findAll();
         List<Project> availableProjects = new ArrayList<>(projects.stream()
