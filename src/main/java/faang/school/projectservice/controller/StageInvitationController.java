@@ -2,9 +2,12 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageInvitationDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.service.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -39,5 +42,13 @@ public class StageInvitationController {
     validateInvitationRequest(invitationDto);
 
     return stageInvitationService.create(invitationDto);
+  }
+
+  public List<StageInvitationDto> getAllByInvitedUserId(Long userId) {
+    if (userId == null) {
+      throw new DataValidationException("Invited user id is required");
+    }
+
+    return stageInvitationService.getAllByInvitedUserId(userId);
   }
 }
