@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    id("jacoco")
 }
 
 group = "faang.school"
@@ -70,4 +71,53 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.required.set(true)
+    }
+
+    classDirectories.setFrom(files(classDirectories.files.map {
+        fileTree(it).apply {
+            exclude("faang/school/projectservice/entity/**",
+                    "faang/school/projectservice/dto/**",
+                    "faang/school/projectservice/config/**",
+                    "faang/school/projectservice/filter/**",
+                    "faang/school/projectservice/exception/**",
+                    "faang/school/projectservice/client/**",
+                    "faang/school/projectservice/model/**",
+                    "faang/school/projectservice/repository/**",
+                    "faang/school/projectservice/ProjectServiceApplication.class",
+                    "com/json/student/**",)
+        }
+    }))
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = "CLASS"
+            excludes = listOf("faang.school.projectservice.entity.**",
+                    "faang.school.projectservice.dto.**",
+                    "faang.school.projectservice.config.**",
+                    "faang.school.projectservice.filter.**",
+                    "faang.school.projectservice.exception.**",
+                    "faang.school.projectservice.model.**",
+                    "faang.school.projectservice.client.**",
+                    "faang.school.projectservice.repository.**",
+                    "faang.school.projectservice.ProjectServiceApplication",
+                    "com.json.student.**")
+            limit {
+                minimum = "0.8".toBigDecimal()
+            }
+        }
+    }
 }
