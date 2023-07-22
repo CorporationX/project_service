@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
@@ -18,5 +19,17 @@ public class ProjectService {
     @Transactional
     public List<ProjectDto> getAllProjects() {
         return projectMapper.toDtoList(projectRepository.findAll());
+    }
+
+    @Transactional
+    public ProjectDto getProject(long projectId) {
+        validateProjectExists(projectId);
+        return projectMapper.toDto(projectRepository.getProjectById(projectId));
+    }
+
+    private void validateProjectExists(long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new DataValidationException("This project doesn't exist");
+        }
     }
 }
