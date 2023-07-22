@@ -15,9 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/user/{id}")
+    @PostMapping("/user/{userId}/create")
     public ProjectDto createProject(@RequestBody ProjectDto projectDto,
-                                    @PathVariable("id") long userId) {
+                                    @PathVariable long userId) {
         return projectService.createProject(projectDto, userId);
+    }
+
+    @PostMapping("/user/{userId}/update")
+    public ProjectDto updateProject(@RequestBody ProjectDto projectDto,
+                                    @PathVariable long userId) {
+        return projectService.updateProject(projectDto, userId);
     }
 }
