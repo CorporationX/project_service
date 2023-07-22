@@ -28,27 +28,27 @@ public class StageController {
         return stageService.createStage(stageDto);
     }
 
-    @PatchMapping("/{updateStage}")
-    public StageDto updateStage(StageDto stageDto) {
+    @PatchMapping("/updateStage")
+    public StageDto updateStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.updateStage(stageDto);
     }
 
-    @GetMapping("/{stageStatus}")
+    @GetMapping("/stageStatus")
     public List<StageDto> getAllStagesByStatus(StageFilterDto stageFilterDto) {
         return stageService.getAllStagesByStatus(stageFilterDto);
     }
 
-    @DeleteMapping("/{stage}")
+    @DeleteMapping("/deleteStage")
     public void deleteStage(StageDto stageDto) {
         stageService.deleteStage(stageDto);
     }
 
-    @GetMapping("/{allStages}")
+    @GetMapping("/getAllStages")
     public List<StageDto> getAllStages() {
         return stageService.getAllStages();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getStageById/{stageId}")
     public StageDto getStageById(long stageId) {
         return stageService.getStageById(stageId);
     }

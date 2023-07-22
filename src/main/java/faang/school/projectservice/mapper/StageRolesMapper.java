@@ -5,9 +5,12 @@ import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = StageMapper.class)
 public interface StageRolesMapper {
+
+//    StageRolesMapper INSTANCE = Mappers.getMapper(StageRolesMapper.class);
     //    @Mapping(target = "teamRole", source = "teamRole", qualifiedByName = "mapTeamRoleToString")
     @Mapping(target = "stageId", source = "stage.stageId")
     StageRolesDto toDto(StageRoles stageRoles);

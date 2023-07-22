@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StageRolesDto {
-    @NotNull
     private Long id;
 
     @NotEmpty
