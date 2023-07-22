@@ -38,6 +38,15 @@ public class ProjectController {
         return projectService.getProjectByStatus(projectFilterDto);
     }
 
+    public List<ProjectDto> getAllProjects() {
+        return projectService.getAllProjectsFromBD();
+    }
+
+    public ProjectDto getProjectById(ProjectDto projectDto) {
+        validateData(projectDto == null || projectDto.getId() == null, "project id doesn't exist");
+        return projectService.getProjectByIdFromBD(projectDto);
+    }
+
     private void validateData(boolean condition, String exception) {
         if (condition) {
             throw new DataValidationException(exception);

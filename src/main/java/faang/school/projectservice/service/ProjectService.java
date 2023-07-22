@@ -53,4 +53,16 @@ public class ProjectService {
                 .filter(project -> projectFilterDto.getStatus().equals(project.getStatus()))
                 .collect(Collectors.toList());
     }
+
+    public List<ProjectDto> getAllProjectsFromBD() {
+        List<Project> allProjects = projectRepository.findAll();
+        return allProjects.stream()
+                .map(project -> mapper.toDto(project))
+                .collect(Collectors.toList());
+    }
+
+    public ProjectDto getProjectByIdFromBD(ProjectDto projectDto) {
+        Project projectById = projectRepository.getProjectById(projectDto.getId());
+        return mapper.toDto(projectById);
+    }
 }

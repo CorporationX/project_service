@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -106,5 +107,26 @@ class ProjectServiceTest {
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
 
         Assertions.assertEquals(projects, projectService.getProjectByName(projectFilterDto));
+    }
+
+    @Test
+    void getAllProjectsFromBD() {
+        List<Project> allProjects = new ArrayList<>();
+        Mockito.when(projectRepository.findAll())
+                .thenReturn(allProjects);
+
+        List<ProjectDto> list = new ArrayList<>();
+        Assertions.assertEquals(list, projectService.getAllProjectsFromBD());
+    }
+
+    @Test
+    void getProjectByIdFromBD() {
+        ProjectDto projectDto = new ProjectDto();
+        projectDto.setId(1L);
+
+        Mockito.when(projectRepository.getProjectById(projectDto.getId()))
+                .thenReturn(Project.builder().build());
+
+        Assertions.assertEquals(projectMapper.toEntity(projectDto), projectMapper.toEntity(projectService.getProjectByIdFromBD(projectDto)));
     }
 }
