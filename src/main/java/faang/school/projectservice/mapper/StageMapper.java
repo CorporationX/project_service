@@ -12,7 +12,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = StageRolesMapper.class)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
     StageRolesMapper stageRolesMapper = Mappers.getMapper(StageRolesMapper.class);
     @Mapping(target = "projectId", source = "project.id")
@@ -22,6 +22,7 @@ public interface StageMapper {
     @Mapping(target = "project.id", source = "projectId")
     @Mapping(target = "stageRoles", source = "stageRolesDto", qualifiedByName = "mapListRolesDtoToListRoles")
     Stage toEntity(StageDto stageDto);
+
     @Named("mapListRolesDtoToListRoles")
     default List<StageRoles> toList(List<StageRolesDto> stageRolesDtos) {
         return stageRolesDtos.stream().map(stageRolesMapper::toEntity).toList();
@@ -31,14 +32,4 @@ public interface StageMapper {
     default List<StageRolesDto> toListDto(List<StageRoles> stageRoles) {
         return stageRoles.stream().map(stageRolesMapper::toDto).toList();
     }
-
-//    @Named("mapStringToRequestStatus")
-//    default StageStatus mapToRequestStatus(String status) {
-//        return StageStatus.valueOf(status.toUpperCase());
-//    }
-//
-//    @Named("mapRequestStatusToString")
-//    default String mapFromRequestStatus(StageStatus status) {
-//        return status.toString().toUpperCase();
-//    }
 }

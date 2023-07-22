@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageFilterDto;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,13 +20,9 @@ public class StageService {
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
-        if(stageDto.getStageId() != null) {
-            throw new IllegalArgumentException("Stage id must be null");
+        if (stageDto.getStageId() != null || stageDto.getStageRolesDto().stream().anyMatch(stageRolesDto -> stageRolesDto.getId() != null)) {
+            throw new IllegalArgumentException("Id must be null");
         }
-        if(stageDto.getStageRolesDto().stream().anyMatch(stageRolesDto -> stageRolesDto.getId() != null)) {
-            throw new IllegalArgumentException("Role id must be null");
-        }
-//        StageRoles stageRoles =
         Stage stage = stageRepository.save(stageMapper.toEntity(stageDto));
         return stageMapper.toDto(stage);
     }

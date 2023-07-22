@@ -59,26 +59,33 @@ class StageMapperTest {
 
     @Test
     void toDto() {
-        StageRolesDto actualRolesDto = stageRolesMapper.toDto(stageRoles1);
-        assertEquals(stageRolesDto1, actualRolesDto);
+        StageRolesDto actualRolesDto1 = stageRolesMapper.toDto(stageRoles1);
+        StageRolesDto actualRolesDto2 = stageRolesMapper.toDto(stageRoles2);
         StageDto actualDto = stageMapper.toDto(stage);
         assertEquals(stageDto, actualDto);
-//        assertAll(() -> {
-//            assertEquals(stageDto.getStageId(), actualDto.getStageId());
-//            assertEquals(stageDto.getStageName(), actualDto.getStageName());
-//            assertEquals(stageDto.getProjectId(), actualDto.getProjectId());
-//            assertEquals(stageDto.getStatus(), actualDto.getStatus());
-//        });
+        assertAll(() -> {
+            assertEquals(stageDto.getStageId(), actualDto.getStageId());
+            assertEquals(stageDto.getStageName(), actualDto.getStageName());
+            assertEquals(stageDto.getProjectId(), actualDto.getProjectId());
+            assertEquals(stageDto.getStatus(), actualDto.getStatus());
+            assertEquals(stageRolesDto1, actualRolesDto1);
+            assertEquals(stageRolesDto2, actualRolesDto2);
+        });
     }
 
     @Test
     void toEntity() {
+        StageRoles actualRoles1 = stageRolesMapper.toEntity(stageRolesDto1);
+        StageRoles actualRoles2 = stageRolesMapper.toEntity(stageRolesDto2);
         Stage actualStage = stageMapper.toEntity(stageDto);
+        assertEquals(stage, actualStage);
         assertAll(() -> {
             assertEquals(stage.getStageId(), actualStage.getStageId());
             assertEquals(stage.getStageName(), actualStage.getStageName());
             assertEquals(stage.getProject().getId(), actualStage.getProject().getId());
             assertEquals(stage.getStatus(), actualStage.getStatus());
+            assertEquals(stageRoles1, actualRoles1);
+            assertEquals(stageRoles2, actualRoles2);
         });
     }
 }
