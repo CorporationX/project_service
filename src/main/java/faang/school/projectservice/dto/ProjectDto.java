@@ -13,5 +13,6 @@ public class ProjectDto {
     private Long id;
     private String name;
     private String description;
-    private int ownerId;
+    private Long ownerId;
+    private String status;
 }

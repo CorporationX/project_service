@@ -9,7 +9,9 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
-    @Mapping(source = "owner.userId", target = "ownerId")
+    @Mapping(source = "ownerId", target = "ownerId")
+    @Mapping(source = "status", target = "status")
     ProjectDto toDto(Project project);
+
     Project toEntity(ProjectDto projectDto);
 }
