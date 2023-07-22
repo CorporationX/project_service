@@ -14,6 +14,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 public class ProjectControllerTest {
     @Mock
@@ -23,6 +25,30 @@ public class ProjectControllerTest {
 
     private final ProjectMapper projectMapper = new ProjectMapperImpl();
     private final long userId = 1L;
+
+    @Test
+    public void shouldReturnProjectsList() {
+        List<ProjectDto> desiredProjects = List.of(new ProjectDto());
+
+        Mockito.when(projectService.getAllProjects())
+                .thenReturn(desiredProjects);
+        List<ProjectDto> receivedProject = projectController.getAllProjects();
+
+        Assertions.assertEquals(desiredProjects, receivedProject);
+        Mockito.verify(projectService).getAllProjects();
+    }
+
+    @Test
+    public void shouldReturnProjectByProjectId() {
+        ProjectDto desiredProject = new ProjectDto();
+
+        Mockito.when(projectService.getProject(projectId))
+                .thenReturn(desiredProject);
+        ProjectDto receivedProject = projectController.getProject(projectId);
+
+        Assertions.assertEquals(desiredProject, receivedProject);
+        Mockito.verify(projectService).getProject(projectId);
+    }
 
     @Test
     public void shouldReturnAndCreateNewProject() {

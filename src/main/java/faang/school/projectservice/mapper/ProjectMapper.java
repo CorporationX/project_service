@@ -6,8 +6,11 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
     ProjectDto toDto(Project project);
     Project toEntity(ProjectDto projectDto);
+    List<ProjectDto> toDtoList(List<Project> projects);
 }
