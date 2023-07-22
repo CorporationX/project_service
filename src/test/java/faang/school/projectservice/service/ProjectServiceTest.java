@@ -8,8 +8,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Assertions;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.ProjectRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +30,7 @@ public class ProjectServiceTest {
 
     private Project desiredProject;
     private final long userId = 1L;
+    private final long projectId = 1;
 
     @BeforeEach
     public void initProject() {

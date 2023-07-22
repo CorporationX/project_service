@@ -37,7 +37,6 @@ public class ProjectService {
 
     public ProjectDto createProject(ProjectDto projectDto) {
         validateOfExistingProjectFromUser(projectDto);
-
         Project project = projectMapper.toEntity(projectDto);
         project.setStatus(ProjectStatus.CREATED);
         return saveEntityAndReturnDto(project);

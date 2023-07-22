@@ -24,7 +24,6 @@ public class ProjectControllerTest {
     private ProjectController projectController;
 
     private final ProjectMapper projectMapper = new ProjectMapperImpl();
-    private final long userId = 1L;
 
     @Test
     public void shouldReturnProjectsList() {
@@ -40,6 +39,7 @@ public class ProjectControllerTest {
 
     @Test
     public void shouldReturnProjectByProjectId() {
+        long projectId = 1;
         ProjectDto desiredProject = new ProjectDto();
 
         Mockito.when(projectService.getProject(projectId))
@@ -52,6 +52,7 @@ public class ProjectControllerTest {
 
     @Test
     public void shouldReturnAndCreateNewProject() {
+        long userId = 1L;
         ProjectDto notCreateProject = ProjectDto.builder()
                 .name("Project")
                 .description("Cool")
