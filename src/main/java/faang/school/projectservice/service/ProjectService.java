@@ -17,20 +17,22 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
 
     @Transactional
-    public ProjectDto createProject(ProjectDto projectDto, long userId) {
-        validationOfExistingProjectFromUser(projectDto, userId);
+    public ProjectDto createProject(ProjectDto projectDto) {
+        validateOfExistingProjectFromUser(projectDto);
+
         Project project = projectMapper.toEntity(projectDto);
-
-        project.setOwnerId(userId);
         project.setStatus(ProjectStatus.CREATED);
-        project = projectRepository.save(project);
-
-        return projectMapper.toDto(project);
+        return saveEntityAndReturnDto(project);
     }
 
-    private void validationOfExistingProjectFromUser(ProjectDto projectDto, long userId) {
-        if (projectRepository.existsByOwnerUserIdAndName(userId, projectDto.getName())) {
+    private void validateOfExistingProjectFromUser(ProjectDto projectDto) {
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getId(), projectDto.getName())) {
             throw new DataValidationException("The user has already created a project with this name");
         }
+    }
+
+    private ProjectDto saveEntityAndReturnDto(Project project) {
+        project = projectRepository.save(project);
+        return projectMapper.toDto(project);
     }
 }

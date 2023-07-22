@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class TeamMemberDto {
     private Long id;
     private Long userId;
+    private Long teamId;
 }
