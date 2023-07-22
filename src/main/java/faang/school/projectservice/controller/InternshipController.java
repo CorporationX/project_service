@@ -12,24 +12,35 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     public InternshipDto internshipCreation(InternshipDto internshipDto) {
-        if (!internshipValidation(internshipDto)) {
+        if (internshipCommonValidation(internshipDto)) {
             throw new IllegalArgumentException("Validation parameters did not passed!");
         }
         return internshipService.internshipCreation(internshipDto);
     }
 
-    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
-        return internshipService.internshipUpdate(internshipDto);
+    public InternshipDto internshipUpdate(Long id, InternshipDto internshipDto) {
+        if (internshipCommonValidation(internshipDto)) {
+            throw new IllegalArgumentException("Validation parameters did not passed!");
+        }
+        internshipValidationId(id);
+        return internshipService.internshipUpdate(id, internshipDto);
     }
 
-    private boolean internshipValidation(InternshipDto internshipDto) {
-        return internshipDto.getName() != null &&
-                internshipDto.getStartDate() != null &&
-                internshipDto.getEndDate() != null &&
-                internshipDto.getDescription() != null &&
-                internshipDto.getMentorId() != null &&
-                internshipDto.getInternsId() != null &&
-                internshipDto.getProjectId() != null &&
-                internshipDto.getStatus() != null;
+    //ID проверяем отдельно, тк он приходит позже
+    private void internshipValidationId(Long id) {
+        if (id == null || id < 1) {
+            throw new IllegalArgumentException("Invalid id");
+        }
+    }
+
+    private boolean internshipCommonValidation(InternshipDto internshipDto) {
+        return internshipDto.getName() == null &&
+                internshipDto.getStartDate() == null &&
+                internshipDto.getEndDate() == null &&
+                internshipDto.getDescription() == null &&
+                internshipDto.getMentorId() == null &&
+                internshipDto.getInternsId() == null &&
+                internshipDto.getProjectId() == null &&
+                internshipDto.getStatus() == null;
     }
 }
