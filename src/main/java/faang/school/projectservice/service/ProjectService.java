@@ -23,11 +23,11 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto getProject(long projectId) {
-        validationProjectExists(projectId);
+        validateProjectExists(projectId);
         return projectMapper.toDto(projectRepository.getProjectById(projectId));
     }
 
-    private void validationProjectExists(long projectId) {
+    private void validateProjectExists(long projectId) {
         if (!projectRepository.existsById(projectId)) {
             throw new DataValidationException("This project doesn't exist");
         }
