@@ -16,21 +16,17 @@ import java.util.List;
 public class StageService {
     private final StageRepository stageRepository;
     private final StageMapper stageMapper;
-    private final List<StageFilterDto> stageFilters;
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
-        if (stageDto.getStageId() != null || stageDto.getStageRolesDto().stream().anyMatch(stageRolesDto -> stageRolesDto.getId() != null)) {
-            throw new IllegalArgumentException("Id must be null");
-        }
         Stage stage = stageRepository.save(stageMapper.toEntity(stageDto));
         return stageMapper.toDto(stage);
     }
 
     @Transactional(readOnly = true)
-    public List<StageDto> getAllStagesByStatus(StageFilterDto filters) {
+    public List<StageDto> getAllStagesByStatus(String status) {
         List<Stage> stages = stageRepository.findAll();
-//        stageFilters.forEach(filter -> filter.apply(stages, filters));      /* нужно придумать фильтр*/
+        stages.removeIf(stage -> !stage.getStatus().toString().equalsIgnoreCase(status));
         return stages.stream().map(stageMapper::toDto).toList();
     }
 
