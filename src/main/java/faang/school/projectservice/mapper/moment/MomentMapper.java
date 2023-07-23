@@ -14,9 +14,7 @@ public interface MomentMapper {
 
     MomentMapper INSTANCE = Mappers.getMapper(MomentMapper.class);
 
-    @Mapping(source = "projects", target = "projects")
     MomentDto toDto(Moment moment);
 
-    @Mapping(source = "projects", target = "projects")
     Moment toEntity(MomentDto momentDto);
 }

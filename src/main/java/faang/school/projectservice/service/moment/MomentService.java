@@ -31,6 +31,19 @@ public class MomentService {
         return momentMapper.toDto(moment);
     }
 
+    public MomentDto update(MomentDto source) {
+        validateMomentDto(source);
+
+        Moment moment = momentRepository.findById(source.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Moment not found. Id: " + source.getId()));
+        MomentDto target = momentMapper.toDto(moment);
+
+        BeanUtils.copyProperties(source, target, "id");
+
+        Moment result = momentRepository.save(momentMapper.toEntity(target));
+        return target;
+    }
+
     private void validateMomentDto(MomentDto momentDto) {
         if (momentDto.getId() == null || momentDto.getId() < 1) {
             throw new DataValidException("Illegal Id: " + momentDto.getId());
@@ -54,19 +67,6 @@ public class MomentService {
         if (!checkMembersOfProjectsTeam(momentDto)) {
             throw new DataValidException("Some users are not in projects team. Id: " + momentDto.getId());
         }
-    }
-
-    private MomentDto update(MomentDto source) {
-        validateMomentDto(source);
-
-        Moment moment = momentRepository.findById(source.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
-        MomentDto target = momentMapper.toDto(moment);
-
-        BeanUtils.copyProperties(source, target, "id");
-
-        Moment result = momentRepository.save(momentMapper.toEntity(target));
-        return momentMapper.toDto(result);
     }
 
     private boolean checkMembersOfProjectsTeam(MomentDto momentDto) {
