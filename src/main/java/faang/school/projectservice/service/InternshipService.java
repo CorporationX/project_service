@@ -52,7 +52,7 @@ public class InternshipService {
         Internship internship = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid internship"));
         Project project = internship.getProject();
-        if (internship.getStatus().equals(IN_PROGRESS) ){
+        if (internship.getStatus().equals(IN_PROGRESS)){
         List<TeamMember> interns = internship.getInterns();
             interns.forEach(intern -> {
                 List <TaskStatus> tasksOfIntern = taskRepository.findAllByProjectIdAndPerformerId(internship.getProject().getId(), intern.getId())
@@ -63,6 +63,7 @@ public class InternshipService {
                     //переписать будто стажер получает статус как у ментора
                     intern.addRole(TeamRole.JUNIOR);
                     intern.addRole(TeamRole.INTERN);
+
                 } else {
                     project.getTeam().getTeamMembers().remove(intern);
                 }
