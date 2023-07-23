@@ -41,11 +41,9 @@ class ProjectServiceTest {
         ProjectDto subProjectDto = ProjectDto.builder()
                 .name("SubProject")
                 .visibility(ProjectVisibility.PRIVATE)
-                .parentId(1L)
                 .build();
 
         Project parentProject = Project.builder()
-                .id(1L)
                 .visibility(ProjectVisibility.PRIVATE)
                 .children(new ArrayList<>())
                 .build();
@@ -60,9 +58,9 @@ class ProjectServiceTest {
         ProjectDto projectDtoActual = projectService.createSubProject(createSubProjectDto);
 
         assertNotNull(projectDtoActual);
-        assertEquals(subProjectDto.getId(), projectDtoActual.getId());
-        assertEquals(subProjectDto.getName(), projectDtoActual.getName());
-        assertEquals(subProjectDto.getVisibility(), projectDtoActual.getVisibility());
+        assertEquals(subProjectDto, projectDtoActual);
+        assertEquals("SubProject", projectDtoActual.getName());
+        assertEquals(ProjectVisibility.PRIVATE, projectDtoActual.getVisibility());
     }
 
     @Test
