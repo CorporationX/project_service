@@ -26,4 +26,8 @@ public class StageInvitationController {
             throw new DataValidationException("StageInvitation is invalid");
         }
     }
+
+    public StageInvitationDto accept(long invitationId){
+        return service.accept(invitationId);
+    }
 }
