@@ -15,11 +15,15 @@ import java.util.List;
 @NoArgsConstructor
 public class StageDto {
     private Long stageId;
-    @NotEmpty
+
+    @NotEmpty(message = "Stage name can not be empty")
     private String stageName;
-    @NotNull
+
+    @NotNull(message = "Project ID can not be null")
     private Long projectId;
+
     private String status;
-    @NotNull
+
+    @NotNull(message = "List of roles can not be null")
     private List<StageRolesDto> stageRolesDto;
 }

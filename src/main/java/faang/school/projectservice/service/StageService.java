@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.StageFilterDto;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
@@ -19,8 +18,11 @@ public class StageService {
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
-        Stage stage = stageRepository.save(stageMapper.toEntity(stageDto));
-        return stageMapper.toDto(stage);
+        Stage stage = stageMapper.toEntity(stageDto);
+        stage.getStageRoles().forEach(stageRole ->
+                stageRole.setStage(stage)
+        );
+        return stageMapper.toDto(stageRepository.save(stage));
     }
 
     @Transactional(readOnly = true)
@@ -31,8 +33,14 @@ public class StageService {
     }
 
     @Transactional
-    public void deleteStage(StageDto stageDto) {
-        stageRepository.delete(stageMapper.toEntity(stageDto));
+    public void deleteStage(Long stageId) {
+        stageRepository.deleteById(stageId);
+    }
+
+    @Transactional
+    public StageDto updateStage(StageDto stageDto) {
+        Stage stage = stageRepository.save(stageMapper.toEntity(stageDto));
+        return stageMapper.toDto(stage);
     }
 
     @Transactional(readOnly = true)
@@ -44,11 +52,5 @@ public class StageService {
     @Transactional(readOnly = true)
     public StageDto getStageById(Long stageId) {
         return stageMapper.toDto(stageRepository.getById(stageId));
-    }
-
-    @Transactional
-    public StageDto updateStage(StageDto stageDto) {
-        Stage stage = stageRepository.save(stageMapper.toEntity(stageDto));
-        return stageMapper.toDto(stage);
     }
 }

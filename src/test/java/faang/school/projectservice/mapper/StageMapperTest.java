@@ -34,11 +34,11 @@ class StageMapperTest {
 
     @BeforeEach
     void setUp() {
-        stageRoles1 = StageRoles.builder().id(1L).teamRole(TeamRole.OWNER).count(1).stage(Stage.builder().stageId(1L).build()).build();
-        stageRoles2 = StageRoles.builder().id(2L).teamRole(TeamRole.MANAGER).count(2).stage(Stage.builder().stageId(2L).build()).build();
+        stageRoles1 = StageRoles.builder().id(1L).teamRole(TeamRole.OWNER).count(1).build();
+        stageRoles2 = StageRoles.builder().id(2L).teamRole(TeamRole.MANAGER).count(2).build();
 
-        stageRolesDto1 = StageRolesDto.builder().id(1L).teamRole("OWNER").count(1).stageId(1L).build();
-        stageRolesDto2 = StageRolesDto.builder().id(2L).teamRole("MANAGER").count(2).stageId(2L).build();
+        stageRolesDto1 = StageRolesDto.builder().id(1L).teamRole("OWNER").count(1).build();
+        stageRolesDto2 = StageRolesDto.builder().id(2L).teamRole("MANAGER").count(2).build();
 
         stage = Stage.builder()
                 .stageId(1L)

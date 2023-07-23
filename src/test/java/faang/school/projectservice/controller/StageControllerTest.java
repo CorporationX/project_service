@@ -8,11 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testcontainers.shaded.org.bouncycastle.crypto.StreamBlockCipher;
 
 import java.util.Collections;
-import java.util.stream.Stream;
+import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -26,6 +26,8 @@ class StageControllerTest {
     StageService stageService;
     @Mock
     StageDto stageDto;
+    @Mock
+    List<StageDto> stageDtoList;
 
     @BeforeEach
     void setUp() {
@@ -45,6 +47,10 @@ class StageControllerTest {
 
     @Test
     void testMethodGetAllStagesByStatus() {
-//        when(stageController.getAllStagesByStatus("active")).thenReturn(List < StageDto >);
+        when(stageService.getAllStagesByStatus(anyString())).thenReturn(stageDtoList);
+        stageController.getAllStagesByStatus(anyString());
+        verify(stageService, times(1)).getAllStagesByStatus(anyString());
+        verifyNoMoreInteractions(stageService);
+
     }
 }
