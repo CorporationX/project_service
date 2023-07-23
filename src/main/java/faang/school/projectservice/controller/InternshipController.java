@@ -23,7 +23,7 @@ public class InternshipController {
             throw new IllegalArgumentException("Validation parameters did not passed!");
         }
         internshipValidationId(id);
-        return internshipService.internshipUpdate(id, internshipDto);
+        return internshipService.internshipUpdate(internshipDto);
     }
 
     //ID проверяем отдельно, тк он приходит позже
@@ -36,11 +36,11 @@ public class InternshipController {
     private boolean internshipCommonValidation(InternshipDto internshipDto) {
         return internshipDto.getName() == null &&
                 internshipDto.getStartDate() == null &&
-                internshipDto.getEndDate() == null &&
-                internshipDto.getDescription() == null &&
+                //internshipDto.getEndDate() == null &&
+                //internshipDto.getDescription() == null &&
                 internshipDto.getMentorId() == null &&
-                internshipDto.getInternsId() == null &&
-                internshipDto.getProjectId() == null &&
-                internshipDto.getStatus() == null;
+                //internshipDto.getInternsId() == null &&
+                internshipDto.getProjectId() == null;
+                //internshipDto.getStatus() == null &&
     }
 }
