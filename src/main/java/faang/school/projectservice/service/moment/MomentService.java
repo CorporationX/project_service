@@ -51,13 +51,13 @@ public class MomentService {
             throw new DataValidException("Unable to create moment with closed project. Id: " + momentDto.getId());
         }
         if (!checkMembersOfProjectsTeam(momentDto)) {
-            throw new DataValidException("Some users are not in projects team. Id: \" + momentDto.getId()");
+            throw new DataValidException("Some users are not in projects team. Id: " + momentDto.getId());
         }
     }
 
     public MomentDto getMomentById(long momentId) {
         Moment moment = momentRepository.findById(momentId)
-                .orElseThrow(() -> new IllegalArgumentException("Moment not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Moment not found. Id: " + momentId));
         return momentMapper.toDto(moment);
     }
 
