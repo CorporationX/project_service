@@ -14,8 +14,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InternshipDto {
     private Long id;
-    private Long project;
-    private Long mentor;
+    private Long projectId;
+    private Long mentorId;
     private List<Long> interns;
     private InternshipStatus status;
     private String description;
