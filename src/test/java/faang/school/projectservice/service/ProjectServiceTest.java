@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -32,6 +33,9 @@ class ProjectServiceTest {
 
     @Spy
     private ProjectMapper projectMapper;
+
+    @Mock
+    private ProjectJpaRepository projectJpaRepository;
 
 
     @Test
@@ -128,5 +132,11 @@ class ProjectServiceTest {
                 .thenReturn(Project.builder().build());
 
         Assertions.assertEquals(projectMapper.toEntity(projectDto), projectMapper.toEntity(projectService.getProjectByIdFromBD(projectDto)));
+    }
+
+    @Test
+    void deleteProjectById() {
+        projectJpaRepository.deleteById(1L);
+        Mockito.verify(projectJpaRepository, Mockito.times(1)).deleteById(1L);
     }
 }

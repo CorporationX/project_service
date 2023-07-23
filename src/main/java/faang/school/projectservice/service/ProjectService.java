@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+    private final ProjectJpaRepository projectJpaRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
 
@@ -64,5 +66,9 @@ public class ProjectService {
     public ProjectDto getProjectByIdFromBD(ProjectDto projectDto) {
         Project projectById = projectRepository.getProjectById(projectDto.getId());
         return mapper.toDto(projectById);
+    }
+
+    public void deleteProjectById(Long id) {
+        projectJpaRepository.deleteById(id);
     }
 }

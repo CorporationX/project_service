@@ -47,6 +47,11 @@ public class ProjectController {
         return projectService.getProjectByIdFromBD(projectDto);
     }
 
+    public void deleteProjectById(long id) {
+        validateData(id < 0, "id doesn't exist");
+        projectService.deleteProjectById(id);
+    }
+
     private void validateData(boolean condition, String exception) {
         if (condition) {
             throw new DataValidationException(exception);
