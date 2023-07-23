@@ -26,4 +26,11 @@ public class StageInvitationController {
             throw new DataValidationException("StageInvitation is invalid");
         }
     }
+
+    public StageInvitationDto reject(long invitationId, String message){
+        if (message == null || message.isBlank()){
+            throw new DataValidationException("Rejection must contains message");
+        }
+        return service.reject(invitationId, message);
+    }
 }

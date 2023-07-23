@@ -73,4 +73,20 @@ public class StageInvitationControllerTest {
                 .build();
         Assertions.assertThrows(DataValidationException.class, () -> controller.create(invalidInvitationDto));
     }
+
+    @Test
+    public void testReject() {
+        controller.reject(1L, "message");
+        Mockito.verify(service, Mockito.times(1)).reject(1L, "message");
+    }
+
+    @Test
+    public void testRejectMessageIsBlank() {
+        Assertions.assertThrows(DataValidationException.class, () -> controller.reject(1L, " "));
+    }
+
+    @Test
+    public void testRejectMessageIsNull() {
+        Assertions.assertThrows(DataValidationException.class, () -> controller.reject(1L, null));
+    }
 }
