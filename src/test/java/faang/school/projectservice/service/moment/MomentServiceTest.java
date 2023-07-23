@@ -77,6 +77,34 @@ class MomentServiceTest {
         verify(momentRepository, never()).save(any(Moment.class));
     }
 
+    @Test
+    public void testCreateMoment_InvalidId() {
+        MomentDto invalidMomentDto = createMomentDto();
+        invalidMomentDto.setId(0L);
+        assertThrows(DataValidException.class, () -> momentService.create(invalidMomentDto));
+    }
+
+    @Test
+    public void testCreateMoment_InvalidName() {
+        MomentDto invalidMomentDto = createMomentDto();
+        invalidMomentDto.setName("   ");
+        assertThrows(DataValidException.class, () -> momentService.create(invalidMomentDto));
+    }
+
+    @Test
+    public void testCreateMoment_InvalidProjects() {
+        MomentDto invalidMomentDto = createMomentDto();
+        invalidMomentDto.setProjects(List.of());
+        assertThrows(DataValidException.class, () -> momentService.create(invalidMomentDto));
+    }
+
+    @Test
+    public void testCreateMoment_InvalidCreator() {
+        MomentDto invalidMomentDto = createMomentDto();
+        invalidMomentDto.setCreatedBy(0L);
+        assertThrows(DataValidException.class, () -> momentService.create(invalidMomentDto));
+    }
+
     private MomentDto createMomentDto() {
         MomentDto momentDto = new MomentDto();
         momentDto.setId(1L);
