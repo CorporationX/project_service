@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [ "pipeline-BC-3949" ]
 
-permissions:
-  contents: read
-
 jobs:
   build:
 
