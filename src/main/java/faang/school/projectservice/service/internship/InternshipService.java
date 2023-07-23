@@ -8,10 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
 
-//        Создать стажировку. Стажировка ВСЕГДА относится к какому-то одному проекту.
-//        Создать стажировку можно только в том случае, если есть кого стажировать.
-//        При создании нужно проверить, что стажировка длится не больше 3 месяцев, и что у стажирующихся есть ментор из команды проекта.
-
 @Service
 @RequiredArgsConstructor
 public class InternshipService {

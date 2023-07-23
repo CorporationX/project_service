@@ -6,10 +6,6 @@ import faang.school.projectservice.service.internship.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
-//        Создать стажировку. Стажировка ВСЕГДА относится к какому-то одному проекту.
-//        Создать стажировку можно только в том случае, если есть кого стажировать.
-//        При создании нужно проверить, что стажировка длится не больше 3 месяцев, и что у стажирующихся есть ментор из команды проекта.
-
 @Controller
 @RequiredArgsConstructor
 public class InternshipController {
