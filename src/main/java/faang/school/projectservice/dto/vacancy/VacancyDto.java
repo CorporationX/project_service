@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @Builder
@@ -17,4 +15,5 @@ public class VacancyDto {
     private String name;
     private Long projectId;
     private Long createdBy;
+    private VacancyStatus status;
 }

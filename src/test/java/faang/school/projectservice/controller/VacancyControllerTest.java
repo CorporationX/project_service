@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class VacancyControllerTest {
-
     @Mock
     VacancyService vacancyService;
 
@@ -27,7 +27,7 @@ class VacancyControllerTest {
         DataValidationException e = assertThrows(
                 DataValidationException.class,
                 () -> vacancyController.createVacancy(new VacancyDto()));
-        assertEquals("Vacancy can't have create an empty name", e.getMessage());
+        assertEquals("Vacancy can't have an empty name", e.getMessage());
     }
 
     @Test
@@ -58,12 +58,28 @@ class VacancyControllerTest {
     }
 
     @Test
+    public void testCreateVacancyThrowExcForStatus() {
+        VacancyDto dto = VacancyDto
+                .builder()
+                .name("A")
+                .projectId(1L)
+                .createdBy(1L)
+                .build();
+
+        DataValidationException e = assertThrows(
+                DataValidationException.class,
+                () -> vacancyController.createVacancy(dto));
+        assertEquals("Vacancy status can't be null", e.getMessage());
+    }
+
+    @Test
     public void testCreateVacancy() {
         VacancyDto dto = VacancyDto
                 .builder()
                 .name("a")
                 .projectId(1L)
                 .createdBy(1L)
+                .status(VacancyStatus.OPEN)
                 .build();
 
         vacancyController.createVacancy(dto);

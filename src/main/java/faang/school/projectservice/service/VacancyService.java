@@ -25,7 +25,7 @@ public class VacancyService {
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         validateVacancy(vacancyDto);
 
-        Vacancy savedVacancy = vacancyRepository.save(vacancyMapper.toEntity(vacancyDto));
+        Vacancy savedVacancy = vacancyRepository.save(vacancyMapper.toModel(vacancyDto));
         return vacancyMapper.toDto(savedVacancy);
     }
 
@@ -35,7 +35,7 @@ public class VacancyService {
 
         if (!projectRepository.existsById(vacancyDto.getProjectId())) {
             throw new DataValidationException("There is no project with this id");
-        } else if (!creatorRoles.contains(TeamRole.OWNER) || !creatorRoles.contains(TeamRole.MANAGER)) {
+        } else if (!creatorRoles.contains(TeamRole.OWNER) && !creatorRoles.contains(TeamRole.MANAGER)) {
             throw new DataValidationException("The vacancy creator doesn't have the required role");
         }
     }
