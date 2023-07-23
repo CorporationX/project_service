@@ -2,7 +2,7 @@ name: Java CI with Gradle
 
 on:
   pull_request:
-    branches: [ "feature/pipeline-BC-3949" ]
+    branches: [ "pipeline-BC-3949" ]
 
 permissions:
   contents: read
