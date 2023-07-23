@@ -1,4 +1,4 @@
-package faang.school.projectservice.stage_invitation;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.controller.stage_invitation.StageInvitationController;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
