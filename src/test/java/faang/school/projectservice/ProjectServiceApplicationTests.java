@@ -9,4 +9,9 @@ class ProjectServiceApplicationTests {
     void contextLoads() {
         Assertions.assertThat(40 + 2).isEqualTo(42);
     }
+
+    @Test
+    void contextLoadsFail() {
+        Assertions.assertThat(40 + 2).isEqualTo(50);
+    }
 }
