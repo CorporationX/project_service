@@ -40,7 +40,7 @@ public class MomentService {
 
         BeanUtils.copyProperties(source, target, "id");
 
-        Moment result = momentRepository.save(momentMapper.toEntity(target));
+        momentRepository.save(momentMapper.toEntity(target));
         return target;
     }
 
