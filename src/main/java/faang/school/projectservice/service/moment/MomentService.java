@@ -12,18 +12,17 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 @Service
 public class MomentService {
-    private MomentRepository momentRepository;
-    private MomentMapper momentMapper;
-    private ProjectRepository projectRepository;
+    private final MomentRepository momentRepository;
+    private final MomentMapper momentMapper;
+    private final ProjectRepository projectRepository;
 
     public MomentDto create(MomentDto momentDto) {
         validateMomentDto(momentDto);
@@ -41,19 +40,17 @@ public class MomentService {
         }
     }
 
-    private void update(MomentDto momentDto) {
-        validateMomentDto(momentDto);
+    private MomentDto update(MomentDto source) {
+        validateMomentDto(source);
 
-        Moment moment = momentRepository.findById(momentDto.getId())
+        Moment moment = momentRepository.findById(source.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Event not found"));
-        updateField(momentDto.getName(), moment.getName(), moment::setName);
-        updateField(momentDto.getDescription(), moment.getDescription(), moment::setDescription);
-    }
+        MomentDto target = momentMapper.toDto(moment);
 
-    private <T> void updateField(T newValue, T oldValue, Consumer<T> updateFunction) {
-        if (newValue != null && !Objects.equals(newValue, oldValue)) {
-            updateFunction.accept(newValue);
-        }
+        BeanUtils.copyProperties(source, target, "id");
+
+        Moment result = momentRepository.save(momentMapper.toEntity(target));
+        return momentMapper.toDto(result);
     }
 
     private boolean checkMembersOfProjectsTeam(MomentDto momentDto) {
