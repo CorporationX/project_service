@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,17 +14,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InternshipDto {
     private Long id;
-    private Long project;
-    private Long mentort;
+    private Long projectId;
+    private Long mentorId;
     private List<Long> interns;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
     private InternshipStatus status;
     private String description;
     private String name;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private Long createdBy;
-    private Long updatedBy;
     private Long schedule;
 }
