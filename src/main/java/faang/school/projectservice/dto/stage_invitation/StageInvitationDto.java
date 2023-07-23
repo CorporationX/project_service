@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Builder
-@Component
 public class StageInvitationDto {
     private final Long id;
     private final String description;
