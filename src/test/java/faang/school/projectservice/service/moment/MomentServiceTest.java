@@ -127,7 +127,7 @@ class MomentServiceTest {
     }
 
     @Test
-    void updateEvent_EventNotFound() {
+    void updateMoment_MomentNotFound() {
         when(projectRepository.getProjectById(any(Long.class))).thenReturn(createProject());
         when(momentRepository.findById(1L)).thenReturn(Optional.empty());
 
