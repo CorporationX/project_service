@@ -2,7 +2,7 @@ name: CIforGriffonMaster
 
 on:
   pull_request:
-    branches: [ "feature/pipeline-BC-3949" ]
+    branches: [ "griffon-master" ]
 
 jobs:
   build:
