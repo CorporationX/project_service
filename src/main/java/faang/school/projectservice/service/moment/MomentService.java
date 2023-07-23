@@ -16,12 +16,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@RequiredArgsConstructor
+
 @Service
+@RequiredArgsConstructor
 public class MomentService {
-    private MomentRepository momentRepository;
-    private MomentMapper momentMapper;
-    private ProjectRepository projectRepository;
+    private final MomentRepository momentRepository;
+    private final MomentMapper momentMapper;
+    private final ProjectRepository projectRepository;
 
     public MomentDto create(MomentDto momentDto) {
         validateMomentDto(momentDto);
@@ -30,12 +31,27 @@ public class MomentService {
     }
 
     private void validateMomentDto(MomentDto momentDto) {
+        if (momentDto.getId() == null || momentDto.getId() < 1) {
+            throw new DataValidException("Illegal Id: " + momentDto.getId());
+        }
+        if (momentDto.getName().isBlank()) {
+            throw new DataValidException("Moment must have name. Id: " + momentDto.getId());
+        }
+        if (momentDto.getProjects() == null || momentDto.getProjects().size() < 1) {
+            throw new DataValidException("Moment must have project. Id: " + momentDto.getId());
+        }
+        if (momentDto.getCreatedBy() == null || momentDto.getCreatedBy() < 1) {
+            throw new DataValidException("Moment must have a creator. Id: " + momentDto.getId());
+        }
+        if (momentDto.getDate() == null) {
+            throw new DataValidException("Moment must have a date. Id: " + momentDto.getId());
+        }
         if (momentDto.getProjects().stream().anyMatch(projectDto -> projectDto.getStatus().equals(ProjectStatus.CANCELLED)
                 || projectDto.getStatus().equals(ProjectStatus.COMPLETED))) {
-            throw new DataValidException("Unable to create moment with closed project");
+            throw new DataValidException("Unable to create moment with closed project. Id: " + momentDto.getId());
         }
-        if (checkMembersOfProjectsTeam(momentDto)) {
-            throw new DataValidException("Some users are not in projects team");
+        if (!checkMembersOfProjectsTeam(momentDto)) {
+            throw new DataValidException("Some users are not in projects team. Id: \" + momentDto.getId()");
         }
     }
 
