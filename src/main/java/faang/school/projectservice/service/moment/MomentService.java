@@ -75,7 +75,7 @@ public class MomentService {
             throw new DataValidException("Unable to create moment with closed project. Id: " + momentDto.getId());
         }
         if (!checkMembersOfProjectsTeam(momentDto)) {
-            throw new DataValidException("Some users are not in projects team. Id: \" + momentDto.getId()");
+            throw new DataValidException("Some users are not in projects team. Id: " + momentDto.getId());
         }
     }
 
@@ -83,6 +83,7 @@ public class MomentService {
         return getMembersOfProjectsTeam(momentDto).equals(momentDto.getUserIds());
     }
 
+    @Transactional(readOnly = true)
     private List<Long> getMembersOfProjectsTeam(MomentDto momentDto) {
         return momentDto.getProjects().stream()
                 .map(ProjectDto::getId)
