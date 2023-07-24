@@ -1,7 +1,6 @@
 package faang.school.projectservice.model;
 
 import faang.school.projectservice.model.stage.Stage;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,7 +14,10 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -26,6 +28,9 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "project")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Project {
 
     @Id
