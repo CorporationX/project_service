@@ -64,8 +64,7 @@ class ProjectServiceTest {
         when(projectRepository.existsById(subProjectDto.getParentId())).thenReturn(false);
 
         DataValidationException validationException = assertThrows(DataValidationException.class,
-                () -> projectService.createSubProject(subProjectDto));
-        assertEquals("No such parent project", validationException.getMessage());
+                () -> projectService.createSubProject(subProjectDto), "No such parent project");
     }
 
     @Test
