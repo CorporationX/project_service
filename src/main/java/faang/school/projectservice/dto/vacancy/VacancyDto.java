@@ -15,5 +15,6 @@ public class VacancyDto {
     private String name;
     private Long projectId;
     private Long createdBy;
+    private Long updatedBy;
     private VacancyStatus status;
 }

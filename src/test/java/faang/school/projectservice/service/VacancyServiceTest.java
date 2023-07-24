@@ -3,12 +3,15 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mappper.VacancyMapper;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,6 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -43,10 +47,10 @@ class VacancyServiceTest {
     VacancyDto vacancyDto;
 
     @Nested
-    class negativeTestGroup {
+    class NegativeTestGroupA {
         @BeforeEach
         public void setUp() {
-            vacancyDto = new VacancyDto(1L, "A", 1L, 1L, VacancyStatus.OPEN);
+            vacancyDto = new VacancyDto(1L, "A", 1L, 1L, 1L, VacancyStatus.OPEN);
             Mockito.when(teamMemberRepository.findById(1L)).thenReturn(TeamMember
                     .builder()
                     .roles(List.of(TeamRole.DEVELOPER))
@@ -71,10 +75,10 @@ class VacancyServiceTest {
     }
 
     @Nested
-    class positiveTestGroup {
+    class PositiveTestGroupA {
         @BeforeEach
         public void setUp() {
-            vacancyDto = new VacancyDto(1L, "A", 1L, 1L, VacancyStatus.OPEN);
+            vacancyDto = new VacancyDto(1L, "A", 1L, 1L, 1L, VacancyStatus.OPEN);
 
             Mockito.when(teamMemberRepository.findById(1L)).thenReturn(TeamMember
                     .builder()
@@ -104,6 +108,60 @@ class VacancyServiceTest {
         public void testCreateVacancyCallToMapper() {
             Mockito.verify(vacancyMapper, Mockito.times(1)).toModel(vacancyDto);
             Mockito.verify(vacancyMapper, Mockito.times(1)).toDto(Mockito.any());
+        }
+    }
+
+    @Nested
+    class NegativeTestsGroupB {
+        @BeforeEach
+        public void setUp() {
+            vacancyDto = new VacancyDto(1L, "A", 1L, 1L, 1L, VacancyStatus.CLOSED);
+        }
+
+        @Test
+        public void testUpdateVacancyThrowEntityExcForId() {
+            assertThrows(EntityNotFoundException.class, () -> vacancyService.updateVacancy(vacancyDto));
+        }
+
+        @Test
+        public void testUpdateVacancyThrowIllegalArgsExc() {
+            Vacancy vacancy = Vacancy.builder().candidates(List.of(new Candidate())).build();
+            Mockito.when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
+
+            assertThrows(IllegalArgumentException.class, () -> vacancyService.updateVacancy(vacancyDto));
+        }
+    }
+
+    @Nested
+    class PositiveTestsGroupB {
+        @Mock
+        Vacancy vacancy;
+
+        @BeforeEach
+        public void setUp() {
+            vacancyDto = new VacancyDto(1L, "A", 1L, 1L, 1L, VacancyStatus.CLOSED);
+            List<Candidate> candidates = List.of(new Candidate(), new Candidate(), new Candidate(), new Candidate(),
+                    new Candidate());
+
+            Mockito.when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
+            Mockito.when(vacancy.getCandidates()).thenReturn(candidates);
+            Mockito.when(teamMemberRepository.findById(1L)).thenReturn(TeamMember
+                    .builder()
+                    .roles(List.of(TeamRole.OWNER))
+                    .build());
+            Mockito.when(projectRepository.existsById(1L)).thenReturn(true);
+
+            vacancyService.updateVacancy(vacancyDto);
+        }
+
+        @Test
+        public void testUpdateVacancyCallFindById() {
+            Mockito.verify(vacancyRepository).findById(1L);
+        }
+
+        @Test
+        public void testUpdateVacancyCallGetCandidates() {
+            Mockito.verify(vacancy).getCandidates();
         }
     }
 }

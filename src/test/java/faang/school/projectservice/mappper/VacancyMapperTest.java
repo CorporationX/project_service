@@ -20,7 +20,7 @@ class VacancyMapperTest {
 
     @BeforeEach
     public void setUp() {
-        vacancyDto = new VacancyDto(1L, "A", 1L, 1L, VacancyStatus.OPEN);
+        vacancyDto = new VacancyDto(1L, "A", 1L, 1L, 1L, VacancyStatus.OPEN);
     }
 
     @Test
@@ -31,6 +31,7 @@ class VacancyMapperTest {
                 .name("A")
                 .project(Project.builder().id(1L).build())
                 .createdBy(1L)
+                .updatedBy(1L)
                 .status(VacancyStatus.OPEN)
                 .build();
 
@@ -44,6 +45,7 @@ class VacancyMapperTest {
                 .id(1L)
                 .name("A")
                 .createdBy(1L)
+                .updatedBy(1L)
                 .status(VacancyStatus.OPEN)
                 .build();
 

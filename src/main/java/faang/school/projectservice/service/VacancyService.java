@@ -6,9 +6,11 @@ import faang.school.projectservice.mappper.VacancyMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,26 +19,44 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class VacancyService {
-    private final TeamMemberRepository teamMemberRepository;
+    private static final int VACANCY_PLACES = 5;
     private final VacancyRepository vacancyRepository;
     private final ProjectRepository projectRepository;
     private final VacancyMapper vacancyMapper;
+    private final TeamMemberRepository teamMemberRepository;
 
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
-        validateVacancy(vacancyDto);
-
-        Vacancy savedVacancy = vacancyRepository.save(vacancyMapper.toModel(vacancyDto));
-        return vacancyMapper.toDto(savedVacancy);
+        validateVacancy(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
+        return saveVacancy(vacancyDto);
     }
 
-    private void validateVacancy(VacancyDto vacancyDto) {
-        TeamMember vacancyCreator = teamMemberRepository.findById(vacancyDto.getCreatedBy());
-        List<TeamRole> creatorRoles = vacancyCreator.getRoles();
+    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+        if (vacancyDto.getStatus() == VacancyStatus.CLOSED) {
+            Vacancy vacancyToUpdate = vacancyRepository
+                    .findById(vacancyDto.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Can't found vacancy with this id"));
+            if (vacancyToUpdate.getCandidates().size() < VACANCY_PLACES) {
+                throw new IllegalArgumentException("There are not enough candidates for this vacancy to close");
+            }
+        }
+        validateVacancy(vacancyDto.getUpdatedBy(), vacancyDto.getProjectId());
 
-        if (!projectRepository.existsById(vacancyDto.getProjectId())) {
+        return saveVacancy(vacancyDto);
+    }
+
+    private void validateVacancy(Long updaterId, Long projectId) {
+        TeamMember vacancyUpdater = teamMemberRepository.findById(updaterId);
+        List<TeamRole> updaterRoles = vacancyUpdater.getRoles();
+
+        if (!projectRepository.existsById(projectId)) {
             throw new DataValidationException("There is no project with this id");
-        } else if (!creatorRoles.contains(TeamRole.OWNER) && !creatorRoles.contains(TeamRole.MANAGER)) {
+        } else if (!updaterRoles.contains(TeamRole.OWNER) && !updaterRoles.contains(TeamRole.MANAGER)) {
             throw new DataValidationException("The vacancy creator doesn't have the required role");
         }
+    }
+
+    private VacancyDto saveVacancy(VacancyDto vacancyDto) {
+        Vacancy vacancyToSave = vacancyRepository.save(vacancyMapper.toModel(vacancyDto));
+        return vacancyMapper.toDto(vacancyToSave);
     }
 }
