@@ -29,23 +29,19 @@ public class StageController {
 
     @PostMapping("/createStage/")
     public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
-        if (stageDto.getStageId() != null || stageDto.getStageRolesDto().stream().anyMatch(stageRolesDto -> stageRolesDto.getId() != null)) {
-            throw new IllegalArgumentException("Id must be null");
-        }
+        validateId(stageDto);
         return stageService.createStage(stageDto);
     }
 
     @GetMapping("/stageStatus/")
     public List<StageDto> getAllStagesByStatus(@RequestParam(value = "status") String status) {
-        if (Arrays.stream(StageStatus.values()).noneMatch(stageStatus -> stageStatus.toString().equalsIgnoreCase(status))) {
-            throw new IllegalArgumentException("Invalid status");
-        }
+        validateStatus(status);
         return stageService.getAllStagesByStatus(status);
     }
 
     @DeleteMapping("/deleteStage/{stageId}")
     public void deleteStage(@Min(1) @PathVariable("stageId") Long stageId) {
-        stageService.deleteStage(stageId);
+        stageService.deleteStageById(stageId);
     }
 
     @PutMapping("/updateStage/")
@@ -60,6 +56,28 @@ public class StageController {
 
     @GetMapping("/getStageById/{stageId}")
     public StageDto getStageById(@Min(1) @PathVariable("stageId") Long stageId) {
+        validateStageId(stageId);
         return stageService.getStageById(stageId);
+    }
+
+    private void validateId(StageDto stageDto) {
+        if (stageDto.getStageId() != null) {
+            throw new IllegalArgumentException("Stage ID must be null");
+        }
+        if(stageDto.getStageRolesDto().stream().anyMatch(stageRolesDto -> stageRolesDto.getId() != null)) {
+            throw new IllegalArgumentException("Stage roles ID must be null");
+        }
+    }
+
+    public void validateStatus(String status) {
+        if (Arrays.stream(StageStatus.values()).noneMatch(stageStatus -> stageStatus.toString().equalsIgnoreCase(status))) {
+            throw new IllegalArgumentException("Invalid status");
+        }
+    }
+
+    private void validateStageId(Long stageId) {
+        if (stageId == null) {
+            throw new IllegalArgumentException("Stage ID must not be null");
+        }
     }
 }

@@ -26,11 +26,12 @@ class StageMapperTest {
 
     private Stage stage;
     private StageDto stageDto;
-    StageRoles stageRoles1;
-    StageRoles stageRoles2;
 
-    StageRolesDto stageRolesDto1;
-    StageRolesDto stageRolesDto2;
+    private StageRoles stageRoles1;
+    private StageRoles stageRoles2;
+
+    private StageRolesDto stageRolesDto1;
+    private StageRolesDto stageRolesDto2;
 
     @BeforeEach
     void setUp() {
