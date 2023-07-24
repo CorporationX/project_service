@@ -1,7 +1,6 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.model.stage.StageStatus;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -17,8 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.List;
+
+import static faang.school.projectservice.validate.Validate.validateId;
+import static faang.school.projectservice.validate.Validate.validateStageId;
+import static faang.school.projectservice.validate.Validate.validateStatus;
 
 @RestController
 @RequestMapping("/stage")
@@ -58,26 +60,5 @@ public class StageController {
     public StageDto getStageById(@Min(1) @PathVariable("stageId") Long stageId) {
         validateStageId(stageId);
         return stageService.getStageById(stageId);
-    }
-
-    private void validateId(StageDto stageDto) {
-        if (stageDto.getStageId() != null) {
-            throw new IllegalArgumentException("Stage ID must be null");
-        }
-        if(stageDto.getStageRolesDto().stream().anyMatch(stageRolesDto -> stageRolesDto.getId() != null)) {
-            throw new IllegalArgumentException("Stage roles ID must be null");
-        }
-    }
-
-    public void validateStatus(String status) {
-        if (Arrays.stream(StageStatus.values()).noneMatch(stageStatus -> stageStatus.toString().equalsIgnoreCase(status))) {
-            throw new IllegalArgumentException("Invalid status");
-        }
-    }
-
-    private void validateStageId(Long stageId) {
-        if (stageId == null) {
-            throw new IllegalArgumentException("Stage ID must not be null");
-        }
     }
 }
