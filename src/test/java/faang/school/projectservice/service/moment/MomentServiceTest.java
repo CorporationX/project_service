@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -151,6 +152,21 @@ class MomentServiceTest {
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getId());
         assertEquals(2L, result.get(1).getId());
+    }
+
+    @Test
+    public void testGetMomentsByDate() {
+        LocalDateTime start = LocalDate.of(2023, 7, 23).atStartOfDay();
+        LocalDateTime end = LocalDate.of(2023, 7, 25).atStartOfDay();
+        momentService.getMomentsByDate(start, end);
+        verify(momentRepository).findAllByDateRange(start, end);
+    }
+
+    @Test
+    public void testGetMomentsByProjects() {
+        List<Long> projectIds = List.of(7L, 8L, 9L);
+        momentService.getMomentsByProjects(projectIds);
+        verify(momentRepository).findAllByProjectIds(projectIds);
     }
 
     private MomentDto createMomentDto() {
