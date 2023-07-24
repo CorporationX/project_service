@@ -21,6 +21,13 @@ public class VacancyController {
         return vacancyService.updateVacancy(vacancyDto);
     }
 
+    public void deleteVacancy(long id) {
+        if (id < 0) {
+            throw new DataValidationException("Vacancy should have correct id");
+        }
+        vacancyService.deleteVacancy(id);
+    }
+
     private void validateVacancy(VacancyDto vacancyDto) {
         if (vacancyDto.getId() != null && vacancyDto.getId() < 0) {
             throw new DataValidationException("Vacancy should have correct id");

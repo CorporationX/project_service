@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -162,6 +163,29 @@ class VacancyServiceTest {
         @Test
         public void testUpdateVacancyCallGetCandidates() {
             Mockito.verify(vacancy).getCandidates();
+        }
+    }
+
+    @Nested
+    class PositiveTestsGroupC {
+        @Mock
+        Vacancy vacancy;
+
+        @BeforeEach
+        public void setUp() {
+            Mockito.when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
+            Mockito.when(vacancy.getCandidates()).thenReturn(new ArrayList<>());
+            vacancyService.deleteVacancy(1);
+        }
+
+        @Test
+        public void testDeleteVacancyCallGetCandidates() {
+            Mockito.verify(vacancy).getCandidates();
+        }
+
+        @Test
+        public void testDeleteVacancyCallDeleteById() {
+            Mockito.verify(vacancyRepository).deleteById(1L);
         }
     }
 }

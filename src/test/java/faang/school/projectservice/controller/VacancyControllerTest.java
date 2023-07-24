@@ -74,6 +74,11 @@ class VacancyControllerTest {
         assertEquals("Vacancy status can't be null", e.getMessage());
     }
 
+    @Test
+    public void testDeleteVacancyThrowDateExc() {
+        assertThrows(DataValidationException.class, () -> vacancyController.deleteVacancy(-1));
+    }
+
     @Nested
     class PositiveTests {
         VacancyDto dto;
@@ -99,6 +104,12 @@ class VacancyControllerTest {
         public void testUpdateVacancy() {
             vacancyController.updateVacancy(dto);
             Mockito.verify(vacancyService, Mockito.times(1)).updateVacancy(dto);
+        }
+
+        @Test
+        public void testDeleteVacancy() {
+            vacancyController.deleteVacancy(1);
+            Mockito.verify(vacancyService, Mockito.times(1)).deleteVacancy(1);
         }
     }
 }

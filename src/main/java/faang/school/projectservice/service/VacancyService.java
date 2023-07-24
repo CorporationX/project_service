@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mappper.VacancyMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -24,6 +25,7 @@ public class VacancyService {
     private final ProjectRepository projectRepository;
     private final VacancyMapper vacancyMapper;
     private final TeamMemberRepository teamMemberRepository;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
 
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         validateVacancy(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
@@ -32,9 +34,7 @@ public class VacancyService {
 
     public VacancyDto updateVacancy(VacancyDto vacancyDto) {
         if (vacancyDto.getStatus() == VacancyStatus.CLOSED) {
-            Vacancy vacancyToUpdate = vacancyRepository
-                    .findById(vacancyDto.getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Can't found vacancy with this id"));
+            Vacancy vacancyToUpdate = getVacancy(vacancyDto.getId());
             if (vacancyToUpdate.getCandidates().size() < VACANCY_PLACES) {
                 throw new IllegalArgumentException("There are not enough candidates for this vacancy to close");
             }
@@ -42,6 +42,18 @@ public class VacancyService {
         validateVacancy(vacancyDto.getUpdatedBy(), vacancyDto.getProjectId());
 
         return saveVacancy(vacancyDto);
+    }
+
+    public void deleteVacancy(long id) {
+        Vacancy vacancy = getVacancy(id);
+        vacancy.getCandidates().stream()
+                .flatMap(candidate -> teamMemberJpaRepository.findByUserId(candidate.getUserId()).stream())
+                .forEach(teamMember -> {
+                    if (teamMember.getRoles().contains(TeamRole.INTERN)) {
+                        teamMemberJpaRepository.delete(teamMember);
+                    }
+                });
+        vacancyRepository.deleteById(id);
     }
 
     private void validateVacancy(Long updaterId, Long projectId) {
@@ -58,5 +70,11 @@ public class VacancyService {
     private VacancyDto saveVacancy(VacancyDto vacancyDto) {
         Vacancy vacancyToSave = vacancyRepository.save(vacancyMapper.toModel(vacancyDto));
         return vacancyMapper.toDto(vacancyToSave);
+    }
+
+    private Vacancy getVacancy(long id) {
+        return vacancyRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Can't found vacancy with this id"));
     }
 }
