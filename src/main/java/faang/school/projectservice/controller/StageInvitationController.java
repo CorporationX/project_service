@@ -14,22 +14,28 @@ import java.util.List;
 public class StageInvitationController {
   private final StageInvitationService stageInvitationService;
 
-  private void validateStageId(Long id) {
+  private void validateRequiredField(Long id, String message) {
     if (id == null) {
-      throw new DataValidationException("Stage id is required");
+      throw new DataValidationException(message);
     }
+  }
+
+  private void validateRequiredField(String field, String message) {
+    if (field == null) {
+      throw new DataValidationException(message);
+    }
+  }
+
+  private void validateStageId(Long id) {
+    validateRequiredField(id, "Stage id is required");
   }
 
   private void validateInvitedPersonId(Long id) {
-    if (id == null) {
-      throw new DataValidationException("Invited person id is required");
-    }
+    validateRequiredField(id, "Invited person id is required");
   }
 
   private void validateAuthorId(Long id) {
-    if (id == null) {
-      throw new DataValidationException("Invited person id is required");
-    }
+    validateRequiredField(id, "User id is required");
   }
 
   private void validateInvitationRequest(StageInvitationDto invitationDto) {
@@ -50,5 +56,20 @@ public class StageInvitationController {
     }
 
     return stageInvitationService.getAllByInvitedUserId(userId);
+  }
+
+  public void acceptInvitation(Long userId, Long invitationId) {
+    validateRequiredField(userId, "User id is required");
+    validateRequiredField(invitationId, "Invitation id is required");
+
+    stageInvitationService.acceptInvitation(userId, invitationId);
+  }
+
+  public void declineInvitation(Long userId, Long invitationId, String cancelDescription) {
+    validateRequiredField(userId, "User id is required");
+    validateRequiredField(invitationId, "Invitation id is required");
+    validateRequiredField(cancelDescription, "Cancel description is required");
+
+    stageInvitationService.declinedInvitation(userId, invitationId, cancelDescription);
   }
 }
