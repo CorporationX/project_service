@@ -17,8 +17,8 @@ public class ProjectDto {
     private Long id;
     private String name;
     private String description;
-    private ProjectStatus status;
-    private ProjectVisibility visibility;
     private Long parentId;
     private List<Long> childrenId;
+    private ProjectStatus status;
+    private ProjectVisibility visibility;
 }

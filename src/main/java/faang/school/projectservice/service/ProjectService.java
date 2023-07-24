@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -17,35 +16,38 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
 
     @Transactional
-    public ProjectDto createSubProject(CreateSubProjectDto createSubProjectDto) {
-        validateParentProjectExist(createSubProjectDto);
-        validateVisibilityConsistency(createSubProjectDto);
-        validateSubProjectUnique(createSubProjectDto);
+    public ProjectDto createSubProject(ProjectDto projectDto) {
+        validateParentProjectExist(projectDto);
+        validateVisibilityConsistency(projectDto);
+        validateSubProjectUnique(projectDto);
 
-        ProjectDto projectDto = projectMapper.toProjectDto(createSubProjectDto);
-        Project project = projectMapper.toEntity(projectDto);
+        Project subProject = projectMapper.toEntity(projectDto);
+        Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
+        subProject.setParentProject(parentProject);
+        Project savedSubProject = projectRepository.save(subProject);
+        parentProject.getChildren().add(savedSubProject);
 
-        return projectMapper.toDto(projectRepository.save(project));
+        return projectMapper.toDto(savedSubProject);
     }
 
-    private void validateParentProjectExist(CreateSubProjectDto createSubProjectDto) {
-        if (!projectRepository.existsById(createSubProjectDto.getParentId())) {
+    private void validateParentProjectExist(ProjectDto projectDto) {
+        if (!projectRepository.existsById(projectDto.getParentId())) {
             throw new DataValidationException("No such parent project");
         }
     }
 
-    private void validateVisibilityConsistency(CreateSubProjectDto createSubProjectDto) {
-        Project parentProject = projectRepository.getProjectById(createSubProjectDto.getParentId());
+    private void validateVisibilityConsistency(ProjectDto projectDto) {
+        Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
 
-        if (!createSubProjectDto.getVisibility().equals(parentProject.getVisibility())) {
+        if (!projectDto.getVisibility().equals(parentProject.getVisibility())) {
             throw new DataValidationException("The visibility of the subproject must be - " +
                     parentProject.getVisibility() + " like the parent project");
         }
     }
 
-    private void validateSubProjectUnique(CreateSubProjectDto createSubProjectDto) {
-        Project parentProject = projectRepository.getProjectById(createSubProjectDto.getParentId());
-        String subProjectName = createSubProjectDto.getName();
+    private void validateSubProjectUnique(ProjectDto projectDto) {
+        Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
+        String subProjectName = projectDto.getName();
         boolean subProjectExists = parentProject.getChildren().stream().anyMatch(
                 subProject -> subProject.getName().equals(subProjectName));
 
