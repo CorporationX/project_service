@@ -44,6 +44,8 @@ public class MomentService {
     public List<MomentDto> getAllMoments() {
         List<Moment> moments = momentRepository.findAll();
         return moments.stream().map(momentMapper::toDto).toList();
+    }
+
     public List<MomentDto> getMomentsByDate(LocalDateTime startDate, LocalDateTime endDate) {
         return momentMapper.toListDto(momentRepository.findAllByDateRange(startDate, endDate));
     }
