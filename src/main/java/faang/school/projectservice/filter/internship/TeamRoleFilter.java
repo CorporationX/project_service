@@ -16,14 +16,11 @@ public class TeamRoleFilter implements InternshipFilter {
 
     @Override
     public Stream<Internship> apply(Stream<Internship> internshipStream, InternshipFilterDto internshipFilterDto) {
-        return internshipStream
-                .filter(internship ->
-                        internship.getInterns()
-                                .stream()
-                                .allMatch(intern ->
-                                        intern.getRoles().contains(internshipFilterDto.getInternshipRole()
-                                        )
-                                )
-                );
+        return internshipStream.filter(internship -> internship.getInterns().stream()
+                .allMatch(intern ->
+                        intern.getRoles().contains(internshipFilterDto.getInternshipRole()
+                        )
+                )
+        );
     }
 }

@@ -38,44 +38,43 @@ public class TeamMember {
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
 
-    public void addRole(TeamRole teamRole){
-        if (roles == null){
+    public void addRole(TeamRole teamRole) {
+        if (roles == null) {
             roles = new ArrayList<>();
         }
         roles.add(teamRole);
     }
 
     public void finishInternship() {
-        TeamRole role = roles.stream()
-                .filter(r ->
-                        r.equals(TeamRole.INTERNANALYST) ||
-                                r.equals(TeamRole.INTERNDESIGNER) ||
-                                r.equals(TeamRole.INTERNDEVELOPER) ||
-                                r.equals(TeamRole.INTERNMANAGER) ||
-                                r.equals(TeamRole.INTERNTESTER)
+        TeamRole role = roles.stream().filter(r ->
+                        r.equals(TeamRole.INTERN_ANALYST) ||
+                                r.equals(TeamRole.INTERN_DESIGNER) ||
+                                r.equals(TeamRole.INTERN_DEVELOPER) ||
+                                r.equals(TeamRole.INTERN_MANAGER) ||
+                                r.equals(TeamRole.INTERN_TESTER)
                 )
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Team member doesn't has intern role"));
+                .orElseThrow(() -> new IllegalArgumentException("Team member with id " + id + " doesn't has intern role"));
 
         switch (role) {
-            case INTERNANALYST -> {
-                roles.remove(TeamRole.INTERNANALYST);
+            case INTERN_ANALYST -> {
+                roles.remove(TeamRole.INTERN_ANALYST);
                 roles.add(TeamRole.ANALYST);
             }
-            case INTERNDESIGNER -> {
-                roles.remove(TeamRole.INTERNDESIGNER);
+            case INTERN_DESIGNER -> {
+                roles.remove(TeamRole.INTERN_DESIGNER);
                 roles.add(TeamRole.DESIGNER);
             }
-            case INTERNDEVELOPER -> {
-                roles.remove(TeamRole.INTERNDEVELOPER);
+            case INTERN_DEVELOPER -> {
+                roles.remove(TeamRole.INTERN_DEVELOPER);
                 roles.add(TeamRole.DEVELOPER);
             }
-            case INTERNMANAGER -> {
-                roles.remove(TeamRole.INTERNMANAGER);
+            case INTERN_MANAGER -> {
+                roles.remove(TeamRole.INTERN_MANAGER);
                 roles.add(TeamRole.MANAGER);
             }
-            case INTERNTESTER -> {
-                roles.remove(TeamRole.INTERNTESTER);
+            case INTERN_TESTER -> {
+                roles.remove(TeamRole.INTERN_TESTER);
                 roles.add(TeamRole.TESTER);
             }
         }

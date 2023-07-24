@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.ResponseInternshipDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
-import faang.school.projectservice.service.internship.InternshipService;
+import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 

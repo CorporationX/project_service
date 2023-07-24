@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.internship;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
@@ -68,7 +68,7 @@ public class InternshipServiceTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMonths(2),
                 "Internship",
-                TeamRole.INTERNDEVELOPER,
+                TeamRole.INTERN_DEVELOPER,
                 5L
         );
 
@@ -136,7 +136,7 @@ public class InternshipServiceTest {
         InternshipFilterDto filterDto = InternshipFilterDto.builder()
                 .projectId(1L)
                 .status(InternshipStatus.COMPLETED)
-                .internshipRole(TeamRole.INTERNDEVELOPER)
+                .internshipRole(TeamRole.INTERN_DEVELOPER)
                 .build();
 
         List<InternshipFilter> filter = List.of(
@@ -147,15 +147,15 @@ public class InternshipServiceTest {
                 teamMemberRepository, taskRepository, internshipMapper, filter);
         Internship internship1 = Internship.builder()
                 .status(InternshipStatus.IN_PROGRESS)
-                .interns(List.of(TeamMember.builder().roles(List.of(TeamRole.INTERNDEVELOPER)).build()))
+                .interns(List.of(TeamMember.builder().roles(List.of(TeamRole.INTERN_DEVELOPER)).build()))
                 .build();
         Internship internship2 = Internship.builder()
                 .status(InternshipStatus.COMPLETED)
-                .interns(List.of(TeamMember.builder().roles(List.of(TeamRole.INTERNANALYST)).build()))
+                .interns(List.of(TeamMember.builder().roles(List.of(TeamRole.INTERN_ANALYST)).build()))
                 .build();
         Internship internship3 = Internship.builder()
                 .status(InternshipStatus.COMPLETED)
-                .interns(List.of(TeamMember.builder().roles(List.of(TeamRole.INTERNDEVELOPER)).build()))
+                .interns(List.of(TeamMember.builder().roles(List.of(TeamRole.INTERN_DEVELOPER)).build()))
                 .build();
         List<Internship> internships = Arrays.asList(internship1, internship2, internship3);
 

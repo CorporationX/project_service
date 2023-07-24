@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.internship;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
@@ -43,6 +43,18 @@ public class InternshipService {
         List<TeamMember> interns = teamMemberRepository.findAllById(dto.getInternIds());
         interns.forEach(intern -> intern.addRole(dto.getInternshipRole()));
 
+        validateCreateDto(dto, mentor);
+
+        Internship internship = internshipMapper.createDtoToEntity(dto);
+        internship.setProject(project);
+        internship.setMentor(mentor);
+        internship.setInterns(interns);
+        internship.setCreatedAt(LocalDateTime.now());
+
+        return internshipMapper.entityToResponseDto(internshipRepository.save(internship));
+    }
+
+    private static void validateCreateDto(CreateInternshipDto dto, TeamMember mentor) {
         if (dto.getName().isBlank()) {
             throw new IllegalArgumentException("Name shouldn't be blank");
         }
@@ -55,14 +67,6 @@ public class InternshipService {
         if (mentor == null) {
             throw new IllegalArgumentException("The internship should contain mentor from project");
         }
-
-        Internship internship = internshipMapper.createDtoToEntity(dto);
-        internship.setProject(project);
-        internship.setMentor(mentor);
-        internship.setInterns(interns);
-        internship.setCreatedAt(LocalDateTime.now());
-
-        return internshipMapper.entityToResponseDto(internshipRepository.save(internship));
     }
 
     @Transactional
@@ -71,6 +75,16 @@ public class InternshipService {
                 .orElseThrow(() -> new IllegalArgumentException("The internship not found"));
         Project project = internship.getProject();
 
+        finishInternship(dto, internship, project);
+        internship.setStatus(dto.getStatus());
+        internship.setUpdatedAt(LocalDateTime.now());
+        internship.setName(dto.getName());
+        internship.setUpdatedBy(dto.getUpdatedBy());
+
+        return internshipMapper.entityToResponseDto(internship);
+    }
+
+    private void finishInternship(UpdateInternshipDto dto, Internship internship, Project project) {
         if (dto.getStatus().equals(InternshipStatus.COMPLETED) && internship.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
             List<TeamMember> interns = internship.getInterns();
             for (TeamMember intern : interns) {
@@ -86,12 +100,6 @@ public class InternshipService {
                 }
             }
         }
-        internship.setStatus(dto.getStatus());
-        internship.setUpdatedAt(LocalDateTime.now());
-        internship.setName(dto.getName());
-        internship.setUpdatedBy(dto.getUpdatedBy());
-
-        return internshipMapper.entityToResponseDto(internship);
     }
 
     @Transactional(readOnly = true)
@@ -117,7 +125,7 @@ public class InternshipService {
     public ResponseInternshipDto findById(Long id) {
         return internshipMapper.entityToResponseDto(
                 internshipRepository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("The internship not found")));
+                        .orElseThrow(() -> new IllegalArgumentException("The internship with id " + id + " is not found")));
     }
 
 }
