@@ -32,6 +32,19 @@ public class MomentService {
         return momentMapper.toDto(moment);
     }
 
+    @Transactional(readOnly = true)
+    public MomentDto getMomentById(long momentId) {
+        Moment moment = momentRepository.findById(momentId)
+                .orElseThrow(() -> new IllegalArgumentException("Moment not found. Id: " + momentId));
+        return momentMapper.toDto(moment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MomentDto> getAllMoments() {
+        List<Moment> moments = momentRepository.findAll();
+        return moments.stream().map(momentMapper::toDto).toList();
+    }
+
     private void validateMomentDto(MomentDto momentDto) {
         if (momentDto.getId() == null || momentDto.getId() < 1) {
             throw new DataValidException("Illegal Id: " + momentDto.getId());
@@ -55,19 +68,6 @@ public class MomentService {
         if (!checkMembersOfProjectsTeam(momentDto)) {
             throw new DataValidException("Some users are not in projects team. Id: " + momentDto.getId());
         }
-    }
-
-    @Transactional(readOnly = true)
-    public MomentDto getMomentById(long momentId) {
-        Moment moment = momentRepository.findById(momentId)
-                .orElseThrow(() -> new IllegalArgumentException("Moment not found. Id: " + momentId));
-        return momentMapper.toDto(moment);
-    }
-
-    @Transactional(readOnly = true)
-    public List<MomentDto> getAllMoments() {
-        List<Moment> moments = momentRepository.findAll();
-        return moments.stream().map(momentMapper::toDto).toList();
     }
 
     private boolean checkMembersOfProjectsTeam(MomentDto momentDto) {
