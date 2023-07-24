@@ -22,10 +22,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -103,6 +105,52 @@ class MomentServiceTest {
         MomentDto invalidMomentDto = createMomentDto();
         invalidMomentDto.setCreatedBy(0L);
         assertThrows(DataValidException.class, () -> momentService.create(invalidMomentDto));
+    }
+
+    @Test
+    public void testGetMomentById_ValidId() {
+        long momentId = 1L;
+        Moment moment = createMoment();
+
+        when(momentRepository.findById(momentId)).thenReturn(Optional.of(moment));
+
+        MomentDto expectedDto = new MomentDto();
+        expectedDto.setId(momentId);
+
+        when(momentMapper.toDto(moment)).thenReturn(expectedDto);
+
+        MomentDto result = momentService.getMomentById(momentId);
+
+        assertNotNull(result);
+        assertEquals(momentId, result.getId());
+    }
+
+    @Test
+    public void testGetMomentById_InvalidId() {
+        long momentId = 1L;
+
+        when(momentRepository.findById(momentId)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> momentService.getMomentById(momentId));
+    }
+
+    @Test
+    public void testGetAllMoments_ReturnsListOfMomentDtos() {
+        Moment moment1 = new Moment();
+        moment1.setId(1L);
+        Moment moment2 = new Moment();
+        moment2.setId(2L);
+
+        List<Moment> moments = List.of(moment1, moment2);
+
+        when(momentRepository.findAll()).thenReturn(moments);
+
+        List<MomentDto> result = momentService.getAllMoments();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(2L, result.get(1).getId());
     }
 
     private MomentDto createMomentDto() {

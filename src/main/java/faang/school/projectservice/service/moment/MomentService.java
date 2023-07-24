@@ -13,8 +13,10 @@ import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class MomentService {
     private final MomentMapper momentMapper;
     private final ProjectRepository projectRepository;
 
+    @Transactional
     public MomentDto create(MomentDto momentDto) {
         validateMomentDto(momentDto);
         Moment moment = momentRepository.save(momentMapper.toEntity(momentDto));
@@ -50,14 +53,28 @@ public class MomentService {
             throw new DataValidException("Unable to create moment with closed project. Id: " + momentDto.getId());
         }
         if (!checkMembersOfProjectsTeam(momentDto)) {
-            throw new DataValidException("Some users are not in projects team. Id: \" + momentDto.getId()");
+            throw new DataValidException("Some users are not in projects team. Id: " + momentDto.getId());
         }
+    }
+
+    @Transactional(readOnly = true)
+    public MomentDto getMomentById(long momentId) {
+        Moment moment = momentRepository.findById(momentId)
+                .orElseThrow(() -> new IllegalArgumentException("Moment not found. Id: " + momentId));
+        return momentMapper.toDto(moment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MomentDto> getAllMoments() {
+        List<Moment> moments = momentRepository.findAll();
+        return moments.stream().map(momentMapper::toDto).toList();
     }
 
     private boolean checkMembersOfProjectsTeam(MomentDto momentDto) {
         return getMembersOfProjectsTeam(momentDto).equals(momentDto.getUserIds());
     }
 
+    @Transactional(readOnly = true)
     private List<Long> getMembersOfProjectsTeam(MomentDto momentDto) {
         return momentDto.getProjects().stream()
                 .map(ProjectDto::getId)
