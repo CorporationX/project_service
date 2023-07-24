@@ -12,3 +12,4 @@ public interface PaymentServiceClient {
     @PostMapping("/api/payment")
     PaymentResponse sendPayment(@RequestBody PaymentRequest paymentRequest);
 }
+

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -24,5 +26,10 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ProjectDto getProject(@PathVariable("id") long projectId) {
         return projectService.getProject(projectId);
+    }
+
+    @PostMapping("/create")
+    public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
+        return projectService.createProject(projectDto);
     }
 }
