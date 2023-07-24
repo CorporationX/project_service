@@ -9,7 +9,7 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring", uses = ProjectMapper.class, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MomentMapper {
-    //    Без INSTANCE я не знаю как тестировать.
+
     MomentMapper INSTANCE = Mappers.getMapper(MomentMapper.class);
 
     MomentDto toDto(Moment moment);
