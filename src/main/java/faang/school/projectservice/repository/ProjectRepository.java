@@ -28,7 +28,7 @@ public class ProjectRepository {
     }
 
     public boolean existsByOwnerUserIdAndName(Long userId, String name) {
-        return projectJpaRepository.existsByOwnerUserIdAndName(userId, name);
+        return projectJpaRepository.existsByOwnerIdAndName(userId, name);
     }
 
     public Project save(Project project){
