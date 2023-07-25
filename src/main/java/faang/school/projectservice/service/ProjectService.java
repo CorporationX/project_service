@@ -11,11 +11,24 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+
+    @Transactional
+    public List<ProjectDto> getAllProjects() {
+        return projectMapper.toDtoList(projectRepository.findAll());
+    }
+
+    @Transactional
+    public ProjectDto getProject(long projectId) {
+        validateProjectExists(projectId);
+        return projectMapper.toDto(projectRepository.getProjectById(projectId));
+    }
 
     @Transactional
     public ProjectDto createProject(ProjectDto projectDto) {
@@ -40,6 +53,12 @@ public class ProjectService {
     private ProjectDto saveEntityAndReturnDto(Project project) {
         project = projectRepository.save(project);
         return projectMapper.toDto(project);
+    }
+
+    private void validateProjectExists(long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new DataValidationException("This project doesn't exist");
+        }
     }
 
     private void validateOfExistingProjectFromUser(ProjectDto projectDto) {
