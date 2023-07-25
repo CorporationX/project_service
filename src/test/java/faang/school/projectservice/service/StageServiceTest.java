@@ -1,13 +1,10 @@
 package faang.school.projectservice.service;
 
-
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,7 +40,6 @@ public class StageServiceTest {
         stage = Stage.builder()
                 .stageId(1L)
                 .stageName("stage")
-
                 .project(Project.builder().id(1L).status(ProjectStatus.CANCELLED).build())
                 .build();
     }
@@ -75,12 +69,6 @@ public class StageServiceTest {
                 .stageId(1L)
                 .stageName("stage")
                 .project(Project.builder().id(1L).name("project").status(ProjectStatus.CREATED).build())
-                .stageRoles(List.of(StageRoles
-                        .builder()
-                        .id(1L)
-                        .teamRole(TeamRole.ANALYST)
-                        .count(1)
-                        .build()))
                 .build();
 
         Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(stage.getProject());
