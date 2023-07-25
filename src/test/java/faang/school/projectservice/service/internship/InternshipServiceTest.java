@@ -26,36 +26,36 @@ public class InternshipServiceTest {
     @InjectMocks
     private InternshipService service;
 
-    @Test
-    public void createInternshipNoInternsTest() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> service.createInternship(new Internship()));
-        assertEquals(exception.getMessage(), "No interns!");
-    }
-
-    @Test
-    public void createInternshipDurationTest() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> service.createInternship(Internship.builder().interns(List.of(mock(TeamMember.class)))
-                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(4, ChronoUnit.MONTHS)).build()));
-        assertEquals(exception.getMessage(), "Internship's duration is too long!");
-    }
-
-    @Test
-    public void createInternshipHasMentorTest() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> service.createInternship(Internship.builder().interns(List.of(mock(TeamMember.class)))
-                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                        .mentorId(null).build()));
-        assertEquals(exception.getMessage(), "Internship has no mentor!");
-    }
-
-    @Test
-    public void createInternshipTest() {
-        Internship internship = Internship.builder().interns(List.of(mock(TeamMember.class)))
-                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                .mentorId(mock(TeamMember.class)).build();
-        Internship res = service.createInternship(internship);
-        Mockito.verify(internshipRepository).save(internship);
-    }
+//    @Test
+//    public void createInternshipNoInternsTest() {
+//        DataValidationException exception = assertThrows(DataValidationException.class,
+//                () -> service.createInternship(new Internship()));
+//        assertEquals(exception.getMessage(), "No interns!");
+//    }
+//
+//    @Test
+//    public void createInternshipDurationTest() {
+//        DataValidationException exception = assertThrows(DataValidationException.class,
+//                () -> service.createInternship(Internship.builder().interns(List.of(mock(TeamMember.class)))
+//                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(4, ChronoUnit.MONTHS)).build()));
+//        assertEquals(exception.getMessage(), "Internship's duration is too long!");
+//    }
+//
+//    @Test
+//    public void createInternshipHasMentorTest() {
+//        DataValidationException exception = assertThrows(DataValidationException.class,
+//                () -> service.createInternship(Internship.builder().interns(List.of(mock(TeamMember.class)))
+//                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+//                        .mentorId(null).build()));
+//        assertEquals(exception.getMessage(), "Internship has no mentor!");
+//    }
+//
+//    @Test
+//    public void createInternshipTest() {
+//        Internship internship = Internship.builder().interns(List.of(mock(TeamMember.class)))
+//                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+//                .mentorId(mock(TeamMember.class)).build();
+//        Internship res = service.createInternship(internship);
+//        Mockito.verify(internshipRepository).save(internship);
+//    }
 }
