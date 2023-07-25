@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.internship;
 
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.service.internship.InternshipService;
@@ -43,6 +44,34 @@ public class InternshipControllerTest {
     @Test
     public void createInternshipNullProjectTest() {
         DataValidationException exception = assertThrows(DataValidationException.class, () -> controller.createInternship(Internship.builder().name("A").build()));
+
+        assertEquals(exception.getMessage(), "Internship relation project error!");
+    }
+
+    @Test
+    public void updateInternshipIDErrorTest() {
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> controller.updateInternship(0, new InternshipDto()));
+
+        assertEquals(exception.getMessage(), "ID error!");
+    }
+
+    @Test
+    public void updateInternshipWithNullNameTest() {
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> controller.updateInternship(1, new InternshipDto()));
+
+        assertEquals(exception.getMessage(), "Internship name can not be blank or null!");
+    }
+
+    @Test
+    public void updateInternshipWithBlankNameTest() {
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> controller.updateInternship(1, InternshipDto.builder().name("").build()));
+
+        assertEquals(exception.getMessage(), "Internship name can not be blank or null!");
+    }
+
+    @Test
+    public void updateInternshipNullProjectTest() {
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> controller.updateInternship(1, InternshipDto.builder().name("A").build()));
 
         assertEquals(exception.getMessage(), "Internship relation project error!");
     }
