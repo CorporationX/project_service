@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
@@ -7,6 +7,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.StageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,6 +59,7 @@ public class StageServiceTest {
                 .stageName("stage")
                 .project(Project.builder().id(1L).status(ProjectStatus.COMPLETED).build())
                 .build();
+
         Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(stage.getProject());
         assertThrows(DataValidationException.class, () -> stageService.createStage(stageMapper.toDto(stage)));
         Mockito.verify(stageRepository, Mockito.times(0)).save(stage);
