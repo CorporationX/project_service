@@ -26,7 +26,7 @@ class ProjectMapperTest {
                 .name("Project")
                 .description("new Project")
                 .status(ProjectStatus.CREATED)
-                .owner(TeamMember.builder().id(1L).build())
+                .ownerId(1L)
                 .build();
     }
 
