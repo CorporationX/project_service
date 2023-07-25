@@ -36,12 +36,12 @@ public class ProjectControllerTest {
         desiredProject.setOwnerId(userId);
         desiredProject.setStatus(ProjectStatus.CREATED);
 
-        Mockito.when(projectService.createProject(notCreateProject, userId))
+        Mockito.when(projectService.createProject(notCreateProject))
                 .thenReturn(projectMapper.toDto(desiredProject));
-        ProjectDto receivedProject = projectController.createProject(notCreateProject, userId);
+        ProjectDto receivedProject = projectController.createProject(notCreateProject);
 
         Assertions.assertEquals(projectMapper.toDto(desiredProject), receivedProject);
 
-        Mockito.verify(projectService).createProject(notCreateProject, userId);
+        Mockito.verify(projectService).createProject(notCreateProject);
     }
 }

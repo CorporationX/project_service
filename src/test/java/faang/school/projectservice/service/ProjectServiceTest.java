@@ -44,7 +44,7 @@ public class ProjectServiceTest {
         Mockito.lenient().when(projectRepository.save(desiredProject))
                 .thenReturn(desiredProject);
 
-        ProjectDto receivedProject = projectService.createProject(desiredProjectDto, userId);
+        ProjectDto receivedProject = projectService.createProject(desiredProjectDto);
 
         Assertions.assertEquals(desiredProjectDto, receivedProject);
         Mockito.verify(projectRepository).save(desiredProject);

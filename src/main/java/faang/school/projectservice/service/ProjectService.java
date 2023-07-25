@@ -18,17 +18,16 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
 
     @Transactional
-    public ProjectDto createProject(ProjectDto projectDto, long userId) {
-        validateOfExistingProjectFromUser(projectDto, userId);
+    public ProjectDto createProject(ProjectDto projectDto) {
+        validateOfExistingProjectFromUser(projectDto);
         Project project = projectMapper.toEntity(projectDto);
 
-        project.setOwnerId(userId);
         project.setStatus(ProjectStatus.CREATED);
         return saveEntityAndReturnDto(project);
     }
 
     @Transactional
-    public ProjectDto updateProject(ProjectDto projectDto, long userId) {
+    public ProjectDto updateProject(ProjectDto projectDto) {
         return projectRepository.findById(projectDto.getId())
                 .map(project -> {
                     projectMapper.updateFromDto(projectDto, project);
@@ -43,16 +42,9 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
-    private void validateOfExistingProjectFromUser(ProjectDto projectDto, long userId) {
-        if (projectRepository.existsByOwnerUserIdAndName(userId, projectDto.getName())) {
+    private void validateOfExistingProjectFromUser(ProjectDto projectDto) {
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("The user has already created a project with this name");
         }
-    }
-
-    private void validateCorrectnessProjectData(ProjectDto projectDto) {
-        if (projectDto.getName() != null && !projectDto.getName().isBlank()) {
-            throw new DataValidationException("The project name cannot be empty");
-        }
-
     }
 }
