@@ -24,7 +24,7 @@ public class ProjectService {
         String projectName = projectDto.getName();
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)) {
             throw new DataAlreadyExistingException(String
-                    .format("User with id: %d already exist project %s",ownerId, projectName));
+                    .format("User conflict2 with id: %d already exist project %s",ownerId, projectName));
         }
         Project project = projectMapper.toModel(projectDto);
         LocalDateTime now = LocalDateTime.now();
