@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -61,9 +62,11 @@ public class ProjectService {
         Project subProject = projectMapper.toEntity(projectDto);
         Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
         subProject.setParentProject(parentProject);
+        subProject.setCreatedAt(LocalDateTime.now());
         subProject.setStatus(ProjectStatus.CREATED);
         Project savedSubProject = projectRepository.save(subProject);
         parentProject.getChildren().add(savedSubProject);
+        projectRepository.save(parentProject);
 
         return projectMapper.toDto(savedSubProject);
     }

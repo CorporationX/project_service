@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,6 +21,7 @@ public class ProjectDto {
     private Long ownerId;
     private Long parentId;
     private List<Long> childrenId;
+    private LocalDateTime createdAt;
     private ProjectStatus status;
     private ProjectVisibility visibility;
 }
