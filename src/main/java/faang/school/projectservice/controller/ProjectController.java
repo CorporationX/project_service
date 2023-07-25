@@ -1,23 +1,58 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.service.ProjectService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
 public class ProjectController {
+    private final ProjectService projectService;
 
-    //Создать проект. У проекта должен назначаться владелец проекта (по умолчанию, пользователь, который создает проект),
-    // должно быть название, описание. Нужно убедиться что один и тот же участник не может создавать проекты с одинаковым названием.
-    // Также созданному проекту автоматически присваивается статус CREATED.
+    public ProjectDto createProject(ProjectDto projectDto) {
+        projectValidate(projectDto);
+        return projectService.createProject(projectDto);
+    }
 
+    public void updateProject(ProjectDto projectDto) {
+        projectValidate(projectDto);
+        projectService.updateProject( projectDto);
+    }
 
-    //Обновить проект. Должна быть возможность изменять статус проекта, описание проекта.
-    // При этом для аудита необходимо проставлять TIMESTAMP на каждое последние изменение проекта.
+    public void getAllProjectsByStatus(ProjectDto projectDto) {
+        projectValidate(projectDto);
+        projectService.getAllProjectsByStatus(projectDto);
+    }
 
+    public void getAllProjects() {
+        projectService.getAllProjects();
+    }
 
-    //Получить все проекты с фильтрами по названию или статусу.
-    // У проекта также должен быть признак приватности.
-    // Если проект приватный, то по поиску он должен быть видим только своим участникам.
+    public ProjectDto getProjectById(Long id) {
+        validateId(id);
+        return projectService.getProjectById(id);
+    }
 
+    private void projectValidate(ProjectDto projectDto) {
+        if (projectDto == null) {
+            throw new DataValidationException("ProjectDto is null");
+        }
+        if (projectDto.getName() == null || projectDto.getName().isBlank() && projectDto.getName().isEmpty()) {
+            throw new DataValidationException("Project name is empty");
+        }
+        if (projectDto.getDescription() == null || projectDto.getDescription().isBlank() && projectDto.getDescription().isEmpty()) {
+            throw new DataValidationException("Project description is empty");
+        }
+        if (projectDto.getOwnerId() == null) {
+            throw new DataValidationException("Project owner id is empty");
+        }
+    }
 
-    //Получить все проекты.
-
-
-    //Получить проект по id.
+    private void validateId(Long id) {
+        if (id == null || id <= 0) {
+            throw new DataValidationException("Project id is null");
+        }
+    }
 }
