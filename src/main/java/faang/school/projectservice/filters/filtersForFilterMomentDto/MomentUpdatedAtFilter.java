@@ -1,12 +1,13 @@
 package faang.school.projectservice.filters.filtersForFilterMomentDto;
 
 import faang.school.projectservice.filters.FilterMomentDto;
-import faang.school.projectservice.filters.FiltersDto;
+import faang.school.projectservice.filters.MomentFilter;
 import faang.school.projectservice.model.Moment;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
-
-public class MomentUpdatedAtFilter implements FiltersDto {
+@Component
+public class MomentUpdatedAtFilter implements MomentFilter {
     @Override
     public boolean isApplicable(FilterMomentDto filterMomentDto) {
         return filterMomentDto.getUpdatedTimePattern() != null;

@@ -6,6 +6,7 @@ import faang.school.projectservice.messages.ErrorMessages;
 import faang.school.projectservice.service.MomentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -14,12 +15,12 @@ import java.util.List;
 public class MomentController {
     public final MomentService momentService;
 
-    public void createMoment(MomentDto momentDto) {
+    public void createMoment(@Validated MomentDto momentDto) {
         validateDtoMoment(momentDto);
         momentService.createMoment(momentDto);
     }
 
-    public void updateMoment(MomentDto momentDto) {
+    public void updateMoment(@Validated MomentDto momentDto) {
         validateDtoMoment(momentDto);
         momentService.updateMoment(momentDto);
     }
@@ -32,7 +33,7 @@ public class MomentController {
         return momentService.getAllMoments();
     }
 
-    public MomentDto getMoment(long momentId) {
+    public MomentDto getMoment(@Validated long momentId) {
         validateId(momentId);
         return momentService.getMoment(momentId);
     }
