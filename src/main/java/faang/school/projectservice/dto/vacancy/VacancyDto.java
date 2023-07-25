@@ -1,26 +1,22 @@
 package faang.school.projectservice.dto.vacancy;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import faang.school.projectservice.model.VacancyStatus;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class VacancyDto {
     private Long vacancyId;
-
-    @NotBlank
     private String name;
-
-    @NotBlank
     private String description;
-
-    @NotNull
     private Long projectId;
-
-    @NotNull
     private Long createdBy;
 
-    private String status;
+    @Builder.Default
+    private VacancyStatus status = VacancyStatus.OPEN;
 }

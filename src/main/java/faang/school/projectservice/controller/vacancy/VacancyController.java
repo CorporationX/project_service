@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class VacancyController {
     private final VacancyService vacancyService;
+    private final VacancyValidator vacancyValidator;
 
     @PostMapping("/vacancy")
     public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
-        VacancyValidator.validateInputBody(vacancyDto);
+        vacancyValidator.validateInputBody(vacancyDto);
         return vacancyService.createVacancy(vacancyDto);
     }
 }
