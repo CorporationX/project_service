@@ -7,6 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,17 +24,23 @@ public class ProjectControllerTest {
 
     private final ProjectMapper projectMapper = new ProjectMapperImpl();
     private final long userId = 1L;
+    private ProjectDto projectDto;
 
-    @Test
-    public void shouldReturnAndCreateNewProject() {
-        ProjectDto notCreateProject = ProjectDto.builder()
+    @BeforeEach
+    public void initProjectDto() {
+        projectDto = ProjectDto.builder()
+                .id(1L)
+                .ownerId(userId)
                 .name("Project")
                 .description("Cool")
                 .build();
+    }
+
+    @Test
+    public void shouldReturnAndCreateNewProject() {
+        ProjectDto notCreateProject = projectDto;
 
         Project desiredProject = projectMapper.toEntity(notCreateProject);
-        desiredProject.setId(1L);
-        desiredProject.setOwnerId(userId);
         desiredProject.setStatus(ProjectStatus.CREATED);
 
         Mockito.when(projectService.createProject(notCreateProject))
@@ -43,5 +50,17 @@ public class ProjectControllerTest {
         Assertions.assertEquals(projectMapper.toDto(desiredProject), receivedProject);
 
         Mockito.verify(projectService).createProject(notCreateProject);
+    }
+
+    @Test
+    public void shouldReturnAndUpdateProject() {
+        ProjectDto notUpdatedProject = ProjectDto.builder()
+                .id(1L)
+                .ownerId(userId)
+                .name("Project")
+                .description("Cool")
+                .build();
+
+        Project desiredProject = projectMapper.toEntity(notUpdatedProject);
     }
 }
