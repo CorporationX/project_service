@@ -5,6 +5,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Assertions;
 import faang.school.projectservice.model.ProjectStatus;
@@ -17,7 +18,11 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
@@ -46,7 +51,7 @@ public class ProjectServiceTest {
     @Test
     public void shouldReturnProjectsList() {
         List<Project> desiredProjects = List.of(new Project());
-        Mockito.when(projectRepository.findAll()).thenReturn(desiredProjects);
+        when(projectRepository.findAll()).thenReturn(desiredProjects);
 
         List<ProjectDto> receivedProject = projectService.getAllProjects();
         Assertions.assertEquals(projectMapper.toDtoList(desiredProjects), receivedProject);
@@ -56,9 +61,9 @@ public class ProjectServiceTest {
     public void shouldReturnProjectByProjectId() {
         Project desiredProject = new Project();
 
-        Mockito.when(projectRepository.existsById(projectId))
+        when(projectRepository.existsById(projectId))
                 .thenReturn(true);
-        Mockito.when(projectRepository.getProjectById(projectId))
+        when(projectRepository.getProjectById(projectId))
                 .thenReturn(desiredProject);
 
         ProjectDto receivedProject = projectService.getProject(projectId);
@@ -69,7 +74,7 @@ public class ProjectServiceTest {
 
     @Test
     public void shouldThrowExceptionWhenProjectNotExists() {
-        Mockito.when(projectRepository.existsById(projectId))
+        when(projectRepository.existsById(projectId))
                 .thenReturn(false);
 
         Assertions.assertThrows(DataValidationException.class, () -> projectService.getProject(projectId));
@@ -78,7 +83,7 @@ public class ProjectServiceTest {
 
     @Test
     public void shouldCreatedAndReturnNewProject() {
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(userId, "Project"))
+        when(projectRepository.existsByOwnerUserIdAndName(userId, "Project"))
                 .thenReturn(false);
 
         ProjectDto desiredProjectDto = projectMapper.toDto(desiredProject);
@@ -96,10 +101,87 @@ public class ProjectServiceTest {
     public void shouldThrowExceptionWhenProjectExists() {
         ProjectDto testProjectDto = projectMapper.toDto(desiredProject);
 
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(testProjectDto.getId(), testProjectDto.getName()))
+        when(projectRepository.existsByOwnerUserIdAndName(testProjectDto.getId(), testProjectDto.getName()))
                 .thenReturn(true);
 
         Assertions.assertThrows(DataValidationException.class, () -> projectService.createProject(testProjectDto));
         Mockito.verify(projectRepository, Mockito.times(0)).save(desiredProject);
+    }
+
+    @Test
+    void testCrateSubProject() {
+        ProjectDto subProjectDto = ProjectDto.builder()
+                .name("SubProject")
+                .visibility(ProjectVisibility.PRIVATE)
+                .build();
+        Project subProject = projectMapper.toEntity(subProjectDto);
+        Project parentProject = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE)
+                .children(new ArrayList<>())
+                .build();
+        subProject.setParentProject(parentProject);
+        subProject.setStatus(ProjectStatus.CREATED);
+        ProjectDto subProjectDtoExpected = projectMapper.toDto(subProject);
+
+
+        when(projectRepository.existsById(subProjectDto.getParentId())).thenReturn(true);
+        when(projectRepository.getProjectById(subProjectDto.getParentId())).thenReturn(parentProject);
+        when(projectRepository.save(subProject)).thenReturn(subProject);
+
+        ProjectDto projectDtoActual = projectService.createSubProject(subProjectDto);
+
+        assertNotNull(projectDtoActual);
+        assertEquals(subProjectDtoExpected, projectDtoActual);
+        assertEquals("SubProject", projectDtoActual.getName());
+        assertEquals(ProjectVisibility.PRIVATE, projectDtoActual.getVisibility());
+    }
+
+    @Test
+    void testValidateParentProjectExists() {
+        ProjectDto subProjectDto = new ProjectDto();
+
+        when(projectRepository.existsById(subProjectDto.getParentId())).thenReturn(false);
+
+        assertThrows(DataValidationException.class,
+                () -> projectService.createSubProject(subProjectDto), "No such parent project");
+    }
+
+    @Test
+    void testValidateVisibilityConsistency() {
+        ProjectDto subProjectDto = new ProjectDto();
+        subProjectDto.setVisibility(ProjectVisibility.PUBLIC);
+
+        Project parentProject = new Project();
+        parentProject.setVisibility(ProjectVisibility.PRIVATE);
+
+        when(projectRepository.existsById(subProjectDto.getParentId())).thenReturn(true);
+        when(projectRepository.getProjectById(subProjectDto.getParentId())).thenReturn(parentProject);
+
+        DataValidationException validationException = assertThrows(DataValidationException.class,
+                () -> projectService.createSubProject(subProjectDto));
+        assertEquals("The visibility of the subproject must be - " +
+                parentProject.getVisibility() + " like the parent project", validationException.getMessage());
+    }
+
+    @Test
+    void testValidateSubProjectUnique() {
+        ProjectDto subProjectDto = new ProjectDto();
+        subProjectDto.setVisibility(ProjectVisibility.PRIVATE);
+        subProjectDto.setName("SubProject");
+
+        Project childProject = new Project();
+        childProject.setName("SubProject");
+
+        Project parentProject = new Project();
+        parentProject.setVisibility(ProjectVisibility.PRIVATE);
+        parentProject.setChildren(List.of(childProject));
+
+        when(projectRepository.existsById(subProjectDto.getParentId())).thenReturn(true);
+        when(projectRepository.getProjectById(subProjectDto.getParentId())).thenReturn(parentProject);
+
+        DataValidationException validationException = assertThrows(DataValidationException.class,
+                () -> projectService.createSubProject(subProjectDto));
+        assertEquals("Subproject with name " + subProjectDto.getName() + " already exists",
+                validationException.getMessage());
     }
 }
