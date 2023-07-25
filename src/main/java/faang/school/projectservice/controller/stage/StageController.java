@@ -19,7 +19,7 @@ public class StageController {
     }
 
     private void validateStageName(StageDto stageDto) {
-        if (stageDto == null || stageDto.getStageName().isBlank()) {
+        if (stageDto.getStageName() == null || stageDto.getStageName().isBlank()) {
             throw new DataValidationException("Stage name can't be blank or null");
         }
     }

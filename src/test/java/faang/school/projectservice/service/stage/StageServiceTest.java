@@ -86,7 +86,7 @@ class StageServiceTest {
     }
 
     @Test
-    public void testCreate_IfProjectStatusIsOnHold_ThrowsException(){
+    public void testCreate_IfProjectStatusIsOnHold_ThrowsException() {
         Project project = new Project();
         project.setId(stageDto.getProjectId());
         project.setStatus(ProjectStatus.ON_HOLD);
@@ -95,11 +95,11 @@ class StageServiceTest {
 
         Mockito.when(projectRepository.getProjectById(stageDto.getProjectId())).thenReturn(project);
 
-        assertThrows(DataValidationException.class,()->stageService.create(stageDto),errorMessage);
+        assertThrows(DataValidationException.class, () -> stageService.create(stageDto), errorMessage);
     }
 
     @Test
-    public void testCreate_IfProjectStatusIsCancelled_ThrowsException(){
+    public void testCreate_IfProjectStatusIsCancelled_ThrowsException() {
         Project project = new Project();
         project.setId(stageDto.getProjectId());
         project.setStatus(ProjectStatus.CANCELLED);
@@ -108,11 +108,11 @@ class StageServiceTest {
 
         Mockito.when(projectRepository.getProjectById(stageDto.getProjectId())).thenReturn(project);
 
-        assertThrows(DataValidationException.class,()->stageService.create(stageDto),errorMessage);
+        assertThrows(DataValidationException.class, () -> stageService.create(stageDto), errorMessage);
     }
 
     @Test
-    public void testCreate_IfProjectStatusIsCompleted_ThrowsException(){
+    public void testCreate_IfProjectStatusIsCompleted_ThrowsException() {
         Project project = new Project();
         project.setId(stageDto.getProjectId());
         project.setStatus(ProjectStatus.COMPLETED);
@@ -121,7 +121,7 @@ class StageServiceTest {
 
         Mockito.when(projectRepository.getProjectById(stageDto.getProjectId())).thenReturn(project);
 
-        assertThrows(DataValidationException.class,()->stageService.create(stageDto),errorMessage);
+        assertThrows(DataValidationException.class, () -> stageService.create(stageDto), errorMessage);
     }
 
     @Test
@@ -129,6 +129,6 @@ class StageServiceTest {
         String errorMessage = "Project does not exist";
         Mockito.when(projectRepository.getProjectById(stageDto.getProjectId())).thenThrow(new IllegalArgumentException());
 
-        assertThrows(DataValidationException.class, () -> stageService.create(stageDto),errorMessage);
+        assertThrows(DataValidationException.class, () -> stageService.create(stageDto), errorMessage);
     }
 }

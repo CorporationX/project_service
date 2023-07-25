@@ -24,7 +24,9 @@ class StageControllerTest {
     @Test
     public void testCreateProjectStage_ValidStageName() {
         StageDto stageDto = new StageDto();
+        stageDto.setStageId(1L);
         stageDto.setStageName("Name");
+        stageDto.setProjectId(2L);
         Mockito.when(stageService.create(stageDto)).thenReturn(stageDto);
 
         StageDto createdStageDto = stageController.createProjectStage(stageDto);
@@ -32,5 +34,23 @@ class StageControllerTest {
         assertNotNull(createdStageDto);
         assertEquals(stageDto, createdStageDto);
         Mockito.verify(stageService, Mockito.times(1)).create(stageDto);
+    }
+
+    @Test
+    public void testCreateProjectStage_IfStageNameIsNull_ShouldThrowException() {
+        StageDto stageDto = new StageDto();
+        stageDto.setStageName(null);
+        String errorMessage = "Stage name can't be blank or null";
+
+        assertThrows(DataValidationException.class, () -> stageController.createProjectStage(stageDto), errorMessage);
+    }
+
+    @Test
+    public void testCreateProjectStage_IfStageNameIsBlank_ShouldThrowException() {
+        StageDto stageDto = new StageDto();
+        stageDto.setStageName(" ");
+        String errorMessage = "Stage name can't be blank or null";
+
+        assertThrows(DataValidationException.class, () -> stageController.createProjectStage(stageDto), errorMessage);
     }
 }
