@@ -12,6 +12,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +44,20 @@ public class MomentService {
     public List<MomentDto> getAllMoments() {
         List<Moment> moments = momentRepository.findAll();
         return moments.stream().map(momentMapper::toDto).toList();
+    }
+
+    @Transactional
+    public MomentDto update(MomentDto source) {
+        validateMomentDto(source);
+
+        Moment moment = momentRepository.findById(source.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Moment not found. Id: " + source.getId()));
+        MomentDto target = momentMapper.toDto(moment);
+
+        BeanUtils.copyProperties(source, target, "id");
+
+        momentRepository.save(momentMapper.toEntity(target));
+        return target;
     }
 
     private void validateMomentDto(MomentDto momentDto) {

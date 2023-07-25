@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -152,6 +153,35 @@ class MomentServiceTest {
         assertEquals(1L, result.get(0).getId());
         assertEquals(2L, result.get(1).getId());
     }
+
+    @Test
+    void updateMoment_ValidMomentDto() {
+        MomentDto momentDto = createMomentDto();
+        momentDto.setName("Moment 2");
+        momentDto.setDate(LocalDate.of(2020, 3, 1).atStartOfDay());
+        momentDto.setProjects(List.of(new ProjectDto(1L, ProjectStatus.CREATED)));
+
+        when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.of(createMoment()));
+        when(projectRepository.getProjectById(any(Long.class))).thenReturn(createProject());
+
+        MomentDto updatedMoment = momentService.update(momentDto);
+
+        assertEquals(momentDto.getName(), updatedMoment.getName());
+        assertEquals(momentDto.getDate(), updatedMoment.getDate());
+        assertEquals(momentDto.getProjects(), updatedMoment.getProjects());
+        assertEquals(momentDto.getDescription(), updatedMoment.getDescription());
+        assertEquals(momentDto.getUserIds(), updatedMoment.getUserIds());
+    }
+
+    @Test
+    void updateMoment_MomentNotFound() {
+        when(projectRepository.getProjectById(any(Long.class))).thenReturn(createProject());
+        when(momentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> momentService.update(createMomentDto()));
+        assertEquals("Moment not found. Id: 1", exception.getMessage());
+    }
+
 
     private MomentDto createMomentDto() {
         MomentDto momentDto = new MomentDto();
