@@ -43,6 +43,7 @@ public class StageController {
 
     @DeleteMapping("/deleteStage/{stageId}")
     public void deleteStage(@Min(1) @PathVariable("stageId") Long stageId) {
+        validateStageId(stageId);
         stageService.deleteStageById(stageId);
     }
 

@@ -2,13 +2,18 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +44,34 @@ public class StageService {
 
     @Transactional
     public StageDto updateStage(StageDto stageDto) {
-        Stage stage = stageRepository.save(stageMapper.toEntity(stageDto));
+        Stage stage = stageMapper.toEntity(stageDto);
+        Stage stageFromRepository = stageRepository.getById(stage.getStageId());
+        List<StageRoles> stageRoles = stage.getStageRoles();
+        List<StageRoles> stageRolesFromRepository = stageFromRepository.getStageRoles();
+        List<StageRoles> newStageRoles = new ArrayList<>();
+        stageRolesFromRepository.forEach(stageRoleFromRepository -> {
+            if (stageRoles.stream()
+                    .map(StageRoles::getTeamRole)
+                    .noneMatch(teamRole -> stageRoleFromRepository.getTeamRole().equals(teamRole))) {
+                newStageRoles.add(stageRoleFromRepository);
+            }
+        });
+        Map<TeamRole, Integer> teamRoleAndCount = newStageRoles.stream()
+                .collect(Collectors.groupingBy(StageRoles::getTeamRole, Collectors.summingInt(StageRoles::getCount)));
+        for (Map.Entry<TeamRole, Integer> entry : teamRoleAndCount.entrySet()) {
+            TeamRole teamRole = entry.getKey();
+            Integer count = entry.getValue();
+           stage.getProject().getStages().forEach(stage1 -> stage1.getExecutors().forEach(executor -> {
+               if(executor.getRoles().contains(teamRole)){
+                   Long userId = executor.getUserId();
+                   }
+                   //TODO
+                   teamRoleAndCount.put(teamRole, count-1);
+
+           }));
+        }
+
+
         return stageMapper.toDto(stage);
     }
 
