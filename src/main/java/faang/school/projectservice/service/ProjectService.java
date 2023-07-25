@@ -49,7 +49,7 @@ public class ProjectService {
                 .toList();
     }
 
-    public void validateSubProject(ProjectDto projectDto) {
+    private void validateSubProject(ProjectDto projectDto) {
         if (projectDto.getOwnerId() <= 0) {
             throw new DataValidationException("Owner id cant be less then 1");
         }
