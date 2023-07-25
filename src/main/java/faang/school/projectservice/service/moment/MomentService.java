@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -58,6 +59,16 @@ public class MomentService {
 
         momentRepository.save(momentMapper.toEntity(target));
         return target;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MomentDto> getMomentsByDate(LocalDateTime startDate, LocalDateTime endDate) {
+        return momentMapper.toListDto(momentRepository.findAllByDateRange(startDate, endDate));
+    }
+
+    @Transactional(readOnly = true)
+    public List<MomentDto> getMomentsByProjects(List<Long> projectIds) {
+        return momentMapper.toListDto(momentRepository.findAllByProjectIds(projectIds));
     }
 
     private void validateMomentDto(MomentDto momentDto) {

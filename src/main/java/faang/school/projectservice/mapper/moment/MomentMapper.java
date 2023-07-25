@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = ProjectMapper.class, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MomentMapper {
 
@@ -15,4 +17,6 @@ public interface MomentMapper {
     MomentDto toDto(Moment moment);
 
     Moment toEntity(MomentDto momentDto);
+
+    List<MomentDto> toListDto(List<Moment> moments);
 }

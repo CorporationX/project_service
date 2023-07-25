@@ -183,6 +183,21 @@ class MomentServiceTest {
     }
 
 
+    @Test
+    public void testGetMomentsByDate() {
+        LocalDateTime start = LocalDate.of(2023, 7, 23).atStartOfDay();
+        LocalDateTime end = LocalDate.of(2023, 7, 25).atStartOfDay();
+        momentService.getMomentsByDate(start, end);
+        verify(momentRepository).findAllByDateRange(start, end);
+    }
+
+    @Test
+    public void testGetMomentsByProjects() {
+        List<Long> projectIds = List.of(7L, 8L, 9L);
+        momentService.getMomentsByProjects(projectIds);
+        verify(momentRepository).findAllByProjectIds(projectIds);
+    }
+
     private MomentDto createMomentDto() {
         MomentDto momentDto = new MomentDto();
         momentDto.setId(1L);
