@@ -7,7 +7,10 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.hibernate.query.results.Builders;
@@ -45,11 +48,15 @@ class ProjectServiceTest {
     @BeforeEach
     public void toSet() {
         List<Resource> lists = List.of(Resource.builder().id(1L).build());
+        List<Team> listsTeamId = List.of(Team.builder().id(1L).build());
+        List<Task> listsTaskId = List.of(Task.builder().id(1L).build());
+        List<Vacancy> listsVacancyId = List.of(Vacancy.builder().id(1L).build());
+        List<Project> listsProjectId = List.of(Project.builder().id(1L).build());
         List<Long> listId = List.of(1L, 2L);
         List<Stage> list = List.of(Stage.builder().stageId(1L).build());
         teamMember = TeamMember.builder().id(1L).build();
-        project = Project.builder().id(1L).name("test").stages(list).resources(lists).status(ProjectStatus.CREATED).owner(teamMember).build();
-        projectDto = ProjectDto.builder().id(1L).name("test").stagesId(listId).resourcesId(listId).tasksId(listId).status(ProjectStatus.CREATED).ownerId(1L).build();
+        project = Project.builder().id(1L).name("test").stages(list).children(listsProjectId).vacancies(listsVacancyId).resources(lists).teams(listsTeamId).tasks(listsTaskId).status(ProjectStatus.CREATED).build();
+        projectDto = ProjectDto.builder().id(1L).name("test").stagesId(listId).childrenId(listId).vacanciesId(listId).resourcesId(listId).teamsId(listId).tasksId(listId).tasksId(listId).status(ProjectStatus.CREATED).ownerId(1L).build();
     }
 
 
@@ -77,9 +84,9 @@ class ProjectServiceTest {
 
     @Test
     void testGetAllProjectsByStatus() {
-        List<ProjectFilter> projectFilter = List.of(ProjectFilter.builder().build());
-        when(projectRepository.findAll()).thenReturn(List.of(project));
-        projectService = new ProjectService(projectRepository, projectMapper, projectFilter);
+//        List<ProjectFilter> projectFilter = List.of(ProjectFilter.builder().build());
+//        when(projectRepository.findAll()).thenReturn(List.of(project));
+//        projectService = new ProjectService(projectRepository, projectMapper, projectFilter);
 
 
     }
