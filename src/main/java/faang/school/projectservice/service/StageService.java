@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,24 +47,22 @@ public class StageService {
         Stage stageFromRepository = stageRepository.getById(stage.getStageId());
         List<StageRoles> stageRoles = stage.getStageRoles();
         List<StageRoles> stageRolesFromRepository = stageFromRepository.getStageRoles();
-        List<StageRoles> newStageRoles = new ArrayList<>();
-        stageRolesFromRepository.forEach(stageRoleFromRepository -> {
-            if (stageRoles.stream()
-                    .map(StageRoles::getTeamRole)
-                    .noneMatch(teamRole -> stageRoleFromRepository.getTeamRole().equals(teamRole))) {
-                newStageRoles.add(stageRoleFromRepository);
-            }
-        });
+        List<StageRoles> newStageRoles = stageRolesFromRepository.stream()
+                .filter(stageRole ->
+                        stageRoles.stream()
+                                .map(StageRoles::getTeamRole)
+                                .noneMatch(teamRole -> stageRole.getTeamRole().equals(teamRole))).toList();
+
         Map<TeamRole, Integer> teamRoleAndCount = newStageRoles.stream()
                 .collect(Collectors.groupingBy(StageRoles::getTeamRole, Collectors.summingInt(StageRoles::getCount)));
         for (Map.Entry<TeamRole, Integer> entry : teamRoleAndCount.entrySet()) {
             TeamRole teamRole = entry.getKey();
             Integer count = entry.getValue();
-           stage.getProject().getStages().forEach(stage1 -> stage1.getExecutors().forEach(executor -> {
-               if(executor.getRoles().contains(teamRole)){
-                   Long userId = executor.getUserId();
-                   }
-                   //TODO
+            stage.getProject().getStages().forEach(stage1 -> stage1.getExecutors().forEach(executor -> {
+                if (executor.getRoles().contains(teamRole)) {
+                    Long userId = executor.getUserId();
+                }
+                //TODO
                    teamRoleAndCount.put(teamRole, count-1);
 
            }));
