@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,7 @@ class ProjectServiceTest {
                 .children(new ArrayList<>())
                 .build();
         subProject.setParentProject(parentProject);
+        subProject.setStatus(ProjectStatus.CREATED);
         ProjectDto subProjectDtoExpected = projectMapper.toDto(subProject);
 
 

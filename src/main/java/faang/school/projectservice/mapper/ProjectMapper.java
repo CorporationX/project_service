@@ -13,18 +13,13 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
 
-    @Mapping(source = "parentProject", target = "parentId", qualifiedByName = "toParentId")
+    @Mapping(source = "parentProject.id", target = "parentId")
     @Mapping(source = "children", target = "childrenId", qualifiedByName = "toChildrenId")
     ProjectDto toDto(Project project);
 
     @Mapping(target = "parentProject", ignore = true)
     @Mapping(target = "children", ignore = true)
     Project toEntity(ProjectDto projectDto);
-
-    @Named("toParentId")
-    default Long toParentId(Project parentProject) {
-        return parentProject.getId();
-    }
 
     @Named("toChildrenId")
     default List<Long> toChildrenId(List<Project> children) {
