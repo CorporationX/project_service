@@ -10,6 +10,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class StageService {
     private final ProjectRepository projectRepository;
     private final StageMapper stageMapper;
 
+    @Transactional
     public StageDto create(StageDto stageDto) {
         validate(stageDto);
 
