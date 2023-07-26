@@ -1,0 +1,19 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - chimera-master
+      - dev
+      - feature-pipline-BC-3942
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        run: ./gradlew test
