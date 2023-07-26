@@ -47,7 +47,7 @@ public class Moment {
             joinColumns = @JoinColumn(name = "moment_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    private List<Project> project;
+    private List<Project> projects;
 
     @ElementCollection
     private List<Long> userIds;
