@@ -2,11 +2,10 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.exceptions.MomentExistingException;
-import faang.school.projectservice.filters.FilterMomentDto;
-import faang.school.projectservice.filters.MomentFilter;
-import faang.school.projectservice.filters.MomentMapper;
-import faang.school.projectservice.messages.ErrorMessages;
-import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.filters.moments.FilterMomentDto;
+import faang.school.projectservice.filters.moments.MomentFilter;
+import faang.school.projectservice.filters.mappers.MomentMapper;
+import faang.school.projectservice.controller.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
