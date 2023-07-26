@@ -6,6 +6,11 @@ import faang.school.projectservice.exception.vacancy.VacancyValidateException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.text.MessageFormat;
+
+import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.NEGATIVE_CREATED_BY_ID_FORMAT;
+import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.NEGATIVE_PROJECT_ID_FORMAT;
+
 @Component
 public class VacancyValidator {
     public void validateInputBody(VacancyDto vacancyDto) {
@@ -17,6 +22,8 @@ public class VacancyValidator {
     public void validateRequiredFieldsInDTO(VacancyDto vacancyDto){
         checkName(vacancyDto.getName());
         checkDescription(vacancyDto.getDescription());
+        checkProjectId(vacancyDto.getProjectId());
+        checkCreatedId(vacancyDto.getCreatedBy());
     }
 
     private void checkName(String name) {
@@ -39,10 +46,21 @@ public class VacancyValidator {
 
     private void checkProjectId(Long projectId) {
         if (projectId == null) {
-            throw new VacancyValidateException(ErrorMessagesForVacancy.DESCRIPTION_IS_NULL);
+            throw new VacancyValidateException(ErrorMessagesForVacancy.PROJECT_ID_IS_NULL);
         }
         if (projectId < 0) {
-            throw new VacancyValidateException(ErrorMessagesForVacancy.DESCRIPTION_IS_BLANK);
+            String errorMessage = MessageFormat.format(NEGATIVE_PROJECT_ID_FORMAT, projectId);
+            throw new VacancyValidateException(errorMessage);
+        }
+    }
+
+    private void checkCreatedId(Long createdId) {
+        if (createdId == null) {
+            throw new VacancyValidateException(ErrorMessagesForVacancy.CREATED_BY_ID_IS_NULL);
+        }
+        if (createdId < 0) {
+            String errorMessage = MessageFormat.format(NEGATIVE_CREATED_BY_ID_FORMAT, createdId);
+            throw new VacancyValidateException(errorMessage);
         }
     }
 }

@@ -37,8 +37,10 @@ public class VacancyService {
         // значит надо сходить в БД и проверить что такой проект существует
         // Также на проекте обязательно должен быть человек, ответственный за вакансию.
         // значит должен иметь какую-то определенную роль
+        vacancyValidator.validateRequiredFieldsInDTO(vacancyDto);
         checkProjectIsExist(vacancyDto.getProjectId());
         checkOwnerVacancy(vacancyDto.getCreatedBy());
+
         Project curProject = projectRepository.getProjectById(vacancyDto.getProjectId());
         Vacancy newVacancy = vacancyMapper.toEntity(vacancyDto);
         newVacancy.setProject(curProject);
