@@ -48,7 +48,7 @@ public class Internship {
     @ManyToOne
     @JoinColumn(name = "team_member_id")
     @NotNull
-    private TeamMember mentorId;
+    private TeamMember mentor;
 
     @ManyToMany
     @JoinTable(

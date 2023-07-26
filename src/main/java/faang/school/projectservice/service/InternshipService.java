@@ -8,6 +8,7 @@ import faang.school.projectservice.repository.InternshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.temporal.ChronoUnit;
 
 
 @Service
@@ -17,10 +18,10 @@ public class InternshipService {
     private final InternshipMapper internshipMapper;
 
     private void validateListOfInternsAndThereIsMentor(InternshipDto internshipDto) {
-        if (internshipDto.getInterns() == null) {
+        if (internshipDto.getInternsId() == null) {
             throw new DataValidationException("Can't create an internship without interns");
         }
-        if (internshipDto.getEndDate().plusMonths(3).isAfter(internshipDto.getStartDate())) {
+        if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate().plus(3, ChronoUnit.MONTHS))) {
             throw new DataValidationException("Internship cannot last more than 3 months");
         }
         if (internshipDto.getMentorId() == null) {
