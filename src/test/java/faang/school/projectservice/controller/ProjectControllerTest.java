@@ -1,7 +1,6 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
@@ -88,25 +87,11 @@ public class ProjectControllerTest {
 
         Project desiredProject = projectMapper.toEntity(notUpdatedProject);
 
-        Mockito.when(projectService.updateProject(notUpdatedProject))
+        Mockito.when(projectService.updateProject(notUpdatedProject, projectId))
                 .thenReturn(projectMapper.toDto(desiredProject));
         ProjectDto receivedProject = projectController.updateProject(notUpdatedProject, projectId);
 
         Assertions.assertEquals(projectMapper.toDto(desiredProject), receivedProject);
-        Mockito.verify(projectService).updateProject(notUpdatedProject);
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenProjectIdNotCorrect() {
-        long otherProjectId = 2;
-
-        ProjectDto notUpdatedProject = projectDto;
-        notUpdatedProject.setId(otherProjectId);
-        notUpdatedProject.setName("Mega project");
-
-        Assertions.assertThrows(DataValidationException.class,
-                () -> projectController.updateProject(notUpdatedProject, projectId));
-
-        Mockito.verify(projectService, Mockito.times(0)).updateProject(notUpdatedProject);
+        Mockito.verify(projectService).updateProject(notUpdatedProject, projectId);
     }
 }

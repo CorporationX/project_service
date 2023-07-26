@@ -2,12 +2,12 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,7 +126,7 @@ public class ProjectServiceTest {
         Mockito.when(projectRepository.save(updatedProject))
                 .thenReturn(updatedProject);
 
-        ProjectDto receivedProject = projectService.updateProject(projectMapper.toDto(newProject));
+        ProjectDto receivedProject = projectService.updateProject(projectMapper.toDto(newProject), projectId);
 
         Assertions.assertEquals(projectMapper.toDto(returnedOptional.get()), receivedProject);
     }
@@ -135,7 +135,8 @@ public class ProjectServiceTest {
     public void shouldThrowExceptionWhenOptionalIsEmpty() {
         Mockito.when(projectRepository.findById(projectId))
                 .thenReturn(Optional.empty());
-        Assertions.assertThrows(ProjectNotFoundException.class, () -> projectService.updateProject(projectDto));
+        Assertions.assertThrows(EntityNotFoundException.class,
+                () -> projectService.updateProject(projectDto, projectId));
     }
 
     @Test
