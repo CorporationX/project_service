@@ -85,7 +85,7 @@ class VacancyServiceTest {
                     .roles(List.of(TeamRole.OWNER))
                     .build());
             Mockito.when(projectRepository.existsById(1L)).thenReturn(true);
-            Mockito.when(vacancyRepository.save(Mockito.any())).thenReturn(new Vacancy());
+            Mockito.when(vacancyMapper.toModel(vacancyDto)).thenReturn(new Vacancy());
 
             vacancyService.createVacancy(vacancyDto);
         }
@@ -151,6 +151,7 @@ class VacancyServiceTest {
                     .roles(List.of(TeamRole.OWNER))
                     .build());
             Mockito.when(projectRepository.existsById(1L)).thenReturn(true);
+            Mockito.when(vacancyMapper.toModel(vacancyDto)).thenReturn(new Vacancy());
 
             vacancyService.updateVacancy(vacancyDto);
         }

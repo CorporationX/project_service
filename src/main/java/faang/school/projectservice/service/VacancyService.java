@@ -42,10 +42,6 @@ public class VacancyService {
         }
         validateVacancy(vacancyDto.getUpdatedBy(), vacancyDto.getProjectId());
 
-        Vacancy savedVacancy = vacancyRepository.save(vacancyMapper.toModel(vacancyDto));
-        Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
-        savedVacancy.setProject(project);
-        return vacancyMapper.toDto(savedVacancy);
         return saveVacancy(vacancyDto);
     }
 
@@ -61,7 +57,10 @@ public class VacancyService {
     }
 
     private VacancyDto saveVacancy(VacancyDto vacancyDto) {
-        Vacancy vacancyToSave = vacancyRepository.save(vacancyMapper.toModel(vacancyDto));
-        return vacancyMapper.toDto(vacancyToSave);
+        Vacancy vacancyToSave = vacancyMapper.toModel(vacancyDto);
+        Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
+        vacancyToSave.setProject(project);
+        Vacancy savedVacancy = vacancyRepository.save(vacancyToSave);
+        return vacancyMapper.toDto(savedVacancy);
     }
 }
