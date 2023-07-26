@@ -1,9 +1,6 @@
 name: ci
 
-on:
-  pull_request:
-    branches:
-      - feature-pipeline-BC-3942
+on: push
 
 jobs:
   build-and-test:
