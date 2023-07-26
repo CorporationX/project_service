@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   pull_request:
     branches:
-      - chimera-master
+      - feature-pipeline-test-BC-3942
 
 jobs:
   build-and-test:
