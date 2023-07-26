@@ -234,7 +234,7 @@ class MomentServiceTest {
         project.setStatus(ProjectStatus.IN_PROGRESS);
         Team team = new Team();
         team.setTeamMembers(createTeamMembers());
-        project.setTeams(List.of(team));
+        project.setTeam(team);
         return project;
     }
 
