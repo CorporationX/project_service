@@ -2,13 +2,19 @@ package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDtoForUpdate;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +27,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -31,10 +36,12 @@ import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesFo
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.NEGATIVE_CREATED_BY_ID_FORMAT;
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.NEGATIVE_PROJECT_ID_FORMAT;
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.PROJECT_NOT_EXIST_FORMAT;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class VacancyServiceTest {
+    private static final Long VACANCY_ID = 1L;
     @Mock
     private VacancyRepository vacancyRepository;
 
@@ -54,6 +61,7 @@ class VacancyServiceTest {
     private VacancyService vacancyService;
 
     private VacancyDto inputVacancyDto;
+    private VacancyDtoForUpdate inputVacancyDtoForUpdate;
 
     private String vacancyName;
     private String vacancyDescription;
@@ -67,7 +75,7 @@ class VacancyServiceTest {
         vacancyName = "Vacancy";
         vacancyDescription = "Some text";
         projectId = 10L;
-        createdBy = 1L;
+        createdBy = 100L;
         project = Project.builder().id(projectId).build();
         ownerVacancy = TeamMember.builder().roles(List.of(TeamRole.OWNER, TeamRole.DEVELOPER)).build();
         inputVacancyDto = VacancyDto.builder()
@@ -80,7 +88,6 @@ class VacancyServiceTest {
     @Test
     void testCreateVacancy_WhenInputDtoIsValid() {
         VacancyDto expectedVacancyDto = getExpectedVacancyDto();
-        Mockito.when(projectRepository.existsById(projectId)).thenReturn(true);
         Mockito.when(teamMemberRepository.findById(createdBy)).thenReturn(ownerVacancy);
 
         Vacancy newVacancy = vacancyMapper.toEntity(inputVacancyDto);
@@ -90,7 +97,6 @@ class VacancyServiceTest {
         VacancyDto result = vacancyService.createVacancy(inputVacancyDto);
 
         Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(createdBy);
-        Mockito.verify(projectRepository, Mockito.times(1)).existsById(projectId);
         Mockito.verify(projectRepository, Mockito.times(1)).getProjectById(projectId);
         Mockito.verify(vacancyRepository, Mockito.times(1)).save(newVacancy);
         assertEquals(expectedVacancyDto, result);
@@ -99,20 +105,20 @@ class VacancyServiceTest {
     @Test
     void testCreatedVacancy_WhenProjectNotExist_ShouldThrowException() {
         String expectedMessage = MessageFormat.format(PROJECT_NOT_EXIST_FORMAT, projectId);
-        Mockito.when(projectRepository.existsById(projectId)).thenReturn(false);
+        Mockito.when(projectRepository.getProjectById(projectId))
+                .thenThrow(new EntityNotFoundException(String.format("Project not found by id: %s", projectId)));
 
-        Exception exception = assertThrows(VacancyValidateException.class,
+        Exception exception = assertThrows(EntityNotFoundException.class,
                 () -> vacancyService.createVacancy(inputVacancyDto));
 
         assertEquals(expectedMessage, exception.getMessage());
-        Mockito.verify(projectRepository, Mockito.times(1)).existsById(projectId);
     }
 
     @Test
     void testCreatedVacancy_WhenOwnerRoleCantBeUse_ShouldThrowException() {
         ownerVacancy = TeamMember.builder().roles(List.of(TeamRole.DESIGNER, TeamRole.DEVELOPER)).build();
-        Mockito.when(projectRepository.existsById(projectId)).thenReturn(true);
         String expectedMessage = MessageFormat.format(ERROR_OWNER_ROLE_FORMAT, createdBy);
+        Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
         Mockito.when(teamMemberRepository.findById(createdBy)).thenReturn(ownerVacancy);
 
         Exception exception = assertThrows(VacancyValidateException.class,
@@ -165,7 +171,7 @@ class VacancyServiceTest {
 
     private VacancyDto getExpectedVacancyDto() {
         return VacancyDto.builder()
-                .vacancyId(1L)
+                .vacancyId(VACANCY_ID)
                 .name(vacancyName)
                 .description(vacancyDescription)
                 .projectId(projectId)
@@ -176,11 +182,34 @@ class VacancyServiceTest {
 
     private Vacancy getVacancyAfterSave() {
         return Vacancy.builder()
-                .id(1L)
+                .id(VACANCY_ID)
                 .name(vacancyName)
                 .description(vacancyDescription)
                 .project(project)
                 .createdBy(createdBy)
+                .status(VacancyStatus.OPEN)
+                .build();
+    }
+
+    private static Stream<Arguments> produceArgsForTestUpdateVacancy() {
+        // надо предоставить ДТО с изменениями и ожидаемый рез-т
+        VacancyDtoForUpdate vacancyDto = VacancyDtoForUpdate.builder()
+                .vacancyId(VACANCY_ID)
+                .status(VacancyStatus.OPEN)
+                .build();
+
+        Vacancy expectedVacancyAfterUpdate =
+
+        return Stream.of(
+
+        );
+    }
+
+    private VacancyDtoForUpdate getInputVacancyDtoForUpdate() {
+        return VacancyDtoForUpdate.builder()
+                .vacancyId(1L)
+                .name(vacancyName)
+                .description(vacancyDescription)
                 .status(VacancyStatus.OPEN)
                 .build();
     }

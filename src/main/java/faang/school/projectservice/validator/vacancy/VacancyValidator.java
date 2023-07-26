@@ -2,6 +2,7 @@ package faang.school.projectservice.validator.vacancy;
 
 import faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDtoForUpdate;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
 import faang.school.projectservice.model.VacancyStatus;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +15,7 @@ import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesFo
 
 @Component
 public class VacancyValidator {
-    public void validateInputBody(VacancyDto vacancyDto) {
+    public void validateInputBody(Object vacancyDto) {
         if (vacancyDto == null) {
             throw new VacancyValidateException(ErrorMessagesForVacancy.INPUT_BODY_IS_NULL);
         }
@@ -27,7 +28,7 @@ public class VacancyValidator {
         checkCreatedId(vacancyDto.getCreatedBy());
     }
 
-    public void validateRequiredFeildsForUpdateVacancy(VacancyDto vacancyDto){
+    public void validateRequiredFeildsForUpdateVacancy(VacancyDtoForUpdate vacancyDto){
         checkId(vacancyDto.getVacancyId());
         checkStatus(vacancyDto.getStatus());
     }
