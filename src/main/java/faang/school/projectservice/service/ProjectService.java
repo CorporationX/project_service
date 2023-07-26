@@ -3,12 +3,13 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.ProjectFilter;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
     private final List<ProjectFilter> filters;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
 
     public ProjectDto create(ProjectDto projectDto) {
         projectDto.setName(processTitle(projectDto.getName()));
@@ -33,7 +35,7 @@ public class ProjectService {
         String projectName = projectDto.getName();
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)) {
             throw new DataAlreadyExistingException(String
-                    .format("User with id: %d already exist project %s",ownerId, projectName));
+                    .format("User with id: %d already exist project %s", ownerId, projectName));
         }
         Project project = projectMapper.toModel(projectDto);
         LocalDateTime now = LocalDateTime.now();
@@ -67,31 +69,42 @@ public class ProjectService {
         return title.trim().toLowerCase();
     }
 
-    public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto, List<Team> userTeams) {
-        Stream<Project> projects = getAvailableProjectsForCurrentUser(userTeams).stream();
+    public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto, long userId) {
+        Stream<Project> projects = getAvailableProjectsForCurrentUser(userId).stream();
 
         List<ProjectFilter> listApplicableFilters = filters.stream()
                 .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto)).toList();
         for (ProjectFilter listApplicableFilter : listApplicableFilters) {
             projects = listApplicableFilter.apply(projects, projectFilterDto);
         }
-        return projects.map(projectMapper::toDto).toList();
+        List<Project> listResult = projects.toList();
+        return listResult.stream().map(projectMapper::toDto).toList();
     }
 
-    private List<Project> getAvailableProjectsForCurrentUser(List<Team> userTeams) {
+    private List<Project> getAvailableProjectsForCurrentUser(long userId) {
         List<Project> projects = projectRepository.findAll();
         List<Project> availableProjects = new ArrayList<>(projects.stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC)
                 .toList());
-        List<Project> privateProjects = new ArrayList<>();
-        if (userTeams != null) {
-            privateProjects = projects.stream()
-                    .filter(project -> project.getVisibility() == ProjectVisibility.PRIVATE)
-                    .filter(project -> project.getTeams().stream()
-                            .anyMatch(team -> userTeams.stream().anyMatch(userTeam -> userTeam == team)))
-                    .toList();
+        List<Project> privateProjects = projects.stream()
+                .filter(project -> project.getVisibility() == ProjectVisibility.PRIVATE)
+                .toList();
+        List<Team> userTeams = new ArrayList<>();
+        for (Project privateProject : privateProjects) {
+            TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, privateProject.getId());
+            if (teamMember != null){
+                userTeams.add(teamMember.getTeam());
+            }
         }
+        privateProjects = projects.stream()
+                .filter(project -> isUserInPrivateProjectTeam(project, userTeams))
+                .toList();
         availableProjects.addAll(privateProjects);
         return availableProjects;
+    }
+
+    private boolean isUserInPrivateProjectTeam(Project project, List<Team> userTeams) {
+        return project.getTeams().stream()
+                .anyMatch(team -> userTeams.stream().anyMatch(userTeam -> userTeam == team));
     }
 }

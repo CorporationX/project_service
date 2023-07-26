@@ -2,14 +2,15 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.ProjectFilter;
 import faang.school.projectservice.service.filters.ProjectFilterByName;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -37,6 +39,8 @@ class ProjectServiceTest {
     private ProjectMapper mockProjectMapper = new ProjectMapperImpl();
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private TeamMemberJpaRepository teamMemberJpaRepository;
 
 
     ProjectDto projectDto;
@@ -174,11 +178,13 @@ class ProjectServiceTest {
                 .projectNamePattern("Proj")
                 .status(ProjectStatus.CREATED)
                 .build();
-        projectService = new ProjectService(mockProjectMapper, projectRepository, filters);
+        projectService = new ProjectService(mockProjectMapper, projectRepository, filters, teamMemberJpaRepository);
         List<ProjectDto> filteredProjectsResult =
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
-        List<ProjectDto> projectsWithFilter = projectService.getProjectsWithFilter(projectFilterDto, List.of(team));
+        TeamMember teamMember = TeamMember.builder().team(team).build();
+        Mockito.when(teamMemberJpaRepository.findByUserIdAndProjectId(anyLong(), anyLong())).thenReturn(teamMember);
+        List<ProjectDto> projectsWithFilter = projectService.getProjectsWithFilter(projectFilterDto, 1L);
         Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
     }
 }

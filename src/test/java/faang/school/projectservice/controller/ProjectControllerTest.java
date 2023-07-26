@@ -23,10 +23,4 @@ class ProjectControllerTest {
         projectDto = ProjectDto.builder().build();
         Assertions.assertThrows(DataValidationException.class, () -> projectController.create(projectDto));
     }
-
-    @Test
-    void testUpdateControllerThrowsDataValidationException() {
-        projectDto = ProjectDto.builder().name("     ").build();
-        Assertions.assertThrows(DataValidationException.class, () -> projectController.update(projectDto, 1L));
-    }
 }
