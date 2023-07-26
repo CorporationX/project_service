@@ -108,11 +108,22 @@ public class ProjectServiceTest {
 
     @Test
     public void shouldReturnAndUpdateProject() {
-        Project notUpdatedProject = projectMapper.toEntity(projectDto);
+        Project newProject = projectMapper.toEntity(projectDto);
+        newProject.setName("Mega project");
+
+        Project updatedProject = projectMapper.toEntity(projectDto);
+        projectMapper.updateFromDto(projectMapper.toDto(newProject), updatedProject);
+
         Optional<Project> returnedOptional = Optional.of(projectMapper.toEntity(projectDto));
 
         Mockito.when(projectRepository.findById(projectId))
                 .thenReturn(returnedOptional);
+        Mockito.when(projectRepository.save(updatedProject))
+                .thenReturn(updatedProject);
+
+        ProjectDto receivedProject = projectService.updateProject(projectMapper.toDto(newProject));
+
+        Assertions.assertEquals(projectMapper.toDto(returnedOptional.get()), receivedProject);
     }
 
     @Test
