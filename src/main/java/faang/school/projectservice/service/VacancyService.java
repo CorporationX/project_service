@@ -26,9 +26,10 @@ public class VacancyService {
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         validateVacancy(vacancyDto);
 
-        Vacancy savedVacancy = vacancyRepository.save(vacancyMapper.toModel(vacancyDto));
+        Vacancy vacancyToSave = vacancyMapper.toModel(vacancyDto);
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
-        savedVacancy.setProject(project);
+        vacancyToSave.setProject(project);
+        Vacancy savedVacancy = vacancyRepository.save(vacancyToSave);
         return vacancyMapper.toDto(savedVacancy);
     }
 
