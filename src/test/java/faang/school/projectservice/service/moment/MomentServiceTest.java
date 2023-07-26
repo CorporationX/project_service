@@ -48,7 +48,7 @@ class MomentServiceTest {
     private MomentService momentService;
 
     @Test
-    public void testCreate_Successful() {
+    void testCreate_Successful() {
         MomentDto momentDto = createMomentDto();
 
         when(momentRepository.save(any(Moment.class))).thenReturn(createMoment());
@@ -61,7 +61,7 @@ class MomentServiceTest {
     }
 
     @Test
-    public void testCreate_ProjectClosed() {
+    void testCreate_ProjectClosed() {
         MomentDto momentDto = createMomentDto();
         momentDto.getProjects().get(0).setStatus(ProjectStatus.COMPLETED);
 
@@ -70,7 +70,7 @@ class MomentServiceTest {
     }
 
     @Test
-    public void testCreate_ProjectTeamMembersInvalid() {
+    void testCreate_ProjectTeamMembersInvalid() {
         MomentDto momentDto = createMomentDto();
         momentDto.setUserIds(List.of(1L, 2L, 3L, 8L, 7L));
 
@@ -81,35 +81,35 @@ class MomentServiceTest {
     }
 
     @Test
-    public void testCreateMoment_InvalidId() {
+    void testCreateMoment_InvalidId() {
         MomentDto invalidMomentDto = createMomentDto();
         invalidMomentDto.setId(0L);
         assertThrows(DataValidException.class, () -> momentService.create(invalidMomentDto));
     }
 
     @Test
-    public void testCreateMoment_InvalidName() {
+    void testCreateMoment_InvalidName() {
         MomentDto invalidMomentDto = createMomentDto();
         invalidMomentDto.setName("   ");
         assertThrows(DataValidException.class, () -> momentService.create(invalidMomentDto));
     }
 
     @Test
-    public void testCreateMoment_InvalidProjects() {
+    void testCreateMoment_InvalidProjects() {
         MomentDto invalidMomentDto = createMomentDto();
         invalidMomentDto.setProjects(List.of());
         assertThrows(DataValidException.class, () -> momentService.create(invalidMomentDto));
     }
 
     @Test
-    public void testCreateMoment_InvalidCreator() {
+    void testCreateMoment_InvalidCreator() {
         MomentDto invalidMomentDto = createMomentDto();
         invalidMomentDto.setCreatedBy(0L);
         assertThrows(DataValidException.class, () -> momentService.create(invalidMomentDto));
     }
 
     @Test
-    public void testGetMomentById_ValidId() {
+    void testGetMomentById_ValidId() {
         long momentId = 1L;
         Moment moment = createMoment();
 
@@ -127,7 +127,7 @@ class MomentServiceTest {
     }
 
     @Test
-    public void testGetMomentById_InvalidId() {
+    void testGetMomentById_InvalidId() {
         long momentId = 1L;
 
         when(momentRepository.findById(momentId)).thenReturn(Optional.empty());
@@ -136,7 +136,7 @@ class MomentServiceTest {
     }
 
     @Test
-    public void testGetAllMoments_ReturnsListOfMomentDtos() {
+    void testGetAllMoments_ReturnsListOfMomentDtos() {
         Moment moment1 = new Moment();
         moment1.setId(1L);
         Moment moment2 = new Moment();
@@ -184,7 +184,7 @@ class MomentServiceTest {
 
 
     @Test
-    public void testGetMomentsByDate() {
+    void testGetMomentsByDate() {
         LocalDateTime start = LocalDate.of(2023, 7, 23).atStartOfDay();
         LocalDateTime end = LocalDate.of(2023, 7, 25).atStartOfDay();
         momentService.getMomentsByDate(start, end);
@@ -192,7 +192,7 @@ class MomentServiceTest {
     }
 
     @Test
-    public void testGetMomentsByProjects() {
+    void testGetMomentsByProjects() {
         List<Long> projectIds = List.of(7L, 8L, 9L);
         momentService.getMomentsByProjects(projectIds);
         verify(momentRepository).findAllByProjectIds(projectIds);
