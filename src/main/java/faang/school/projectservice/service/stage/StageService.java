@@ -11,7 +11,6 @@ import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-
 @RequiredArgsConstructor
 @Service
 public class StageService {

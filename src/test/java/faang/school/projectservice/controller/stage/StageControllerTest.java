@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller.stage;
 
-
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage.StageService;
