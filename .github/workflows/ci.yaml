@@ -1,9 +1,9 @@
-name: CI/CD Pipeline
+name: ci
 
 on:
   pull_request:
     branches:
-      - feature-pipeline-test-BC-3942
+      - feature-pipeline-BC-3942
 
 jobs:
   build-and-test:
