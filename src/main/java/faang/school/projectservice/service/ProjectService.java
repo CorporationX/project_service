@@ -81,13 +81,12 @@ public class ProjectService {
         return listResult.stream().map(projectMapper::toDto).toList();
     }
 
-    private List<Project> getAvailableProjectsForCurrentUser(long userId) {
-    public List<ProjectDto> getAllProjects(List<Team> userTeams) {
-        Stream<Project> projects = getAvailableProjectsForCurrentUser(userTeams).stream();
+    public List<ProjectDto> getAllProjects(long userId) {
+        Stream<Project> projects = getAvailableProjectsForCurrentUser(userId).stream();
         return projects.map(projectMapper::toDto).toList();
     }
 
-    private List<Project> getAvailableProjectsForCurrentUser(List<Team> userTeams) {
+    private List<Project> getAvailableProjectsForCurrentUser(long userId) {
         List<Project> projects = projectRepository.findAll();
         List<Project> availableProjects = new ArrayList<>(projects.stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC)

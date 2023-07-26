@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,8 +37,9 @@ public class ProjectController {
         return projectService.getProjectsWithFilter(projectFilterDto, userId);
     }
 
-    public List<ProjectDto> getAllProjects(List<Team> userTeams) {
-        return projectService.getAllProjects(userTeams);
+    @GetMapping("/project/{userId}")
+    public List<ProjectDto> getAllProjects(@PathVariable long userId) {
+        return projectService.getAllProjects(userId);
     }
 
     private void validateCreateProject(ProjectDto projectDto) {

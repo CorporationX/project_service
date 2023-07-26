@@ -195,11 +195,13 @@ class ProjectServiceTest {
     void testGetAllProjects() {
         List<Project> projects = List.of(project, project1, project2, project3);
 
+        TeamMember teamMember = TeamMember.builder().team(team).build();
+        Mockito.when(teamMemberJpaRepository.findByUserIdAndProjectId(anyLong(), anyLong())).thenReturn(teamMember);
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
         List<ProjectDto> filteredProjectsResult =
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
-        List<ProjectDto> projectsWithFilter = projectService.getAllProjects(List.of(team));
+        List<ProjectDto> projectsWithFilter = projectService.getAllProjects(1L);
         Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
     }
 }
