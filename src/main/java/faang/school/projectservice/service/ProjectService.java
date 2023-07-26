@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -88,21 +87,23 @@ public class ProjectService {
         return projects.map(projectMapper::toDto).toList();
     }
 
-    public List<ProjectDto> getAllProjects(List<Team> userTeams) {
-        Stream<Project> projects = getAvailableProjectsForCurrentUser(userTeams).stream();
-        return projects.map(projectMapper::toDto).toList();
-    }
 
-    public ProjectDto getProjectById(long projectId, List<Team> userTeams) {
+    public ProjectDto getProjectById(long projectId, long userId) {
         Project projectById = projectRepository.getProjectById(projectId);
+        TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, projectId);
+        Team team = null;
+        if (teamMember != null){
+            team = teamMember.getTeam();
+        }
+        Team userTeam = team;
         if (projectById.getVisibility() == ProjectVisibility.PRIVATE
-                && !(isUserInPrivateProjectTeam(projectById, userTeams))) {
+                && projectById.getTeams().stream().noneMatch(projectTeam -> projectTeam == userTeam)) {
             throw new PrivateAccessException("This project is private");
         }
         return projectMapper.toDto(projectById);
     }
 
-    private List<Project> getAvailableProjectsForCurrentUser(List<Team> userTeams) {
+
     private List<Project> getAvailableProjectsForCurrentUser(long userId) {
         List<Project> projects = projectRepository.findAll();
         List<Project> availableProjects = new ArrayList<>(projects.stream()

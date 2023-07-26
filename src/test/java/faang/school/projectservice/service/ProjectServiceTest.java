@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -209,16 +208,20 @@ class ProjectServiceTest {
 
     @Test
     void getProjectById() {
+        TeamMember teamMember = TeamMember.builder().team(team).build();
+        Mockito.when(teamMemberJpaRepository.findByUserIdAndProjectId(anyLong(), anyLong())).thenReturn(teamMember);
         Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
         Assertions.assertEquals(mockProjectMapper.toDto(project),
-                projectService.getProjectById(1L, List.of(team)));
+                projectService.getProjectById(1L, 1L));
     }
 
     @Test
     void getProjectByIdThrowsPrivateAccessException() {
+        TeamMember teamMember = TeamMember.builder().team(team).build();
+        Mockito.when(teamMemberJpaRepository.findByUserIdAndProjectId(anyLong(), anyLong())).thenReturn(teamMember);
         Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project3);
         PrivateAccessException exception = Assertions.assertThrows(PrivateAccessException.class,
-                () -> projectService.getProjectById(1L, List.of(team)));
+                () -> projectService.getProjectById(1L, 1L));
         Assertions.assertEquals("This project is private", exception.getMessage());
     }
 }
