@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mappper.VacancyMapper;
@@ -12,10 +13,12 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.VacancyFilters.VacancyFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,6 +30,7 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
+    private final List<VacancyFilter> filters;
 
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         validateVacancy(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
@@ -55,6 +59,18 @@ public class VacancyService {
                     }
                 });
         vacancyRepository.deleteById(id);
+    }
+
+    public List<VacancyDto> getVacancies(VacancyFilterDto filter) {
+        List<Vacancy> vacancies = vacancyRepository.findAll();
+        if (vacancies.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        filters.stream()
+                .filter(f -> f.isApplicable(filter))
+                .forEach(f -> f.apply(vacancies.stream(), filter));
+        return vacancies.stream().map(vacancyMapper::toDto).toList();
     }
 
     private void validateVacancy(Long updaterId, Long projectId) {

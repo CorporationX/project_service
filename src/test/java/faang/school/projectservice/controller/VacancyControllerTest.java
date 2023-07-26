@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.service.VacancyService;
@@ -79,6 +80,36 @@ class VacancyControllerTest {
         assertThrows(DataValidationException.class, () -> vacancyController.deleteVacancy(-1));
     }
 
+    @Test
+    public void testGetVacanciesThrowDateExc1() {
+        VacancyFilterDto filter = VacancyFilterDto.builder().name(" ").build();
+
+        DataValidationException e = assertThrows(
+                DataValidationException.class,
+                () -> vacancyController.getVacancies(filter));
+        assertEquals("Name filter can't be empty", e.getMessage());
+    }
+
+    @Test
+    public void testGetVacanciesThrowDateExc2() {
+        VacancyFilterDto filter = VacancyFilterDto.builder().descriptionPattern(" ").build();
+
+        DataValidationException e = assertThrows(
+                DataValidationException.class,
+                () -> vacancyController.getVacancies(filter));
+        assertEquals("Description filter can't be empty", e.getMessage());
+    }
+
+    @Test
+    public void testGetVacanciesThrowDateExc3() {
+        VacancyFilterDto filter = VacancyFilterDto.builder().requiredSkillId(-1L).build();
+
+        DataValidationException e = assertThrows(
+                DataValidationException.class,
+                () -> vacancyController.getVacancies(filter));
+        assertEquals("Required skill id filter can't be less than 1", e.getMessage());
+    }
+
     @Nested
     class PositiveTests {
         VacancyDto dto;
@@ -97,19 +128,25 @@ class VacancyControllerTest {
         @Test
         public void testCreateVacancy() {
             vacancyController.createVacancy(dto);
-            Mockito.verify(vacancyService, Mockito.times(1)).createVacancy(dto);
+            Mockito.verify(vacancyService).createVacancy(dto);
         }
 
         @Test
         public void testUpdateVacancy() {
             vacancyController.updateVacancy(dto);
-            Mockito.verify(vacancyService, Mockito.times(1)).updateVacancy(dto);
+            Mockito.verify(vacancyService).updateVacancy(dto);
         }
 
         @Test
         public void testDeleteVacancy() {
             vacancyController.deleteVacancy(1);
-            Mockito.verify(vacancyService, Mockito.times(1)).deleteVacancy(1);
+            Mockito.verify(vacancyService).deleteVacancy(1);
+        }
+
+        @Test
+        public void testGetVacancies() {
+            vacancyController.getVacancies(new VacancyFilterDto());
+            Mockito.verify(vacancyService).getVacancies(new VacancyFilterDto());
         }
     }
 }
