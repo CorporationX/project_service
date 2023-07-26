@@ -4,36 +4,47 @@ import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.filters.FilterMomentDto;
 import faang.school.projectservice.messages.ErrorMessages;
 import faang.school.projectservice.service.MomentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
 @RequiredArgsConstructor
+@RestController
+@RequestMapping("/moments")
 public class MomentController {
     public final MomentService momentService;
 
-    public void createMoment(@Validated MomentDto momentDto) {
+    @PostMapping("/create")
+    public void createMoment(@Valid MomentDto momentDto) {
         validateDtoMoment(momentDto);
         momentService.createMoment(momentDto);
     }
 
-    public void updateMoment(@Validated MomentDto momentDto) {
+    @PutMapping("/update")
+    public void updateMoment(@Valid MomentDto momentDto) {
         validateDtoMoment(momentDto);
         momentService.updateMoment(momentDto);
     }
 
+    @GetMapping("/getFiltered")
     public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto) {
         return momentService.getFilteredMoments(filterMomentDto);
     }
 
+    @GetMapping("/getAll")
     public List<MomentDto> getAllMoments() {
         return momentService.getAllMoments();
     }
 
-    public MomentDto getMoment(@Validated long momentId) {
+    @GetMapping("/get")
+    public MomentDto getMoment(@Valid long momentId) {
         validateId(momentId);
         return momentService.getMoment(momentId);
     }

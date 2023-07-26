@@ -10,8 +10,10 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -20,21 +22,26 @@ public class MomentService {
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilter;
 
+    @Transactional
     public Moment createMoment(MomentDto momentDto) {
         return momentRepository.save(momentMapper.dtoToMoment(momentDto));
     }
 
+    @Transactional
     public void updateMoment(MomentDto momentDto) {
         Moment deprecatedMoment = momentRepository.findById(momentDto.getId())
-                .orElseThrow(() -> new NullPointerException("Such moment wasn't found"));
+                .orElseThrow(() -> new NullPointerException(
+                        String.format("moment with %d wasn't found", momentDto.getId())));
         Moment updatedMoment = momentMapper.updateMomentFromDto(momentDto, deprecatedMoment);
         momentRepository.save(updatedMoment);
     }
 
+    @Transactional(readOnly = true)
     public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto) {
+        Stream<Moment> allMoments = momentRepository.findAll().stream();
         return momentFilter.stream()
                 .filter(filter -> filter.isApplicable(filterMomentDto))
-                .flatMap(filter -> filter.apply(momentRepository.findAll().stream(), filterMomentDto))
+                .flatMap(filter -> filter.apply(allMoments, filterMomentDto))
                 .map(momentMapper::momentToDto)
                 .toList();
     }
@@ -45,6 +52,7 @@ public class MomentService {
 
     public MomentDto getMoment(long momentId) {
         return momentMapper.momentToDto(momentRepository.findById(momentId)
-                .orElseThrow(() -> new MomentExistingException(ErrorMessages.NO_SUCH_MOMENT)));
+                .orElseThrow(() -> new MomentExistingException(
+                        String.format("moment with %d wasn't found", momentId))));
     }
 }
