@@ -31,17 +31,16 @@ public class ProjectService {
     }
 
     public ProjectDto update(ProjectDto projectDto, long projectId) {
-        Project updatedProject = projectRepository.getProjectById(projectId);
-        Project project = projectMapper.toModel(projectDto);
-        if (project.getDescription() != null) {
-            updatedProject.setDescription(project.getDescription());
-            updatedProject.setUpdatedAt(LocalDateTime.now());
+        Project projectToUpdate = projectRepository.getProjectById(projectId);
+        if (projectDto.getDescription() != null) {
+            projectToUpdate.setDescription(projectDto.getDescription());
+            projectToUpdate.setUpdatedAt(LocalDateTime.now());
         }
-        if (project.getStatus() != null) {
-            updatedProject.setStatus(project.getStatus());
-            updatedProject.setUpdatedAt(LocalDateTime.now());
+        if (projectDto.getStatus() != null) {
+            projectToUpdate.setStatus(projectDto.getStatus());
+            projectToUpdate.setUpdatedAt(LocalDateTime.now());
         }
-        projectRepository.save(updatedProject);
-        return projectMapper.toDto(updatedProject);
+        projectRepository.save(projectToUpdate);
+        return projectMapper.toDto(projectToUpdate);
     }
 }

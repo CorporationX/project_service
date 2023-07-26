@@ -19,17 +19,14 @@ class ProjectControllerTest {
     ProjectDto projectDto;
 
     @Test
-    void testCreateControllerThrowsException() {
-        projectDto = ProjectDto.builder()
-                .build();
-        Assertions.assertThrows(DataValidationException.class,()-> projectController.create(projectDto));
+    void testCreateControllerThrowsDataValidationException() {
+        projectDto = ProjectDto.builder().build();
+        Assertions.assertThrows(DataValidationException.class, () -> projectController.create(projectDto));
     }
 
     @Test
-    void testUpdateControllerThrowsException() {
-        projectDto = ProjectDto.builder()
-                .name("     ")
-                .build();
-        Assertions.assertThrows(DataValidationException.class,()-> projectController.update(projectDto,1L));
+    void testUpdateControllerThrowsDataValidationException() {
+        projectDto = ProjectDto.builder().name("     ").build();
+        Assertions.assertThrows(DataValidationException.class, () -> projectController.update(projectDto, 1L));
     }
 }
