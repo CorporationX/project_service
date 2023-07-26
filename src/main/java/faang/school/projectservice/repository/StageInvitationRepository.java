@@ -3,7 +3,7 @@ package faang.school.projectservice.repository;
 import java.util.List;
 
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.controller.model.stage_invitation.StageInvitation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

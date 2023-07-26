@@ -1,19 +1,19 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.filters.FilterMomentDto;
-import faang.school.projectservice.filters.MomentFilter;
-import faang.school.projectservice.filters.MomentMapper;
+import faang.school.projectservice.filters.moments.FilterMomentDto;
+import faang.school.projectservice.filters.moments.MomentFilter;
+import faang.school.projectservice.filters.mappers.MomentMapper;
 import faang.school.projectservice.filters.MomentMapperImpl;
-import faang.school.projectservice.filters.filtersForFilterMomentDto.MomentNameFilter;
-import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.filters.moments.filtersForFilterMomentDto.MomentNameFilter;
+import faang.school.projectservice.controller.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.Mapper;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -28,7 +28,8 @@ class MomentServiceTest {
     private MomentService momentService;
     @Mock
     private MomentRepository momentRepository;
-    private final MomentMapper momentMapper = new MomentMapperImpl();
+    @Spy
+    private MomentMapper momentMapper = new MomentMapperImpl();
     @Mock
     private List<MomentFilter> momentFilter;
     private Moment moment = new Moment();
