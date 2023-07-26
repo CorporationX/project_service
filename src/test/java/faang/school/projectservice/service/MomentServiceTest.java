@@ -15,7 +15,6 @@ import org.mapstruct.Mapper;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,6 +39,7 @@ class MomentServiceTest {
         momentFilter = List.of(momentNameFilter);
         momentService = new MomentService(momentRepository, momentMapper, momentFilter);
         moment.setName("first important moment");
+        moment.setDate(LocalDateTime.now());
         filterMomentDto = new FilterMomentDto();
         filterMomentDto.setNamePattern("first");
     }
