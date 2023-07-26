@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -65,10 +66,10 @@ class ProjectServiceTest {
     void testCreateProjectThrowsException() {
         Mockito.when(projectRepository
                 .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(true);
-        DataValidationException dataValidationException = Assertions
-                .assertThrows(DataValidationException.class, () -> projectService.create(projectDto));
-        Assertions.assertEquals(String
-                .format("Project %s already exist",projectDto.getName()),dataValidationException.getMessage());
+        DataAlreadyExistingException dataAlreadyExistingException = Assertions
+                .assertThrows(DataAlreadyExistingException.class, () -> projectService.create(projectDto));
+        Assertions.assertEquals(String.format("User with id: %d already exist project %s",
+                projectDto.getOwnerId(), projectDto.getName()), dataAlreadyExistingException.getMessage());
     }
 
     @Test
