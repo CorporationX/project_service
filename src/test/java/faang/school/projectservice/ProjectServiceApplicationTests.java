@@ -7,6 +7,6 @@ import org.junit.jupiter.api.Test;
 class ProjectServiceApplicationTests {
     @Test
     void contextLoads() {
-        Assertions.assertThat(40 + 0).isEqualTo(43);
+        Assertions.assertThat(40 + 5).isEqualTo(43);
     }
 }
