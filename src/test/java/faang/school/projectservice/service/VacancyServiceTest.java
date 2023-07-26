@@ -85,29 +85,30 @@ class VacancyServiceTest {
                     .roles(List.of(TeamRole.OWNER))
                     .build());
             Mockito.when(projectRepository.existsById(1L)).thenReturn(true);
+            Mockito.when(vacancyRepository.save(Mockito.any())).thenReturn(new Vacancy());
 
             vacancyService.createVacancy(vacancyDto);
         }
 
         @Test
         public void testCreateVacancyCallFindById() {
-            Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(1L);
+            Mockito.verify(teamMemberRepository).findById(1L);
         }
 
         @Test
         public void testCreateVacancyCallExistsById() {
-            Mockito.verify(projectRepository, Mockito.times(1)).existsById(1L);
+            Mockito.verify(projectRepository).existsById(1L);
         }
 
         @Test
         public void testCreateVacancyCallSave() {
-            Mockito.verify(vacancyRepository, Mockito.times(1)).save(Mockito.any());
+            Mockito.verify(vacancyRepository).save(Mockito.any());
         }
 
         @Test
         public void testCreateVacancyCallToMapper() {
-            Mockito.verify(vacancyMapper, Mockito.times(1)).toModel(vacancyDto);
-            Mockito.verify(vacancyMapper, Mockito.times(1)).toDto(Mockito.any());
+            Mockito.verify(vacancyMapper).toModel(vacancyDto);
+            Mockito.verify(vacancyMapper).toDto(Mockito.any());
         }
     }
 

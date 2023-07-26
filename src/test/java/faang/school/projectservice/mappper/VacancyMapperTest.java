@@ -51,5 +51,4 @@ class VacancyMapperTest {
 
         assertEquals(expected, vacancyMapper.toModel(vacancyDto));
     }
-
 }

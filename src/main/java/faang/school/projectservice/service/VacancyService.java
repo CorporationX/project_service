@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mappper.VacancyMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
@@ -41,6 +42,10 @@ public class VacancyService {
         }
         validateVacancy(vacancyDto.getUpdatedBy(), vacancyDto.getProjectId());
 
+        Vacancy savedVacancy = vacancyRepository.save(vacancyMapper.toModel(vacancyDto));
+        Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
+        savedVacancy.setProject(project);
+        return vacancyMapper.toDto(savedVacancy);
         return saveVacancy(vacancyDto);
     }
 
