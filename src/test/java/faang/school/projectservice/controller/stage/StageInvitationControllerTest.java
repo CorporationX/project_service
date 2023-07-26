@@ -60,4 +60,36 @@ public class StageInvitationControllerTest {
       stageInvitationController.create(stageInvitationDto);
     });
   }
+
+  @Test
+  public void getAllByInvitedUserIdSuccess() {
+    stageInvitationController.getAllByInvitedUserId(1L);
+    Mockito.verify(stageInvitationService, Mockito.times(1)).getAllByInvitedUserId(1L);
+  }
+  @Test
+  public void getAllByInvitedUserIdUserValidationFailed() {
+    assertThrows(DataValidationException.class, () -> {
+      stageInvitationController.getAllByInvitedUserId(null);
+    });
+  }
+
+  @Test
+  public void acceptStageInvitationTestSuccess() {
+    stageInvitationController.acceptInvitation(1L, 1L);
+    Mockito.verify(stageInvitationService, Mockito.times(1)).acceptInvitation(1L, 1L);
+  }
+
+  @Test
+  public void acceptStageInvitationUserIdValidationTestFailed() {
+    assertThrows(DataValidationException.class, () -> {
+      stageInvitationController.acceptInvitation(null, 1L);
+    });
+  }
+
+  @Test
+  public void acceptStageInvitationInvitationIdValidationTestFailed() {
+    assertThrows(DataValidationException.class, () -> {
+      stageInvitationController.acceptInvitation(1L, null);
+    });
+  }
 }
