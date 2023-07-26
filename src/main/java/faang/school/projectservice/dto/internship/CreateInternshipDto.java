@@ -1,6 +1,8 @@
 package faang.school.projectservice.dto.internship;
 
 import faang.school.projectservice.model.TeamRole;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,12 +14,18 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CreateInternshipDto {
+    @NotNull
     private Long projectId;
+    @NotNull
     private Long mentorId;
+    @NotEmpty
     private List<Long> internIds;
+    @NotNull
     private LocalDateTime startDate;
+    @NotNull
     private LocalDateTime endDate;
     private String name;
+    @NotNull
     private TeamRole internshipRole;
     private Long createdBy;
 }
