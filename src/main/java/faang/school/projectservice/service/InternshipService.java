@@ -1,33 +1,37 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.repository.InternshipRepository;
 import lombok.RequiredArgsConstructor;
+import org.mapstruct.Mapper;
 import org.springframework.stereotype.Service;
 
-import java.time.temporal.ChronoUnit;
 
 
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
     private final InternshipRepository internshipRepository;
+    private final InternshipMapper internshipMapper;
 
-    private void validateListOfInternsAndThereIsMentor(Internship internship) {
-        if (internship.getInterns() == null) {
+    private void validateListOfInternsAndThereIsMentor(InternshipDto internshipDto) {
+        if (internshipDto.getInterns() == null) {
             throw new DataValidationException("Can't create an internship without interns");
         }
-        if (internship.getMentorId() == null) {
+        if (internshipDto.getMentorId() == null) {
             throw new DataValidationException("There is not mentor for interns!");
         }
-        if (internship.getStartDate().isAfter(internship.getEndDate().plus(3, ChronoUnit.MONTHS))) {
-            throw new DataValidationException("Internship date was entered incorrectly!");
-        } // true - конец стажировки +3 мес.; не позже начала стажировки - false
+        if (internshipDto.getEndDate().plusMonths(3).isBefore(internshipDto.getStartDate())) {
+            throw new DataValidationException("Internship cannot last more than 3 months");
+        }
     }
 
-    public Internship saveNewInternship(Internship internship) {
-        validateListOfInternsAndThereIsMentor(internship);
-        return internshipRepository.save(internship);
+    public InternshipDto saveNewInternship(InternshipDto internshipDto) {
+        validateListOfInternsAndThereIsMentor(internshipDto);
+        Internship internship = internshipRepository.save(internshipMapper.toEntity(internshipDto));
+        return internshipMapper.toDto(internship);
     }
 }
