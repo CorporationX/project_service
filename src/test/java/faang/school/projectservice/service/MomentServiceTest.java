@@ -1,10 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.filters.mappers.MomentMapperImpl;
 import faang.school.projectservice.filters.moments.FilterMomentDto;
 import faang.school.projectservice.filters.moments.MomentFilter;
 import faang.school.projectservice.filters.mappers.MomentMapper;
-import faang.school.projectservice.filters.MomentMapperImpl;
 import faang.school.projectservice.filters.moments.filtersForFilterMomentDto.MomentNameFilter;
 import faang.school.projectservice.controller.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
@@ -29,7 +29,7 @@ class MomentServiceTest {
     @Mock
     private MomentRepository momentRepository;
     @Spy
-    private MomentMapper momentMapper = new MomentMapperImpl();
+    private MomentMapperImpl momentMapper;
     @Mock
     private List<MomentFilter> momentFilter;
     private Moment moment = new Moment();
