@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -27,12 +28,17 @@ public class ProjectService {
     private final List<ProjectFilter> filters;
 
     public ProjectDto create(ProjectDto projectDto) {
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new DataValidationException(String.format("Project %s already exist", projectDto.getName()));
+        projectDto.setName(processTitle(projectDto.getName()));
+        long ownerId = projectDto.getOwnerId();
+        String projectName = projectDto.getName();
+        if (projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)) {
+            throw new DataAlreadyExistingException(String
+                    .format("User with id: %d already exist project %s",ownerId, projectName));
         }
         Project project = projectMapper.toModel(projectDto);
-        project.setCreatedAt(LocalDateTime.now());
-        project.setUpdatedAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        project.setCreatedAt(now);
+        project.setUpdatedAt(now);
         project.setStatus(ProjectStatus.CREATED);
         if (projectDto.getVisibility() == null) {
             project.setVisibility(ProjectVisibility.PUBLIC);
@@ -42,18 +48,23 @@ public class ProjectService {
     }
 
     public ProjectDto update(ProjectDto projectDto, long projectId) {
-        Project updatedProject = projectRepository.getProjectById(projectId);
-        Project project = projectMapper.toModel(projectDto);
-        if (project.getDescription() != null) {
-            updatedProject.setDescription(project.getDescription());
-            updatedProject.setUpdatedAt(LocalDateTime.now());
+        Project projectToUpdate = projectRepository.getProjectById(projectId);
+        if (projectDto.getDescription() != null) {
+            projectToUpdate.setDescription(projectDto.getDescription());
+            projectToUpdate.setUpdatedAt(LocalDateTime.now());
         }
-        if (project.getStatus() != null) {
-            updatedProject.setStatus(project.getStatus());
-            updatedProject.setUpdatedAt(LocalDateTime.now());
+        if (projectDto.getStatus() != null) {
+            projectToUpdate.setStatus(projectDto.getStatus());
+            projectToUpdate.setUpdatedAt(LocalDateTime.now());
         }
-        projectRepository.save(updatedProject);
-        return projectMapper.toDto(updatedProject);
+        projectRepository.save(projectToUpdate);
+        return projectMapper.toDto(projectToUpdate);
+    }
+
+    private String processTitle(String title) {
+        title = title.replaceAll("[^A-Za-zА-Яа-я0-9+-/#]", " ");
+        title = title.replaceAll("[\\s]+", " ");
+        return title.trim().toLowerCase();
     }
 
     public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto, List<Team> userTeams) {
