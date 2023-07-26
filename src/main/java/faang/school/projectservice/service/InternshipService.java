@@ -6,7 +6,6 @@ import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.repository.InternshipRepository;
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.Mapper;
 import org.springframework.stereotype.Service;
 
 
@@ -21,11 +20,11 @@ public class InternshipService {
         if (internshipDto.getInterns() == null) {
             throw new DataValidationException("Can't create an internship without interns");
         }
+        if (internshipDto.getEndDate().plusMonths(3).isAfter(internshipDto.getStartDate())) {
+            throw new DataValidationException("Internship cannot last more than 3 months");
+        }
         if (internshipDto.getMentorId() == null) {
             throw new DataValidationException("There is not mentor for interns!");
-        }
-        if (internshipDto.getEndDate().plusMonths(3).isBefore(internshipDto.getStartDate())) {
-            throw new DataValidationException("Internship cannot last more than 3 months");
         }
     }
 

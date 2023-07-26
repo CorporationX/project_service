@@ -33,6 +33,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 @Entity
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "internship")
 public class Internship {
 

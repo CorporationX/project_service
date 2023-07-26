@@ -1,6 +1,7 @@
 package faang.school.projectservice;
 
 import faang.school.projectservice.controller.InternshipController;
+import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.service.InternshipService;
@@ -23,6 +24,6 @@ public class InternshipControllerTest {
     @Test
     public void saveNewInternshipThrowsExceptionTest() {
         assertThrows(DataValidationException.class,
-                () -> internshipController.saveNewInternship(new Internship()));
+                () -> internshipController.saveNewInternship(new InternshipDto()));
     }
 }
