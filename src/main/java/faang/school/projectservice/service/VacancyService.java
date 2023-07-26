@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mappper.VacancyMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
@@ -68,8 +69,11 @@ public class VacancyService {
     }
 
     private VacancyDto saveVacancy(VacancyDto vacancyDto) {
-        Vacancy vacancyToSave = vacancyRepository.save(vacancyMapper.toModel(vacancyDto));
-        return vacancyMapper.toDto(vacancyToSave);
+        Vacancy vacancyToSave = vacancyMapper.toModel(vacancyDto);
+        Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
+        vacancyToSave.setProject(project);
+        Vacancy savedVacancy = vacancyRepository.save(vacancyToSave);
+        return vacancyMapper.toDto(savedVacancy);
     }
 
     private Vacancy getVacancy(long id) {
