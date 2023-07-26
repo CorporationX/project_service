@@ -2,7 +2,7 @@ package faang.school.projectservice.commonMessages.vacancy;
 
 public final class ErrorMessagesForVacancy {
     public static final String INPUT_BODY_IS_NULL = "Input body from request is null!";
-    public static final String PROJECT_NOT_EXIST_FORMAT = "Project id:{0} is not exist.";
+    public static final String PROJECT_NOT_EXIST_FORMAT = "Project not found by id: {0}";
     public static final String ERROR_OWNER_ROLE_FORMAT = "The user id{0} cannot create a vacancy," +
             " because his role does not allow creating vacancies";
     public static final String NAME_IS_NULL = "Name is null.";

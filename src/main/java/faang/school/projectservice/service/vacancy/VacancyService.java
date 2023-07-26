@@ -12,14 +12,12 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.ERROR_OWNER_ROLE_FORMAT;
-import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.PROJECT_NOT_EXIST_FORMAT;
 
 @Service
 @RequiredArgsConstructor
@@ -31,28 +29,19 @@ public class VacancyService {
     private final VacancyValidator vacancyValidator;
 
     @Transactional
-    public VacancyDto createVacancy(@Valid VacancyDto vacancyDto) {
+    public VacancyDto createVacancy(VacancyDto vacancyDto) {
         // вакансия всегда относиться к какому-то проекту
         // -> перед созданием нужно проверить существует ли проект с таким ид
         // значит надо сходить в БД и проверить что такой проект существует
         // Также на проекте обязательно должен быть человек, ответственный за вакансию.
         // значит должен иметь какую-то определенную роль
         vacancyValidator.validateRequiredFieldsInDTO(vacancyDto);
-        checkProjectIsExist(vacancyDto.getProjectId());
+        Project curProject = projectRepository.getProjectById(vacancyDto.getProjectId());
         checkOwnerVacancy(vacancyDto.getCreatedBy());
 
-        Project curProject = projectRepository.getProjectById(vacancyDto.getProjectId());
         Vacancy newVacancy = vacancyMapper.toEntity(vacancyDto);
         newVacancy.setProject(curProject);
-        Vacancy createdVacancy = vacancyRepository.save(newVacancy);
-        return vacancyMapper.toDto(createdVacancy);
-    }
-
-    private void checkProjectIsExist(Long projectId) {
-        if (!projectRepository.existsById(projectId)) {
-            String errorMessage = MessageFormat.format(PROJECT_NOT_EXIST_FORMAT, projectId);
-            throw new VacancyValidateException(errorMessage);
-        }
+        return vacancyMapper.toDto(vacancyRepository.save(newVacancy));
     }
 
     private void checkOwnerVacancy(Long creatorId) {
