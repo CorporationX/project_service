@@ -3,14 +3,16 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -18,6 +20,7 @@ import java.util.List;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final MomentRepository momentRepository;
 
     @Transactional
     public List<ProjectDto> getAllProjects() {
@@ -62,7 +65,6 @@ public class ProjectService {
         Project subProject = projectMapper.toEntity(projectDto);
         Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
         subProject.setParentProject(parentProject);
-        subProject.setCreatedAt(LocalDateTime.now());
         subProject.setStatus(ProjectStatus.CREATED);
         Project savedSubProject = projectRepository.save(subProject);
         parentProject.getChildren().add(savedSubProject);
@@ -95,5 +97,45 @@ public class ProjectService {
         if (subProjectExists) {
             throw new DataValidationException("Subproject with name " + subProjectName + " already exists");
         }
+    }
+
+    public ProjectDto updateSubProject(ProjectDto projectDto) {
+        validateProjectExists(projectDto.getId());
+        validateParentProjectExist(projectDto);
+
+        Project subProject = projectRepository.getProjectById(projectDto.getId());
+        ProjectStatus sPStatus = subProject.getStatus();
+
+        if (!sPStatus.equals(ProjectStatus.COMPLETED)) {
+            subProject.setStatus(projectDto.getStatus());
+        } else if (subProject.getChildren().isEmpty() || checkChildrenStatusCompleted(subProject)) {
+            createMomentCompletedForSubProject(subProject);
+        } else {
+            throw new DataValidationException("Not all subprojects completed");
+        }
+
+        return projectMapper.toDto(projectRepository.save(subProject));
+    }
+
+    private boolean checkChildrenStatusCompleted(Project project) {
+        List<Project> children = project.getChildren();
+        return children.stream()
+                .anyMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
+    }
+
+    private void createMomentCompletedForSubProject(Project subProject) {
+        Moment moment = new Moment();
+        moment.setName(subProject.getName());
+        moment.setDescription("All subprojects completed");
+        moment.setUserIds(getProjectMembers(subProject));
+        momentRepository.save(moment);
+    }
+
+    private List<Long> getProjectMembers(Project project) {
+        return project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers()
+                        .stream()
+                        .map(TeamMember::getUserId))
+                .toList();
     }
 }

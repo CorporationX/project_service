@@ -19,6 +19,12 @@ public class SubProjectController {
         return projectService.createSubProject(projectDto);
     }
 
+    @PostMapping("/update-subproject")
+    public ProjectDto updateSubProject(@RequestBody ProjectDto projectDto) {
+        validateSubProject(projectDto);
+        return projectService.updateSubProject(projectDto);
+    }
+
     private void validateSubProject(ProjectDto projectDto) {
         if (projectDto.getName().isBlank()) {
             throw new DataValidationException("Enter project name, please");

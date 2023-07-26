@@ -22,6 +22,7 @@ public class ProjectDto {
     private Long parentId;
     private List<Long> childrenId;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private ProjectStatus status;
     private ProjectVisibility visibility;
 }

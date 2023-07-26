@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,14 +121,13 @@ public class ProjectServiceTest {
                 .children(new ArrayList<>())
                 .build();
         subProject.setParentProject(parentProject);
-        subProject.setCreatedAt(LocalDateTime.now());
         subProject.setStatus(ProjectStatus.CREATED);
         ProjectDto subProjectDtoExpected = projectMapper.toDto(subProject);
 
 
         when(projectRepository.existsById(subProjectDto.getParentId())).thenReturn(true);
         when(projectRepository.getProjectById(subProjectDto.getParentId())).thenReturn(parentProject);
-        when(projectRepository.save(any(Project.class))).thenReturn(subProject);
+        when(projectRepository.save(subProject)).thenReturn(subProject);
 
         ProjectDto projectDtoActual = projectService.createSubProject(subProjectDto);
 
