@@ -27,23 +27,45 @@ class StageControllerTest {
     @Mock
     StageService stageService;
     String status;
+    Long stageId;
     StageDto stageDtoWithStageId;
     StageDto stageDtoWithNullId;
-    StageDto stageDtoWithStageRoleId;
-    Long stageId;
+    StageDto stageDtoWithNullStageId;
+    StageDto stageDtoWithNullStageRoleId;
+    StageDto stageDtoWithListStageRoles;
+    StageDto stageDtoWithEmptyListStageRoles;
+    StageDto stageDtoWithStageRolesWithoutTeamRole;
 
     @BeforeEach
     void setUp() {
         stageId = 1L;
         status = "created";
-        stageDtoWithStageId = StageDto.builder().stageId(1L).build();
-        stageDtoWithNullId = StageDto.builder().
-                stageId(null).
-                stageRolesDto(List.of(StageRolesDto.builder().id(null).build()))
+        stageDtoWithNullId = StageDto.builder()
+                .stageId(null)
+                .stageRolesDto(List.of(StageRolesDto.builder().id(null).build()))
                 .build();
-        stageDtoWithStageRoleId = StageDto.builder().
+        stageDtoWithStageId = StageDto.builder()
+                .stageId(1L)
+                .build();
+        stageDtoWithNullStageId = StageDto.builder().
                 stageId(null).
                 stageRolesDto(List.of(StageRolesDto.builder().id(1L).build()))
+                .build();
+        stageDtoWithNullStageRoleId = StageDto.builder().
+                stageId(1L).
+                stageRolesDto(List.of(StageRolesDto.builder().id(null).build()))
+                .build();
+        stageDtoWithListStageRoles = StageDto.builder()
+                .stageId(1L)
+                .stageRolesDto(List.of(StageRolesDto.builder().id(1L).teamRole("OWNER").build()))
+                .build();
+        stageDtoWithEmptyListStageRoles = StageDto.builder()
+                .stageId(1L)
+                .stageRolesDto(List.of())
+                .build();
+        stageDtoWithStageRolesWithoutTeamRole = StageDto.builder()
+                .stageId(1L)
+                .stageRolesDto(List.of(StageRolesDto.builder().id(1L).teamRole(" ").build()))
                 .build();
     }
 
@@ -58,7 +80,7 @@ class StageControllerTest {
     @Test
     void testMethodCreateStage_ThrowExceptionAndMessage() {
         assertThrows(IllegalArgumentException.class, () -> stageController.createStage(stageDtoWithStageId), "Stage ID must be null");
-        assertThrows(IllegalArgumentException.class, () -> stageController.createStage(stageDtoWithStageRoleId), "Stage roles ID must be null");
+        assertThrows(IllegalArgumentException.class, () -> stageController.createStage(stageDtoWithNullStageRoleId), "Stage roles ID must be null");
     }
 
     @Test
@@ -80,6 +102,21 @@ class StageControllerTest {
 
         verify(stageService, times(1)).deleteStageById(stageId);
         verifyNoMoreInteractions(stageService);
+    }
+
+    @Test
+    void testMethodUpdateStage() {
+        stageController.updateStage(stageDtoWithListStageRoles);
+
+        verify(stageService, times(1)).updateStage(stageDtoWithListStageRoles);
+        verifyNoMoreInteractions(stageService);
+    }
+
+    @Test
+    void testMethodUpdateStage_ThrowExceptionAndMessage() {
+        assertThrows(IllegalArgumentException.class, () -> stageController.updateStage(stageDtoWithNullStageId), "Stage ID must not be null");
+        assertThrows(IllegalArgumentException.class, () -> stageController.updateStage(stageDtoWithEmptyListStageRoles), "List stage roles must not be empty");
+        assertThrows(IllegalArgumentException.class, () -> stageController.updateStage(stageDtoWithStageRolesWithoutTeamRole), "Team role must not be null");
     }
 
     @Test

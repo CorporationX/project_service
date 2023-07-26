@@ -10,9 +10,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static faang.school.projectservice.validator.StageValidator.isCompletedOrCancelled;
 
 @Service
 @RequiredArgsConstructor
@@ -45,31 +48,50 @@ public class StageService {
     public StageDto updateStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
         Stage stageFromRepository = stageRepository.getById(stage.getStageId());
+
+        isCompletedOrCancelled(stageFromRepository);
+
         List<StageRoles> stageRoles = stage.getStageRoles();
         List<StageRoles> stageRolesFromRepository = stageFromRepository.getStageRoles();
-        List<StageRoles> newStageRoles = stageRolesFromRepository.stream()
-                .filter(stageRole ->
-                        stageRoles.stream()
-                                .map(StageRoles::getTeamRole)
-                                .noneMatch(teamRole -> stageRole.getTeamRole().equals(teamRole))).toList();
+        List<StageRoles> newStageRoles = addNewStageRolesToList(stageRoles, stageRolesFromRepository);
 
+        sendStageInvitation(newStageRoles, stage);
+
+        return stageMapper.toDto(stageRepository.save(stage));
+    }
+
+    private void sendStageInvitation(List<StageRoles> newStageRoles, Stage stage) {
         Map<TeamRole, Integer> teamRoleAndCount = newStageRoles.stream()
                 .collect(Collectors.groupingBy(StageRoles::getTeamRole, Collectors.summingInt(StageRoles::getCount)));
+
         for (Map.Entry<TeamRole, Integer> entry : teamRoleAndCount.entrySet()) {
             TeamRole teamRole = entry.getKey();
             Integer count = entry.getValue();
             stage.getProject().getStages().forEach(stage1 -> stage1.getExecutors().forEach(executor -> {
-                if (executor.getRoles().contains(teamRole)) {
-                    Long userId = executor.getUserId();
+                if (executor.getRoles().contains(teamRole) && count > 0) {
+//                    sendInvitation(executor); реализовать после добавления метода sendInvitation
+                    teamRoleAndCount.put(teamRole, count - 1);
                 }
-                //TODO
-                   teamRoleAndCount.put(teamRole, count-1);
-
-           }));
+            }));
         }
+    }
 
+    private List<StageRoles> addNewStageRolesToList(List<StageRoles> stageRoles, List<StageRoles> stageRolesFromRepository) {
+        List<StageRoles> newStageRoles = new ArrayList<>(stageRolesFromRepository.stream()
+                .filter(stageRole ->
+                        stageRoles.stream()
+                                .map(StageRoles::getTeamRole)
+                                .noneMatch(teamRole -> stageRole.getTeamRole().equals(teamRole))).toList());
 
-        return stageMapper.toDto(stage);
+        stageRolesFromRepository
+                .forEach(stageRole -> stageRoles.stream()
+                        .filter(stageRole1 -> stageRole.getCount() < stageRole1.getCount())
+                        .forEach(stageRole1 -> {
+                            stageRole1.setCount(stageRole1.getCount() - stageRole.getCount());
+                            newStageRoles.add(stageRole1);
+                        }));
+
+        return newStageRoles;
     }
 
     @Transactional(readOnly = true)

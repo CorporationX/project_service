@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static faang.school.projectservice.validate.Validate.validateId;
-import static faang.school.projectservice.validate.Validate.validateStageId;
-import static faang.school.projectservice.validate.Validate.validateStatus;
+import static faang.school.projectservice.validator.StageValidator.validateId;
+import static faang.school.projectservice.validator.StageValidator.validateStageDto;
+import static faang.school.projectservice.validator.StageValidator.validateStageId;
+import static faang.school.projectservice.validator.StageValidator.validateStatus;
 
 @RestController
 @RequestMapping("/stage")
@@ -35,7 +36,7 @@ public class StageController {
         return stageService.createStage(stageDto);
     }
 
-    @GetMapping("/stageStatus/")
+    @PostMapping("/stageStatus/")
     public List<StageDto> getAllStagesByStatus(@RequestParam(value = "status") String status) {
         validateStatus(status);
         return stageService.getAllStagesByStatus(status);
@@ -49,6 +50,7 @@ public class StageController {
 
     @PutMapping("/updateStage/")
     public StageDto updateStage(@Valid @RequestBody StageDto stageDto) {
+        validateStageDto(stageDto);
         return stageService.updateStage(stageDto);
     }
 
@@ -57,7 +59,7 @@ public class StageController {
         return stageService.getAllStages();
     }
 
-    @GetMapping("/getStageById/{stageId}")
+    @PostMapping("/getStageById/{stageId}")
     public StageDto getStageById(@Min(1) @PathVariable("stageId") Long stageId) {
         validateStageId(stageId);
         return stageService.getStageById(stageId);
