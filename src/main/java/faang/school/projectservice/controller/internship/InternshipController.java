@@ -1,11 +1,15 @@
 package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.internship.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -24,6 +28,21 @@ public class InternshipController {
         updateInternshipValidation(internship);
         service.updateInternship(id, internship);
         return internship;
+    }
+
+    public InternshipDto findInternshipbyId(long id) {
+        if (id < 1) {
+            throw new DataValidationException("ID error!");
+        }
+        return service.findInternshipbyId(id);
+    }
+
+    public List<InternshipDto> findAllInternships() {
+        return service.findAllInternships();
+    }
+
+    public List<InternshipDto> findInternshipsWithFilter(long projectId, InternshipFilterDto filterDto) {
+        return service.findInternshipsWithFilter(projectId, filterDto);
     }
 
     private void createInternshipValidation(Internship internship) {
