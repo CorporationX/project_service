@@ -5,6 +5,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mappper.VacancyMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -81,29 +82,30 @@ class VacancyServiceTest {
                     .roles(List.of(TeamRole.OWNER))
                     .build());
             Mockito.when(projectRepository.existsById(1L)).thenReturn(true);
+            Mockito.when(vacancyRepository.save(Mockito.any())).thenReturn(new Vacancy());
 
             vacancyService.createVacancy(vacancyDto);
         }
 
         @Test
         public void testCreateVacancyCallFindById() {
-            Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(1L);
+            Mockito.verify(teamMemberRepository).findById(1L);
         }
 
         @Test
         public void testCreateVacancyCallExistsById() {
-            Mockito.verify(projectRepository, Mockito.times(1)).existsById(1L);
+            Mockito.verify(projectRepository).existsById(1L);
         }
 
         @Test
         public void testCreateVacancyCallSave() {
-            Mockito.verify(vacancyRepository, Mockito.times(1)).save(Mockito.any());
+            Mockito.verify(vacancyRepository).save(Mockito.any());
         }
 
         @Test
         public void testCreateVacancyCallToMapper() {
-            Mockito.verify(vacancyMapper, Mockito.times(1)).toModel(vacancyDto);
-            Mockito.verify(vacancyMapper, Mockito.times(1)).toDto(Mockito.any());
+            Mockito.verify(vacancyMapper).toModel(vacancyDto);
+            Mockito.verify(vacancyMapper).toDto(Mockito.any());
         }
     }
 }

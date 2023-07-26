@@ -84,6 +84,6 @@ class VacancyControllerTest {
 
         vacancyController.createVacancy(dto);
 
-        Mockito.verify(vacancyService, Mockito.times(1)).createVacancy(dto);
+        Mockito.verify(vacancyService).createVacancy(dto);
     }
 }
