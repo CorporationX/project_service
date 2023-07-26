@@ -1,7 +1,9 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class InternshipService {
     private final InternshipRepository internshipRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipMapper internshipMapper;
+    private final List<InternshipFilter> filterList;
 
     public Internship createInternship(Internship internship) {
         createInternshipValidation(internshipMapper.toDto(internship));
@@ -42,6 +46,22 @@ public class InternshipService {
         } else {
             internshipRepository.save(internship);
         }
+    }
+
+    public InternshipDto findInternshipbyId(long id) {
+        return internshipMapper.toDto(internshipRepository.getById(id));
+    }
+
+    public List<InternshipDto> findAllInternships() {
+        List<Internship> ents = internshipRepository.findAll();
+        return ents.stream().map(internshipMapper::toDto).toList();
+    }
+
+    public List<InternshipDto> findInternshipsWithFilter(long projectId, InternshipFilterDto filterDto) {
+        List<InternshipDto> list= findAllInternships();
+        list.removeIf(dto -> !dto.getProjectId().equals(projectId));
+        filter(filterDto, list);
+        return list;
     }
 
     private void createInternshipValidation(InternshipDto internshipDto) {
@@ -100,4 +120,10 @@ public class InternshipService {
         }
         return res;
     }
+    public void filter(InternshipFilterDto filter, List<InternshipDto> dtoList) {
+        filterList.stream()
+                .filter((fil) -> fil.isApplicable(filter))
+                .forEach((fil) -> fil.apply(dtoList, filter));
+    }
+
 }
