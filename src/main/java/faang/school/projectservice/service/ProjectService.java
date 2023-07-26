@@ -20,6 +20,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
 
     public ProjectDto create(ProjectDto projectDto) {
+        projectDto.setName(processTitle(projectDto.getName()));
         long ownerId = projectDto.getOwnerId();
         String projectName = projectDto.getName();
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)) {
@@ -47,5 +48,11 @@ public class ProjectService {
         }
         projectRepository.save(projectToUpdate);
         return projectMapper.toDto(projectToUpdate);
+    }
+
+    private String processTitle(String title) {
+        title = title.replaceAll("[^A-Za-zА-Яа-я0-9+-/#]", " ");
+        title = title.replaceAll("[\\s]+", " ");
+        return title.trim().toLowerCase();
     }
 }

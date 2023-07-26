@@ -12,10 +12,10 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ProjectMapper {
 
-    @Mapping(target = "ownerId", source = "owner.id")
+    @Mapping(target = "ownerId", source = "ownerId")
     ProjectDto toDto(Project project);
 
-    @Mapping(target = "owner", source = "ownerId", qualifiedByName = "ownerTeamMember")
+    @Mapping(target = "ownerId", source = "ownerId")
     Project toModel(ProjectDto projectDto);
 
     @Named("ownerTeamMember")
