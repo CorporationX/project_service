@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
@@ -25,13 +26,13 @@ public class ProjectControllerTest {
     private ProjectController projectController;
 
     private final ProjectMapper projectMapper = new ProjectMapperImpl();
-    private final long userId = 1L;
+    private final long userId = 1;
+    private long projectId = 1;
     private ProjectDto projectDto;
 
     @BeforeEach
     public void initProjectDto() {
         projectDto = ProjectDto.builder()
-                .id(1L)
                 .ownerId(userId)
                 .name("Project")
                 .description("Cool")
@@ -52,7 +53,6 @@ public class ProjectControllerTest {
 
     @Test
     public void shouldReturnProjectByProjectId() {
-        long projectId = 1;
         ProjectDto desiredProject = new ProjectDto();
 
         Mockito.when(projectService.getProject(projectId))
@@ -68,6 +68,7 @@ public class ProjectControllerTest {
         ProjectDto notCreateProject = projectDto;
 
         Project desiredProject = projectMapper.toEntity(notCreateProject);
+        desiredProject.setId(projectId);
         desiredProject.setStatus(ProjectStatus.CREATED);
 
         Mockito.when(projectService.createProject(notCreateProject))
@@ -81,13 +82,31 @@ public class ProjectControllerTest {
 
     @Test
     public void shouldReturnAndUpdateProject() {
-        ProjectDto notUpdatedProject = ProjectDto.builder()
-                .id(1L)
-                .ownerId(userId)
-                .name("Project")
-                .description("Cool")
-                .build();
+        ProjectDto notUpdatedProject = projectDto;
+        notUpdatedProject.setId(projectId);
+        notUpdatedProject.setName("Mega project");
 
         Project desiredProject = projectMapper.toEntity(notUpdatedProject);
+
+        Mockito.when(projectService.updateProject(notUpdatedProject))
+                .thenReturn(projectMapper.toDto(desiredProject));
+        ProjectDto receivedProject = projectController.updateProject(notUpdatedProject, projectId);
+
+        Assertions.assertEquals(projectMapper.toDto(desiredProject), receivedProject);
+        Mockito.verify(projectService).updateProject(notUpdatedProject);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenProjectIdNotCorrect() {
+        long otherProjectId = 2;
+
+        ProjectDto notUpdatedProject = projectDto;
+        notUpdatedProject.setId(otherProjectId);
+        notUpdatedProject.setName("Mega project");
+
+        Assertions.assertThrows(DataValidationException.class,
+                () -> projectController.updateProject(notUpdatedProject, projectId));
+
+        Mockito.verify(projectService, Mockito.times(0)).updateProject(notUpdatedProject);
     }
 }
