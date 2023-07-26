@@ -16,6 +16,6 @@ public class ProjectFilterByName implements ProjectFilter {
     @Override
     public Stream<Project> apply(Stream<Project> projectStream, ProjectFilterDto filterDto) {
         return projectStream.filter(project ->
-                project.getDescription().contains(filterDto.getProjectNamePattern()));
+                project.getName().contains(filterDto.getProjectNamePattern()));
     }
 }
