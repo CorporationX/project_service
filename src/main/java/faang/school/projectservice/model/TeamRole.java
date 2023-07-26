@@ -9,7 +9,11 @@ public enum TeamRole {
     DESIGNER,
     TESTER,
     ANALYST,
-    INTERN;
+    INTERNMANAGER,
+    INTERNDEVELOPER,
+    INTERNDESIGNER,
+    INTERNTESTER,
+    INTERNANALYST;
 
     public static List<TeamRole> getAll() {
         return List.of(TeamRole.values());
