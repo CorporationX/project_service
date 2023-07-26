@@ -10,7 +10,7 @@ public class StageDto {
     private Long stageId;
     private String stageName;
     private Long projectId;
-    private List <Long> stageRoleIds;
+    private List<Long> stageRoleIds;
     private List<Long> taskIds;
     private List<Long> executorIds;
 }
