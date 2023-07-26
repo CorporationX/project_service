@@ -8,6 +8,7 @@ import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,5 +22,11 @@ public class VacancyController {
     public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
         vacancyValidator.validateInputBody(vacancyDto);
         return vacancyService.createVacancy(vacancyDto);
+    }
+
+    @PutMapping("/vacancy")
+    public VacancyDto updtaeVacancy(@RequestBody VacancyDto vacancyDto) {
+        vacancyValidator.validateInputBody(vacancyDto);
+        return vacancyService.updateVacancy(vacancyDto);
     }
 }
