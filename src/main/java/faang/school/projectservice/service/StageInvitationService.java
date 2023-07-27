@@ -50,24 +50,14 @@ public class StageInvitationService {
     }
 
     public List<StageInvitationDto> getFilteredInvites(Long userId, FilterStageInviteDto filterStageInviteDto) {
-        List<StageInvitation> userInvites = stageInvitationRepository.findAll().stream()
-                .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(userId)).toList();
-        List<List<StageInvitation>> afterFilters = filters.stream()
+        Stream<StageInvitation> userInvites = stageInvitationRepository.findAll().stream()
+                .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(userId));
+        List<StageInviteFilter> requiredFilters = filters.stream()
                 .filter(filter -> filter.isApplicable(filterStageInviteDto))
-                .map(filter -> filter.apply(userInvites.stream(), filterStageInviteDto).toList())
                 .toList();
-        List<StageInvitation> result = afterFilters.get(0);
-        if(result.size() == 0){
-            throw new RuntimeException(ErrorMessages.NO_SUCH_STAGE_INVITATIONS);
+        for(StageInviteFilter requiredFilter : requiredFilters){
+            userInvites = requiredFilter.apply(userInvites, filterStageInviteDto);
         }
-        if(afterFilters.size() == 1){
-            return stageInvitationMapper.listEntityToDto(result);
-        }
-        for (int i = 1; i < afterFilters.size(); i++) {
-            result = result.stream()
-                    .filter(afterFilters.get(i)::contains)
-                    .toList();
-        }
-        return stageInvitationMapper.listEntityToDto(result);
+        return userInvites.map(stageInvitationMapper::entityToDto).toList();
     }
 }
