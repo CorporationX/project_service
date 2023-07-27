@@ -6,8 +6,8 @@ CREATE TABLE moment (
   image_id VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP,
-  created_by BIGINT NOT NULL,
-  updated_by BIGINT NOT NULL
+  created_by BIGINT,
+  updated_by BIGINT
 );
 
 CREATE TABLE moment_resource (
