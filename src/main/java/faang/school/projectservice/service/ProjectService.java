@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class ProjectService {
 
     public ProjectDto createSubProject(ProjectDto projectDto) {
         validateSubProject(projectDto);
+        validateProjectNotExist(projectDto);
         Project subProject = subProjectMapper.toEntity(projectDto);
         subProject.setChildren(projectRepository.findAllByIds(projectDto.getChildrenIds()));
         Project parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
@@ -49,15 +51,22 @@ public class ProjectService {
                 .toList();
     }
 
+    public Timestamp updateSubProject(ProjectDto projectDto) {
+        validateSubProject(projectDto);
+        someMethod(projectDto);
+
+        return null;
+    }
+
     public void validateSubProject(ProjectDto projectDto) {
         if (projectDto.getOwnerId() <= 0) {
             throw new DataValidationException("Owner id cant be less then 1");
         }
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new DataValidationException(String.format("Project %s is already exist", projectDto.getName()));
-        }
         if (projectDto.getChildrenIds() == null) {
             throw new DataValidationException("Subprojects can be empty but not null");
+        }
+        if (projectDto.getStatus() == null){
+            throw new DataValidationException("Project status cant be null");
         }
         if (projectDto.getVisibility() == null) {
             throw new DataValidationException(String.format("Visibility of subProject '%s' must be specified as 'private' or 'public'.", projectDto.getName()));
@@ -71,6 +80,23 @@ public class ProjectService {
         }
         if (parentProject.getVisibility().equals(ProjectVisibility.PUBLIC) && projectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
             throw new DataValidationException(String.format("Cant create private SubProject; %s, on a public Project: %s", projectDto.getName(), parentProject.getName()));
+        }
+    }
+
+    private void validateProjectNotExist(ProjectDto projectDto) {
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+            throw new DataValidationException(String.format("Project %s is already exist", projectDto.getName()));
+        }
+    }
+//    private void validateProjectExist(ProjectDto projectDto) {
+//        if (!projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+//            throw new DataValidationException(String.format("Project %s is already exist", projectDto.getName()));
+//        }
+//}   ?
+
+    private void someMethod(ProjectDto subProject) {
+        if (subProject.getStatus() != ProjectStatus.COMPLETED && subProject.getStatus() != ProjectStatus.CANCELLED) {
+            throw new DataValidationException("Can't close project if subProject status are not complete");
         }
     }
 }
