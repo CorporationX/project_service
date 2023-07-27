@@ -1,13 +1,11 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.filters.FilterMomentDto;
-import faang.school.projectservice.messages.ErrorMessages;
+import faang.school.projectservice.filters.moments.FilterMomentDto;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;

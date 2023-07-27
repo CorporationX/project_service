@@ -1,4 +1,4 @@
-package faang.school.projectservice.filters;
+package faang.school.projectservice.filters.moments;
 
 import lombok.Data;
 
