@@ -60,7 +60,7 @@ public class ProjectServiceTest {
         when(projectRepository.findAll()).thenReturn(desiredProjects);
 
         List<ProjectDto> receivedProject = projectService.getAllProjects();
-        assertEquals(projectMapper.toDtoList(desiredProjects), receivedProject);
+        Assertions.assertEquals(projectMapper.toDtoList(desiredProjects), receivedProject);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class ProjectServiceTest {
 
         ProjectDto receivedProject = projectService.getProject(projectId);
 
-        assertEquals(projectMapper.toDto(desiredProject), receivedProject);
+        Assertions.assertEquals(projectMapper.toDto(desiredProject), receivedProject);
         Mockito.verify(projectRepository).getProjectById(projectId);
     }
 
@@ -99,7 +99,7 @@ public class ProjectServiceTest {
 
         ProjectDto receivedProject = projectService.createProject(desiredProjectDto);
 
-        assertEquals(desiredProjectDto, receivedProject);
+        Assertions.assertEquals(desiredProjectDto, receivedProject);
         Mockito.verify(projectRepository).save(desiredProject);
     }
 
