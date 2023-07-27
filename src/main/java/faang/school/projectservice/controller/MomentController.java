@@ -5,8 +5,10 @@ import faang.school.projectservice.filters.moments.FilterMomentDto;
 import faang.school.projectservice.messages.ErrorMessages;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,38 +22,29 @@ import java.util.List;
 public class MomentController {
     public final MomentService momentService;
 
-    @PostMapping("/create")
+    @PostMapping
     public void createMoment(@Valid MomentDto momentDto) {
-        validateDtoMoment(momentDto);
         momentService.createMoment(momentDto);
     }
 
-    @PutMapping("/update")
+    @PutMapping
     public void updateMoment(@Valid MomentDto momentDto) {
-        validateDtoMoment(momentDto);
         momentService.updateMoment(momentDto);
     }
 
-    @GetMapping("/getFiltered")
+    @GetMapping
     public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto) {
         return momentService.getFilteredMoments(filterMomentDto);
     }
 
-    @GetMapping("/getAll")
+    @GetMapping
     public List<MomentDto> getAllMoments() {
         return momentService.getAllMoments();
     }
 
-    @GetMapping("/get")
-    public MomentDto getMoment(@Valid long momentId) {
-        validateId(momentId);
+    @GetMapping("{id}")
+    public MomentDto getMoment(@PathVariable("id") @Valid @Min(0) long momentId) {
         return momentService.getMoment(momentId);
-    }
-
-    private void validateName(String name) {
-        if (name.isEmpty()) {
-            throw new NullPointerException(ErrorMessages.EMPTY_NAME);
-        }
     }
 
     private void validateDtoMoment(MomentDto momentDto) {

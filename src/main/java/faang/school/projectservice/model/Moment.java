@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.model;
+package faang.school.projectservice.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;

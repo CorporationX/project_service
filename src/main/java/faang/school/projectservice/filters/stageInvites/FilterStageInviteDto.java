@@ -1,8 +1,10 @@
 package faang.school.projectservice.filters.stageInvites;
 
-import faang.school.projectservice.controller.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import lombok.Builder;
 import lombok.Data;
 
+@Builder
 @Data
 public class FilterStageInviteDto {
     private String descriptionPattern;

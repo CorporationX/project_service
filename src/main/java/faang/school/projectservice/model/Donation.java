@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.model;
+package faang.school.projectservice.model;
 
 import faang.school.projectservice.dto.client.Currency;
 import jakarta.persistence.Entity;

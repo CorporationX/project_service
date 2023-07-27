@@ -5,12 +5,14 @@ import faang.school.projectservice.exceptions.MomentExistingException;
 import faang.school.projectservice.filters.moments.FilterMomentDto;
 import faang.school.projectservice.filters.moments.MomentFilter;
 import faang.school.projectservice.filters.mappers.MomentMapper;
-import faang.school.projectservice.controller.model.Moment;
+import faang.school.projectservice.messages.ErrorMessages;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -37,12 +39,24 @@ public class MomentService {
 
     @Transactional(readOnly = true)
     public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto) {
-        Stream<Moment> allMoments = momentRepository.findAll().stream();
-        return momentFilter.stream()
+        List<Moment> allMoments = momentRepository.findAll();
+        List<List<Moment>> afterFilters = momentFilter.stream()
                 .filter(filter -> filter.isApplicable(filterMomentDto))
-                .flatMap(filter -> filter.apply(allMoments, filterMomentDto))
-                .map(momentMapper::momentToDto)
+                .map(filter -> filter.apply(allMoments.stream(), filterMomentDto).toList())
                 .toList();
+        List<Moment> result = afterFilters.get(0);
+        if(result.size() == 0){
+            throw new RuntimeException(ErrorMessages.NO_SUCH_MOMENTS);
+        }
+        if(afterFilters.size() == 1){
+            return momentMapper.listMomentToDto(result);
+        }
+        for (int i = 1; i < afterFilters.size(); i++) {
+            result = result.stream()
+                    .filter(afterFilters.get(i)::contains)
+                    .toList();
+        }
+        return momentMapper.listMomentToDto(result);
     }
 
     public List<MomentDto> getAllMoments() {

@@ -1,6 +1,6 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.controller.model.Moment;
+import faang.school.projectservice.model.Moment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

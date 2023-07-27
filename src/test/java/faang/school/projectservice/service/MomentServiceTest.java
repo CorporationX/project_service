@@ -1,16 +1,18 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.filters.mappers.MomentMapper;
 import faang.school.projectservice.filters.mappers.MomentMapperImpl;
 import faang.school.projectservice.filters.moments.FilterMomentDto;
 import faang.school.projectservice.filters.moments.MomentFilter;
-import faang.school.projectservice.filters.mappers.MomentMapper;
+import faang.school.projectservice.filters.moments.filtersForFilterMomentDto.MomentDescriptionFilter;
 import faang.school.projectservice.filters.moments.filtersForFilterMomentDto.MomentNameFilter;
-import faang.school.projectservice.controller.model.Moment;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -25,24 +27,26 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class MomentServiceTest {
     private FilterMomentDto filterMomentDto;
-    private MomentService momentService;
     @Mock
     private MomentRepository momentRepository;
     @Spy
-    private MomentMapperImpl momentMapper;
+    private MomentMapper momentMapper = new MomentMapperImpl();
     @Mock
     private List<MomentFilter> momentFilter;
+    private MomentService momentService;
     private Moment moment = new Moment();
 
     @BeforeEach
     void setUp() {
         MomentFilter momentNameFilter = new MomentNameFilter();
-        momentFilter = List.of(momentNameFilter);
+        momentFilter = List.of(momentNameFilter, new MomentDescriptionFilter());
         momentService = new MomentService(momentRepository, momentMapper, momentFilter);
         moment.setName("first important moment");
         moment.setDate(LocalDateTime.now());
+        moment.setDescription("description");
         filterMomentDto = new FilterMomentDto();
         filterMomentDto.setNamePattern("first");
+        filterMomentDto.setDescriptionPattern("desc");
     }
 
     @Test
@@ -83,7 +87,7 @@ class MomentServiceTest {
 
     @Test
     void getFilteredMomentsReturnsValidList() {
-        Moment invalidMoment = Moment.builder().name("Second").build();
+        Moment invalidMoment = Moment.builder().name("First").description("invalid").build();
         Mockito.when(momentRepository.findAll()).thenReturn(List.of(moment, invalidMoment));
 
         assertEquals(1, momentService.getFilteredMoments(filterMomentDto).size());

@@ -1,8 +1,6 @@
-package faang.school.projectservice.controller.model;
+package faang.school.projectservice.model;
 
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,7 +8,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -24,24 +25,48 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
-@Entity
-@Table(name = "vacancy")
 @Data
-public class Vacancy {
+@Entity
+@Table(name = "internship")
+public class Internship {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @ManyToOne
+    @JoinColumn(name = "team_member_id")
+    @NotNull
+    private TeamMember mentorId;
+
+    @ManyToMany
+    @JoinTable(
+            name = "internship_interns",
+            joinColumns = @JoinColumn(name = "internship_id"),
+            inverseJoinColumns = @JoinColumn(name = "team_member_id")
+    )
+    private List<TeamMember> interns;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @NotNull
+    private LocalDateTime startDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime endDate;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private InternshipStatus status;
 
     @NotBlank
     private String description;
 
-    @OneToMany
-    @JoinColumn(name = "vacancy")
-    private List<Candidate> candidates;
+    @NotBlank
+    private String name;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -53,23 +78,13 @@ public class Vacancy {
     private LocalDateTime updatedAt;
 
     @CreatedBy
+    @NotNull
     private Long createdBy;
 
     @LastModifiedBy
     private Long updatedBy;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private VacancyStatus status;
-
-    private Double salary;
-
-    @Enumerated(EnumType.STRING)
-    private WorkSchedule workSchedule;
-
-    @ElementCollection
-    @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
-    @Column(name = "skill_id")
-    private List<Long> requiredSkillIds;
+    @OneToOne
+    @JoinColumn(name = "schedule_id")
+    private Schedule schedule;
 }
-

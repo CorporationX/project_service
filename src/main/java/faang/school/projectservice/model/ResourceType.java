@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.model;
+package faang.school.projectservice.model;
 
 import static java.util.Objects.isNull;
 public enum ResourceType {
