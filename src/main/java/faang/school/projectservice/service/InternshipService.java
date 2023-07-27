@@ -55,12 +55,6 @@ public class InternshipService {
     }
 
     private static void validateCreateDto(CreateInternshipDto dto, TeamMember mentor) {
-        if (dto.getName().isBlank()) {
-            throw new IllegalArgumentException("Name shouldn't be blank");
-        }
-        if (dto.getInternIds() == null || dto.getInternIds().isEmpty()) {
-            throw new IllegalArgumentException("The internship should contains interns");
-        }
         if (Period.between(dto.getStartDate().toLocalDate(), dto.getEndDate().toLocalDate()).getMonths() > 3) {
             throw new IllegalArgumentException("The duration of the internship should not exceed 3 months");
         }
