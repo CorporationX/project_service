@@ -38,7 +38,7 @@ public class ProjectService {
         Project project = projectMapper.toEntity(projectDto);
 
         project.setStatus(ProjectStatus.CREATED);
-        return saveEntityAndReturnDto(project);
+        return saveEntity(project);
     }
 
     @Transactional
@@ -46,7 +46,7 @@ public class ProjectService {
         return projectRepository.findById(projectId)
                 .map(project -> {
                     projectMapper.updateFromDto(projectDto, project);
-                    return saveEntityAndReturnDto(project);
+                    return saveEntity(project);
                 })
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Project with id %d does not exist.", projectDto.getId())));
@@ -67,7 +67,7 @@ public class ProjectService {
         return projectMapper.toDto(savedSubProject);
     }
 
-    private ProjectDto saveEntityAndReturnDto(Project project) {
+    private ProjectDto saveEntity(Project project) {
         project = projectRepository.save(project);
         return projectMapper.toDto(project);
     }
