@@ -20,7 +20,7 @@ public class SubProjectController {
         return projectService.createSubProject(projectDto);
     }
 
-    @PutMapping("/update-subproject")
+    @PutMapping("/subprojects")
     public ProjectDto updateSubProject(@RequestBody ProjectDto projectDto) {
         validateSubProject(projectDto);
         return projectService.updateSubProject(projectDto);
