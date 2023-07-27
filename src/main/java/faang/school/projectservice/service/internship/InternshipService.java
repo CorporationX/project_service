@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,14 +24,14 @@ public class InternshipService {
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> filterList;
 
-    public Internship createInternship(Internship internship) {
-        createInternshipValidation(internshipMapper.toDto(internship));
-        return internshipRepository.save(internship);
+    public InternshipDto createInternship(InternshipDto internshipDto) {
+        createInternshipValidation(internshipDto);
+        return internshipMapper.toDto(internshipRepository.save(internshipMapper.toEntity(internshipDto)));
     }
 
-    public void updateInternship(long id, InternshipDto internshipDto) {
+    public InternshipDto updateInternship(long id, InternshipDto internshipDto) {
         Internship old = internshipRepository.getById(id);
-        updateInternshipValidation(id, old, internshipDto);
+        updateInternshipValidation(old, internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setInterns(getInterns(internshipDto.getInterns()));
 
@@ -44,11 +43,12 @@ public class InternshipService {
             }
             internshipRepository.deleteById(id);
         } else {
-            internshipRepository.save(internship);
+            return internshipMapper.toDto(internshipRepository.save(internship));
         }
+        return null;
     }
 
-    public InternshipDto findInternshipbyId(long id) {
+    public InternshipDto findInternshipById(long id) {
         return internshipMapper.toDto(internshipRepository.getById(id));
     }
 
@@ -58,13 +58,13 @@ public class InternshipService {
     }
 
     public List<InternshipDto> findInternshipsWithFilter(long projectId, InternshipFilterDto filterDto) {
-        List<InternshipDto> list= findAllInternships();
+        List<InternshipDto> list = findAllInternships();
         list.removeIf(dto -> !dto.getProjectId().equals(projectId));
         filter(filterDto, list);
         return list;
     }
 
-    private void createInternshipValidation(InternshipDto internshipDto) {
+    public void createInternshipValidation(InternshipDto internshipDto) {
         if (internshipDto.getInterns() == null) {
             throw new DataValidationException("No interns!");
         }
@@ -76,9 +76,10 @@ public class InternshipService {
         }
     }
 
-    private void updateInternshipValidation(long id, Internship old, InternshipDto internshipDto) {
+    private void updateInternshipValidation(Internship old, InternshipDto internshipDto) {
         createInternshipValidation(internshipDto);
-        if (old.getStatus().equals(InternshipStatus.COMPLETED)) {
+
+        if (old.getStatus() == null || old.getStatus().equals(InternshipStatus.COMPLETED)) {
             throw new DataValidationException("Internship already over!");
         }
         if (old.getInterns().size() < internshipDto.getInterns().size()) {
@@ -86,7 +87,7 @@ public class InternshipService {
         }
     }
 
-    private List<TeamMember> internsResults(List<Long> interns) {
+    public List<TeamMember> internsResults(List<Long> interns) {
         int size = interns.size();
         List<TeamMember> res = new ArrayList<>(size);
         for (int i = 0; i < size; ++i) {
@@ -98,7 +99,7 @@ public class InternshipService {
         return res;
     }
 
-    private boolean isAllTAsksDone(TeamMember member) {
+    public boolean isAllTAsksDone(TeamMember member) {
         List<Stage> stages = member.getStages();
         for (Stage stage : stages) {
             List<Task> tasks = stage.getTasks();
@@ -111,7 +112,7 @@ public class InternshipService {
         return true;
     }
 
-    private List<TeamMember> getInterns(List<Long> interns) {
+    public List<TeamMember> getInterns(List<Long> interns) {
         int size = interns.size();
         List<TeamMember> res = new ArrayList<>(size);
         for (int i = 0; i < size; ++i) {
@@ -120,7 +121,8 @@ public class InternshipService {
         }
         return res;
     }
-    public void filter(InternshipFilterDto filter, List<InternshipDto> dtoList) {
+
+    private void filter(InternshipFilterDto filter, List<InternshipDto> dtoList) {
         filterList.stream()
                 .filter((fil) -> fil.isApplicable(filter))
                 .forEach((fil) -> fil.apply(dtoList, filter));

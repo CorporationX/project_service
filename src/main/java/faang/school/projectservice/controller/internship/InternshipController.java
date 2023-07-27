@@ -3,8 +3,6 @@ package faang.school.projectservice.controller.internship;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.internship.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -16,25 +14,24 @@ import java.util.List;
 public class InternshipController {
     private final InternshipService service;
 
-    public Internship createInternship(Internship internship) {
-        createInternshipValidation(internship);
-        return service.createInternship(internship);
+    public InternshipDto createInternship(InternshipDto internshipDto) {
+        internshipValidation(internshipDto);
+        return service.createInternship(internshipDto);
     }
 
-    public InternshipDto updateInternship(long id, InternshipDto internship) {
+    public InternshipDto updateInternship(long id, InternshipDto internshipDto) {
         if (id < 1) {
             throw new DataValidationException("ID error!");
         }
-        updateInternshipValidation(internship);
-        service.updateInternship(id, internship);
-        return internship;
+        internshipValidation(internshipDto);
+        return service.updateInternship(id, internshipDto);
     }
 
-    public InternshipDto findInternshipbyId(long id) {
+    public InternshipDto findInternshipById(long id) {
         if (id < 1) {
             throw new DataValidationException("ID error!");
         }
-        return service.findInternshipbyId(id);
+        return service.findInternshipById(id);
     }
 
     public List<InternshipDto> findAllInternships() {
@@ -45,26 +42,14 @@ public class InternshipController {
         return service.findInternshipsWithFilter(projectId, filterDto);
     }
 
-    private void createInternshipValidation(Internship internship) {
-        if (internship == null) {
+    private void internshipValidation(InternshipDto internshipDto) {
+        if (internshipDto == null) {
             throw new DataValidationException("Internship is null!");
         }
-        if (internship.getName() == null || internship.getName().isBlank()) {
+        if (internshipDto.getName() == null || internshipDto.getName().isBlank()) {
             throw new DataValidationException("Internship name can not be blank or null!");
         }
-        if (internship.getProject() == null || internship.getProject().getId() < 1) {
-            throw new DataValidationException("Internship relation project error!");
-        }
-    }
-
-    private void updateInternshipValidation(InternshipDto internship) {
-        if (internship == null) {
-            throw new DataValidationException("Internship is null!");
-        }
-        if (internship.getName() == null || internship.getName().isBlank()) {
-            throw new DataValidationException("Internship name can not be blank or null!");
-        }
-        if (internship.getProjectId() == null || internship.getProjectId() < 1) {
+        if (internshipDto.getProjectId() == null || internshipDto.getProjectId() < 1) {
             throw new DataValidationException("Internship relation project error!");
         }
     }
