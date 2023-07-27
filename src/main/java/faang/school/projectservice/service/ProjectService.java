@@ -49,7 +49,7 @@ public class ProjectService {
         }
 
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, dto.getName())) {
-            throw new IllegalArgumentException("User with id " + ownerId + " already has a project with same name");
+            throw new IllegalArgumentException("User with id " + ownerId + " already has a project with name " + dto.getName());
         }
     }
 }
