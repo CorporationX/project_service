@@ -20,7 +20,7 @@ import java.util.Set;
 public class MomentService {
     private final MomentRepository momentRepository;
 
-    public void createMomentCompletedForSubProject(Project subProject) {
+    public Moment createMomentCompletedForSubProject(Project subProject) {
         Moment moment = new Moment();
         moment.setName(subProject.getName());
         moment.setDescription("All subprojects completed");
@@ -29,7 +29,7 @@ public class MomentService {
         getProjectMembers(subProject, allProjectMembers);
 
         moment.setUserIds(new ArrayList<>(allProjectMembers));
-        momentRepository.save(moment);
+        return momentRepository.save(moment);
     }
 
     private void getProjectMembers(Project project, Set<Long> allProjectMembers) {
