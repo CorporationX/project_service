@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,6 +18,10 @@ public class ProjectRepository {
         return projectJpaRepository.findById(projectId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
         );
+    }
+
+    public Optional<Project> findById(long projectId) {
+        return projectJpaRepository.findById(projectId);
     }
 
     public List<Project> findAll() {
