@@ -5,6 +5,7 @@ import faang.school.projectservice.model.Project;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
@@ -23,6 +24,11 @@ public interface ProjectMapper {
     @Mapping(target = "parentProject", ignore = true)
     @Mapping(target = "children", ignore = true)
     Project toEntity(ProjectDto projectDto);
+
+    @Mapping(target = "parentProject", ignore = true)
+    @Mapping(target = "children", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    void updateFromDto(ProjectDto projectDto, @MappingTarget Project project);
 
     @Named("toChildrenId")
     default List<Long> toChildrenId(List<Project> children) {

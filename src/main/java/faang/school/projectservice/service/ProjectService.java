@@ -129,7 +129,7 @@ public class ProjectService {
             return true;
         }
         return children.stream()
-                .anyMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
+                .allMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
     }
 
     private void createMomentCompletedForSubProject(Project subProject) {
