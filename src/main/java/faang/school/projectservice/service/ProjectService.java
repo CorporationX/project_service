@@ -7,6 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class ProjectService {
     private final TeamMemberRepository teamMemberRepository;
     private final CreateProjectMapper createProjectMapper;
 
+    @Transactional
     public ResponseProjectDto create(CreateProjectDto dto) {
         Project project = createProjectMapper.toEntity(dto);
 
