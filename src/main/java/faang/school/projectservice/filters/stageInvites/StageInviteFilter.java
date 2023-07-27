@@ -1,8 +1,6 @@
 package faang.school.projectservice.filters.stageInvites;
 
-import faang.school.projectservice.controller.model.Moment;
-import faang.school.projectservice.controller.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.filters.moments.FilterMomentDto;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
 
 import java.util.stream.Stream;
 

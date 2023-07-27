@@ -1,7 +1,7 @@
 package faang.school.projectservice.filters.mappers;
 
 import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.controller.model.Moment;
+import faang.school.projectservice.model.Moment;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;

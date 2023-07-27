@@ -1,7 +1,7 @@
-package faang.school.projectservice.controller.model.stage_invitation;
+package faang.school.projectservice.model.stage_invitation;
 
-import faang.school.projectservice.controller.model.stage.Stage;
-import faang.school.projectservice.controller.model.TeamMember;
+import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

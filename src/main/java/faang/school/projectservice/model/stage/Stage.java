@@ -1,8 +1,8 @@
-package faang.school.projectservice.controller.model.stage;
+package faang.school.projectservice.model.stage;
 
-import faang.school.projectservice.controller.model.Project;
-import faang.school.projectservice.controller.model.Task;
-import faang.school.projectservice.controller.model.TeamMember;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

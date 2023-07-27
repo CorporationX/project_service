@@ -2,10 +2,11 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageInvitationDto;
 import faang.school.projectservice.filters.mappers.StageInvitationMapper;
-import faang.school.projectservice.controller.model.TeamMember;
-import faang.school.projectservice.controller.model.TeamRole;
-import faang.school.projectservice.controller.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.controller.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.messages.ErrorMessages;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.filters.stageInvites.FilterStageInviteDto;
 import faang.school.projectservice.filters.stageInvites.StageInviteFilter;
 import faang.school.projectservice.repository.StageInvitationRepository;
@@ -49,12 +50,24 @@ public class StageInvitationService {
     }
 
     public List<StageInvitationDto> getFilteredInvites(Long userId, FilterStageInviteDto filterStageInviteDto) {
-        Stream<StageInvitation> userInvites = stageInvitationRepository.findAll().stream()
-                .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(userId));
-        return filters.stream()
-                 .filter(filter -> filter.isApplicable(filterStageInviteDto))
-                 .flatMap(filter -> filter.apply(userInvites, filterStageInviteDto))
-                 .map(stageInvitationMapper::entityToDto)
-                 .toList();
+        List<StageInvitation> userInvites = stageInvitationRepository.findAll().stream()
+                .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(userId)).toList();
+        List<List<StageInvitation>> afterFilters = filters.stream()
+                .filter(filter -> filter.isApplicable(filterStageInviteDto))
+                .map(filter -> filter.apply(userInvites.stream(), filterStageInviteDto).toList())
+                .toList();
+        List<StageInvitation> result = afterFilters.get(0);
+        if(result.size() == 0){
+            throw new RuntimeException(ErrorMessages.NO_SUCH_STAGE_INVITATIONS);
+        }
+        if(afterFilters.size() == 1){
+            return stageInvitationMapper.listEntityToDto(result);
+        }
+        for (int i = 1; i < afterFilters.size(); i++) {
+            result = result.stream()
+                    .filter(afterFilters.get(i)::contains)
+                    .toList();
+        }
+        return stageInvitationMapper.listEntityToDto(result);
     }
 }

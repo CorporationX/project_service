@@ -1,13 +1,14 @@
 package faang.school.projectservice.dto;
 
-import faang.school.projectservice.controller.model.TeamMember;
-import faang.school.projectservice.controller.model.stage.Stage;
-import faang.school.projectservice.controller.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.stage.Stage;
 import jakarta.validation.constraints.Min;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+@Builder
 @Data
 @Component
 public class StageInvitationDto {

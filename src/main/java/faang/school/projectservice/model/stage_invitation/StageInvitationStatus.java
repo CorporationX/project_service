@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.model.stage_invitation;
+package faang.school.projectservice.model.stage_invitation;
 
 public enum StageInvitationStatus {
     PENDING,
