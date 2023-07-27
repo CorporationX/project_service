@@ -17,8 +17,6 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import faang.school.projectservice.service.StageInvitationService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +38,6 @@ class StageInvitationServiceTest {
     private StageInvitationRepository repository;
     @Spy
     private StageInvitationMapper mapper = new StageInvitationMapperImpl();
-    @Spy
     private List<StageInviteFilter> filters;
     @Mock
     private StageInvitationDto dto;
