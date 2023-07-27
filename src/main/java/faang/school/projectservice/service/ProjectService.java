@@ -27,6 +27,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final MomentRepository momentRepository;
+    private final MomentService momentService;
 
     @Transactional
     public List<ProjectDto> getAllProjects() {
@@ -132,28 +133,5 @@ public class ProjectService {
                 .allMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
     }
 
-    private void createMomentCompletedForSubProject(Project subProject) {
-        Moment moment = new Moment();
-        moment.setName(subProject.getName());
-        moment.setDescription("All subprojects completed");
 
-        Set<Long> allProjectMembers = new HashSet<>();
-        getProjectMembers(subProject, allProjectMembers);
-
-        moment.setUserIds(new ArrayList<>(allProjectMembers));
-        momentRepository.save(moment);
-    }
-
-    private void getProjectMembers(Project project, Set<Long> allProjectMembers) {
-        List<Team> teams = Optional.ofNullable(project.getTeams()).orElse(Collections.emptyList());
-        teams.stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .map(TeamMember::getUserId)
-                .forEach(allProjectMembers::add);
-
-        List<Project> children = project.getChildren();
-        if (children != null) {
-            children.forEach(child -> getProjectMembers(child, allProjectMembers));
-        }
-    }
 }
