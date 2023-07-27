@@ -6,6 +6,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -13,7 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -104,21 +107,24 @@ public class ProjectService {
         validateParentProjectExist(projectDto);
 
         Project subProject = projectRepository.getProjectById(projectDto.getId());
-        ProjectStatus sPStatus = subProject.getStatus();
+        ProjectStatus sPStatusDto = projectDto.getStatus();
 
-        if (!sPStatus.equals(ProjectStatus.COMPLETED)) {
-            subProject.setStatus(projectDto.getStatus());
-        } else if (subProject.getChildren().isEmpty() || checkChildrenStatusCompleted(subProject)) {
+        if (!sPStatusDto.equals(ProjectStatus.COMPLETED)) {
+            subProject.setStatus(sPStatusDto);
+        } else if (checkChildrenStatusCompleted(subProject)) {
             createMomentCompletedForSubProject(subProject);
+            subProject.setStatus(sPStatusDto);
         } else {
             throw new DataValidationException("Not all subprojects completed");
         }
-
         return projectMapper.toDto(projectRepository.save(subProject));
     }
 
     private boolean checkChildrenStatusCompleted(Project project) {
         List<Project> children = project.getChildren();
+        if (children == null) {
+            return true;
+        }
         return children.stream()
                 .anyMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
     }
@@ -132,7 +138,8 @@ public class ProjectService {
     }
 
     private List<Long> getProjectMembers(Project project) {
-        return project.getTeams().stream()
+        List<Team> teams = Optional.ofNullable(project.getTeams()).orElse(Collections.emptyList());
+        return teams.stream()
                 .flatMap(team -> team.getTeamMembers()
                         .stream()
                         .map(TeamMember::getUserId))

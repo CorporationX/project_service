@@ -4,8 +4,10 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Assertions;
 import faang.school.projectservice.model.ProjectStatus;
@@ -22,13 +24,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private MomentRepository momentRepository;
     @Spy
     private ProjectMapper projectMapper = new ProjectMapperImpl();
     @InjectMocks
@@ -184,5 +189,59 @@ public class ProjectServiceTest {
                 () -> projectService.createSubProject(subProjectDto));
         assertEquals("Subproject with name " + subProjectDto.getName() + " already exists",
                 validationException.getMessage());
+    }
+
+    @Test
+    void testUpdateSubProjectNotCompletedStatus() {
+        ProjectDto subProjectDto = ProjectDto.builder()
+                .id(1L)
+                .status(ProjectStatus.CREATED)
+                .parentId(2L)
+                .build();
+        Project subProject = projectMapper.toEntity(subProjectDto);
+        Project parentProject = Project.builder()
+                .id(2L)
+                .build();
+        subProject.setParentProject(parentProject);
+        ProjectDto subProjectDtoExpected = projectMapper.toDto(subProject);
+
+        when(projectRepository.existsById(subProjectDto.getId())).thenReturn(true);
+        when(projectRepository.existsById(parentProject.getId())).thenReturn(true);
+        when(projectRepository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
+        when(projectRepository.save(subProject)).thenReturn(subProject);
+
+        ProjectDto projectDtoActual = projectService.updateSubProject(subProjectDto);
+
+        assertNotNull(projectDtoActual);
+        assertEquals(subProjectDtoExpected, projectDtoActual);
+        assertEquals(ProjectStatus.CREATED, projectDtoActual.getStatus());
+    }
+
+    @Test
+    void testUpdateSubProjectCompletedStatus() {
+        ProjectDto subProjectDto = ProjectDto.builder()
+                .id(1L)
+                .status(ProjectStatus.COMPLETED)
+                .parentId(2L)
+                .childrenId(List.of(1L))
+                .build();
+        Project subProject = projectMapper.toEntity(subProjectDto);
+        Project parentProject = Project.builder()
+                .id(2L)
+                .build();
+        Moment moment = Moment.builder()
+                .description("All subprojects completed")
+                .userIds(new ArrayList<>())
+                .build();
+
+
+        when(projectRepository.existsById(subProjectDto.getId())).thenReturn(true);
+        when(projectRepository.existsById(parentProject.getId())).thenReturn(true);
+        when(projectRepository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
+        when(momentRepository.save(moment)).thenReturn(moment);
+
+        projectService.updateSubProject(subProjectDto);
+
+        verify(momentRepository, times(1)).save(moment);
     }
 }
