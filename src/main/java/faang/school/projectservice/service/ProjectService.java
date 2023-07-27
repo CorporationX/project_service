@@ -14,9 +14,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -133,16 +136,24 @@ public class ProjectService {
         Moment moment = new Moment();
         moment.setName(subProject.getName());
         moment.setDescription("All subprojects completed");
-        moment.setUserIds(getProjectMembers(subProject));
+
+        Set<Long> allProjectMembers = new HashSet<>();
+        getProjectMembers(subProject, allProjectMembers);
+
+        moment.setUserIds(new ArrayList<>(allProjectMembers));
         momentRepository.save(moment);
     }
 
-    private List<Long> getProjectMembers(Project project) {
+    private void getProjectMembers(Project project, Set<Long> allProjectMembers) {
         List<Team> teams = Optional.ofNullable(project.getTeams()).orElse(Collections.emptyList());
-        return teams.stream()
-                .flatMap(team -> team.getTeamMembers()
-                        .stream()
-                        .map(TeamMember::getUserId))
-                .toList();
+        teams.stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .map(TeamMember::getUserId)
+                .forEach(allProjectMembers::add);
+
+        List<Project> children = project.getChildren();
+        if (children != null) {
+            children.forEach(child -> getProjectMembers(child, allProjectMembers));
+        }
     }
 }

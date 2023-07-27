@@ -244,4 +244,29 @@ public class ProjectServiceTest {
 
         verify(momentRepository, times(1)).save(moment);
     }
+
+    @Test
+    void testUpdateSubProject() {
+        ProjectDto subProjectDto = ProjectDto.builder()
+                .id(1L)
+                .status(ProjectStatus.COMPLETED)
+                .parentId(2L)
+                .build();
+        Project subProject = projectMapper.toEntity(subProjectDto);
+        Project parentProject = Project.builder()
+                .id(2L)
+                .build();
+        Project childProject = Project.builder()
+                .status(ProjectStatus.CREATED)
+                .build();
+        subProject.setParentProject(parentProject);
+        subProject.setChildren(List.of(childProject));
+
+        when(projectRepository.existsById(subProjectDto.getId())).thenReturn(true);
+        when(projectRepository.existsById(parentProject.getId())).thenReturn(true);
+        when(projectRepository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
+
+        assertThrows(DataValidationException.class,
+                () -> projectService.updateSubProject(subProjectDto), "Not all subprojects completed");
+    }
 }
