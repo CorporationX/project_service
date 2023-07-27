@@ -3,30 +3,20 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    private final MomentRepository momentRepository;
     private final MomentService momentService;
 
     @Transactional
@@ -116,11 +106,11 @@ public class ProjectService {
         if (!sPStatusDto.equals(ProjectStatus.COMPLETED)) {
             subProject.setStatus(sPStatusDto);
         } else if (checkChildrenStatusCompleted(subProject)) {
-            createMomentCompletedForSubProject(subProject);
+            momentService.createMomentCompletedForSubProject(subProject);
             subProject.setStatus(sPStatusDto);
-        } else {
-            throw new DataValidationException("Not all subprojects completed");
         }
+        projectMapper.updateFromDto(projectDto, subProject);
+
         return projectMapper.toDto(projectRepository.save(subProject));
     }
 
@@ -132,6 +122,4 @@ public class ProjectService {
         return children.stream()
                 .allMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
     }
-
-
 }
