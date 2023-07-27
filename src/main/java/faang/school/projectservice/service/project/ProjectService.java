@@ -27,7 +27,7 @@ public class ProjectService {
 
     @Transactional
     public List<ProjectDto> getAllProjects() {
-        return projectMapper.toDtoList(projectRepository.findAll());
+        return projectMapper.toDtoList(projectRepository.findAll().toList());
     }
 
     @Transactional
@@ -58,7 +58,7 @@ public class ProjectService {
 
     @Transactional
     public List<ProjectDto> getProjects(ProjectFilterDto filters) {
-        return filterProjects(projectRepository.findAll().stream(), filters);
+        return filterProjects(projectRepository.findAll(), filters);
     }
 
     public ProjectDto createSubProject(ProjectDto projectDto) {
