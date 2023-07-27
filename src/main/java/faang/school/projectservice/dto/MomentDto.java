@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-@RequiredArgsConstructor
 public class MomentDto {
     @Min(1)
     private Long id;
