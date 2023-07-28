@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
@@ -20,6 +21,7 @@ public interface ProjectMapper {
     ProjectDto toDto(Project project);
 
     List<ProjectDto> toDtoList(List<Project> projects);
+    void updateFromDto(ProjectDto projectDto, @MappingTarget Project project);
 
     @Mapping(target = "parentProject", ignore = true)
     @Mapping(target = "children", ignore = true)

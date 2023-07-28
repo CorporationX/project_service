@@ -7,6 +7,7 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
@@ -37,14 +39,14 @@ public class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
 
-    private Project desiredProject;
-    private final long userId = 1L;
+    private ProjectDto projectDto;
+    private final long userId = 1;
     private final long projectId = 1;
 
     @BeforeEach
     public void initProject() {
-        desiredProject = Project.builder()
-                .id(1L)
+        projectDto = ProjectDto.builder()
+                .id(projectId)
                 .name("Project")
                 .description("Cool")
                 .ownerId(userId)
@@ -90,26 +92,55 @@ public class ProjectServiceTest {
         when(projectRepository.existsByOwnerUserIdAndName(userId, "Project"))
                 .thenReturn(false);
 
-        ProjectDto desiredProjectDto = projectMapper.toDto(desiredProject);
+        Project desiredProject = projectMapper.toEntity(projectDto);
 
         Mockito.lenient().when(projectRepository.save(desiredProject))
                 .thenReturn(desiredProject);
 
-        ProjectDto receivedProject = projectService.createProject(desiredProjectDto);
+        ProjectDto receivedProject = projectService.createProject(projectDto);
 
-        Assertions.assertEquals(desiredProjectDto, receivedProject);
-        Mockito.verify(projectRepository).save(desiredProject);
+        Assertions.assertEquals(projectMapper.toDto(desiredProject), receivedProject);
+        Mockito.verify(projectRepository).save(projectMapper.toEntity(projectDto));
     }
 
     @Test
     public void shouldThrowExceptionWhenProjectExists() {
-        ProjectDto testProjectDto = projectMapper.toDto(desiredProject);
+        ProjectDto testProjectDto = projectDto;
 
         when(projectRepository.existsByOwnerUserIdAndName(testProjectDto.getId(), testProjectDto.getName()))
                 .thenReturn(true);
 
         Assertions.assertThrows(DataValidationException.class, () -> projectService.createProject(testProjectDto));
-        Mockito.verify(projectRepository, Mockito.times(0)).save(desiredProject);
+        Mockito.verify(projectRepository, Mockito.times(0))
+                .save(projectMapper.toEntity(projectDto));
+    }
+
+    @Test
+    public void shouldReturnAndUpdateProject() {
+        Project newProject = projectMapper.toEntity(projectDto);
+        newProject.setName("Mega project");
+
+        Project updatedProject = projectMapper.toEntity(projectDto);
+        projectMapper.updateFromDto(projectMapper.toDto(newProject), updatedProject);
+
+        Optional<Project> returnedOptional = Optional.of(projectMapper.toEntity(projectDto));
+
+        Mockito.when(projectRepository.findById(projectId))
+                .thenReturn(returnedOptional);
+        Mockito.when(projectRepository.save(updatedProject))
+                .thenReturn(updatedProject);
+
+        ProjectDto receivedProject = projectService.updateProject(projectMapper.toDto(newProject), projectId);
+
+        Assertions.assertEquals(projectMapper.toDto(returnedOptional.get()), receivedProject);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenOptionalIsEmpty() {
+        Mockito.when(projectRepository.findById(projectId))
+                .thenReturn(Optional.empty());
+        Assertions.assertThrows(EntityNotFoundException.class,
+                () -> projectService.updateProject(projectDto, projectId));
     }
 
     @Test
