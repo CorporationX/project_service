@@ -7,15 +7,14 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class ProjectStatusPattern implements ProjectFilter {
+public class ProjectStatusFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectFilterDto filters) {
-        return filters.getStatusPattern() != null;
+        return filters.getStatuses() != null;
     }
 
     @Override
     public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto filters) {
-        return projects.filter(project -> project.getStatus().toString()
-                .equals(filters.getStatusPattern().toString()));
+        return projects.filter(project -> filters.getStatuses().contains(project.getStatus()));
     }
 }
