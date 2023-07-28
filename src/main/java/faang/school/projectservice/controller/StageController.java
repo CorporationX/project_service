@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.dto.StageDtoForUpdate;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -31,7 +32,7 @@ public class StageController {
     private final StageService stageService;
 
     @PostMapping("/createStage/")
-    public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
+    public StageDto createStage(@RequestBody StageDto stageDto) {
         validateId(stageDto);
         return stageService.createStage(stageDto);
     }
@@ -49,7 +50,7 @@ public class StageController {
     }
 
     @PutMapping("/updateStage/")
-    public StageDto updateStage(@Valid @RequestBody StageDto stageDto) {
+    public StageDto updateStage(@Valid @RequestBody StageDtoForUpdate stageDto) {
         validateStageDto(stageDto);
         return stageService.updateStage(stageDto);
     }

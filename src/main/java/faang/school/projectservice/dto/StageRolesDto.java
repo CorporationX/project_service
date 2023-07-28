@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StageRolesDto {
-    private Long id;
 
     @NotEmpty(message = "Team role can not be empty")
     private String teamRole;

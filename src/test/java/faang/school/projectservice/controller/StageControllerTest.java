@@ -1,7 +1,10 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.dto.StageDtoForUpdate;
 import faang.school.projectservice.dto.StageRolesDto;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,59 +31,56 @@ class StageControllerTest {
     StageService stageService;
     String status;
     Long stageId;
-    StageDto stageDtoWithStageId;
-    StageDto stageDtoWithNullId;
-    StageDto stageDtoWithNullStageId;
-    StageDto stageDtoWithNullStageRoleId;
     StageDto stageDtoWithListStageRoles;
     StageDto stageDtoWithEmptyListStageRoles;
     StageDto stageDtoWithStageRolesWithoutTeamRole;
+    StageDto stageDtoNull;
+    StageDto stageDtoWithNullStageRoles;
+    StageDtoForUpdate stageDtoForUpdateNull;
+    StageDtoForUpdate stageDtoForUpdateWithNullTeamRoles;
+    StageDtoForUpdate stageDtoForUpdate;
 
     @BeforeEach
     void setUp() {
         stageId = 1L;
         status = "created";
-        stageDtoWithNullId = StageDto.builder()
-                .stageId(null)
-                .stageRolesDto(List.of(StageRolesDto.builder().id(null).build()))
-                .build();
-        stageDtoWithStageId = StageDto.builder()
+        stageDtoNull = null;
+        stageDtoForUpdateNull = null;
+        stageDtoForUpdate = StageDtoForUpdate.builder()
                 .stageId(1L)
+                .stageName("stageName")
+                .teamRoles(List.of(TeamRole.valueOf("OWNER")))
                 .build();
-        stageDtoWithNullStageId = StageDto.builder().
-                stageId(null).
-                stageRolesDto(List.of(StageRolesDto.builder().id(1L).build()))
+        stageDtoForUpdateWithNullTeamRoles = StageDtoForUpdate.builder()
+                .stageName("stageName")
+                .teamRoles(null)
                 .build();
-        stageDtoWithNullStageRoleId = StageDto.builder().
-                stageId(1L).
-                stageRolesDto(List.of(StageRolesDto.builder().id(null).build()))
+        stageDtoWithNullStageRoles = StageDto.builder()
+                .stageRolesDto(null)
                 .build();
         stageDtoWithListStageRoles = StageDto.builder()
-                .stageId(1L)
-                .stageRolesDto(List.of(StageRolesDto.builder().id(1L).teamRole("OWNER").build()))
+                .stageRolesDto(List.of(StageRolesDto.builder().teamRole("OWNER").build()))
                 .build();
         stageDtoWithEmptyListStageRoles = StageDto.builder()
-                .stageId(1L)
                 .stageRolesDto(List.of())
                 .build();
         stageDtoWithStageRolesWithoutTeamRole = StageDto.builder()
-                .stageId(1L)
-                .stageRolesDto(List.of(StageRolesDto.builder().id(1L).teamRole(" ").build()))
+                .stageRolesDto(List.of(StageRolesDto.builder().teamRole(" ").build()))
                 .build();
     }
 
     @Test
     void testMethodCreateStage() {
-        stageController.createStage(stageDtoWithNullId);
+        stageController.createStage(stageDtoWithListStageRoles);
 
-        verify(stageService, times(1)).createStage(stageDtoWithNullId);
+        verify(stageService, times(1)).createStage(stageDtoWithListStageRoles);
         verifyNoMoreInteractions(stageService);
     }
 
     @Test
     void testMethodCreateStage_ThrowExceptionAndMessage() {
-        assertThrows(IllegalArgumentException.class, () -> stageController.createStage(stageDtoWithStageId), "Stage ID must be null");
-        assertThrows(IllegalArgumentException.class, () -> stageController.createStage(stageDtoWithNullStageRoleId), "Stage roles ID must be null");
+        assertThrows(DataValidationException.class, () -> stageController.createStage(stageDtoNull), "Stage must not be null");
+        assertThrows(NullPointerException.class, () -> stageController.createStage(stageDtoWithNullStageRoles), "Stage roles must not be null");
     }
 
     @Test
@@ -93,7 +93,7 @@ class StageControllerTest {
 
     @Test
     void testMethodGetAllStagesByStatus_ThrowExceptionAndMessage() {
-        assertThrows(IllegalArgumentException.class, () -> stageController.getAllStagesByStatus("Wrong status"), "Invalid status");
+        assertThrows(DataValidationException.class, () -> stageController.getAllStagesByStatus("Wrong status"), "Invalid status");
     }
 
     @Test
@@ -106,17 +106,16 @@ class StageControllerTest {
 
     @Test
     void testMethodUpdateStage() {
-        stageController.updateStage(stageDtoWithListStageRoles);
+        stageController.updateStage(stageDtoForUpdate);
 
-        verify(stageService, times(1)).updateStage(stageDtoWithListStageRoles);
+        verify(stageService, times(1)).updateStage(stageDtoForUpdate);
         verifyNoMoreInteractions(stageService);
     }
 
     @Test
     void testMethodUpdateStage_ThrowExceptionAndMessage() {
-        assertThrows(IllegalArgumentException.class, () -> stageController.updateStage(stageDtoWithNullStageId), "Stage ID must not be null");
-        assertThrows(IllegalArgumentException.class, () -> stageController.updateStage(stageDtoWithEmptyListStageRoles), "List stage roles must not be empty");
-        assertThrows(IllegalArgumentException.class, () -> stageController.updateStage(stageDtoWithStageRolesWithoutTeamRole), "Team role must not be null");
+        assertThrows(DataValidationException.class, () -> stageController.updateStage(stageDtoForUpdateNull), "List stage roles must not be null");
+        assertThrows(DataValidationException.class, () -> stageController.updateStage(stageDtoForUpdateWithNullTeamRoles), "List team roles must not be null or empty");
     }
 
     @Test
@@ -137,6 +136,6 @@ class StageControllerTest {
 
     @Test
     void testMethodGetStageById_ThrowExceptionAndMessage() {
-        assertThrows(IllegalArgumentException.class, () -> stageController.getStageById(null), "Stage ID must not be null");
+        assertThrows(DataValidationException.class, () -> stageController.getStageById(null), "Stage ID must not be null");
     }
 }

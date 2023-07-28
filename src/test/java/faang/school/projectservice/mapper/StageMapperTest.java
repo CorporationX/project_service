@@ -35,14 +35,13 @@ class StageMapperTest {
 
     @BeforeEach
     void setUp() {
-        stageRoles1 = StageRoles.builder().id(1L).teamRole(TeamRole.OWNER).count(1).build();
-        stageRoles2 = StageRoles.builder().id(2L).teamRole(TeamRole.MANAGER).count(2).build();
+        stageRoles1 = StageRoles.builder().teamRole(TeamRole.OWNER).count(1).build();
+        stageRoles2 = StageRoles.builder().teamRole(TeamRole.MANAGER).count(2).build();
 
-        stageRolesDto1 = StageRolesDto.builder().id(1L).teamRole("OWNER").count(1).build();
-        stageRolesDto2 = StageRolesDto.builder().id(2L).teamRole("MANAGER").count(2).build();
+        stageRolesDto1 = StageRolesDto.builder().teamRole("OWNER").count(1).build();
+        stageRolesDto2 = StageRolesDto.builder().teamRole("MANAGER").count(2).build();
 
         stage = Stage.builder()
-                .stageId(1L)
                 .stageName("stageName")
                 .project(Project.builder().id(1L).build())
                 .status(StageStatus.CREATED)
@@ -50,7 +49,6 @@ class StageMapperTest {
                 .build();
 
         stageDto = StageDto.builder()
-                .stageId(1L)
                 .stageName("stageName")
                 .projectId(1L)
                 .status("CREATED")
@@ -65,7 +63,6 @@ class StageMapperTest {
         StageDto actualDto = stageMapper.toDto(stage);
         assertEquals(stageDto, actualDto);
         assertAll(() -> {
-            assertEquals(stageDto.getStageId(), actualDto.getStageId());
             assertEquals(stageDto.getStageName(), actualDto.getStageName());
             assertEquals(stageDto.getProjectId(), actualDto.getProjectId());
             assertEquals(stageDto.getStatus(), actualDto.getStatus());
@@ -81,7 +78,6 @@ class StageMapperTest {
         Stage actualStage = stageMapper.toEntity(stageDto);
         assertEquals(stage, actualStage);
         assertAll(() -> {
-            assertEquals(stage.getStageId(), actualStage.getStageId());
             assertEquals(stage.getStageName(), actualStage.getStageName());
             assertEquals(stage.getProject().getId(), actualStage.getProject().getId());
             assertEquals(stage.getStatus(), actualStage.getStatus());

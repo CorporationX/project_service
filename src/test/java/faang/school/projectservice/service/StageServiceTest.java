@@ -1,10 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.dto.StageDtoForUpdate;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageStatus;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,10 @@ class StageServiceTest {
     private StageMapper stageMapper;
     @Mock
     private StageDto stageDto;
+    @Mock
+    private StageDtoForUpdate stageDtoForUpdate;
+    @Mock
+    private StageValidator stageValidator;
     @Mock
     private Stage stage;
     private Stage stage1;
@@ -92,6 +98,19 @@ class StageServiceTest {
         verify(stageRepository, times(1)).deleteById(stageId);
         verifyNoMoreInteractions(stageRepository);
     }
+
+//    @Test
+//    void testMethodUpdateStage() {
+//
+//        when(stageRepository.save(stage)).thenReturn(stage);
+//
+//        stageService.updateStage(stageDtoForUpdate);
+//
+//        verify(stageRepository, times(1)).save(stage);
+//
+//        verifyNoMoreInteractions(stageRepository);
+//
+//    }
 
     @Test
     void testMethodGetAllStages() {

@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto;
 
+import faang.school.projectservice.model.TeamRole;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class StageDto {
+public class StageDtoForUpdate {
+    private Long stageId;
 
     @NotEmpty(message = "Stage name can not be empty")
     private String stageName;
@@ -24,5 +26,6 @@ public class StageDto {
     private String status;
 
     @NotNull(message = "List of roles can not be null")
-    private List<StageRolesDto> stageRolesDto;
+    @NotEmpty(message = "List of roles can not be empty")
+    private List<TeamRole> teamRoles;
 }
