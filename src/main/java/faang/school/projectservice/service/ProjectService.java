@@ -5,6 +5,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -119,6 +120,11 @@ public class ProjectService {
         validateParentProjectExist(projectDto);
 
         Project subProject = projectRepository.getProjectById(projectDto.getId());
+
+        if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
+            updateChildrenVisibility(subProject, projectDto.getVisibility());
+        }
+
         ProjectStatus sPStatusDto = projectDto.getStatus();
 
         if (!sPStatusDto.equals(ProjectStatus.COMPLETED)) {
@@ -139,5 +145,15 @@ public class ProjectService {
         }
         return children.stream()
                 .allMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
+    }
+
+    private void updateChildrenVisibility(Project project, ProjectVisibility visibility) {
+        List<Project> children = project.getChildren();
+        if (children != null) {
+            for (Project child : children) {
+                child.setVisibility(visibility);
+                updateChildrenVisibility(child, visibility);
+            }
+        }
     }
 }
