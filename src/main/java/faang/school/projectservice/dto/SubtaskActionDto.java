@@ -1,6 +1,6 @@
 package faang.school.projectservice.dto;
 
-public enum MethodDeletingStageDto {
+public enum SubtaskActionDto {
 
     CASCADE,
     CLOSE,

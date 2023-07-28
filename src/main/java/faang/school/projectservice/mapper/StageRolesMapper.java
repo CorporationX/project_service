@@ -6,6 +6,8 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
         injectionStrategy = InjectionStrategy.FIELD)
 public interface StageRolesMapper {
@@ -13,4 +15,8 @@ public interface StageRolesMapper {
     StageRoles toEntity(StageRolesDto stageRolesDto);
 
     StageRolesDto toDto(StageRoles stageRoles);
+
+    List<StageRoles> toListDto(List<StageRolesDto> stageRolesDtos);
+
+    List<StageRolesDto> toListEntity(List<StageRoles> stageRoles);
 }
