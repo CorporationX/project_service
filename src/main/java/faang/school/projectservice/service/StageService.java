@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
+
 
 @Service
 @RequiredArgsConstructor
@@ -36,13 +38,13 @@ public class StageService {
         }
 
         Project project = projectRepository.getProjectById(stage.getProject().getId());
-        boolean projectInProgress = projectRepository.getProjectById(project.getId()).getStatus().equals(ProjectStatus.IN_PROGRESS);
-        boolean projectCreated = projectRepository.getProjectById(project.getId()).getStatus().equals(ProjectStatus.CREATED);
+        boolean projectInProgress = project.getStatus().equals(ProjectStatus.IN_PROGRESS);
+        boolean projectCreated = project.getStatus().equals(ProjectStatus.CREATED);
 
         if (projectInProgress || projectCreated) {
             return stageMapper.toStageDto(stageRepository.getById(stage.getStageId()));
         } else {
-            throw new ProjectException("Project unavailable");
+            throw new ProjectException(MessageFormat.format("Project with id {0} unavailable", project.getId()));
         }
     }
 }

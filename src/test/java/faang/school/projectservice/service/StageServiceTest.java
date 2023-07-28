@@ -47,7 +47,7 @@ class StageServiceTest {
         when(projectRepository.getProjectById(anyLong())).thenReturn(stage.getProject());
         ProjectException projectException = assertThrows(ProjectException.class, () -> stageService.createStage(StageMapper.INSTANCE.toStageDto(stage)));
         verify(stageRepository, times(0)).save(stage);
-        assertEquals("Project unavailable", projectException.getMessage());
+        assertEquals("Project with id 1 unavailable", projectException.getMessage());
     }
 
     @Test
@@ -71,7 +71,7 @@ class StageServiceTest {
                 .stageId(2L)
                 .stageName("stage1")
                 .project(Project.builder()
-                        .id(1L)
+                        .id(3L)
                         .status(ProjectStatus.CREATED)
                         .build())
                 .build();
