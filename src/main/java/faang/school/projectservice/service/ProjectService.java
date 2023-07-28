@@ -127,7 +127,7 @@ public class ProjectService {
             momentService.createMomentCompletedForSubProject(subProject);
             subProject.setStatus(sPStatusDto);
         }
-        projectMapper.updateFromDto(projectDto, subProject);
+        projectMapper.updateFromDtoWithoutStatus(projectDto, subProject);
 
         return projectMapper.toDto(projectRepository.save(subProject));
     }

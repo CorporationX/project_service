@@ -30,7 +30,7 @@ public interface ProjectMapper {
     @Mapping(target = "parentProject", ignore = true)
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "status", ignore = true)
-    void updateFromDto(ProjectDto projectDto, @MappingTarget Project project);
+    void updateFromDtoWithoutStatus(ProjectDto projectDto, @MappingTarget Project project);
 
     @Named("toChildrenId")
     default List<Long> toChildrenId(List<Project> children) {
