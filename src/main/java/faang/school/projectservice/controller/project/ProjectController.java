@@ -22,7 +22,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/byFilter")
-    public ResponseProjectDto getAllByFilter(@Valid @RequestBody ProjectFilterDto dto) {
+    public List<ResponseProjectDto> getAllByFilter(@Valid @RequestBody ProjectFilterDto dto) {
         return projectService.getAllByFilter(dto);
     }
 
