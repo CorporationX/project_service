@@ -31,7 +31,7 @@ public class ProjectController {
         return projectService.getProject(projectId);
     }
 
-    @PostMapping()
+    @PostMapping
     public List<ProjectDto> getProjects(@RequestBody ProjectFilterDto projectFilter) {
         return projectService.getProjects(projectFilter);
     }
