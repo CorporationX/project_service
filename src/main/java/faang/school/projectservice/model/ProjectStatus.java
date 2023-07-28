@@ -2,9 +2,6 @@ package faang.school.projectservice.model;
 
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 public enum ProjectStatus {
     CREATED("CREATED"),
@@ -21,15 +18,5 @@ public enum ProjectStatus {
     @Override
     public String toString() {
         return statusName;
-    }
-
-    public static List<String> getAllStatusNames() {
-        List<String> statusNames = new ArrayList<>();
-
-        for (ProjectStatus status : ProjectStatus.values()) {
-            statusNames.add(status.getStatusName());
-        }
-
-        return statusNames;
     }
 }

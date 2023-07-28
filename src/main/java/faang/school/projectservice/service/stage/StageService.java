@@ -1,9 +1,7 @@
 package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
@@ -24,7 +21,6 @@ public class StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final StageMapper stageMapper;
-    private final List<StageFilter> stageFilters;
 
     @Transactional
     public StageDto create(StageDto stageDto) {
@@ -48,17 +44,6 @@ public class StageService {
         Stage stage = stageRepository.getById(stageId);
 
         return stageMapper.toDto(stage);
-    }
-
-    public List<StageDto> filterProjectStages(long projectId, StageFilterDto filters) {
-        Stream<Stage> stages = projectRepository.getProjectById(projectId).getStages().stream();
-
-        stageFilters.stream()
-                .filter(filter -> filter.isApplicable(filters))
-                .forEach(filter -> filter.apply(stages, filters));
-
-        return stages.map(stageMapper::toDto)
-                .toList();
     }
 
     private void validate(StageDto stageDto) {

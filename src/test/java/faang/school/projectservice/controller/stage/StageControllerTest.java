@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,5 +53,33 @@ class StageControllerTest {
         String errorMessage = "Stage name can't be blank or null";
 
         assertThrows(DataValidationException.class, () -> stageController.createProjectStage(stageDto), errorMessage);
+    }
+
+    @Test
+    public void testGetAllProjectStages() {
+        StageDto stageDto = new StageDto();
+        stageDto.setStageId(1L);
+        stageDto.setStageName("Name");
+        stageDto.setProjectId(2L);
+        List<StageDto> stageDtos = List.of(stageDto);
+
+        Mockito.when(stageService.getAllProjectStages(2L)).thenReturn(List.of(stageDto));
+
+        List<StageDto> output = stageController.getAllProjectStages(2L);
+        assertEquals(stageDtos, output);
+        Mockito.verify(stageService, Mockito.times(1)).getAllProjectStages(2L);
+    }
+
+    @Test
+    public void testGetStageById() {
+        StageDto stageDto = new StageDto();
+        stageDto.setStageId(1L);
+        stageDto.setStageName("Name");
+
+        Mockito.when(stageService.getStageById(1L)).thenReturn(stageDto);
+
+        StageDto output = stageController.getStageById(1L);
+        assertEquals(stageDto, output);
+        Mockito.verify(stageService, Mockito.times(1)).getStageById(1L);
     }
 }

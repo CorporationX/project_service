@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -129,5 +131,44 @@ class StageServiceTest {
         Mockito.when(projectRepository.getProjectById(stageDto.getProjectId())).thenThrow(new IllegalArgumentException());
 
         assertThrows(DataValidationException.class, () -> stageService.create(stageDto), errorMessage);
+    }
+
+    @Test
+    public void testGetStageById() {
+        Project project = new Project();
+        project.setId(stageDto.getProjectId());
+
+        Stage stage = new Stage();
+        stage.setStageId(stageDto.getStageId());
+        stage.setStageName(stageDto.getStageName());
+        stage.setProject(project);
+
+        Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
+        Mockito.when(stageMapper.toDto(stage)).thenReturn(stageDto);
+
+        StageDto outputStageDto = stageService.getStageById(1L);
+
+        assertEquals(stageDto, outputStageDto);
+    }
+
+    @Test
+    public void testGetAllProjectStages() {
+        Stage stage = new Stage();
+        stage.setStageId(stageDto.getStageId());
+        stage.setStageName(stageDto.getStageName());
+        List<Stage> stages = List.of(stage);
+
+        Project project = new Project();
+        project.setId(stageDto.getProjectId());
+        project.setStages(stages);
+
+        List<StageDto> stageDtos = List.of(stageDto);
+
+        Mockito.when(projectRepository.getProjectById(2L)).thenReturn(project);
+        Mockito.when(stageMapper.toDto(stage)).thenReturn(stageDto);
+
+        List<StageDto> output = stageService.getAllProjectStages(2L);
+
+        assertEquals(stageDtos, output);
     }
 }
