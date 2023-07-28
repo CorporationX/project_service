@@ -120,6 +120,11 @@ public class ProjectService {
         validateParentProjectExist(projectDto);
 
         Project subProject = projectRepository.getProjectById(projectDto.getId());
+
+        if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
+            updateChildrenVisibility(subProject, projectDto.getVisibility());
+        }
+
         ProjectStatus sPStatusDto = projectDto.getStatus();
 
         if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
