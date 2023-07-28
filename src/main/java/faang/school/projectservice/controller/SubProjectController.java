@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/subproject")
+    @PostMapping("/subprojects")
     public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
         validateSubProject(projectDto);
         return projectService.createSubProject(projectDto);
@@ -27,7 +27,7 @@ public class SubProjectController {
     }
 
     private void validateSubProject(ProjectDto projectDto) {
-        if (projectDto.getName().isBlank()) {
+        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new DataValidationException("Enter project name, please");
         }
     }

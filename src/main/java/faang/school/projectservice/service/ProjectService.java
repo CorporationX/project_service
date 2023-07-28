@@ -96,6 +96,7 @@ public class ProjectService {
         }
     }
 
+    @Transactional
     public ProjectDto updateSubProject(ProjectDto projectDto) {
         validateProjectExists(projectDto.getId());
         validateParentProjectExist(projectDto);
