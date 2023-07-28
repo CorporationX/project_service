@@ -242,7 +242,7 @@ public class ProjectServiceTest {
         ProjectDto projectDtoActual = projectService.updateSubProject(subProjectDto);
 
         verify(projectMapper, times(1))
-                .updateFromDto(subProjectDto, subProject);
+                .updateFromDtoWithoutStatus(subProjectDto, subProject);
         assertNotNull(projectDtoActual);
         assertEquals(subProjectDtoExpected, projectDtoActual);
         assertEquals(ProjectStatus.CREATED, projectDtoActual.getStatus());
