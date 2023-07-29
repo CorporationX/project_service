@@ -144,7 +144,7 @@ class StageServiceTest {
         stage.setProject(project);
 
         Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
-        Mockito.when(stageMapper.toDto(stage)).thenReturn(stageDto);
+//        Mockito.when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
         StageDto outputStageDto = stageService.getStageById(1L);
 
@@ -153,6 +153,11 @@ class StageServiceTest {
 
     @Test
     public void testGetAllProjectStages() {
+        StageDto stageDto = new StageDto();
+        stageDto.setStageId(1L);
+        stageDto.setStageName("Name");
+        stageDto.setProjectId(2L);
+
         Stage stage = new Stage();
         stage.setStageId(stageDto.getStageId());
         stage.setStageName(stageDto.getStageName());
@@ -171,4 +176,6 @@ class StageServiceTest {
 
         assertEquals(stageDtos, output);
     }
+
+
 }
