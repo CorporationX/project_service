@@ -7,6 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage.StageStatus;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -59,12 +60,12 @@ public class StageService {
 
         findNewTeamRoles(stageFromRepository, stageDto);
         sendStageInvitation(stageFromRepository, stageDto);
-        setStageRolesForStage(stageFromRepository, stageDto);
+        setNewFieldsForStage(stageFromRepository, stageDto);
 
         return stageMapper.toDto(stageRepository.save(stageFromRepository));
     }
 
-    private void setStageRolesForStage(Stage stageFromRepository, StageDtoForUpdate stageDto) {
+    private void setNewFieldsForStage(Stage stageFromRepository, StageDtoForUpdate stageDto) {
         List<TeamRole> teamRoles = stageDto.getTeamRoles();
         Map<String, Long> teamRolesMap = teamRoles.stream().collect(Collectors.groupingBy(TeamRole::toString, Collectors.counting()));
         List<StageRoles> newStageRoles = new ArrayList<>();
@@ -74,6 +75,7 @@ public class StageService {
             newStageRoles.add(StageRoles.builder().teamRole(TeamRole.valueOf(entry.getKey())).count(count).build());
         }
         stageFromRepository.setStageRoles(newStageRoles);
+        stageFromRepository.setStatus(StageStatus.valueOf(stageDto.getStatus()));
     }
 
     private void sendStageInvitation(Stage stageFromRepository, StageDtoForUpdate stageDto) {

@@ -3,10 +3,8 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageDtoForUpdate;
 import faang.school.projectservice.service.StageService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,19 +23,18 @@ import static faang.school.projectservice.validator.StageValidator.validateStage
 import static faang.school.projectservice.validator.StageValidator.validateStatus;
 
 @RestController
-@RequestMapping("/stage")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
-@Validated
 public class StageController {
     private final StageService stageService;
 
-    @PostMapping("/createStage/")
+    @PostMapping("/stages")
     public StageDto createStage(@RequestBody StageDto stageDto) {
         validateId(stageDto);
         return stageService.createStage(stageDto);
     }
 
-    @PostMapping("/stageStatus/")
+    @PostMapping("/filterStatus")
     public List<StageDto> getAllStagesByStatus(@RequestParam(value = "status") String status) {
         validateStatus(status);
         return stageService.getAllStagesByStatus(status);
@@ -49,18 +46,18 @@ public class StageController {
         stageService.deleteStageById(stageId);
     }
 
-    @PutMapping("/updateStage/")
-    public StageDto updateStage(@Valid @RequestBody StageDtoForUpdate stageDto) {
+    @PutMapping("/stage")
+    public StageDto updateStage(@RequestBody StageDtoForUpdate stageDto) {
         validateStageDto(stageDto);
         return stageService.updateStage(stageDto);
     }
 
-    @GetMapping("/getAllStages/")
+    @GetMapping("/allStages")
     public List<StageDto> getAllStages() {
         return stageService.getAllStages();
     }
 
-    @PostMapping("/getStageById/{stageId}")
+    @PostMapping("/stageById/{stageId}")
     public StageDto getStageById(@Min(1) @PathVariable("stageId") Long stageId) {
         validateStageId(stageId);
         return stageService.getStageById(stageId);
