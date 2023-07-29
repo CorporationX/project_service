@@ -26,31 +26,39 @@ public class ProjectService {
         }
 
         projectDto.setStatus(ProjectStatus.CREATED);
+        projectDto.setCreatedAt(LocalDateTime.now());
+        projectDto.setUpdatedAt(LocalDateTime.now());
         return mapper.toDto(projectRepository.save(mapper.toEntity(projectDto)));
     }
 
     public ProjectDto updateStatusAndDescription(ProjectDto projectDto, Long id) {
+        if (id == null) {
+            throw new DataValidationException("Project doesn't exist");
+        }
         Project projectById = projectRepository.getProjectById(id);
         projectById.setStatus(projectDto.getStatus());
         projectById.setDescription(projectDto.getDescription());
-        projectDto.setUpdatedAt(LocalDateTime.now());
+        projectById.setUpdatedAt(LocalDateTime.now());
 
-        return mapper.toDto(projectRepository.save(mapper.toEntity(projectDto)));
+        Project project = mapper.toEntity(projectDto);
+        return mapper.toDto(projectRepository.save(project));
     }
 
-    public List<Project> getProjectByName(ProjectFilterDto projectFilterDto) {
+    public List<ProjectDto> getProjectByName(ProjectFilterDto projectFilterDto) {
         List<Project> allProjects = projectRepository.findAll();
         return allProjects.stream()
                 .filter(project -> project.getVisibility() == projectFilterDto.getVisibility())
                 .filter(project -> projectFilterDto.getName().equals(project.getName()))
+                .map(project -> mapper.toDto(project))
                 .collect(Collectors.toList());
     }
 
-    public List<Project> getProjectByStatus(ProjectFilterDto projectFilterDto) {
+    public List<ProjectDto> getProjectByStatus(ProjectFilterDto projectFilterDto) {
         List<Project> allProjects = projectRepository.findAll();
         return allProjects.stream()
                 .filter(project -> project.getVisibility() == projectFilterDto.getVisibility())
                 .filter(project -> projectFilterDto.getStatus().equals(project.getStatus()))
+                .map(project -> mapper.toDto(project))
                 .collect(Collectors.toList());
     }
 
