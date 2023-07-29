@@ -1,11 +1,12 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -93,5 +95,18 @@ public class ProjectControllerTest {
 
         Assertions.assertEquals(projectMapper.toDto(desiredProject), receivedProject);
         Mockito.verify(projectService).updateProject(notUpdatedProject, projectId);
+    }
+
+    @Test
+    public void shouldReturnProjectsListForFilters() {
+        ProjectFilterDto filters = new ProjectFilterDto();
+        List<ProjectDto> desiredProjects = new ArrayList<>();
+
+        Mockito.when(projectService.getProjects(filters))
+                .thenReturn(desiredProjects);
+        List<ProjectDto> receivedProjects = projectController.getProjects(filters);
+
+        Assertions.assertEquals(desiredProjects, receivedProjects);
+        Mockito.verify(projectService).getProjects(filters);
     }
 }
