@@ -10,7 +10,6 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,8 +19,14 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -39,7 +44,7 @@ class ProjectServiceTest {
 
 
     @Test
-    void create() {
+    void createValidProject() {
         TeamMember teamMember = new TeamMember();
         teamMember.setUserId(1L);
 
@@ -53,7 +58,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    void createWithException() {
+    void createWithDataValidationException() {
         TeamMember teamMember = new TeamMember();
         teamMember.setUserId(1L);
 
@@ -65,20 +70,35 @@ class ProjectServiceTest {
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(teamMember.getUserId(), projectDto.getName()))
                 .thenReturn(true);
 
-        Assert.assertThrows(DataValidationException.class, () -> projectService.create(projectDto));
+        assertThrows(DataValidationException.class, () -> projectService.create(projectDto));
     }
 
     @Test
     void updateStatusAndDescription() {
         ProjectDto projectDto = new ProjectDto();
         projectDto.setId(1L);
+        projectDto.setStatus(ProjectStatus.CREATED);
+        projectDto.setDescription("crud");
+        projectDto.setUpdatedAt(LocalDateTime.now());
 
-        Mockito.when(projectRepository.getProjectById(projectDto.getId()))
+        Long id = projectDto.getId();
+        Mockito.when(projectRepository.getProjectById(id))
                 .thenReturn(Project.builder().build());
-        projectService.updateStatusAndDescription(projectDto, projectDto.getId());
+
+        projectService.updateStatusAndDescription(projectDto, id);
 
         Mockito.verify(projectRepository, Mockito.times(1))
                 .save(projectMapper.toEntity(projectDto));
+
+        Project projectById = projectRepository.getProjectById(id);
+        assertEquals(projectDto.getDescription(), projectById.getDescription());
+        assertEquals(projectDto.getStatus(), projectById.getStatus());
+        assertEquals(projectDto.getUpdatedAt(), projectById.getUpdatedAt());
+    }
+
+    @Test
+    void updateStatusAndDescriptionProjectNotFound() {
+        assertThrows(DataValidationException.class, () -> projectService.updateStatusAndDescription(new ProjectDto(), null));
     }
 
     @Test
@@ -86,15 +106,19 @@ class ProjectServiceTest {
         ProjectFilterDto projectFilterDto = new ProjectFilterDto();
         projectFilterDto.setStatus(ProjectStatus.CREATED);
         projectFilterDto.setName("project");
-        projectFilterDto.setVisibility(ProjectVisibility.PRIVATE);
+        projectFilterDto.setVisibility(ProjectVisibility.PUBLIC);
 
         List<Project> projects = List.of(
-                Project.builder().name("project").status(ProjectStatus.CREATED).visibility(ProjectVisibility.PRIVATE).build()
+                Project.builder().name("project").status(ProjectStatus.CREATED).visibility(ProjectVisibility.PUBLIC).build()
         );
+        List<ProjectDto> expected = projects.stream()
+                .map(project -> projectMapper.toDto(project))
+                .collect(Collectors.toList());
 
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
 
-        Assertions.assertEquals(projectService.getProjectByName(projectFilterDto), projects);
+        List<ProjectDto> actual = projectService.getProjectByName(projectFilterDto);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -107,10 +131,30 @@ class ProjectServiceTest {
         List<Project> projects = List.of(
                 Project.builder().name("project").status(ProjectStatus.CREATED).visibility(ProjectVisibility.PRIVATE).build()
         );
+        List<ProjectDto> expected = projects.stream()
+                .map(project -> projectMapper.toDto(project))
+                .collect(Collectors.toList());
 
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
 
-        Assertions.assertEquals(projects, projectService.getProjectByName(projectFilterDto));
+        List<ProjectDto> actual = projectService.getProjectByName(projectFilterDto);
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    void getProjectByStatus_WrongVisibility() {
+        ProjectFilterDto projectFilterDto = new ProjectFilterDto();
+        projectFilterDto.setStatus(ProjectStatus.CREATED);
+        projectFilterDto.setName("project");
+        projectFilterDto.setVisibility(ProjectVisibility.PUBLIC);
+
+        List<Project> projects = List.of(
+                Project.builder().name("project").status(ProjectStatus.CREATED).visibility(ProjectVisibility.PRIVATE).build()
+        );
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        List<ProjectDto> actual = projectService.getProjectByName(projectFilterDto);
+        Assertions.assertEquals(Collections.emptyList(), actual);
     }
 
     @Test

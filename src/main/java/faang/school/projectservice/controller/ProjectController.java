@@ -16,25 +16,26 @@ public class ProjectController {
     private final ProjectService projectService;
 
     public ProjectDto create(ProjectDto projectDto) {
-        validateData(projectDto == null, "Project doesn't exist");
+        validateProject(projectDto);
         return projectService.create(projectDto);
     }
 
     public ProjectDto changeStatus(ProjectDto projectDto, Long id) {
-        validateData(projectDto == null || id == null || projectDto.getStatus() == null || projectDto.getDescription().isEmpty(),
-                "Status or id doesn't exist");
+        validateProject(projectDto);
         return projectService.updateStatusAndDescription(projectDto, id);
     }
 
-    public List<Project> getProjectsByName(ProjectFilterDto projectFilterDto) {
-        validateData(projectFilterDto == null || projectFilterDto.getName() == null,
-                "Name doesn't exist");
+    public List<ProjectDto> getProjectsByName(ProjectFilterDto projectFilterDto) {
+        if (projectFilterDto.getName().isBlank()) {
+            throw new DataValidationException("Project name is empty");
+        }
         return projectService.getProjectByName(projectFilterDto);
     }
 
-    public List<Project> getProjectsByStatus(ProjectFilterDto projectFilterDto) {
-        validateData(projectFilterDto == null || projectFilterDto.getStatus() == null,
-                "Status doesn't exist");
+    public List<ProjectDto> getProjectsByStatus(ProjectFilterDto projectFilterDto) {
+        if (projectFilterDto.getStatus() == null) {
+            throw new DataValidationException("Project status is empty");
+        }
         return projectService.getProjectByStatus(projectFilterDto);
     }
 
@@ -43,18 +44,35 @@ public class ProjectController {
     }
 
     public ProjectDto getProjectById(ProjectDto projectDto) {
-        validateData(projectDto == null || projectDto.getId() == null, "project id doesn't exist");
+        validateProject(projectDto);
         return projectService.getProjectByIdFromBD(projectDto);
     }
 
     public void deleteProjectById(long id) {
-        validateData(id < 0, "id doesn't exist");
         projectService.deleteProjectById(id);
     }
 
-    private void validateData(boolean condition, String exception) {
-        if (condition) {
-            throw new DataValidationException(exception);
+    private void validateProject(ProjectDto projectDto) {
+        if (projectDto == null) {
+            throw new DataValidationException("Project is null");
+        }
+        if (projectDto.getName().length() < 128) {
+            throw new DataValidationException("Project name should be less than 128 character");
+        }
+        if (projectDto.getId() == null) {
+            throw new DataValidationException("Project id is null");
+        }
+        if (projectDto.getDescription().length() < 4096) {
+            throw new DataValidationException("Project description should be less than 4096 character");
+        }
+        if (projectDto.getDescription().isEmpty()) {
+            throw new DataValidationException("Project description is empty");
+        }
+        if (projectDto.getStatus() == null) {
+            throw new DataValidationException("Project status is empty");
+        }
+        if (projectDto.getName().isBlank()) {
+            throw new DataValidationException("Project name is empty");
         }
     }
 }
