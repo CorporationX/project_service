@@ -1,17 +1,20 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.filter.ProjectFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +23,11 @@ public class ProjectService {
             "The user (with id %d) has already created a project (with id %d) with this name";
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final List<ProjectFilter> projectFilters;
 
     @Transactional
     public List<ProjectDto> getAllProjects() {
-        return projectMapper.toDtoList(projectRepository.findAll());
+        return projectMapper.toDtoList(projectRepository.findAll().toList());
     }
 
     @Transactional
@@ -52,6 +56,11 @@ public class ProjectService {
                         String.format("Project with id %d does not exist.", projectDto.getId())));
     }
 
+    @Transactional
+    public List<ProjectDto> getProjects(ProjectFilterDto filters) {
+        return filterProjects(projectRepository.findAll(), filters);
+    }
+
     public ProjectDto createSubProject(ProjectDto projectDto) {
         validateParentProjectExist(projectDto);
         validateVisibilityConsistency(projectDto);
@@ -70,6 +79,14 @@ public class ProjectService {
     private ProjectDto saveEntity(Project project) {
         project = projectRepository.save(project);
         return projectMapper.toDto(project);
+    }
+
+    private List<ProjectDto> filterProjects(Stream<Project> projects, ProjectFilterDto filters) {
+        return projectFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(projects, filters))
+                .map(projectMapper::toDto)
+                .toList();
     }
 
     private void validateProjectExists(long projectId) {
