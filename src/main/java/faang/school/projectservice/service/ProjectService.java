@@ -29,12 +29,16 @@ public class ProjectService {
     }
 
     public ProjectDto updateStatusAndDescription(ProjectDto projectDto, Long id) {
+        if (id == null) {
+            throw new DataValidationException("Project doesn't exist");
+        }
         Project projectById = projectRepository.getProjectById(id);
         projectById.setStatus(projectDto.getStatus());
         projectById.setDescription(projectDto.getDescription());
-        projectDto.setUpdatedAt(LocalDateTime.now());
+        projectById.setUpdatedAt(LocalDateTime.now());
 
-        return mapper.toDto(projectRepository.save(mapper.toEntity(projectDto)));
+        Project project = mapper.toEntity(projectDto);
+        return mapper.toDto(projectRepository.save(project));
     }
 
 }
