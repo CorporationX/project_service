@@ -69,10 +69,8 @@ public class ProjectService {
             createAndSaveMoment(projectDto);
             updateAllNeededFields(projectDto, originalProject, updatedProject);
             projectRepository.save(updatedProject);
-            return null;//TimeStamp
+            return Timestamp.valueOf(originalProject.getUpdatedAt());
         }
-
-        updateAllNeededFields(projectDto, originalProject, updatedProject);
 
         if (projectDto.getVisibility() != null && projectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
             List<Project> subProjects = collectAllProjectsByUniqueId(originalProject, projectDto);
@@ -80,9 +78,13 @@ public class ProjectService {
                     .peek(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE))
                     .forEach(projectRepository::save);
             updatedProject.setChildren(subProjects);
+        } else {
+            updatedProject.setChildren(collectAllProjectsByUniqueId(originalProject, projectDto));
         }
+
+        updateAllNeededFields(projectDto, originalProject, updatedProject);
         projectRepository.save(updatedProject);
-        return null;//timestamp
+        return Timestamp.valueOf(originalProject.getUpdatedAt());
     }
 
     public void createAndSaveMoment(ProjectDto projectDto) {
@@ -116,7 +118,6 @@ public class ProjectService {
         setThreeField(projectDto, updatedProject);
         Project originalWithNewParrentProject = changeParentProject(projectDto, originalProject);
         updatedProject.setParentProject(originalWithNewParrentProject.getParentProject());
-        updatedProject.setChildren(collectAllProjectsByUniqueId(originalProject, projectDto));
     }
 
     public List<Project> collectAllProjectsByUniqueId(Project originalProject, ProjectDto projectDto) {
