@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.SubProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -15,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -64,6 +67,7 @@ public class ProjectService {
         return filterProjects(projectRepository.findAll(), filters);
     }
 
+    @Transactional
     public ProjectDto createSubProject(ProjectDto projectDto) {
         validateParentProjectExist(projectDto);
         validateVisibilityConsistency(projectDto);
@@ -80,6 +84,45 @@ public class ProjectService {
         return projectMapper.toDto(savedSubProject);
     }
 
+    @Transactional
+    public ProjectDto updateSubProject(ProjectDto projectDto) {
+        validateProjectExists(projectDto.getId());
+        validateParentProjectExist(projectDto);
+
+        Project subProject = projectRepository.getProjectById(projectDto.getId());
+        ProjectStatus sPStatusDto = projectDto.getStatus();
+
+        if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
+            updateChildrenVisibility(subProject, projectDto.getVisibility());
+        }
+        if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
+            updateChildrenVisibility(subProject, projectDto.getVisibility());
+        }
+        if (!sPStatusDto.equals(ProjectStatus.COMPLETED)) {
+            subProject.setStatus(sPStatusDto);
+        } else if (checkChildrenStatusCompleted(subProject)) {
+            momentService.createMomentCompletedForSubProject(subProject);
+            subProject.setStatus(sPStatusDto);
+        }
+        projectMapper.updateFromDtoWithoutStatus(projectDto, subProject);
+
+        return projectMapper.toDto(projectRepository.save(subProject));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectDto> getFilteredSubProjects(SubProjectFilterDto filtersDto) {
+        validateProjectExists(filtersDto.getProjectId());
+
+        Project parentProject = projectRepository.getProjectById(filtersDto.getProjectId());
+        List<Project> subProjects =
+                Optional.ofNullable(parentProject.getChildren()).orElse(Collections.emptyList());
+
+        return subProjects.stream()
+                .filter(subProject -> checkFilters(subProject, filtersDto))
+                .map(projectMapper::toDto)
+                .toList();
+    }
+
     private ProjectDto saveEntity(Project project) {
         project = projectRepository.save(project);
         return projectMapper.toDto(project);
@@ -91,6 +134,35 @@ public class ProjectService {
                 .flatMap(filter -> filter.apply(projects, filters))
                 .map(projectMapper::toDto)
                 .toList();
+    }
+
+    private boolean checkChildrenStatusCompleted(Project project) {
+        List<Project> children = project.getChildren();
+        if (children == null) {
+            return true;
+        }
+        return children.stream()
+                .allMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
+    }
+
+    private void updateChildrenVisibility(Project project, ProjectVisibility visibility) {
+        List<Project> children = project.getChildren();
+        if (children != null) {
+            for (Project child : children) {
+                child.setVisibility(visibility);
+                updateChildrenVisibility(child, visibility);
+            }
+        }
+    }
+
+    private boolean checkFilters(Project subProject, SubProjectFilterDto filtersDto) {
+        if (filtersDto.getNameFilter() != null && !subProject.getName().contains(filtersDto.getNameFilter())) {
+            return false;
+        }
+        if (filtersDto.getStatusFilter() != null && !filtersDto.getStatusFilter().contains(subProject.getStatus())) {
+            return false;
+        }
+        return true;
     }
 
     private void validateProjectExists(long projectId) {
@@ -129,52 +201,6 @@ public class ProjectService {
 
         if (subProjectExists) {
             throw new DataValidationException("Subproject with name " + subProjectName + " already exists");
-        }
-    }
-
-    @Transactional
-    public ProjectDto updateSubProject(ProjectDto projectDto) {
-        validateProjectExists(projectDto.getId());
-        validateParentProjectExist(projectDto);
-
-        Project subProject = projectRepository.getProjectById(projectDto.getId());
-
-        if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
-            updateChildrenVisibility(subProject, projectDto.getVisibility());
-        }
-
-        ProjectStatus sPStatusDto = projectDto.getStatus();
-
-        if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
-            updateChildrenVisibility(subProject, projectDto.getVisibility());
-        }
-        if (!sPStatusDto.equals(ProjectStatus.COMPLETED)) {
-            subProject.setStatus(sPStatusDto);
-        } else if (checkChildrenStatusCompleted(subProject)) {
-            momentService.createMomentCompletedForSubProject(subProject);
-            subProject.setStatus(sPStatusDto);
-        }
-        projectMapper.updateFromDtoWithoutStatus(projectDto, subProject);
-
-        return projectMapper.toDto(projectRepository.save(subProject));
-    }
-
-    private boolean checkChildrenStatusCompleted(Project project) {
-        List<Project> children = project.getChildren();
-        if (children == null) {
-            return true;
-        }
-        return children.stream()
-                .allMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
-    }
-
-    private void updateChildrenVisibility(Project project, ProjectVisibility visibility) {
-        List<Project> children = project.getChildren();
-        if (children != null) {
-            for (Project child : children) {
-                child.setVisibility(visibility);
-                updateChildrenVisibility(child, visibility);
-            }
         }
     }
 }

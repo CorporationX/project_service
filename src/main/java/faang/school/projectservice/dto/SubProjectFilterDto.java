@@ -15,5 +15,5 @@ import java.util.List;
 public class SubProjectFilterDto {
     private Long projectId;
     private String nameFilter;
-    private List<ProjectStatus> statusesFilter;
+    private List<ProjectStatus> statusFilter;
 }
