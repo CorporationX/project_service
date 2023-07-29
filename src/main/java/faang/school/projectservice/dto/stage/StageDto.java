@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.stage;
 
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,4 +19,5 @@ public class StageDto {
     private Long stageId;
     private String stageName;
     private Project project;
+    private List<Task> tasks;
 }

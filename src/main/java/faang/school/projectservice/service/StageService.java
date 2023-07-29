@@ -1,11 +1,16 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.stage.DeleteStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.project.ProjectException;
 import faang.school.projectservice.exception.stage.StageException;
+import faang.school.projectservice.filter.StageStatusFilter;
+import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
@@ -14,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 
 @Service
@@ -22,11 +28,32 @@ public class StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final StageMapper stageMapper;
+    private final List<StageStatusFilter> stageDtoList;
+    private final TaskRepository taskRepository;
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageRepository.save(stageMapper.toStage(validStage(stageDto)));
         return stageMapper.toStageDto(stage);
+    }
+
+    @Transactional
+    public void deleteStage(Long stageId1, Long stageId2, DeleteStageDto deleteStageDto) {
+        Stage stage = stageRepository.getById(stageId1);
+        List<Task> tasks = stage.getTasks();
+        if (deleteStageDto.equals(DeleteStageDto.CASCADE)) {
+            taskRepository.deleteAll(tasks);
+        }
+        if (deleteStageDto.equals(DeleteStageDto.CLOSE)) {
+            tasks.forEach(task -> task.setStatus(TaskStatus.DONE));
+        }
+        if (deleteStageDto.equals(DeleteStageDto.MOVE_TO_ANOTHER_STAGE)) {
+            stage.setTasks(List.of());
+            Stage newStage = stageRepository.getById(stageId2);
+            newStage.setTasks(tasks);
+            stageRepository.save(newStage);
+        }
+        stageRepository.delete(stage);
     }
 
     private StageDto validStage(StageDto stage) {
