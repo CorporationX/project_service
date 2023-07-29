@@ -4,7 +4,6 @@ import faang.school.projectservice.controller.StageController;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.mapper.stage.StageRolesMapperImpl;
 import faang.school.projectservice.service.StageService;
@@ -13,15 +12,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StageControllerTest {
-    @Mock
-    private StageMapper stageMapper = new StageMapperImpl();
-    @Mock
-    private StageRolesMapperImpl stageRolesMapper = new StageRolesMapperImpl();
+    @Spy
+    private StageMapperImpl stageMapper;
+    @Spy
+    private StageRolesMapperImpl stageRolesMapper;
     @Mock
     private StageService stageService;
     @InjectMocks
