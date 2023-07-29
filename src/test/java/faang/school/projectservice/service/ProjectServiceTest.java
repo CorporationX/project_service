@@ -28,7 +28,7 @@ class ProjectServiceTest {
 
 
     @Test
-    void create() {
+    void createValidProject() {
         TeamMember teamMember = new TeamMember();
         teamMember.setUserId(1L);
 
@@ -42,7 +42,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    void createWithException() {
+    void createWithDataValidationException() {
         TeamMember teamMember = new TeamMember();
         teamMember.setUserId(1L);
 
