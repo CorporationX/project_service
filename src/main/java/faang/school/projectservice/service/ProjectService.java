@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.DataNotExistingException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -34,15 +35,18 @@ public class ProjectService {
         projectDto.setName(processTitle(projectDto.getName()));
         long ownerId = projectDto.getOwnerId();
         String projectName = projectDto.getName();
+
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)) {
             throw new DataAlreadyExistingException(String
                     .format("User with id: %d already exist project %s", ownerId, projectName));
         }
+
         Project project = projectMapper.toModel(projectDto);
         LocalDateTime now = LocalDateTime.now();
         project.setCreatedAt(now);
         project.setUpdatedAt(now);
         project.setStatus(ProjectStatus.CREATED);
+
         if (projectDto.getVisibility() == null) {
             project.setVisibility(ProjectVisibility.PUBLIC);
         }
@@ -51,6 +55,9 @@ public class ProjectService {
     }
 
     public ProjectDto update(ProjectDto projectDto, long projectId) {
+        if (projectRepository.getProjectById(projectId) == null){
+            throw new DataNotExistingException("This Project doesn't exist");
+        }
         Project projectToUpdate = projectRepository.getProjectById(projectId);
         if (projectDto.getDescription() != null) {
             projectToUpdate.setDescription(projectDto.getDescription());
@@ -62,12 +69,6 @@ public class ProjectService {
         }
         projectRepository.save(projectToUpdate);
         return projectMapper.toDto(projectToUpdate);
-    }
-
-    private String processTitle(String title) {
-        title = title.replaceAll("[^A-Za-zА-Яа-я0-9+-/#]", " ");
-        title = title.replaceAll("[\\s]+", " ");
-        return title.trim().toLowerCase();
     }
 
     public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto, long userId) {
@@ -83,8 +84,9 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getAllProjects(long userId) {
-        Stream<Project> projects = getAvailableProjectsForCurrentUser(userId).stream();
-        return projects.map(projectMapper::toDto).toList();
+        return getAvailableProjectsForCurrentUser(userId).stream()
+                .map(projectMapper::toDto)
+                .toList();
     }
 
 
@@ -129,5 +131,11 @@ public class ProjectService {
     private boolean isUserInPrivateProjectTeam(Project project, List<Team> userTeams) {
         return project.getTeams().stream()
                 .anyMatch(team -> userTeams.stream().anyMatch(userTeam -> userTeam == team));
+    }
+
+    private String processTitle(String title) {
+        title = title.replaceAll("[^A-Za-zА-Яа-я0-9+-/#]", " ");
+        title = title.replaceAll("[\\s]+", " ");
+        return title.trim().toLowerCase();
     }
 }

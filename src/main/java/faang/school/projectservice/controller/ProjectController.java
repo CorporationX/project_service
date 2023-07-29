@@ -27,19 +27,26 @@ public class ProjectController {
         validateCreateProject(projectDto);
         return projectService.create(projectDto);
     }
+
     @PostMapping("/projectUpdate/{projectId}")
-    public ProjectDto update(@RequestBody ProjectDto projectDto,@PathVariable long projectId) {
-        validateUpdateProject(projectDto,projectId);
+    public ProjectDto update(@RequestBody ProjectDto projectDto, @PathVariable long projectId) {
+        validateUpdateProject(projectDto, projectId);
         return projectService.update(projectDto, projectId);
     }
 
     @PostMapping("/project/{userId}")
-    public List<ProjectDto> getProjectWithFilters(@RequestBody ProjectFilterDto projectFilterDto,@PathVariable long userId){
+    public List<ProjectDto> getProjectWithFilters(@RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
+        if (userId <= 0) {
+            throw new DataValidationException("UserId can't be negative or zero");
+        }
         return projectService.getProjectsWithFilter(projectFilterDto, userId);
     }
 
     @GetMapping("/project/{userId}")
     public List<ProjectDto> getAllProjects(@PathVariable long userId) {
+        if (userId <= 0) {
+            throw new DataValidationException("UserId can't be negative or zero");
+        }
         return projectService.getAllProjects(userId);
     }
 
@@ -55,7 +62,7 @@ public class ProjectController {
         if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new DataValidationException("Project can't be created with empty name");
         }
-        if (projectDto.getName().length() > MAX_NAME_LENGTH){
+        if (projectDto.getName().length() > MAX_NAME_LENGTH) {
             throw new DataValidationException("Project's name length can't be more than 128 symbols");
         }
         if (projectDto.getDescription() == null || projectDto.getDescription().isBlank()) {
