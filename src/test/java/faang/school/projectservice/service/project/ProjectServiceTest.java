@@ -8,6 +8,7 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectNameFilter;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -240,7 +241,7 @@ public class ProjectServiceTest {
         Stream<Project> desiredProjects = getFilteredProjects(projectsFromDB);
 
         ProjectNameFilter nameFilter = Mockito.mock(ProjectNameFilter.class);
-        projectService = new ProjectService(projectRepository, projectMapper, List.of(nameFilter));
+        projectService = new ProjectService(projectRepository, projectMapper, momentService, List.of(nameFilter));
 
         Mockito.when(projectRepository.findAll()).thenReturn(projectFromBDStream);
 

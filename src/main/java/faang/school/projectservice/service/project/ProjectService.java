@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
@@ -8,6 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
