@@ -26,6 +26,11 @@ public interface ProjectMapper {
     @Mapping(target = "children", ignore = true)
     Project toEntity(ProjectDto projectDto);
 
+    @Mapping(target = "parentProject", ignore = true)
+    @Mapping(target = "children", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    void updateFromDtoWithoutStatus(ProjectDto projectDto, @MappingTarget Project project);
+
     @Named("toChildrenId")
     default List<Long> toChildrenId(List<Project> children) {
         return children != null ? children.stream().map(Project::getId).toList() : Collections.emptyList();

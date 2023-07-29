@@ -5,6 +5,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,14 +14,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/subproject")
+    @PostMapping("/subprojects")
     public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
         validateSubProject(projectDto);
         return projectService.createSubProject(projectDto);
     }
 
+    @PutMapping("/subprojects")
+    public ProjectDto updateSubProject(@RequestBody ProjectDto projectDto) {
+        validateSubProject(projectDto);
+        return projectService.updateSubProject(projectDto);
+    }
+
     private void validateSubProject(ProjectDto projectDto) {
-        if (projectDto.getName().isBlank()) {
+        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new DataValidationException("Enter project name, please");
         }
     }

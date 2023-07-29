@@ -6,7 +6,9 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class ProjectService {
             "The user (with id %d) has already created a project (with id %d) with this name";
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final MomentService momentService;
     private final List<ProjectFilter> projectFilters;
 
     @Transactional
@@ -72,6 +75,7 @@ public class ProjectService {
         subProject.setStatus(ProjectStatus.CREATED);
         Project savedSubProject = projectRepository.save(subProject);
         parentProject.getChildren().add(savedSubProject);
+        projectRepository.save(parentProject);
 
         return projectMapper.toDto(savedSubProject);
     }
@@ -125,6 +129,52 @@ public class ProjectService {
 
         if (subProjectExists) {
             throw new DataValidationException("Subproject with name " + subProjectName + " already exists");
+        }
+    }
+
+    @Transactional
+    public ProjectDto updateSubProject(ProjectDto projectDto) {
+        validateProjectExists(projectDto.getId());
+        validateParentProjectExist(projectDto);
+
+        Project subProject = projectRepository.getProjectById(projectDto.getId());
+
+        if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
+            updateChildrenVisibility(subProject, projectDto.getVisibility());
+        }
+
+        ProjectStatus sPStatusDto = projectDto.getStatus();
+
+        if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
+            updateChildrenVisibility(subProject, projectDto.getVisibility());
+        }
+        if (!sPStatusDto.equals(ProjectStatus.COMPLETED)) {
+            subProject.setStatus(sPStatusDto);
+        } else if (checkChildrenStatusCompleted(subProject)) {
+            momentService.createMomentCompletedForSubProject(subProject);
+            subProject.setStatus(sPStatusDto);
+        }
+        projectMapper.updateFromDtoWithoutStatus(projectDto, subProject);
+
+        return projectMapper.toDto(projectRepository.save(subProject));
+    }
+
+    private boolean checkChildrenStatusCompleted(Project project) {
+        List<Project> children = project.getChildren();
+        if (children == null) {
+            return true;
+        }
+        return children.stream()
+                .allMatch(child -> child.getStatus().equals(ProjectStatus.COMPLETED));
+    }
+
+    private void updateChildrenVisibility(Project project, ProjectVisibility visibility) {
+        List<Project> children = project.getChildren();
+        if (children != null) {
+            for (Project child : children) {
+                child.setVisibility(visibility);
+                updateChildrenVisibility(child, visibility);
+            }
         }
     }
 }

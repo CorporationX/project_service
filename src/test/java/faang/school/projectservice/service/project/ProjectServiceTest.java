@@ -8,6 +8,7 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectNameFilter;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -27,12 +28,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private MomentService momentService;
     @Spy
     private ProjectMapper projectMapper = new ProjectMapperImpl();
     @InjectMocks
@@ -236,7 +241,7 @@ public class ProjectServiceTest {
         Stream<Project> desiredProjects = getFilteredProjects(projectsFromDB);
 
         ProjectNameFilter nameFilter = Mockito.mock(ProjectNameFilter.class);
-        projectService = new ProjectService(projectRepository, projectMapper, List.of(nameFilter));
+        projectService = new ProjectService(projectRepository, projectMapper, momentService, List.of(nameFilter));
 
         Mockito.when(projectRepository.findAll()).thenReturn(projectFromBDStream);
 
@@ -253,5 +258,55 @@ public class ProjectServiceTest {
     private Stream<Project> getFilteredProjects(List<Project> projects) {
         return projects.stream()
                 .filter(project -> project.getName().contains("Uni"));
+    }
+
+    @Test
+    void testUpdateSubProjectNotCompletedStatus() {
+        ProjectDto subProjectDto = ProjectDto.builder()
+                .id(1L)
+                .status(ProjectStatus.CREATED)
+                .parentId(2L)
+                .build();
+        Project subProject = projectMapper.toEntity(subProjectDto);
+        Project parentProject = Project.builder()
+                .id(2L)
+                .build();
+        subProject.setParentProject(parentProject);
+        ProjectDto subProjectDtoExpected = projectMapper.toDto(subProject);
+
+        when(projectRepository.existsById(subProjectDto.getId())).thenReturn(true);
+        when(projectRepository.existsById(parentProject.getId())).thenReturn(true);
+        when(projectRepository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
+        when(projectRepository.save(subProject)).thenReturn(subProject);
+
+        ProjectDto projectDtoActual = projectService.updateSubProject(subProjectDto);
+
+        verify(projectMapper, times(1))
+                .updateFromDtoWithoutStatus(subProjectDto, subProject);
+        assertNotNull(projectDtoActual);
+        assertEquals(subProjectDtoExpected, projectDtoActual);
+        assertEquals(ProjectStatus.CREATED, projectDtoActual.getStatus());
+    }
+
+    @Test
+    void testUpdateSubProjectCompletedStatus() {
+        ProjectDto subProjectDto = ProjectDto.builder()
+                .id(1L)
+                .status(ProjectStatus.COMPLETED)
+                .parentId(2L)
+                .childrenId(List.of(1L))
+                .build();
+        Project subProject = projectMapper.toEntity(subProjectDto);
+        Project parentProject = Project.builder()
+                .id(2L)
+                .build();
+
+        when(projectRepository.existsById(subProjectDto.getId())).thenReturn(true);
+        when(projectRepository.existsById(parentProject.getId())).thenReturn(true);
+        when(projectRepository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
+
+        projectService.updateSubProject(subProjectDto);
+
+        verify(momentService, times(1)).createMomentCompletedForSubProject(subProject);
     }
 }
