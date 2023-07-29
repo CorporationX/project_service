@@ -12,13 +12,14 @@ public class ProjectController {
     private final ProjectService projectService;
 
     public ProjectDto create(ProjectDto projectDto) {
-        validateData(projectDto == null, "Project doesn't exist");
+        validateProject(projectDto == null || projectDto.getName().length() < 128
+                || projectDto.getDescription().length() < 4096, "Project is empty");
         return projectService.create(projectDto);
     }
 
-    private void validateData(boolean condition, String exception) {
+    private void validateProject(boolean condition, String errorMessage) {
         if (condition) {
-            throw new DataValidationException(exception);
+            throw new DataValidationException(errorMessage);
         }
     }
 }

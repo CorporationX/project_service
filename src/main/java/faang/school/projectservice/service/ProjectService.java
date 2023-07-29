@@ -8,6 +8,8 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -20,6 +22,8 @@ public class ProjectService {
         }
 
         projectDto.setStatus(ProjectStatus.CREATED);
+        projectDto.setCreatedAt(LocalDateTime.now());
+        projectDto.setUpdatedAt(LocalDateTime.now());
         return mapper.toDto(projectRepository.save(mapper.toEntity(projectDto)));
     }
 }
