@@ -34,6 +34,9 @@ public class ProjectController {
 
     @PostMapping("/project/{userId}")
     public List<ProjectDto> getProjectWithFilters(@RequestBody ProjectFilterDto projectFilterDto,@PathVariable long userId){
+        if (userId <= 0){
+            throw new DataValidationException("UserId can't be negative or zero");
+        }
         return projectService.getProjectsWithFilter(projectFilterDto, userId);
     }
 

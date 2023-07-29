@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
+import faang.school.projectservice.exception.DataNotExistingException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -151,10 +152,19 @@ class ProjectServiceTest {
     }
 
     @Test
+    void testUpdateThrowsDataNotExistingException() {
+        long projectId = 1L;
+        Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(null);
+        Assertions.assertThrows(DataNotExistingException.class, () -> projectService.update(projectDto, projectId));
+    }
+
+    @Test
     void testUpdateDescription() {
         long projectId = 1L;
         projectDto.setDescription("New Description");
+
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
         Assertions.assertEquals("New Description", projectService.update(projectDto, projectId).getDescription());
         Mockito.verify(projectRepository).save(any());
         Assertions.assertEquals(project.getStatus(), projectService.update(projectDto, projectId).getStatus());
@@ -165,14 +175,50 @@ class ProjectServiceTest {
         long projectId = 1L;
         projectDto.setStatus(ProjectStatus.IN_PROGRESS);
         projectDto.setDescription("New Description");
+
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
         Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectDto, projectId).getStatus());
+
         Mockito.verify(projectRepository).save(any());
-        Assertions.assertEquals("New Description", projectService.update(projectDto, projectId).getDescription());
+        String descriptionResult = projectService.update(projectDto, projectId).getDescription();
+        Assertions.assertEquals("New Description", descriptionResult);
     }
 
     @Test
     void testGetProjectsWithFilter() {
+        Project project1 = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(new Team()))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        Project project2 = Project.builder()
+                .id(2L)
+                .name("Project2")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .teams(List.of(new Team()))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        Project project3 = Project.builder()
+                .id(3L)
+                .name("Project3")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(new Team()))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
         List<Project> projects = List.of(project, project1, project2, project3);
 
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
