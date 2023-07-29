@@ -40,12 +40,15 @@ public class StageServiceTest {
     @Spy
     private StageMapperImpl stageMapper;
 
+    private Project project;
     private Stage stage;
     private Stage stage1;
     private List<Task> tasks;
 
     @BeforeEach
     void init() {
+       project = Project.builder().build();
+
         stage = Stage.builder()
                 .stageId(1L)
                 .stageName("stage")
@@ -69,6 +72,12 @@ public class StageServiceTest {
                         .status(ProjectStatus.IN_PROGRESS)
                         .build())
                 .build();
+
+        List<Stage> stages = new ArrayList<>();
+        stages.add(stage);
+        stages.add(stage1);
+        project.setStages(stages);
+
     }
 
     @Test
@@ -110,6 +119,15 @@ public class StageServiceTest {
     void testFindById() {
         Mockito.when(stageRepository.getById(anyLong())).thenReturn(stage1);
         stageService.getStageById(anyLong());
+        Mockito.verify(stageMapper).toDto(stage1);
+    }
+
+    @Test
+    void testFindAllStagesOfProject() {
+        Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+        stageService.findAllStagesOfProject(anyLong());
+        Mockito.verify(projectRepository).getProjectById(anyLong());
+        Mockito.verify(stageMapper).toDto(stage);
         Mockito.verify(stageMapper).toDto(stage1);
     }
 }

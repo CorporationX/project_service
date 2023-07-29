@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/stage")
 @RequiredArgsConstructor
@@ -32,6 +34,11 @@ public class StageController {
     @GetMapping("/{stageId}")
     public StageDto getStageById(@PathVariable long stageId) {
         return stageService.getStageById(stageId);
+    }
+
+    @GetMapping("/{projectId}")
+    public List<StageDto> findAllStagesOfProject(@PathVariable Long projectId) {
+        return stageService.findAllStagesOfProject(projectId);
     }
 
     private void validateStage(StageDto stageDto) {

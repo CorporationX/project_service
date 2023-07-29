@@ -43,6 +43,14 @@ public class StageService {
         return stageMapper.toDto(stageById);
     }
 
+    public List<StageDto> findAllStagesOfProject(Long projectId) {
+        return projectRepository.getProjectById(projectId)
+                .getStages()
+                .stream()
+                .map(stageMapper::toDto)
+                .toList();
+    }
+
     private void validationStageDto(StageDto stageDto) {
         Project projectById = projectRepository.getProjectById(stageDto.getProjectId());
 
