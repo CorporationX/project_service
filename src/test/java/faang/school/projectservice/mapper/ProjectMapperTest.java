@@ -3,7 +3,6 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.TeamMember;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

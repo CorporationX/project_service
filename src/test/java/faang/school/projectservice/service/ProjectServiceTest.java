@@ -41,7 +41,6 @@ class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
-
         this.projectDto = ProjectDto.builder()
                 .name("Faang")
                 .description("This is Faang")
@@ -79,6 +78,10 @@ class ProjectServiceTest {
     void createSubProjectThrowExceptionWhenProjectIsAlreadyExist() {
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
                 .thenReturn(true);
+        Mockito.when(projectRepository.getProjectById(projectDto.getParentProjectId()))
+                .thenReturn(Project.builder()
+                        .visibility(ProjectVisibility.PUBLIC)
+                        .build());
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(projectDto));
 
@@ -88,13 +91,8 @@ class ProjectServiceTest {
     @Test
     void createSubProjectThrowExceptionWhenChildrenNull() {
         ProjectDto wrongProjectDto = ProjectDto.builder()
-                .name("Faang")
                 .ownerId(1)
-                .parentProjectId(2L)
                 .build();
-
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
 
@@ -102,16 +100,24 @@ class ProjectServiceTest {
     }
 
     @Test
+    void createSubProjectThrowExceptionWhenStatusNull() {
+        ProjectDto wrongProjectDto = ProjectDto.builder()
+                .ownerId(1)
+                .childrenIds(Collections.emptyList())
+                .build();
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
+
+        assertEquals("Project status cant be null", exception.getMessage());
+    }
+    @Test
     void createSubProjectThrowExceptionWhenVisibilityNull() {
         ProjectDto wrongProjectDto = ProjectDto.builder()
                 .name("Faang")
                 .ownerId(1)
-                .parentProjectId(2L)
                 .childrenIds(Collections.emptyList())
+                .status(ProjectStatus.CREATED)
                 .build();
-
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
 
@@ -126,10 +132,8 @@ class ProjectServiceTest {
                 .parentProjectId(-2L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .childrenIds(Collections.emptyList())
+                .status(ProjectStatus.CREATED)
                 .build();
-
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
 
@@ -144,14 +148,12 @@ class ProjectServiceTest {
                 .parentProjectId(100L)
                 .childrenIds(Collections.emptyList())
                 .visibility(ProjectVisibility.PRIVATE)
+                .status(ProjectStatus.CREATED)
                 .build();
-
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> projectService.createSubProject(wrongProjectDto));
 
-        assertEquals("Project not found by id: 100", exception.getMessage());
+        assertEquals("Parent project not found by id: 100", exception.getMessage());
     }
 
     @Test
@@ -162,10 +164,9 @@ class ProjectServiceTest {
                 .parentProjectId(2L)
                 .childrenIds(Collections.emptyList())
                 .visibility(ProjectVisibility.PRIVATE)
+                .status(ProjectStatus.CREATED)
                 .build();
 
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
         Mockito.when(projectRepository.getProjectById(wrongProjectDto.getParentProjectId()))
                 .thenReturn(Project.builder()
                         .name("Uber")
@@ -174,9 +175,9 @@ class ProjectServiceTest {
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
 
-        assertEquals("Cant create private SubProject; Faang, on a public Project: Uber", exception.getMessage());
+        assertEquals("Private SubProject; Faang, cant be with a public Parent Project: Uber", exception.getMessage());
     }
-
+//Private SubProject; %s, cant be with a public Parent Project: %s
     @Test
     void createSubProjectTest() {
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
@@ -216,7 +217,7 @@ class ProjectServiceTest {
 
         projectService.createSubProject(projectDto);
 
-        Mockito.verify(projectRepository, Mockito.times(2)).getProjectById(projectDto.getParentProjectId());
+        Mockito.verify(projectRepository, Mockito.times(3)).getProjectById(projectDto.getParentProjectId());
     }
 
     @Test
