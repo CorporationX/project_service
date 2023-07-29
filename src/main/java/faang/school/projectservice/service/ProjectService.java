@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.DataNotExistingException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.exception.PrivateAccessException;
@@ -10,8 +11,6 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.ProjectFilter;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,6 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
     private final List<ProjectFilter> filters;
-    private final TeamMemberJpaRepository teamMemberJpaRepository;
 
     public ProjectDto create(ProjectDto projectDto) {
         projectDto.setName(processTitle(projectDto.getName()));
@@ -54,9 +52,10 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
-    public ProjectDto update(ProjectDto projectDto, long projectId) {
-        if (projectRepository.getProjectById(projectId) == null){
-            throw new DataNotExistingException("This Project doesn't exist");
+    public ProjectDto update(ProjectDto projectDto) {
+        long projectId = projectDto.getId();
+        if (projectRepository.getProjectById(projectId) == null) {
+            throw new DataNotFoundException("This Project doesn't exist");
         }
         Project projectToUpdate = projectRepository.getProjectById(projectId);
         if (projectDto.getDescription() != null) {
@@ -115,30 +114,20 @@ public class ProjectService {
         List<Project> availableProjects = new ArrayList<>(projects.stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC)
                 .toList());
-
         List<Project> privateProjects = projects.stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PRIVATE)
                 .toList();
 
-        List<Team> userTeams = new ArrayList<>();
         for (Project privateProject : privateProjects) {
-            TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, privateProject.getId());
-            if (teamMember != null){
-                userTeams.add(teamMember.getTeam());
+            boolean isUserInPrivateProjectTeam = privateProject.getTeams().stream()
+                    .anyMatch(team -> team.getTeamMembers().stream()
+                            .anyMatch(teamMember -> teamMember.getUserId() == userId));
+            if (isUserInPrivateProjectTeam) {
+                availableProjects.add(privateProject);
             }
         }
 
-        privateProjects = projects.stream()
-                .filter(project -> isUserInPrivateProjectTeam(project, userTeams))
-                .toList();
-
-        availableProjects.addAll(privateProjects);
         return availableProjects;
-    }
-
-    private boolean isUserInPrivateProjectTeam(Project project, List<Team> userTeams) {
-        return project.getTeams().stream()
-                .anyMatch(team -> userTeams.stream().anyMatch(userTeam -> userTeam == team));
     }
 
     private String processTitle(String title) {

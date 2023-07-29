@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.exception.DataNotExistingException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.exception.PrivateAccessException;
+import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
@@ -28,10 +29,10 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -41,19 +42,30 @@ class ProjectServiceTest {
     private ProjectMapper mockProjectMapper = new ProjectMapperImpl();
     @Mock
     private ProjectRepository projectRepository;
-    @Mock
-    private TeamMemberJpaRepository teamMemberJpaRepository;
-
-
-    private ProjectDto projectDto;
-    private Project project;
-    private Project project1;
-    private Project project2;
-    private Project project3;
-    private final Team team = new Team();
+    private TeamMember teamMemberCurrentUser;
+    private Team teamWithCurrentUser;
+    private Team team;
+    private TeamMember teamMember;
+    ProjectDto projectDto;
+    Project project;
+    Project project1;
+    Project project2;
+    Project project3;
 
     @BeforeEach
     void setUp() {
+        teamMember = TeamMember.builder()
+                .userId(2L)
+                .build();
+        team = Team.builder()
+                .teamMembers(List.of(teamMember))
+                .build();
+        teamMemberCurrentUser = TeamMember.builder()
+                .userId(1L)
+                .build();
+        teamWithCurrentUser = Team.builder()
+                .teamMembers(List.of(teamMemberCurrentUser))
+                .build();
         projectDto = ProjectDto.builder()
                 .id(1L)
                 .name("Project")
@@ -67,41 +79,41 @@ class ProjectServiceTest {
                 .description("new Project")
                 .ownerId(1L)
                 .visibility(ProjectVisibility.PRIVATE)
-                .teams(List.of(team))
+                .teams(List.of(teamWithCurrentUser))
                 .status(ProjectStatus.CREATED)
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
         project1 = Project.builder()
-                .id(1L)
+                .id(2L)
                 .name("Project1")
                 .description("new Project")
                 .ownerId(1L)
                 .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PRIVATE)
-                .teams(List.of(new Team()))
+                .teams(List.of(team))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
         project2 = Project.builder()
-                .id(2L)
+                .id(3L)
                 .name("Project2")
                 .description("new Project")
                 .ownerId(1L)
                 .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
-                .teams(List.of(new Team()))
+                .teams(List.of(team))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
         project3 = Project.builder()
-                .id(3L)
+                .id(4L)
                 .name("Project3")
                 .description("new Project")
                 .ownerId(1L)
                 .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PRIVATE)
-                .teams(List.of(new Team()))
+                .teams(List.of(team))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -144,44 +156,44 @@ class ProjectServiceTest {
 
     @Test
     void testUpdateStatus() {
-        long projectId = 1L;
+        long projectId = projectDto.getId();
         projectDto.setStatus(ProjectStatus.IN_PROGRESS);
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
-        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectDto, projectId).getStatus());
+        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectDto).getStatus());
         Mockito.verify(projectRepository).save(any());
-        Assertions.assertEquals(project.getDescription(), projectService.update(projectDto, projectId).getDescription());
+        Assertions.assertEquals(project.getDescription(), projectService.update(projectDto).getDescription());
     }
 
     @Test
     void testUpdateThrowsDataNotExistingException() {
-        long projectId = 1L;
+        long projectId = projectDto.getId();
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(null);
-        Assertions.assertThrows(DataNotExistingException.class, () -> projectService.update(projectDto, projectId));
+        Assertions.assertThrows(DataNotFoundException.class, () -> projectService.update(projectDto));
     }
 
     @Test
     void testUpdateDescription() {
-        long projectId = 1L;
+        long projectId = projectDto.getId();
         projectDto.setDescription("New Description");
 
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
-        Assertions.assertEquals("New Description", projectService.update(projectDto, projectId).getDescription());
+        Assertions.assertEquals("New Description", projectService.update(projectDto).getDescription());
         Mockito.verify(projectRepository).save(any());
-        Assertions.assertEquals(project.getStatus(), projectService.update(projectDto, projectId).getStatus());
+        Assertions.assertEquals(project.getStatus(), projectService.update(projectDto).getStatus());
     }
 
     @Test
     void testUpdateStatusAndDescription() {
-        long projectId = 1L;
+        long projectId = projectDto.getId();
         projectDto.setStatus(ProjectStatus.IN_PROGRESS);
         projectDto.setDescription("New Description");
 
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
-        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectDto, projectId).getStatus());
+        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectDto).getStatus());
 
         Mockito.verify(projectRepository).save(any());
-        String descriptionResult = projectService.update(projectDto, projectId).getDescription();
+        String descriptionResult = projectService.update(projectDto).getDescription();
         Assertions.assertEquals("New Description", descriptionResult);
     }
 
@@ -195,12 +207,10 @@ class ProjectServiceTest {
                 .projectNamePattern("Proj")
                 .status(ProjectStatus.CREATED)
                 .build();
-        projectService = new ProjectService(mockProjectMapper, projectRepository, filters, teamMemberJpaRepository);
+        projectService = new ProjectService(mockProjectMapper, projectRepository, filters);
         List<ProjectDto> filteredProjectsResult =
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
-        TeamMember teamMember = TeamMember.builder().team(team).build();
-        Mockito.when(teamMemberJpaRepository.findByUserIdAndProjectId(anyLong(), anyLong())).thenReturn(teamMember);
         List<ProjectDto> projectsWithFilter = projectService.getProjectsWithFilter(projectFilterDto, 1L);
         Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
     }
@@ -209,14 +219,23 @@ class ProjectServiceTest {
     void testGetAllProjects() {
         List<Project> projects = List.of(project, project1, project2, project3);
 
-        TeamMember teamMember = TeamMember.builder().team(team).build();
-        Mockito.when(teamMemberJpaRepository.findByUserIdAndProjectId(anyLong(), anyLong())).thenReturn(teamMember);
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
-        List<ProjectDto> filteredProjectsResult =
+        List<ProjectDto> projectsExpected =
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
-        List<ProjectDto> projectsWithFilter = projectService.getAllProjects(1L);
-        Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
+        List<ProjectDto> projectsResult = projectService.getAllProjects(1L);
+        Assertions.assertEquals(projectsExpected, projectsResult);
+    }
+
+    @Test
+    void testGetEmptyListProjects() {
+        List<Project> projects = List.of(project1, project3);
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        List<ProjectDto> projectsExpected = new ArrayList<>();
+
+        List<ProjectDto> projectsResult = projectService.getAllProjects(1L);
+        Assertions.assertEquals(projectsExpected, projectsResult);
     }
 
     @Test
