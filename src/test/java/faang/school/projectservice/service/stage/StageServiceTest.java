@@ -66,7 +66,7 @@ public class StageServiceTest {
                         .id(1L)
                         .name("project")
                         .tasks(tasks)
-                        .status(ProjectStatus.TODO)
+                        .status(ProjectStatus.IN_PROGRESS)
                         .build())
                 .build();
     }
