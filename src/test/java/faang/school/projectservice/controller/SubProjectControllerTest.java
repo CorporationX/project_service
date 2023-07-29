@@ -19,7 +19,6 @@ class SubProjectControllerTest {
         ProjectDto notNullName = new ProjectDto();
         ProjectDto notBlankName = ProjectDto.builder().name("").build();
 
-
         assertThrows(DataValidationException.class,
                 () -> subProjectController.createSubProject(notNullName), "Enter project name, please");
         assertThrows(DataValidationException.class,

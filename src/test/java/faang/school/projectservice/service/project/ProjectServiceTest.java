@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.SubProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -308,5 +309,68 @@ public class ProjectServiceTest {
         projectService.updateSubProject(subProjectDto);
 
         verify(momentService, times(1)).createMomentCompletedForSubProject(subProject);
+    }
+
+    @Test
+    void testGetFilteredSubProjects() {
+        Long projectId = 1L;
+        List<Project> subProjects = List.of(
+                Project.builder()
+                        .name("SubProject1")
+                        .status(ProjectStatus.CREATED)
+                        .build(),
+                Project.builder()
+                        .name("SubProject2")
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build(),
+                Project.builder()
+                        .name("SubProject3")
+                        .status(ProjectStatus.COMPLETED)
+                        .build(),
+                Project.builder()
+                        .name("subProject4")
+                        .status(ProjectStatus.CANCELLED)
+                        .build()
+        );
+        Project parentProject = Project.builder()
+                .id(projectId)
+                .children(subProjects)
+                .build();
+        SubProjectFilterDto filtersDto = SubProjectFilterDto.builder()
+                .projectId(projectId)
+                .nameFilter("Sub")
+                .statusFilter(List.of(ProjectStatus.IN_PROGRESS, ProjectStatus.COMPLETED))
+                .build();
+
+        when(projectRepository.existsById(projectId)).thenReturn(true);
+        when(projectRepository.getProjectById(projectId)).thenReturn(parentProject);
+
+        List<ProjectDto> actualProjects = projectService.getFilteredSubProjects(filtersDto);
+
+        assertEquals(2, actualProjects.size());
+        assertEquals("SubProject2", actualProjects.get(0).getName());
+        assertEquals(ProjectStatus.COMPLETED, actualProjects.get(1).getStatus());
+    }
+
+    @Test
+    void testGetFilteredEmptySubProjects() {
+        Long projectId = 1L;
+        List<Project> subProjects = List.of();
+        Project parentProject = Project.builder()
+                .id(projectId)
+                .children(subProjects)
+                .build();
+        SubProjectFilterDto filtersDto = SubProjectFilterDto.builder()
+                .projectId(projectId)
+                .nameFilter("Sub")
+                .statusFilter(List.of(ProjectStatus.IN_PROGRESS, ProjectStatus.COMPLETED))
+                .build();
+
+        when(projectRepository.existsById(projectId)).thenReturn(true);
+        when(projectRepository.getProjectById(projectId)).thenReturn(parentProject);
+
+        List<ProjectDto> actualProjects = projectService.getFilteredSubProjects(filtersDto);
+
+        assertEquals(0, actualProjects.size());
     }
 }
