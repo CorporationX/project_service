@@ -39,25 +39,16 @@ public class ProjectController {
 
     @PostMapping("/{userId}")
     public List<ProjectDto> getProjectWithFilters(@RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
-        if (userId <= 0) {
-            throw new DataValidationException("UserId can't be negative or zero");
-        }
         return projectService.getProjectsWithFilter(projectFilterDto, userId);
     }
 
     @GetMapping("/project/{userId}")
     public List<ProjectDto> getAllProjects(@PathVariable long userId) {
-        if (userId <= 0) {
-            throw new DataValidationException("UserId can't be negative or zero");
-        }
         return projectService.getAllProjects(userId);
     }
 
     @GetMapping("/project")
-    public ProjectDto getProjectById(@RequestParam("projectId") long projectId,@RequestParam("userId") long userId) {
-        if (projectId <= 0 || userId <= 0) {
-            throw new DataValidationException("Id can't be negative or zero");
-        }
+    public ProjectDto getProjectById(@RequestParam("projectId") long projectId, @RequestParam("userId") long userId) {
         return projectService.getProjectById(projectId, userId);
     }
 
@@ -79,9 +70,6 @@ public class ProjectController {
     }
 
     private void validateUpdateProject(ProjectDto projectDto) {
-        if (projectDto.getId() <= 0) {
-            throw new DataValidationException("Id can't be negative or zero");
-        }
         if (projectDto.getDescription() != null) {
             if (projectDto.getDescription().length() > MAX_DESCRIPTION_LENGTH) {
                 throw new DataValidationException("Project's description length can't be more than 4096 symbols");
