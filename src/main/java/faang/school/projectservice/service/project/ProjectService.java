@@ -95,9 +95,6 @@ public class ProjectService {
         if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
             updateChildrenVisibility(subProject, projectDto.getVisibility());
         }
-        if (projectDto.getVisibility() != null && !projectDto.getVisibility().equals(subProject.getVisibility())) {
-            updateChildrenVisibility(subProject, projectDto.getVisibility());
-        }
         if (!sPStatusDto.equals(ProjectStatus.COMPLETED)) {
             subProject.setStatus(sPStatusDto);
         } else if (checkChildrenStatusCompleted(subProject)) {
