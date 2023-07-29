@@ -94,26 +94,32 @@ public class ProjectService {
         Project projectById = projectRepository.getProjectById(projectId);
         TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, projectId);
         Team team = null;
+
         if (teamMember != null){
             team = teamMember.getTeam();
         }
         Team userTeam = team;
+
+        boolean isUserNotInPrivateProjectTeam = projectById.getTeams().stream()
+                .noneMatch(projectTeam -> projectTeam == userTeam);
+
         if (projectById.getVisibility() == ProjectVisibility.PRIVATE
-                && projectById.getTeams().stream().noneMatch(projectTeam -> projectTeam == userTeam)) {
+                && isUserNotInPrivateProjectTeam) {
             throw new PrivateAccessException("This project is private");
         }
         return projectMapper.toDto(projectById);
     }
-
 
     private List<Project> getAvailableProjectsForCurrentUser(long userId) {
         List<Project> projects = projectRepository.findAll();
         List<Project> availableProjects = new ArrayList<>(projects.stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC)
                 .toList());
+
         List<Project> privateProjects = projects.stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PRIVATE)
                 .toList();
+
         List<Team> userTeams = new ArrayList<>();
         for (Project privateProject : privateProjects) {
             TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, privateProject.getId());
@@ -121,9 +127,11 @@ public class ProjectService {
                 userTeams.add(teamMember.getTeam());
             }
         }
+
         privateProjects = projects.stream()
                 .filter(project -> isUserInPrivateProjectTeam(project, userTeams))
                 .toList();
+
         availableProjects.addAll(privateProjects);
         return availableProjects;
     }

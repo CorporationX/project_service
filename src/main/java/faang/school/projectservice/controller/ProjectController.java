@@ -52,7 +52,7 @@ public class ProjectController {
 
     @GetMapping("/project")
     public ProjectDto getProjectById(@RequestParam("projectId") long projectId,@RequestParam("userId") long userId) {
-        if (projectId <= 0) {
+        if (projectId <= 0 || userId <= 0) {
             throw new DataValidationException("Id can't be negative or zero");
         }
         return projectService.getProjectById(projectId, userId);

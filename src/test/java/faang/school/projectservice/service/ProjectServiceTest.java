@@ -45,12 +45,12 @@ class ProjectServiceTest {
     private TeamMemberJpaRepository teamMemberJpaRepository;
 
 
-    ProjectDto projectDto;
-    Project project;
-    Project project1;
-    Project project2;
-    Project project3;
-    Team team = new Team();
+    private ProjectDto projectDto;
+    private Project project;
+    private Project project1;
+    private Project project2;
+    private Project project3;
+    private final Team team = new Team();
 
     @BeforeEach
     void setUp() {
