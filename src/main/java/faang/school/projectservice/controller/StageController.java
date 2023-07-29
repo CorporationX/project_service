@@ -5,6 +5,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,8 +25,13 @@ public class StageController {
     }
 
     @DeleteMapping("/{stageId}")
-    public void deleteStage(@PathVariable long stageId){
+    public void deleteStage(@PathVariable long stageId) {
         stageService.deleteStage(stageId);
+    }
+
+    @GetMapping("/{stageId}")
+    public StageDto getStageById(@PathVariable long stageId) {
+        return stageService.getStageById(stageId);
     }
 
     private void validateStage(StageDto stageDto) {
@@ -42,4 +48,6 @@ public class StageController {
             throw new DataValidationException("Stage roles cannot be null or empty");
         }
     }
+
+
 }

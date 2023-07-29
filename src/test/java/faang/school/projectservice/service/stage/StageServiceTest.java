@@ -105,4 +105,11 @@ public class StageServiceTest {
         Mockito.verify(taskRepository).saveAll(tasks);
         Mockito.verify(stageRepository).delete(stage1);
     }
+
+    @Test
+    void testFindById() {
+        Mockito.when(stageRepository.getById(anyLong())).thenReturn(stage1);
+        stageService.getStageById(anyLong());
+        Mockito.verify(stageMapper).toDto(stage1);
+    }
 }

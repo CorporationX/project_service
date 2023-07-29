@@ -38,6 +38,11 @@ public class StageService {
         stageRepository.delete(stageById);
     }
 
+    public StageDto getStageById(Long stageId) {
+        Stage stageById = stageRepository.getById(stageId);
+        return stageMapper.toDto(stageById);
+    }
+
     private void validationStageDto(StageDto stageDto) {
         Project projectById = projectRepository.getProjectById(stageDto.getProjectId());
 
