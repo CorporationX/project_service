@@ -186,39 +186,6 @@ class ProjectServiceTest {
 
     @Test
     void testGetProjectsWithFilter() {
-        Project project1 = Project.builder()
-                .id(1L)
-                .name("Project1")
-                .description("new Project")
-                .ownerId(1L)
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PRIVATE)
-                .teams(List.of(new Team()))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        Project project2 = Project.builder()
-                .id(2L)
-                .name("Project2")
-                .description("new Project")
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .teams(List.of(new Team()))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        Project project3 = Project.builder()
-                .id(3L)
-                .name("Project3")
-                .description("new Project")
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PRIVATE)
-                .teams(List.of(new Team()))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
         List<Project> projects = List.of(project, project1, project2, project3);
 
         Mockito.when(projectRepository.findAll()).thenReturn(projects);

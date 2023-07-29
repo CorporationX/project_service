@@ -83,8 +83,9 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getAllProjects(long userId) {
-        Stream<Project> projects = getAvailableProjectsForCurrentUser(userId).stream();
-        return projects.map(projectMapper::toDto).toList();
+        return getAvailableProjectsForCurrentUser(userId).stream()
+                .map(projectMapper::toDto)
+                .toList();
     }
 
     private List<Project> getAvailableProjectsForCurrentUser(long userId) {
