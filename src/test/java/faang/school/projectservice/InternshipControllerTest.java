@@ -1,14 +1,15 @@
 package faang.school.projectservice;
 
 import faang.school.projectservice.controller.InternshipController;
+import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.service.InternshipService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -26,6 +27,6 @@ public class InternshipControllerTest {
     @Test
     public void validateInternshipTest() {
         assertThrows(DataValidationException.class,
-                () -> internshipController.updateInternship(new Internship(), new ArrayList<>(), new Task()));
+                () -> internshipController.updateInternship(new InternshipDto(), Mockito.anyLong()));
     }
 }
