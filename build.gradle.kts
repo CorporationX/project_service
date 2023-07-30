@@ -60,6 +60,14 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+
+    /**
+     * Swagger
+     */
+    //implementation("io.springfox:springfox-swagger-ui:3.0.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+
 }
 
 tasks.withType<Test> {
