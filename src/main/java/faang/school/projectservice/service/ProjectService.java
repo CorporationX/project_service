@@ -18,10 +18,10 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +33,9 @@ public class ProjectService {
 
     public ProjectDto createSubProject(ProjectDto projectDto) {
         validateSubProject(projectDto);
+        validateProjectNotExist(projectDto);
         validateParentProjectExist(projectDto);
         checkSubProjectNotPrivateOnPublicProject(projectDto);
-        validateProjectNotExist(projectDto);
         Project subProject = subProjectMapper.toEntity(projectDto);
         subProject.setChildren(projectRepository.findAllByIds(projectDto.getChildrenIds()));
         Project parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
@@ -63,23 +63,22 @@ public class ProjectService {
         Project originalProject = projectRepository.getProjectById(projectDto.getId());
 
         if (projectDto.getStatus() != null && projectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
-            List<Project> allProjects = collectAllProjectsByUniqueId(originalProject, projectDto);
+            List<Project> allProjects = projectRepository.findAllByIds(projectDto.getChildrenIds());
             allProjects.forEach(this::checkSubProjectStatusCompleteOrCancelled);
             updatedProject.setChildren(allProjects);
-            createAndSaveMoment(projectDto);
             updateAllNeededFields(projectDto, originalProject, updatedProject);
             projectRepository.save(updatedProject);
+            momentRepository.save(createMoment(projectDto));
             return Timestamp.valueOf(originalProject.getUpdatedAt());
         }
-
+        List<Project> subProjects = projectRepository.findAllByIds(projectDto.getChildrenIds());
         if (projectDto.getVisibility() != null && projectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
-            List<Project> subProjects = collectAllProjectsByUniqueId(originalProject, projectDto);
             subProjects.stream()
                     .peek(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE))
                     .forEach(projectRepository::save);
             updatedProject.setChildren(subProjects);
         } else {
-            updatedProject.setChildren(collectAllProjectsByUniqueId(originalProject, projectDto));
+            updatedProject.setChildren(subProjects);
         }
 
         updateAllNeededFields(projectDto, originalProject, updatedProject);
@@ -87,57 +86,54 @@ public class ProjectService {
         return Timestamp.valueOf(originalProject.getUpdatedAt());
     }
 
-    public void createAndSaveMoment(ProjectDto projectDto) {
+    public Moment createMoment(ProjectDto projectDto) {
         Project project = projectRepository.getProjectById(projectDto.getId());
-        Moment moment = new Moment();
-        moment.setName(String.format("%s project tasks", projectDto.getName()));
-        moment.setDescription(String.format("All tasks are completed in %s project", projectDto.getName()));
-        moment.setResource(project.getResources());
-        moment.setProjects(project.getChildren());
+        Moment moment = Moment.builder()
+                .name(String.format("%s project tasks", projectDto.getName()))
+                .description(String.format("All tasks are completed in %s project", projectDto.getName()))
+                .resource(project.getResources())
+                .projects(new ArrayList<>(project.getChildren()))
+                .userIds(collectAllUsersIdOnProject(project))
+                .imageId(project.getCoverImageId())
+                .createdBy(projectDto.getOwnerId())
+                .updatedBy(project.getOwnerId())
+                .build();
         moment.getProjects().add(project);
-        moment.setUserIds(collectAllUsersIdOnProject(project));
-        moment.setImageId(project.getCoverImageId());
-        moment.setCreatedBy(projectDto.getOwnerId());
-        moment.setUpdatedBy(project.getOwnerId());
-        momentRepository.save(moment);
+        return moment;
     }
 
     public List<Long> collectAllUsersIdOnProject(Project project) {
-        Set<Long> userIds = project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream()
-                        .map(TeamMember::getId))
-                .collect(Collectors.toSet());
-        project.getChildren().stream()
-                .flatMap(subProject -> momentRepository.findAllByProjectId(subProject.getId()).stream())
-                .flatMap(subProjectMoment -> subProjectMoment.getUserIds().stream())
-                .forEach(userIds::add);
-        return userIds.stream().toList();
+        Set<Long> userIds = new HashSet<>();
+        if (project.getTeams() != null && !project.getTeams().isEmpty()) {
+            if (project.getChildren() != null && !project.getChildren().isEmpty()) {
+                collectTeamUserIds(project, userIds);
+                collectChildrenMomentUserIds(project, userIds);
+            } else {
+                collectTeamUserIds(project, userIds);
+            }
+        } else if (project.getChildren() != null && !project.getChildren().isEmpty()) {
+            collectChildrenMomentUserIds(project, userIds);
+        }
+        return new ArrayList<>(userIds);
     }
 
-    public void updateAllNeededFields(ProjectDto projectDto, Project originalProject, Project updatedProject) {
-        setThreeField(projectDto, updatedProject);
+    public Project changeParentProject(ProjectDto projectDto, Project originalProject) {
+        if (projectDto.getParentProjectId() != null && !Objects.equals(originalProject.getParentProject().getId(), projectDto.getParentProjectId())) {
+            Project oldParentProject = originalProject.getParentProject();
+            oldParentProject.getChildren().remove(originalProject);
+            projectRepository.save(oldParentProject);
+            Project newParentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
+            newParentProject.getChildren().add(originalProject);
+            projectRepository.save(newParentProject);
+            originalProject.setParentProject(newParentProject);
+        }
+        return originalProject;
+    }
+
+    private void updateAllNeededFields(ProjectDto projectDto, Project originalProject, Project updatedProject) {
         Project originalWithNewParrentProject = changeParentProject(projectDto, originalProject);
         updatedProject.setParentProject(originalWithNewParrentProject.getParentProject());
-    }
-
-    public List<Project> collectAllProjectsByUniqueId(Project originalProject, ProjectDto projectDto) {
-        List<Project> allSubProjects = new ArrayList<>();
-        if (!originalProject.getChildren().isEmpty()) {
-            if (projectDto.getChildrenIds() != null && !projectDto.getChildrenIds().isEmpty()) {
-                List<Long> dataBaseProjectIds = originalProject.getChildren().stream()
-                        .map(Project::getId).toList();
-                List<Long> allSubProjectsIds = projectDto.getChildrenIds().stream()
-                        .flatMap(subProjectId -> dataBaseProjectIds.stream()
-                                .filter(id -> !Objects.equals(id, subProjectId)))
-                        .toList();
-                allSubProjects.addAll(projectRepository.findAllByIds(allSubProjectsIds));
-            } else {
-                allSubProjects.addAll(originalProject.getChildren());
-            }
-        } else if (projectDto.getChildrenIds() != null && !projectDto.getChildrenIds().isEmpty()) {
-            allSubProjects.addAll(projectRepository.findAllByIds(projectDto.getChildrenIds()));
-        }
-        return allSubProjects;
+        setThreeField(projectDto, updatedProject);
     }
 
     private void setThreeField(ProjectDto projectDto, Project project) {
@@ -156,17 +152,18 @@ public class ProjectService {
         }
     }
 
-    private Project changeParentProject(ProjectDto projectDto, Project project) {
-        if (projectDto.getParentProjectId() != null && !Objects.equals(project.getParentProject().getId(), projectDto.getParentProjectId())) {
-            Project oldParentProject = project.getParentProject();
-            oldParentProject.getChildren().remove(project);
-            projectRepository.save(oldParentProject);
-            Project newParentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
-            newParentProject.getChildren().add(project);
-            projectRepository.save(newParentProject);
-            project.setParentProject(newParentProject);
-        }
-        return project;
+    private void collectTeamUserIds(Project project, Set<Long> collectIn) {
+        project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream()
+                        .map(TeamMember::getId))
+                .forEach(collectIn::add);
+    }
+
+    private void collectChildrenMomentUserIds(Project project, Set<Long> collectIn) {
+        project.getChildren().stream()
+                .flatMap(subProject -> momentRepository.findAllByProjectId(subProject.getId()).stream())
+                .flatMap(subProjectMoment -> subProjectMoment.getUserIds().stream())
+                .forEach(collectIn::add);
     }
 
     private void validateSubProject(ProjectDto projectDto) {
