@@ -35,6 +35,8 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+springfox.documentation.swagger.v2.path: /api-docs
+
 services:
   s3:
     endpoint: http://localhost:9000
