@@ -38,13 +38,13 @@ public class InternshipServiceTest {
     private InternshipService service;
 
     @Test
-    public void createInternshipNoInternsTest() {
+    public void createInternship_WithNoInterns_ThrowsDataValidationException_Test() {
         DataValidationException exception = assertThrows(DataValidationException.class, () -> service.createInternship(new InternshipDto()));
         assertEquals(exception.getMessage(), "No interns!");
     }
 
     @Test
-    public void createInternshipDurationTest() {
+    public void createInternship_Duration_ThrowsDataValidationException_Test() {
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> service.createInternship(InternshipDto.builder().interns(List.of(1L))
                         .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(4, ChronoUnit.MONTHS)).build()));
@@ -52,7 +52,7 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void createInternshipHasMentorTest() {
+    public void createInternship_Mentor_ThrowsDataValidationException_Test() {
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> service.createInternship(InternshipDto.builder().interns(List.of(1L))
                         .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
@@ -61,7 +61,7 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void createInternshipTest() {
+    public void createInternship_Test() {
         InternshipDto internshipDto = InternshipDto.builder().interns(List.of(1L))
                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
                 .mentorId(anyLong()).build();
@@ -70,7 +70,7 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void updateAlreadyOverInternshipTest() {
+    public void updateInternship_AlreadyOver_ThrowsDataValidationException_Test() {
         InternshipDto internshipDto = InternshipDto.builder().interns(List.of(1L))
                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
                 .mentorId(anyLong()).build();
@@ -84,7 +84,7 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void updateInternshipNewInternTest() {
+    public void updateInternship_TryToAddNewIntern_ThrowsDataValidationException_Test() {
         InternshipDto internshipDto = InternshipDto.builder()
                 .interns(List.of(1L, 2L, 3L))
                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
@@ -99,10 +99,10 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void updateInternshipTest() {
+    public void updateInternship_Test() {
         InternshipDto internshipDto = InternshipDto.builder()
                 .interns(List.of())
-                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                 .mentorId(anyLong()).build();
         long id = 1;
         Internship old = Internship.builder().name("OLD").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
@@ -116,7 +116,7 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void updateInternshipToCOMPLETEDTest() {
+    public void updateInternship_ToCOMPLETED_Test() {
         InternshipDto internshipDto = InternshipDto.builder()
                 .interns(List.of())
                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
@@ -134,7 +134,7 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void findAllInternshipsTest() {
+    public void findAllInternships_Test() {
         Internship i1 = Internship.builder().name("A").build();
         Internship i2 = Internship.builder().name("B").build();
         List<Internship> list = List.of(i1, i2);
@@ -148,7 +148,7 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void internshipsFilterTest() {
+    public void internships_Filter_Test() {
         List<InternshipFilter> filters = List.of(new InternshipStatusFilter());
         InternshipFilterDto filterDto = InternshipFilterDto.builder().status(InternshipStatus.IN_PROGRESS).build();
         System.out.println(filterDto);

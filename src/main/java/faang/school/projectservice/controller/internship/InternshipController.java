@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.internship.InternshipService;
+import faang.school.projectservice.validator.internship.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
@@ -15,7 +16,7 @@ public class InternshipController {
     private final InternshipService service;
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
-        internshipValidation(internshipDto);
+        InternshipValidator.internshipControllerValidation(internshipDto);
         return service.createInternship(internshipDto);
     }
 
@@ -23,7 +24,7 @@ public class InternshipController {
         if (id < 1) {
             throw new DataValidationException("ID error!");
         }
-        internshipValidation(internshipDto);
+        InternshipValidator.internshipControllerValidation(internshipDto);
         return service.updateInternship(id, internshipDto);
     }
 
@@ -42,15 +43,5 @@ public class InternshipController {
         return service.findInternshipsWithFilter(projectId, filterDto);
     }
 
-    private void internshipValidation(InternshipDto internshipDto) {
-        if (internshipDto == null) {
-            throw new DataValidationException("Internship is null!");
-        }
-        if (internshipDto.getName() == null || internshipDto.getName().isBlank()) {
-            throw new DataValidationException("Internship name can not be blank or null!");
-        }
-        if (internshipDto.getProjectId() == null || internshipDto.getProjectId() < 1) {
-            throw new DataValidationException("Internship relation project error!");
-        }
-    }
+
 }
