@@ -2,19 +2,15 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-07-19T11:40:02+0300",
+    date = "2023-07-28T15:36:36+0300",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.5 (Oracle Corporation)"
 )
 @Component
@@ -34,7 +30,7 @@ public class StageMapperImpl implements StageMapper {
         stageDto.stageId( stage.getStageId() );
         stageDto.stageName( stage.getStageName() );
         stageDto.project( projectToProjectDto( stage.getProject() ) );
-        stageDto.stageRoles( stageRolesListToStageRolesDtoList( stage.getStageRoles() ) );
+        stageDto.stageRoles( stageRolesMapper.toListEntity( stage.getStageRoles() ) );
 
         return stageDto.build();
     }
@@ -50,7 +46,7 @@ public class StageMapperImpl implements StageMapper {
         stage.stageId( stageDto.getStageId() );
         stage.stageName( stageDto.getStageName() );
         stage.project( projectDtoToProject( stageDto.getProject() ) );
-        stage.stageRoles( stageRolesDtoListToStageRolesList( stageDto.getStageRoles() ) );
+        stage.stageRoles( stageRolesMapper.toListDto( stageDto.getStageRoles() ) );
 
         return stage.build();
     }
@@ -72,19 +68,6 @@ public class StageMapperImpl implements StageMapper {
         return projectDto.build();
     }
 
-    protected List<StageRolesDto> stageRolesListToStageRolesDtoList(List<StageRoles> list) {
-        if ( list == null ) {
-            return null;
-        }
-
-        List<StageRolesDto> list1 = new ArrayList<StageRolesDto>( list.size() );
-        for ( StageRoles stageRoles : list ) {
-            list1.add( stageRolesMapper.toDto( stageRoles ) );
-        }
-
-        return list1;
-    }
-
     protected Project projectDtoToProject(ProjectDto projectDto) {
         if ( projectDto == null ) {
             return null;
@@ -100,18 +83,5 @@ public class StageMapperImpl implements StageMapper {
         project.status( projectDto.getStatus() );
 
         return project.build();
-    }
-
-    protected List<StageRoles> stageRolesDtoListToStageRolesList(List<StageRolesDto> list) {
-        if ( list == null ) {
-            return null;
-        }
-
-        List<StageRoles> list1 = new ArrayList<StageRoles>( list.size() );
-        for ( StageRolesDto stageRolesDto : list ) {
-            list1.add( stageRolesMapper.toEntity( stageRolesDto ) );
-        }
-
-        return list1;
     }
 }

@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.dto.SubtaskActionDto;
@@ -12,6 +13,9 @@ import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.StageValidator;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +36,12 @@ public class StageService {
 
     private final TeamMemberJpaRepository teamMemberJpaRepository;
 
+
+    private final StageInvitationRepository stageInvitationRepository;
+
     private final StageValidator stageValidator;
+
+    private final UserContext userContext;
 
     public StageDto createStage(StageDto stageDto) {
         stageValidator.validateStageDtoForProjectCompletedAndCancelled(stageDto);
@@ -53,9 +62,11 @@ public class StageService {
             taskRepository.deleteAll(tasks);
         } else if (SubtaskActionDto.CLOSE.equals(methodDeletingStageDto)) {
             tasks.forEach(task -> task.setStatus(TaskStatus.DONE));
+            taskRepository.saveAll(tasks);
         } else if (SubtaskActionDto.MOVE_TO_NEXT_STAGE.equals(methodDeletingStageDto)) {
             stage.setTasks(List.of());
             Stage stageToAddTasks = stageRepository.getById(newStageId);
+
             if (stageToAddTasks.getTasks() == null) {
                 stageToAddTasks.setTasks(new ArrayList<>());
             }
@@ -75,23 +86,34 @@ public class StageService {
         return stageRoles;
     }
 
-    private void inviteMembersToStage(StageRolesDto stageRoles, Stage stageById, int countTeamRoles) {
+    private void inviteMembersToStage(StageRolesDto stageRoles, Stage stageById, long countTeamRoles) {
         List<TeamMember> teamMembersInProject = teamMemberJpaRepository.findByProjectId(stageById.getProject().getId());
         teamMembersInProject.stream()
                 .filter(teamMember -> teamMember.getStages().stream()
                         .noneMatch(stage -> stage.getStageId().equals(stageById.getStageId())))
                 .filter(teamMember -> teamMember.getRoles().contains(stageRoles.getTeamRole()))
                 .limit(stageRoles.getCount() - countTeamRoles)
-                .forEach(teamMember -> teamMember.getStages().add(stageById));
+                .forEach(teamMember -> sendStageInvitation(stageById, teamMember));
         changeStageRolesToActual(stageRoles, stageById, countTeamRoles);
         teamMemberJpaRepository.saveAll(teamMembersInProject);
     }
 
-    private void changeStageRolesToActual(StageRolesDto stageRoles, Stage stageById, int countTeamRoles) {
+    private void sendStageInvitation(Stage stageById, TeamMember teamMember) {
+        StageInvitation invitation = StageInvitation.builder()
+                .description("Invitation to the stage " + stageById.getStageName())
+                .status(StageInvitationStatus.PENDING)
+                .stage(stageById)
+                .author(TeamMember.builder().id(userContext.getUserId()).build()) //вопрос как сделать автора?
+                .invited(teamMember)
+                .build();
+        stageInvitationRepository.save(invitation);
+    }
+
+    private void changeStageRolesToActual(StageRolesDto stageRoles, Stage stageById, long countTeamRoles) {
         stageById.getStageRoles().stream()
                 .filter(stageRole -> stageRole.getTeamRole().equals(stageRoles.getTeamRole()))
                 .findFirst()
-                .ifPresent(stageRole -> stageRole.setCount(stageRole.getCount() - countTeamRoles + stageRoles.getCount()));
+                .ifPresent(stageRole -> stageRole.setCount((int) (stageRole.getCount() - countTeamRoles + stageRoles.getCount())));
         stageRepository.save(stageById);
     }
 

@@ -2,12 +2,14 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.model.stage.StageRoles;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-07-19T11:40:02+0300",
+    date = "2023-07-28T15:36:36+0300",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.5 (Oracle Corporation)"
 )
 @Component
@@ -41,5 +43,33 @@ public class StageRolesMapperImpl implements StageRolesMapper {
         stageRolesDto.count( stageRoles.getCount() );
 
         return stageRolesDto.build();
+    }
+
+    @Override
+    public List<StageRoles> toListDto(List<StageRolesDto> stageRolesDtos) {
+        if ( stageRolesDtos == null ) {
+            return null;
+        }
+
+        List<StageRoles> list = new ArrayList<StageRoles>( stageRolesDtos.size() );
+        for ( StageRolesDto stageRolesDto : stageRolesDtos ) {
+            list.add( toEntity( stageRolesDto ) );
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<StageRolesDto> toListEntity(List<StageRoles> stageRoles) {
+        if ( stageRoles == null ) {
+            return null;
+        }
+
+        List<StageRolesDto> list = new ArrayList<StageRolesDto>( stageRoles.size() );
+        for ( StageRoles stageRoles1 : stageRoles ) {
+            list.add( toDto( stageRoles1 ) );
+        }
+
+        return list;
     }
 }

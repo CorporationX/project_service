@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
@@ -16,6 +17,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.StageValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +50,9 @@ class StageServiceTest {
     @Mock
     private TeamMemberJpaRepository teamMemberJpaRepository;
 
+    @Mock
+    private StageInvitationRepository stageInvitationRepository;
+
     @Spy
     private StageRolesMapperImpl stageRolesMapper;
 
@@ -56,6 +61,9 @@ class StageServiceTest {
 
     @Mock
     private StageValidator stageValidator;
+
+    @Mock
+    private UserContext userContext;
 
     private Stage stage1;
     private Stage stage2;
@@ -213,6 +221,7 @@ class StageServiceTest {
     void testUpdateStageRoles() {
         Mockito.when(stageRepository.getById(1L)).thenReturn(stage1);
         Mockito.when(teamMemberJpaRepository.findByProjectId(1L)).thenReturn(List.of(teamMember1, teamMember2, teamMember3));
+        Mockito.when(userContext.getUserId()).thenReturn(1L);
         stageRolesDto.setCount(2);
 
         stageService.updateStageRoles(1L, stageRolesDto);
