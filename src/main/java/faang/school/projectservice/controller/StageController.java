@@ -5,8 +5,10 @@ import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -14,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class StageController {
     private final StageService stageService;
 
-    @PostMapping("/stage")
+    @PostMapping
     public StageDto createStage(@RequestBody StageDto stage) {
         return stageService.createStage(stage);
     }
 
-    @DeleteMapping("/delete")
-    public void deleteStage(@RequestBody Long id1, @RequestBody Long id2, @RequestBody DeleteStageDto deleteStageDto) {
-        stageService.deleteStage(id1, id2, deleteStageDto);
+    @DeleteMapping("{id1}")
+    public void deleteStage(@PathVariable Long id1, @RequestBody DeleteStageDto deleteStageDto, @RequestParam("id2") Long id2) {
+        stageService.deleteStage(id1, deleteStageDto, id2);
     }
 }
