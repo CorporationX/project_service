@@ -32,9 +32,9 @@ public class StageController {
         stageService.deleteStageCloseTasks(stageId);
     }
 
-    @DeleteMapping("/stage/{stageId}/{stageToTransferId}")
-    public void deleteStageTransferTasks(@PathVariable long stageId, @PathVariable long stageToTransferId) {
-        stageService.deleteStageTransferTasks(stageId, stageToTransferId);
+    @DeleteMapping("/stage/{stageId}/{stageToUpdateId}")
+    public void deleteStageTransferTasks(@PathVariable long stageId, @PathVariable long stageToUpdateId) {
+        stageService.deleteStageTransferTasks(stageId, stageToUpdateId);
     }
 
     @GetMapping("/project/{projectId}")
