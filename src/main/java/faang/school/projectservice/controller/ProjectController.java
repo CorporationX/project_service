@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -38,18 +39,17 @@ public class ProjectController {
 
     @PostMapping("/{userId}")
     public List<ProjectDto> getProjectWithFilters(@RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
-        if (userId <= 0) {
-            throw new DataValidationException("UserId can't be negative or zero");
-        }
         return projectService.getProjectsWithFilter(projectFilterDto, userId);
     }
 
     @GetMapping("/project/{userId}")
     public List<ProjectDto> getAllProjects(@PathVariable long userId) {
-        if (userId <= 0) {
-            throw new DataValidationException("UserId can't be negative or zero");
-        }
         return projectService.getAllProjects(userId);
+    }
+
+    @GetMapping("/project")
+    public ProjectDto getProjectById(@RequestParam("projectId") long projectId, @RequestParam("userId") long userId) {
+        return projectService.getProjectById(projectId, userId);
     }
 
     private void validateCreateProject(ProjectDto projectDto) {
@@ -70,9 +70,6 @@ public class ProjectController {
     }
 
     private void validateUpdateProject(ProjectDto projectDto) {
-        if (projectDto.getId() <= 0) {
-            throw new DataValidationException("Id can't be negative or zero");
-        }
         if (projectDto.getDescription() != null) {
             if (projectDto.getDescription().length() > MAX_DESCRIPTION_LENGTH) {
                 throw new DataValidationException("Project's description length can't be more than 4096 symbols");

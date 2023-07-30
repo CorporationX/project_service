@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataNotFoundException;
+import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -83,6 +84,19 @@ public class ProjectService {
         return getAvailableProjectsForCurrentUser(userId).stream()
                 .map(projectMapper::toDto)
                 .toList();
+    }
+
+
+    public ProjectDto getProjectById(long projectId, long userId) {
+        Project projectById = projectRepository.getProjectById(projectId);
+        boolean isUserInPrivateProjectTeam = projectById.getTeams().stream()
+                .anyMatch(team -> team.getTeamMembers().stream()
+                        .anyMatch(teamMember -> teamMember.getUserId() == userId));
+
+        if (!isUserInPrivateProjectTeam) {
+            throw new PrivateAccessException("This project is private");
+        }
+        return projectMapper.toDto(projectById);
     }
 
     private List<Project> getAvailableProjectsForCurrentUser(long userId) {

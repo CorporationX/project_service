@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
+import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -233,5 +234,19 @@ class ProjectServiceTest {
 
         List<ProjectDto> projectsResult = projectService.getAllProjects(1L);
         Assertions.assertEquals(projectsExpected, projectsResult);
+    }
+
+    @Test
+    void getProjectById() {
+        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
+        Assertions.assertEquals(mockProjectMapper.toDto(project),
+                projectService.getProjectById(1L, 1L));
+    }
+
+    @Test
+    void getProjectByIdThrowsPrivateAccessException() {
+        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project3);
+        Assertions.assertThrows(PrivateAccessException.class,
+                () -> projectService.getProjectById(1L, 1L));
     }
 }
