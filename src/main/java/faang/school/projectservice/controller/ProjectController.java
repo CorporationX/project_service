@@ -6,6 +6,8 @@ import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class ProjectController {
@@ -16,18 +18,19 @@ public class ProjectController {
         return projectService.createProject(projectDto);
     }
 
-    public void updateProject(ProjectDto projectDto) {
+    public ProjectDto updateProject(Long id, ProjectDto projectDto) {
         projectValidate(projectDto);
-        projectService.updateProject( projectDto);
+        return projectService.updateProject(id, projectDto);
     }
 
-    public void getAllProjectsByStatus(ProjectDto projectDto) {
+    public List<ProjectDto> getAllProjectsByStatus(Long id, ProjectDto projectDto) {
         projectValidate(projectDto);
-        projectService.getAllProjectsByStatus(projectDto);
+        return projectService.getAllProjectsByStatus(id,projectDto);
     }
 
-    public void getAllProjects() {
-        projectService.getAllProjects();
+    public List<ProjectDto> getAllProjects() {
+
+        return projectService.getAllProjects();
     }
 
     public ProjectDto getProjectById(Long id) {

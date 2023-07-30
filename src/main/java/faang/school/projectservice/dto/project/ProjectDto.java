@@ -1,14 +1,7 @@
 package faang.school.projectservice.dto.project;
 
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.Schedule;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.stage.Stage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

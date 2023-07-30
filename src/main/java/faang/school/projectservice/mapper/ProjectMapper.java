@@ -6,7 +6,6 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Schedule;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.InjectionStrategy;
@@ -19,14 +18,14 @@ import org.mapstruct.ReportingPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring",injectionStrategy = InjectionStrategy.FIELD,
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
-    @Mapping(target = "stages.id", ignore = true)
+    @Mapping(target = "stagesId", source = "stages", qualifiedByName = "toStagesId")
     @Mapping(target = "scheduleId", source = "schedule.id")
     @Mapping(target = "teamsId", source = "teams", qualifiedByName = "toTeamsId")
-    @Mapping(target = "resourcesId", ignore = true)
-    @Mapping(target = "tasksId",source = "tasks", qualifiedByName = "toTasksId")
+    @Mapping(target = "resourcesId", source = "resources", qualifiedByName = "toResourceId")
+    @Mapping(target = "tasksId", source = "tasks", qualifiedByName = "toTasksId")
     @Mapping(target = "parentProjectId", source = "parentProject.id")
     @Mapping(target = "vacanciesId", source = "vacancies", qualifiedByName = "toVacanciesId")
     @Mapping(target = "childrenId", source = "children", qualifiedByName = "toChildrenId")
@@ -43,10 +42,10 @@ public interface ProjectMapper {
     Project toEntity(ProjectDto projectDto);
 
     @Mapping(target = "stages", source = "stagesId", qualifiedByName = "toStages")
-    @Mapping(target = "schedule.id", source = "scheduleId")
+    @Mapping(target = "schedule", source = "scheduleId", qualifiedByName = "toSchedule")
     @Mapping(target = "teams", source = "teamsId", qualifiedByName = "toTeams")
     @Mapping(target = "resources", source = "resourcesId", qualifiedByName = "toResource")
-    @Mapping(target = "parentProject.id", source = "parentProjectId")
+    @Mapping(target = "parentProject", source = "parentProjectId", qualifiedByName = "toProject")
     @Mapping(target = "tasks", source = "tasksId", qualifiedByName = "toTask")
     @Mapping(target = "vacancies", source = "vacanciesId", qualifiedByName = "toVacancies")
     @Mapping(target = "children", source = "childrenId", qualifiedByName = "toChildren")
@@ -78,6 +77,7 @@ public interface ProjectMapper {
         }
         return tasks;
     }
+
     @Named(value = "toVacanciesId")
     default List<Long> toVacanciesId(List<Vacancy> vacancies) {
         List<Long> tasks = new ArrayList<>();
@@ -95,6 +95,7 @@ public interface ProjectMapper {
         }
         return tasks;
     }
+
     @Named(value = "toTeamsId")
     default List<Long> toTeamId(List<Team> teams) {
         List<Long> tasks = new ArrayList<>();
@@ -113,14 +114,26 @@ public interface ProjectMapper {
     default Project toProject(Long id) {
         return Project.builder().id(id).build();
     }
+
+    @Named(value = "toResourceId")
+    default List<Long> toResourceId(List<Resource> resources) {
+        List<Long> tasks = new ArrayList<>();
+        for (Resource resource : resources) {
+            tasks.add(resource.getId());
+        }
+        return tasks;
+
+    }
+
     @Named(value = "toResource")
-    default List<Resource> toResourceId(List<Long> resourcesId) {
+    default List<Resource> toResource(List<Long> resourcesId) {
         List<Resource> tasks = new ArrayList<>();
         for (Long idResource : resourcesId) {
             tasks.add(Resource.builder().id(idResource).build());
         }
         return tasks;
     }
+
     @Named(value = "toTask")
     default List<Task> toTask(List<Long> tasksId) {
         List<Task> tasks = new ArrayList<>();
@@ -129,6 +142,7 @@ public interface ProjectMapper {
         }
         return tasks;
     }
+
     @Named(value = "toTasksId")
     default List<Long> toTaskId(List<Task> tasks) {
         List<Long> tasksId = new ArrayList<>();
@@ -137,12 +151,21 @@ public interface ProjectMapper {
         }
         return tasksId;
     }
-    @Named(value = "toStages")
-    default List<Stage> toId(List<Long> stages) {
-        List<Stage> tasks = new ArrayList<>();
-        for (Long idStage : stages) {
-            tasks.add(Stage.builder().stageId(idStage).build());
+
+    @Named(value = "toStagesId")
+    default List<Long> toStagesId(List<Stage> stages) {
+        List<Long> stagesId = new ArrayList<>();
+        for (Stage stage : stages) {
+            stagesId.add(stage.getStageId());
         }
-        return tasks;
+        return stagesId;
+    }
+    @Named(value = "toStages")
+    default List<Stage> toStages(List<Long> stagesId) {
+        List<Stage> oneStages = new ArrayList<>();
+        for (Long idStage : stagesId) {
+            oneStages.add(Stage.builder().stageId(idStage).build());
+        }
+        return oneStages;
     }
 }

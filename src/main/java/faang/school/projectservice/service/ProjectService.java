@@ -6,6 +6,7 @@ import faang.school.projectservice.filter.project_filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,20 +32,22 @@ public class ProjectService {
         return projectMapper.toDto(projectRepository.save(projectMapper.toEntity(projectDto)));
     }
 
-    //Обновить проект. Должна быть возможность изменять статус проекта, описание проекта.
-    // При этом для аудита необходимо проставлять TIMESTAMP на каждое последние изменение проекта.
-    public ProjectDto updateProject(ProjectDto projectDto) {
-        Project project = projectRepository.getProjectById(projectDto.getId());
-        projectDto.setUpdatedAt(LocalDateTime.now());
+    public ProjectDto updateProject(Long id, ProjectDto projectDto) {
+        validateProjectExists(id);
+        Project project = projectRepository.getProjectById(id);
         projectMapper.update(projectDto, project);
         return projectMapper.toDto(projectRepository.save(project));
     }
-    //Получить все проекты с фильтрами по названию или статусу.
-    // У проекта также должен быть признак приватности.
-    // Если проект приватный, то по поиску он должен быть видим только своим участникам.
 
-    public List<ProjectDto> getAllProjectsByStatus(ProjectDto projectDto) {
-        Stream<Project> projectStream = projectRepository.findAll().stream();
+    public List<ProjectDto> getAllProjectsByStatus(Long id, ProjectDto projectDto) {
+        validateProjectExists(id);
+        Stream<Project> projectStream = projectRepository.findAll().stream()
+                .filter(project ->  project.getVisibility().equals(ProjectVisibility.PUBLIC)
+                        || (project.getTeams().stream()
+                        .anyMatch(team -> team.getTeamMembers().stream()
+                                .anyMatch(teamMember -> teamMember.getId().equals(id)))
+                        && project.getVisibility().equals(ProjectVisibility.PRIVATE)));
+
         List<ProjectFilter> projectFilterList = projectFilter.stream()
                 .filter(filter -> filter.isApplicable(projectDto))
                 .toList();
@@ -62,42 +65,13 @@ public class ProjectService {
     }
 
     public ProjectDto getProjectById(Long id) {
+        validateProjectExists(id);
         return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 
-
-    //Обновить стажировку. Если стажировка завершена, то стажирующиеся должны получить новые роли на проекте,
-    // если прошли, и быть удалены из списка участников проекта, если не прошли.
-    // Участник считается прошедшим стажировку, если все запланированные задачи выполнены.
-    // После старта стажировки нельзя добавлять новых стажёров.
-    // Стажировку можно пройти досрочно или досрочно быть уволенным.
-//    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
-//        Internship internship = internshipRepository.findById(internshipDto.getId())
-//                .orElseThrow(() -> new IllegalArgumentException("Invalid internship"));
-//        Project project = internship.getProject();
-//        if (internship.getStatus().equals(IN_PROGRESS)){
-//            if (internship.getInterns().getStages().getTasks().) {
-//                internship.setStatus(ENDED);
-//            }
-//            for (TeamMember intern : internship.getInterns()){
-//                project.getTeam().getTeamMembers().remove(intern);
-//            }
-//            internship.setUpdatedAt(LocalDateTime.now());
-//        }
-//            List<TeamMember> interns = internship.getInterns();
-//            interns.forEach(intern -> {
-//                List <TaskStatus> tasksOfIntern = taskRepository.findAllByProjectIdAndPerformerId(internship.getProject().getId(), intern.getId())
-//                        .stream()
-//                        .map(task -> task.getStatus())
-//                        .toList();
-//                if (tasksOfIntern.stream().allMatch(task -> task.equals(TaskStatus.DONE))) {
-//                    //переписать будто стажер получает статус как у ментора
-//                    intern.addRole(TeamRole.JUNIOR);
-//                    intern.addRole(TeamRole.INTERN);
-//
-//                } else {
-//                    project.getTeam().getTeamMembers().remove(intern);
-//                }
-//            });
-
+    private void validateProjectExists(long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new DataValidationException("Project with this id = " + projectId + " does not exist");
+        }
+    }
 }
