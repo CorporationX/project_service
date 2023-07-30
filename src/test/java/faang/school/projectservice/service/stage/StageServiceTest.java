@@ -10,6 +10,7 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -129,10 +130,10 @@ class StageServiceTest {
 
     @Test
     public void testCreateInvalidStage_ProjectNotFound_ThrowsException() {
-        String errorMessage = "Project does not exist";
-        Mockito.when(projectRepository.getProjectById(stageDto.getProjectId())).thenThrow(new IllegalArgumentException());
+        String errorMessage = String.format("Project not found by id: %s", stageDto.getStageName());
+        Mockito.when(projectRepository.getProjectById(stageDto.getProjectId())).thenThrow(new EntityNotFoundException(errorMessage));
 
-        assertThrows(DataValidationException.class, () -> stageService.create(stageDto), errorMessage);
+        assertThrows(EntityNotFoundException.class, () -> stageService.create(stageDto), errorMessage);
     }
 
     @Test
@@ -172,7 +173,7 @@ class StageServiceTest {
     }
 
     @Test
-    public void testDeleteStageWithTasks(){
+    public void testDeleteStageWithTasks() {
         stageDto.setTaskIds(List.of(1L));
 
         Stage stage = new Stage();
@@ -184,12 +185,12 @@ class StageServiceTest {
         Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
         stageService.deleteStageWithTasks(1L);
 
-        Mockito.verify(taskRepository,Mockito.times(1)).deleteAll(stage.getTasks());
-        Mockito.verify(stageRepository,Mockito.times(1)).delete(stage);
+        Mockito.verify(taskRepository, Mockito.times(1)).deleteAll(stage.getTasks());
+        Mockito.verify(stageRepository, Mockito.times(1)).delete(stage);
     }
 
     @Test
-    public void testDeleteStageCloseTasks(){
+    public void testDeleteStageCloseTasks() {
         stageDto.setTaskIds(List.of(1L));
 
         Stage stage = new Stage();
@@ -201,12 +202,12 @@ class StageServiceTest {
         Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
         stageService.deleteStageCloseTasks(1L);
 
-        Mockito.verify(taskRepository,Mockito.times(stage.getTasks().size())).save(Mockito.any(Task.class));
-        Mockito.verify(stageRepository,Mockito.times(1)).delete(stage);
+        Mockito.verify(taskRepository, Mockito.times(stage.getTasks().size())).save(Mockito.any(Task.class));
+        Mockito.verify(stageRepository, Mockito.times(1)).delete(stage);
     }
 
     @Test
-    public void testDeleteStageTransferTasks(){
+    public void testDeleteStageTransferTasks() {
         stageDto.setTaskIds(List.of(1L));
 
         StageDto stageToTransferDto = new StageDto();
@@ -224,9 +225,9 @@ class StageServiceTest {
         Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
         Mockito.when(stageRepository.getById(2L)).thenReturn(stageToTransfer);
 
-        stageService.deleteStageTransferTasks(1L,2L);
+        stageService.deleteStageTransferTasks(1L, 2L);
 
-        Mockito.verify(stageRepository,Mockito.times(1)).save(stageToTransfer);
-        Mockito.verify(stageRepository,Mockito.times(1)).delete(stage);
+        Mockito.verify(stageRepository, Mockito.times(1)).save(stageToTransfer);
+        Mockito.verify(stageRepository, Mockito.times(1)).delete(stage);
     }
 }

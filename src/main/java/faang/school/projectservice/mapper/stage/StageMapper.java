@@ -38,7 +38,7 @@ public interface StageMapper {
 
     @Named(value = "toStageRoles")
     default List<StageRoles> toStageRoles(List<Long> stageRoleIds) {
-        if(stageRoleIds == null){
+        if (stageRoleIds == null) {
             return null;
         }
 
@@ -52,7 +52,7 @@ public interface StageMapper {
 
     @Named(value = "toStageRoleIds")
     default List<Long> toStageRoleIds(List<StageRoles> stageRoles) {
-        if(stageRoles == null){
+        if (stageRoles == null) {
             return null;
         }
 
@@ -66,7 +66,7 @@ public interface StageMapper {
 
     @Named(value = "toTasks")
     default List<Task> toTask(List<Long> taskIds) {
-        if(taskIds == null){
+        if (taskIds == null) {
             return null;
         }
 
@@ -80,7 +80,7 @@ public interface StageMapper {
 
     @Named(value = "toTaskIds")
     default List<Long> toTaskIds(List<Task> tasks) {
-        if(tasks == null){
+        if (tasks == null) {
             return null;
         }
 
@@ -93,22 +93,22 @@ public interface StageMapper {
     }
 
     @Named(value = "toExecutors")
-    default List<TeamMember> toExecutors(List<Long> executorIds){
-        if(executorIds == null){
+    default List<TeamMember> toExecutors(List<Long> executorIds) {
+        if (executorIds == null) {
             return null;
         }
 
         List<TeamMember> executors = new ArrayList<>();
         for (Long executorId : executorIds) {
-           executors.add(TeamMember.builder().id(executorId).build());
+            executors.add(TeamMember.builder().id(executorId).build());
         }
 
         return executors;
     }
 
     @Named(value = "toExecutorIds")
-    default List<Long> toExecutorIds(List<TeamMember> executors){
-        if(executors == null){
+    default List<Long> toExecutorIds(List<TeamMember> executors) {
+        if (executors == null) {
             return null;
         }
 
