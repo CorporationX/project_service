@@ -24,7 +24,7 @@ public class StageService {
 
     @Transactional
     public StageDto create(StageDto stageDto) {
-        validate(stageDto);
+        validateStageProject(stageDto);
 
         Stage stage = stageMapper.toEntity(stageDto);
         stageRepository.save(stage);
@@ -46,12 +46,8 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
-    private void validate(StageDto stageDto) {
-        validateStageProjectIsValid(stageDto);
-    }
-
-    private void validateStageProjectIsValid(StageDto stageDto) {
-        Project project = getStageProject(stageDto);
+    private void validateStageProject(StageDto stageDto) {
+        Project project = projectRepository.getProjectById(stageDto.getProjectId());
         ProjectStatus projectStatus = project.getStatus();
 
         if (!projectStatus.equals(ProjectStatus.IN_PROGRESS) && !projectStatus.equals(ProjectStatus.CREATED)) {
@@ -59,14 +55,6 @@ public class StageService {
                     "Project %d is %s", project.getId(), projectStatus.name().toLowerCase());
 
             throw new DataValidationException(errorMessage);
-        }
-    }
-
-    private Project getStageProject(StageDto stageDto) {
-        try {
-            return projectRepository.getProjectById(stageDto.getProjectId());
-        } catch (IllegalArgumentException e) {
-            throw new DataValidationException("Project does not exist");
         }
     }
 }
