@@ -1,106 +1,99 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
+import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
+import faang.school.projectservice.exception.DataValidateInviteException;
+import faang.school.projectservice.filter.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.validator.Validator;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.nio.file.AccessDeniedException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class StageInvitationService {
     private final StageInvitationRepository stageInvitationRepository;
     private final StageInvitationMapper stageInvitationMapper;
+    private final List<StageInvitationFilter> filters;
     private final TeamMemberRepository teamMemberRepository;
-    private final UserContext userContext;
-    private final Validator validator;
 
     @Transactional
-    public StageInvitationDto sendInvitation(StageInvitationDto stageInvitationDto) {
-        validator.validateStageInvitationDto(stageInvitationDto);
+    public StageInvitationDto sendInvitation(@NonNull StageInvitationDto stageInvitationDto) {
+        Long invitedUserId = stageInvitationDto.getInvited().getUserId();
+        TeamMember invitedUser = teamMemberRepository.findById(invitedUserId);
 
-        StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
-        stageInvitation.setStatus(StageInvitationStatus.PENDING);
-        stageInvitation = stageInvitationRepository.save(stageInvitation);
-        return stageInvitationMapper.toDto(stageInvitation);
+        if (invitedUser.getRoles().contains(TeamRole.OWNER) || invitedUser.getRoles().contains(TeamRole.MANAGER)) {
+            throw new DataValidateInviteException("Can't send invitation to user with OWNER or MANAGER role");
+        }
+
+        List<TeamMember> executors = stageInvitationDto.getStage().getExecutors();
+        boolean isUserAlreadyExecutor = executors.stream()
+                .anyMatch(executor -> executor.getId().equals(invitedUser.getId()));
+
+        if (!isUserAlreadyExecutor) {
+            StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
+            stageInvitation.setStatus(StageInvitationStatus.PENDING);
+            TeamMember author = stageInvitationDto.getStage().getExecutors().stream()
+                    .filter(teamMember -> teamMember.getRoles().contains(TeamRole.OWNER))
+                    .toList().get(0);
+            TeamMember invited = stageInvitationDto.getInvited();
+            stageInvitation.setAuthor(author);
+            stageInvitation.setInvited(invited);
+            return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
+        } else {
+            throw new DataValidateInviteException("User is already executor for this stage");
+        }
     }
 
     @Transactional
-    public StageInvitationDto acceptInvitation(StageInvitationDto stageInvitationDto, TeamMember invited) {
-        validator.validateStageInvitationDto(stageInvitationDto);
-
-        StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
+    public StageInvitationDto acceptInvitation(@NonNull StageInvitationDto stageInvitationDto) {
+        StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
 
+        TeamMember invitedUser = stageInvitation.getInvited();
         Stage stage = stageInvitation.getStage();
-        List<TeamMember> executors = stage.getExecutors();
-        executors.add(invited);
 
-        stageInvitation = stageInvitationRepository.save(stageInvitation);
-        return stageInvitationMapper.toDto(stageInvitation);
+        boolean isUserAlreadyExecutor = stage.getExecutors().stream()
+                .anyMatch(executor -> executor.getId().equals(invitedUser.getId()));
+
+        if (!isUserAlreadyExecutor) {
+            stageInvitation.getStage().getExecutors().add(stageInvitation.getInvited());
+        } else {
+            throw new DataValidateInviteException("User is already executor for this stage");
+        }
+        return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
     }
 
     @Transactional
-    public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto, TeamMember invited, String rejectionReason) {
-        validator.validateStageInvitationDto(stageInvitationDto);
-
-        StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
+    public StageInvitationDto rejectInvitation(@NonNull StageInvitationDto stageInvitationDto) {
+        StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
+        stageInvitationMapper.updateDto(stageInvitationDto, stageInvitation);
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
-
-        Stage stage = stageInvitation.getStage();
-        List<TeamMember> executors = stage.getExecutors();
-        executors.remove(invited);
-
-        stageInvitation.setRejectionReason(rejectionReason);
-
-        stageInvitation = stageInvitationRepository.save(stageInvitation);
-        return stageInvitationMapper.toDto(stageInvitation);
+        return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
     }
 
     @Transactional(readOnly = true)
-    public List<StageInvitationDto> getInvitationsForTeamMemberWithFilters(Long teamMemberId, String status, Long authorId) {
-        Long currentUserId = userContext.getUserId();
-        TeamMember currentUser = teamMemberRepository.findById(currentUserId);
-        if (currentUser == null) {
-            throw new RuntimeException("Current user is null");
-        }
-        validator.validateTeamMemberId(teamMemberId);
+    public List<StageInvitationDto> getInvitationsForTeamMemberWithFilters(Long userId, StageInvitationFilterDto stageInvitationFilterDto) {
+        Stream<StageInvitation> userInvitations = stageInvitationRepository.findAll().stream()
+                .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(userId));
+        List<StageInvitationFilter> requestedFilters = filters.stream()
+                .filter(stageInvitationFilter -> stageInvitationFilter.isApplicable(stageInvitationFilterDto))
+                .toList();
 
-        if (!currentUser.getId().equals(teamMemberId)) {
-            try {
-                throw new AccessDeniedException("You don't have permission to view invitations for this team member");
-            } catch (AccessDeniedException e) {
-                throw new RuntimeException(e);
-            }
+        for (StageInvitationFilter requestedFilter : requestedFilters) {
+            userInvitations = requestedFilter.apply(userInvitations, stageInvitationFilterDto);
         }
-
-        validator.validateInvitationsFilterParams(teamMemberId, status, authorId);
-        List<StageInvitation> invitations = stageInvitationRepository.findByInvitedId(teamMemberId);
-
-        if (status != null && !status.isEmpty()) {
-            invitations = invitations.stream()
-                    .filter(invitation -> invitation.getStatus().toString().equalsIgnoreCase(status))
-                    .collect(Collectors.toList());
-        }
-
-        if (authorId != null) {
-            invitations = invitations.stream()
-                    .filter(invitation -> invitation.getAuthor().getId().equals(authorId))
-                    .collect(Collectors.toList());
-        }
-        return invitations.stream()
-                .map(stageInvitationMapper::toDto)
-                .collect(Collectors.toList());
+        return userInvitations.map(stageInvitationMapper::toDto)
+                .toList();
     }
 }

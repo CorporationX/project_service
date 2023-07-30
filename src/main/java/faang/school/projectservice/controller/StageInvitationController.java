@@ -1,52 +1,39 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
 import faang.school.projectservice.service.StageInvitationService;
-import faang.school.projectservice.validator.Validator;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/stage-invitation")
+@RequestMapping("/invitation")
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
-    private final Validator validator;
 
     @PostMapping
-    public StageInvitationDto sendInvitation(@RequestBody StageInvitationDto stageInvitationDto) {
-        validator.validateStageInvitationDto(stageInvitationDto);
+    public StageInvitationDto sendInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
         return stageInvitationService.sendInvitation(stageInvitationDto);
     }
 
-    @PostMapping
-    public StageInvitationDto acceptInvitation(@RequestBody StageInvitationDto stageInvitationDto,
-                                               @RequestBody TeamMember invited) {
-        validator.validateStageInvitationDto(stageInvitationDto);
-        return stageInvitationService.acceptInvitation(stageInvitationDto, invited);
+    @PutMapping("/accept")
+    public StageInvitationDto acceptInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
+        return stageInvitationService.acceptInvitation(stageInvitationDto);
     }
 
-    @PostMapping
-    public StageInvitationDto rejectInvitation(@RequestBody StageInvitationDto stageInvitationDto,
-                                               @RequestBody TeamMember invited,
-                                               @RequestParam("rejectionReason") String rejectionReason) {
-        validator.validateStageInvitationDto(stageInvitationDto);
-        return stageInvitationService.rejectInvitation(stageInvitationDto, invited, rejectionReason);
+    @PutMapping("/reject")
+    public StageInvitationDto rejectInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
+        return stageInvitationService.rejectInvitation(stageInvitationDto);
     }
 
-    @GetMapping("/members/{teamMemberId}/invitations")
-    public List<StageInvitationDto> viewAllInvitationsForSingleMemberWithFilters(
-            @PathVariable("teamMemberId") Long teamMemberId,
-            @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "authorId", required = false) Long authorId) {
-
-        validator.validateTeamMemberId(teamMemberId);
-        if (authorId != null) {
-            validator.validateAuthorId(authorId);
-        }
-
-        return stageInvitationService.getInvitationsForTeamMemberWithFilters(teamMemberId, status, authorId);
+    @GetMapping("/{userId}")
+    public List<StageInvitationDto> getInvitationsForTeamMemberWithFilters(
+            @PathVariable @Valid @Min(0) Long userId,
+            @Valid StageInvitationFilterDto stageInvitationFilterDto) {
+        return stageInvitationService.getInvitationsForTeamMemberWithFilters(userId, stageInvitationFilterDto);
     }
 }

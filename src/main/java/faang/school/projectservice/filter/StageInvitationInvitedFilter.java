@@ -6,15 +6,15 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class StageInvitationAuthorFilter implements StageInvitationFilter{
+public class StageInvitationInvitedFilter implements StageInvitationFilter {
     @Override
     public boolean isApplicable(StageInvitationFilterDto stageInvitationFilterDto) {
-        return stageInvitationFilterDto.getAuthorPattern() != null;
+        return stageInvitationFilterDto.getInvitedPattern() != null;
     }
 
     @Override
     public Stream<StageInvitation> apply(Stream<StageInvitation> invitationStream, StageInvitationFilterDto stageInvitationFilterDto) {
         return invitationStream.filter(stageInvitation ->
-                stageInvitation.getAuthor().getUserId().equals(stageInvitationFilterDto.getAuthorPattern()));
+                stageInvitation.getInvited().getId().equals(stageInvitationFilterDto.getInvitedPattern()));
     }
 }
