@@ -60,12 +60,12 @@ public class StageService {
     }
 
     @Transactional
-    public void deleteStageTransferTasks(long stageId, long stageToTransferId) {
+    public void deleteStageTransferTasks(long stageId, long stageToUpdateId) {
         Stage stage = stageRepository.getById(stageId);
         List<Task> tasks = stage.getTasks();
-        Stage stageToUpdate = stageRepository.getById(stageToTransferId);
-
+        Stage stageToUpdate = stageRepository.getById(stageToUpdateId);
         List<Task> updatedTasks = stageToUpdate.getTasks();
+
         if (updatedTasks == null) {
             updatedTasks = new ArrayList<>();
         }
