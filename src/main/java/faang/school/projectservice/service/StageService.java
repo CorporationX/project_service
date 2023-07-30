@@ -1,11 +1,13 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.DeleteStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.project.ProjectException;
 import faang.school.projectservice.exception.stage.StageException;
-import faang.school.projectservice.filter.StageStatusFilter;
 import faang.school.projectservice.jpa.TaskRepository;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -28,8 +30,9 @@ public class StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final StageMapper stageMapper;
-    private final List<StageStatusFilter> stageDtoList;
+    private final ProjectMapper projectMapper;
     private final TaskRepository taskRepository;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
@@ -54,6 +57,17 @@ public class StageService {
             stageRepository.save(newStage);
         }
         stageRepository.delete(stage);
+    }
+
+    public List<StageDto> getAllStage(ProjectDto projectDto) {
+        if (projectDto.getName().isBlank()) {
+            throw new ProjectException("Name cannot be empty");
+        }
+        if (projectDto.getProjectStatus() == null) {
+            throw new ProjectException("The project must have a status");
+        }
+        projectMapper.toProjectDto(projectRepository.getProjectById(projectDto.getId()));
+        return projectDto.getStageList();
     }
 
     private StageDto validStage(StageDto stage) {

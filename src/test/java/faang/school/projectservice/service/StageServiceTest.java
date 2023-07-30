@@ -1,9 +1,12 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.DeleteStageDto;
+import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.project.ProjectException;
 import faang.school.projectservice.exception.stage.StageException;
 import faang.school.projectservice.jpa.TaskRepository;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -37,6 +40,8 @@ class StageServiceTest {
     private TaskRepository taskRepository;
     @Mock
     private StageMapper stageMapper;
+    @Mock
+    private ProjectMapper projectMapper;
     @InjectMocks
     private StageService stageService;
 
@@ -159,4 +164,29 @@ class StageServiceTest {
         stage.setTasks(new ArrayList<>());
         verify(stageRepository, times(1)).delete(stage);
     }
+
+    @Test
+    public void getAllStage_correctAnswer() {
+        ProjectDto project = ProjectDto.builder()
+                .id(5L)
+                .name("project")
+                .projectStatus(ProjectStatus.CANCELLED)
+                .stageList(List.of(new StageDto(), new StageDto()))
+                .build();
+        List<StageDto> stageSize = stageService.getAllStage(project);
+        assertEquals(2, stageSize.size());
+    }
+
+    @Test
+    public void getAllStage_invalidStatus() {
+        ProjectDto project = ProjectDto.builder()
+                .id(5L)
+                .name("project")
+                .projectStatus(null)
+                .stageList(List.of(new StageDto(), new StageDto()))
+                .build();
+        ProjectException projectException = assertThrows(ProjectException.class, () -> stageService.getAllStage(project));
+        assertEquals("The project must have a status", projectException.getMessage());
+    }
+
 }
