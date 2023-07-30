@@ -13,14 +13,11 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,9 +44,6 @@ class VacancyServiceTest {
 
     @Spy
     private VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
-
-    @Spy
-    private VacancyValidator vacancyValidator;
 
     @Mock
     private ProjectRepository projectRepository;
@@ -128,13 +122,6 @@ class VacancyServiceTest {
         Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(createdBy);
     }
 
-    @ParameterizedTest
-    @MethodSource("prepareInvalidDto")
-    void TestCreateVacancy_WhenInvalidInputDto_ShouldThrowException(VacancyDto inputVacancy, String expectedMessage) {
-        Exception exception = assertThrows(VacancyValidateException.class,
-                () -> vacancyService.createVacancy(inputVacancy));
-        assertEquals(expectedMessage, exception.getMessage());
-    }
 
     private static Stream<Arguments> prepareInvalidDto() {
         VacancyDto DtoWithNullName = VacancyDto.builder().vacancyId(1L).build();
@@ -189,20 +176,6 @@ class VacancyServiceTest {
                 .createdBy(createdBy)
                 .status(VacancyStatus.OPEN)
                 .build();
-    }
-
-    private static Stream<Arguments> produceArgsForTestUpdateVacancy() {
-        // надо предоставить ДТО с изменениями и ожидаемый рез-т
-        VacancyDtoForUpdate vacancyDto = VacancyDtoForUpdate.builder()
-                .vacancyId(VACANCY_ID)
-                .status(VacancyStatus.OPEN)
-                .build();
-
-        Vacancy expectedVacancyAfterUpdate =
-
-        return Stream.of(
-
-        );
     }
 
     private VacancyDtoForUpdate getInputVacancyDtoForUpdate() {

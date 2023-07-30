@@ -12,7 +12,6 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,16 +33,9 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final VacancyValidator vacancyValidator;
 
     @Transactional
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
-        // вакансия всегда относиться к какому-то проекту
-        // -> перед созданием нужно проверить существует ли проект с таким ид
-        // значит надо сходить в БД и проверить что такой проект существует
-        // Также на проекте обязательно должен быть человек, ответственный за вакансию.
-        // значит должен иметь какую-то определенную роль
-        vacancyValidator.validateRequiredFieldsInDTO(vacancyDto);
         Project curProject = projectRepository.getProjectById(vacancyDto.getProjectId());
         checkOwnerVacancy(vacancyDto.getCreatedBy());
 
@@ -54,27 +46,12 @@ public class VacancyService {
 
     @Transactional
     public VacancyDto updateVacancy(VacancyDtoForUpdate vacancyDto) {
-        vacancyValidator.validateRequiredFeildsForUpdateVacancy(vacancyDto);
-        checkVacancyIsExist(vacancyDto.getVacancyId());
-        // если я просто хочу закрыть вакансию, допустим что все ок
-        // я сделаю update запрос с телом id вакансии, и статус = Close.
-        // остальные параметры мне не очень интересны
-        // должен ли я как то сопоставлять данные из БД с обновленными данными.
-        // или условно клиент изначально послал запрос получил данные вакансии, потом поменял у себя что-то
-        // апдейт сделлать когда?
-        // в дто-шке есть два поля с ID, те их надо при апдейте игнорировать
-        // т.е из ДТО получаем ИД проекта и ИД создателя, за этими сущностями идем в БД
-        // обновляем эти сущности в вакансии
-        // далее делаем апдейт, и если все ок, то должно сработать.
-
-        // пытаемся получить вакансиию
-        // сценарий если вакансии нет? должен ли я сохранять тогда, или выпасть по эксепшен
         Vacancy vacancyForUpdate = vacancyRepository.findById(vacancyDto.getVacancyId())
                 .orElseThrow(() -> new VacancyValidateException(
                         MessageFormat.format(VACANCY_NOT_EXIST_FORMAT, vacancyDto.getVacancyId())));
 
         // проверка возможности закрытия вакансии
-        if (isStatusClose(vacancyDto.getStatus())) {
+        if (isNeedChangedStatusToClosed(vacancyDto.getStatus())) {
             checkPossibilityCloseVacancy(vacancyForUpdate);
         }
 
@@ -87,31 +64,21 @@ public class VacancyService {
         return vacancyMapper.toDto(vacancyRepository.save(vacancyForUpdate));
     }
 
-    private boolean isStatusClose(VacancyStatus status) {
+    private boolean isNeedChangedStatusToClosed(VacancyStatus status) {
         return status.equals(VacancyStatus.CLOSED);
     }
 
     private void checkPossibilityCloseVacancy(Vacancy vacancy) {
         if (vacancy.getCandidates().size() < MIN_COUNT_MEMBERS) {
-            String errorMessage = MessageFormat.format(VACANCY_CANT_BE_CLOSED_FORMAT, vacancy.getId(), MIN_COUNT_MEMBERS);
+            String errorMessage = MessageFormat.format(VACANCY_CANT_BE_CLOSED_FORMAT,
+                    vacancy.getId(), MIN_COUNT_MEMBERS);
             throw new VacancyValidateException(errorMessage);
         }
-    }
-
-    private Vacancy saveVacancy(Vacancy vacancyEntity) {
-        return vacancyRepository.save(vacancyEntity);
     }
 
     private void checkProjectIsExist(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
             String errorMessage = MessageFormat.format(PROJECT_NOT_EXIST_FORMAT, projectId);
-            throw new VacancyValidateException(errorMessage);
-        }
-    }
-
-    private void checkVacancyIsExist(Long vacancyId) {
-        if (!vacancyRepository.existsById(vacancyId)) {
-            String errorMessage = MessageFormat.format(VACANCY_NOT_EXIST_FORMAT, vacancyId);
             throw new VacancyValidateException(errorMessage);
         }
     }

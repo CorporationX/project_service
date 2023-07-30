@@ -1,32 +1,31 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDtoForUpdate;
 import faang.school.projectservice.service.vacancy.VacancyService;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/vacancy")
+@RequestMapping("/api/v1/vacancy")
+@Validated
 @RequiredArgsConstructor
+@Tag(name = "Вакансии", description = "Взаимодействие с вакансиями.")
 public class VacancyController {
     private final VacancyService vacancyService;
-    private final VacancyValidator vacancyValidator;
 
     @PostMapping()
-    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
-        vacancyValidator.validateInputBody(vacancyDto);
+    @Operation(summary = "Создать новую вакансию.",
+    description = "Позволяет создать вакансию. Вакансия принадлежит проекту. " +
+            "Вакансию может создать участник с определенной ролью.")
+    public VacancyDto createVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
         return vacancyService.createVacancy(vacancyDto);
-    }
-
-    @PutMapping("/vacancy")
-    public VacancyDto updateVacancy(@RequestBody VacancyDtoForUpdate vacancyDto) {
-        vacancyValidator.validateInputBody(vacancyDto);
-        return vacancyService.updateVacancy(vacancyDto);
     }
 }
