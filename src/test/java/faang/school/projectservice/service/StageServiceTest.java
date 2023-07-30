@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.DeleteStageDto;
+import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.project.ProjectException;
 import faang.school.projectservice.exception.stage.StageException;
 import faang.school.projectservice.jpa.TaskRepository;
@@ -39,7 +40,6 @@ class StageServiceTest {
     private StageMapper stageMapper;
     @InjectMocks
     private StageService stageService;
-
     private Stage stage;
     private Stage stage1;
 
@@ -88,6 +88,7 @@ class StageServiceTest {
         when(stageRepository.save(any())).thenReturn(stage);
         stageService.createStage(StageMapper.INSTANCE.toStageDto(stage));
         verify(stageRepository, times(1)).save(any());
+        StageDto stageDto = stageService.createStage(StageMapper.INSTANCE.toStageDto(stage));
     }
 
     @Test
@@ -102,7 +103,7 @@ class StageServiceTest {
                 .tasks(List.of(new Task(), new Task()))
                 .build();
         when(stageRepository.getById(2L)).thenReturn(stage);
-        stageService.deleteStage(2L, null, DeleteStageDto.CASCADE);
+        stageService.deleteStage(2L, DeleteStageDto.CASCADE, null);
         verify(taskRepository, times(1)).deleteAll(stage.getTasks());
         verify(stageRepository, times(1)).delete(stage);
     }
@@ -119,7 +120,7 @@ class StageServiceTest {
                 .tasks(List.of(new Task(), new Task()))
                 .build();
         when(stageRepository.getById(2L)).thenReturn(stage);
-        stageService.deleteStage(2L, null, DeleteStageDto.CLOSE);
+        stageService.deleteStage(2L, DeleteStageDto.CLOSE, null);
         verify(stageRepository, times(1)).delete(stage);
     }
 
@@ -151,7 +152,7 @@ class StageServiceTest {
                 .build();
         when(stageRepository.getById(1L)).thenReturn(stage);
         when(stageRepository.getById(2L)).thenReturn(stageNew);
-        stageService.deleteStage(1L, 2L, DeleteStageDto.MOVE_TO_ANOTHER_STAGE);
+        stageService.deleteStage(1L, DeleteStageDto.MOVE_TO_ANOTHER_STAGE, 2L);
 
         stageNew.setTasks(tasks);
 

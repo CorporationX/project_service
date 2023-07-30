@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.stage.DeleteStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.project.ProjectException;
@@ -37,8 +38,7 @@ public class StageService {
         return stageMapper.toStageDto(stage);
     }
 
-    @Transactional
-    public void deleteStage(Long stageId1, Long stageId2, DeleteStageDto deleteStageDto) {
+    public void deleteStage(Long stageId1, DeleteStageDto deleteStageDto, Long stageId2) {
         Stage stage = stageRepository.getById(stageId1);
         List<Task> tasks = stage.getTasks();
         if (deleteStageDto.equals(DeleteStageDto.CASCADE)) {
