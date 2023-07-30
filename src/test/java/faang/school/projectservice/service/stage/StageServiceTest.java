@@ -8,6 +8,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -125,9 +126,10 @@ class StageServiceTest {
 
     @Test
     public void testCreateInvalidStage_ProjectNotFound_ThrowsException() {
-        String errorMessage = "Project does not exist";
-        Mockito.when(projectRepository.getProjectById(stageDto.getProjectId())).thenThrow(new IllegalArgumentException());
+        String errorMessage = String.format("Project not found by id: %s", stageDto.getProjectId());
+        Mockito.when(projectRepository.getProjectById(stageDto.getProjectId()))
+                .thenThrow(new EntityNotFoundException(errorMessage));
 
-        assertThrows(DataValidationException.class, () -> stageService.create(stageDto), errorMessage);
+        assertThrows(EntityNotFoundException.class, () -> stageService.create(stageDto), errorMessage);
     }
 }
