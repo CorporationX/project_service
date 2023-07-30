@@ -41,8 +41,8 @@ public class StageController {
         return stageService.getAllProjectStages(projectId);
     }
 
-    @GetMapping("/stage")
-    public StageDto getStageById(long stageId) {
+    @GetMapping("/stage/{stageId}")
+    public StageDto getStageById(@PathVariable long stageId) {
         return stageService.getStageById(stageId);
     }
 

@@ -18,7 +18,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class StageControllerTest {
     @Mock
     private StageService stageService;
-
     @InjectMocks
     private StageController stageController;
 
@@ -97,15 +95,15 @@ class StageControllerTest {
     }
 
     @Test
-    public void testGetStageById() {
+    public void testGetStageById() throws Exception {
         StageDto stageDto = new StageDto();
         stageDto.setStageId(1L);
         stageDto.setStageName("Name");
 
         Mockito.when(stageService.getStageById(1L)).thenReturn(stageDto);
 
-        StageDto output = stageController.getStageById(1L);
-        assertEquals(stageDto, output);
-        Mockito.verify(stageService, Mockito.times(1)).getStageById(1L);
+        mockMvc.perform(get("/stage/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(stageDto)));
     }
 }

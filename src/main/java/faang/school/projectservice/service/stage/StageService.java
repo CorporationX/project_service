@@ -29,7 +29,7 @@ public class StageService {
 
     @Transactional
     public StageDto create(StageDto stageDto) {
-        validate(stageDto);
+       validateStageProject(stageDto);
 
         Stage stage = stageMapper.toEntity(stageDto);
         stageRepository.save(stage);
@@ -91,11 +91,7 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
-    private void validate(StageDto stageDto) {
-        validateStageProjectIsValid(stageDto);
-    }
-
-    private void validateStageProjectIsValid(StageDto stageDto) {
+    private void validateStageProject(StageDto stageDto) {
         Project project = getStageProject(stageDto);
         ProjectStatus projectStatus = project.getStatus();
 
