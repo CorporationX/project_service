@@ -1,18 +1,29 @@
 package faang.school.projectservice.controller.stage;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage.StageService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class StageControllerTest {
@@ -22,19 +33,33 @@ class StageControllerTest {
     @InjectMocks
     private StageController stageController;
 
+    private MockMvc mockMvc;
+    @Spy
+    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    public void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(stageController).build();
+    }
+
     @Test
-    public void testCreateProjectStage_ValidStageName() {
+    public void testCreateProjectStage_ValidStageName() throws Exception {
         StageDto stageDto = new StageDto();
-        stageDto.setStageId(1L);
         stageDto.setStageName("Name");
         stageDto.setProjectId(2L);
-        Mockito.when(stageService.create(stageDto)).thenReturn(stageDto);
 
-        StageDto createdStageDto = stageController.createProjectStage(stageDto);
+        StageDto stageDto1 = new StageDto();
+        stageDto1.setStageId(1L);
+        stageDto1.setStageName("Name");
+        stageDto1.setProjectId(2L);
 
-        assertNotNull(createdStageDto);
-        assertEquals(stageDto, createdStageDto);
-        Mockito.verify(stageService, Mockito.times(1)).create(stageDto);
+        Mockito.when(stageService.create(stageDto)).thenReturn(stageDto1);
+
+        mockMvc.perform(post("/project")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(stageDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(stageDto1)));
     }
 
     @Test
@@ -56,18 +81,19 @@ class StageControllerTest {
     }
 
     @Test
-    public void testGetAllProjectStages() {
+    public void testGetAllProjectStages() throws Exception {
         StageDto stageDto = new StageDto();
         stageDto.setStageId(1L);
         stageDto.setStageName("Name");
         stageDto.setProjectId(2L);
+
         List<StageDto> stageDtos = List.of(stageDto);
 
         Mockito.when(stageService.getAllProjectStages(2L)).thenReturn(List.of(stageDto));
 
-        List<StageDto> output = stageController.getAllProjectStages(2L);
-        assertEquals(stageDtos, output);
-        Mockito.verify(stageService, Mockito.times(1)).getAllProjectStages(2L);
+        mockMvc.perform(get("/project/2"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(stageDtos)));
     }
 
     @Test

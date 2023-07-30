@@ -15,7 +15,7 @@ public class StageController {
     private final StageService stageService;
 
     @PostMapping("/project")
-    public StageDto createProjectStage(StageDto stageDto) {
+    public StageDto createProjectStage(@RequestBody StageDto stageDto) {
         validateStageName(stageDto);
 
         return stageService.create(stageDto);

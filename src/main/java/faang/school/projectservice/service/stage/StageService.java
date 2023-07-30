@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -65,6 +66,10 @@ public class StageService {
         Stage stageToUpdate = stageRepository.getById(stageToTransferId);
 
         List<Task> updatedTasks = stageToUpdate.getTasks();
+        if (updatedTasks == null) {
+            updatedTasks = new ArrayList<>();
+        }
+
         updatedTasks.addAll(tasks);
         stageToUpdate.setTasks(updatedTasks);
 
