@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataNotFoundException;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -78,6 +77,12 @@ public class ProjectService {
         }
         List<Project> listResult = projects.toList();
         return listResult.stream().map(projectMapper::toDto).toList();
+    }
+
+    public List<ProjectDto> getAllProjects(long userId) {
+        return getAvailableProjectsForCurrentUser(userId).stream()
+                .map(projectMapper::toDto)
+                .toList();
     }
 
     private List<Project> getAvailableProjectsForCurrentUser(long userId) {

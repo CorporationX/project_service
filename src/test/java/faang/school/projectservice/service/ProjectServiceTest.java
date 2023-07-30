@@ -26,10 +26,10 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -39,17 +39,15 @@ class ProjectServiceTest {
     private ProjectMapper mockProjectMapper = new ProjectMapperImpl();
     @Mock
     private ProjectRepository projectRepository;
-
-
-    private ProjectDto projectDto;
-    private Project project;
-
     private TeamMember teamMemberCurrentUser;
     private Team teamWithCurrentUser;
-
     private Team team;
-
     private TeamMember teamMember;
+    ProjectDto projectDto;
+    Project project;
+    Project project1;
+    Project project2;
+    Project project3;
 
     @BeforeEach
     void setUp() {
@@ -82,6 +80,39 @@ class ProjectServiceTest {
                 .status(ProjectStatus.CREATED)
                 .createdAt(now)
                 .updatedAt(now)
+                .build();
+        project1 = Project.builder()
+                .id(2L)
+                .name("Project1")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(team))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        project2 = Project.builder()
+                .id(3L)
+                .name("Project2")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .teams(List.of(team))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        project3 = Project.builder()
+                .id(4L)
+                .name("Project3")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(team))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -165,39 +196,6 @@ class ProjectServiceTest {
 
     @Test
     void testGetProjectsWithFilter() {
-        Project project1 = Project.builder()
-                .id(2L)
-                .name("Project1")
-                .description("new Project")
-                .ownerId(1L)
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PRIVATE)
-                .teams(List.of(team))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        Project project2 = Project.builder()
-                .id(3L)
-                .name("Project2")
-                .description("new Project")
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .teams(List.of(team))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        Project project3 = Project.builder()
-                .id(4L)
-                .name("Project3")
-                .description("new Project")
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PRIVATE)
-                .teams(List.of(team))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
         List<Project> projects = List.of(project, project1, project2, project3);
 
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
@@ -212,5 +210,28 @@ class ProjectServiceTest {
 
         List<ProjectDto> projectsWithFilter = projectService.getProjectsWithFilter(projectFilterDto, 1L);
         Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
+    }
+
+    @Test
+    void testGetAllProjects() {
+        List<Project> projects = List.of(project, project1, project2, project3);
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        List<ProjectDto> projectsExpected =
+                List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
+
+        List<ProjectDto> projectsResult = projectService.getAllProjects(1L);
+        Assertions.assertEquals(projectsExpected, projectsResult);
+    }
+
+    @Test
+    void testGetEmptyListProjects() {
+        List<Project> projects = List.of(project1, project3);
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        List<ProjectDto> projectsExpected = new ArrayList<>();
+
+        List<ProjectDto> projectsResult = projectService.getAllProjects(1L);
+        Assertions.assertEquals(projectsExpected, projectsResult);
     }
 }
