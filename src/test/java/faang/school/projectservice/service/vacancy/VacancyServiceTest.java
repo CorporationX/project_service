@@ -4,18 +4,19 @@ import faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacanc
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -31,7 +32,8 @@ import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesFo
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.NEGATIVE_CREATED_BY_ID_FORMAT;
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.NEGATIVE_PROJECT_ID_FORMAT;
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.PROJECT_NOT_EXIST_FORMAT;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class VacancyServiceTest {
@@ -40,9 +42,6 @@ class VacancyServiceTest {
 
     @Spy
     private VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
-
-    @Spy
-    private VacancyValidator vacancyValidator;
 
     @Mock
     private ProjectRepository projectRepository;
@@ -120,13 +119,6 @@ class VacancyServiceTest {
         Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(createdBy);
     }
 
-    @ParameterizedTest
-    @MethodSource("prepareInvalidDto")
-    void TestCreateVacancy_WhenInvalidInputDto_ShouldThrowException(VacancyDto inputVacancy, String expectedMessage) {
-        Exception exception = assertThrows(VacancyValidateException.class,
-                () -> vacancyService.createVacancy(inputVacancy));
-        assertEquals(expectedMessage, exception.getMessage());
-    }
 
     private static Stream<Arguments> prepareInvalidDto() {
         VacancyDto DtoWithNullName = VacancyDto.builder().vacancyId(1L).build();

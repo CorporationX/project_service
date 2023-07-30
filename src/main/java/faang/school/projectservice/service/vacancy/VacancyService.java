@@ -10,7 +10,6 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,16 +25,9 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final VacancyValidator vacancyValidator;
 
     @Transactional
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
-        // вакансия всегда относиться к какому-то проекту
-        // -> перед созданием нужно проверить существует ли проект с таким ид
-        // значит надо сходить в БД и проверить что такой проект существует
-        // Также на проекте обязательно должен быть человек, ответственный за вакансию.
-        // значит должен иметь какую-то определенную роль
-        vacancyValidator.validateRequiredFieldsInDTO(vacancyDto);
         Project curProject = projectRepository.getProjectById(vacancyDto.getProjectId());
         checkOwnerVacancy(vacancyDto.getCreatedBy());
 
