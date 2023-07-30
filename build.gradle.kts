@@ -65,7 +65,6 @@ dependencies {
     /**
      * Swagger
      */
-    //implementation("io.springfox:springfox-swagger-ui:3.0.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
 }
