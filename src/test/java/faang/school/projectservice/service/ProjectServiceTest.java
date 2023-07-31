@@ -8,6 +8,8 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
@@ -400,13 +402,69 @@ class ProjectServiceTest {
     }
 
     @Test
-    void collectAllUsersIdOnProjectTest() {
+    void collectAllUsersIdOnProjectWhenOnlyTeamExistTest() {
+        TeamMember first = TeamMember.builder()
+                .id(5L)
+                .build();
+        TeamMember second = TeamMember.builder()
+                .id(10L)
+                .build();
+        Team team = Team.builder()
+                .teamMembers(List.of(first, second))
+                .build();
+        Project projectWithTeam = Project.builder()
+                .teams(List.of(team))
+                .build();
 
-        projectService.collectAllUsersIdOnProject(null);
+        List<Long> expected = List.of(5L, 10L);
+
+        List<Long> result = projectService.collectAllUsersIdOnProject(projectWithTeam);
+
+        assertEquals(expected, result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void collectAllUsersIdOnProjectTestWhenOnlyChildrenExist() {
+        Project projectWithChildren = Project.builder()
+                .children(List.of(onlyWithIdProject, onlyWithIdProject))
+                .build();
+        List<Long> expected = List.of(1L);
+
+
+        Mockito.when(momentRepository.findAllByProjectId(1L))
+                .thenReturn(moments);
+
+        List<Long> result = projectService.collectAllUsersIdOnProject(projectWithChildren);
+
+        assertEquals(expected, result);
+        assertEquals(1, result.size());
+
+        Mockito.verify(momentRepository, Mockito.times(2)).findAllByProjectId(1L);
     }
 
     @Test
     void changeParentProjectTest() {
+        Project originalProject = Project.builder()
+                .parentProject(Project.builder().id(5L).build())
+                .build();
 
+        Project getProjectById = Project.builder()
+                .children(new ArrayList<>())
+                .build();
+
+        Project expected = Project.builder()
+                .parentProject(Project.builder()
+                        .children(new ArrayList<>())
+                        .build())
+                .build();
+
+        Mockito.when(projectRepository.getProjectById(2L))
+                .thenReturn(getProjectById);
+
+        Project result = projectService.changeParentProject(projectDto, originalProject);
+
+        assertEquals(expected, result);
+        Mockito.verify(projectRepository).getProjectById(2L);
     }
 }

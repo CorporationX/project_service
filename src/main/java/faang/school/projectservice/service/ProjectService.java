@@ -20,7 +20,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -118,14 +117,11 @@ public class ProjectService {
     }
 
     public Project changeParentProject(ProjectDto projectDto, Project originalProject) {
-        if (projectDto.getParentProjectId() != null && !Objects.equals(originalProject.getParentProject().getId(), projectDto.getParentProjectId())) {
-            Project oldParentProject = originalProject.getParentProject();
-            oldParentProject.getChildren().remove(originalProject);
-            projectRepository.save(oldParentProject);
+        if (projectDto.getParentProjectId() != null) {
             Project newParentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
-            newParentProject.getChildren().add(originalProject);
-            projectRepository.save(newParentProject);
             originalProject.setParentProject(newParentProject);
+        } else {
+            originalProject.setParentProject(null);
         }
         return originalProject;
     }
