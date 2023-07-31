@@ -21,10 +21,10 @@ public class ProjectService {
     private final CreateProjectMapper createProjectMapper;
 
     @Transactional
-    public ResponseProjectDto create(CreateProjectDto dto) {
+    public ResponseProjectDto create(CreateProjectDto dto, long userId) {
         Project project = createProjectMapper.toEntity(dto);
 
-        validateCreateDtoAndMap(dto, project);
+        validateCreateDtoAndMap(dto, project, userId);
 
         project.setCreatedAt(LocalDateTime.now());
         project.setStatus(ProjectStatus.CREATED);
@@ -40,18 +40,11 @@ public class ProjectService {
         return createProjectMapper.toDto(projectRepository.save(project));
     }
 
-    private void validateCreateDtoAndMap(CreateProjectDto dto, Project project) {
-        Long ownerId = dto.getOwnerId();
-
-        if (ownerId != null) {
-            project.setOwnerId(ownerId);
-        } else {
-            //TODO (по умолчанию, пользователь, который создает проект)
-            // можно будет достать из авторизации
+    private void validateCreateDtoAndMap(CreateProjectDto dto, Project project, long userId) {
+        if (projectRepository.existsByOwnerUserIdAndName(userId, dto.getName())) {
+            throw new IllegalArgumentException("User with id " + userId + " already has a project with name " + dto.getName());
         }
 
-        if (projectRepository.existsByOwnerUserIdAndName(ownerId, dto.getName())) {
-            throw new IllegalArgumentException("User with id " + ownerId + " already has a project with name " + dto.getName());
-        }
+        project.setOwnerId(userId);
     }
 }

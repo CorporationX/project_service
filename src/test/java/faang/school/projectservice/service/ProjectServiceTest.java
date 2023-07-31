@@ -39,14 +39,13 @@ class ProjectServiceTest {
     @Test
     void createWithExistingName() {
         CreateProjectDto dto = CreateProjectDto.builder()
-                .ownerId(1L)
                 .name("Existing")
                 .build();
 
         when(projectRepository.existsByOwnerUserIdAndName(1L, "Existing")).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> projectService.create(dto));
+                () -> projectService.create(dto, 1));
 
         assertEquals("User with id 1 already has a project with name Existing", exception.getMessage());
     }
@@ -55,7 +54,6 @@ class ProjectServiceTest {
     void createTest() {
 
         CreateProjectDto dto = CreateProjectDto.builder()
-                .ownerId(1L)
                 .name("NotExisting")
                 .parentProjectId(1L)
                 .childrenIds(List.of(1L))
@@ -77,7 +75,7 @@ class ProjectServiceTest {
         when(projectRepository.findAllByIds(anyList())).thenReturn(List.of(project));
         when(projectRepository.save(any(Project.class))).thenReturn(project);
 
-        ResponseProjectDto result = projectService.create(dto);
+        ResponseProjectDto result = projectService.create(dto, 1);
 
         assertEquals(project.getOwnerId(), result.getOwnerId());
         assertEquals(project.getName(), result.getName());

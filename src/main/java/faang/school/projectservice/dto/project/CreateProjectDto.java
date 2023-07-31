@@ -17,7 +17,6 @@ public class CreateProjectDto {
     private String name;
     @NotBlank
     private String description;
-    private Long ownerId;
     private Long parentProjectId;
     private List<Long> childrenIds;
 }

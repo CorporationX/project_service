@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ResponseProjectDto;
 import faang.school.projectservice.service.ProjectService;
@@ -15,9 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/project")
 public class ProjectController {
     private final ProjectService projectService;
+    private final UserContext userContext;
 
     @PostMapping
     public ResponseProjectDto create(@Valid @RequestBody CreateProjectDto dto) {
-        return projectService.create(dto);
+        return projectService.create(dto, userContext.getUserId());
     }
 }
