@@ -32,7 +32,7 @@ public class SubProjectController {
         return projectService.updateSubProject(projectDto);
     }
 
-    @GetMapping
+    @PostMapping("/filter")
     public List<ProjectDto> getFilteredSubProjects(@RequestBody SubProjectFilterDto filtersDto) {
         validateSubProjectFilterId(filtersDto);
         return projectService.getFilteredSubProjects(filtersDto);
