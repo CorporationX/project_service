@@ -53,6 +53,9 @@ public interface ProjectMapper {
 
     @Named(value = "toChildrenId")
     default List<Long> toChildrenId(List<Project> projects) {
+        if (projects == null) {
+            return new ArrayList<>();
+        }
         List<Long> tasks = new ArrayList<>();
         for (Project project : projects) {
             tasks.add(project.getId());
@@ -62,6 +65,9 @@ public interface ProjectMapper {
 
     @Named(value = "toChildren")
     default List<Project> toChildren(List<Long> projects) {
+        if (projects == null) {
+            return new ArrayList<>();
+        }
         List<Project> tasks = new ArrayList<>();
         for (Long id : projects) {
             tasks.add(Project.builder().id(id).build());
@@ -71,6 +77,9 @@ public interface ProjectMapper {
 
     @Named(value = "toVacancies")
     default List<Vacancy> toVacancies(List<Long> vacancies) {
+        if (vacancies == null) {
+            return new ArrayList<>();
+        }
         List<Vacancy> tasks = new ArrayList<>();
         for (Long vacancyId : vacancies) {
             tasks.add(Vacancy.builder().id(vacancyId).build());
@@ -80,6 +89,9 @@ public interface ProjectMapper {
 
     @Named(value = "toVacanciesId")
     default List<Long> toVacanciesId(List<Vacancy> vacancies) {
+        if (vacancies == null) {
+            return new ArrayList<>();
+        }
         List<Long> tasks = new ArrayList<>();
         for (Vacancy vacancy : vacancies) {
             tasks.add(vacancy.getId());
@@ -89,6 +101,9 @@ public interface ProjectMapper {
 
     @Named(value = "toTeams")
     default List<Team> toTeam(List<Long> teamsId) {
+        if (teamsId == null) {
+            return new ArrayList<>();
+        }
         List<Team> tasks = new ArrayList<>();
         for (Long idTeam : teamsId) {
             tasks.add(Team.builder().id(idTeam).build());
@@ -98,6 +113,9 @@ public interface ProjectMapper {
 
     @Named(value = "toTeamsId")
     default List<Long> toTeamId(List<Team> teams) {
+        if (teams == null) {
+            return new ArrayList<>();
+        }
         List<Long> tasks = new ArrayList<>();
         for (Team team : teams) {
             tasks.add(team.getId());
@@ -117,6 +135,9 @@ public interface ProjectMapper {
 
     @Named(value = "toResourceId")
     default List<Long> toResourceId(List<Resource> resources) {
+        if (resources == null) {
+            return new ArrayList<>();
+        }
         List<Long> tasks = new ArrayList<>();
         for (Resource resource : resources) {
             tasks.add(resource.getId());
@@ -127,6 +148,9 @@ public interface ProjectMapper {
 
     @Named(value = "toResource")
     default List<Resource> toResource(List<Long> resourcesId) {
+        if (resourcesId == null) {
+            return new ArrayList<>();
+        }
         List<Resource> tasks = new ArrayList<>();
         for (Long idResource : resourcesId) {
             tasks.add(Resource.builder().id(idResource).build());
@@ -136,6 +160,9 @@ public interface ProjectMapper {
 
     @Named(value = "toTask")
     default List<Task> toTask(List<Long> tasksId) {
+        if (tasksId == null) {
+            return new ArrayList<>();
+        }
         List<Task> tasks = new ArrayList<>();
         for (Long idTask : tasksId) {
             tasks.add(Task.builder().id(idTask).build());
@@ -145,6 +172,9 @@ public interface ProjectMapper {
 
     @Named(value = "toTasksId")
     default List<Long> toTaskId(List<Task> tasks) {
+        if (tasks == null) {
+            return new ArrayList<>();
+        }
         List<Long> tasksId = new ArrayList<>();
         for (Task task : tasks) {
             tasksId.add(task.getId());
@@ -154,14 +184,21 @@ public interface ProjectMapper {
 
     @Named(value = "toStagesId")
     default List<Long> toStagesId(List<Stage> stages) {
+        if (stages == null) {
+            return new ArrayList<>();
+        }
         List<Long> stagesId = new ArrayList<>();
         for (Stage stage : stages) {
             stagesId.add(stage.getStageId());
         }
         return stagesId;
     }
+
     @Named(value = "toStages")
     default List<Stage> toStages(List<Long> stagesId) {
+        if (stagesId == null) {
+            return new ArrayList<>();
+        }
         List<Stage> oneStages = new ArrayList<>();
         for (Long idStage : stagesId) {
             oneStages.add(Stage.builder().stageId(idStage).build());

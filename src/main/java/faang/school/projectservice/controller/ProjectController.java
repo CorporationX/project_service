@@ -4,37 +4,47 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/projects")
 public class ProjectController {
     private final ProjectService projectService;
 
-    public ProjectDto createProject(ProjectDto projectDto) {
+    @PostMapping
+    public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
         projectValidate(projectDto);
         return projectService.createProject(projectDto);
     }
 
-    public ProjectDto updateProject(Long id, ProjectDto projectDto) {
+    @PutMapping("/{id}")
+    public ProjectDto updateProject(@PathVariable long id, @RequestBody ProjectDto projectDto) {
         projectValidate(projectDto);
         return projectService.updateProject(id, projectDto);
     }
 
-    public List<ProjectDto> getAllProjectsByStatus(Long id, ProjectDto projectDto) {
+    @GetMapping("/all/{id}")
+    public List<ProjectDto> getAllProjectsByStatus(@PathVariable long id, @RequestBody ProjectDto projectDto) {
         projectValidate(projectDto);
-        return projectService.getAllProjectsByStatus(id,projectDto);
+        return projectService.getAllProjectsByStatus(id, projectDto);
     }
 
+    @GetMapping
     public List<ProjectDto> getAllProjects() {
-
         return projectService.getAllProjects();
     }
 
-    public ProjectDto getProjectById(Long id) {
-        validateId(id);
+    @GetMapping("/{id}")
+    public ProjectDto getProjectById(long id) {
         return projectService.getProjectById(id);
     }
 
@@ -50,12 +60,6 @@ public class ProjectController {
         }
         if (projectDto.getOwnerId() == null) {
             throw new DataValidationException("Project owner id is empty");
-        }
-    }
-
-    private void validateId(Long id) {
-        if (id == null || id <= 0) {
-            throw new DataValidationException("Project id is null");
         }
     }
 }
