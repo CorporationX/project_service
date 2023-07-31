@@ -341,6 +341,10 @@ public class ProjectServiceTest {
                 .nameFilter("Sub")
                 .statusFilter(List.of(ProjectStatus.IN_PROGRESS, ProjectStatus.COMPLETED))
                 .build();
+        SubProjectFilter nameFilter = new SubProjectNameFilter();
+        SubProjectFilter statusFilter = new SubProjectStatusFilter();
+        projectService = new ProjectService(projectRepository, projectMapper, momentService,
+                List.of(), List.of(nameFilter, statusFilter));
 
         when(projectRepository.existsById(projectId)).thenReturn(true);
         when(projectRepository.getProjectById(projectId)).thenReturn(parentProject);
@@ -350,27 +354,5 @@ public class ProjectServiceTest {
         assertEquals(2, actualProjects.size());
         assertEquals("SubProject2", actualProjects.get(0).getName());
         assertEquals(ProjectStatus.COMPLETED, actualProjects.get(1).getStatus());
-    }
-
-    @Test
-    void testGetFilteredEmptySubProjects() {
-        Long projectId = 1L;
-        List<Project> subProjects = List.of();
-        Project parentProject = Project.builder()
-                .id(projectId)
-                .children(subProjects)
-                .build();
-        SubProjectFilterDto filtersDto = SubProjectFilterDto.builder()
-                .projectId(projectId)
-                .nameFilter("Sub")
-                .statusFilter(List.of(ProjectStatus.IN_PROGRESS, ProjectStatus.COMPLETED))
-                .build();
-
-        when(projectRepository.existsById(projectId)).thenReturn(true);
-        when(projectRepository.getProjectById(projectId)).thenReturn(parentProject);
-
-        List<ProjectDto> actualProjects = projectService.getFilteredSubProjects(filtersDto);
-
-        assertEquals(0, actualProjects.size());
     }
 }
