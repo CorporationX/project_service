@@ -10,10 +10,10 @@ import java.util.List;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface InternshipMapper {
 
-    @Mapping(target = "interns", source = "interns", qualifiedByName = "internsOfId")
+    @Mapping(target = "internsId", source = "interns", qualifiedByName = "internsOfId")
+    @Mapping(target = "projectId", source = "project.id")
     InternshipDto toDto (Internship internship);
 
-    @Mapping(target = "interns", source = "interns", ignore = true)
     Internship toEntity (InternshipDto internshipDto);
 
     @Named("internsOfId")

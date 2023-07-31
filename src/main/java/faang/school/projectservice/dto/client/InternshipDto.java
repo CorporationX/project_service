@@ -18,7 +18,8 @@ public class InternshipDto {
     private String name;
     private Long id;
     private Long mentorId;
-    private List<Long> interns;
+    private Long projectId;
+    private List<Long> internsId;
     private TaskStatus taskStatus;
     private InternshipStatus internshipStatus;
     private LocalDateTime startDate;

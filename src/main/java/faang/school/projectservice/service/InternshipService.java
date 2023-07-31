@@ -1,12 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.InternshipDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,22 +20,19 @@ public class InternshipService {
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipMapper internshipMapper;
 
-    private void validateUpdateInternship(Internship internship, InternshipDto internshipDto) {
-        if (internship.getStatus() == null || internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            throw new DataValidationException("Internship is over!");
-        }
-        if (internship.getInterns().size() < internshipDto.getInterns().size()) {
-            throw new DataValidationException("Cannot add interns!");
-        }
+    public InternshipDto saveNewInternship(InternshipDto internshipDto) {
+        InternshipValidator.validateServiceSaveInternship(internshipDto);
+        Internship internship = internshipRepository.save(internshipMapper.toEntity(internshipDto));
+        return internshipMapper.toDto(internship);
     }
 
     public InternshipDto updateInternship(InternshipDto internshipDto, long id) {
         Internship oldInternship = internshipRepository.getById(id);
-        validateUpdateInternship(oldInternship, internshipDto);
+        InternshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
-        internship.setInterns(getListOfInterns(internshipDto.getInterns())); //50
+        internship.setInterns(getListOfInterns(internshipDto.getInternsId())); //50
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            List<TeamMember> interns = internsDoneTasks(internshipDto.getInterns()); //60
+            List<TeamMember> interns = internsDoneTasks(internshipDto.getInternsId()); //60
             TeamRole role = TeamRole.DEVELOPER;
             for (TeamMember intern : interns) {
                 intern.setRoles(List.of(role));
@@ -50,8 +47,8 @@ public class InternshipService {
     public List<TeamMember> getListOfInterns(List<Long> interns) {
         int sizeOfListInterns = interns.size();
         List<TeamMember> secondListOfInterns = new ArrayList<>(sizeOfListInterns);
-        for (int i = 0; i < sizeOfListInterns; i++) {
-            TeamMember intern = teamMemberRepository.findById(interns.get(i));
+        for (Long aLong : interns) {
+            TeamMember intern = teamMemberRepository.findById(aLong);
             secondListOfInterns.add(intern);
         }
         return secondListOfInterns;
@@ -60,8 +57,8 @@ public class InternshipService {
     public List<TeamMember> internsDoneTasks(List<Long> interns) {
         int sizeOfListInterns = interns.size();
         List<TeamMember> secondListOfInterns = new ArrayList<>(sizeOfListInterns);
-        for (int i = 0; i < sizeOfListInterns; i++) {
-            TeamMember intern = teamMemberRepository.findById(interns.get(i));
+        for (Long aLong : interns) {
+            TeamMember intern = teamMemberRepository.findById(aLong);
             if (checkTaskDone(intern)) { //72
                 secondListOfInterns.add(intern);
             }

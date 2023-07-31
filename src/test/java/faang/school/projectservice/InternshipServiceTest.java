@@ -6,7 +6,6 @@ import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.InternshipService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,8 +36,75 @@ public class InternshipServiceTest {
     private InternshipService internshipService;
 
     @Test
-    public void updateAlreadyOverInternshipTest() {
-        InternshipDto internshipDto = InternshipDto.builder().interns(List.of(10L))
+    public void saveNewInternshipThrowsExceptionTest() {
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> internshipService.saveNewInternship(new InternshipDto()));
+        assertEquals(exception.getMessage(), "There is not project for create internship!");
+    }
+
+    @Test
+    public void saveNewInternshipWithWrongDateTest() {
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> internshipService.saveNewInternship(InternshipDto.builder()
+                        .projectId(1L)
+                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(4, ChronoUnit.MONTHS))
+                        .internsId(List.of(1L))
+                        .build()));
+        assertEquals(exception.getMessage(), "Internship cannot last more than 3 months!");
+    }
+
+    @Test
+    public void saveNewInternshipWithoutMentorTest() {
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> internshipService.saveNewInternship(InternshipDto.builder()
+                        .projectId(1L)
+                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                        .mentorId(null)
+                        .build()));
+        assertEquals(exception.getMessage(), "There is not mentor for internship!");
+    }
+
+    @Test
+    public void saveNewInternshipWithoutInternsTest() {
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> internshipService.saveNewInternship(InternshipDto.builder()
+                        .projectId(1L)
+                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                        .mentorId(anyLong())
+                        .internsId(Collections.emptyList())
+                        .build()));
+        assertEquals(exception.getMessage(), "There is not interns for internship!");
+    }
+
+    @Test
+    public void saveNewInternshipWithWrongNameTest() {
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> internshipService.saveNewInternship(InternshipDto.builder()
+                        .projectId(1L)
+                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                        .mentorId(1L)
+                        .internsId(List.of(10L))
+                        .name(null)
+                        .build()));
+        assertEquals(exception.getMessage(), "Need create a name for the internship");
+    }
+
+    @Test
+    public void saveInternshipMapperTest() {
+        InternshipDto internshipDto = InternshipDto.builder()
+                .projectId(1L)
+                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                .mentorId(anyLong())
+                .internsId(List.of(1L))
+                .name("best")
+                .build();
+        internshipService.saveNewInternship(internshipDto);
+        Mockito.verify(internshipRepository).save(internshipMapper.toEntity(internshipDto));
+    }
+
+    @Test
+    public void updateInternshipWithWrongDateTest() {
+        InternshipDto internshipDto = InternshipDto.builder().internsId(List.of(10L))
                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
                 .mentorId(anyLong()).build();
         long id = 1;
@@ -50,31 +117,33 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void updateInternshipNewInternTest() {
+    public void updateInternshipAfterItsStartTest() {
         InternshipDto internshipDto = InternshipDto.builder()
-                .interns(List.of(10L))
                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                .mentorId(anyLong()).build();
+                .mentorId(anyLong())
+                .internsId(List.of(10L))
+                .build();
         long id = 1;
         Internship old = Internship.builder().status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
 
         when(internshipRepository.getById(id)).thenReturn(old);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> internshipService.updateInternship(internshipDto, id));
-        assertEquals(exception.getMessage(), "Cannot add interns!");
+        assertEquals(exception.getMessage(), "Can't add new interns!");
     }
 
     @Test
-    public void updateInternshipTest() {
+    public void updateInternshipWithStatusINPROGRESSAndMapperTest() {
         InternshipDto internshipDto = InternshipDto.builder()
-                .interns(List.of())
-                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                .mentorId(anyLong()).build();
+                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
+                .mentorId(anyLong())
+                .internsId(Collections.emptyList())
+                .build();
         long id = 1;
-        Internship oldInternship = Internship.builder().name("old internship").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
+        Internship old = Internship.builder().name("old internship").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
         Internship internship = Internship.builder().name("new internship").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
 
-        when(internshipRepository.getById(id)).thenReturn(oldInternship);
+        when(internshipRepository.getById(id)).thenReturn(old);
         when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
 
         internshipService.updateInternship(internshipDto, id);
@@ -82,12 +151,13 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void updateInternshipToCOMPLETEDTest() {
+    public void updateInternshipWithBothStatusAndMapperTest() {
         InternshipDto internshipDto = InternshipDto.builder()
-                .interns(List.of())
                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                 .mentorId(anyLong())
-                .internshipStatus(InternshipStatus.COMPLETED).build();
+                .internsId(Collections.emptyList())
+                .internshipStatus(InternshipStatus.COMPLETED)
+                .build();
         long id = 1;
         Internship oldInternship = Internship.builder().name("old internship").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
         Internship internship = Internship.builder().name("new internship").status(InternshipStatus.COMPLETED).interns(List.of()).build();
