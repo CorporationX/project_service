@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.srvice.vacancy.VacancyService;
+import faang.school.projectservice.service.vacancy.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

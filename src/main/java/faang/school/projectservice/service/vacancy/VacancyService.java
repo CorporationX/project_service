@@ -1,4 +1,4 @@
-package faang.school.projectservice.srvice.vacancy;
+package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;

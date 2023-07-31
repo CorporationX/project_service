@@ -6,7 +6,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.srvice.vacancy.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
