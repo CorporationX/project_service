@@ -27,6 +27,10 @@ public class VacancyValidator {
     }
 
     public void createVacancyValidation(VacancyDto vacancyDto, long creator) {
+        if (!projectRepository.existsById(vacancyDto.getProjectId())) {
+            throw new VacancyValidationException("Non-existent project");
+        }
+
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
         if (!project.getOwnerId().equals(creator)) {
             throw new VacancyValidationException("Access Denied!");

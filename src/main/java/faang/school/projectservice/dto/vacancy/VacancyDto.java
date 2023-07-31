@@ -18,5 +18,6 @@ public class VacancyDto {
     private VacancyStatus status;
     private Double salary;
     private WorkSchedule workSchedule;
+    private Integer count;
     private List<Long> requiredSkillIds;
 }
