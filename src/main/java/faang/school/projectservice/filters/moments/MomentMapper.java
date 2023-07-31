@@ -17,9 +17,14 @@ import java.util.List;
 public interface MomentMapper {
     Moment dtoToMoment(MomentDto momentDto);
     MomentDto momentToDto(Moment moment);
-    Moment dtoUpdatedToMoment(MomentDtoUpdate momentDtoUpdate);
-    MomentDtoUpdate momentToDtoUpdated(Moment moment);
-    Moment updateMomentFromUpdatedDto(MomentDtoUpdate momentDtoUpdate, @MappingTarget Moment deprecatedMoment);
     List<Moment> listDtoToMoment(List<MomentDto> listDto);
     List<MomentDto> listMomentToDto(List<Moment> momentList);
+
+    //updatedDto
+    Moment dtoUpdatedToMoment(MomentDtoUpdate momentDtoUpdate);
+    MomentDtoUpdate momentToDtoUpdated(Moment moment);
+    List<Moment> listUpdatedDtoToMoment(List<MomentDtoUpdate> listDto);
+    List<MomentDtoUpdate> listMomentToUpdatedDto(List<Moment> momentList);
+    Moment updateMomentFromUpdatedDto(MomentDtoUpdate momentDtoUpdate, @MappingTarget Moment deprecatedMoment);
+
 }

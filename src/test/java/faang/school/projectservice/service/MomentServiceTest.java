@@ -112,11 +112,11 @@ class MomentServiceTest {
     void getAllMomentsCallsRepositoryMethod() {
         Mockito.when(momentRepository.findAll()).thenReturn(List.of(moment));
 
-        List<MomentDto> result = momentService.getAllMoments();
+        List<MomentDtoUpdate> result = momentService.getAllMoments();
 
         Mockito.verify(momentRepository, Mockito.times(1))
                 .findAll();
-        assertEquals(List.of(momentMapper.momentToDto(moment)), result);
+        assertEquals(List.of(momentMapper.momentToDtoUpdated(moment)), result);
     }
 
     @Test

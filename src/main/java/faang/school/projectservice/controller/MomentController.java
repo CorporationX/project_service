@@ -32,18 +32,18 @@ public class MomentController {
         momentService.updateMoment(momentDtoUpdate);
     }
 
-    @GetMapping("/filtered")
-    public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto, Long idProject) {
+    @GetMapping("/{idProject}")
+    public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto, @PathVariable Long idProject) {
         return momentService.getFilteredMoments(filterMomentDto, idProject);
     }
 
     @GetMapping
-    public List<MomentDto> getAllMoments() {
+    public List<MomentDtoUpdate> getAllMoments() {
         return momentService.getAllMoments();
     }
 
     @GetMapping("{id}")
-    public MomentDto getMoment(@PathVariable("id") @Valid @Min(0) long momentId) {
+    public MomentDtoUpdate getMoment(@PathVariable("id") @Valid @Min(0) long momentId) {
         return momentService.getMoment(momentId);
     }
 }

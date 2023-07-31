@@ -16,6 +16,5 @@ public class MomentDtoUpdate {
     private String name;
     @NonNull
     private LocalDateTime date;
-    @NonNull
     private Long idProject;
 }

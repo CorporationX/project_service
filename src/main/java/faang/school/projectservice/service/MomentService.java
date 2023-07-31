@@ -65,12 +65,12 @@ public class MomentService {
                 .peek(momentDto -> momentDto.setIdProject(idProject)).toList();
     }
 
-    public List<MomentDto> getAllMoments() {
-        return momentMapper.listMomentToDto(momentRepository.findAll());
+    public List<MomentDtoUpdate> getAllMoments() {
+        return momentMapper.listMomentToUpdatedDto(momentRepository.findAll());
     }
 
-    public MomentDto getMoment(long momentId) {
-        return momentMapper.momentToDto(momentRepository.findById(momentId)
+    public MomentDtoUpdate getMoment(long momentId) {
+        return momentMapper.momentToDtoUpdated(momentRepository.findById(momentId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("moment with %d wasn't found", momentId))));
     }
