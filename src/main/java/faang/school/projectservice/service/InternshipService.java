@@ -1,15 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.InternshipDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.repository.InternshipRepository;
+import faang.school.projectservice.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.temporal.ChronoUnit;
-
 
 @Service
 @RequiredArgsConstructor
@@ -17,20 +14,8 @@ public class InternshipService {
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
 
-    private void validateListOfInternsAndThereIsMentor(InternshipDto internshipDto) {
-        if (internshipDto.getInternsId() == null) {
-            throw new DataValidationException("Can't create an internship without interns");
-        }
-        if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate().plus(3, ChronoUnit.MONTHS))) {
-            throw new DataValidationException("Internship cannot last more than 3 months");
-        }
-        if (internshipDto.getMentorId() == null) {
-            throw new DataValidationException("There is not mentor for interns!");
-        }
-    }
-
     public InternshipDto saveNewInternship(InternshipDto internshipDto) {
-        validateListOfInternsAndThereIsMentor(internshipDto);
+        InternshipValidator.validateServiceSaveInternship(internshipDto);
         Internship internship = internshipRepository.save(internshipMapper.toEntity(internshipDto));
         return internshipMapper.toDto(internship);
     }
