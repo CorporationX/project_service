@@ -6,7 +6,6 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filters.ProjectFilter;
 import faang.school.projectservice.filters.ProjectFilterByName;
 import faang.school.projectservice.filters.ProjectFilterByStatus;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -36,7 +35,7 @@ class ProjectServiceTest {
     private ProjectRepository projectRepository;
 
     @Spy
-    private ProjectMapper projectMapper = new ProjectMapperImpl();
+    private ProjectMapperImpl projectMapper = new ProjectMapperImpl();
     private ProjectDto projectDto;
     private Project project;
 
@@ -190,7 +189,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    void getAllProjects() {
+    void getAllProjects_EmptyList() {
         List<Project> allProjects = new ArrayList<>();
         Mockito.when(projectRepository.findAll())
                 .thenReturn(allProjects);
@@ -200,13 +199,22 @@ class ProjectServiceTest {
     }
 
     @Test
+    void getAllProjects() {
+        Project build = Project.builder().id(1L).build();
+        List<Project> allProjects = List.of(build);
+        Mockito.when(projectRepository.findAll())
+                .thenReturn(allProjects);
+
+
+        assertEquals(List.of(projectMapper.toDto(build)), projectService.getAllProject());
+    }
+
+    @Test
     void getProjectById() {
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setId(1L);
+        Project build = Project.builder().id(1L).build();
+        Mockito.when(projectRepository.getProjectById(build.getId()))
+                .thenReturn(build);
 
-        Mockito.when(projectRepository.getProjectById(projectDto.getId()))
-                .thenReturn(Project.builder().id(1L).build());
-
-        Assertions.assertEquals(projectMapper.toEntity(projectDto), projectMapper.toEntity(projectService.getProjectById(projectDto.getId())));
+        Assertions.assertEquals(projectDto, projectService.getProjectById(projectDto.getId()));
     }
 }
