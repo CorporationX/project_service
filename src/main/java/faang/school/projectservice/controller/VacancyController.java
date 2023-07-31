@@ -5,6 +5,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +20,8 @@ public class VacancyController {
         return vacancyService.createVacancy(vacancyDto);
     }
 
-    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+    @PutMapping("/vacancy")
+    public VacancyDto updateVacancy(@RequestBody VacancyDto vacancyDto) {
         validateVacancy(vacancyDto);
         return vacancyService.updateVacancy(vacancyDto);
     }
