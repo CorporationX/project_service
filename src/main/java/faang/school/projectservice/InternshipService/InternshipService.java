@@ -2,17 +2,16 @@ package faang.school.projectservice.InternshipService;
 
 import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.dto.client.InternshipFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,36 +23,15 @@ public class InternshipService {
     private final TeamMemberRepository teamMemberRepository;
     private final List<InternshipFilter> filterList;
 
-    private void validateListOfInternsAndThereIsMentor(InternshipDto internshipDto) {
-        if (internshipDto.getInternsId() == null) {
-            throw new DataValidationException("Can't create an internship without interns");
-        }
-        if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate().plus(3, ChronoUnit.MONTHS))) {
-            throw new DataValidationException("Internship cannot last more than 3 months");
-        }
-        if (internshipDto.getMentorId() == null) {
-            throw new DataValidationException("There is not mentor for interns!");
-        }
-    }
-
-    public InternshipDto saveNewInternship(InternshipDto internshipDto) {
-        validateListOfInternsAndThereIsMentor(internshipDto);
+    public InternshipDto saveNewInternship(InternshipDto internshipDto) { //1
+        InternshipValidator.validateServiceSaveInternship(internshipDto);
         Internship internship = internshipRepository.save(internshipMapper.toEntity(internshipDto));
         return internshipMapper.toDto(internship);
     }
 
-    private void validateUpdateInternship(Internship internship, InternshipDto internshipDto) {
-        if (internship.getStatus() == null || internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            throw new DataValidationException("Internship is over!");
-        }
-        if (internship.getInterns().size() < internshipDto.getInternsId().size()) {
-            throw new DataValidationException("Cannot add interns!");
-        }
-    }
-
-    public InternshipDto updateInternship(InternshipDto internshipDto, long id) {
+    public InternshipDto updateInternship(InternshipDto internshipDto, long id) { //2
         Internship oldInternship = internshipRepository.getById(id);
-        validateUpdateInternship(oldInternship, internshipDto);
+        InternshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setInterns(getListOfInterns(internshipDto.getInternsId())); //50
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
@@ -69,7 +47,7 @@ public class InternshipService {
         return null;
     }
 
-    public List<TeamMember> getListOfInterns(List<Long> interns) {
+    public List<TeamMember> getListOfInterns(List<Long> interns) { //2.1
         int sizeOfListInterns = interns.size();
         List<TeamMember> secondListOfInterns = new ArrayList<>(sizeOfListInterns);
         for (int i = 0; i < sizeOfListInterns; i++) {
@@ -79,7 +57,7 @@ public class InternshipService {
         return secondListOfInterns;
     }
 
-    public List<TeamMember> internsDoneTasks(List<Long> interns) {
+    public List<TeamMember> internsDoneTasks(List<Long> interns) { //2.2
         int sizeOfListInterns = interns.size();
         List<TeamMember> secondListOfInterns = new ArrayList<>(sizeOfListInterns);
         for (int i = 0; i < sizeOfListInterns; i++) {
@@ -91,7 +69,7 @@ public class InternshipService {
         return secondListOfInterns;
     }
 
-    public boolean checkTaskDone(TeamMember member) {
+    public boolean checkTaskDone(TeamMember member) { //2.3
         List<Stage> stages = member.getStages();
         for (Stage stage : stages) {
             List<Task> tasks = stage.getTasks();
@@ -104,25 +82,21 @@ public class InternshipService {
         return true;
     }
 
-    public InternshipDto findInternshipById(long id) {
-        return internshipMapper.toDto(internshipRepository.getById(id));
+    public List<InternshipDto> findInternshipsWithFilter(long projectId, InternshipFilterDto filterDto) { //3
+        List<InternshipDto> listOfInternship = findAllInternships();
+        listOfInternship.removeIf(dto -> !dto.getProjectId().equals(projectId));
+        filter(filterDto, listOfInternship);
+        return listOfInternship;
     }
 
-    public List<InternshipDto> findAllInternships() {
-        List<Internship> ents = internshipRepository.findAll();
-        return ents.stream().map(internshipMapper::toDto).toList();
-    }
-
-    public List<InternshipDto> findInternshipsWithFilter(long projectId, InternshipFilterDto filterDto) {
-        List<InternshipDto> list= findAllInternships();
-        list.removeIf(dto -> !dto.getProjectId().equals(projectId));
-        filter(filterDto, list);
-        return list;
-    }
-
-    public void filter(InternshipFilterDto filter, List<InternshipDto> dtoList) {
+    public void filter(InternshipFilterDto filter, List<InternshipDto> dtoList) { //3.1
         filterList.stream()
                 .filter(f -> f.isApplicable(filter))
                 .forEach(f -> f.apply(dtoList, filter));
+    }
+
+    public List<InternshipDto> findAllInternships() { //4
+        List<Internship> listOfInternship = internshipRepository.findAll();
+        return listOfInternship.stream().map(internshipMapper::toDto).toList();
     }
 }

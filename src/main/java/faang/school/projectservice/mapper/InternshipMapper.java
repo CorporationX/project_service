@@ -10,17 +10,22 @@ import java.util.List;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface InternshipMapper {
 
-    @Mapping(target = "internsId", source = "interns", qualifiedByName = "listOfId")
+    @Mapping(target = "internsId", source = "interns", qualifiedByName = "mapInternsToId")
+    @Mapping(target = "mentorId", source = "mentor", qualifiedByName = "mapMentorToId")
     @Mapping(target = "projectId", source = "project.id")
-    @Mapping(target = "mentorId", source = "mentor.id")
     InternshipDto toDto(Internship internship);
 
     Internship toEntity(InternshipDto internshipDto);
 
-    @Named("listOfId")
-    default List<Long> listOfId(List<TeamMember> teamMembers) {
+    @Named("mapInternsToId")
+    default List<Long> mapInterns(List<TeamMember> teamMembers) {
         return teamMembers.stream()
                 .map(TeamMember::getUserId)
                 .toList();
+    }
+
+    @Named("mapMentorToId")
+    default Long mapMentors(TeamMember teamMember) {
+        return teamMember.getId();
     }
 }
