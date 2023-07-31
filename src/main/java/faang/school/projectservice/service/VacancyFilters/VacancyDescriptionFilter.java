@@ -2,10 +2,12 @@ package faang.school.projectservice.service.VacancyFilters;
 
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Stream;
 
+@Component
 public class VacancyDescriptionFilter implements VacancyFilter {
     @Override
     public boolean isApplicable(VacancyFilterDto filter) {
