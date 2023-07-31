@@ -2,73 +2,40 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/project")
 public class ProjectController {
     private final ProjectService projectService;
 
-    public ProjectDto create(ProjectDto projectDto) {
-        validateProject(projectDto);
+    @PostMapping("/createProject")
+    public ProjectDto create(@RequestBody ProjectDto projectDto) {
         return projectService.create(projectDto);
     }
 
-    public ProjectDto changeStatus(ProjectDto projectDto, Long id) {
-        validateProject(projectDto);
+    @PutMapping("/update")
+    public ProjectDto changeStatus(@RequestBody ProjectDto projectDto, Long id) {
         return projectService.updateStatusAndDescription(projectDto, id);
     }
 
-    public List<ProjectDto> getProjectsByName(ProjectFilterDto projectFilterDto) {
-        if (projectFilterDto.getName().isBlank()) {
-            throw new DataValidationException("Project name is empty");
-        }
-        return projectService.getProjectByName(projectFilterDto);
+    @PostMapping("/{userId}")
+    public List<ProjectDto> getProjectsByNameAndStatus(@RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
+        return projectService.getProjectByNameAndStatus(projectFilterDto, userId);
     }
 
-    public List<ProjectDto> getProjectsByStatus(ProjectFilterDto projectFilterDto) {
-        if (projectFilterDto.getStatus() == null) {
-            throw new DataValidationException("Project status is empty");
-        }
-        return projectService.getProjectByStatus(projectFilterDto);
-    }
-
-
+    @GetMapping("/getProjectsByNameAndStatus")
     public List<ProjectDto> getAllProjects() {
-        return projectService.getAllProjectsFromBD();
+        return projectService.getAllProject();
     }
 
-    public ProjectDto getProjectById(ProjectDto projectDto) {
-        validateProject(projectDto);
-        return projectService.getProjectByIdFromBD(projectDto);
-    }
-
-    private void validateProject(ProjectDto projectDto) {
-        if (projectDto == null) {
-            throw new DataValidationException("Project is null");
-        }
-        if (projectDto.getName().length() < 128) {
-            throw new DataValidationException("Project name should be less than 128 character");
-        }
-        if (projectDto.getId() == null) {
-            throw new DataValidationException("Project id is null");
-        }
-        if (projectDto.getDescription().length() < 4096) {
-            throw new DataValidationException("Project description should be less than 4096 character");
-        }
-        if (projectDto.getDescription().isEmpty()) {
-            throw new DataValidationException("Project description is empty");
-        }
-        if (projectDto.getStatus() == null) {
-            throw new DataValidationException("Project status is empty");
-        }
-        if (projectDto.getName().isBlank()) {
-            throw new DataValidationException("Project name is empty");
-        }
+    @GetMapping("/getProjectById/{userId}")
+    public ProjectDto getProjectById(@PathVariable long userId) {
+        return projectService.getProjectById(userId);
     }
 }
