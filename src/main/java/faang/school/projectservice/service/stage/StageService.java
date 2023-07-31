@@ -1,7 +1,9 @@
 package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageRoleDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
@@ -26,6 +28,7 @@ public class StageService {
     private final ProjectRepository projectRepository;
     private final StageMapper stageMapper;
     private final TaskRepository taskRepository;
+    private final StageRolesRepository stageRolesRepository;
 
     @Transactional
     public StageDto create(StageDto stageDto) {
@@ -35,6 +38,25 @@ public class StageService {
         stageRepository.save(stage);
 
         return stageMapper.toDto(stage);
+    }
+//Обновить этап.
+//
+//ProcessStageRoles Если на этап требуется участник с определённой ролью, нужно проверить, что в списке задействованных на этапе участников есть пользователь с такой ролью.
+//Если нет, то нужно найти среди участников проекта пользователя с такой ролью и отправить ему приглашение участвовать в этапе.
+//Сколько пользователей с данной ролью требуется, столько приглашений разным пользователям должно быть отправлено.
+//
+//валидация Если изменяется список участников, нужно проверять, что обновлённые список участников удовлетворяет требованиям ролей.
+//update
+
+    @Transactional
+    public StageDto updateStageRoles(StageDto stageDto) {
+        validateStageProject(stageDto);
+        Stage stageToUpdate = stageRepository.getById(stageDto.getStageId());
+
+
+        stageRepository.save(stageToUpdate);
+
+        return stageMapper.toDto(stageToUpdate);
     }
 
     @Transactional

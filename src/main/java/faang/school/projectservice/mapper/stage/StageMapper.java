@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageRoleDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
@@ -21,7 +22,7 @@ public interface StageMapper {
     Stage toEntity(StageDto stageDto);
 
     @Mapping(target = "projectId", source = "project", qualifiedByName = "toProjectId")
-    @Mapping(target = "stageRoleIds", source = "stageRoles", qualifiedByName = "toStageRoleIds")
+    @Mapping(target = "stageRoles", source = "stageRoles", qualifiedByName = "toStageRoleIds")
     @Mapping(target = "taskIds", source = "tasks", qualifiedByName = "toTaskIds")
     @Mapping(target = "executorIds", source = "executors", qualifiedByName = "toExecutorIds")
     StageDto toDto(Stage stage);
@@ -37,20 +38,20 @@ public interface StageMapper {
     }
 
     @Named(value = "toStageRoles")
-    default List<StageRoles> toStageRoles(List<Long> stageRoleIds) {
-        if (stageRoleIds == null) {
+    default List<StageRoles> toStageRoles(List<StageRoleDto> stageRoleDtos) {
+        if (stageRoleDtos == null) {
             return null;
         }
 
         List<StageRoles> stageRoles = new ArrayList<>();
-        for (Long stageRoleId : stageRoleIds) {
-            stageRoles.add(StageRoles.builder().id(stageRoleId).build());
+        for (StageRoleDto stageRoleDto : stageRoleDtos) {
+            stageRoles.add(StageRoles.builder().id(stageRoleDto.getStageRoleId()).build());
         }
 
         return stageRoles;
     }
 
-    @Named(value = "toStageRoleIds")
+    @Named(value = "toStageRoleDto")
     default List<Long> toStageRoleIds(List<StageRoles> stageRoles) {
         if (stageRoles == null) {
             return null;

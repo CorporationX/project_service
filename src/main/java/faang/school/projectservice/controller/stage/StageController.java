@@ -1,9 +1,8 @@
 package faang.school.projectservice.controller.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage.StageService;
-import io.micrometer.common.util.StringUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +15,7 @@ public class StageController {
     private final StageService stageService;
 
     @PostMapping("/project")//поменяю эндпоинты после утверждения их формата
-    public StageDto createProjectStage(@RequestBody StageDto stageDto) {
-        validateStageName(stageDto);
-
+    public StageDto createProjectStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.create(stageDto);
     }
 
@@ -45,11 +42,5 @@ public class StageController {
     @GetMapping("/stage/{stageId}")
     public StageDto getStageById(@PathVariable long stageId) {
         return stageService.getStageById(stageId);
-    }
-
-    private void validateStageName(StageDto stageDto) {
-        if (StringUtils.isBlank(stageDto.getStageName())) {
-            throw new DataValidationException("Stage name can't be blank or null");
-        }
     }
 }
