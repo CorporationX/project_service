@@ -64,24 +64,24 @@ public interface ProjectMapper {
     }
 
     @Named(value = "toChildren")
-    default List<Project> toChildren(List<Long> projects) {
-        if (projects == null) {
+    default List<Project> toChildren(List<Long> projectsId) {
+        if (projectsId == null) {
             return new ArrayList<>();
         }
         List<Project> tasks = new ArrayList<>();
-        for (Long id : projects) {
+        for (Long id : projectsId) {
             tasks.add(Project.builder().id(id).build());
         }
         return tasks;
     }
 
     @Named(value = "toVacancies")
-    default List<Vacancy> toVacancies(List<Long> vacancies) {
-        if (vacancies == null) {
+    default List<Vacancy> toVacancies(List<Long> vacanciesId) {
+        if (vacanciesId == null) {
             return new ArrayList<>();
         }
         List<Vacancy> tasks = new ArrayList<>();
-        for (Long vacancyId : vacancies) {
+        for (Long vacancyId : vacanciesId) {
             tasks.add(Vacancy.builder().id(vacancyId).build());
         }
         return tasks;
