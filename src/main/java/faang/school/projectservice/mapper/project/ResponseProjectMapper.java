@@ -14,7 +14,7 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,70 +37,49 @@ public interface ResponseProjectMapper {
 
     @Named("childrenToChildrenIds")
     default List<Long> childrenToChildrenIds(List<Project> children) {
-        if (children == null) {
-            return new ArrayList<>();
-        }
-        return children.stream()
+        return children == null ? Collections.emptyList() : children.stream()
                 .map(Project::getId)
                 .collect(Collectors.toList());
     }
 
     @Named("tasksToTasksIds")
     default List<Long> tasksToTasksIds(List<Task> tasks) {
-        if (tasks == null) {
-            return new ArrayList<>();
-        }
-        return tasks.stream()
+        return tasks == null ? Collections.emptyList() : tasks.stream()
                 .map(Task::getId)
                 .collect(Collectors.toList());
     }
 
     @Named("resourcesToResourcesIds")
     default List<Long> resourcesToResourcesIds(List<Resource> resources) {
-        if (resources == null) {
-            return new ArrayList<>();
-        }
-        return resources.stream()
+        return resources == null ? Collections.emptyList() : resources.stream()
                 .map(Resource::getId)
                 .collect(Collectors.toList());
     }
 
     @Named("teamsToTeamsIds")
     default List<Long> teamsToTeamsIds(List<Team> teams) {
-        if (teams == null) {
-            return new ArrayList<>();
-        }
-        return teams.stream()
+        return teams == null ? Collections.emptyList() : teams.stream()
                 .map(Team::getId)
                 .collect(Collectors.toList());
     }
 
     @Named("stagesToStagesIds")
     default List<Long> stagesToStagesIds(List<Stage> stages) {
-        if (stages == null) {
-            return new ArrayList<>();
-        }
-        return stages.stream()
+        return stages == null ? Collections.emptyList() : stages.stream()
                 .map(Stage::getStageId)
                 .collect(Collectors.toList());
     }
 
     @Named("vacanciesToVacanciesIds")
     default List<Long> vacanciesToVacanciesIds(List<Vacancy> vacancies) {
-        if (vacancies == null) {
-            return new ArrayList<>();
-        }
-        return vacancies.stream()
+        return vacancies == null ? Collections.emptyList() : vacancies.stream()
                 .map(Vacancy::getId)
                 .collect(Collectors.toList());
     }
 
     @Named("momentsToMomentsIds")
     default List<Long> momentsToMomentsIds(List<Moment> moments) {
-        if (moments == null) {
-            return new ArrayList<>();
-        }
-        return moments.stream()
+        return moments == null ? Collections.emptyList() : moments.stream()
                 .map(Moment::getId)
                 .collect(Collectors.toList());
     }

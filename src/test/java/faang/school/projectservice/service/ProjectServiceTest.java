@@ -44,7 +44,7 @@ class ProjectServiceTest {
 
         when(projectRepository.findAllByVisibilityOrOwnerId(ProjectVisibility.PUBLIC, 1L)).thenReturn(projects);
 
-        List<ResponseProjectDto> result = projectService.getAllByFilter(filterDto);
+        List<ResponseProjectDto> result = projectService.getAllByFilter(filterDto, userContext.getUserId());
 
         assertEquals(1, result.size());
     }

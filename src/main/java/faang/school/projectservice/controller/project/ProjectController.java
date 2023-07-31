@@ -1,10 +1,10 @@
 package faang.school.projectservice.controller.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ResponseProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,13 +20,14 @@ import java.util.List;
 @RequestMapping("api/v1/project")
 public class ProjectController {
     private final ProjectService projectService;
+    private final UserContext userContext;
 
     @PostMapping("/byFilter")
     public List<ResponseProjectDto> getAllByFilter(@Valid @RequestBody ProjectFilterDto dto) {
-        return projectService.getAllByFilter(dto);
+        return projectService.getAllByFilter(dto, userContext.getUserId());
     }
 
-    @GetMapping()
+    @GetMapping
     public List<ResponseProjectDto> getAll() {
         return projectService.getAll();
     }

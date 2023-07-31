@@ -23,9 +23,8 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
 
     @Transactional(readOnly = true)
-    public List<ResponseProjectDto> getAllByFilter(ProjectFilterDto dto) {
-        //TODO вместо ownerId должен быть юзер, который отправляет запрос
-        Stream<Project> projects = projectRepository.findAllByVisibilityOrOwnerId(ProjectVisibility.PUBLIC, dto.getUserId()).stream();
+    public List<ResponseProjectDto> getAllByFilter(ProjectFilterDto dto, long userId) {
+        Stream<Project> projects = projectRepository.findAllByVisibilityOrOwnerId(ProjectVisibility.PUBLIC, userId).stream();
 
         for (ProjectFilter filter : projectFilters) {
             if (filter.isApplicable(dto)) {
