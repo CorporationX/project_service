@@ -8,9 +8,17 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class VacancyValidator {
-    public void deleteVacancyControllerVAlidation(VacancyDto vacancyDto) {
+    public void deleteVacancyControllerValidation(VacancyDto vacancyDto, long creatorId) {
         if (vacancyDto == null) {
             throw new VacancyValidationException("Vacancy not found!");
         }
+
+        if (creatorId < 1) {
+            throw new VacancyValidationException("Permission error!");
+        }
+    }
+
+    public void deleteVacancyServiceValidation(VacancyDto vacancyDto, long creatorId) {
+        if (vacancyDto.get)
     }
 }

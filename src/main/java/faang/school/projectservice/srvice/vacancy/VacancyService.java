@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class VacancyService {
 
-    public void deleteVacancy(VacancyDto vacancyDto) {
+    public void deleteVacancy(VacancyDto vacancyDto, long creatorId) {
 
     }
 }
