@@ -3,14 +3,15 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filters.ProjectFilter;
+import faang.school.projectservice.filters.ProjectFilterByName;
+import faang.school.projectservice.filters.ProjectFilterByStatus;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
-import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -183,7 +184,7 @@ class ProjectServiceTest {
                 .status(ProjectStatus.CREATED)
                 .build();
 
-        projectService = new ProjectService(projectMapper, projectRepository, filters);
+        projectService = ProjectService.builder().mapper(projectMapper).projectRepository(projectRepository).filters(filters).build();
         List<ProjectDto> filteredProjectsResult =
                 List.of(projectMapper.toDto(project2), projectMapper.toDto(project));
 
@@ -214,11 +215,13 @@ class ProjectServiceTest {
 
     @Test
     void getProjectById() {
+        ProjectDto projectDto = new ProjectDto();
+        projectDto.setId(1L);
         Project build = Project.builder().id(1L).build();
         Mockito.when(projectRepository.getProjectById(build.getId()))
                 .thenReturn(build);
 
-        Assertions.assertEquals(projectDto, projectService.getProjectById(projectDto.getId()));
+        assertEquals(projectDto, projectService.getProjectById(1L));
     }
 
     @Test

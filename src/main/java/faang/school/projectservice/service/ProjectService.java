@@ -4,11 +4,13 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filters.ProjectFilter;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +22,15 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Builder
 public class ProjectService {
     private final ProjectJpaRepository projectJpaRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
-    private final ProjectRepository projectRepository;
     private final List<ProjectFilter> filters;
 
     public ProjectDto create(ProjectDto projectDto) {
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwner().getUserId(), projectDto.getName())) {
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("This project already exist");
         }
 
@@ -90,8 +92,8 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    public ProjectDto getProjectById(ProjectDto projectDto) {
-        Project projectById = projectRepository.getProjectById(projectDto.getId());
+    public ProjectDto getProjectById(Long userId) {
+        Project projectById = projectRepository.getProjectById(userId);
         return mapper.toDto(projectById);
     }
 
