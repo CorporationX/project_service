@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.dto.MomentDtoUpdate;
 import faang.school.projectservice.filters.moments.FilterMomentDto;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.Valid;
@@ -17,7 +18,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/moments")
+@RequestMapping("api/v1/moments")
 public class MomentController {
     public final MomentService momentService;
 
@@ -27,13 +28,13 @@ public class MomentController {
     }
 
     @PutMapping
-    public void updateMoment(@Valid MomentDto momentDto) {
-        momentService.updateMoment(momentDto);
+    public void updateMoment(@Valid MomentDtoUpdate momentDtoUpdate) {
+        momentService.updateMoment(momentDtoUpdate);
     }
 
-    @GetMapping
-    public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto) {
-        return momentService.getFilteredMoments(filterMomentDto);
+    @GetMapping("/filtered")
+    public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto, Long idProject) {
+        return momentService.getFilteredMoments(filterMomentDto, idProject);
     }
 
     @GetMapping

@@ -3,6 +3,7 @@ package faang.school.projectservice.filters.moments;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+
 @Data
 public class FilterMomentDto {
     private String namePattern;
