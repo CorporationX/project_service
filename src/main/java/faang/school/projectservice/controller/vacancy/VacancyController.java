@@ -2,18 +2,20 @@ package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.srvice.vacancy.VacancyService;
+import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/vacancy")
 public class VacancyController {
-    private VacancyService service;
+    private final VacancyService service;
+    private final VacancyValidator vacancyValidator;
 
-
-    public VacancyDto createVacancy(VacancyDto vacancyDto) {
-        return vacancyDto;
+    @PostMapping("/{creator}")
+    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto, @PathVariable long creator) {
+        vacancyValidator.createVacancyControllerValidation(vacancyDto, creator);
+        return service.createVacancy(vacancyDto, creator);
     }
 }
