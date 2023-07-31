@@ -5,33 +5,42 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class VacancyController {
     private final VacancyService vacancyService;
 
-    public VacancyDto createVacancy(VacancyDto vacancyDto) {
+    @PostMapping("/vacancy")
+    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
         validateVacancy(vacancyDto);
         return vacancyService.createVacancy(vacancyDto);
     }
 
-    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+    @PutMapping("/vacancy")
+    public VacancyDto updateVacancy(@RequestBody VacancyDto vacancyDto) {
         validateVacancy(vacancyDto);
         return vacancyService.updateVacancy(vacancyDto);
     }
 
-    public void deleteVacancy(long id) {
+    @DeleteMapping("/vacancy/{id}")
+    public void deleteVacancy(@PathVariable long id) {
         if (id < 0) {
             throw new DataValidationException("Vacancy should have correct id");
         }
         vacancyService.deleteVacancy(id);
     }
 
-    public List<VacancyDto> getVacancies(VacancyFilterDto filter) {
+    @PostMapping("/vacancy/filters")
+    public List<VacancyDto> getVacancies(@RequestBody VacancyFilterDto filter) {
         validateFilter(filter);
         return vacancyService.getVacancies(filter);
     }
