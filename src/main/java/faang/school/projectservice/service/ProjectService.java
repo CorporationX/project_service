@@ -27,7 +27,7 @@ public class ProjectService {
         return updateProjectMapper.toDto(project);
     }
 
-    private static void updateEntityFields(UpdateProjectDto dto, Project project) {
+    private void updateEntityFields(UpdateProjectDto dto, Project project) {
         if (dto.getDescription() != null) {
             project.setDescription(dto.getDescription());
         }
