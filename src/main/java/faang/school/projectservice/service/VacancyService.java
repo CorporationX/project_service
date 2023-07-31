@@ -84,6 +84,10 @@ public class VacancyService {
         }
     }
 
+    public VacancyDto getVacancyById(long id) {
+        return vacancyMapper.toDto(getVacancy(id));
+    }
+
     private VacancyDto saveVacancy(VacancyDto vacancyDto) {
         Vacancy vacancyToSave = vacancyMapper.toModel(vacancyDto);
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());

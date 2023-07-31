@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -33,7 +34,7 @@ public class VacancyController {
 
     @DeleteMapping("/vacancy/{id}")
     public void deleteVacancy(@PathVariable long id) {
-        if (id < 0) {
+        if (id <= 0) {
             throw new DataValidationException("Vacancy should have correct id");
         }
         vacancyService.deleteVacancy(id);
@@ -43,6 +44,14 @@ public class VacancyController {
     public List<VacancyDto> getVacancies(@RequestBody VacancyFilterDto filter) {
         validateFilter(filter);
         return vacancyService.getVacancies(filter);
+    }
+
+    @GetMapping("/vacancy/{id}")
+    public VacancyDto getVacancy(@PathVariable long id) {
+        if (id <= 0) {
+            throw new DataValidationException("Vacancy should have correct id");
+        }
+        return vacancyService.getVacancyById(id);
     }
 
     private void validateVacancy(VacancyDto vacancyDto) {

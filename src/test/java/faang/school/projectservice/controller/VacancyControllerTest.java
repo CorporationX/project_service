@@ -76,12 +76,12 @@ class VacancyControllerTest {
     }
 
     @Test
-    public void testDeleteVacancyThrowDateExc() {
+    public void testDeleteVacancyThrowDataExc() {
         assertThrows(DataValidationException.class, () -> vacancyController.deleteVacancy(-1));
     }
 
     @Test
-    public void testGetVacanciesThrowDateExc1() {
+    public void testGetVacanciesThrowDataExc1() {
         VacancyFilterDto filter = VacancyFilterDto.builder().name(" ").build();
 
         DataValidationException e = assertThrows(
@@ -91,7 +91,7 @@ class VacancyControllerTest {
     }
 
     @Test
-    public void testGetVacanciesThrowDateExc2() {
+    public void testGetVacanciesThrowDataExc2() {
         VacancyFilterDto filter = VacancyFilterDto.builder().descriptionPattern(" ").build();
 
         DataValidationException e = assertThrows(
@@ -101,13 +101,18 @@ class VacancyControllerTest {
     }
 
     @Test
-    public void testGetVacanciesThrowDateExc3() {
+    public void testGetVacanciesThrowDataExc3() {
         VacancyFilterDto filter = VacancyFilterDto.builder().requiredSkillId(-1L).build();
 
         DataValidationException e = assertThrows(
                 DataValidationException.class,
                 () -> vacancyController.getVacancies(filter));
         assertEquals("Required skill id filter can't be less than 1", e.getMessage());
+    }
+
+    @Test
+    public void testGetVacancyThrowDataExc() {
+        assertThrows(DataValidationException.class, () -> vacancyController.getVacancy(-1));
     }
 
     @Nested
@@ -147,6 +152,12 @@ class VacancyControllerTest {
         public void testGetVacancies() {
             vacancyController.getVacancies(new VacancyFilterDto());
             Mockito.verify(vacancyService).getVacancies(new VacancyFilterDto());
+        }
+
+        @Test
+        public void testGetVacancy() {
+            vacancyController.getVacancy(1);
+            Mockito.verify(vacancyService).getVacancyById(1);
         }
     }
 }
