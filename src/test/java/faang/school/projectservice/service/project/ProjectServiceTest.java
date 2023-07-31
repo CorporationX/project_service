@@ -242,7 +242,7 @@ public class ProjectServiceTest {
         Stream<Project> desiredProjects = getFilteredProjects(projectsFromDB);
 
         ProjectNameFilter nameFilter = Mockito.mock(ProjectNameFilter.class);
-        projectService = new ProjectService(projectRepository, projectMapper, momentService, List.of(nameFilter));
+        projectService = new ProjectService(projectRepository, projectMapper, momentService, List.of(nameFilter), List.of());
 
         Mockito.when(projectRepository.findAll()).thenReturn(projectFromBDStream);
 

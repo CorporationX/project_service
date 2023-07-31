@@ -30,6 +30,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final MomentService momentService;
     private final List<ProjectFilter> projectFilters;
+    private final List<SubProjectFilter> subProjectFilters;
 
     @Transactional
     public List<ProjectDto> getAllProjects() {
@@ -115,7 +116,8 @@ public class ProjectService {
                 Optional.ofNullable(parentProject.getChildren()).orElse(Collections.emptyList());
 
         return subProjects.stream()
-                .filter(subProject -> checkFilters(subProject, filtersDto))
+                .filter(subProject -> subProjectFilters.stream()
+                        .allMatch(filter -> filter.checkFilters(subProject, filtersDto)))
                 .map(projectMapper::toDto)
                 .toList();
     }
@@ -150,16 +152,6 @@ public class ProjectService {
                 updateChildrenVisibility(child, visibility);
             }
         }
-    }
-
-    private boolean checkFilters(Project subProject, SubProjectFilterDto filtersDto) {
-        if (filtersDto.getNameFilter() != null && !subProject.getName().contains(filtersDto.getNameFilter())) {
-            return false;
-        }
-        if (filtersDto.getStatusFilter() != null && !filtersDto.getStatusFilter().contains(subProject.getStatus())) {
-            return false;
-        }
-        return true;
     }
 
     private void validateProjectExists(long projectId) {
