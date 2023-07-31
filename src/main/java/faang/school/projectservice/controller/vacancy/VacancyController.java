@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/vacancy")
+@RequestMapping("/api/v1/vacancy")
 public class VacancyController {
     private final VacancyService service;
     private final VacancyValidator vacancyValidator;
 
-    @PostMapping("/{creator}")
-    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto, @PathVariable long creator) {
-        vacancyValidator.createVacancyControllerValidation(vacancyDto, creator);
-        return service.createVacancy(vacancyDto, creator);
+    @PostMapping("/{creatorId}")
+    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto, @PathVariable long creatorId) {
+        vacancyValidator.createVacancyControllerValidation(vacancyDto, creatorId);
+        return service.createVacancy(vacancyDto, creatorId);
     }
 }

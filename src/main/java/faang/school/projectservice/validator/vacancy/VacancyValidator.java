@@ -14,15 +14,15 @@ public class VacancyValidator {
 
     public void createVacancyControllerValidation(VacancyDto vacancyDto, long creator) {
         if (vacancyDto == null) {
-            throw new VacancyValidationException("your vacancy is null!");
+            throw new VacancyValidationException("Your vacancy is null!");
         }
 
-        if (vacancyDto.getProjectId() == null || vacancyDto.getProjectId() < 1) {
+        if (vacancyDto.getProjectId() == null) {
             throw new VacancyValidationException("Illegal project!");
         }
 
         if (creator < 1) {
-            throw new VacancyValidationException("IWrong creator!");
+            throw new VacancyValidationException("Wrong creator!");
         }
     }
 
