@@ -2,7 +2,8 @@ CREATE TABLE candidate(
                           id             BIGSERIAL PRIMARY KEY,
                           user_id        BIGINT NOT NULL,
                           resume_doc_key VARCHAR(255),
-                          cover_letter   TEXT
+                          cover_letter   TEXT,
+                          candidate_status VARCHAR(30)
 );
 
 CREATE TABLE vacancy
