@@ -2,12 +2,10 @@ package faang.school.projectservice.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
 import faang.school.projectservice.exception.DataValidateInviteException;
 import faang.school.projectservice.filter.*;
-import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
@@ -31,7 +29,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 class StageInvitationServiceTest {
     private StageInvitationService stageInvitationService;
     @Spy
-    private StageInvitationMapper stageInvitationMapper = new StageInvitationMapperImpl();
+    private StageInvitationMapperImpl stageInvitationMapper;
     @Mock
     private StageInvitationRepository stageInvitationRepository;
     @Mock
@@ -42,10 +40,12 @@ class StageInvitationServiceTest {
     private List<StageInvitationFilter> filters;
     private StageInvitation stageInvitation;
 
+    @Mock
     private StageInvitationDto stageInvitationDto;
 
+    @Mock
     private Stage stage;
-
+    @Mock
     private TeamMember invited;
 
     private TeamMember author;
@@ -67,21 +67,21 @@ class StageInvitationServiceTest {
         List<TeamMember> executors = new ArrayList<>();
         executors.add(author);
 
-        stage = Stage.builder()
-                .stageName("Stage")
-                .executors(executors)
-                .build();
+//        stage = Stage.builder()
+//                .stageName("Stage")
+//                .executors(executors)
+//                .build();
+//
+//        invited = TeamMember.builder()
+//                .userId(2L)
+//                .build();
 
-        invited = TeamMember.builder()
-                .userId(2L)
-                .build();
-
-        stageInvitationDto = StageInvitationDto.builder()
-                .id(5L)
-                .stage(stage)
-                .author(author)
-                .invited(invited)
-                .build();
+//        stageInvitationDto = StageInvitationDto.builder()
+//                .id(5L)
+//                .stage(stage)
+//                .author(author)
+//                .invited(invited)
+//                .build();
 
         stageInvitation = StageInvitation.builder()
                 .id(6L)
