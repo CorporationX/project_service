@@ -79,6 +79,8 @@ public class Vacancy {
     @Enumerated(EnumType.STRING)
     private WorkSchedule workSchedule;
 
+    private Integer count;
+
     @ElementCollection
     @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "skill_id")
