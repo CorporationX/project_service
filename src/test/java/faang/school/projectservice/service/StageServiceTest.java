@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ class StageServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private TaskRepository taskRepository;
-    @Mock
+    @Spy
     private StageMapper stageMapper;
     @Mock
     private ProjectMapper projectMapper;
@@ -58,7 +59,7 @@ class StageServiceTest {
                         .build())
                 .build();
         when(projectRepository.getProjectById(anyLong())).thenReturn(stage.getProject());
-        ProjectException projectException = assertThrows(ProjectException.class, () -> stageService.createStage(StageMapper.INSTANCE.toStageDto(stage)));
+        ProjectException projectException = assertThrows(ProjectException.class, () -> stageService.createStage(stageMapper.toStageDto(stage)));
         verify(stageRepository, times(0)).save(stage);
         assertEquals("Project with id 1 unavailable", projectException.getMessage());
     }
@@ -92,7 +93,6 @@ class StageServiceTest {
         when(stageRepository.save(any())).thenReturn(stage);
         stageService.createStage(StageMapper.INSTANCE.toStageDto(stage));
         verify(stageRepository, times(1)).save(any());
-        StageDto stageDto = stageService.createStage(StageMapper.INSTANCE.toStageDto(stage));
     }
 
     @Test
@@ -187,6 +187,23 @@ class StageServiceTest {
                 .build();
         ProjectException projectException = assertThrows(ProjectException.class, () -> stageService.getAllStage(project));
         assertEquals("The project must have a status", projectException.getMessage());
+    }
+
+   @Test
+    public void getStageById() {
+        StageDto stageDto = StageDto.builder()
+                .stageId(9L)
+                .stageName("stage2")
+                .project(Project.builder()
+                        .id(3L)
+                        .status(ProjectStatus.CREATED)
+                        .build())
+                .tasks(new ArrayList<>())
+                .stageRoles(new ArrayList<>())
+                .build();
+        when(stageMapper.toStageDto(stage)).thenReturn(stageDto);
+        when(stageRepository.getById(9L)).thenReturn(stage);
+        assertEquals("stage2", stageService.getStageById((9L)).getStageName());
     }
 
 }

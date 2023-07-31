@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.DeleteStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
@@ -68,6 +67,11 @@ public class StageService {
         }
         projectMapper.toProjectDto(projectRepository.getProjectById(projectDto.getId()));
         return projectDto.getStageList();
+    }
+
+    public StageDto getStageById(Long id) {
+        Stage stage = stageRepository.getById(id);
+        return stageMapper.toStageDto(stage);
     }
 
     private StageDto validStage(StageDto stage) {
