@@ -7,7 +7,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.model.stage.StageStatus;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -51,49 +50,6 @@ public class StageService {
         stageRepository.deleteById(stageId);
     }
 
-    @Transactional
-    public StageDto updateStage(StageDtoForUpdate stageDto) {
-
-        Stage stageFromRepository = stageRepository.getById(stageDto.getStageId());
-
-        stageValidator.isCompletedOrCancelled(stageFromRepository);
-
-        findNewTeamRoles(stageFromRepository, stageDto);
-        sendStageInvitation(stageFromRepository, stageDto);
-        setNewFieldsForStage(stageFromRepository, stageDto);
-
-        return stageMapper.toDto(stageRepository.save(stageFromRepository));
-    }
-
-    private void setNewFieldsForStage(Stage stageFromRepository, StageDtoForUpdate stageDto) {
-        List<TeamRole> teamRoles = stageDto.getTeamRoles();
-        Map<String, Long> teamRolesMap = teamRoles.stream().collect(Collectors.groupingBy(TeamRole::toString, Collectors.counting()));
-        List<StageRoles> newStageRoles = new ArrayList<>();
-
-        for (Map.Entry<String, Long> entry : teamRolesMap.entrySet()) {
-            Integer count = Math.toIntExact(entry.getValue());
-            newStageRoles.add(StageRoles.builder().teamRole(TeamRole.valueOf(entry.getKey())).count(count).build());
-        }
-        stageFromRepository.setStageRoles(newStageRoles);
-        stageFromRepository.setStatus(StageStatus.valueOf(stageDto.getStatus()));
-    }
-
-    private void sendStageInvitation(Stage stageFromRepository, StageDtoForUpdate stageDto) {
-        Project projectFromRepository = projectRepository.getProjectById(stageFromRepository.getProject().getId());
-
-        stageDto.getTeamRoles().forEach(teamRole -> projectFromRepository.getTeams().forEach(team -> {
-            if (team.getTeamMembers().contains(teamRole)) {
-                StageInvitation.builder().stage(stageFromRepository).status(StageInvitationStatus.PENDING).build();
-            }
-        }));
-    }
-
-    private void findNewTeamRoles(Stage stageFromRepository, StageDtoForUpdate stageDto) {
-        stageFromRepository.getExecutors()
-                .forEach(teamMember -> teamMember.getRoles().forEach(teamRole -> stageDto.getTeamRoles()
-                        .removeIf(role -> role.equals(teamRole))));
-    }
-
     @Transactional(readOnly = true)
     public List<StageDto> getAllStages() {
         List<Stage> stages = stageRepository.findAll();
@@ -103,5 +59,63 @@ public class StageService {
     @Transactional(readOnly = true)
     public StageDto getStageById(Long stageId) {
         return stageMapper.toDto(stageRepository.getById(stageId));
+    }
+
+    @Transactional
+    public StageDto updateStage(StageDtoForUpdate stageDto) {
+
+        Stage stageFromRepository = stageRepository.getById(stageDto.getStageId());
+
+        stageValidator.isCompletedOrCancelled(stageFromRepository);
+        List<TeamRole> teamRolesFromStageDto = stageDto.getTeamRoles();
+
+        List<TeamRole> newTeamRoles = findNewTeamRoles(stageFromRepository, teamRolesFromStageDto);
+        Stage stageAfterUpdate = setNewFieldsForStage(stageFromRepository, teamRolesFromStageDto);
+        sendStageInvitation(stageFromRepository, newTeamRoles);
+
+        return stageMapper.toDto(stageRepository.save(stageAfterUpdate));
+    }
+
+    private Stage setNewFieldsForStage(Stage stageFromRepository, List<TeamRole> teamRoles) {
+        Map<String, Long> teamRolesMap = teamRoles.stream().collect(Collectors.groupingBy(TeamRole::toString, Collectors.counting()));
+        List<StageRoles> newStageRoles = new ArrayList<>();
+
+        for (Map.Entry<String, Long> entry : teamRolesMap.entrySet()) {
+            Integer count = Math.toIntExact(entry.getValue());
+            newStageRoles.add(StageRoles.builder().teamRole(TeamRole.valueOf(entry.getKey())).count(count).build());
+        }
+        stageFromRepository.setStageRoles(newStageRoles);
+
+        return stageFromRepository;
+    }
+
+    private void sendStageInvitation(Stage stageFromRepository, List<TeamRole> newTemRoles) {
+        if (!newTemRoles.isEmpty()) {
+            Project projectFromRepository = projectRepository.getProjectById(stageFromRepository.getProject().getId());
+
+            newTemRoles
+                    .forEach(teamRole ->
+                            projectFromRepository.getTeams()
+                                    .stream()
+                                    .flatMap(team -> team.getTeamMembers()
+                                            .stream())
+                                    .filter(teamMember -> teamMember.getRoles().contains(teamRole))
+                                    .forEach(teamMember -> StageInvitation.builder()
+                                            .invited(teamMember)
+                                            .author(teamMember)// Нужно еще определить кто будет автором в приглашении
+                                            .stage(stageFromRepository)
+                                            .status(StageInvitationStatus.PENDING)
+                                            .build()));
+        }
+    }
+
+    private List<TeamRole> findNewTeamRoles(Stage stageFromRepository, List<TeamRole> teamRoles) {
+
+        stageFromRepository.getExecutors()
+                .forEach(teamMember -> teamMember.getRoles()
+                        .forEach(teamRole -> teamRoles
+                                .removeIf(role -> role.equals(teamRole))));
+
+        return teamRoles;
     }
 }

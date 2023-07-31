@@ -49,8 +49,8 @@ public class StageValidator {
                 || stageFromRepository.getProject().getStatus().toString().equalsIgnoreCase("COMPLETED")) {
             throw new DataValidationException("Project is completed or cancelled");
         }
-        if (stageFromRepository.getStatus().toString().equalsIgnoreCase("CANCELLED")
-                || stageFromRepository.getStatus().toString().equalsIgnoreCase("COMPLETED")) {
+        if (stageFromRepository.getStatus().toString().equals("CANCELLED")
+                || stageFromRepository.getStatus().toString().equals("COMPLETED")) {
             throw new DataValidationException("Stage is completed or cancelled");
         }
     }

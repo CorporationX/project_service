@@ -2,12 +2,14 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageDtoForUpdate;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage.StageStatus;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,9 +26,10 @@ import org.mockito.quality.Strictness;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -43,41 +46,63 @@ class StageServiceTest {
     private StageMapper stageMapper;
     @Mock
     private StageDto stageDto;
-    @Mock
+
     private StageValidator stageValidator;
     @Mock
+    private ProjectRepository projectRepository;
+    @Mock
     private Stage stage;
-    private Stage stage1;
-    private Stage stage2;
+    @Mock
+    private Stage stageFromRepositoryMock;
+    @Mock
+    private StageDtoForUpdate stageDtoForUpdateMock;
+    @Mock
+    private Stage stageAfterUpdateMock;
+    private Stage stageWithStatusCreated;
+    private Stage stageWithStatusIn_Progress;
     private String status;
     private Long stageId;
     private StageDtoForUpdate stageDtoForUpdate;
-    private Stage stageEntity;
+    private Stage stageFromRepository;
+    private Stage stageAfterUpdate;
+    private Stage stageFromRepositoryWithWrongStageStatus;
 
     @BeforeEach
     void setUp() {
         stageId = 1L;
         status = "created";
-        stage1 = Stage.builder().
-                stageId(1L).
-                status(StageStatus.CREATED)
+        stageWithStatusCreated = Stage.builder()
+                .stageId(1L)
+                .status(StageStatus.CREATED)
                 .build();
-        stage2 = Stage.builder().
-                stageId(2L).
-                status(StageStatus.IN_PROGRESS)
+        stageWithStatusIn_Progress = Stage.builder()
+                .stageId(2L)
+                .status(StageStatus.IN_PROGRESS)
                 .build();
-        stageDtoForUpdate = StageDtoForUpdate.builder().
-                stageId(1L).
-                stageName("stageName")
+        stageDtoForUpdate = StageDtoForUpdate.builder()
+                .stageId(1L)
+                .stageName("stageName")
                 .projectId(1L)
-                .status("IN_PROGRESS")
+                .status("CREATED")
                 .teamRoles(List.of(TeamRole.valueOf("OWNER"), TeamRole.valueOf("MANAGER")))
                 .build();
-        stageEntity = Stage.builder().
-                stageId(1L)
+        stageFromRepository = Stage.builder()
+                .stageId(1L)
                 .status(StageStatus.CREATED)
                 .project(Project.builder().id(1L).build())
                 .stageRoles(List.of(StageRoles.builder().teamRole(TeamRole.valueOf("OWNER")).count(1).build()))
+                .build();
+        stageAfterUpdate = Stage.builder()
+                .stageId(1L)
+                .stageName("stageName")
+                .project(Project.builder().id(1L).build())
+                .status(StageStatus.CREATED)
+                .stageRoles(List.of(
+                        StageRoles.builder().teamRole(TeamRole.valueOf("OWNER")).count(1).build(),
+                        StageRoles.builder().teamRole(TeamRole.valueOf("MANAGER")).count(1).build()))
+                .build();
+        stageFromRepositoryWithWrongStageStatus = Stage.builder()
+                .status(StageStatus.CANCELLED)
                 .build();
     }
 
@@ -98,13 +123,13 @@ class StageServiceTest {
 
     @Test
     void testMethodGetAllStagesByStatus() {
-        when(stageRepository.findAll()).thenReturn(new ArrayList<>(List.of(stage1, stage2)));
-        when(stageMapper.toDto(stage1)).thenReturn(stageDto);
+        when(stageRepository.findAll()).thenReturn(new ArrayList<>(List.of(stageWithStatusCreated, stageWithStatusIn_Progress)));
+        when(stageMapper.toDto(stageWithStatusCreated)).thenReturn(stageDto);
 
         stageService.getAllStagesByStatus(status);
 
         verify(stageRepository, times(1)).findAll();
-        verify(stageMapper, times(1)).toDto(stage1);
+        verify(stageMapper, times(1)).toDto(stageWithStatusCreated);
         verifyNoMoreInteractions(stageRepository);
         verifyNoMoreInteractions(stageMapper);
     }
@@ -115,20 +140,6 @@ class StageServiceTest {
 
         verify(stageRepository, times(1)).deleteById(stageId);
         verifyNoMoreInteractions(stageRepository);
-    }
-
-    @Test
-    void testMethodUpdateStage() {
-        StageDto stageAfterUpdate = stageService.updateStage(stageDtoForUpdate);
-        assertAll(() -> {
-            assertEquals(stageDtoForUpdate.getStageName(), stageAfterUpdate.getStageName());
-            assertEquals(stageDtoForUpdate.getProjectId(), stageAfterUpdate.getProjectId());
-            assertEquals(stageDtoForUpdate.getStatus(), stageAfterUpdate.getStatus());
-            assertEquals(stageDtoForUpdate.getTeamRoles().get(0).toString(),
-                    stageAfterUpdate.getStageRolesDto().get(0).getTeamRole());
-            assertEquals(stageDtoForUpdate.getTeamRoles().get(1).toString(),
-                    stageAfterUpdate.getStageRolesDto().get(1).getTeamRole());
-        });
     }
 
     @Test
@@ -155,5 +166,32 @@ class StageServiceTest {
     void testMethodGetStageById_ThrowExceptionAndMessage() {
         when(stageRepository.getById(stageId)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class, () -> stageService.getStageById(stageId), "Stage not found by id: " + stageId);
+    }
+
+    @Test
+    void testMethodUpdateStage() {
+
+        when(stageRepository.getById(stageDtoForUpdateMock.getStageId())).thenReturn(stageFromRepositoryMock);
+        when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
+        doNothing().when(stageValidator).isCompletedOrCancelled(any(Stage.class));
+        when(stageRepository.save(any(Stage.class))).thenReturn(stageAfterUpdateMock);
+
+        stageService.updateStage(stageDtoForUpdateMock);
+
+        verify(stageRepository, times(1)).getById(stageDtoForUpdateMock.getStageId());
+        verify(stageMapper, times(1)).toDto(stageAfterUpdateMock);
+        verify(stageValidator, times(1)).isCompletedOrCancelled(any(Stage.class));
+        verify(stageRepository, times(1)).save(any(Stage.class));
+
+        verifyNoMoreInteractions(stageRepository);
+
+    }
+
+    @Test()
+    public void testUpdateStage_InvalidStage() {
+
+//        when(stageRepository.getById(stageDtoForUpdateMock.getStageId())).thenReturn(stageFromRepositoryWithWrongStageStatus);
+        assertThrows(DataValidationException.class, () -> stageValidator.isCompletedOrCancelled(stageFromRepositoryWithWrongStageStatus), ("Stage is completed or cancelled"));
+
     }
 }

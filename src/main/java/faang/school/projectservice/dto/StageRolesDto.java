@@ -18,5 +18,4 @@ public class StageRolesDto {
 
     @NotNull(message = "Count can not be null")
     private Integer count;
-
 }

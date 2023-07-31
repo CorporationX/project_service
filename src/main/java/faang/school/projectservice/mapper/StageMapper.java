@@ -26,8 +26,8 @@ public interface StageMapper {
     Stage toEntity(StageDto stageDto);
 
     @Named("mapListRolesDtoToListRoles")
-    default List<StageRoles> toList(List<StageRolesDto> stageRolesDtos) {
-        return stageRolesDtos.stream().map(stageRolesMapper::toEntity).toList();
+    default List<StageRoles> toList(List<StageRolesDto> stageRolesDto) {
+        return stageRolesDto.stream().map(stageRolesMapper::toEntity).toList();
     }
 
     @Named("mapListRolesToListRolesDto")
