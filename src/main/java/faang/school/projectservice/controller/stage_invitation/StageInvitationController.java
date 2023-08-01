@@ -33,4 +33,14 @@ public class StageInvitationController {
     public List<StageInvitationDto> getStageInvitationsWithFilters(StageInvitationFilterDto filterDto) {
         return service.getStageInvitationsWithFilters(filterDto);
     }
+
+    public List<StageInvitationDto> getStageInvitationsForTeamMemberWithFilters(long invitedId, StageInvitationFilterDto filterDto) {
+        if (filterDto.getInvitedId() == null || filterDto.getInvitedId() != invitedId) {
+            filterDto = StageInvitationFilterDto.builder()
+                    .stageId(filterDto.getStageId())
+                    .authorId(filterDto.getAuthorId())
+                    .invitedId(invitedId).build();
+        }
+        return service.getStageInvitationsWithFilters(filterDto);
+    }
 }
