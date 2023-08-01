@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.invitation;
 
-;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import lombok.*;
 

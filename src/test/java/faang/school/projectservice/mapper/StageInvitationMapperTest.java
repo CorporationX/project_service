@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class StageInvitationMapperTest {
     private final StageInvitationMapper stageInvitationMapper = StageInvitationMapper.INSTANCE;
-
     private StageInvitationDto dto;
     private StageInvitation entity;
 

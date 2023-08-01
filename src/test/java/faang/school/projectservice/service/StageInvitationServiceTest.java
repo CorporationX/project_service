@@ -3,162 +3,230 @@ package faang.school.projectservice.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
-import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
 import faang.school.projectservice.exception.DataValidateInviteException;
-import faang.school.projectservice.filter.*;
 import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.ArrayList;
-import java.util.List;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class StageInvitationServiceTest {
-    private StageInvitationService stageInvitationService;
+    @Mock
+    private StageInvitationRepository stageInvitationRepository;
     @Spy
     private StageInvitationMapperImpl stageInvitationMapper;
     @Mock
-    private StageInvitationRepository stageInvitationRepository;
-    @Mock
     private TeamMemberRepository teamMemberRepository;
-
-    private StageInvitationFilterDto stageInvitationFilterDto;
-
-    private List<StageInvitationFilter> filters;
-    private StageInvitation stageInvitation;
-
     @Mock
-    private StageInvitationDto stageInvitationDto;
+    private StageRepository stageRepository;
+    @InjectMocks
+    private StageInvitationService stageInvitationService;
+    TeamMember invitedUser;
+    TeamMember author;
+    StageInvitationDto stageInvitationDto;
 
-    @Mock
-    private Stage stage;
-    @Mock
-    private TeamMember invited;
-
-    private TeamMember author;
+    Stage stage;
+    StageInvitation stageInvitation;
 
     @BeforeEach
     void setUp() {
-        stageInvitationFilterDto = StageInvitationFilterDto.builder()
-                .statusPattern(StageInvitationStatus.PENDING)
-                .stagePattern("Stage")
-                .authorPattern(1L)
-                .invitedPattern(2L)
-                .build();
+        Long invitedUserId = 1L;
+        Long authorId = 2L;
 
-        author = TeamMember.builder()
-                .userId(1L)
-                .roles(List.of(TeamRole.OWNER, TeamRole.MANAGER, TeamRole.DEVELOPER))
-                .build();
+        invitedUser = new TeamMember();
+        invitedUser.setId(111L);
+        invitedUser.setUserId(invitedUserId);
+
+        author = new TeamMember();
+        author.setId(112L);
+        author.setUserId(authorId);
+
+        stage = new Stage();
+        stage.setStageId(20L);
+
+        stageInvitationDto = new StageInvitationDto();
+        stageInvitationDto.setId(123L);
+        stageInvitationDto.setInvited(invitedUser);
+        stageInvitationDto.setStage(stage);
+
+        stageInvitation = new StageInvitation();
+        stageInvitation.setId(123L);
+        stageInvitation.setStage(stage);
+
+        when(teamMemberRepository.findById(invitedUserId)).thenReturn(invitedUser);
+        when(teamMemberRepository.findById(authorId)).thenReturn(invitedUser);
+
+        when(stageRepository.getById(20L)).thenReturn(stage);
+
+        when(stageInvitationRepository.findById(123L)).thenReturn(stageInvitation);
+        when(stageInvitationMapper.toEntity(stageInvitationDto)).thenReturn(stageInvitation);
+        when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
+    }
+
+    @Test
+    public void testSendInvitation_Success() {
+        invitedUser.setRoles(List.of(TeamRole.DEVELOPER));
+        author.setRoles(List.of(TeamRole.OWNER));
+        stageInvitation.setStatus(StageInvitationStatus.PENDING);
 
         List<TeamMember> executors = new ArrayList<>();
         executors.add(author);
-
-//        stage = Stage.builder()
-//                .stageName("Stage")
-//                .executors(executors)
-//                .build();
-//
-//        invited = TeamMember.builder()
-//                .userId(2L)
-//                .build();
-
-//        stageInvitationDto = StageInvitationDto.builder()
-//                .id(5L)
-//                .stage(stage)
-//                .author(author)
-//                .invited(invited)
-//                .build();
-
-        stageInvitation = StageInvitation.builder()
-                .id(6L)
-                .status(StageInvitationStatus.PENDING)
-                .stage(stage)
-                .author(TeamMember.builder().id(1L).build())
-                .invited(TeamMember.builder().id(2L).build())
-                .build();
-
-//        stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
-//        stageInvitation.setAuthor(author);
-
-        List<StageInvitationFilter> filters = List.of(
-                new StageInvitationAuthorFilter(),
-                new StageInvitationInvitedFilter(),
-                new StageInvitationStageFilter(),
-                new StageInvitationStatusFilter()
-        );
-        stageInvitationService = new StageInvitationService(stageInvitationRepository, stageInvitationMapper, filters, teamMemberRepository);
-
-        when(stageInvitationRepository.save(any(StageInvitation.class))).thenReturn(stageInvitation);
-    }
-
-    @Test
-    void testSendInvitation_UserAlreadyExecutor() {
-        List<TeamMember> executors = new ArrayList<>();
-        executors.add(invited);
         stage.setExecutors(executors);
 
-        assertThrows(DataValidateInviteException.class, () -> stageInvitationService.sendInvitation(stageInvitationDto));
+        StageInvitationDto result = stageInvitationService.sendInvitation(stageInvitationDto);
+
+        assertNotNull(result);
+        assertEquals(StageInvitationStatus.PENDING, result.getStatus());
+        assertEquals(author, result.getAuthor());
+        assertEquals(invitedUser, result.getInvited());
+
+        verify(teamMemberRepository, times(1)).findById(invitedUser.getUserId());
+        verify(stageInvitationRepository, times(1)).save(any(StageInvitation.class));
+        verify(stageInvitationMapper, never()).listToEntity(anyList());
     }
 
     @Test
-    void testSendInvitation_UserHasOwnerRole_ExceptionThrown() {
-        Mockito.when(stageInvitationDto.getInvited()).thenReturn(invited);
-        Mockito.when(invited.getRoles()).thenReturn(List.of(TeamRole.OWNER));
+    public void testSendInvitation_InviteUserWithOwnerRole() {
+        invitedUser.setRoles(List.of(TeamRole.OWNER));
 
-        assertThrows(DataValidateInviteException.class, () -> {
+        DataValidateInviteException exception = assertThrows(DataValidateInviteException.class, () -> {
             stageInvitationService.sendInvitation(stageInvitationDto);
         });
+
+        String expectedMessage = "Can't send invitation to user with OWNER or MANAGER role";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
-    void testAcceptInvitation_UserIsNotExecutor_Success() {
-        when(stageInvitationRepository.findById(anyLong())).thenReturn(stageInvitation);
+    public void testSendInvitation_InviteUserWithManagerRole() {
+        invitedUser.setRoles(List.of(TeamRole.MANAGER));
+
+        DataValidateInviteException exception = assertThrows(DataValidateInviteException.class, () -> {
+            stageInvitationService.sendInvitation(stageInvitationDto);
+        });
+
+        String expectedMessage = "Can't send invitation to user with OWNER or MANAGER role";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void testSendInvitation_InvitationSuccessfullySent() {
+        invitedUser.setRoles(List.of(TeamRole.DEVELOPER));
+        author.setRoles(List.of(TeamRole.OWNER));
 
         List<TeamMember> executors = new ArrayList<>();
-        when(stage.getExecutors()).thenReturn(executors);
+        executors.add(author);
+        stage.setExecutors(executors);
+
+        when(stageInvitationMapper.toEntity(stageInvitationDto)).thenReturn(stageInvitation);
+        when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
+
+        StageInvitationDto result = stageInvitationService.sendInvitation(stageInvitationDto);
+
+        assertNotNull(result);
+        assertEquals(StageInvitationStatus.PENDING, result.getStatus());
+        assertEquals(author, result.getAuthor());
+        assertEquals(invitedUser, result.getInvited());
+
+        verify(teamMemberRepository, times(1)).findById(invitedUser.getUserId());
+        verify(stageInvitationRepository, times(1)).save(any(StageInvitation.class));
+        verify(stageInvitationMapper, never()).listToEntity(anyList());
+    }
+
+    @Test
+    public void testSendInvitation_UserIsAlreadyExecutorThisStage() {
+        invitedUser.setRoles(List.of(TeamRole.DEVELOPER));
+        author.setRoles(List.of(TeamRole.OWNER));
+
+        List<TeamMember> executors = new ArrayList<>();
+        executors.add(author);
+        executors.add(invitedUser);
+        stage.setExecutors(executors);
+
+        DataValidateInviteException exception = assertThrows(DataValidateInviteException.class, () -> {
+            stageInvitationService.sendInvitation(stageInvitationDto);
+        });
+
+        String expectedMessage = "User is already executor for this stage";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void testAcceptInvitation_Success() {
+        stage.setExecutors(new ArrayList<>());
+        stageInvitation.setInvited(invitedUser);
+        stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
 
         StageInvitationDto result = stageInvitationService.acceptInvitation(stageInvitationDto);
 
         assertNotNull(result);
         assertEquals(StageInvitationStatus.ACCEPTED, result.getStatus());
-        verify(stageInvitationRepository, times(1)).save(Mockito.any());
+        assertEquals(invitedUser, result.getInvited());
+        assertEquals(1, result.getStage().getExecutors().size());
+        assertTrue(result.getStage().getExecutors().contains(invitedUser));
     }
 
     @Test
-    void testAcceptInvitation_UserIsExecutor_ExceptionThrown() {
-        when(stageInvitationRepository.findById(anyLong())).thenReturn(stageInvitation);
-
+    public void testAcceptInvitation_UserIsAlreadyExecutor() {
+        stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
         List<TeamMember> executors = new ArrayList<>();
-        executors.add(invited);
-        when(stage.getExecutors()).thenReturn(executors);
+        executors.add(invitedUser);
+        stage.setExecutors(executors);
 
-        assertThrows(DataValidateInviteException.class, () -> {
-            stageInvitationService.acceptInvitation(stageInvitationDto);
-        });
+        assertThrows(DataValidateInviteException.class, () -> stageInvitationService.acceptInvitation(stageInvitationDto));
     }
 
     @Test
-    void testRejectInvitation_Success() {
-        when(stageInvitationRepository.findById(anyLong())).thenReturn(stageInvitation);
+    public void testAcceptInvitation_InvalidInvitationId() {
+        when(stageInvitationRepository.findById(123L)).thenReturn(null);
+
+        assertThrows(NullPointerException.class, () -> stageInvitationService.acceptInvitation(stageInvitationDto));
+    }
+
+    @Test
+    public void testAcceptInvitation_NullInput() {
+        assertThrows(NullPointerException.class, () -> stageInvitationService.acceptInvitation(null));
+    }
+
+    @Test
+    public void testRejectInvitation_Success() {
+        stageInvitation.setStatus(StageInvitationStatus.PENDING);
 
         StageInvitationDto result = stageInvitationService.rejectInvitation(stageInvitationDto);
 
         assertNotNull(result);
         assertEquals(StageInvitationStatus.REJECTED, result.getStatus());
-        verify(stageInvitationRepository, times(1)).save(Mockito.any());
+    }
+    @Test
+    public void testRejectInvitation_InvalidStatus() {
+        stageInvitation.setStatus(StageInvitationStatus.REJECTED);
+        when(stageInvitationRepository.findById(123L)).thenReturn(stageInvitation);
+
+        assertThrows(DataValidateInviteException.class, () -> stageInvitationService.rejectInvitation(stageInvitationDto));
+    }
+
+    @Test
+    public void testRejectInvitation_InvalidId() {
+        when(stageInvitationRepository.findById(123L)).thenReturn(null);
+
+        assertThrows(DataValidateInviteException.class, () -> stageInvitationService.rejectInvitation(stageInvitationDto));
     }
 }

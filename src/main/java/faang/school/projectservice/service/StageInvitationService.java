@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
@@ -58,12 +59,14 @@ public class StageInvitationService {
     @Transactional
     public StageInvitationDto acceptInvitation(@NonNull StageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
+        stageInvitationMapper.updateDto(stageInvitationDto, stageInvitation);
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
 
         TeamMember invitedUser = stageInvitation.getInvited();
         Stage stage = stageInvitation.getStage();
 
         boolean isUserAlreadyExecutor = stage.getExecutors().stream()
+                .filter(Objects::nonNull)
                 .anyMatch(executor -> executor.getId().equals(invitedUser.getId()));
 
         if (!isUserAlreadyExecutor) {
@@ -77,6 +80,16 @@ public class StageInvitationService {
     @Transactional
     public StageInvitationDto rejectInvitation(@NonNull StageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
+
+        if (stageInvitation == null) {
+            throw new DataValidateInviteException("Invitation not found");
+        }
+
+        if (stageInvitation.getStatus() != StageInvitationStatus.PENDING &&
+                stageInvitation.getStatus() != StageInvitationStatus.ACCEPTED) {
+            throw new DataValidateInviteException("Invalid invitation status for rejection");
+        }
+
         stageInvitationMapper.updateDto(stageInvitationDto, stageInvitation);
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
         return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
