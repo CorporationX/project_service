@@ -1,17 +1,18 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.StageRoleDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ public class StageService {
     private final StageMapper stageMapper;
     private final TaskRepository taskRepository;
     private final StageRolesRepository stageRolesRepository;
+    private final UserContext userContext;
+    private final StageInvitationRepository stageInvitationRepository;
 
     @Transactional
     public StageDto create(StageDto stageDto) {
@@ -45,8 +48,8 @@ public class StageService {
 //Если нет, то нужно найти среди участников проекта пользователя с такой ролью и отправить ему приглашение участвовать в этапе.
 //Сколько пользователей с данной ролью требуется, столько приглашений разным пользователям должно быть отправлено.
 //
-//валидация Если изменяется список участников, нужно проверять, что обновлённые список участников удовлетворяет требованиям ролей.
-//update
+//Валидация Если изменяется список участников, нужно проверять, что обновлённые список участников удовлетворяет требованиям ролей.
+//Update
 
     @Transactional
     public StageDto updateStageRoles(StageDto stageDto) {
@@ -111,6 +114,24 @@ public class StageService {
         Stage stage = stageRepository.getById(stageId);
 
         return stageMapper.toDto(stage);
+    }
+
+    private void sendStageInvitation(long stageId, long invitedTeamMemberId) {
+        TeamMember author = TeamMember.builder().id(userContext.getUserId()).build();
+        StageInvitation stageInvitation = StageInvitation.builder()
+                .author(author)
+                .invited(TeamMember.builder().id(invitedTeamMemberId).build())
+                .description("You are invited on the Project stage " + stageId)
+                .status(StageInvitationStatus.PENDING)
+                .build();
+
+        stageInvitationRepository.save(stageInvitation);
+    }
+
+    private int executorsNeeded(StageDto stageDto) {
+        return stageDto.getStageRoles().stream()
+                .mapToInt(StageRolesDto::getCount)
+                .sum();
     }
 
     private void validateStageProject(StageDto stageDto) {

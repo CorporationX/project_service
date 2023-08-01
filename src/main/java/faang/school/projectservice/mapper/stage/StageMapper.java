@@ -1,28 +1,27 @@
 package faang.school.projectservice.mapper.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.StageRoleDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",
+        injectionStrategy = InjectionStrategy.FIELD,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        uses = {StageRolesMapper.class})
 public interface StageMapper {
 
     @Mapping(target = "project", source = "projectId", qualifiedByName = "toProject")
-    @Mapping(target = "stageRoles", source = "stageRoleIds", qualifiedByName = "toStageRoles")
     @Mapping(target = "tasks", source = "taskIds", qualifiedByName = "toTasks")
     @Mapping(target = "executors", source = "executorIds", qualifiedByName = "toExecutors")
     Stage toEntity(StageDto stageDto);
 
     @Mapping(target = "projectId", source = "project", qualifiedByName = "toProjectId")
-    @Mapping(target = "stageRoles", source = "stageRoles", qualifiedByName = "toStageRoleIds")
     @Mapping(target = "taskIds", source = "tasks", qualifiedByName = "toTaskIds")
     @Mapping(target = "executorIds", source = "executors", qualifiedByName = "toExecutorIds")
     StageDto toDto(Stage stage);
@@ -35,34 +34,6 @@ public interface StageMapper {
     @Named(value = "toProjectId")
     default Long toProjectId(Project project) {
         return project.getId();
-    }
-
-    @Named(value = "toStageRoles")
-    default List<StageRoles> toStageRoles(List<StageRoleDto> stageRoleDtos) {
-        if (stageRoleDtos == null) {
-            return null;
-        }
-
-        List<StageRoles> stageRoles = new ArrayList<>();
-        for (StageRoleDto stageRoleDto : stageRoleDtos) {
-            stageRoles.add(StageRoles.builder().id(stageRoleDto.getStageRoleId()).build());
-        }
-
-        return stageRoles;
-    }
-
-    @Named(value = "toStageRoleDto")
-    default List<Long> toStageRoleIds(List<StageRoles> stageRoles) {
-        if (stageRoles == null) {
-            return null;
-        }
-
-        List<Long> stageRoleIds = new ArrayList<>();
-        for (StageRoles stageRole : stageRoles) {
-            stageRoleIds.add(stageRole.getId());
-        }
-
-        return stageRoleIds;
     }
 
     @Named(value = "toTasks")

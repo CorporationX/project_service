@@ -4,11 +4,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@Builder
 public class StageDto {
 
     private Long stageId;
@@ -18,7 +20,7 @@ public class StageDto {
     private Long projectId;
     @Valid
     @NotEmpty(message = "Stage roles can't be null or empty")
-    private List<StageRoleDto> stageRoles;
+    private List<StageRolesDto> stageRoles;
     private List<Long> taskIds;
     private List<Long> executorIds;
 }
