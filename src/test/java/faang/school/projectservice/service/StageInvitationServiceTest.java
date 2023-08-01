@@ -82,4 +82,22 @@ public class StageInvitationServiceTest {
         Assertions.assertTrue(stage.getExecutors().contains(member));
         Assertions.assertEquals(StageInvitationStatus.ACCEPTED, invitation.getStatus());
     }
+
+    @Test
+    public void testAcceptInvitedIsExecutor() {
+        TeamMember member = TeamMember.builder().build();
+        Stage stage = Stage.builder()
+                .executors(new ArrayList<>(List.of(member)))
+                .build();
+        StageInvitation invitation = StageInvitation.builder()
+                .status(StageInvitationStatus.PENDING)
+                .stage(stage)
+                .invited(member)
+                .build();
+        Mockito.when(repository.findById(1L)).thenReturn(invitation);
+        service.accept(1L);
+        Assertions.assertTrue(stage.getExecutors().contains(member));
+        Assertions.assertEquals(StageInvitationStatus.ACCEPTED, invitation.getStatus());
+        Assertions.assertEquals(1, stage.getExecutors().size());
+    }
 }
