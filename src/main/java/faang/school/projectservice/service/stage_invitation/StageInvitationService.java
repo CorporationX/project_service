@@ -6,17 +6,15 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.stage_invitation.StageInvitationFilter;
 import faang.school.projectservice.mapper.stage_invitation.StageInvitationMapper;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import lombok.Data;
-import org.apache.el.stream.Stream;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Data
+@RequiredArgsConstructor
 @Service
 public class StageInvitationService {
     private final StageInvitationRepository repository;
