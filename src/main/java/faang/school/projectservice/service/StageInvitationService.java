@@ -12,6 +12,7 @@ import faang.school.projectservice.filters.stageInvites.StageInviteFilter;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -23,6 +24,7 @@ public class StageInvitationService {
     private final StageInvitationMapper stageInvitationMapper;
     private final List<StageInviteFilter> filters;
 
+    @Transactional
     public StageInvitationDto sendInvite(StageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitation = stageInvitationMapper.dtoToEntity(stageInvitationDto);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
