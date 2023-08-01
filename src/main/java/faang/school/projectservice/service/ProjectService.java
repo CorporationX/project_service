@@ -5,6 +5,7 @@ import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mappers.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class ProjectService {
         }
         Project project = projectMapper.toEntity(projectDto);
         project.setStatus(ProjectStatus.CREATED);
+        project.setVisibility(ProjectVisibility.valueOf(projectDto.getVisibility()));
         return projectMapper.toDto(projectRepository.save(project));
     }
 

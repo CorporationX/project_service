@@ -1,6 +1,13 @@
 package faang.school.projectservice.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum ProjectVisibility {
-    PUBLIC,
-    PRIVATE,
+    PUBLIC("PUBLIC"),
+    PRIVATE("PRIVATE");
+    private String projectVisibility;
+
 }
