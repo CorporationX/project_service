@@ -39,17 +39,27 @@ public class StageInvitationServiceTest {
 
     @Test
     public void testSuccessCreate() {
-        validInvitationDto = StageInvitationDto.builder().stageId(1L).invitedId(2L).authorId(1L).build();
-        Mockito.when(stageRepository.getById(validInvitationDto.getStageId())).thenReturn(Stage.builder().stageId(1L).executors(List.of(TeamMember.builder().id(1L).build())).build());
+        validInvitationDto = StageInvitationDto.builder()
+                .stageId(1L)
+                .invitedId(2L)
+                .authorId(1L)
+                .build();
+        Mockito.when(stageRepository.getById(validInvitationDto.getStageId())).thenReturn(Stage.builder()
+                .stageId(1L)
+                .executors(List.of(TeamMember.builder().id(1L).build()))
+                .build());
         service.create(validInvitationDto);
         Mockito.verify(SIRepository, Mockito.times(1)).save(mapper.toModel(validInvitationDto));
     }
 
     @Test
     public void testCreateAuthorNotFound() {
-        invalidInvitationDto = StageInvitationDto.builder().stageId(1L).invitedId(2L).authorId(1L).build();
+        invalidInvitationDto = StageInvitationDto.builder()
+                .stageId(1L)
+                .invitedId(2L)
+                .authorId(1L)
+                .build();
         Mockito.when(stageRepository.getById(invalidInvitationDto.getStageId())).thenReturn(Stage.builder().stageId(1L).executors(List.of()).build());
         Assertions.assertThrows(DataValidationException.class, () -> service.create(invalidInvitationDto));
     }
-
 }

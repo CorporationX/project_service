@@ -10,9 +10,10 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Data
+@RequiredArgsConstructor
 @Service
 public class StageInvitationService {
     private final StageInvitationRepository SIRepository;
