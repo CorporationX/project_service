@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -33,8 +33,6 @@ public class StageServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private StageRepository stageRepository;
-    @Mock
-    private TaskRepository taskRepository;
     @InjectMocks
     private StageService stageService;
     @Spy
@@ -43,7 +41,9 @@ public class StageServiceTest {
     private Project project;
     private Stage stage;
     private Stage stage1;
+    private StageDto stageDto;
     private List<Task> tasks;
+    private List<Task> unexpected;
 
     @BeforeEach
     void init() {
@@ -78,6 +78,7 @@ public class StageServiceTest {
         stages.add(stage1);
         project.setStages(stages);
 
+        stageDto = stageMapper.toDto(stage1);
     }
 
     @Test
@@ -108,10 +109,9 @@ public class StageServiceTest {
     }
 
     @Test
-    void testDeleteStage_ChangeStatus() {
-        Mockito.when(stageRepository.getById(anyLong())).thenReturn(stage1);
-        stageService.deleteStage(anyLong());
-        Mockito.verify(taskRepository).saveAll(tasks);
+    void testDeleteStage_CancelTasks() {
+        Mockito.when(stageRepository.getById(stage1.getStageId() )).thenReturn(stage1);
+        stageService.deleteStage(stage1.getStageId());
         Mockito.verify(stageRepository).delete(stage1);
     }
 
