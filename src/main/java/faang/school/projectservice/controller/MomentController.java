@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.MomentDtoUpdate;
 import faang.school.projectservice.filters.moments.FilterMomentDto;
@@ -20,30 +21,31 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/moments")
 public class MomentController {
-    public final MomentService momentService;
+    private final MomentService momentService;
+    private final UserContext userContext;
 
     @PostMapping
     public void createMoment(@Valid MomentDto momentDto) {
-        momentService.createMoment(momentDto);
+        momentService.createMoment(momentDto, userContext.getUserId());
     }
 
     @PutMapping
     public void updateMoment(@Valid MomentDtoUpdate momentDtoUpdate) {
-        momentService.updateMoment(momentDtoUpdate);
+        momentService.updateMoment(momentDtoUpdate, userContext.getUserId());
+    }
+
+    @GetMapping("/{idProject}/filter")
+    public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto, @PathVariable Long idProject) {
+        return momentService.getFilteredMoments(filterMomentDto, idProject, userContext.getUserId());
     }
 
     @GetMapping("/{idProject}")
-    public List<MomentDto> getFilteredMoments(FilterMomentDto filterMomentDto, @PathVariable Long idProject) {
-        return momentService.getFilteredMoments(filterMomentDto, idProject);
-    }
-
-    @GetMapping
-    public List<MomentDtoUpdate> getAllMoments() {
-        return momentService.getAllMoments();
+    public List<MomentDtoUpdate> getAllMoments(@PathVariable Long idProject) {
+        return momentService.getAllMoments(userContext.getUserId(), idProject);
     }
 
     @GetMapping("{id}")
     public MomentDtoUpdate getMoment(@PathVariable("id") @Valid @Min(0) long momentId) {
-        return momentService.getMoment(momentId);
+        return momentService.getMoment(momentId, userContext.getUserId());
     }
 }

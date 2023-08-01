@@ -11,6 +11,8 @@ import faang.school.projectservice.filters.moments.filtersForFilterMomentDto.Mom
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,9 +44,8 @@ class MomentServiceTest {
     private Moment moment;
     @InjectMocks
     private MomentService momentService;
-
-    @Mock
     private Project project;
+    private TeamMember teamMember;
 
     @BeforeEach
     void setUp() {
@@ -58,9 +59,14 @@ class MomentServiceTest {
         filterMomentDto = new FilterMomentDto();
         filterMomentDto.setNamePattern("first");
         filterMomentDto.setDescriptionPattern("desc");
+        teamMember = new TeamMember();
+        teamMember.setUserId(10L);
+        Team team = new Team();
+        team.setTeamMembers(List.of(teamMember));
         project = new Project();
         project.setStatus(ProjectStatus.CREATED);
         project.setId(100L);
+        project.setTeam(team);
         moment.setProject(List.of(project));
     }
 
@@ -71,7 +77,7 @@ class MomentServiceTest {
         Mockito.when(momentRepository.save(momentMapper.dtoToMoment(momentDto))).thenReturn(moment);
         Mockito.when(projectRepository.getProjectById(momentDto.getIdProject())).thenReturn(project);
 
-        Moment createdMoment = momentService.createMoment(momentDto);
+        Moment createdMoment = momentService.createMoment(momentDto, 10L);
 
         Mockito.verify(momentRepository, Mockito.times(1))
                 .save(momentMapper.dtoToMoment(momentDto));
@@ -88,8 +94,10 @@ class MomentServiceTest {
         Mockito.when(momentRepository.save(momentMapper.dtoUpdatedToMoment(momentDtoUpdate))).thenReturn(updatedMoment);
         Mockito.when(momentRepository.findById(momentDtoUpdate.getId())).thenReturn(Optional.of(deprecatedMoment));
         Mockito.when(momentRepository.findById(updatedMoment.getId())).thenReturn(Optional.of(updatedMoment));
+        Mockito.when(projectRepository.getProjectById(momentDtoUpdate.getIdProject()))
+                .thenReturn(project);
 
-        momentService.updateMoment(momentDtoUpdate);
+        momentService.updateMoment(momentDtoUpdate, 10L);
         Moment dbMoment = momentRepository.findById(updatedMoment.getId()).orElse(new Moment());
 
         Mockito.verify(momentRepository, Mockito.times(1))
@@ -102,8 +110,9 @@ class MomentServiceTest {
     void getFilteredMomentsReturnsValidList() {
         Moment invalidMoment = Moment.builder().name("First").description("invalid").project(List.of(project)).build();
         Mockito.when(momentRepository.findAll()).thenReturn(List.of(moment, invalidMoment));
+        Mockito.when(projectRepository.getProjectById(100L)).thenReturn(project);
 
-        assertEquals(1, momentService.getFilteredMoments(filterMomentDto, 100L).size());
+        assertEquals(1, momentService.getFilteredMoments(filterMomentDto, 100L, 10L).size());
         Mockito.verify(momentRepository, Mockito.times(1))
                 .findAll();
     }
@@ -111,8 +120,9 @@ class MomentServiceTest {
     @Test
     void getAllMomentsCallsRepositoryMethod() {
         Mockito.when(momentRepository.findAll()).thenReturn(List.of(moment));
+        Mockito.when(projectRepository.getProjectById(100L)).thenReturn(project);
 
-        List<MomentDtoUpdate> result = momentService.getAllMoments();
+        List<MomentDtoUpdate> result = momentService.getAllMoments(10L, 100L);
 
         Mockito.verify(momentRepository, Mockito.times(1))
                 .findAll();
@@ -124,10 +134,9 @@ class MomentServiceTest {
         Optional<Moment> optionalMoment = Optional.of(moment);
         Mockito.when(momentRepository.findById(1L)).thenReturn(optionalMoment);
 
-        momentService.getMoment(1L);
+        momentService.getMoment(1L, 10L);
 
-        Mockito.verify(momentRepository, Mockito.times(1))
-                .findById(1L);
+        Mockito.verify(momentRepository, Mockito.times(2)).findById(1L);
         assertEquals(momentRepository.findById(1L).get().getName(), optionalMoment.get().getName());
     }
 }

@@ -5,4 +5,5 @@ public class ErrorMessages {
     public static final String INVALID_DTO = "Moment's data is invalid";
     public static final String INVALID_ID = "Moment's id is invalid";
     public static final String NO_SUCH_MOMENTS = "Such moments don't exist";
+    public static final String INVALID_CURRENT_USER = "Current user can't perform this action";
 }
