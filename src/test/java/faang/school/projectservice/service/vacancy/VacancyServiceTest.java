@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Project;
@@ -27,6 +28,8 @@ public class VacancyServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private VacancyRepository vacancyRepository;
+    @Mock
+    private UserContext userContext;
     @InjectMocks
     private VacancyService service;
 
@@ -36,11 +39,12 @@ public class VacancyServiceTest {
 
     @Test
     public void createVacancy_Test() {
+        Mockito.when(userContext.getUserId()).thenReturn(1L);
         Mockito.when(projectRepository.getProjectById(vacancyDto.getProjectId())).thenReturn(project);
         Mockito.when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         Mockito.when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
 
-        service.createVacancy(vacancyDto, 1);
+        service.createVacancy(vacancyDto);
         Assertions.assertTrue(vacancy.getCreatedAt().isBefore(LocalDateTime.now()));
 
         Mockito.verify(vacancyMapper).toDto(vacancyRepository.save(vacancy));

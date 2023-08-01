@@ -12,17 +12,13 @@ import org.springframework.stereotype.Component;
 public class VacancyValidator {
     private final ProjectRepository projectRepository;
 
-    public void createVacancyControllerValidation(VacancyDto vacancyDto, long creator) {
+    public void createVacancyControllerValidation(VacancyDto vacancyDto) {
         if (vacancyDto == null) {
             throw new VacancyValidationException("Your vacancy is null!");
         }
 
         if (vacancyDto.getProjectId() == null) {
             throw new VacancyValidationException("Illegal project!");
-        }
-
-        if (creator < 1) {
-            throw new VacancyValidationException("Wrong creator!");
         }
     }
 

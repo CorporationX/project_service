@@ -20,7 +20,7 @@ public class VacancyValidatorTest {
     @Test
     public void createVacancyControllerValidation_VacancyDtoIsNull_Test() {
         VacancyValidationException exception = Assertions.assertThrows(VacancyValidationException.class,
-                () -> validator.createVacancyControllerValidation(null, 1));
+                () -> validator.createVacancyControllerValidation(null));
 
         Assertions.assertEquals(exception.getMessage(), "Your vacancy is null!");
     }
@@ -28,16 +28,8 @@ public class VacancyValidatorTest {
     @Test
     public void createVacancyControllerValidation_NullProjectId_Test() {
         VacancyValidationException exception = Assertions.assertThrows(VacancyValidationException.class,
-                () -> validator.createVacancyControllerValidation(VacancyDto.builder().projectId(null).build(), 1));
+                () -> validator.createVacancyControllerValidation(VacancyDto.builder().projectId(null).build()));
 
         Assertions.assertEquals(exception.getMessage(), "Illegal project!");
-    }
-
-    @Test
-    public void createVacancyControllerValidation_WrongCreator_Test() {
-        VacancyValidationException exception = Assertions.assertThrows(VacancyValidationException.class,
-                () -> validator.createVacancyControllerValidation(VacancyDto.builder().projectId(1L).build(), 0));
-
-        Assertions.assertEquals(exception.getMessage(), "Wrong creator!");
     }
 }
