@@ -18,6 +18,9 @@ public final class ErrorMessagesForVacancy {
     public static final String STATUS_IS_NULL = "Status is null.";
     public static final String VACANCY_NOT_EXIST_FORMAT = "Vacancy with id:{0} is not exist.";
     public static final String VACANCY_CANT_BE_CLOSED_FORMAT = "Vacancy id: {0} cannot be closed, because the number of participants is less {1}.";
+    public static final String VACANCY_CANT_BE_CHANGED_FORMAT = "Vacancy cannot be changed. " +
+            "The user role does not allow you to make changes. User roles {0}. Required roles one of MANAGER or OWNER";
+
 
 
     private ErrorMessagesForVacancy() {

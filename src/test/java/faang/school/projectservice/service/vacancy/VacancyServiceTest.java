@@ -2,14 +2,10 @@ package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDtoForUpdate;
+import faang.school.projectservice.dto.vacancy.VacancyDtoReqUpdate;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
@@ -26,13 +22,12 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.ERROR_OWNER_ROLE_FORMAT;
-import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.NEGATIVE_CREATED_BY_ID_FORMAT;
-import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.NEGATIVE_PROJECT_ID_FORMAT;
-import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.PROJECT_NOT_EXIST_FORMAT;
+import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -55,28 +50,33 @@ class VacancyServiceTest {
     private VacancyService vacancyService;
 
     private VacancyDto inputVacancyDto;
-    private VacancyDtoForUpdate inputVacancyDtoForUpdate;
+    private VacancyDtoReqUpdate inputVacancyDtoReqUpdate;
 
     private String vacancyName;
     private String vacancyDescription;
     private Long projectId;
     private Long createdBy;
+    private Long updatedBy;
     private Project project;
     private TeamMember ownerVacancy;
+    private TeamMember managerVacancy;
+    private Vacancy savedVacancy;
 
     @BeforeEach
     void setUp() {
-        vacancyName = "Vacancy";
-        vacancyDescription = "Some text";
+        vacancyName = StringValuesForTesting.NAME.getValue();
+        vacancyDescription = StringValuesForTesting.DESCRIPTION.getValue();
         projectId = 10L;
         createdBy = 100L;
+        updatedBy = 1000L;
+
         project = Project.builder().id(projectId).build();
         ownerVacancy = TeamMember.builder().roles(List.of(TeamRole.OWNER, TeamRole.DEVELOPER)).build();
-        inputVacancyDto = VacancyDto.builder()
-                .name(vacancyName)
-                .description(vacancyDescription)
-                .projectId(projectId)
-                .createdBy(createdBy).build();
+        managerVacancy = TeamMember.builder().roles(List.of(TeamRole.MANAGER, TeamRole.DEVELOPER)).build();
+
+        inputVacancyDto = getVacancyDtoForReqCreate();
+        savedVacancy = getSavedVacancy();
+        inputVacancyDtoReqUpdate = getUpdatedInputVacancyDto();
     }
 
     @Test
@@ -85,7 +85,7 @@ class VacancyServiceTest {
         Mockito.when(teamMemberRepository.findById(createdBy)).thenReturn(ownerVacancy);
 
         Vacancy newVacancy = vacancyMapper.toEntity(inputVacancyDto);
-        Vacancy createdVacancy = getVacancyAfterSave();
+        Vacancy createdVacancy = getSavedVacancy();
         Mockito.when(vacancyRepository.save(newVacancy)).thenReturn(createdVacancy);
 
         VacancyDto result = vacancyService.createVacancy(inputVacancyDto);
@@ -109,7 +109,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    void testCreatedVacancy_WhenOwnerRoleCantBeUse_ShouldThrowException() {
+    void testCreatedVacancy_WhenOwnerRoleCantBeUseToCreate_ShouldThrowException() {
         ownerVacancy = TeamMember.builder().roles(List.of(TeamRole.DESIGNER, TeamRole.DEVELOPER)).build();
         String expectedMessage = MessageFormat.format(ERROR_OWNER_ROLE_FORMAT, createdBy);
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
@@ -120,6 +120,74 @@ class VacancyServiceTest {
 
         assertEquals(expectedMessage, exception.getMessage());
         Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(createdBy);
+    }
+
+
+    @Test
+    void testUpdateVacancy_WhenDataIsValid() {
+        vacancyMapper.updateEntityFromDto(inputVacancyDtoReqUpdate, savedVacancy);
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
+        Mockito.when(teamMemberRepository.findById(updatedBy)).thenReturn(managerVacancy);
+        Mockito.when(vacancyRepository.save(savedVacancy)).thenReturn(savedVacancy);
+        VacancyDto expectedVacancyDto = getExpectedVacancyDtoAfterUpdated();
+
+        VacancyDto result = vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoReqUpdate);
+
+        assertEquals(expectedVacancyDto, result);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
+        Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(updatedBy);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).save(savedVacancy);
+    }
+
+    @Test
+    void testUpdateVacancy_WhenNeedCloseVacancyAndIsPossible() {
+        inputVacancyDtoReqUpdate.setStatus(VacancyStatus.CLOSED);
+        vacancyMapper.updateEntityFromDto(inputVacancyDtoReqUpdate, savedVacancy);
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
+        Mockito.when(teamMemberRepository.findById(updatedBy)).thenReturn(managerVacancy);
+        Mockito.when(vacancyRepository.save(savedVacancy)).thenReturn(savedVacancy);
+        VacancyDto expectedVacancyDto = getExpectedVacancyDtoAfterUpdated();
+        expectedVacancyDto.setStatus(VacancyStatus.CLOSED);
+
+        VacancyDto result = vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoReqUpdate);
+
+        assertEquals(expectedVacancyDto, result);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
+        Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(updatedBy);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).save(savedVacancy);
+    }
+
+    @Test
+    void testUpdateVacancy_WhenNeedCloseVacancyAndIsImpossible_ShouldThrowException() {
+        savedVacancy.getCandidates().remove(0);
+        inputVacancyDtoReqUpdate.setStatus(VacancyStatus.CLOSED);
+        vacancyMapper.updateEntityFromDto(inputVacancyDtoReqUpdate, savedVacancy);
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
+        Mockito.when(teamMemberRepository.findById(updatedBy)).thenReturn(managerVacancy);
+        String expectedMessage = MessageFormat.format(VACANCY_CANT_BE_CLOSED_FORMAT, VACANCY_ID, 5);
+
+        Exception exception = assertThrows(VacancyValidateException.class,
+                () -> vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoReqUpdate));
+
+        assertEquals(expectedMessage, exception.getMessage());
+        Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
+        Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(updatedBy);
+    }
+
+    @Test
+    void testUpdateVacancy_WhenNotSupportedRoleUserForChanged_ShouldThrowException() {
+        TeamMember someTeamMember = TeamMember.builder().roles(List.of(TeamRole.ANALYST)).build();
+        vacancyMapper.updateEntityFromDto(inputVacancyDtoReqUpdate, savedVacancy);
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
+        Mockito.when(teamMemberRepository.findById(updatedBy)).thenReturn(someTeamMember);
+        String expectedMessage = MessageFormat.format(VACANCY_CANT_BE_CHANGED_FORMAT, someTeamMember.getRoles());
+
+        Exception exception = assertThrows(VacancyValidateException.class,
+                () -> vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoReqUpdate));
+
+        assertEquals(expectedMessage, exception.getMessage());
+        Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
+        Mockito.verify(teamMemberRepository, Mockito.times(1)).findById(updatedBy);
     }
 
 
@@ -156,6 +224,23 @@ class VacancyServiceTest {
         );
     }
 
+    private List<Candidate> getCandidates() {
+        int count = 5;
+        List<Candidate> candidates = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            candidates.add(Candidate.builder().id(i + 1L).build());
+        }
+        return candidates;
+    }
+
+    private VacancyDto getVacancyDtoForReqCreate() {
+        return VacancyDto.builder()
+                .name(vacancyName)
+                .description(vacancyDescription)
+                .projectId(projectId)
+                .createdBy(createdBy).build();
+    }
+
     private VacancyDto getExpectedVacancyDto() {
         return VacancyDto.builder()
                 .vacancyId(VACANCY_ID)
@@ -167,23 +252,53 @@ class VacancyServiceTest {
                 .build();
     }
 
-    private Vacancy getVacancyAfterSave() {
+    private Vacancy getSavedVacancy() {
         return Vacancy.builder()
                 .id(VACANCY_ID)
                 .name(vacancyName)
                 .description(vacancyDescription)
                 .project(project)
                 .createdBy(createdBy)
+                .candidates(getCandidates())
                 .status(VacancyStatus.OPEN)
                 .build();
     }
 
-    private VacancyDtoForUpdate getInputVacancyDtoForUpdate() {
-        return VacancyDtoForUpdate.builder()
-                .vacancyId(1L)
+    private VacancyDto getExpectedVacancyDtoAfterUpdated() {
+        Vacancy expectedVacancy = getSavedVacancy();
+        expectedVacancy.setName(StringValuesForTesting.UPDATED_NAME.getValue());
+        expectedVacancy.setDescription(StringValuesForTesting.UPDATED_DESCRIPTION.getValue());
+        expectedVacancy.setUpdatedBy(updatedBy);
+        return vacancyMapper.toDto(expectedVacancy);
+    }
+
+    private VacancyDtoReqUpdate getUpdatedInputVacancyDto() {
+        vacancyName = StringValuesForTesting.UPDATED_NAME.getValue();
+        vacancyDescription = StringValuesForTesting.UPDATED_DESCRIPTION.getValue();
+
+        return VacancyDtoReqUpdate.builder()
+                .vacancyId(VACANCY_ID)
                 .name(vacancyName)
                 .description(vacancyDescription)
+                .updatedBy(updatedBy)
                 .status(VacancyStatus.OPEN)
                 .build();
+    }
+}
+
+enum StringValuesForTesting {
+    NAME("Test vacancy name"),
+    UPDATED_NAME("Updated vacancy name"),
+    DESCRIPTION("Some description of vacancy"),
+    UPDATED_DESCRIPTION("Description was updated");
+
+    private final String value;
+
+    StringValuesForTesting(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
     }
 }
