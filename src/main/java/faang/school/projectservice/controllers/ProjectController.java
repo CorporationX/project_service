@@ -1,5 +1,6 @@
 package faang.school.projectservice.controllers;
 
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
@@ -36,10 +37,17 @@ public class ProjectController {
         return projectService.getProjectById(id);
     }
 
+    @GetMapping("project/filter")
+    public List<ProjectDto> getProjectByFilter(@RequestBody ProjectFilterDto filters) {
+        return projectService.getProjectByFilter(filters);
+    }
+
     @GetMapping("/project")
     public List<ProjectDto> getAllProject() {
         return projectService.getAllProject();
     }
+
+
 
     private void validateProject(ProjectDto projectDto) {
         if (projectDto.getName().isBlank() || projectDto.getName() == null) {

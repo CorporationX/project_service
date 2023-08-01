@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mappers.ProjectMapper;
@@ -7,6 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filter.ProjectFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,12 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final List<ProjectFilter> projectFilters;
 
     @Transactional
     public ProjectDto createProject(ProjectDto projectDto) {
@@ -55,5 +59,15 @@ public class ProjectService {
 
     public List<ProjectDto> getAllProject() {
         return projectMapper.toDtoList(projectRepository.findAll());
+    }
+
+
+    public List<ProjectDto> getProjectByFilter(ProjectFilterDto filters) {
+        return projectFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(projectRepository.findAll().stream(), filters))
+                .map(projectMapper::toDto)
+                .toList();
+
     }
 }
