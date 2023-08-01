@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.StageInvitationDto;
 import faang.school.projectservice.filters.stageInvites.FilterStageInviteDto;
 import faang.school.projectservice.service.StageInvitationService;
@@ -20,20 +21,21 @@ import java.util.List;
 @RequestMapping("/invites")
 public class StageInvitationController {
     private final StageInvitationService service;
+    private final UserContext userContext;
 
     @PostMapping
     public StageInvitationDto sendInvite(@Valid StageInvitationDto stageInvitationDto){
-        return service.sendInvite(stageInvitationDto);
+        return service.sendInvite(stageInvitationDto, userContext.getUserId());
     }
 
     @PutMapping("/accept")
     public StageInvitationDto acceptInvite(@Valid StageInvitationDto stageInvitationDto){
-        return service.acceptInvite(stageInvitationDto);
+        return service.acceptInvite(stageInvitationDto, userContext.getUserId());
     }
 
     @PutMapping("/reject")
     public StageInvitationDto rejectInvite(@Valid StageInvitationDto stageInvitationDto){
-        return service.rejectInvite(stageInvitationDto);
+        return service.rejectInvite(stageInvitationDto, userContext.getUserId());
     }
 
     @GetMapping("/{userId}")

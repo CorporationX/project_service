@@ -75,7 +75,7 @@ class StageInvitationServiceTest {
         Mockito.when(repository.save(stageInvitation)).thenReturn(stageInvitation);
         Mockito.when(repository.findById(dto.getId())).thenReturn(stageInvitation);
 
-        service.sendInvite(dto);
+        service.sendInvite(dto, 25L);
 
         assertEquals(repository.findById(dto.getId()).getInvited(), dto.getInvited());
         assertEquals(repository.findById(dto.getId()).getStage(), dto.getStage());
@@ -91,7 +91,7 @@ class StageInvitationServiceTest {
         final int EXPECTED_POSITION_IN_LIST_OF_EXECUTORS_OF_INVITED = 1;
         Mockito.when(repository.findById(dto.getId())).thenReturn(stageInvitation);
 
-        service.acceptInvite(dto);
+        service.acceptInvite(dto, 10L);
 
         assertEquals(StageInvitationStatus.ACCEPTED, repository.findById(stageInvitation.getId()).getStatus());
         assertEquals(repository.findById(stageInvitation.getId()).getStage().getExecutors()
@@ -103,7 +103,7 @@ class StageInvitationServiceTest {
         final int EXPECTED_SIZE_OF_EXECUTORS_LIST = 1;
         Mockito.when(repository.findById(dto.getId())).thenReturn(stageInvitation);
 
-        service.rejectInvite(dto);
+        service.rejectInvite(dto, 10L);
 
         assertEquals(StageInvitationStatus.REJECTED, repository.findById(stageInvitation.getId()).getStatus());
         assertEquals(repository.findById(stageInvitation.getId()).getStage().getExecutors().size(),
