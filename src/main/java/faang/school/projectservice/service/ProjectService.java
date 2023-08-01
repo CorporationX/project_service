@@ -49,13 +49,13 @@ public class ProjectService {
     public List<ProjectDto> getAllProjectsByStatus(Long id, ProjectDto projectDto) {
         validateProjectExists(id);
         log.info("Getting all projects by status {}", id);
-        List<Project> projectList = projectRepository.findAll().stream()
+        Stream<Project> projectList = projectRepository.findAll().stream()
                 .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC)
                         || (project.getTeams().stream()
                         .anyMatch(team -> team.getTeamMembers().stream()
                                 .anyMatch(teamMember -> teamMember.getId().equals(id)))
-                )).toList();
-        Stream<Project> projectStream = projectList.stream();
+                ));
+        Stream<Project> projectStream = projectList;
 
         log.info("Project stream started filtering {}", projectStream);
         List<ProjectFilter> projectFilterList = projectFilter.stream()

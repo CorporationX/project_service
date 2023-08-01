@@ -56,11 +56,11 @@ public interface ProjectMapper {
         if (projects == null) {
             return new ArrayList<>();
         }
-        List<Long> tasks = new ArrayList<>();
+        List<Long> projectId = new ArrayList<>();
         for (Project project : projects) {
-            tasks.add(project.getId());
+            projectId.add(project.getId());
         }
-        return tasks;
+        return projectId;
     }
 
     @Named(value = "toChildren")
@@ -68,11 +68,11 @@ public interface ProjectMapper {
         if (projectsId == null) {
             return new ArrayList<>();
         }
-        List<Project> tasks = new ArrayList<>();
+        List<Project> projectList = new ArrayList<>();
         for (Long id : projectsId) {
-            tasks.add(Project.builder().id(id).build());
+            projectList.add(Project.builder().id(id).build());
         }
-        return tasks;
+        return projectList;
     }
 
     @Named(value = "toVacancies")

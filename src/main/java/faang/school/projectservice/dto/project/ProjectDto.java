@@ -5,7 +5,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigInteger;
