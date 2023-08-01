@@ -10,9 +10,10 @@ import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Data
+@RequiredArgsConstructor
 @Service
 public class StageInvitationService {
     private final StageInvitationRepository repository;
