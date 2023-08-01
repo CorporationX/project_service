@@ -15,8 +15,10 @@ public class VacancyDto {
     private String description;
     private Long projectId;
     private List<Long> candidates;
+    private Long createdBy;
     private VacancyStatus status;
     private Double salary;
     private WorkSchedule workSchedule;
+    private Integer count;
     private List<Long> requiredSkillIds;
 }
