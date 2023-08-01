@@ -4,9 +4,13 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.mapper.SubProjectMapperImpl;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,6 +23,8 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,15 +39,19 @@ class ProjectServiceTest {
     private SubProjectMapper subProjectMapper = new SubProjectMapperImpl();
     @Mock
     private StageRepository stageRepository;
+    @Mock
+    private MomentRepository momentRepository;
     @InjectMocks
     private ProjectService projectService;
     private ProjectDto projectDto;
+    private ProjectDto updatedProjectDto;
     private Project project;
+    private Project onlyWithIdProject;
     private List<Project> children;
+    private List<Moment> moments;
 
     @BeforeEach
     void setUp() {
-
         this.projectDto = ProjectDto.builder()
                 .name("Faang")
                 .description("This is Faang")
@@ -52,13 +62,24 @@ class ProjectServiceTest {
                 .stagesId(Collections.emptyList())
                 .status(ProjectStatus.CREATED)
                 .build();
+        this.updatedProjectDto = ProjectDto.builder()
+                .id(1L)
+                .status(ProjectStatus.COMPLETED)
+                .childrenIds(Collections.emptyList())
+                .build();
         this.project = Project.builder()
                 .id(2L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(new ArrayList<>())
                 .build();
+        this.onlyWithIdProject = Project.builder()
+                .id(1L)
+                .build();
         this.children = List.of(Project.builder()
                 .id(10L)
+                .build());
+        this.moments = List.of(Moment.builder()
+                .userIds(List.of(1L))
                 .build());
     }
 
@@ -88,13 +109,8 @@ class ProjectServiceTest {
     @Test
     void createSubProjectThrowExceptionWhenChildrenNull() {
         ProjectDto wrongProjectDto = ProjectDto.builder()
-                .name("Faang")
                 .ownerId(1)
-                .parentProjectId(2L)
                 .build();
-
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
 
@@ -102,16 +118,25 @@ class ProjectServiceTest {
     }
 
     @Test
+    void createSubProjectThrowExceptionWhenStatusNull() {
+        ProjectDto wrongProjectDto = ProjectDto.builder()
+                .ownerId(1)
+                .childrenIds(Collections.emptyList())
+                .build();
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
+
+        assertEquals("Project status cant be null", exception.getMessage());
+    }
+
+    @Test
     void createSubProjectThrowExceptionWhenVisibilityNull() {
         ProjectDto wrongProjectDto = ProjectDto.builder()
                 .name("Faang")
                 .ownerId(1)
-                .parentProjectId(2L)
                 .childrenIds(Collections.emptyList())
+                .status(ProjectStatus.CREATED)
                 .build();
-
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
 
@@ -126,10 +151,8 @@ class ProjectServiceTest {
                 .parentProjectId(-2L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .childrenIds(Collections.emptyList())
+                .status(ProjectStatus.CREATED)
                 .build();
-
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
 
@@ -144,14 +167,12 @@ class ProjectServiceTest {
                 .parentProjectId(100L)
                 .childrenIds(Collections.emptyList())
                 .visibility(ProjectVisibility.PRIVATE)
+                .status(ProjectStatus.CREATED)
                 .build();
-
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> projectService.createSubProject(wrongProjectDto));
 
-        assertEquals("Project not found by id: 100", exception.getMessage());
+        assertEquals("Parent project not found by id: 100", exception.getMessage());
     }
 
     @Test
@@ -162,10 +183,9 @@ class ProjectServiceTest {
                 .parentProjectId(2L)
                 .childrenIds(Collections.emptyList())
                 .visibility(ProjectVisibility.PRIVATE)
+                .status(ProjectStatus.CREATED)
                 .build();
 
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(wrongProjectDto.getOwnerId(), wrongProjectDto.getName()))
-                .thenReturn(false);
         Mockito.when(projectRepository.getProjectById(wrongProjectDto.getParentProjectId()))
                 .thenReturn(Project.builder()
                         .name("Uber")
@@ -174,9 +194,10 @@ class ProjectServiceTest {
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(wrongProjectDto));
 
-        assertEquals("Cant create private SubProject; Faang, on a public Project: Uber", exception.getMessage());
+        assertEquals("Private SubProject; Faang, cant be with a public Parent Project: Uber", exception.getMessage());
     }
 
+    //Private SubProject; %s, cant be with a public Parent Project: %s
     @Test
     void createSubProjectTest() {
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
@@ -216,7 +237,7 @@ class ProjectServiceTest {
 
         projectService.createSubProject(projectDto);
 
-        Mockito.verify(projectRepository, Mockito.times(2)).getProjectById(projectDto.getParentProjectId());
+        Mockito.verify(projectRepository, Mockito.times(3)).getProjectById(projectDto.getParentProjectId());
     }
 
     @Test
@@ -264,5 +285,186 @@ class ProjectServiceTest {
 
         assertEquals(expected, result);
         assertEquals(2, result.size());
+    }
+
+    @Test
+    void updateSubProjectThrowExceptionWhenChildrenStatusesAreNotComplete() {
+        ProjectDto fakeProject = ProjectDto.builder()
+                .status(ProjectStatus.COMPLETED)
+                .childrenIds(Collections.emptyList())
+                .build();
+
+        Mockito.when(projectRepository.findAllByIds(fakeProject.getChildrenIds()))
+                .thenReturn(List.of(Project.builder()
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build()));
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.updateSubProject(fakeProject));
+
+        assertEquals("Can't close project if subProject status are not complete or cancelled", exception.getMessage());
+    }
+
+    @Test
+    void updateSubProjectInvokesGetProjectByIdAndFindAllByIds() {
+        Mockito.when(projectRepository.getProjectById(updatedProjectDto.getId()))
+                .thenReturn(Project.builder()
+                        .updatedAt(LocalDateTime.now())
+                        .children(List.of(onlyWithIdProject))
+                        .build());
+        Mockito.when(projectRepository.findAllByIds(updatedProjectDto.getChildrenIds()))
+                .thenReturn(List.of(Project.builder()
+                        .status(ProjectStatus.COMPLETED)
+                        .build()));
+        Mockito.when(momentRepository.findAllByProjectId(Mockito.anyLong()))
+                .thenReturn(moments);
+
+        projectService.updateSubProject(updatedProjectDto);
+
+        Mockito.verify(projectRepository, Mockito.times(2)).getProjectById(updatedProjectDto.getId());
+        Mockito.verify(projectRepository).findAllByIds(updatedProjectDto.getChildrenIds());
+    }
+
+    @Test
+    void updateSubProjectInvokesSaveMethods() {
+        Project test = Project.builder()
+                .updatedAt(LocalDateTime.now())
+                .children(List.of(onlyWithIdProject))
+                .build();
+        Project projectToSave = Project.builder()
+                .id(1L)
+                .ownerId(0L)
+                .status(ProjectStatus.COMPLETED)
+                .children(List.of(Project.builder()
+                        .status(ProjectStatus.COMPLETED)
+                        .build()))
+                .build();
+        Moment moment = Moment.builder()
+                .name(String.format("%s project tasks", updatedProjectDto.getName()))
+                .description(String.format("All tasks are completed in %s project", updatedProjectDto.getName()))
+                .projects(List.of(onlyWithIdProject,
+                        Project.builder()
+                                .children(List.of(onlyWithIdProject))
+                                .updatedAt(test.getUpdatedAt())
+                                .build()))
+                .build();
+        moment.setUserIds(List.of(1L));
+        moment.setCreatedBy(0L);
+
+        Mockito.when(projectRepository.getProjectById(updatedProjectDto.getId()))
+                .thenReturn(test);
+        Mockito.when(projectRepository.findAllByIds(updatedProjectDto.getChildrenIds()))
+                .thenReturn(List.of(Project.builder()
+                        .status(ProjectStatus.COMPLETED)
+                        .build()));
+        Mockito.when(momentRepository.findAllByProjectId(Mockito.anyLong()))
+                .thenReturn(moments);
+
+        projectService.updateSubProject(updatedProjectDto);
+
+        Mockito.verify(projectRepository).save(projectToSave);
+        Mockito.verify(momentRepository).save(moment);
+    }
+
+    @Test
+    void updateSubProjectTest() {
+        projectDto.setVisibility(ProjectVisibility.PRIVATE);
+        projectDto.setParentProjectId(null);
+        project.setVisibility(ProjectVisibility.PRIVATE);
+        project.setUpdatedAt(LocalDateTime.now().minusMonths(1));
+
+        Mockito.when(projectRepository.getProjectById(projectDto.getId()))
+                .thenReturn(project);
+        Mockito.when(projectRepository.findAllByIds(projectDto.getChildrenIds()))
+                .thenReturn(children);
+
+        Timestamp result = projectService.updateSubProject(projectDto);
+
+        assertEquals(Timestamp.valueOf(project.getUpdatedAt()), result);
+    }
+
+    @Test
+    void createMomentTest() {
+        projectDto.setId(1L);
+        Moment expected = Moment.builder()
+                .name("Faang project tasks")
+                .description("All tasks are completed in Faang project")
+                .projects(new ArrayList<>(List.of(project)))
+                .userIds(Collections.emptyList())
+                .createdBy(1L)
+                .build();
+
+        Mockito.when(projectRepository.getProjectById(projectDto.getId()))
+                .thenReturn(project);
+
+        Moment result = projectService.createMoment(projectDto);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void collectAllUsersIdOnProjectWhenOnlyTeamExistTest() {
+        TeamMember first = TeamMember.builder()
+                .id(5L)
+                .build();
+        TeamMember second = TeamMember.builder()
+                .id(10L)
+                .build();
+        Team team = Team.builder()
+                .teamMembers(List.of(first, second))
+                .build();
+        Project projectWithTeam = Project.builder()
+                .teams(List.of(team))
+                .build();
+
+        List<Long> expected = List.of(5L, 10L);
+
+        List<Long> result = projectService.collectAllUsersIdOnProject(projectWithTeam);
+
+        assertEquals(expected, result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void collectAllUsersIdOnProjectTestWhenOnlyChildrenExist() {
+        Project projectWithChildren = Project.builder()
+                .children(List.of(onlyWithIdProject, onlyWithIdProject))
+                .build();
+        List<Long> expected = List.of(1L);
+
+
+        Mockito.when(momentRepository.findAllByProjectId(1L))
+                .thenReturn(moments);
+
+        List<Long> result = projectService.collectAllUsersIdOnProject(projectWithChildren);
+
+        assertEquals(expected, result);
+        assertEquals(1, result.size());
+
+        Mockito.verify(momentRepository, Mockito.times(2)).findAllByProjectId(1L);
+    }
+
+    @Test
+    void changeParentProjectTest() {
+        Project originalProject = Project.builder()
+                .parentProject(Project.builder().id(5L).build())
+                .build();
+
+        Project getProjectById = Project.builder()
+                .children(new ArrayList<>())
+                .build();
+
+        Project expected = Project.builder()
+                .parentProject(Project.builder()
+                        .children(new ArrayList<>())
+                        .build())
+                .build();
+
+        Mockito.when(projectRepository.getProjectById(2L))
+                .thenReturn(getProjectById);
+
+        Project result = projectService.changeParentProject(projectDto, originalProject);
+
+        assertEquals(expected, result);
+        Mockito.verify(projectRepository).getProjectById(2L);
     }
 }

@@ -1,4 +1,4 @@
-package faang.school.projectservice.controler;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @RestController
@@ -26,6 +27,11 @@ public class SubProjectController {
         validateProjectsList(projectsDtos);
         projectsDtos.forEach(this::validateSubProject);
         return projectService.createSubProjects(projectsDtos);
+    }
+
+    public Timestamp updateSubProject(ProjectDto projectDto) {
+        validateSubProject(projectDto);
+        return projectService.updateSubProject(projectDto);
     }
 
     private void validateSubProject(ProjectDto projectDto) {
