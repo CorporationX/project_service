@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 class VacancyServiceTest {
     private static final Long VACANCY_ID = 1L;
+    private static final int DEFAULT_COUNT_CANDIDATES = 5;
     @Mock
     private VacancyRepository vacancyRepository;
 
@@ -193,7 +194,7 @@ class VacancyServiceTest {
 
     @Test
     void testDeleteVacancy() {
-        List<TeamMember> members = getTeamMembers(5);
+        List<TeamMember> members = getTeamMembers(DEFAULT_COUNT_CANDIDATES);
         Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
         for (int i = 0; i < members.size(); i++) {
             Mockito.when(teamMemberRepository.findByUserIdAndProjectId(1L + i, projectId))
@@ -201,6 +202,23 @@ class VacancyServiceTest {
         }
 
         vacancyService.deleteVacancy(VACANCY_ID);
+
+        Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
+        Mockito.verify(teamMemberRepository, Mockito.times(2)).deleteEntity(Mockito.any());
+        Mockito.verify(teamMemberRepository, Mockito.times(5))
+                .findByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong());
+        Mockito.verify(vacancyRepository, Mockito.times(1)).delete(savedVacancy);
+    }
+
+    @Test
+    void testDeleteVacancy_WhenVacancyNotFoundById_ShouldThrowException() {
+        String expectedMessage = MessageFormat.format(VACANCY_NOT_EXIST_FORMAT, VACANCY_ID);
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(VacancyValidateException.class,
+                () -> vacancyService.deleteVacancy(VACANCY_ID));
+
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
 
@@ -242,8 +260,14 @@ class VacancyServiceTest {
         for (int i = 1; i < count + 1; i++) {
             TeamMember teamMember = TeamMember.builder()
                     .userId((long) i)
-                    .roles(List.of(TeamRole.INTERN, TeamRole.ANALYST))
                     .build();
+
+            if (i == 1 || i == 2) {
+                teamMember.setRoles(List.of(TeamRole.INTERN, TeamRole.ANALYST));
+            } else {
+                teamMember.setRoles(List.of(TeamRole.ANALYST, TeamRole.DESIGNER));
+            }
+
             teamMembers.add(teamMember);
         }
         return teamMembers;
@@ -283,7 +307,7 @@ class VacancyServiceTest {
                 .description(vacancyDescription)
                 .project(project)
                 .createdBy(createdBy)
-                .candidates(getCandidates(5))
+                .candidates(getCandidates(DEFAULT_COUNT_CANDIDATES))
                 .status(VacancyStatus.OPEN)
                 .build();
     }
