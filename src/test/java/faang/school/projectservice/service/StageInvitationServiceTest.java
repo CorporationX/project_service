@@ -18,13 +18,12 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 public class StageInvitationServiceTest {
     @Mock
-    private StageInvitationRepository SIRepository;
+    private StageInvitationRepository repository;
     @Mock
     private StageRepository stageRepository;
     @Mock
@@ -49,7 +48,7 @@ public class StageInvitationServiceTest {
                 .executors(List.of(TeamMember.builder().id(1L).build()))
                 .build());
         service.create(validInvitationDto);
-        Mockito.verify(SIRepository, Mockito.times(1)).save(mapper.toModel(validInvitationDto));
+        Mockito.verify(repository).save(mapper.toModel(validInvitationDto));
     }
 
     @Test
