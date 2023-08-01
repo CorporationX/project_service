@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Project;
@@ -20,9 +21,11 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final ProjectRepository projectRepository;
     private final VacancyRepository vacancyRepository;
+    private final UserContext userContext;
 
     @Transactional
-    public VacancyDto createVacancy(VacancyDto vacancyDto, long creator) {
+    public VacancyDto createVacancy(VacancyDto vacancyDto) {
+        long creator = userContext.getUserId();
         validator.createVacancyValidation(vacancyDto, creator);
 
         Project vacancyProject = projectRepository.getProjectById(vacancyDto.getProjectId());
