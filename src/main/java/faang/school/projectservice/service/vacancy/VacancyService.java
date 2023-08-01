@@ -4,17 +4,13 @@ import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDtoReqUpdate;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -57,6 +53,22 @@ public class VacancyService {
         vacancyForUpdate.setUpdatedAt(LocalDateTime.now());
 
         return vacancyMapper.toDto(vacancyRepository.save(vacancyForUpdate));
+    }
+
+    @Transactional
+    public void deleteVacancy(Long vacancyId) {
+        Vacancy vacancy = getVacancyById(vacancyId);
+        Long projectId = vacancy.getProject().getId();
+        List<Long> usersID = vacancy.getCandidates().stream().map(Candidate::getUserId).toList();
+        usersID.forEach(candidateId -> deleteCandidateFromTeamMember(candidateId, projectId));
+        vacancyRepository.delete(vacancy);
+    }
+
+    private void deleteCandidateFromTeamMember(Long userId, Long projectId) {
+        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+        if (teamMember.getRoles().stream().anyMatch(role -> role.equals(TeamRole.INTERN))) {
+            teamMemberRepository.deleteEntity(teamMember);
+        }
     }
 
     private Vacancy getVacancyById(Long vacancyId) {

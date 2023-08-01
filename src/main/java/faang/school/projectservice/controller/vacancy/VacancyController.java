@@ -35,4 +35,12 @@ public class VacancyController {
                                     @Valid @RequestBody VacancyDtoReqUpdate vacancyDto) {
         return vacancyService.updateVacancy(vacancyId, vacancyDto);
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Удалить существующую вакансию.",
+            description = "Удалить вакансию по ID. При удалении вакансии будут также удалены все кандидаты, " +
+                    "если они не были приняты в команду")
+    public void deleteVacancy(@NotNull @PathVariable("id") Long vacancyId) {
+        vacancyService.deleteVacancy(vacancyId);
+    }
 }

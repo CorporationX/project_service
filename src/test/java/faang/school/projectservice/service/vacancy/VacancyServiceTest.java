@@ -191,6 +191,19 @@ class VacancyServiceTest {
     }
 
 
+    @Test
+    void testDeleteVacancy() {
+        List<TeamMember> members = getTeamMembers(5);
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
+        for (int i = 0; i < members.size(); i++) {
+            Mockito.when(teamMemberRepository.findByUserIdAndProjectId(1L + i, projectId))
+                    .thenReturn(members.get(i));
+        }
+
+        vacancyService.deleteVacancy(VACANCY_ID);
+    }
+
+
     private static Stream<Arguments> prepareInvalidDto() {
         VacancyDto DtoWithNullName = VacancyDto.builder().vacancyId(1L).build();
         VacancyDto DtoWithBlankName = VacancyDto.builder().name("").build();
@@ -224,11 +237,22 @@ class VacancyServiceTest {
         );
     }
 
-    private List<Candidate> getCandidates() {
-        int count = 5;
+    private List<TeamMember> getTeamMembers(int count) {
+        List<TeamMember> teamMembers = new ArrayList<>(count);
+        for (int i = 1; i < count + 1; i++) {
+            TeamMember teamMember = TeamMember.builder()
+                    .userId((long) i)
+                    .roles(List.of(TeamRole.INTERN, TeamRole.ANALYST))
+                    .build();
+            teamMembers.add(teamMember);
+        }
+        return teamMembers;
+    }
+
+    private List<Candidate> getCandidates(int count) {
         List<Candidate> candidates = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            candidates.add(Candidate.builder().id(i + 1L).build());
+            candidates.add(Candidate.builder().id(i + 1L).userId(i + 1L).build());
         }
         return candidates;
     }
@@ -259,7 +283,7 @@ class VacancyServiceTest {
                 .description(vacancyDescription)
                 .project(project)
                 .createdBy(createdBy)
-                .candidates(getCandidates())
+                .candidates(getCandidates(5))
                 .status(VacancyStatus.OPEN)
                 .build();
     }
