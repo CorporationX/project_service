@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/vacancy")
+@RequestMapping("/api/v1/vacancy")
 public class VacancyController {
     private final VacancyService service;
     private final VacancyValidator vacancyValidator;
