@@ -13,6 +13,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.StageValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StageService {
     private final StageRepository stageRepository;
     private final StageMapper stageMapper;
@@ -32,9 +34,11 @@ public class StageService {
     @Transactional
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
+        log.debug("StageDto mapped to entity is successfully");
         stage.getStageRoles().forEach(stageRole ->
                 stageRole.setStage(stage)
         );
+        log.debug("Set field stage in StageRoles");
         return stageMapper.toDto(stageRepository.save(stage));
     }
 

@@ -46,7 +46,7 @@ class StageServiceTest {
     private StageMapper stageMapper;
     @Mock
     private StageDto stageDto;
-
+    @Mock
     private StageValidator stageValidator;
     @Mock
     private ProjectRepository projectRepository;
@@ -65,7 +65,7 @@ class StageServiceTest {
     private StageDtoForUpdate stageDtoForUpdate;
     private Stage stageFromRepository;
     private Stage stageAfterUpdate;
-    private Stage stageFromRepositoryWithWrongStageStatus;
+    private Stage stageFromRepositoryWithWrongStatus;
 
     @BeforeEach
     void setUp() {
@@ -101,7 +101,7 @@ class StageServiceTest {
                         StageRoles.builder().teamRole(TeamRole.valueOf("OWNER")).count(1).build(),
                         StageRoles.builder().teamRole(TeamRole.valueOf("MANAGER")).count(1).build()))
                 .build();
-        stageFromRepositoryWithWrongStageStatus = Stage.builder()
+        stageFromRepositoryWithWrongStatus = Stage.builder()
                 .status(StageStatus.CANCELLED)
                 .build();
     }
@@ -187,11 +187,12 @@ class StageServiceTest {
 
     }
 
+
     @Test()
     public void testUpdateStage_InvalidStage() {
 
-//        when(stageRepository.getById(stageDtoForUpdateMock.getStageId())).thenReturn(stageFromRepositoryWithWrongStageStatus);
-        assertThrows(DataValidationException.class, () -> stageValidator.isCompletedOrCancelled(stageFromRepositoryWithWrongStageStatus), ("Stage is completed or cancelled"));
-
+        when(stageRepository.getById(stageDtoForUpdateMock.getStageId())).thenReturn(stageFromRepositoryWithWrongStatus);
+        assertThrows(DataValidationException.class, () -> stageValidator.isCompletedOrCancelled(stageFromRepositoryWithWrongStatus), "Stage is completed or cancelled");
+//        doThrow(new DataValidationException("Stage is completed or cancelled")).when(stageValidator).isCompletedOrCancelled(stageFromRepositoryWithWrongStatus);
     }
 }
