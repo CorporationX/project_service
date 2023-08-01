@@ -25,7 +25,7 @@ public class ProjectService {
 
     public ProjectDto createProject(ProjectDto projectDto) {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new DataValidationException("You can't create project with the same name");
+            throw new DataValidationException("You can't create project with name existed");
         }
         projectDto.setCreatedAt(LocalDateTime.now());
         projectDto.setStatus(ProjectStatus.CREATED);
@@ -48,7 +48,7 @@ public class ProjectService {
         return projectRepository.findAll()
                 .stream()
                 .map(projectMapper::toProjectDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public ProjectDto getProjectById(Long id) {
