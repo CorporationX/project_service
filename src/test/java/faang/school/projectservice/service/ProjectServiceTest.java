@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.mapper.SubProjectMapperImpl;
@@ -10,9 +11,13 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.filters.ProjectFilter;
+import faang.school.projectservice.service.filters.ProjectFilterByName;
+import faang.school.projectservice.service.filters.ProjectFilterByStatus;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -197,7 +202,6 @@ class ProjectServiceTest {
         assertEquals("Private SubProject; Faang, cant be with a public Parent Project: Uber", exception.getMessage());
     }
 
-    //Private SubProject; %s, cant be with a public Parent Project: %s
     @Test
     void createSubProjectTest() {
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
@@ -306,8 +310,10 @@ class ProjectServiceTest {
 
     @Test
     void updateSubProjectInvokesGetProjectByIdAndFindAllByIds() {
+        updatedProjectDto.setParentProjectId(3L);
         Mockito.when(projectRepository.getProjectById(updatedProjectDto.getId()))
                 .thenReturn(Project.builder()
+                        .parentProject(Project.builder().id(2L).build())
                         .updatedAt(LocalDateTime.now())
                         .children(List.of(onlyWithIdProject))
                         .build());
@@ -327,6 +333,7 @@ class ProjectServiceTest {
     @Test
     void updateSubProjectInvokesSaveMethods() {
         Project test = Project.builder()
+                .parentProject(Project.builder().id(2L).build())
                 .updatedAt(LocalDateTime.now())
                 .children(List.of(onlyWithIdProject))
                 .build();
@@ -367,10 +374,11 @@ class ProjectServiceTest {
 
     @Test
     void updateSubProjectTest() {
-        projectDto.setVisibility(ProjectVisibility.PRIVATE);
-        projectDto.setParentProjectId(null);
+        project.setParentProject(Project.builder().id(2L).build());
         project.setVisibility(ProjectVisibility.PRIVATE);
         project.setUpdatedAt(LocalDateTime.now().minusMonths(1));
+        projectDto.setVisibility(ProjectVisibility.PRIVATE);
+        projectDto.setParentProjectId(null);
 
         Mockito.when(projectRepository.getProjectById(projectDto.getId()))
                 .thenReturn(project);
@@ -466,5 +474,60 @@ class ProjectServiceTest {
 
         assertEquals(expected, result);
         Mockito.verify(projectRepository).getProjectById(2L);
+    }
+
+    @Test
+    void getProjectChildrenWithFilterTest() {
+        List<ProjectFilter> projectFilters = new ArrayList<>(List.of(new ProjectFilterByName(), new ProjectFilterByStatus()));
+        ProjectService mockedProjectService = ProjectService.builder()
+                .projectRepository(projectRepository)
+                .subProjectMapper(subProjectMapper)
+                .stageRepository(stageRepository)
+                .momentRepository(momentRepository)
+                .projectFilters(projectFilters)
+                .build();
+        long projectId = 10L;
+        ProjectFilterDto projectFilterDto = ProjectFilterDto.builder()
+                .status(ProjectStatus.IN_PROGRESS)
+                .projectNamePattern("name")
+                .build();
+        Project first = Project.builder()
+                .id(1L)
+                .name("My first name")
+                .description("Some description")
+                .ownerId(10L)
+                .parentProject(onlyWithIdProject)
+                .children(List.of(onlyWithIdProject))
+                .status(ProjectStatus.COMPLETED)
+                .visibility(ProjectVisibility.PRIVATE)
+                .stages(List.of(Stage.builder().stageId(15L).build()))
+                .build();
+        Project second = Project.builder()
+                .id(2L)
+                .name("My second name")
+                .description("Some description")
+                .ownerId(20L)
+                .parentProject(onlyWithIdProject)
+                .children(List.of(onlyWithIdProject))
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PUBLIC)
+                .stages(List.of(Stage.builder().stageId(15L).build()))
+                .build();
+        List<Project> childrenList = new ArrayList<>(List.of(first, second));
+
+        Project mainProject = Project.builder()
+                .children(childrenList)
+                .build();
+
+        ProjectDto secondDto = subProjectMapper.toDto(second);
+
+        List<ProjectDto> expected = new ArrayList<>(List.of(secondDto));
+
+        Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(mainProject);
+
+        List<ProjectDto> result = mockedProjectService.getProjectChildrenWithFilter(projectFilterDto, projectId);
+
+        assertEquals(expected, result);
+        assertEquals(1, result.size());
     }
 }

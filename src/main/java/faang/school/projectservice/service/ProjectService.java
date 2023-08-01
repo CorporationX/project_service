@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
@@ -12,7 +13,9 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.filters.ProjectFilter;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,14 +25,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Builder
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final SubProjectMapper subProjectMapper;
     private final StageRepository stageRepository;
     private final MomentRepository momentRepository;
+    private final List<ProjectFilter> projectFilters;
 
     public ProjectDto createSubProject(ProjectDto projectDto) {
         validateSubProject(projectDto);
@@ -71,7 +77,9 @@ public class ProjectService {
             momentRepository.save(createMoment(projectDto));
             return Timestamp.valueOf(originalProject.getUpdatedAt());
         }
+
         List<Project> subProjects = projectRepository.findAllByIds(projectDto.getChildrenIds());
+
         if (projectDto.getVisibility() != null && projectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
             subProjects.stream()
                     .peek(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE))
@@ -84,6 +92,19 @@ public class ProjectService {
         updateAllNeededFields(projectDto, originalProject, updatedProject);
         projectRepository.save(updatedProject);
         return Timestamp.valueOf(originalProject.getUpdatedAt());
+    }
+
+    public List<ProjectDto> getProjectChildrenWithFilter(ProjectFilterDto projectFilterDto, long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+        Stream<Project> subProjectsStream = project.getChildren().stream();
+        List<ProjectFilter> applicableFilters = projectFilters.stream()
+                .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
+                .toList();
+        for (ProjectFilter filter : applicableFilters) {
+            subProjectsStream = filter.apply(subProjectsStream, projectFilterDto);
+        }
+        return subProjectsStream.map(subProjectMapper::toDto)
+                .toList();
     }
 
     public Moment createMoment(ProjectDto projectDto) {
