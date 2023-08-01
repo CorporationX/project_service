@@ -18,7 +18,6 @@ public class ProjectDto {
     private Long id;
     private String name;
     private String description;
-    private Long ownerId;
     private Long parentId;
     private List<Long> childrenId;
     private ProjectStatus status;

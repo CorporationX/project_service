@@ -9,6 +9,7 @@ import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -64,23 +65,23 @@ public class ProjectServiceTest {
                 .id(1L)
                 .name("Project")
                 .description("Cool")
-                .ownerId(userId)
                 .status(ProjectStatus.CREATED)
                 .build();
         desiredProjectDto = ProjectDto.builder()
                 .id(1L)
                 .name("Project")
                 .description("Cool")
-                .ownerId(userId)
                 .status(ProjectStatus.CREATED)
                 .build();
     }
 
     @Test
     public void returnProjectsListTest() {
-        List<Project> desiredProjects = List.of(new Project());
+        List<Project> desiredProjects = List.of(Project.builder().visibility(ProjectVisibility.PUBLIC).build());
         Mockito.when(projectRepository.findAll()).thenReturn(desiredProjects.stream());
-        List<ProjectDto> receivedProject = projectService.getAllProjects();
+        Mockito.when(projectMapper.toDtoList(desiredProjects))
+                .thenReturn(List.of(ProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build()));
+        List<ProjectDto> receivedProject = projectService.getAllProjects(1L);
         Assertions.assertEquals(projectMapper.toDtoList(desiredProjects), receivedProject);
     }
 
@@ -147,14 +148,12 @@ public class ProjectServiceTest {
                 .id(1L)
                 .name("Mega project")
                 .description("Cool")
-                .ownerId(userId)
                 .status(ProjectStatus.CREATED)
                 .build();
         Project updatedProject = Project.builder()
                 .id(1L)
                 .name("Mega project")
                 .description("Cool")
-                .ownerId(userId)
                 .status(ProjectStatus.CREATED)
                 .build();
 

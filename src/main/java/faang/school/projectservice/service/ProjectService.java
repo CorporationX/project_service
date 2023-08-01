@@ -7,6 +7,7 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -14,24 +15,31 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
     private static final String PROJECT_FROM_USER_EXISTS =
-            "The user (with id %d) has already created a project (with id %d) with this name";
+            "The project (with id %d) has already been created with this name";
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
 
     @Transactional
-    public List<ProjectDto> getAllProjects() {
-        return projectMapper.toDtoList(projectRepository.findAll().toList());
+    public List<ProjectDto> getAllProjects(Long userId) {
+        List<Project> projects = projectRepository.findAll().collect(Collectors.toList());
+        List<Project> filteredProjects = projects.stream()
+                .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC ||
+                        project.getTeams().stream().anyMatch(team -> team.getTeamMembers().stream().anyMatch(teamMember -> teamMember.getUserId() == userId)))
+                .collect(Collectors.toList());
+        return projectMapper.toDtoList(filteredProjects);
     }
+
     @Transactional
     public List<ProjectDto> getProjects(ProjectFilterDto filters) {
-        return filterProjects(projectRepository.findAll(), filters);
+        return filterProjects(filters);
     }
 
     @Transactional
@@ -59,6 +67,7 @@ public class ProjectService {
                         String.format("Project with id %d does not exist.", projectDto.getId())));
     }
 
+    @Transactional
     public ProjectDto createSubProject(ProjectDto projectDto) {
         validateParentProjectExist(projectDto);
         validateVisibilityConsistency(projectDto);
@@ -77,12 +86,18 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
-    private List<ProjectDto> filterProjects(Stream<Project> projects, ProjectFilterDto filters) {
-        return projectFilters.stream()
+    private List<ProjectDto> filterProjects(ProjectFilterDto filters) {
+        Stream<Project> projects = projectRepository.findAll();
+
+        List<ProjectFilter> projectFilterList = projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(projects, filters))
-                .map(projectMapper::toDto)
                 .toList();
+
+        for (ProjectFilter filter : projectFilterList) {
+            projects = filter.apply(projects, filters);
+        }
+
+        return projects.map(projectMapper::toDto).toList();
     }
 
     private void validateProjectExists(long projectId) {
@@ -94,7 +109,7 @@ public class ProjectService {
     private void validateOfExistingProjectFromUser(ProjectDto projectDto) {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getId(), projectDto.getName())) {
             throw new DataValidException(String
-                    .format(PROJECT_FROM_USER_EXISTS, projectDto.getOwnerId(), projectDto.getId()));
+                    .format(PROJECT_FROM_USER_EXISTS, projectDto.getId()));
         }
     }
 
@@ -121,5 +136,4 @@ public class ProjectService {
             throw new DataValidException("Subproject with name " + subProjectName + " already exists");
         }
     }
-
 }
