@@ -9,8 +9,8 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage.StageStatus;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -42,14 +41,12 @@ class StageServiceTest {
     private StageService stageService;
     @Mock
     private StageRepository stageRepository;
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
     @Spy
     private StageMapper stageMapper;
     @Mock
     private StageDto stageDto;
-    @Mock
-    private StageValidator stageValidator;
-    @Mock
-    private ProjectRepository projectRepository;
     @Mock
     private Stage stage;
     @Mock
@@ -62,14 +59,18 @@ class StageServiceTest {
     private Stage stageWithStatusIn_Progress;
     private String status;
     private Long stageId;
+    private Long authorId;
     private StageDtoForUpdate stageDtoForUpdate;
     private Stage stageFromRepository;
     private Stage stageAfterUpdate;
     private Stage stageFromRepositoryWithWrongStatus;
+    @Mock
+    private StageValidator stageValidator;
 
     @BeforeEach
     void setUp() {
         stageId = 1L;
+        authorId = 2L;
         status = "created";
         stageWithStatusCreated = Stage.builder()
                 .stageId(1L)
@@ -187,12 +188,16 @@ class StageServiceTest {
 
     }
 
-
     @Test()
     public void testUpdateStage_InvalidStage() {
-
+        StageValidator stageValidator1 = new StageValidator();
         when(stageRepository.getById(stageDtoForUpdateMock.getStageId())).thenReturn(stageFromRepositoryWithWrongStatus);
-        assertThrows(DataValidationException.class, () -> stageValidator.isCompletedOrCancelled(stageFromRepositoryWithWrongStatus), "Stage is completed or cancelled");
-//        doThrow(new DataValidationException("Stage is completed or cancelled")).when(stageValidator).isCompletedOrCancelled(stageFromRepositoryWithWrongStatus);
+        assertThrows(DataValidationException.class, () -> stageValidator1.isCompletedOrCancelled(stageFromRepositoryWithWrongStatus), "Stage is completed or cancelled");
+    }
+
+    @Test
+    void testMethodFindTeamMemberById_ThrowExceptionAndMessage() {
+        when(teamMemberRepository.findById(authorId)).thenThrow(EntityNotFoundException.class);
+        assertThrows(EntityNotFoundException.class, () -> teamMemberRepository.findById(authorId), String.format("Team member doesn't exist by id: %s", authorId));
     }
 }

@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -17,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class StageDtoForUpdate {
     private Long stageId;
+    private Long authorId;
 
     @NotEmpty(message = "Stage name can not be empty")
     private String stageName;

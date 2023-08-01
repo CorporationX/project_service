@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageDtoForUpdate;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
@@ -11,6 +12,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.StageValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,7 @@ public class StageService {
     private final StageMapper stageMapper;
     private final StageValidator stageValidator;
     private final ProjectRepository projectRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
@@ -38,7 +41,7 @@ public class StageService {
         stage.getStageRoles().forEach(stageRole ->
                 stageRole.setStage(stage)
         );
-        log.debug("Set field stage in StageRoles");
+        log.debug("Sat stage on field stage in StageRoles");
         return stageMapper.toDto(stageRepository.save(stage));
     }
 
@@ -71,11 +74,12 @@ public class StageService {
         Stage stageFromRepository = stageRepository.getById(stageDto.getStageId());
 
         stageValidator.isCompletedOrCancelled(stageFromRepository);
+        TeamMember author = teamMemberRepository.findById(stageDto.getAuthorId());
         List<TeamRole> teamRolesFromStageDto = stageDto.getTeamRoles();
 
         List<TeamRole> newTeamRoles = findNewTeamRoles(stageFromRepository, teamRolesFromStageDto);
         Stage stageAfterUpdate = setNewFieldsForStage(stageFromRepository, teamRolesFromStageDto);
-        sendStageInvitation(stageFromRepository, newTeamRoles);
+        sendStageInvitation(stageFromRepository, newTeamRoles, author);
 
         return stageMapper.toDto(stageRepository.save(stageAfterUpdate));
     }
@@ -93,7 +97,7 @@ public class StageService {
         return stageFromRepository;
     }
 
-    private void sendStageInvitation(Stage stageFromRepository, List<TeamRole> newTemRoles) {
+    private void sendStageInvitation(Stage stageFromRepository, List<TeamRole> newTemRoles, TeamMember author) {
         if (!newTemRoles.isEmpty()) {
             Project projectFromRepository = projectRepository.getProjectById(stageFromRepository.getProject().getId());
 
@@ -106,7 +110,7 @@ public class StageService {
                                     .filter(teamMember -> teamMember.getRoles().contains(teamRole))
                                     .forEach(teamMember -> StageInvitation.builder()
                                             .invited(teamMember)
-                                            .author(teamMember)// Нужно еще определить кто будет автором в приглашении
+                                            .author(author)
                                             .stage(stageFromRepository)
                                             .status(StageInvitationStatus.PENDING)
                                             .build()));
