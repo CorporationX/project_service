@@ -26,12 +26,12 @@ public class InternshipService {
 
 
     public InternshipDto internshipCreation(InternshipDto internshipDto) {
-        if (internshipDto.getProjectId() == null ||
+        if (internshipDto.getProjectId() == null) {
 
 // Стажировка ВСЕГДА относится к какому-то одному проекту.
 //                internshipDto.getProjectId() > 1 &&
 //                        internshipDto.getProjectId() < 1
-        ) {
+
             throw new IllegalArgumentException("Invalid project id");
         }
         if (internshipDto.getInternsId().size() == 0) {
@@ -52,10 +52,10 @@ public class InternshipService {
         Internship internship = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid internship"));
         Project project = internship.getProject();
-        if (internship.getStatus().equals(IN_PROGRESS)){
-        List<TeamMember> interns = internship.getInterns();
+        if (internship.getStatus().equals(IN_PROGRESS)) {
+            List<TeamMember> interns = internship.getInterns();
             interns.forEach(intern -> {
-                List <TaskStatus> tasksOfIntern = taskRepository.findAllByProjectIdAndPerformerId(internship.getProject().getId(), intern.getId())
+                List<TaskStatus> tasksOfIntern = taskRepository.findAllByProjectIdAndPerformerId(internship.getProject().getId(), intern.getId())
                         .stream()
                         .map(task -> task.getStatus())
                         .toList();
@@ -68,8 +68,10 @@ public class InternshipService {
                     project.getTeam().getTeamMembers().remove(intern);
                 }
             });
-
+        }
+        return internshipDto;
     }
+}
 //        internshipDto.getUpdatedAt()
 //        Long project = internshipDto.getProjectId();;
 //        project.setId(internshipDto.getProjectId());
@@ -79,15 +81,13 @@ public class InternshipService {
 //        })
 //                .filter(task -> task.getPerformerUserId() == internshipDto.getId())
 //                .toList();
-        //internshipDto.setStatus();
+//internshipDto.setStatus();
 
 //        internshipRepository.findById(id).stream().forEach(task -> {
 //            task.getPerformerUserId();
 //        })
 //    }
 
-
-}
 
 //private boolean internshipValidation(InternshipDto internshipDto) {
 //        return internshipDto.getProjectId() != null &&
