@@ -10,13 +10,9 @@ import org.springframework.stereotype.Component;
 public class VacancyValidator {
 
     // Controller Validation:
-    public void updateVacancyControllerValidation(VacancyDto vacancyDto, long updaterId) {
+    public void updateVacancyControllerValidation(VacancyDto vacancyDto) {
         if (vacancyDto == null) {
             throw new VacancyValidationException("Vacancy not found!");
-        }
-
-        if (updaterId < 1) {
-            throw new VacancyValidationException("Permission error!");
         }
     }
 

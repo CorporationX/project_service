@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.vacancy.VacancyValidationException;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
@@ -10,6 +11,7 @@ import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.srvice.vacancy.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,15 +34,22 @@ public class VacancyServiceTest {
     private VacancyValidator vacancyValidator;
     @Mock
     private VacancyMapper vacancyMapper;
+    @Mock
+    private UserContext userContext;
     @InjectMocks
     private VacancyService service;
+
+    @BeforeEach
+    public void setup() {
+        Mockito.when(userContext.getUserId()).thenReturn(1L);
+    }
 
     @Test
     public void deleteVacancy_Test() {
         VacancyDto vacancyDto = VacancyDto.builder().candidates(List.of(1L, 2L)).build();
         long deleterId = 9;
 
-        service.deleteVacancy(vacancyDto, deleterId);
+        service.deleteVacancy(vacancyDto);
 
         Mockito.verify(candidateRepository).deleteAllByIdInBatch(vacancyDto.getCandidates());
         Mockito.verify(vacancyRepository).deleteById(vacancyDto.getId());
@@ -54,7 +63,7 @@ public class VacancyServiceTest {
         Mockito.when(vacancyRepository.findById(vacancyDto.getId())).thenReturn(Optional.of(Vacancy.builder().id(1L).status(VacancyStatus.OPEN).build()));
         Mockito.when(vacancyMapper.toEntity(vacancyDto)).thenReturn(Vacancy.builder().id(1L).status(VacancyStatus.CLOSED).count(2).build());
 
-        VacancyValidationException exception = Assertions.assertThrows(VacancyValidationException.class, () -> service.updateVacancy(vacancyDto, updaterId));
+        VacancyValidationException exception = Assertions.assertThrows(VacancyValidationException.class, () -> service.updateVacancy(vacancyDto));
 
         Assertions.assertEquals(exception.getMessage(), "Still need employee!");
     }
@@ -70,7 +79,7 @@ public class VacancyServiceTest {
         Mockito.when(vacancyMapper.toEntity(vacancyDto)).thenReturn(source);
         Mockito.when(vacancyRepository.save(source)).thenReturn(source);
 
-        service.updateVacancy(vacancyDto, updaterId);
+        service.updateVacancy(vacancyDto);
 
         Mockito.verify(vacancyMapper, Mockito.times(1)).toDto(source);
         Assertions.assertTrue(target.get().getUpdatedAt().isBefore(source.getUpdatedAt()));

@@ -13,15 +13,15 @@ public class VacancyController {
     private final VacancyService service;
     private final VacancyValidator vacancyValidator;
 
-    @DeleteMapping("/{deleterId}")
-    public void deleteVacancy(@RequestBody VacancyDto vacancyDto, @PathVariable long deleterId) {
-        vacancyValidator.updateVacancyControllerValidation(vacancyDto, deleterId);
-        service.deleteVacancy(vacancyDto, deleterId);
+    @DeleteMapping
+    public void deleteVacancy(@RequestBody VacancyDto vacancyDto) {
+        vacancyValidator.updateVacancyControllerValidation(vacancyDto);
+        service.deleteVacancy(vacancyDto);
     }
 
-    @PutMapping("/{updaterId}")
-    public VacancyDto updateVacancy(@RequestBody VacancyDto vacancyDto, @PathVariable long updaterId) {
-        vacancyValidator.updateVacancyControllerValidation(vacancyDto, updaterId);
-        return service.updateVacancy(vacancyDto, updaterId);
+    @PutMapping
+    public VacancyDto updateVacancy(@RequestBody VacancyDto vacancyDto) {
+        vacancyValidator.updateVacancyControllerValidation(vacancyDto);
+        return service.updateVacancy(vacancyDto);
     }
 }

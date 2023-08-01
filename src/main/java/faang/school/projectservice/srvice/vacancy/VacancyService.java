@@ -1,5 +1,6 @@
 package faang.school.projectservice.srvice.vacancy;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.vacancy.VacancyValidationException;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
@@ -10,6 +11,7 @@ import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -20,15 +22,20 @@ public class VacancyService {
     private final CandidateRepository candidateRepository;
     private final VacancyValidator vacancyValidator;
     private final VacancyMapper vacancyMapper;
+    private final UserContext userContext;
 
-    public void deleteVacancy(VacancyDto vacancyDto, long deleterId) {
-        vacancyValidator.updateVacancyServiceValidation(vacancyDto, deleterId);
+    @Transactional
+    public void deleteVacancy(VacancyDto vacancyDto) {
+        long userId = userContext.getUserId();
+        vacancyValidator.updateVacancyServiceValidation(vacancyDto, userId);
         candidateRepository.deleteAllByIdInBatch(vacancyDto.getCandidates());
         vacancyRepository.deleteById(vacancyDto.getId());
     }
 
-    public VacancyDto updateVacancy(VacancyDto vacancyDto, long updaterId) {
-        vacancyValidator.updateVacancyServiceValidation(vacancyDto, updaterId);
+    @Transactional
+    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+        long userId = userContext.getUserId();
+        vacancyValidator.updateVacancyServiceValidation(vacancyDto, userId);
 
         Vacancy target = vacancyRepository.findById(vacancyDto.getId()).orElseThrow(() -> new VacancyValidationException("Invalid vacancy!"));
         Vacancy source = vacancyMapper.toEntity(vacancyDto);
@@ -39,7 +46,13 @@ public class VacancyService {
             }
         }
 
-        source.setUpdatedBy(updaterId);
+        if (target.getStatus().equals(VacancyStatus.CLOSED) && !source.getStatus().equals(VacancyStatus.CLOSED)) {
+            if (target.getCount() == 0) {
+                throw new VacancyValidationException("Add needed employee");
+            }
+        }
+
+        source.setUpdatedBy(userId);
         source.setUpdatedAt(LocalDateTime.now());
         return vacancyMapper.toDto(vacancyRepository.save(source));
     }

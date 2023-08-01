@@ -16,17 +16,9 @@ public class VacancyValidatorTest {
     @Test
     public void updateVacancyControllerValidation_NullVacancyDto_Test() {
         VacancyValidationException exception = Assertions.assertThrows(VacancyValidationException.class,
-                () -> vacancyValidator.updateVacancyControllerValidation(null, 1));
+                () -> vacancyValidator.updateVacancyControllerValidation(null));
 
         Assertions.assertEquals(exception.getMessage(), "Vacancy not found!");
-    }
-
-    @Test
-    public void deleteVacancyControllerValidation_WrongDeleter_Test() {
-        VacancyValidationException exception = Assertions.assertThrows(VacancyValidationException.class,
-                () -> vacancyValidator.updateVacancyControllerValidation(VacancyDto.builder().build(), 0));
-
-        Assertions.assertEquals(exception.getMessage(), "Permission error!");
     }
 
     @Test
