@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Builder
 public class ProjectDto {
     private Long id;
-    @NotNull(message = "Project description should not be null")
     @Size(max = 4096, message = "Project's description length can't be more than 4096 symbols")
     private String description;
     @NotNull(message = "Project name should not be null")
