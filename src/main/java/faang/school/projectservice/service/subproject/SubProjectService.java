@@ -19,11 +19,13 @@ public class SubProjectService {
     public void updateStatusSubProject(UpdateStatusSubprojectDto updateStatusSubprojectDto) {
         Project project = getProjectById(updateStatusSubprojectDto.getId());
         ProjectStatus status = updateStatusSubprojectDto.getStatus();
+
         if (status == ProjectStatus.COMPLETED && project.getChildren() != null) {
             if (!checkStatusChildren(project.getChildren())) {
                 throw new DataValidationException("You can make the project completed only after finishing all subprojects");
             }
         }
+
         project.setStatus(status);
         project.setUpdatedAt(LocalDateTime.now());
     }

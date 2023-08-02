@@ -63,8 +63,10 @@ class SubProjectServiceTest {
 
         assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDto));
         assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDtoCOMPLETED));
+
         assertEquals(ProjectStatus.COMPLETED, projectCompleted.getStatus());
         assertEquals(ProjectStatus.IN_PROGRESS, project.getStatus());
+
         assertTrue(project.getUpdatedAt().isBefore(LocalDateTime.now()));
     }
 
