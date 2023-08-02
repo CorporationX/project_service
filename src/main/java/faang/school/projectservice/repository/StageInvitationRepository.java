@@ -3,6 +3,7 @@ package faang.school.projectservice.repository;
 import java.util.List;
 
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,8 @@ public class StageInvitationRepository {
 
     public List<StageInvitation> findAll() {
         return repository.findAll();
+    }
+    public List<StageInvitation> findAllByStage(Stage stage) {
+        return repository.findAllByStage(stage);
     }
 }
