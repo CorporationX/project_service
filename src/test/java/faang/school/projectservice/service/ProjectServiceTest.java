@@ -319,6 +319,7 @@ class ProjectServiceTest {
                         .build());
         Mockito.when(projectRepository.findAllByIds(updatedProjectDto.getChildrenIds()))
                 .thenReturn(List.of(Project.builder()
+                        .id(5L)
                         .status(ProjectStatus.COMPLETED)
                         .build()));
         Mockito.when(momentRepository.findAllByProjectId(Mockito.anyLong()))
@@ -326,7 +327,7 @@ class ProjectServiceTest {
 
         projectService.updateSubProject(updatedProjectDto);
 
-        Mockito.verify(projectRepository, Mockito.times(2)).getProjectById(updatedProjectDto.getId());
+        Mockito.verify(projectRepository).getProjectById(updatedProjectDto.getId());
         Mockito.verify(projectRepository).findAllByIds(updatedProjectDto.getChildrenIds());
     }
 
@@ -338,29 +339,38 @@ class ProjectServiceTest {
                 .children(List.of(onlyWithIdProject))
                 .build();
         Project projectToSave = Project.builder()
-                .id(1L)
-                .ownerId(0L)
                 .status(ProjectStatus.COMPLETED)
                 .children(List.of(Project.builder()
+                        .id(5L)
                         .status(ProjectStatus.COMPLETED)
                         .build()))
+                .updatedAt(test.getUpdatedAt())
                 .build();
         Moment moment = Moment.builder()
                 .name(String.format("%s project tasks", updatedProjectDto.getName()))
                 .description(String.format("All tasks are completed in %s project", updatedProjectDto.getName()))
-                .projects(List.of(onlyWithIdProject,
+                .projects(List.of(Project.builder().
+                                id(5L).
+                                status(ProjectStatus.COMPLETED)
+                                .build(),
                         Project.builder()
-                                .children(List.of(onlyWithIdProject))
+                                .children(List.of(Project.builder().
+                                        id(5L).
+                                        status(ProjectStatus.COMPLETED)
+                                        .build()))
                                 .updatedAt(test.getUpdatedAt())
+                                .status(ProjectStatus.COMPLETED)
                                 .build()))
                 .build();
         moment.setUserIds(List.of(1L));
         moment.setCreatedBy(0L);
+        onlyWithIdProject.setStatus(ProjectStatus.COMPLETED);
 
         Mockito.when(projectRepository.getProjectById(updatedProjectDto.getId()))
                 .thenReturn(test);
         Mockito.when(projectRepository.findAllByIds(updatedProjectDto.getChildrenIds()))
                 .thenReturn(List.of(Project.builder()
+                        .id(5L)
                         .status(ProjectStatus.COMPLETED)
                         .build()));
         Mockito.when(momentRepository.findAllByProjectId(Mockito.anyLong()))
@@ -401,10 +411,7 @@ class ProjectServiceTest {
                 .createdBy(1L)
                 .build();
 
-        Mockito.when(projectRepository.getProjectById(projectDto.getId()))
-                .thenReturn(project);
-
-        Moment result = projectService.createMoment(projectDto);
+        Moment result = projectService.createMoment(projectDto, project);
 
         assertEquals(expected, result);
     }

@@ -73,7 +73,8 @@ public class ProjectService {
             projectToUpdate.setChildren(allProjects);
             updateAllNeededFields(projectDto, projectToUpdate);
             projectRepository.save(projectToUpdate);
-            momentRepository.save(createMoment(projectDto));
+            Moment projectMoment = createMoment(projectDto, projectToUpdate);
+            momentRepository.save(projectMoment);
             return Timestamp.valueOf(projectToUpdate.getUpdatedAt());
         }
 
@@ -106,8 +107,8 @@ public class ProjectService {
                 .toList();
     }
 
-    public Moment createMoment(ProjectDto projectDto) {
-        Project project = projectRepository.getProjectById(projectDto.getId());
+    public Moment createMoment(ProjectDto projectDto, Project project) {
+//        Project project = projectRepository.getProjectById(projectDto.getId());
         Moment moment = Moment.builder()
                 .name(String.format("%s project tasks", projectDto.getName()))
                 .description(String.format("All tasks are completed in %s project", projectDto.getName()))
@@ -151,6 +152,14 @@ public class ProjectService {
     }
 
     private void setThreeField(ProjectDto projectDto, Project projectToUpdate) {
+        projectToUpdate.setName(projectToUpdate.getName());
+
+        if (projectDto.getDescription() != null) {
+            projectToUpdate.setDescription(projectDto.getDescription());
+        }
+        if (projectDto.getOwnerId() > 0) {
+            projectToUpdate.setOwnerId(projectDto.getOwnerId());
+        }
         if (projectDto.getStatus() != null) {
             projectToUpdate.setStatus(projectDto.getStatus());
         }
