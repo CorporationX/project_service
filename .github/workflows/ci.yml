@@ -1,0 +1,19 @@
+name: ci
+on:
+  push:
+    branches: [ "feature/pipline-BC-4693" ]
+  pull_request:
+    branches: [ "feature/pipline-BC-4693" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+      - uses: actions/checkout@v3
+      - name: setup JDK 17
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+
