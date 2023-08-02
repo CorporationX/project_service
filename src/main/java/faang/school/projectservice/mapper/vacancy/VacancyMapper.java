@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDtoReqUpdate;
+import faang.school.projectservice.dto.vacancy.VacancyDtoUpdateReq;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -20,5 +20,5 @@ public interface VacancyMapper {
     Vacancy toEntity(VacancyDto vacancyDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDto(VacancyDtoReqUpdate vacancyDto, @MappingTarget Vacancy vacancy);
+    void updateEntityFromDto(VacancyDtoUpdateReq vacancyDto, @MappingTarget Vacancy vacancy);
 }
