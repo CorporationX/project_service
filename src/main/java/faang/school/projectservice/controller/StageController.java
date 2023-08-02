@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.filter.StageFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.DeleteStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
@@ -38,5 +39,10 @@ public class StageController {
     @PutMapping
     public StageDto getStageById(@RequestBody Long id) {
         return stageService.getStageById(id);
+    }
+
+    @PutMapping
+    public List<StageDto> filterByStatus(@RequestBody StageFilterDto stageFilterDto) {
+        return stageService.filterByStatus(stageFilterDto);
     }
 }

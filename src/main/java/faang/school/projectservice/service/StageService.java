@@ -1,12 +1,13 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.filter.StageFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.DeleteStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.project.ProjectException;
 import faang.school.projectservice.exception.stage.StageException;
+import faang.school.projectservice.filter.StageFilter;
 import faang.school.projectservice.jpa.TaskRepository;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 @Service
@@ -30,9 +32,9 @@ public class StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final StageMapper stageMapper;
+    private final List<StageFilter> stageFilters;
     private final ProjectMapper projectMapper;
     private final TaskRepository taskRepository;
-    private final TeamMemberJpaRepository teamMemberJpaRepository;
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
@@ -72,6 +74,16 @@ public class StageService {
     public StageDto getStageById(Long id) {
         Stage stage = stageRepository.getById(id);
         return stageMapper.toStageDto(stage);
+    }
+
+    public List<StageDto> filterByStatus(StageFilterDto stageFilterDto) {
+        List<Stage> stages = stageRepository.findAll();
+        Stream<Stage> projectStream = stages.stream();
+        return stageFilters.stream()
+                .filter(stageFilter -> stageFilter.isApplicable(stageFilterDto))
+                .flatMap(stageFilter -> stageFilter.apply(projectStream, stageFilterDto))
+                .map(stageMapper :: toStageDto)
+                .toList();
     }
 
     private StageDto validStage(StageDto stage) {
