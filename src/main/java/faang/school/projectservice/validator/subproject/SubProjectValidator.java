@@ -1,13 +1,11 @@
 package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.project.CreateProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -15,37 +13,47 @@ public class SubProjectValidator {
     private final SubProjectService subProjectService;
     private final UserServiceClient userServiceClient;
 
-    public void validateCreateProjectDto(CreateProjectDto createProjectDto) {
-        validateId(createProjectDto.getId());
-        validateDescription(createProjectDto.getDescription());
+    public void validateCreateProjectDto(CreateSubProjectDto createSubProjectDto) {
+        validateProjectId(createSubProjectDto.getId());
 
-        String name = userServiceClient.getUser(createProjectDto.getOwnerId()).getUsername();
-        subProjectService.existsByOwnerUserIdAndName(createProjectDto.getOwnerId(), name);
+        validateStringData(createSubProjectDto.getName(),"Name");
+        validateStringData(createSubProjectDto.getDescription(),"Description");
 
-        validateTime(createProjectDto.getCreatedAt());
+        validateOwnerId(createSubProjectDto.getOwnerId());
+        validateParentProject(createSubProjectDto.getParentProjectId());
     }
 
-    public void validateId(Long id) {
-        if (id < 1 && id != null) {
-            throw new DataValidationException("It's wrong id");
+    private void validateProjectId(Long id) {
+        validateId(id);
+        if (subProjectService.isExistProjectById(id)) {
+            throw new DataValidationException("Can't be exist two project with equals id");
         }
     }
 
-    private void validateDescription(String description) {
-        if (description == null) {
-            throw new DataValidationException("Description can't be null");
+    private void validateOwnerId(Long ownerId) {
+        validateId(ownerId);
+        userServiceClient.getUser(ownerId);
+    }
+
+    private void validateParentProject(Long projectId) {
+        validateId(projectId);
+        subProjectService.getProjectById(projectId);
+    }
+
+    private void validateStringData(String str,String message) {
+        if (str == null) {
+            throw new DataValidationException(message+" can't be null");
         }
 
-        int discLen = description.length();
+        int discLen = str.length();
         if (discLen == 0 || discLen >= 4096) {
-            throw new DataValidationException("You wrought wrong disruption, pls revise it");
+            throw new DataValidationException("You wrote wrong"+ message+", pls revise it");
         }
     }
 
-    private void validateTime(LocalDateTime time) {
-        LocalDateTime now = LocalDateTime.now();
-        if (time.isBefore(now)) {
-            throw new DataValidationException("Time can't be more that now");
+    private void validateId(Long id) {
+        if (id == null || id < 0) {
+            throw new DataValidationException("It's wrong id, id can't be null");
         }
     }
 }

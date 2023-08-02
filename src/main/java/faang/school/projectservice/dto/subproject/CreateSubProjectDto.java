@@ -1,16 +1,14 @@
-package faang.school.projectservice.dto.project;
+package faang.school.projectservice.dto.subproject;
 
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
-public class CreateProjectDto {
+public class CreateSubProjectDto {
     private Long id;
+    private String name;
     private String description;
     private Long ownerId;
     private Long parentProjectId;
-    private LocalDateTime createdAt;
 }
