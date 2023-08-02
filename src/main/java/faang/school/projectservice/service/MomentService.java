@@ -2,17 +2,16 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -76,6 +75,15 @@ public class MomentService {
             });
         }
         return momentMapper.toDto(momentRepository.save(newMoment));
+    }
+
+    public Page<MomentDto> getAllMoments(int page, int pageSize) {
+        Page<Moment> moments = momentRepository.findAll(PageRequest.of(page, pageSize));
+        return moments.map(momentMapper::toDto);
+    }
+
+    public MomentDto getById(Long id) {
+        return momentMapper.toDto(findById(id));
     }
 
     private Moment findById(Long id) {
