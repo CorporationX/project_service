@@ -14,7 +14,8 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        uses = StageRolesMapper.class, injectionStrategy = InjectionStrategy.FIELD)
+        unmappedSourcePolicy = ReportingPolicy.IGNORE, uses = StageRolesMapper.class,
+        injectionStrategy = InjectionStrategy.FIELD)
 public interface StageMapper {
     StageRolesMapper stageRolesMapper = Mappers.getMapper(StageRolesMapper.class);
     @Mapping(target = "projectId", source = "project.id")

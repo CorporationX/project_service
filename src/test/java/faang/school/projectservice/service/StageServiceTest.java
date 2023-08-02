@@ -55,6 +55,8 @@ class StageServiceTest {
     private StageDtoForUpdate stageDtoForUpdateMock;
     @Mock
     private Stage stageAfterUpdateMock;
+    @Mock
+    private StageValidator stageValidator;
     private Stage stageWithStatusCreated;
     private Stage stageWithStatusIn_Progress;
     private String status;
@@ -64,8 +66,6 @@ class StageServiceTest {
     private Stage stageFromRepository;
     private Stage stageAfterUpdate;
     private Stage stageFromRepositoryWithWrongStatus;
-    @Mock
-    private StageValidator stageValidator;
 
     @BeforeEach
     void setUp() {
@@ -84,7 +84,7 @@ class StageServiceTest {
                 .stageId(1L)
                 .stageName("stageName")
                 .projectId(1L)
-                .status("CREATED")
+                .status(StageStatus.CREATED)
                 .teamRoles(List.of(TeamRole.valueOf("OWNER"), TeamRole.valueOf("MANAGER")))
                 .build();
         stageFromRepository = Stage.builder()
@@ -185,7 +185,6 @@ class StageServiceTest {
         verify(stageRepository, times(1)).save(any(Stage.class));
 
         verifyNoMoreInteractions(stageRepository);
-
     }
 
     @Test()

@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.stage.StageStatus;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ public class StageDtoForUpdate {
     @NotNull(message = "Project ID can not be null")
     private Long projectId;
 
-    private String status;
+    private StageStatus status;
 
     @NotNull(message = "List of roles can not be null")
     @NotEmpty(message = "List of roles can not be empty")
