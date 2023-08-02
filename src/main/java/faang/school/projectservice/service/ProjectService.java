@@ -65,17 +65,16 @@ public class ProjectService {
     }
 
     public Timestamp updateSubProject(ProjectDto projectDto) {
-        Project updatedProject = subProjectMapper.toEntity(projectDto);
-        Project originalProject = projectRepository.getProjectById(projectDto.getId());
+        Project projectToUpdate = projectRepository.getProjectById(projectDto.getId());
 
         if (projectDto.getStatus() != null && projectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
             List<Project> allProjects = projectRepository.findAllByIds(projectDto.getChildrenIds());
             allProjects.forEach(this::checkSubProjectStatusCompleteOrCancelled);
-            updatedProject.setChildren(allProjects);
-            updateAllNeededFields(projectDto, originalProject, updatedProject);
-            projectRepository.save(updatedProject);
+            projectToUpdate.setChildren(allProjects);
+            updateAllNeededFields(projectDto, projectToUpdate);
+            projectRepository.save(projectToUpdate);
             momentRepository.save(createMoment(projectDto));
-            return Timestamp.valueOf(originalProject.getUpdatedAt());
+            return Timestamp.valueOf(projectToUpdate.getUpdatedAt());
         }
 
         List<Project> subProjects = projectRepository.findAllByIds(projectDto.getChildrenIds());
@@ -84,14 +83,14 @@ public class ProjectService {
             subProjects.stream()
                     .peek(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE))
                     .forEach(projectRepository::save);
-            updatedProject.setChildren(subProjects);
+            projectToUpdate.setChildren(subProjects);
         } else {
-            updatedProject.setChildren(subProjects);
+            projectToUpdate.setChildren(subProjects);
         }
 
-        updateAllNeededFields(projectDto, originalProject, updatedProject);
-        projectRepository.save(updatedProject);
-        return Timestamp.valueOf(originalProject.getUpdatedAt());
+        updateAllNeededFields(projectDto, projectToUpdate);
+        projectRepository.save(projectToUpdate);
+        return Timestamp.valueOf(projectToUpdate.getUpdatedAt());
     }
 
     public List<ProjectDto> getProjectChildrenWithFilter(ProjectFilterDto projectFilterDto, long projectId) {
@@ -138,33 +137,32 @@ public class ProjectService {
         return new ArrayList<>(userIds);
     }
 
-    public Project changeParentProject(ProjectDto projectDto, Project originalProject) {
-        if (!Objects.equals(projectDto.getParentProjectId(), originalProject.getParentProject().getId())) {
+    public Project changeParentProject(ProjectDto projectDto, Project projectToUpdate) {
+        if (!Objects.equals(projectDto.getParentProjectId(), projectToUpdate.getParentProject().getId())) {
             Project newParentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
-            originalProject.setParentProject(newParentProject);
+            projectToUpdate.setParentProject(newParentProject);
         }
-        return originalProject;
+        return projectToUpdate;
     }
 
-    private void updateAllNeededFields(ProjectDto projectDto, Project originalProject, Project updatedProject) {
-        Project originalWithNewParrentProject = changeParentProject(projectDto, originalProject);
-        updatedProject.setParentProject(originalWithNewParrentProject.getParentProject());
-        setThreeField(projectDto, updatedProject);
+    private void updateAllNeededFields(ProjectDto projectDto, Project projectToUpdate) {
+        changeParentProject(projectDto, projectToUpdate);
+        setThreeField(projectDto, projectToUpdate);
     }
 
-    private void setThreeField(ProjectDto projectDto, Project project) {
+    private void setThreeField(ProjectDto projectDto, Project projectToUpdate) {
         if (projectDto.getStatus() != null) {
-            project.setStatus(projectDto.getStatus());
+            projectToUpdate.setStatus(projectDto.getStatus());
         }
         if (projectDto.getStagesId() != null) {
             List<Stage> stages = projectDto.getStagesId().stream()
                     .map(stageRepository::getById)
                     .toList();
-            project.setStages(stages);
+            projectToUpdate.setStages(stages);
         }
         if (projectDto.getVisibility() != null) {
             checkSubProjectNotPrivateOnPublicProject(projectDto);
-            project.setVisibility(projectDto.getVisibility());
+            projectToUpdate.setVisibility(projectDto.getVisibility());
         }
     }
 
