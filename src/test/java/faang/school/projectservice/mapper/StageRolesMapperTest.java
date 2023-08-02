@@ -9,23 +9,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class StageRolesMapperTest {
 
     @Spy
-    private StageRolesMapperImpl stageRolesMapper;
+    private faang.school.projectservice.mapper.StageRolesMapperImpl stageRolesMapper;
 
     private StageRoles stageRoles;
 
     private StageRolesDto stageRolesDto;
-
-    private List<StageRoles> stageRolesList;
-
-    private List<StageRolesDto> stageRolesDtosList;
 
     @BeforeEach
     void setUp() {
@@ -40,8 +34,6 @@ class StageRolesMapperTest {
                 .teamRole(TeamRole.DEVELOPER)
                 .count(3)
                 .build();
-        stageRolesList = List.of(stageRoles);
-        stageRolesDtosList = List.of(stageRolesDto);
     }
 
     @Test

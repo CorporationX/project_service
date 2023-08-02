@@ -66,7 +66,6 @@ class StageServiceTest {
     private UserContext userContext;
 
     private Stage stage1;
-    private Stage stage2;
 
     private Stage stage4;
 
@@ -98,7 +97,7 @@ class StageServiceTest {
                         .count(1)
                         .build()))
                 .build();
-        stage2 = Stage
+        Stage stage2 = Stage
                 .builder()
                 .stageId(2L)
                 .stageName("stage")
@@ -243,3 +242,4 @@ class StageServiceTest {
         Mockito.verify(stageRepository, Mockito.times(1)).getById(1L);
     }
 }
+

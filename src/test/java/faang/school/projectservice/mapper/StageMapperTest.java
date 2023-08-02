@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class StageMapperTest {
 
     @Spy
-    private StageRolesMapperImpl stageRolesMapper;
+    private faang.school.projectservice.mapper.StageRolesMapperImpl stageRolesMapper;
 
     @Spy
-    private StageMapperImpl stageMapper;
+    private faang.school.projectservice.mapper.StageMapperImpl stageMapper;
 
     private Stage stage;
 
