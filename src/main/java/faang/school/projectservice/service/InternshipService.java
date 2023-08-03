@@ -59,11 +59,13 @@ public class InternshipService {
                 .map(internshipMapper::toInternshipDto).toList();
     }
 
-    public InternshipDto getInternshipById(Long id){
-        //return internshipMapper.toInternshipDto(internshipRepository.getReferenceById(id));
-        return internshipMapper.toInternshipDto(internshipRepository.getById(id));
-    }
-}
+//    public InternshipDto getInternshipById(Long id){
+//        //return internshipMapper.toInternshipDto(internshipRepository.getReferenceById(id));
+//        return internshipMapper.toInternshipDto(internshipRepository.getById(id));
+//    }
+//}
+
+
 
 //    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
 //        Internship internship = internshipRepository.findById(internshipDto.getId())
