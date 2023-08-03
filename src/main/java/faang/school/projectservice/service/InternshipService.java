@@ -52,8 +52,18 @@ public class InternshipService {
         internshipBusinessValidation(internshipDto);
         return internshipMapper.toInternshipDto(internshipRepository.save(internshipMapper.toInternship(internshipDto)));
     }
-}
 
+
+    public List <InternshipDto> gettingAllInternships (){
+        return internshipRepository.findAll().stream()
+                .map(internshipMapper::toInternshipDto).toList();
+    }
+
+    public InternshipDto getInternshipById(Long id){
+        //return internshipMapper.toInternshipDto(internshipRepository.getReferenceById(id));
+        return internshipMapper.toInternshipDto(internshipRepository.getById(id));
+    }
+}
 
 //    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
 //        Internship internship = internshipRepository.findById(internshipDto.getId())

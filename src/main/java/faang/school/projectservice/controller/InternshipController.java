@@ -6,6 +6,8 @@ import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class InternshipController {
@@ -17,6 +19,14 @@ public class InternshipController {
             throw new InternshipValidationException("Validation parameters did not passed!");
         }
         return internshipService.internshipCreation(internshipDto);
+    }
+
+    public List<InternshipDto> gettingAllInternships() {
+        return internshipService.gettingAllInternships();
+    }
+
+    public InternshipDto getInternshipById(Long id) {
+        return internshipService.getInternshipById(id);
     }
 
 //    public InternshipDto internshipUpdate(Long id, InternshipDto internshipDto) {
@@ -33,6 +43,7 @@ public class InternshipController {
             throw new InternshipValidationException("Invalid id");
         }
     }
+
 
     private boolean internshipCommonValidation(InternshipDto internshipDto) {
         return internshipDto.getName() == null &&
