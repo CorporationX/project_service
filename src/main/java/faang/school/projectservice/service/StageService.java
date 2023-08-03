@@ -6,8 +6,6 @@ import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
@@ -21,8 +19,10 @@ import java.util.List;
 public class StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
-    private final StageMapper stageMapper;
     private final TaskRepository taskRepository;
+    private final TaskService taskService;
+    private final StageMapper stageMapper;
+
 
     public StageDto createStage(StageDto stageDto) {
         validationStageDto(stageDto);
@@ -31,11 +31,22 @@ public class StageService {
     }
 
     public void deleteStage(Long stageId) {
+        Stage stage = stageRepository.getById(stageId);
+        taskService.cancelTasksOfStage(stageId);
+        stageRepository.delete(stage);
+    }
+
+    public StageDto getStageById(Long stageId) {
         Stage stageById = stageRepository.getById(stageId);
-        List<Task> tasks = stageById.getTasks();
-        tasks.forEach(task -> task.setStatus(TaskStatus.CANCELLED));
-        taskRepository.saveAll(tasks);
-        stageRepository.delete(stageById);
+        return stageMapper.toDto(stageById);
+    }
+
+    public List<StageDto> findAllStagesOfProject(Long projectId) {
+        return projectRepository.getProjectById(projectId)
+                .getStages()
+                .stream()
+                .map(stageMapper::toDto)
+                .toList();
     }
 
     private void validationStageDto(StageDto stageDto) {

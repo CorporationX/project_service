@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -33,19 +33,22 @@ public class StageServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private StageRepository stageRepository;
-    @Mock
-    private TaskRepository taskRepository;
     @InjectMocks
     private StageService stageService;
     @Spy
     private StageMapperImpl stageMapper;
 
+    private Project project;
     private Stage stage;
     private Stage stage1;
+    private StageDto stageDto;
     private List<Task> tasks;
+    private List<Task> unexpected;
 
     @BeforeEach
     void init() {
+       project = Project.builder().build();
+
         stage = Stage.builder()
                 .stageId(1L)
                 .stageName("stage")
@@ -69,6 +72,13 @@ public class StageServiceTest {
                         .status(ProjectStatus.IN_PROGRESS)
                         .build())
                 .build();
+
+        List<Stage> stages = new ArrayList<>();
+        stages.add(stage);
+        stages.add(stage1);
+        project.setStages(stages);
+
+        stageDto = stageMapper.toDto(stage1);
     }
 
     @Test
@@ -99,10 +109,25 @@ public class StageServiceTest {
     }
 
     @Test
-    void testDeleteStage_ChangeStatus() {
-        Mockito.when(stageRepository.getById(anyLong())).thenReturn(stage1);
-        stageService.deleteStage(anyLong());
-        Mockito.verify(taskRepository).saveAll(tasks);
+    void testDeleteStage_CancelTasks() {
+        Mockito.when(stageRepository.getById(stage1.getStageId() )).thenReturn(stage1);
+        stageService.deleteStage(stage1.getStageId());
         Mockito.verify(stageRepository).delete(stage1);
+    }
+
+    @Test
+    void testFindById() {
+        Mockito.when(stageRepository.getById(anyLong())).thenReturn(stage1);
+        stageService.getStageById(anyLong());
+        Mockito.verify(stageMapper).toDto(stage1);
+    }
+
+    @Test
+    void testFindAllStagesOfProject() {
+        Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+        stageService.findAllStagesOfProject(anyLong());
+        Mockito.verify(projectRepository).getProjectById(anyLong());
+        Mockito.verify(stageMapper).toDto(stage);
+        Mockito.verify(stageMapper).toDto(stage1);
     }
 }
