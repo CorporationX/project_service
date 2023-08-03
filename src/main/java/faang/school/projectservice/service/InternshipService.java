@@ -52,50 +52,61 @@ public class InternshipService {
         internshipBusinessValidation(internshipDto);
         return internshipMapper.toInternshipDto(internshipRepository.save(internshipMapper.toInternship(internshipDto)));
     }
-
-    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
-        Internship internship = internshipRepository.findById(internshipDto.getId())
-                .orElseThrow(() -> new InternshipValidationException("Invalid internship Id"));
-        Project project = internship.getProject();
-        internshipBusinessValidation(internshipDto);
-        if (internship.getStatus().equals(COMPLETED)) {
-            for(TeamMember teamMember : internship.getInterns()) {
-                for(Stage stage : teamMember.getStages()){
-                    for(Task task : stage.getTasks()) {
-                        if(task.getStatus().equals(TaskStatus.DONE)) {
-                            //team member обладает списком ролей , по логике значит
-                            //у него мб несколько ролей, значит у него ужес разу все роли
-                            //как жить ?
-                        }
-                    }
-                } 143118028230
-            }
-
-        })
-        if (internship.getStatus().equals(IN_PROGRESS)) {
-            List<TeamMember> interns = internship.getInterns();
-            interns.forEach(intern -> {
-                List<TaskStatus> tasksOfIntern = taskRepository.findAllByProjectIdAndPerformerId(internship.getProject().getId(), intern.getId())
-                        .stream()
-                        .map(task -> task.getStatus())
-                        .toList();
-                if (tasksOfIntern.stream().allMatch(task -> task.equals(TaskStatus.DONE))) {
-                    //переписать будто стажер получает статус как у ментора
-                    intern.addRole(TeamRole.JUNIOR);
-                    intern.addRole(TeamRole.INTERN);
-
-                } else {
-                    project.getTeam().getTeamMembers().remove(intern);
-                }
-            });
-        }
-        return internshipDto;
-    }
-
-    public List<InternshipDto> filterByInternshipStatusAndRole(InternshipDto internshipDto) {
-
-    }
 }
+
+
+//    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
+//        Internship internship = internshipRepository.findById(internshipDto.getId())
+//                .orElseThrow(() -> new InternshipValidationException("Invalid internship Id"));
+//        Project project = internship.getProject();
+//        internshipBusinessValidation(internshipDto);
+//        if (internship.getStatus().equals(COMPLETED)) {
+//            for(TeamMember teamMember : internship.getInterns()) {
+//                for(Stage stage : teamMember.getStages()){
+//                    for(Task task : stage.getTasks()) {
+//                        if(task.getStatus().equals(TaskStatus.DONE)) {
+//                            //team member обладает списком ролей , по логике значит
+//                            //у него мб несколько ролей, значит у него ужес разу все роли
+//                            //как жить ?
+//                        }
+//                    }
+//                }
+//            }
+//
+//        })
+//        if (internship.getStatus().equals(IN_PROGRESS)) {
+//            List<TeamMember> interns = internship.getInterns();
+//            interns.forEach(intern -> {
+//                List<TaskStatus> tasksOfIntern = taskRepository.findAllByProjectIdAndPerformerId(internship.getProject().getId(), intern.getId())
+//                        .stream()
+//                        .map(task -> task.getStatus())
+//                        .toList();
+//                if (tasksOfIntern.stream().allMatch(task -> task.equals(TaskStatus.DONE))) {
+//                    //переписать будто стажер получает статус как у ментора
+//                    intern.addRole(TeamRole.JUNIOR);
+//                    intern.addRole(TeamRole.INTERN);
+//
+//                } else {
+//                    project.getTeam().getTeamMembers().remove(intern);
+//                }
+//            });
+//        }
+//        return internshipDto;
+//    }
+//
+//    public List<InternshipDto> filterByInternshipStatusAndRole(InternshipDto internshipDto) {
+//
+//    }
+//}
+
+
+
+
+
+
+
+
+
 
 //    Internship internship = internshipRepository.findById(internshipDto.getId())
 //            .orElseThrow(() -> new IllegalArgumentException("Invalid internship"));
