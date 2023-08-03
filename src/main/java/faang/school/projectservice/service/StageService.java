@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.TaskRepository;
+import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -19,9 +19,9 @@ import java.util.List;
 public class StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
-    private final TaskRepository taskRepository;
     private final TaskService taskService;
     private final StageMapper stageMapper;
+    private final StageRolesRepository stageRolesRepository;
 
 
     public StageDto createStage(StageDto stageDto) {
@@ -47,6 +47,10 @@ public class StageService {
                 .stream()
                 .map(stageMapper::toDto)
                 .toList();
+    }
+
+    public void updateStage(){
+
     }
 
     private void validationStageDto(StageDto stageDto) {

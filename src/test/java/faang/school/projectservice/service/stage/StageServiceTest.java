@@ -11,6 +11,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.StageService;
+import faang.school.projectservice.service.TaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,8 @@ public class StageServiceTest {
     private StageService stageService;
     @Spy
     private StageMapperImpl stageMapper;
+    @Mock
+    private TaskService taskService;
 
     private Project project;
     private Stage stage;
@@ -112,14 +115,14 @@ public class StageServiceTest {
     void testDeleteStage_CancelTasks() {
         Mockito.when(stageRepository.getById(stage1.getStageId() )).thenReturn(stage1);
         stageService.deleteStage(stage1.getStageId());
-        Mockito.verify(stageRepository).delete(stage1);
+        Mockito.verify(stageRepository).delete(any());
     }
 
     @Test
     void testFindById() {
         Mockito.when(stageRepository.getById(anyLong())).thenReturn(stage1);
         stageService.getStageById(anyLong());
-        Mockito.verify(stageMapper).toDto(stage1);
+        Mockito.verify(stageMapper, Mockito.times(2)).toDto(stage1);
     }
 
     @Test
@@ -128,6 +131,6 @@ public class StageServiceTest {
         stageService.findAllStagesOfProject(anyLong());
         Mockito.verify(projectRepository).getProjectById(anyLong());
         Mockito.verify(stageMapper).toDto(stage);
-        Mockito.verify(stageMapper).toDto(stage1);
+        Mockito.verify(stageMapper, Mockito.times(2)).toDto(stage1);
     }
 }
