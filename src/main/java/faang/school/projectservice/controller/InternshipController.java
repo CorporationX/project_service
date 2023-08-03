@@ -19,13 +19,13 @@ public class InternshipController {
         return internshipService.internshipCreation(internshipDto);
     }
 
-    public InternshipDto internshipUpdate(Long id, InternshipDto internshipDto) {
-        if (internshipCommonValidation(internshipDto)) {
-            throw new InternshipValidationException("Validation parameters did not passed!");
-        }
-        internshipValidationId(id);
-        return internshipService.internshipUpdate(internshipDto);
-    }
+//    public InternshipDto internshipUpdate(Long id, InternshipDto internshipDto) {
+//        if (internshipCommonValidation(internshipDto)) {
+//            throw new InternshipValidationException("Validation parameters did not passed!");
+//        }
+//        internshipValidationId(id);
+//        return internshipService.internshipUpdate(internshipDto);
+//    }
 
     //ID проверяем отдельно, тк он приходит позже
     private void internshipValidationId(Long id) {
