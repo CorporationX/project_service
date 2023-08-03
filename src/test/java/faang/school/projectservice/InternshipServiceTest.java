@@ -3,7 +3,12 @@ package faang.school.projectservice;
 import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
+import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.InternshipService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +24,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipServiceTest {
@@ -28,6 +32,12 @@ public class InternshipServiceTest {
 
     @Mock
     private InternshipMapper internshipMapper;
+
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
+
+    @Mock
+    private ProjectRepository projectRepository;
 
     @InjectMocks
     private InternshipService internshipService;
@@ -90,11 +100,14 @@ public class InternshipServiceTest {
     public void saveInternshipMapperTest() {
         InternshipDto internshipDto = InternshipDto.builder()
                 .projectId(1L)
-                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                .mentorId(anyLong())
+                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
+                .mentorId(1L)
                 .internsId(List.of(1L))
                 .name("best")
                 .build();
+        Mockito.when(teamMemberRepository.findById(Mockito.anyLong())).thenReturn(new TeamMember());
+        Mockito.when(internshipMapper.toEntity(internshipDto)).thenReturn(new Internship());
+        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(new Project());
         internshipService.saveNewInternship(internshipDto);
         Mockito.verify(internshipRepository).save(internshipMapper.toEntity(internshipDto));
     }
