@@ -310,6 +310,7 @@ class ProjectServiceTest {
 
     @Test
     void updateSubProjectInvokesGetProjectByIdAndFindAllByIds() {
+        updatedProjectDto.setOwnerId(2L);
         updatedProjectDto.setParentProjectId(3L);
         Mockito.when(projectRepository.getProjectById(updatedProjectDto.getId()))
                 .thenReturn(Project.builder()
@@ -333,12 +334,14 @@ class ProjectServiceTest {
 
     @Test
     void updateSubProjectInvokesSaveMethods() {
+        updatedProjectDto.setOwnerId(2L);
         Project test = Project.builder()
                 .parentProject(Project.builder().id(2L).build())
                 .updatedAt(LocalDateTime.now())
                 .children(List.of(onlyWithIdProject))
                 .build();
         Project projectToSave = Project.builder()
+                .ownerId(2L)
                 .status(ProjectStatus.COMPLETED)
                 .children(List.of(Project.builder()
                         .id(5L)
@@ -354,6 +357,7 @@ class ProjectServiceTest {
                                 status(ProjectStatus.COMPLETED)
                                 .build(),
                         Project.builder()
+                                .ownerId(2L)
                                 .children(List.of(Project.builder().
                                         id(5L).
                                         status(ProjectStatus.COMPLETED)
@@ -361,9 +365,10 @@ class ProjectServiceTest {
                                 .updatedAt(test.getUpdatedAt())
                                 .status(ProjectStatus.COMPLETED)
                                 .build()))
+                .createdBy(2L)
+                .updatedBy(2L)
                 .build();
         moment.setUserIds(List.of(1L));
-        moment.setCreatedBy(0L);
         onlyWithIdProject.setStatus(ProjectStatus.COMPLETED);
 
         Mockito.when(projectRepository.getProjectById(updatedProjectDto.getId()))

@@ -107,7 +107,7 @@ public class ProjectService {
 
     public Moment createMoment(ProjectDto projectDto, Project project) {
         Moment moment = Moment.builder()
-                .name(project.getName() + " project tasks")
+                .name(projectDto.getName() + " project tasks")
                 .description(String.format("All tasks are completed in %s project", projectDto.getName()))
                 .resource(project.getResources())
                 .projects(new ArrayList<>(project.getChildren()))
