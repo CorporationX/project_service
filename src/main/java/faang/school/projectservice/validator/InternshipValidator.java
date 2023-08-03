@@ -27,7 +27,7 @@ public class InternshipValidator {
         if (internshipDto.getMentorId() == null) {
             throw new DataValidationException("There is not mentor for internship!");
         }
-        if (internshipDto.getInternsId() == null) {
+        if (internshipDto.getInternsId() == null || internshipDto.getInternsId().isEmpty()) {
             throw new DataValidationException("There is not interns for internship!");
         }
         if (internshipDto.getName() == null || internshipDto.getName().isBlank()) {

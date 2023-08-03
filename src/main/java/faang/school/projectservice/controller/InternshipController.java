@@ -27,7 +27,7 @@ public class InternshipController {
     }
 
     @GetMapping("/findInternshipsWithFilter")
-    public List<InternshipDto> findInternshipsWithFilter(long projectId,@RequestBody InternshipFilterDto filterDto) {
+    public List<InternshipDto> findInternshipsWithFilter(long projectId, @RequestBody InternshipFilterDto filterDto) {
         return internshipService.findInternshipsByStatusWithFilter(projectId, filterDto);
     }
 
