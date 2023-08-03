@@ -19,7 +19,7 @@ public class InternshipDto {
     private Long mentorId;
     private Long projectId;
     private List<Long> internsId;
-    private InternshipStatus internshipStatus = InternshipStatus.IN_PROGRESS;
+    private InternshipStatus internshipStatus;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 }
