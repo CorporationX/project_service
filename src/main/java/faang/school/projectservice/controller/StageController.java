@@ -4,6 +4,8 @@ import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +21,11 @@ public class StageController {
     public StageDto createStage(@RequestBody StageDto stageDto) {
         validateStage(stageDto);
         return stageService.createStage(stageDto);
+    }
+
+    @DeleteMapping("/{stageId}")
+    public void deleteStage(@PathVariable long stageId){
+        stageService.deleteStage(stageId);
     }
 
     private void validateStage(StageDto stageDto) {
