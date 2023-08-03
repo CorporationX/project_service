@@ -39,7 +39,7 @@ public class SubProjectController {
     }
 
     @PostMapping("project/{projectId}/children")
-    public List<ProjectDto> getProjectChildrenWithFilter(@RequestBody ProjectFilterDto filterDto,@PathVariable long projectId) {
+    public List<ProjectDto> getProjectChildrenWithFilter(@RequestBody ProjectFilterDto filterDto, @PathVariable long projectId) {
         return projectService.getProjectChildrenWithFilter(filterDto, projectId);
     }
 

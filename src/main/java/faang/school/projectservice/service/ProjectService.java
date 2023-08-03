@@ -81,14 +81,12 @@ public class ProjectService {
         List<Project> subProjects = projectRepository.findAllByIds(projectDto.getChildrenIds());
 
         if (projectDto.getVisibility() != null && projectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
-            subProjects.stream()
-                    .peek(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE))
-                    .forEach(projectRepository::save);
-            projectToUpdate.setChildren(subProjects);
-        } else {
-            projectToUpdate.setChildren(subProjects);
+            subProjects.forEach(subProject -> {
+                subProject.setVisibility(ProjectVisibility.PRIVATE);
+                projectRepository.save(subProject);
+            });
         }
-
+        projectToUpdate.setChildren(subProjects);
         updateAllNeededFields(projectDto, projectToUpdate);
         projectRepository.save(projectToUpdate);
         return Timestamp.valueOf(projectToUpdate.getUpdatedAt());
@@ -108,9 +106,8 @@ public class ProjectService {
     }
 
     public Moment createMoment(ProjectDto projectDto, Project project) {
-//        Project project = projectRepository.getProjectById(projectDto.getId());
         Moment moment = Moment.builder()
-                .name(String.format("%s project tasks", projectDto.getName()))
+                .name(project.getName() + " project tasks")
                 .description(String.format("All tasks are completed in %s project", projectDto.getName()))
                 .resource(project.getResources())
                 .projects(new ArrayList<>(project.getChildren()))
@@ -148,18 +145,21 @@ public class ProjectService {
 
     private void updateAllNeededFields(ProjectDto projectDto, Project projectToUpdate) {
         changeParentProject(projectDto, projectToUpdate);
-        setThreeField(projectDto, projectToUpdate);
+        setAllNeededFields(projectDto, projectToUpdate);
     }
 
-    private void setThreeField(ProjectDto projectDto, Project projectToUpdate) {
+    private void setAllNeededFields(ProjectDto projectDto, Project projectToUpdate) {
         projectToUpdate.setName(projectToUpdate.getName());
 
         if (projectDto.getDescription() != null) {
             projectToUpdate.setDescription(projectDto.getDescription());
         }
-        if (projectDto.getOwnerId() > 0) {
-            projectToUpdate.setOwnerId(projectDto.getOwnerId());
+        if (projectDto.getOwnerId() <= 0) {
+            throw new DataValidationException("Owner id cant be less then 1");
         }
+
+        projectToUpdate.setOwnerId(projectDto.getOwnerId());
+
         if (projectDto.getStatus() != null) {
             projectToUpdate.setStatus(projectDto.getStatus());
         }
