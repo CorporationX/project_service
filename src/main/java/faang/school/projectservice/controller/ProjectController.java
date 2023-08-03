@@ -19,12 +19,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/project")
-@Validated
 public class ProjectController {
 
     private final ProjectService projectService;
 
     @PostMapping
+    @Validated
     public ProjectDto create(@RequestBody ProjectDto projectDto) {
         return projectService.create(projectDto);
     }
