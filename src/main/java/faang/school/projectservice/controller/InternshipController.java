@@ -25,9 +25,9 @@ public class InternshipController {
         return internshipService.gettingAllInternships();
     }
 
-    public InternshipDto getInternshipById(Long id) {
-        return internshipService.getInternshipById(id);
-    }
+//    public InternshipDto getInternshipById(Long id) {
+//        return internshipService.getInternshipById(id);
+//    }
 
 //    public InternshipDto internshipUpdate(Long id, InternshipDto internshipDto) {
 //        if (internshipCommonValidation(internshipDto)) {
