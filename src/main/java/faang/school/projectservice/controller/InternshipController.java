@@ -6,6 +6,7 @@ import faang.school.projectservice.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -14,7 +15,7 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     @PostMapping("/saveInternship")
-    public InternshipDto saveNewInternship(InternshipDto internshipDto) {
+    public InternshipDto saveNewInternship(@RequestBody InternshipDto internshipDto) {
         InternshipValidator.validateControllerInternship(internshipDto);
         return internshipService.saveNewInternship(internshipDto);
     }
