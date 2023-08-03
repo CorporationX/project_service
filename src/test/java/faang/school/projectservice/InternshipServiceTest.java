@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -76,9 +75,10 @@ public class InternshipServiceTest {
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> internshipService.saveNewInternship(InternshipDto.builder()
                         .projectId(1L)
-                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                        .name("best")
+                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                         .mentorId(1L)
-                        .internsId(Collections.emptyList())
+                        .internsId(null)
                         .build()));
         assertEquals(exception.getMessage(), "There is not interns for internship!");
     }
