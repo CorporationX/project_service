@@ -40,13 +40,6 @@ public class InternshipServiceTest {
     private InternshipService internshipService;
 
     @Test
-    public void saveNewInternshipThrowsExceptionTest() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> internshipService.saveNewInternship(new InternshipDto()));
-        assertEquals(exception.getMessage(), "There is not project for create internship!");
-    }
-
-    @Test
     public void saveNewInternshipWithWrongDateTest() {
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> internshipService.saveNewInternship(InternshipDto.builder()
@@ -65,7 +58,7 @@ public class InternshipServiceTest {
                         .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
                         .mentorId(null)
                         .build()));
-        assertEquals(exception.getMessage(), "There is not mentor for internship!");
+        assertEquals("There is not mentor for internship!", exception.getMessage());
     }
 
     @Test
@@ -74,8 +67,8 @@ public class InternshipServiceTest {
                 () -> internshipService.saveNewInternship(InternshipDto.builder()
                         .projectId(1L)
                         .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                        .mentorId(anyLong())
-                        .internsId(Collections.emptyList())
+                        .mentorId(1L)
+                        .internsId(null)
                         .build()));
         assertEquals(exception.getMessage(), "There is not interns for internship!");
     }

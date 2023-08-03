@@ -7,6 +7,7 @@ import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +22,20 @@ public class InternshipService {
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
     private final TeamMemberRepository teamMemberRepository;
+    private final ProjectRepository projectRepository;
     private final List<InternshipFilter> filterList;
 
     public InternshipDto saveNewInternship(InternshipDto internshipDto) { //1 создать стажировку
         InternshipValidator.validateServiceSaveInternship(internshipDto);
-        Internship internship = internshipRepository.save(internshipMapper.toEntity(internshipDto));
+        Internship internship = internshipMapper.toEntity(internshipDto);
+        List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
+                .map(teamMemberRepository::findById).toList();
+        internship.setInterns(teamMembers); // set интерны
+        TeamMember teamMember = teamMemberRepository.findById(internshipDto.getMentorId());
+        internship.setMentor(teamMember); // set ментор
+        Project project = projectRepository.getProjectById(internshipDto.getProjectId());
+        internship.setProject(project); // set проект
+        internshipRepository.save(internship);
         return internshipMapper.toDto(internship);
     }
 

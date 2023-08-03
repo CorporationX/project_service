@@ -12,8 +12,8 @@ public class InternshipValidator {
         if (internshipDto == null) {
             throw new DataValidationException("There is not internship!");
         }
-        if (internshipDto.getId() == null) {
-            throw new DataValidationException("There is not internship with this ID!");
+        if (internshipDto.getProjectId() == null || internshipDto.getProjectId() < 1) {
+            throw new DataValidationException("There is not project for create internship!");
         }
         if (internshipDto.getName() == null || internshipDto.getName().isBlank()) {
             throw new DataValidationException("Incorrect name of internship!");
@@ -21,9 +21,6 @@ public class InternshipValidator {
     }
     public static void validateServiceSaveInternship(InternshipDto internshipDto) {
 
-        if (internshipDto.getProjectId() == null) {
-            throw new DataValidationException("There is not project for create internship!");
-        }
         if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate().plus(3, ChronoUnit.MONTHS))) {
             throw new DataValidationException("Internship cannot last more than 3 months!");
         }
