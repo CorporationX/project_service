@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.subproject.UpdateStatusSubprojectDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -16,7 +16,7 @@ import java.util.List;
 public class SubProjectService {
     private final ProjectRepository projectRepository;
 
-    public void updateStatusSubProject(UpdateStatusSubprojectDto updateStatusSubprojectDto) {
+    public void updateStatusSubProject(StatusSubprojectUpdateDto updateStatusSubprojectDto) {
         Project project = getProjectById(updateStatusSubprojectDto.getId());
         ProjectStatus status = updateStatusSubprojectDto.getStatus();
 

@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.subproject.UpdateStatusSubprojectDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -22,8 +22,8 @@ class SubProjectServiceTest {
     private SubProjectService subProjectService;
     @Mock
     private ProjectRepository projectRepository;
-    private UpdateStatusSubprojectDto updateStatusSubprojectDtoCOMPLETED;
-    private UpdateStatusSubprojectDto updateStatusSubprojectDto;
+    private StatusSubprojectUpdateDto updateStatusSubprojectDtoCOMPLETED;
+    private StatusSubprojectUpdateDto updateStatusSubprojectDto;
     private Project project = new Project();
     private Project projectCompleted = new Project();
 
@@ -37,12 +37,12 @@ class SubProjectServiceTest {
         rightId = 1L;
         idCompleted = 2L;
 
-        updateStatusSubprojectDto = UpdateStatusSubprojectDto.builder()
+        updateStatusSubprojectDto = StatusSubprojectUpdateDto.builder()
                 .id(rightId)
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
 
-        updateStatusSubprojectDtoCOMPLETED = UpdateStatusSubprojectDto.builder()
+        updateStatusSubprojectDtoCOMPLETED = StatusSubprojectUpdateDto.builder()
                 .id(idCompleted)
                 .status(ProjectStatus.COMPLETED)
                 .build();

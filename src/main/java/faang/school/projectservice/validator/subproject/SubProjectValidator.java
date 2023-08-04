@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.subproject;
 
-import faang.school.projectservice.dto.subproject.UpdateStatusSubprojectDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.subproject.SubProjectService;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 public class SubProjectValidator {
     private final SubProjectService subProjectService;
 
-    public void validateUpdateStatusSubprojectDto(UpdateStatusSubprojectDto updateStatusSubprojectDto) {
-        validateProjectId(updateStatusSubprojectDto.getId());
-        validateStatus(updateStatusSubprojectDto.getStatus());
+    public void validateUpdateStatusSubprojectDto(StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
+        validateProjectId(statusSubprojectUpdateDto.getId());
+        validateStatus(statusSubprojectUpdateDto.getStatus());
     }
 
     private void validateProjectId(Long id) {

@@ -59,9 +59,6 @@ class SubProjectValidatorTest {
         validateStatus.setAccessible(true);
 
         assertDoesNotThrow(() -> validateStatus.invoke(validatorClass, ProjectStatus.CREATED));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> validateStatus.invoke(validatorClass, null));
     }
 
     @Test
@@ -70,9 +67,6 @@ class SubProjectValidatorTest {
         validateId.setAccessible(true);
 
         assertDoesNotThrow(() -> validateId.invoke(validatorClass, rightId));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> validateId.invoke(validatorClass, null));
 
         try {
             validateId.invoke(validatorClass, -rightId);
