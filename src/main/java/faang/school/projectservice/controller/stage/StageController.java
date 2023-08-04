@@ -14,7 +14,7 @@ public class StageController {
 
     private final StageService stageService;
 
-    @PostMapping("/project")//поменяю эндпоинты после утверждения их формата
+    @PostMapping("/stage")//поменяю в будущем когда договоримся об общем виде
     public StageDto createProjectStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.create(stageDto);
     }
@@ -34,7 +34,7 @@ public class StageController {
         stageService.deleteStageTransferTasks(stageId, stageToUpdateId);
     }
 
-    @GetMapping("/project/{projectId}")
+    @GetMapping("/{projectId}/stage")
     public List<StageDto> getAllProjectStages(@PathVariable long projectId) {
         return stageService.getAllProjectStages(projectId);
     }
