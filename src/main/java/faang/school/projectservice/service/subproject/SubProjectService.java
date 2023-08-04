@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.subproject.UpdateVisibilitySubprojectDto;
+import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -16,7 +16,7 @@ import java.util.Deque;
 public class SubProjectService {
     private final ProjectRepository projectRepository;
 
-    public void updateVisibilitySubProject(UpdateVisibilitySubprojectDto updateStatusSubprojectDto) {
+    public void updateVisibilitySubProject(VisibilitySubprojectUpdateDto updateStatusSubprojectDto) {
         Project project = getProjectById(updateStatusSubprojectDto.getId());
         Project parentProject = project.getParentProject();
         ProjectVisibility visibility = updateStatusSubprojectDto.getVisibility();
@@ -48,8 +48,12 @@ public class SubProjectService {
             Project currentProject = stack.pop();
             currentProject.setVisibility(ProjectVisibility.PRIVATE);
 
-            for (Project child : currentProject.getChildren()) {
-                stack.push(child);
+            if (currentProject.getChildren() == null) {
+                continue;
+            }
+
+            for (Project subproject : currentProject.getChildren()) {
+                stack.push(subproject);
             }
         }
     }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.subproject;
 
-import faang.school.projectservice.dto.subproject.UpdateVisibilitySubprojectDto;
+import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class SubProjectController {
     private final SubProjectValidator subProjectValidator;
 
     @PutMapping("/update_visibility")
-    public void updateStatusSubProject(@RequestBody UpdateVisibilitySubprojectDto updateStatusSubprojectDto) {
+    public void updateVisibilitySubProject(@RequestBody VisibilitySubprojectUpdateDto updateStatusSubprojectDto) {
         subProjectValidator.validateUpdateVisibilitySubprojectDto(updateStatusSubprojectDto);
         subProjectService.updateVisibilitySubProject(updateStatusSubprojectDto);
     }

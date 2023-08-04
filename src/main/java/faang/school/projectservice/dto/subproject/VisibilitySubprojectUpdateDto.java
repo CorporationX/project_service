@@ -1,12 +1,16 @@
 package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.model.ProjectVisibility;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-public class UpdateVisibilitySubprojectDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class VisibilitySubprojectUpdateDto {
     private Long id;
     private ProjectVisibility visibility;
 }

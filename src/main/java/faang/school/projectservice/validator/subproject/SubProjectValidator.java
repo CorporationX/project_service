@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.subproject;
 
-import faang.school.projectservice.dto.subproject.UpdateVisibilitySubprojectDto;
+import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.subproject.SubProjectService;
@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SubProjectValidator {
     private final SubProjectService subProjectService;
-    public void validateUpdateVisibilitySubprojectDto(UpdateVisibilitySubprojectDto updateVisibilitySubprojectDto){
-        validateProjectId(updateVisibilitySubprojectDto.getId());
-        validateVisibility(updateVisibilitySubprojectDto.getVisibility());
+    public void validateUpdateVisibilitySubprojectDto(VisibilitySubprojectUpdateDto visibilitySubprojectUpdateDto){
+        validateProjectId(visibilitySubprojectUpdateDto.getId());
+        validateVisibility(visibilitySubprojectUpdateDto.getVisibility());
     }
 
     private void validateProjectId(Long id) {
