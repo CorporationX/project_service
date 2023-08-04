@@ -29,14 +29,11 @@ class StageControllerTest {
     private StageService stageService;
     @InjectMocks
     private StageController stageController;
-
-    private MockMvc mockMvc;
     @Spy
     private ObjectMapper objectMapper;
-
+    private MockMvc mockMvc;
     private StageDto stageDto;
     private StageRolesDto stageRolesDto;
-
 
     @BeforeEach
     public void setUp() {
@@ -73,24 +70,4 @@ class StageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(stageDto1)));
     }
-
-//    @Deprecated
-//    @Test
-//    public void testCreateProjectStage_IfStageNameIsNull_ShouldThrowException() {
-//        StageDto stageDto = new StageDto();
-//        stageDto.setStageName(null);
-//        String errorMessage = "Stage name can't be blank or null";
-//
-//        assertThrows(DataValidationException.class, () -> stageController.createProjectStage(stageDto), errorMessage);
-//    }
-//
-//    @Deprecated
-//    @Test
-//    public void testCreateProjectStage_IfStageNameIsBlank_ShouldThrowException() {
-//        StageDto stageDto = new StageDto();
-//        stageDto.setStageName(" ");
-//        String errorMessage = "Stage name can't be blank or null";
-//
-//        assertThrows(DataValidationException.class, () -> stageController.createProjectStage(stageDto), errorMessage);
-//    }
 }

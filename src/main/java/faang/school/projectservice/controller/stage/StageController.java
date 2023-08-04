@@ -2,9 +2,10 @@ package faang.school.projectservice.controller.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.service.stage.StageService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
