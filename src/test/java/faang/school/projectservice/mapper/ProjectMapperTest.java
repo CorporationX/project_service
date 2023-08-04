@@ -1,9 +1,8 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.TeamMember;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,12 +10,12 @@ import org.junit.jupiter.api.Test;
 class ProjectMapperTest {
 
     ProjectMapper projectMapper = new ProjectMapperImpl();
-    ProjectDto projectDto;
+    ProjectCreateDto projectCreateDto;
     Project project;
 
     @BeforeEach
     void setUp() {
-        projectDto = ProjectDto.builder()
+        projectCreateDto = faang.school.projectservice.dto.project.ProjectCreateDto.builder()
                 .name("Project")
                 .description("new Project")
                 .ownerId(1L)
@@ -32,11 +31,11 @@ class ProjectMapperTest {
 
     @Test
     void testMapperToDto() {
-        Assertions.assertEquals(projectDto, projectMapper.toDto(project));
+        Assertions.assertEquals(projectCreateDto, projectMapper.toDto(project));
     }
 
     @Test
     void testMapperToModel() {
-        Assertions.assertEquals(project, projectMapper.toModel(projectDto));
+        Assertions.assertEquals(project, projectMapper.toModel(projectCreateDto));
     }
 }

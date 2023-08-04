@@ -1,10 +1,11 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,33 +20,32 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/project")
-@Validated
 public class ProjectController {
 
     private final ProjectService projectService;
 
     @PostMapping
-    public ProjectDto create(@RequestBody ProjectDto projectDto) {
-        return projectService.create(projectDto);
+    public ProjectCreateDto create(@Valid @RequestBody ProjectCreateDto projectCreateDto) {
+        return projectService.create(projectCreateDto);
     }
 
     @PutMapping("/update")
-    public ProjectDto update(@RequestBody ProjectDto projectDto) {
-        return projectService.update(projectDto);
+    public ProjectCreateDto update(@Valid @RequestBody ProjectUpdateDto projectCreateDto) {
+        return projectService.update(projectCreateDto);
     }
 
     @PostMapping("/{userId}")
-    public List<ProjectDto> getProjectWithFilters(@RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
+    public List<ProjectCreateDto> getProjectWithFilters(@Valid @RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
         return projectService.getProjectsWithFilter(projectFilterDto, userId);
     }
 
     @GetMapping("/project/{userId}")
-    public List<ProjectDto> getAllProjects(@PathVariable long userId) {
+    public List<ProjectCreateDto> getAllProjects(@PathVariable long userId) {
         return projectService.getAllProjects(userId);
     }
 
     @GetMapping("/project")
-    public ProjectDto getProjectById(@RequestParam("projectId") long projectId, @RequestParam("userId") long userId) {
+    public ProjectCreateDto getProjectById(@RequestParam("projectId") long projectId, @RequestParam("userId") long userId) {
         return projectService.getProjectById(projectId, userId);
     }
 }

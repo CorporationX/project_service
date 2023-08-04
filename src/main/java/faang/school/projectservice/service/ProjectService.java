@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectCreateDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataNotFoundException;
@@ -27,48 +28,48 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final List<ProjectFilter> filters;
 
-    public ProjectDto create(ProjectDto projectDto) {
-        projectDto.setName(processTitle(projectDto.getName()));
-        long ownerId = projectDto.getOwnerId();
-        String projectName = projectDto.getName();
+    public ProjectCreateDto create(ProjectCreateDto projectCreateDto) {
+        projectCreateDto.setName(processTitle(projectCreateDto.getName()));
+        long ownerId = projectCreateDto.getOwnerId();
+        String projectName = projectCreateDto.getName();
 
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)) {
             throw new DataAlreadyExistingException(String
                     .format("User with id: %d already exist project %s", ownerId, projectName));
         }
 
-        Project project = projectMapper.toModel(projectDto);
+        Project project = projectMapper.toModel(projectCreateDto);
         LocalDateTime now = LocalDateTime.now();
         project.setCreatedAt(now);
         project.setUpdatedAt(now);
         project.setStatus(ProjectStatus.CREATED);
 
-        if (projectDto.getVisibility() == null) {
+        if (projectCreateDto.getVisibility() == null) {
             project.setVisibility(ProjectVisibility.PUBLIC);
         }
         projectRepository.save(project);
         return projectMapper.toDto(project);
     }
 
-    public ProjectDto update(ProjectDto projectDto) {
-        long projectId = projectDto.getId();
+    public ProjectCreateDto update(ProjectUpdateDto projectCreateDto) {
+        long projectId = projectCreateDto.getId();
         if (projectRepository.getProjectById(projectId) == null) {
             throw new DataNotFoundException("This Project doesn't exist");
         }
         Project projectToUpdate = projectRepository.getProjectById(projectId);
-        if (projectDto.getDescription() != null) {
-            projectToUpdate.setDescription(projectDto.getDescription());
+        if (projectCreateDto.getDescription() != null) {
+            projectToUpdate.setDescription(projectCreateDto.getDescription());
             projectToUpdate.setUpdatedAt(LocalDateTime.now());
         }
-        if (projectDto.getStatus() != null) {
-            projectToUpdate.setStatus(projectDto.getStatus());
+        if (projectCreateDto.getStatus() != null) {
+            projectToUpdate.setStatus(projectCreateDto.getStatus());
             projectToUpdate.setUpdatedAt(LocalDateTime.now());
         }
         projectRepository.save(projectToUpdate);
         return projectMapper.toDto(projectToUpdate);
     }
 
-    public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto, long userId) {
+    public List<ProjectCreateDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto, long userId) {
         Stream<Project> projects = getAvailableProjectsForCurrentUser(userId).stream();
 
         List<ProjectFilter> listApplicableFilters = filters.stream()
@@ -80,14 +81,14 @@ public class ProjectService {
         return listResult.stream().map(projectMapper::toDto).toList();
     }
 
-    public List<ProjectDto> getAllProjects(long userId) {
+    public List<ProjectCreateDto> getAllProjects(long userId) {
         return getAvailableProjectsForCurrentUser(userId).stream()
                 .map(projectMapper::toDto)
                 .toList();
     }
 
 
-    public ProjectDto getProjectById(long projectId, long userId) {
+    public ProjectCreateDto getProjectById(long projectId, long userId) {
         Project projectById = projectRepository.getProjectById(projectId);
         boolean isUserInPrivateProjectTeam = projectById.getTeams().stream()
                 .anyMatch(team -> team.getTeamMembers().stream()

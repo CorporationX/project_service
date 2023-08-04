@@ -1,7 +1,8 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.exception.DataNotFoundException;
@@ -44,7 +45,8 @@ class ProjectServiceTest {
     private Team teamWithCurrentUser;
     private Team team;
     private TeamMember teamMember;
-    ProjectDto projectDto;
+    ProjectCreateDto projectCreateDto;
+    ProjectUpdateDto projectUpdateDto;
     Project project;
     Project project1;
     Project project2;
@@ -64,11 +66,17 @@ class ProjectServiceTest {
         teamWithCurrentUser = Team.builder()
                 .teamMembers(List.of(teamMemberCurrentUser))
                 .build();
-        projectDto = ProjectDto.builder()
+        projectCreateDto = faang.school.projectservice.dto.project.ProjectCreateDto.builder()
                 .id(1L)
                 .name("Project")
                 .description("new Project")
                 .ownerId(1L)
+                .build();
+        projectUpdateDto = ProjectUpdateDto.builder()
+                .id(2L)
+                .name("ProjectTwo")
+                .description("new ProjectTwo")
+                .ownerId(2L)
                 .build();
         LocalDateTime now = LocalDateTime.now();
         project = Project.builder()
@@ -119,27 +127,27 @@ class ProjectServiceTest {
 
     @Test
     void testCreateProject() {
-        projectDto.setName("Project^%$^*^^£     C++, Python/C# Мой проект.    ");
+        projectCreateDto.setName("Project^%$^*^^£     C++, Python/C# Мой проект.    ");
         Mockito.when(projectRepository
                 .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
-        Assertions.assertEquals(ProjectStatus.CREATED, projectService.create(projectDto).getStatus());
+        Assertions.assertEquals(ProjectStatus.CREATED, projectService.create(projectCreateDto).getStatus());
         Mockito.verify(projectRepository).save(any());
-        Assertions.assertEquals("project c++, python/c# мой проект.", projectService.create(projectDto).getName());
+        Assertions.assertEquals("project c++, python/c# мой проект.", projectService.create(projectCreateDto).getName());
     }
 
     @Test
     void testSetDefaultVisibilityProject() {
         Mockito.when(projectRepository
                 .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
-        Assertions.assertEquals(ProjectVisibility.PUBLIC, projectService.create(projectDto).getVisibility());
+        Assertions.assertEquals(ProjectVisibility.PUBLIC, projectService.create(projectCreateDto).getVisibility());
     }
 
     @Test
     void testSetPrivateVisibilityProject() {
-        projectDto.setVisibility(ProjectVisibility.PRIVATE);
+        projectCreateDto.setVisibility(ProjectVisibility.PRIVATE);
         Mockito.when(projectRepository
                 .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
-        Assertions.assertEquals(ProjectVisibility.PRIVATE, projectService.create(projectDto).getVisibility());
+        Assertions.assertEquals(ProjectVisibility.PRIVATE, projectService.create(projectCreateDto).getVisibility());
     }
 
     @Test
@@ -147,51 +155,51 @@ class ProjectServiceTest {
         Mockito.when(projectRepository
                 .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(true);
         DataAlreadyExistingException dataAlreadyExistingException = Assertions
-                .assertThrows(DataAlreadyExistingException.class, () -> projectService.create(projectDto));
+                .assertThrows(DataAlreadyExistingException.class, () -> projectService.create(projectCreateDto));
         Assertions.assertEquals(String.format("User with id: %d already exist project %s",
-                projectDto.getOwnerId(), projectDto.getName()), dataAlreadyExistingException.getMessage());
+                projectCreateDto.getOwnerId(), projectCreateDto.getName()), dataAlreadyExistingException.getMessage());
     }
 
     @Test
     void testUpdateStatus() {
-        long projectId = projectDto.getId();
-        projectDto.setStatus(ProjectStatus.IN_PROGRESS);
+        long projectId = projectUpdateDto.getId();
+        projectUpdateDto.setStatus(ProjectStatus.IN_PROGRESS);
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
-        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectDto).getStatus());
+        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectUpdateDto).getStatus());
         Mockito.verify(projectRepository).save(any());
-        Assertions.assertEquals(project.getDescription(), projectService.update(projectDto).getDescription());
+        Assertions.assertEquals(project.getDescription(), projectService.update(projectUpdateDto).getDescription());
     }
 
     @Test
     void testUpdateThrowsDataNotExistingException() {
-        long projectId = projectDto.getId();
+        long projectId = projectUpdateDto.getId();
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(null);
-        Assertions.assertThrows(DataNotFoundException.class, () -> projectService.update(projectDto));
+        Assertions.assertThrows(DataNotFoundException.class, () -> projectService.update(projectUpdateDto));
     }
 
     @Test
     void testUpdateDescription() {
-        long projectId = projectDto.getId();
-        projectDto.setDescription("New Description");
+        long projectId = projectUpdateDto.getId();
+        projectUpdateDto.setDescription("New Description");
 
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
-        Assertions.assertEquals("New Description", projectService.update(projectDto).getDescription());
+        Assertions.assertEquals("New Description", projectService.update(projectUpdateDto).getDescription());
         Mockito.verify(projectRepository).save(any());
-        Assertions.assertEquals(project.getStatus(), projectService.update(projectDto).getStatus());
+        Assertions.assertEquals(project.getStatus(), projectService.update(projectUpdateDto).getStatus());
     }
 
     @Test
     void testUpdateStatusAndDescription() {
-        long projectId = projectDto.getId();
-        projectDto.setStatus(ProjectStatus.IN_PROGRESS);
-        projectDto.setDescription("New Description");
+        long projectId = projectUpdateDto.getId();
+        projectUpdateDto.setStatus(ProjectStatus.IN_PROGRESS);
+        projectUpdateDto.setDescription("New Description");
 
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
-        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectDto).getStatus());
+        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectUpdateDto).getStatus());
 
         Mockito.verify(projectRepository).save(any());
-        String descriptionResult = projectService.update(projectDto).getDescription();
+        String descriptionResult = projectService.update(projectUpdateDto).getDescription();
         Assertions.assertEquals("New Description", descriptionResult);
     }
 
@@ -206,10 +214,10 @@ class ProjectServiceTest {
                 .status(ProjectStatus.CREATED)
                 .build();
         projectService = new ProjectService(mockProjectMapper, projectRepository, filters);
-        List<ProjectDto> filteredProjectsResult =
+        List<ProjectCreateDto> filteredProjectsResult =
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
-        List<ProjectDto> projectsWithFilter = projectService.getProjectsWithFilter(projectFilterDto, 1L);
+        List<ProjectCreateDto> projectsWithFilter = projectService.getProjectsWithFilter(projectFilterDto, 1L);
         Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
     }
 
@@ -218,10 +226,10 @@ class ProjectServiceTest {
         List<Project> projects = List.of(project, project1, project2, project3);
 
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
-        List<ProjectDto> projectsExpected =
+        List<ProjectCreateDto> projectsExpected =
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
-        List<ProjectDto> projectsResult = projectService.getAllProjects(1L);
+        List<ProjectCreateDto> projectsResult = projectService.getAllProjects(1L);
         Assertions.assertEquals(projectsExpected, projectsResult);
     }
 
@@ -230,9 +238,9 @@ class ProjectServiceTest {
         List<Project> projects = List.of(project1, project3);
 
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
-        List<ProjectDto> projectsExpected = new ArrayList<>();
+        List<ProjectCreateDto> projectsExpected = new ArrayList<>();
 
-        List<ProjectDto> projectsResult = projectService.getAllProjects(1L);
+        List<ProjectCreateDto> projectsResult = projectService.getAllProjects(1L);
         Assertions.assertEquals(projectsExpected, projectsResult);
     }
 
