@@ -65,8 +65,6 @@ public class InternshipService {
         return listOfInternshipFilters.stream().map(internshipMapper::toInternshipDto).toList();
     }
 
-
-
     public List <InternshipDto> gettingAllInternships (){
         return internshipRepository.findAll().stream()
                 .map(internshipMapper::toInternshipDto).toList();
@@ -119,12 +117,6 @@ public class InternshipService {
         return internshipDto;
     }
 }
-
-
-
-
-
-
 
 
 
