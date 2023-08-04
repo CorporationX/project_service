@@ -56,7 +56,7 @@ class StageServiceTest {
     @Mock
     private Stage stageAfterUpdateMock;
     @Mock
-    private StageValidator stageValidator;
+    StageValidator stageValidator;
     private Stage stageWithStatusCreated;
     private Stage stageWithStatusIn_Progress;
     private String status;
@@ -189,14 +189,19 @@ class StageServiceTest {
 
     @Test()
     public void testUpdateStage_InvalidStage() {
-        StageValidator stageValidator1 = new StageValidator();
+        StageValidator stageValidator = new StageValidator();
         when(stageRepository.getById(stageDtoForUpdateMock.getStageId())).thenReturn(stageFromRepositoryWithWrongStatus);
-        assertThrows(DataValidationException.class, () -> stageValidator1.isCompletedOrCancelled(stageFromRepositoryWithWrongStatus), "Stage is completed or cancelled");
+        assertThrows(DataValidationException.class, () -> stageValidator.isCompletedOrCancelled(stageFromRepositoryWithWrongStatus), "Stage is completed or cancelled");
     }
 
     @Test
     void testMethodFindTeamMemberById_ThrowExceptionAndMessage() {
         when(teamMemberRepository.findById(authorId)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class, () -> teamMemberRepository.findById(authorId), String.format("Team member doesn't exist by id: %s", authorId));
+    }
+
+    @Test
+    void testMethodFindTeamMemberById() {
+
     }
 }

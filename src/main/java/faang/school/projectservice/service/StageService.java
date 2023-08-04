@@ -30,17 +30,14 @@ import java.util.stream.Collectors;
 public class StageService {
     private final StageRepository stageRepository;
     private final StageMapper stageMapper;
-    private final StageValidator stageValidator;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
-
+    private final StageValidator stageValidator;
     @Transactional
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
         log.debug("StageDto mapped to entity is successfully");
-        stage.getStageRoles().forEach(stageRole ->
-                stageRole.setStage(stage)
-        );
+        stage.getStageRoles().forEach(stageRole -> stageRole.setStage(stage));
         log.debug("Sat stage on field stage in StageRoles");
         return stageMapper.toDto(stageRepository.save(stage));
     }

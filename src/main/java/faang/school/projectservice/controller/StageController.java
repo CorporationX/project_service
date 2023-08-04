@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageDtoForUpdate;
 import faang.school.projectservice.service.StageService;
-import faang.school.projectservice.validator.StageValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,12 +32,10 @@ import java.util.List;
 @Slf4j
 public class StageController {
     private final StageService stageService;
-    private final StageValidator stageValidator;
 
     @Operation(summary = "Create stage")
     @PostMapping("/stages")
     public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
-        stageValidator.validateId(stageDto);
         log.debug("Received request to create stage: {}", stageDto);
         return stageService.createStage(stageDto);
     }
@@ -48,7 +45,6 @@ public class StageController {
     public List<StageDto> getAllStagesByStatus(@RequestParam(value = "status")
                                                @Parameter(description = "Status of stages", example = "created")
                                                @NotEmpty String status) {
-        stageValidator.validateStatus(status);
         log.debug("Received request to filter stage by status: {}", status);
         return stageService.getAllStagesByStatus(status);
     }
@@ -58,7 +54,6 @@ public class StageController {
     public void deleteStage(@PathVariable("stageId")
                             @Parameter(description = "Stage ID", example = "1")
                             @NotNull Long stageId) {
-        stageValidator.validateStageId(stageId);
         log.debug("Received request to delete stage by ID: {}", stageId);
         stageService.deleteStageById(stageId);
     }
@@ -66,7 +61,6 @@ public class StageController {
     @Operation(summary = "Update stage")
     @PutMapping("/stage")
     public StageDto updateStage(@Valid @RequestBody StageDtoForUpdate stageDto) {
-        stageValidator.validateStageDto(stageDto);
         log.debug("Received request to update stage: {}", stageDto);
         return stageService.updateStage(stageDto);
     }
@@ -83,7 +77,6 @@ public class StageController {
     public StageDto getStageById(@PathVariable("stageId")
                                  @Parameter(description = "Stage ID", example = "1")
                                  @NotNull Long stageId) {
-        stageValidator.validateStageId(stageId);
         log.debug("Received request to get stage by ID: {}", stageId);
         return stageService.getStageById(stageId);
     }
