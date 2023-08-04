@@ -10,9 +10,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -32,29 +30,32 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
-    public List<StageDto> getAllProjectStages(long projectId) {
-        List<Stage> stages = projectRepository.getProjectById(projectId).getStages();
-
-        return stages.stream()
-                .map(stageMapper::toDto)
-                .toList();
-    }
-
-    public StageDto getStageById(long stageId) {
-        Stage stage = stageRepository.getById(stageId);
-
-        return stageMapper.toDto(stage);
-    }
-
     private void validateStageProject(StageDto stageDto) {
         Project project = projectRepository.getProjectById(stageDto.getProjectId());
-        ProjectStatus projectStatus = project.getStatus();
+        public List<StageDto> getAllProjectStages ( long projectId){
+            List<Stage> stages = projectRepository.getProjectById(projectId).getStages();
 
-        if (!projectStatus.equals(ProjectStatus.IN_PROGRESS) && !projectStatus.equals(ProjectStatus.CREATED)) {
-            String errorMessage = String.format(
-                    "Project %d is %s", project.getId(), projectStatus.name().toLowerCase());
+            return stages.stream()
+                    .map(stageMapper::toDto)
+                    .toList();
+        }
 
-            throw new DataValidationException(errorMessage);
+        public StageDto getStageById ( long stageId){
+            Stage stage = stageRepository.getById(stageId);
+
+            return stageMapper.toDto(stage);
+        }
+
+        private void validateStageProject (StageDto stageDto){
+            Project project = projectRepository.getProjectById(stageDto.getProjectId());
+            ProjectStatus projectStatus = project.getStatus();
+
+            if (!projectStatus.equals(ProjectStatus.IN_PROGRESS) && !projectStatus.equals(ProjectStatus.CREATED)) {
+                String errorMessage = String.format(
+                        "Project %d is %s", project.getId(), projectStatus.name().toLowerCase());
+
+                throw new DataValidationException(errorMessage);
+            }
         }
     }
 }
