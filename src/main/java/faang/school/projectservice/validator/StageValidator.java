@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.Objects;
 
-
+@Component
 public class StageValidator {
-    public static void validateId(StageDto stageDto) {
+    public void validateId(StageDto stageDto) {
         if (stageDto == null) {
             throw new DataValidationException("Stage must not be null");
         }
@@ -21,19 +21,19 @@ public class StageValidator {
         }
     }
 
-    public static void validateStatus(String status) {
+    public void validateStatus(String status) {
         if (Arrays.stream(StageStatus.values()).noneMatch(stageStatus -> stageStatus.toString().equalsIgnoreCase(status))) {
             throw new DataValidationException("Invalid status");
         }
     }
 
-    public static void validateStageId(Long stageId) {
+    public void validateStageId(Long stageId) {
         if (stageId == null) {
             throw new DataValidationException("Stage ID must not be null");
         }
     }
 
-    public static void validateStageDto(StageDtoForUpdate stageDto) {
+    public void validateStageDto(StageDtoForUpdate stageDto) {
         if (stageDto == null) {
             throw new DataValidationException("Stage must not be null");
         }
