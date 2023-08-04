@@ -4,10 +4,12 @@ package faang.school.projectservice.service.stage;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.mapper.stage.StageRolesMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
@@ -37,6 +39,8 @@ class StageServiceTest {
     private StageRepository stageRepository;
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private TaskRepository taskRepository;
     @Spy
     private StageMapperImpl stageMapper;
     @Spy
@@ -60,6 +64,7 @@ class StageServiceTest {
                 .stageName("Name")
                 .projectId(2L)
                 .stageRoles(List.of(stageRolesDto))
+                .taskIds(List.of(1L))
                 .build();
 
         project = Project.builder()
@@ -73,6 +78,7 @@ class StageServiceTest {
                 .stageName(stageDto.getStageName())
                 .project(Project.builder().id(2L).build())
                 .stageRoles(List.of(StageRoles.builder().teamRole(TeamRole.DEVELOPER).count(1).build()))
+                .tasks(List.of(Task.builder().id(1L).build()))
                 .build();
     }
 
@@ -157,5 +163,40 @@ class StageServiceTest {
         Mockito.when(projectRepository.getProjectById(2L)).thenReturn(project);
         List<StageDto> output = stageService.getAllProjectStages(2L);
         assertEquals(stageDtos, output);
+    }
+
+    @Test
+    public void testDeleteStageWithTasks() {
+        Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
+        stageService.deleteStageWithTasks(1L);
+
+        Mockito.verify(taskRepository, Mockito.times(1)).deleteAll(stage.getTasks());
+        Mockito.verify(stageRepository, Mockito.times(1)).delete(stage);
+    }
+
+    @Test
+    public void testDeleteStageCloseTasks() {
+        Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
+        stageService.deleteStageCloseTasks(1L);
+
+        Mockito.verify(taskRepository, Mockito.times(stage.getTasks().size())).save(Mockito.any(Task.class));
+        Mockito.verify(stageRepository, Mockito.times(1)).delete(stage);
+    }
+
+    @Test
+    public void testDeleteStageTransferTasks() {
+        StageDto stageToTransferDto = new StageDto();
+        stageToTransferDto.setStageId(2L);
+
+        Stage stageToTransfer = new Stage();
+        stageToTransfer.setStageId(stageToTransferDto.getStageId());
+
+        Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
+        Mockito.when(stageRepository.getById(2L)).thenReturn(stageToTransfer);
+
+        stageService.deleteStageTransferTasks(1L, 2L);
+
+        Mockito.verify(stageRepository, Mockito.times(1)).save(stageToTransfer);
+        Mockito.verify(stageRepository, Mockito.times(1)).delete(stage);
     }
 }

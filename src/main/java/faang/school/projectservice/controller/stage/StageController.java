@@ -1,7 +1,6 @@
 package faang.school.projectservice.controller.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage.StageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,6 @@ public class StageController {
         return stageService.create(stageDto);
     }
 
-    @GetMapping("/{projectId}/stage")
     @DeleteMapping("/stage/{stageId}")
     public void deleteStageWithTasks(@PathVariable long stageId) {
         stageService.deleteStageWithTasks(stageId);
@@ -35,7 +33,7 @@ public class StageController {
         stageService.deleteStageTransferTasks(stageId, stageToUpdateId);
     }
 
-    @GetMapping("/project/{projectId}")
+    @GetMapping("/{projectId}/stage")
     public List<StageDto> getAllProjectStages(@PathVariable long projectId) {
         return stageService.getAllProjectStages(projectId);
     }

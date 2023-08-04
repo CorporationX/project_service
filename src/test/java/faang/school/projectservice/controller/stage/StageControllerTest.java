@@ -91,4 +91,22 @@ class StageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(stageDto)));
     }
+
+    @Test
+    public void testDeleteStageTransferTasks() {
+        stageController.deleteStageTransferTasks(1L,2L);
+        Mockito.verify(stageService, Mockito.times(1)).deleteStageTransferTasks(1L, 2L);
+    }
+
+    @Test
+    public void testDeleteStageCloseTasks() {
+        stageController.deleteStageCloseTasks(1L);
+        Mockito.verify(stageService, Mockito.times(1)).deleteStageCloseTasks(1L );
+    }
+
+    @Test
+    public void testDeleteStageWithTasks() {
+        stageController.deleteStageWithTasks(1L);
+        Mockito.verify(stageService, Mockito.times(1)).deleteStageWithTasks(1L );
+    }
 }
