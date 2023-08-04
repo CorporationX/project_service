@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.subproject;
 
-import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectCreateDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,8 @@ public class SubProjectController {
     private final SubProjectValidator subProjectValidator;
 
     @PostMapping("/create")
-    public CreateSubProjectDto createSubProject(@RequestBody CreateSubProjectDto createSubProjectDto) {
-        subProjectValidator.validateCreateProjectDto(createSubProjectDto);
-        return subProjectService.createProject(createSubProjectDto);
+    public SubProjectCreateDto createSubProject(@RequestBody SubProjectCreateDto subProjectCreateDto) {
+        subProjectValidator.validateCreateProjectDto(subProjectCreateDto);
+        return subProjectService.createProject(subProjectCreateDto);
     }
 }

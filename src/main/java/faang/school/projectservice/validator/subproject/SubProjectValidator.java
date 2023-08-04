@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectCreateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import lombok.RequiredArgsConstructor;
@@ -13,21 +13,12 @@ public class SubProjectValidator {
     private final SubProjectService subProjectService;
     private final UserServiceClient userServiceClient;
 
-    public void validateCreateProjectDto(CreateSubProjectDto createSubProjectDto) {
-        validateProjectId(createSubProjectDto.getId());
+    public void validateCreateProjectDto(SubProjectCreateDto subProjectCreateDto) {
+        validateStringData(subProjectCreateDto.getName(),"Name");
+        validateStringData(subProjectCreateDto.getDescription(),"Description");
 
-        validateStringData(createSubProjectDto.getName(),"Name");
-        validateStringData(createSubProjectDto.getDescription(),"Description");
-
-        validateOwnerId(createSubProjectDto.getOwnerId());
-        validateParentProject(createSubProjectDto.getParentProjectId());
-    }
-
-    private void validateProjectId(Long id) {
-        validateId(id);
-        if (subProjectService.isExistProjectById(id)) {
-            throw new DataValidationException("Can't be exist two project with equals id");
-        }
+        validateOwnerId(subProjectCreateDto.getOwnerId());
+        validateParentProject(subProjectCreateDto.getParentProjectId());
     }
 
     private void validateOwnerId(Long ownerId) {

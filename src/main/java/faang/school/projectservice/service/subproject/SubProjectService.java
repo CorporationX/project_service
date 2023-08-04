@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectCreateDto;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -17,12 +17,12 @@ public class SubProjectService {
     private final ProjectRepository projectRepository;
     private final SubProjectMapper subProjectMapper;
 
-    public CreateSubProjectDto createProject(CreateSubProjectDto createSubProjectDto) {
-        Project project = subProjectMapper.toEntity(createSubProjectDto);
+    public SubProjectCreateDto createProject(SubProjectCreateDto subProjectCreateDto) {
+        Project project = subProjectMapper.toEntity(subProjectCreateDto);
         prepareProjectForCreate(project);
 
         projectRepository.save(project);
-        return createSubProjectDto;
+        return subProjectCreateDto;
     }
 
     public Project getProjectById(long projectId) {
