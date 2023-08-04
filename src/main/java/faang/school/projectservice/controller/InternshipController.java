@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.InternshipDto;
+import faang.school.projectservice.dto.client.InternshipFilterDto;
 import faang.school.projectservice.exceptions.InternshipValidationException;
 import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,9 @@ public class InternshipController {
         }
     }
 
+    public  List<InternshipDto> gettingAllInternshipsAccordingToFilters (InternshipFilterDto internshipFilterDto) {
+        return internshipService.gettingAllInternshipsAccordingToFilters(internshipFilterDto);
+    }
 
     private boolean internshipCommonValidation(InternshipDto internshipDto) {
         return internshipDto.getName() == null &&
