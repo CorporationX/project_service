@@ -4,17 +4,21 @@ import faang.school.projectservice.dto.filter.StageFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.DeleteStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.project.ProjectException;
 import faang.school.projectservice.exception.stage.StageException;
 import faang.school.projectservice.filter.StageFilter;
 import faang.school.projectservice.jpa.TaskRepository;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import jakarta.transaction.Transactional;
@@ -35,6 +39,7 @@ public class StageService {
     private final List<StageFilter> stageFilters;
     private final ProjectMapper projectMapper;
     private final TaskRepository taskRepository;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
@@ -84,6 +89,43 @@ public class StageService {
                 .flatMap(stageFilter -> stageFilter.apply(projectStream, stageFilterDto))
                 .map(stageMapper :: toStageDto)
                 .toList();
+    }
+
+    public void updateStageRoles(Long id, StageRolesDto stageRoles) {
+        Stage stage = stageRepository.getById(id);
+        int countTeamRoles = getTotalTeamRoles(stageRoles, stage);
+        if (countTeamRoles >= stageRoles.getCount()) {
+            throw new StageException(stageRoles.getTeamRole().name() + " no longer required");
+        } else {
+            invitationMembersToStage(stageRoles, stage, countTeamRoles);
+        }
+    }
+
+    private void invitationMembersToStage(StageRolesDto stageRoles, Stage stageById, int countTeamRoles) {
+        List<TeamMember> teamMembersInProject = teamMemberJpaRepository.findByProjectId(stageById.getProject().getId());
+        teamMembersInProject.stream()
+                .filter(teamMember -> teamMember.getStages().stream()
+                        .noneMatch(stage -> stage.getStageId().equals(stageById.getStageId())))
+                .filter(teamMember -> teamMember.getRoles().contains(stageRoles.getTeamRole()))
+                .limit(stageRoles.getCount() - countTeamRoles)
+                .forEach(teamMember -> teamMember.getStages().add(stageById));
+        changeStageRolesToActual(stageRoles, stageById, countTeamRoles);
+        teamMemberJpaRepository.saveAll(teamMembersInProject);
+    }
+
+    private void changeStageRolesToActual(StageRolesDto stageRoles, Stage stageById, int countTeamRoles) {
+        stageById.getStageRoles().stream()
+                .filter(stageRole -> stageRole.getTeamRole().equals(stageRoles.getTeamRole()))
+                .findFirst()
+                .ifPresent(stageRole -> stageRole.setCount(stageRole.getCount() - countTeamRoles + stageRoles.getCount()));
+        stageRepository.save(stageById);
+    }
+
+    private int getTotalTeamRoles(StageRolesDto stageRoles, Stage stageById) {
+        return stageById.getStageRoles().stream()
+                .filter(stageRole -> stageRole.getTeamRole().equals(stageRoles.getTeamRole()))
+                .mapToInt(StageRoles::getCount)
+                .sum();
     }
 
     private StageDto validStage(StageDto stage) {
