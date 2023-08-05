@@ -18,7 +18,7 @@ public class SubProjectController {
 
     @PutMapping("/update/status")
     public void updateStatusSubProject(@RequestBody StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
-        subProjectValidator.validateUpdateStatusSubprojectDto(statusSubprojectUpdateDto);
+        subProjectValidator.validateStatusSubprojectUpdateDto(statusSubprojectUpdateDto);
         subProjectService.updateStatusSubProject(statusSubprojectUpdateDto);
     }
 }

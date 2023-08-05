@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class SubProjectValidator {
     private final SubProjectService subProjectService;
 
-    public void validateUpdateStatusSubprojectDto(StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
+    public void validateStatusSubprojectUpdateDto(StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
         validateProjectId(statusSubprojectUpdateDto.getId());
         validateStatus(statusSubprojectUpdateDto.getStatus());
     }

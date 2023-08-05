@@ -40,7 +40,7 @@ class SubProjectControllerTest {
                 .andExpect(status().isOk());
 
         Mockito.verify(subProjectValidator, Mockito.times(1))
-                .validateUpdateStatusSubprojectDto(statusSubprojectUpdateDto);
+                .validateStatusSubprojectUpdateDto(statusSubprojectUpdateDto);
         Mockito.verify(subProjectService, Mockito.times(1))
                 .updateStatusSubProject(statusSubprojectUpdateDto);
     }
