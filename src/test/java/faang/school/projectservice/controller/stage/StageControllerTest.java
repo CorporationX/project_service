@@ -19,8 +19,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,8 +61,6 @@ class StageControllerTest {
                 .build();
 
         Mockito.when(stageService.create(stageDto)).thenReturn(stageDto1);
-
-        System.out.println(objectMapper.writeValueAsString(stageDto));
 
         mockMvc.perform(post("/stage")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,5 +105,24 @@ class StageControllerTest {
     public void testDeleteStageWithTasks() {
         stageController.deleteStageWithTasks(1L);
         Mockito.verify(stageService, Mockito.times(1)).deleteStageWithTasks(1L );
+    }
+
+    @Test
+    public void testUpdateStageRoles() throws  Exception{
+        StageRolesDto stageRolesDto = StageRolesDto.builder()
+                .id(1L)
+                .teamRole(TeamRole.DEVELOPER)
+                .count(4)
+                .build();
+
+        stageDto.setStageRoles(List.of(stageRolesDto));
+
+        Mockito.when(stageService.updateStage(1L, stageRolesDto)).thenReturn(stageDto);
+
+        mockMvc.perform(put("/stage/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(stageRolesDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(stageDto)));
     }
 }

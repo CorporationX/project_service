@@ -21,7 +21,7 @@ public class StageController {
     }
 
     @PutMapping("/stage/{stageId}")
-    public StageDto updateStageRoles(@PathVariable long stageId,@Valid @RequestBody StageRolesDto stageRolesDto) {
+    public StageDto updateStageRoles(@PathVariable long stageId, @Valid @RequestBody StageRolesDto stageRolesDto) {
         return stageService.updateStage(stageId, stageRolesDto);
     }
 
