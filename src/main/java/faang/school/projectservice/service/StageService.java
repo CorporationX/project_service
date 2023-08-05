@@ -45,7 +45,9 @@ public class StageService {
     @Transactional(readOnly = true)
     public List<StageDto> getAllStagesByStatus(String status) {
         List<Stage> stages = stageRepository.findAll();
+        log.debug("All stages are successfully retrieved");
         stages.removeIf(stage -> !stage.getStatus().toString().equalsIgnoreCase(status));
+        log.debug("Filtered stages are successfully retrieved");
         return stages.stream().map(stageMapper::toDto).toList();
     }
 
@@ -57,6 +59,7 @@ public class StageService {
     @Transactional(readOnly = true)
     public List<StageDto> getAllStages() {
         List<Stage> stages = stageRepository.findAll();
+        log.debug("All stages are successfully retrieved");
         return stages.stream().map(stageMapper::toDto).toList();
     }
 
@@ -69,14 +72,22 @@ public class StageService {
     public StageDto updateStage(StageDtoForUpdate stageDto) {
 
         Stage stageFromRepository = stageRepository.getById(stageDto.getStageId());
+        log.debug("Stage from repository is successfully retrieved");
 
         stageValidator.isCompletedOrCancelled(stageFromRepository);
+        log.debug("Stage is not completed or cancelled");
+
         TeamMember author = teamMemberRepository.findById(stageDto.getAuthorId());
         List<TeamRole> teamRolesFromStageDto = stageDto.getTeamRoles();
 
         List<TeamRole> newTeamRoles = findNewTeamRoles(stageFromRepository, teamRolesFromStageDto);
+        log.debug("New team roles are successfully retrieved");
+
         Stage stageAfterUpdate = setNewFieldsForStage(stageFromRepository, stageDto);
+        log.debug("Stage after update is successfully retrieved");
+
         sendStageInvitation(stageFromRepository, newTeamRoles, author);
+        log.debug("Stage invitation is successfully sent");
 
         return stageMapper.toDto(stageRepository.save(stageAfterUpdate));
     }
