@@ -55,8 +55,8 @@ public class StageService {
 
         List<StageRoles> stageRoles = updateStageRoles(stageRolesDto, stageToUpdate);
         stageToUpdate.setStageRoles(stageRoles);
-
         stageRepository.save(stageToUpdate);
+
         return stageMapper.toDto(stageToUpdate);
     }
 
@@ -166,17 +166,10 @@ public class StageService {
 
     private List<StageRoles> updateStageRoles(StageRolesDto stageRolesDto, Stage stage) {
         List<StageRoles> stageRoles = stage.getStageRoles();
-        List<StageRoles> updatedStageRoles = new ArrayList<>(stageRoles);
+        stageRoles.removeIf(stageRole -> stageRole.getId().equals(stageRolesDto.getId()));
+        stageRoles.add(stageRolesMapper.toEntity(stageRolesDto));
 
-        for (StageRoles stageRole : stageRoles) {
-            if (stageRole.getId().equals(stageRolesDto.getStageRoleId())) {
-                updatedStageRoles.remove(stageRole);
-                break;
-            }
-        }
-        updatedStageRoles.add(stageRolesMapper.toEntity(stageRolesDto));
-
-        return updatedStageRoles;
+        return stageRoles;
     }
 
     private void validateStageProject(StageDto stageDto) {
@@ -191,4 +184,3 @@ public class StageService {
         }
     }
 }
-

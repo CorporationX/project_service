@@ -7,10 +7,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.mapper.stage.StageRolesMapperImpl;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -26,6 +23,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,7 +69,6 @@ class StageServiceTest {
                 .id(stageDto.getProjectId())
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
-
 
         stage = Stage.builder()
                 .stageId(stageDto.getStageId())
@@ -199,4 +196,32 @@ class StageServiceTest {
         Mockito.verify(stageRepository, Mockito.times(1)).save(stageToTransfer);
         Mockito.verify(stageRepository, Mockito.times(1)).delete(stage);
     }
+
+    @Test
+    public void testUpdateStage() {
+        StageRolesDto stageRolesDto = StageRolesDto.builder()
+                .id(1L)
+                .teamRole(TeamRole.DEVELOPER)
+                .count(2)
+                .build();
+
+        TeamMember teamMember = TeamMember.builder()
+                .id(1L)
+                .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
+                .build();
+
+        TeamMember teamMember1 = TeamMember.builder()
+                .id(1L)
+                .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
+                .build();
+
+        stage.setExecutors(new ArrayList<>(List.of(teamMember, teamMember1)));
+        stage.setStageRoles(new ArrayList<>(List.of(StageRoles.builder().id(1L).teamRole(TeamRole.DEVELOPER).count(1).build())));
+
+        Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
+
+        StageDto output = stageService.updateStage(1L, stageRolesDto);
+    }
+
+
 }
