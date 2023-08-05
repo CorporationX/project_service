@@ -4,6 +4,7 @@ on:
   pull_request:
       branches:
         - unicorn-master
+        - feature-BC-3964-ci_pipelines
 
 jobs:
   build_and_run_tests:
