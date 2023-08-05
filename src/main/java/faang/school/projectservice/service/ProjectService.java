@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataNotFoundException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -28,6 +29,7 @@ public class ProjectService {
     private final List<ProjectFilter> filters;
 
     public ProjectDto create(ProjectDto projectDto) {
+        validateNameAndDescription(projectDto);
         projectDto.setName(processTitle(projectDto.getName()));
         long ownerId = projectDto.getOwnerId();
         String projectName = projectDto.getName();
@@ -124,5 +126,16 @@ public class ProjectService {
         title = title.replaceAll("[^A-Za-zА-Яа-я0-9+-/#]", " ");
         title = title.replaceAll("[\\s]+", " ");
         return title.trim().toLowerCase();
+    }
+
+    private void validateNameAndDescription(ProjectDto projectDto) {
+        String name = projectDto.getName();
+        String description = projectDto.getDescription();
+        if (name == null || name.isBlank()) {
+            throw new DataValidationException("Project can't be created with empty name");
+        }
+        if (description == null || description.isBlank()) {
+            throw new DataValidationException("Project can't be created with empty description");
+        }
     }
 }
