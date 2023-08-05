@@ -1,36 +1,67 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.invitation.DtoStageInvitation;
-import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.dto.invitation.DtoStageInvitationFilter;
+import faang.school.projectservice.dto.invitation.DtoStatus;
+import faang.school.projectservice.exception.ValidException;
+import faang.school.projectservice.filter.stageInvitation.StageInvitationFilter;
+import faang.school.projectservice.mapper.invitationMaper.StageInvitationMapper;
+import faang.school.projectservice.mapper.invitationMaper.StageMapper;
+import faang.school.projectservice.mapper.invitationMaper.TeamMemberMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class StageInvitationService {
 
-    private final StageInvitationMapper mapper = StageInvitationMapper.INSTANCE;
+    private final StageInvitationMapper stageInvitationMapper = StageInvitationMapper.INSTANCE;
+    private final TeamMemberMapper memberMapper = TeamMemberMapper.INSTANCE;
+    private final StageMapper stageMapper = StageMapper.INSTANCE;
 
     private final StageInvitationRepository invitationRepository;
 
-    public String invitationHasBeenSent(DtoStageInvitation dto) {
-        invitationRepository.save(mapper.toStageInvitation(dto));
-        return "приглаение отправлено";
+    private final List<StageInvitationFilter> invitationFilter;
+
+    public DtoStageInvitation invitationHasBeenSent(DtoStageInvitation dto) {
+        if (!invitationRepository.existsByAuthorAndInvitedAndStage(memberMapper.toTeamMember(dto.getIdAuthor()), memberMapper.toTeamMember(dto.getIdInvited())
+                , stageMapper.toStage(dto.getStage()))) {
+            throw new ValidException("check the data");
+        } else if (dto.getIdAuthor() == dto.getIdInvited()) {
+            throw new ValidException("repeated id");
+        }
+
+        return stageInvitationMapper.toDto(invitationRepository.save(stageInvitationMapper.toStageInvitation(dto)));
     }
 
-    public String acceptInvitation(String status, long idInvitation) {
+    public DtoStatus acceptDeclineInvitation(String status, long idInvitation) {
         StageInvitation invitation = invitationRepository.findById(idInvitation);
+
         if (status.equals("ACCEPTED")) {
             invitation.setStatus(StageInvitationStatus.ACCEPTED);
             invitationRepository.save(invitation);
-            return "приглашение принято";
+        } else if (status.equals("REJECTED")) {
+            invitation.setStatus(StageInvitationStatus.REJECTED);
+            invitationRepository.save(invitation);
+        } else if (status.equals("PENDING")) {
+            invitation.setStatus(StageInvitationStatus.PENDING);
+            invitationRepository.save(invitation);
         }
-        invitation.setStatus(StageInvitationStatus.REJECTED);
-        invitationRepository.save(invitation);
-        return "приглашение отклонено";
+
+        return new DtoStatus(invitation.getStatus());
     }
 
+    public List<DtoStageInvitation> getAllStageInvitation(long id, DtoStageInvitationFilter filters) {
+        List<StageInvitation> stageInvitations = invitationRepository.findAll().stream()
+                .filter(invitation -> invitation.getInvited().getId() == id).toList();
+
+        return invitationFilter.stream().filter(filter -> filter.isApplication(filters))
+                .flatMap(filter -> filter.apply(stageInvitations.stream(), filters))
+                .map(stageInvitationMapper::toDto).toList();
+    }
 }

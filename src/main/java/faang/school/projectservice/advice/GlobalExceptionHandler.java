@@ -1,11 +1,13 @@
 package faang.school.projectservice.advice;
 
 import faang.school.projectservice.exception.ValidException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -18,21 +20,25 @@ import java.util.List;
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<String> validErrors(MethodArgumentNotValidException e) {
+    public ResponseEntity<List<String>> validErrors(MethodArgumentNotValidException e) {
         List<String> error = e.getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
         log.error("Data validation exception occurred: {}", error);
-        return error;
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String validError(ValidException e) {
-        return e.getMessage();
+    public ResponseEntity<String> validError(ValidException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<String> constraintViolationException(ConstraintViolationException e) {
-        return e.getConstraintViolations().stream().map(ConstraintViolation::getMessage).toList();
+    public ResponseEntity<List<String>> constraintViolationException(ConstraintViolationException e) {
+        return new ResponseEntity<>(e.getConstraintViolations().stream().map(ConstraintViolation::getMessage).toList()
+                , HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> entityNotFoundException(EntityNotFoundException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
