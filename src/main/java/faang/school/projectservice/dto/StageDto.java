@@ -14,7 +14,7 @@ import java.util.List;
 public class StageDto {
     private Long stageId;
     private String stageName;
-    private ProjectDto project;
+    private long projectId;
     private List<StageRolesDto> stageRoles;
 }
 

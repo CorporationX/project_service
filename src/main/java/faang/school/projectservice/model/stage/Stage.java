@@ -30,7 +30,10 @@ public class Stage {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
+    @ManyToMany
+    @JoinTable(name = "project_stage_stage_roles",
+            joinColumns = @JoinColumn(name = "stage_id"),
+            inverseJoinColumns = @JoinColumn(name = "stage_roles_id"))
     private List<StageRoles> stageRoles;
 
     @OneToMany(cascade = CascadeType.MERGE)

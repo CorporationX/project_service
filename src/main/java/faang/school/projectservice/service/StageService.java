@@ -36,7 +36,6 @@ public class StageService {
 
     private final TeamMemberJpaRepository teamMemberJpaRepository;
 
-
     private final StageInvitationRepository stageInvitationRepository;
 
     private final StageValidator stageValidator;
@@ -50,20 +49,20 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
-    public void deleteStage(Long oldStageId, SubtaskActionDto methodDeletingStageDto, Long newStageId) {
+    public void deleteStage(Long oldStageId, SubtaskActionDto subtaskActionDto, Long newStageId) {
         Stage stage = stageRepository.getById(oldStageId);
         List<Task> tasks = stage.getTasks();
-        deleteBySubtaskAction(methodDeletingStageDto, newStageId, stage, tasks);
+        deleteBySubtaskAction(subtaskActionDto, newStageId, stage, tasks);
         stageRepository.delete(stage);
     }
 
-    private void deleteBySubtaskAction(SubtaskActionDto methodDeletingStageDto, Long newStageId, Stage stage, List<Task> tasks) {
-        if (SubtaskActionDto.CASCADE.equals(methodDeletingStageDto)) {
+    private void deleteBySubtaskAction(SubtaskActionDto subtaskActionDto, Long newStageId, Stage stage, List<Task> tasks) {
+        if (SubtaskActionDto.CASCADE.equals(subtaskActionDto)) {
             taskRepository.deleteAll(tasks);
-        } else if (SubtaskActionDto.CLOSE.equals(methodDeletingStageDto)) {
+        } else if (SubtaskActionDto.CLOSE.equals(subtaskActionDto)) {
             tasks.forEach(task -> task.setStatus(TaskStatus.DONE));
             taskRepository.saveAll(tasks);
-        } else if (SubtaskActionDto.MOVE_TO_NEXT_STAGE.equals(methodDeletingStageDto)) {
+        } else if (SubtaskActionDto.MOVE_TO_NEXT_STAGE.equals(subtaskActionDto)) {
             stage.setTasks(List.of());
             Stage stageToAddTasks = stageRepository.getById(newStageId);
 
@@ -103,7 +102,7 @@ public class StageService {
                 .description("Invitation to the stage " + stageById.getStageName())
                 .status(StageInvitationStatus.PENDING)
                 .stage(stageById)
-                .author(TeamMember.builder().id(userContext.getUserId()).build()) //вопрос как сделать автора?
+                .author(TeamMember.builder().id(userContext.getUserId()).build())
                 .invited(teamMember)
                 .build();
         stageInvitationRepository.save(invitation);

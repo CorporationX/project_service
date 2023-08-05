@@ -1,15 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.dto.SubtaskActionDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.mapper.StageMapperImpl;
-import faang.school.projectservice.mapper.StageRolesMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
@@ -83,7 +80,6 @@ class StageServiceTest {
         Project project = Project
                 .builder()
                 .id(1L)
-                .status(ProjectStatus.CREATED)
                 .build();
         stage1 = Stage
                 .builder()
@@ -186,10 +182,10 @@ class StageServiceTest {
         tasks.add(task);
 
         Stage stage = stageMapper.toEntity(
-                new StageDto(1L, "stage", ProjectDto.builder().build(), new ArrayList<>()));
+                new StageDto(1L, "stage", 1L, new ArrayList<>()));
         stage.setTasks(tasks);
         Stage stageNew = stageMapper.toEntity(
-                new StageDto(2L, "Rtest", ProjectDto.builder().build(), new ArrayList<>()));
+                new StageDto(2L, "Rtest", 1L, new ArrayList<>()));
 
         Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
         Mockito.when(stageRepository.getById(2L)).thenReturn(stageNew);
@@ -242,4 +238,3 @@ class StageServiceTest {
         Mockito.verify(stageRepository, Mockito.times(1)).getById(1L);
     }
 }
-

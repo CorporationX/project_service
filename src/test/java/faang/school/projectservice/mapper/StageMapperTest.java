@@ -1,6 +1,5 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.model.Project;
@@ -21,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class StageMapperTest {
 
     @Spy
-    private faang.school.projectservice.mapper.StageRolesMapperImpl stageRolesMapper;
+    private StageRolesMapperImpl stageRolesMapper;
 
     @Spy
-    private faang.school.projectservice.mapper.StageMapperImpl stageMapper;
+    private StageMapperImpl stageMapper;
 
     private Stage stage;
 
@@ -37,7 +36,7 @@ class StageMapperTest {
         stageDto = StageDto.builder()
                 .stageId(1L)
                 .stageName("stageName")
-                .project(ProjectDto.builder().id(1L).build())
+                .projectId(1L)
                 .stageRoles(List.of(
                         StageRolesDto.builder().id(1L).build(),
                         StageRolesDto.builder().id(2L).build(),

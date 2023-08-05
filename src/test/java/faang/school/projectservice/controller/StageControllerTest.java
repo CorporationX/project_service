@@ -2,11 +2,9 @@ package faang.school.projectservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.dto.SubtaskActionDto;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.validator.StageValidator;
@@ -50,7 +48,7 @@ class StageControllerTest {
 
     private StageDto stageDto;
 
-    private StageDto createdStage;
+    private StageDto stageCreated;
 
     @BeforeEach
     void setUp() {
@@ -59,7 +57,7 @@ class StageControllerTest {
 
         stageDto = StageDto.builder()
                 .stageName("stageName")
-                .project(ProjectDto.builder().id(1L).status(ProjectStatus.CREATED).build())
+                .projectId(1L)
                 .stageRoles(List.of(
                         StageRolesDto.builder().id(1L).build(),
                         StageRolesDto.builder().id(2L).build(),
@@ -67,10 +65,10 @@ class StageControllerTest {
                 ))
                 .build();
 
-        createdStage = StageDto.builder()
+        stageCreated = StageDto.builder()
                 .stageId(1L)
                 .stageName("stageName")
-                .project(ProjectDto.builder().id(1L).status(ProjectStatus.CREATED).build())
+                .projectId(1L)
                 .stageRoles(List.of(
                         StageRolesDto.builder().id(1L).build(),
                         StageRolesDto.builder().id(2L).build(),
@@ -81,12 +79,12 @@ class StageControllerTest {
 
     @Test
     void testCreateStage() throws Exception {
-        Mockito.when(stageService.createStage(stageDto)).thenReturn(createdStage);
+        Mockito.when(stageService.createStage(stageDto)).thenReturn(stageCreated);
         mockMvc.perform(post("/stage")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stageDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(createdStage)));
+                .andExpect(content().json(objectMapper.writeValueAsString(stageCreated)));
     }
 
     @Test
