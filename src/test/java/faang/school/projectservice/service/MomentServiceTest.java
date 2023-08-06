@@ -5,6 +5,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +30,8 @@ import static org.mockito.Mockito.when;
 class MomentServiceTest {
     @Mock
     private MomentRepository momentRepository;
+    @Mock
+    private ProjectRepository projectRepository;
     @Mock
     private MomentMapper momentMapper;
     @InjectMocks
@@ -84,7 +87,7 @@ class MomentServiceTest {
                 .name("First moment")
                 .description("description")
                 .date(LocalDateTime.now())
-                .projects(List.of(project))
+                .projectIds(List.of(project.getId()))
                 .build();
 
         Moment moment = Moment.builder()
@@ -94,7 +97,7 @@ class MomentServiceTest {
                 .projects(List.of(project))
                 .build();
 
-        when(momentMapper.toEntity(momentDto)).thenReturn(moment);
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
         assertThrows(
                 DataValidationException.class,
                 () -> momentService.create(momentDto)
@@ -113,7 +116,7 @@ class MomentServiceTest {
                 .name("First moment")
                 .description("description")
                 .date(LocalDateTime.now())
-                .projects(List.of(project))
+                .projectIds(List.of(project.getId()))
                 .build();
 
         Moment moment = Moment.builder()
@@ -128,6 +131,7 @@ class MomentServiceTest {
         when(momentRepository.save(moment)).thenReturn(moment);
         momentDto.setId(1L);
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
         MomentDto createdMoment = momentService.create(momentDto);
         verify(momentRepository).save(moment);
         assertEquals(momentDto, createdMoment);
@@ -147,7 +151,7 @@ class MomentServiceTest {
                 .name("First moment")
                 .description("description")
                 .date(LocalDateTime.now())
-                .projects(List.of(project))
+                .projectIds(List.of(project.getId()))
                 .build();
 
         assertThrows(
