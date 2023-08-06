@@ -20,14 +20,14 @@ public class InternshipController {
         return internshipService.saveNewInternship(internshipDto);
     }
 
-    @PutMapping("/updateInternship")
-    public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto, long id) {
+    @PutMapping("/updateInternship/{id}")
+    public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto,@PathVariable Long id) {
         InternshipValidator.validateControllerInternship(internshipDto);
         return internshipService.updateInternship(internshipDto, id);
     }
 
-    @GetMapping("/findInternshipsWithFilter")
-    public List<InternshipDto> findInternshipsWithFilter(long projectId, @RequestBody InternshipFilterDto filterDto) {
+    @GetMapping("/findInternshipsWithFilter/{projectId}")
+    public List<InternshipDto> findInternshipsWithFilter(@RequestBody InternshipFilterDto filterDto,@PathVariable Long projectId) {
         return internshipService.findInternshipsByStatusWithFilter(projectId, filterDto);
     }
 
@@ -37,7 +37,7 @@ public class InternshipController {
     }
 
     @GetMapping("/findAllInternshipById/{id}")
-    public InternshipDto findAllInternshipById(@PathVariable long id) {
+    public InternshipDto findAllInternshipById(@PathVariable Long id) {
         return internshipService.findAllInternshipById(id);
     }
 }
