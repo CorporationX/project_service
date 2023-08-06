@@ -3,6 +3,8 @@ name: CIforGriffonMaster
 on:
   pull_request:
     branches: [ "griffon-master" ]
+  push:
+    branches: [ "griffon-master" ]
 
 jobs:
   build:
