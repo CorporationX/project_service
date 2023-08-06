@@ -36,13 +36,11 @@ public class StageServiceTest {
     @Mock
     private StageRepository stageRepository;
     @Mock
-    TaskService taskService;
+    private TaskService taskService;
     @InjectMocks
     private StageService stageService;
     @Spy
     private StageMapperImpl stageMapper;
-    @Mock
-    private TaskService taskService;
 
     private Project project;
     private Stage stage;
