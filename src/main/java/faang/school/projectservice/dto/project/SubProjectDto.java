@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @Builder
-public class ProjectDto {
+public class SubProjectDto {
     private Long id;
     private String name;
     private String description;

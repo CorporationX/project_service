@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -18,11 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class SubProjectMapperTest {
     @Autowired
     private SubProjectMapper subProjectMapper;
-    private ProjectDto projectDto;
+    private SubProjectDto projectDto;
 
     @BeforeEach
     void setUp() {
-        this.projectDto = ProjectDto.builder()
+        this.projectDto = SubProjectDto.builder()
                 .id(1L)
                 .name("Faang")
                 .description("This is Faang")

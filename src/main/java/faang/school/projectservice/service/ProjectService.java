@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.SubProjectMapper;
@@ -37,7 +37,7 @@ public class ProjectService {
     private final MomentRepository momentRepository;
     private final List<ProjectFilter> projectFilters;
 
-    public ProjectDto createSubProject(ProjectDto projectDto) {
+    public SubProjectDto createSubProject(SubProjectDto projectDto) {
         validateSubProject(projectDto);
         validateProjectNotExist(projectDto);
         validateParentProjectExist(projectDto);
@@ -57,14 +57,14 @@ public class ProjectService {
         return subProjectMapper.toDto(subProject);
     }
 
-    public List<ProjectDto> createSubProjects(List<ProjectDto> projectsDtos) {
+    public List<SubProjectDto> createSubProjects(List<SubProjectDto> projectsDtos) {
         projectsDtos.forEach(this::validateSubProject);
         return projectsDtos.stream()
                 .map(this::createSubProject)
                 .toList();
     }
 
-    public Timestamp updateSubProject(ProjectDto projectDto) {
+    public Timestamp updateSubProject(SubProjectDto projectDto) {
         Project projectToUpdate = projectRepository.getProjectById(projectDto.getId());
 
         if (projectDto.getStatus() != null && projectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
@@ -92,7 +92,7 @@ public class ProjectService {
         return Timestamp.valueOf(projectToUpdate.getUpdatedAt());
     }
 
-    public List<ProjectDto> getProjectChildrenWithFilter(ProjectFilterDto projectFilterDto, long projectId) {
+    public List<SubProjectDto> getProjectChildrenWithFilter(ProjectFilterDto projectFilterDto, long projectId) {
         Project project = projectRepository.getProjectById(projectId);
         Stream<Project> subProjectsStream = project.getChildren().stream();
         List<ProjectFilter> applicableFilters = projectFilters.stream()
@@ -105,7 +105,7 @@ public class ProjectService {
                 .toList();
     }
 
-    public Moment createMoment(ProjectDto projectDto, Project project) {
+    public Moment createMoment(SubProjectDto projectDto, Project project) {
         Moment moment = Moment.builder()
                 .name(projectDto.getName() + " project tasks")
                 .description(String.format("All tasks are completed in %s project", projectDto.getName()))
@@ -135,7 +135,7 @@ public class ProjectService {
         return new ArrayList<>(userIds);
     }
 
-    public Project changeParentProject(ProjectDto projectDto, Project projectToUpdate) {
+    public Project changeParentProject(SubProjectDto projectDto, Project projectToUpdate) {
         if (!Objects.equals(projectDto.getParentProjectId(), projectToUpdate.getParentProject().getId())) {
             Project newParentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
             projectToUpdate.setParentProject(newParentProject);
@@ -143,12 +143,12 @@ public class ProjectService {
         return projectToUpdate;
     }
 
-    private void updateAllNeededFields(ProjectDto projectDto, Project projectToUpdate) {
+    private void updateAllNeededFields(SubProjectDto projectDto, Project projectToUpdate) {
         changeParentProject(projectDto, projectToUpdate);
         setAllNeededFields(projectDto, projectToUpdate);
     }
 
-    private void setAllNeededFields(ProjectDto projectDto, Project projectToUpdate) {
+    private void setAllNeededFields(SubProjectDto projectDto, Project projectToUpdate) {
         projectToUpdate.setName(projectToUpdate.getName());
 
         if (projectDto.getDescription() != null) {
@@ -189,7 +189,7 @@ public class ProjectService {
                 .forEach(collectIn::add);
     }
 
-    private void validateSubProject(ProjectDto projectDto) {
+    private void validateSubProject(SubProjectDto projectDto) {
         if (projectDto.getOwnerId() <= 0) {
             throw new DataValidationException("Owner id cant be less then 1");
         }
@@ -207,21 +207,21 @@ public class ProjectService {
         }
     }
 
-    private void checkSubProjectNotPrivateOnPublicProject(ProjectDto projectDto) {
+    private void checkSubProjectNotPrivateOnPublicProject(SubProjectDto projectDto) {
         Project parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
         if (parentProject.getVisibility().equals(ProjectVisibility.PUBLIC) && projectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
             throw new DataValidationException(String.format("Private SubProject; %s, cant be with a public Parent Project: %s", projectDto.getName(), parentProject.getName()));
         }
     }
 
-    private void validateParentProjectExist(ProjectDto projectDto) {
+    private void validateParentProjectExist(SubProjectDto projectDto) {
         Project parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
         if (parentProject == null) {
             throw new EntityNotFoundException(String.format("Parent project not found by id: %s", projectDto.getParentProjectId()));
         }
     }
 
-    private void validateProjectNotExist(ProjectDto projectDto) {
+    private void validateProjectNotExist(SubProjectDto projectDto) {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException(String.format("Project %s is already exist", projectDto.getName()));
         }

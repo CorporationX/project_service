@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.InjectionStrategy;
@@ -13,12 +13,12 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface SubProjectMapper {
-    Project toEntity(ProjectDto projectDto);
+    Project toEntity(SubProjectDto projectDto);
 
     @Mapping(source = "parentProject.id", target = "parentProjectId")
     @Mapping(source = "children", target = "childrenIds", qualifiedByName = "getSubprojectsId")
     @Mapping(source = "stages", target = "stagesId", qualifiedByName = "getStagesId")
-    ProjectDto toDto(Project project);
+    SubProjectDto toDto(Project project);
 
     @Named("getSubprojectsId")
     default List<Long> getSubprojectsId(List<Project> subProjects) {

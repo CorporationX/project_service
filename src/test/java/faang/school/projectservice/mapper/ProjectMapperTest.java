@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.Assertions;
@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test;
 class ProjectMapperTest {
 
     ProjectMapper projectMapper = new ProjectMapperImpl();
-    ProjectDto projectDto;
+    SubProjectDto projectDto;
     Project project;
 
     @BeforeEach
     void setUp() {
-        projectDto = ProjectDto.builder()
+        projectDto = SubProjectDto.builder()
                 .name("Project")
                 .description("new Project")
                 .ownerId(1L)

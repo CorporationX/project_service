@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.InjectionStrategy;
@@ -13,10 +13,10 @@ import org.mapstruct.ReportingPolicy;
 public interface ProjectMapper {
 
     @Mapping(target = "ownerId", source = "ownerId")
-    ProjectDto toDto(Project project);
+    SubProjectDto toDto(Project project);
 
     @Mapping(target = "ownerId", source = "ownerId")
-    Project toModel(ProjectDto projectDto);
+    Project toModel(SubProjectDto subProjectDto);
 
     @Named("ownerTeamMember")
     default TeamMember ownerTeamMember(long ownerId) {

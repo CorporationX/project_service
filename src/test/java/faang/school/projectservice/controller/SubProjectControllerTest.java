@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,11 +22,11 @@ class SubProjectControllerTest {
     private ProjectService projectService;
     @InjectMocks
     private SubProjectController subProjectController;
-    private ProjectDto projectDto;
+    private SubProjectDto projectDto;
 
     @BeforeEach
     void setUp() {
-        this.projectDto = ProjectDto.builder()
+        this.projectDto = SubProjectDto.builder()
                 .name("Faang")
                 .parentProjectId(1L)
                 .build();
@@ -41,7 +41,7 @@ class SubProjectControllerTest {
 
     @Test
     void createSubProjectThrowExceptionWhenNameIsNullOrBlank() {
-        ProjectDto projectDto = ProjectDto.builder().build();
+        SubProjectDto projectDto = SubProjectDto.builder().build();
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> subProjectController.createSubProject(projectDto));
 
@@ -50,7 +50,7 @@ class SubProjectControllerTest {
 
     @Test
     void createSubProjectThrowExceptionWhenParentProjectIdIsNull() {
-        ProjectDto projectDto = ProjectDto.builder()
+        SubProjectDto projectDto = SubProjectDto.builder()
                 .name("Faang")
                 .build();
 

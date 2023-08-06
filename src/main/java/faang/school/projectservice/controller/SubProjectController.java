@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
@@ -20,30 +20,30 @@ public class SubProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/subProject/create")
-    public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
+    public SubProjectDto createSubProject(@RequestBody SubProjectDto projectDto) {
         validateSubProject(projectDto);
         return projectService.createSubProject(projectDto);
     }
 
     @PostMapping("/subProjects/create")
-    public List<ProjectDto> createSubProjects(@RequestBody List<ProjectDto> projectsDtos) {
+    public List<SubProjectDto> createSubProjects(@RequestBody List<SubProjectDto> projectsDtos) {
         validateProjectsList(projectsDtos);
         projectsDtos.forEach(this::validateSubProject);
         return projectService.createSubProjects(projectsDtos);
     }
 
     @PutMapping("/subProject/update")
-    public Timestamp updateSubProject(@RequestBody ProjectDto projectDto) {
+    public Timestamp updateSubProject(@RequestBody SubProjectDto projectDto) {
         validateSubProject(projectDto);
         return projectService.updateSubProject(projectDto);
     }
 
-    @PostMapping("project/{projectId}/children")
-    public List<ProjectDto> getProjectChildrenWithFilter(@RequestBody ProjectFilterDto filterDto, @PathVariable long projectId) {
+    @PostMapping("/subProject/{projectId}/children")
+    public List<SubProjectDto> getProjectChildrenWithFilter(@RequestBody ProjectFilterDto filterDto, @PathVariable long projectId) {
         return projectService.getProjectChildrenWithFilter(filterDto, projectId);
     }
 
-    private void validateSubProject(ProjectDto projectDto) {
+    private void validateSubProject(SubProjectDto projectDto) {
         if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new DataValidationException("Project can't be created with empty name");
         }
@@ -52,7 +52,7 @@ public class SubProjectController {
         }
     }
 
-    private void validateProjectsList(List<ProjectDto> projectDtos) {
+    private void validateProjectsList(List<SubProjectDto> projectDtos) {
         if (projectDtos.isEmpty()) {
             throw new DataValidationException("List of project is empty");
         }

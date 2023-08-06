@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.SubProjectMapper;
@@ -48,8 +48,8 @@ class ProjectServiceTest {
     private MomentRepository momentRepository;
     @InjectMocks
     private ProjectService projectService;
-    private ProjectDto projectDto;
-    private ProjectDto updatedProjectDto;
+    private SubProjectDto projectDto;
+    private SubProjectDto updatedProjectDto;
     private Project project;
     private Project onlyWithIdProject;
     private List<Project> children;
@@ -57,7 +57,7 @@ class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.projectDto = ProjectDto.builder()
+        this.projectDto = SubProjectDto.builder()
                 .name("Faang")
                 .description("This is Faang")
                 .ownerId(1)
@@ -67,7 +67,7 @@ class ProjectServiceTest {
                 .stagesId(Collections.emptyList())
                 .status(ProjectStatus.CREATED)
                 .build();
-        this.updatedProjectDto = ProjectDto.builder()
+        this.updatedProjectDto = SubProjectDto.builder()
                 .id(1L)
                 .status(ProjectStatus.COMPLETED)
                 .childrenIds(Collections.emptyList())
@@ -90,7 +90,7 @@ class ProjectServiceTest {
 
     @Test
     void createSubProjectThrowExceptionWhenOwnerIdLessThenOne() {
-        ProjectDto projectDto = ProjectDto.builder()
+        SubProjectDto projectDto = SubProjectDto.builder()
                 .name("Faang")
                 .ownerId(0)
                 .parentProjectId(2L)
@@ -113,7 +113,7 @@ class ProjectServiceTest {
 
     @Test
     void createSubProjectThrowExceptionWhenChildrenNull() {
-        ProjectDto wrongProjectDto = ProjectDto.builder()
+        SubProjectDto wrongProjectDto = SubProjectDto.builder()
                 .ownerId(1)
                 .build();
 
@@ -124,7 +124,7 @@ class ProjectServiceTest {
 
     @Test
     void createSubProjectThrowExceptionWhenStatusNull() {
-        ProjectDto wrongProjectDto = ProjectDto.builder()
+        SubProjectDto wrongProjectDto = SubProjectDto.builder()
                 .ownerId(1)
                 .childrenIds(Collections.emptyList())
                 .build();
@@ -136,7 +136,7 @@ class ProjectServiceTest {
 
     @Test
     void createSubProjectThrowExceptionWhenVisibilityNull() {
-        ProjectDto wrongProjectDto = ProjectDto.builder()
+        SubProjectDto wrongProjectDto = SubProjectDto.builder()
                 .name("Faang")
                 .ownerId(1)
                 .childrenIds(Collections.emptyList())
@@ -150,7 +150,7 @@ class ProjectServiceTest {
 
     @Test
     void createSubProjectThrowExceptionWhenParentProjectIdLessThenOne() {
-        ProjectDto wrongProjectDto = ProjectDto.builder()
+        SubProjectDto wrongProjectDto = SubProjectDto.builder()
                 .name("Faang")
                 .ownerId(1)
                 .parentProjectId(-2L)
@@ -166,7 +166,7 @@ class ProjectServiceTest {
 
     @Test
     void createSubProjectThrowEntityNotFoundException() {
-        ProjectDto wrongProjectDto = ProjectDto.builder()
+        SubProjectDto wrongProjectDto = SubProjectDto.builder()
                 .name("Faang")
                 .ownerId(1)
                 .parentProjectId(100L)
@@ -182,7 +182,7 @@ class ProjectServiceTest {
 
     @Test
     void createSubProjectThrowExceptionWhenTryingToCreatePrivateSubProjectOnAPublicProject() {
-        ProjectDto wrongProjectDto = ProjectDto.builder()
+        SubProjectDto wrongProjectDto = SubProjectDto.builder()
                 .name("Faang")
                 .ownerId(1)
                 .parentProjectId(2L)
@@ -211,7 +211,7 @@ class ProjectServiceTest {
         Mockito.when(projectRepository.findAllByIds(projectDto.getChildrenIds()))
                 .thenReturn(children);
 
-        ProjectDto result = projectService.createSubProject(projectDto);
+        SubProjectDto result = projectService.createSubProject(projectDto);
 
         assertEquals(projectDto, result);
     }
@@ -274,7 +274,7 @@ class ProjectServiceTest {
 
     @Test
     void createSubProjects() {
-        List<ProjectDto> expected = new ArrayList<>();
+        List<SubProjectDto> expected = new ArrayList<>();
         expected.add(projectDto);
         expected.add(projectDto);
 
@@ -285,7 +285,7 @@ class ProjectServiceTest {
         Mockito.when(projectRepository.findAllByIds(projectDto.getChildrenIds()))
                 .thenReturn(children);
 
-        List<ProjectDto> result = projectService.createSubProjects(expected);
+        List<SubProjectDto> result = projectService.createSubProjects(expected);
 
         assertEquals(expected, result);
         assertEquals(2, result.size());
@@ -293,7 +293,7 @@ class ProjectServiceTest {
 
     @Test
     void updateSubProjectThrowExceptionWhenChildrenStatusesAreNotComplete() {
-        ProjectDto fakeProject = ProjectDto.builder()
+        SubProjectDto fakeProject = SubProjectDto.builder()
                 .status(ProjectStatus.COMPLETED)
                 .childrenIds(Collections.emptyList())
                 .build();
@@ -531,13 +531,13 @@ class ProjectServiceTest {
                 .children(childrenList)
                 .build();
 
-        ProjectDto secondDto = subProjectMapper.toDto(second);
+        SubProjectDto secondDto = subProjectMapper.toDto(second);
 
-        List<ProjectDto> expected = new ArrayList<>(List.of(secondDto));
+        List<SubProjectDto> expected = new ArrayList<>(List.of(secondDto));
 
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(mainProject);
 
-        List<ProjectDto> result = mockedProjectService.getProjectChildrenWithFilter(projectFilterDto, projectId);
+        List<SubProjectDto> result = mockedProjectService.getProjectChildrenWithFilter(projectFilterDto, projectId);
 
         assertEquals(expected, result);
         assertEquals(1, result.size());
