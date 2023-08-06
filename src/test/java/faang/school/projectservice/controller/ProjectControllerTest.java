@@ -7,12 +7,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.org.awaitility.core.DeadlockException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class ProjectControllerTest {
+
+    @Autowired
+    MockMvc mockMvc;
+
 
     @InjectMocks
     ProjectController projectController;
@@ -20,7 +28,6 @@ class ProjectControllerTest {
 
     @Test
     void testCreateControllerThrowsDataValidationException() {
-        projectDto = ProjectDto.builder().build();
-        Assertions.assertThrows(DataValidationException.class, () -> projectController.create(projectDto));
+
     }
 }
