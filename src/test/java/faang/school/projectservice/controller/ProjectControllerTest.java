@@ -1,12 +1,14 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +27,18 @@ public class ProjectControllerTest {
     private ProjectController projectController;
 
     private final ProjectMapper projectMapper = new ProjectMapperImpl();
+    private final long userId = 1;
+    private long projectId = 1;
+    private ProjectDto projectDto;
+
+    @BeforeEach
+    public void initProjectDto() {
+        projectDto = ProjectDto.builder()
+                .ownerId(userId)
+                .name("Project")
+                .description("Cool")
+                .build();
+    }
 
     @Test
     public void shouldReturnProjectsList() {
@@ -39,7 +54,6 @@ public class ProjectControllerTest {
 
     @Test
     public void shouldReturnProjectByProjectId() {
-        long projectId = 1;
         ProjectDto desiredProject = new ProjectDto();
 
         Mockito.when(projectService.getProject(projectId))
@@ -52,15 +66,10 @@ public class ProjectControllerTest {
 
     @Test
     public void shouldReturnAndCreateNewProject() {
-        long userId = 1L;
-        ProjectDto notCreateProject = ProjectDto.builder()
-                .name("Project")
-                .description("Cool")
-                .build();
+        ProjectDto notCreateProject = projectDto;
 
         Project desiredProject = projectMapper.toEntity(notCreateProject);
-        desiredProject.setId(1L);
-        desiredProject.setOwnerId(userId);
+        desiredProject.setId(projectId);
         desiredProject.setStatus(ProjectStatus.CREATED);
 
         Mockito.when(projectService.createProject(notCreateProject))
@@ -70,5 +79,34 @@ public class ProjectControllerTest {
         Assertions.assertEquals(projectMapper.toDto(desiredProject), receivedProject);
 
         Mockito.verify(projectService).createProject(notCreateProject);
+    }
+
+    @Test
+    public void shouldReturnAndUpdateProject() {
+        ProjectDto notUpdatedProject = projectDto;
+        notUpdatedProject.setId(projectId);
+        notUpdatedProject.setName("Mega project");
+
+        Project desiredProject = projectMapper.toEntity(notUpdatedProject);
+
+        Mockito.when(projectService.updateProject(notUpdatedProject, projectId))
+                .thenReturn(projectMapper.toDto(desiredProject));
+        ProjectDto receivedProject = projectController.updateProject(notUpdatedProject, projectId);
+
+        Assertions.assertEquals(projectMapper.toDto(desiredProject), receivedProject);
+        Mockito.verify(projectService).updateProject(notUpdatedProject, projectId);
+    }
+
+    @Test
+    public void shouldReturnProjectsListForFilters() {
+        ProjectFilterDto filters = new ProjectFilterDto();
+        List<ProjectDto> desiredProjects = new ArrayList<>();
+
+        Mockito.when(projectService.getProjects(filters))
+                .thenReturn(desiredProjects);
+        List<ProjectDto> receivedProjects = projectController.getProjects(filters);
+
+        Assertions.assertEquals(desiredProjects, receivedProjects);
+        Mockito.verify(projectService).getProjects(filters);
     }
 }
