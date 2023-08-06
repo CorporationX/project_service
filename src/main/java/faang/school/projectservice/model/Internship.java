@@ -39,7 +39,7 @@ public class Internship {
     private Project project;
 
     @ManyToOne
-    @JoinColumn(name = "team_member_id")
+    @JoinColumn(name = "mentor_id")
     @NotNull
     private TeamMember mentorId;
 

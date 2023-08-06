@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Repository
 @RequiredArgsConstructor
@@ -19,8 +21,12 @@ public class ProjectRepository {
         );
     }
 
-    public List<Project> findAll() {
-        return projectJpaRepository.findAll();
+    public Optional<Project> findById(long projectId) {
+        return projectJpaRepository.findById(projectId);
+    }
+
+    public Stream<Project> findAll() {
+        return projectJpaRepository.findAll().stream();
     }
 
     public List<Project> findAllByIds(List<Long> ids) {
