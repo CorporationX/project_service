@@ -22,6 +22,7 @@ public class InternshipController {
         return internshipService.internshipCreation(internshipDto);
     }
 
+
     public List<InternshipDto> gettingAllInternships() {
         return internshipService.gettingAllInternships();
     }
