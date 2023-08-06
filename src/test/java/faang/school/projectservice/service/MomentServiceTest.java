@@ -60,6 +60,6 @@ class MomentServiceTest {
         assertNotNull(createdMoment);
         assertEquals(moment, createdMoment);
         assertEquals(List.of(1L, 2L), createdMoment.getUserIds());
-        verify(momentRepository, times(2)).save(moment);
+        verify(momentRepository, times(1)).save(moment);
     }
 }
