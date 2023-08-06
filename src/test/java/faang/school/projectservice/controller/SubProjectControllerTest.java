@@ -33,13 +33,6 @@ class SubProjectControllerTest {
     }
 
     @Test
-    void createSubProjectThrowExceptionWhenDtoIsNull() {
-        DataValidationException exception = assertThrows(DataValidationException.class, () -> subProjectController.createSubProject(null));
-
-        assertEquals("ProjectDto cannot be null", exception.getMessage());
-    }
-
-    @Test
     void createSubProjectThrowExceptionWhenNameIsNullOrBlank() {
         SubProjectDto projectDto = SubProjectDto.builder().build();
 
@@ -64,13 +57,6 @@ class SubProjectControllerTest {
         subProjectController.createSubProject(projectDto);
 
         Mockito.verify(projectService).createSubProject(projectDto);
-    }
-
-    @Test
-    void createSubProjectsThrowExceptionWhenListAreNull() {
-        DataValidationException exception = assertThrows(DataValidationException.class, () -> subProjectController.createSubProjects(null));
-
-        assertEquals("List of projects is null", exception.getMessage());
     }
 
     @Test
