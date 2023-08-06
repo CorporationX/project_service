@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MomentExistingException.class)
-    public ResponseEntity<Error> handleMomentExistingException(MomentExistingException e){
+    public ResponseEntity<Error> handleMomentExistingException(MomentExistingException e) {
         log.error("MomentExistingException: {}", e.getMessage());
 
         return ResponseEntity
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Error> handleEntityNotFoundException(EntityNotFoundException e){
+    public ResponseEntity<Error> handleEntityNotFoundException(EntityNotFoundException e) {
         log.error("EntityNotFoundException: {}", e.getMessage());
 
         return ResponseEntity
