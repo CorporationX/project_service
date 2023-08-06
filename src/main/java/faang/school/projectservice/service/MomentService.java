@@ -45,8 +45,8 @@ public class MomentService {
 
     public MomentDto update(Long id, MomentDto momentDto) {
         Moment oldMoment = findById(id);
-        MomentDto dto = checkNewProjects(oldMoment, momentDto);
-        Moment newMoment = checkNewMembers(oldMoment, dto);
+        MomentDto checkedDto = checkNewProjects(oldMoment, momentDto);
+        Moment newMoment = checkNewMembers(oldMoment, checkedDto);
         return momentMapper.toDto(momentRepository.save(newMoment));
     }
 

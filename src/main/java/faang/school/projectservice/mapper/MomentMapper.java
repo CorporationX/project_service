@@ -25,12 +25,16 @@ public interface MomentMapper {
 
     @Named("resourceToIdList")
     default List<Long> resourceToIdList(List<Resource> resource) {
-        return resource != null ? resource.stream().map(Resource::getId).toList() : Collections.emptyList();
+        return resource != null ? resource.stream()
+                .map(Resource::getId)
+                .toList() : Collections.emptyList();
     }
 
     @Named("projectsToIdList")
     default List<Long> projectsToIdList(List<Project> projects) {
-        return projects != null ? projects.stream().map(Project::getId).toList() : Collections.emptyList();
+        return projects != null ? projects.stream()
+                .map(Project::getId)
+                .toList() : Collections.emptyList();
     }
 
     @Named("idsToProjectList")
