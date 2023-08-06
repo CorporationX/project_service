@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.model.Project;
@@ -11,7 +12,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TaskService;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import static faang.school.projectservice.model.stage.StageStatus.CREATED;
+import static faang.school.projectservice.model.stage.StageStatus.IN_PROGRESS;
+import static faang.school.projectservice.model.stage.StageStatus.ON_HOLD;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -49,11 +52,12 @@ public class StageServiceTest {
 
     @BeforeEach
     void init() {
-        project = Project.builder().build();
+        project = Project.builder().id(1L).build();
 
         stage = Stage.builder()
                 .stageId(1L)
                 .stageName("stage")
+                .status(CREATED)
                 .project(Project.builder().id(1L).status(ProjectStatus.CANCELLED).build())
                 .build();
 
@@ -67,6 +71,7 @@ public class StageServiceTest {
                 .stageId(1L)
                 .stageName("stage")
                 .tasks(tasks)
+                .status(IN_PROGRESS)
                 .project(Project.builder()
                         .id(1L)
                         .name("project")
@@ -79,6 +84,7 @@ public class StageServiceTest {
         stages.add(stage);
         stages.add(stageOne);
         project.setStages(stages);
+
     }
 
     @Test
@@ -119,6 +125,29 @@ public class StageServiceTest {
     void testFindAllStagesOfProject() {
         Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
         stageService.findAllStagesOfProject(anyLong());
+        Mockito.verify(projectRepository).getProjectById(anyLong());
+    }
+
+    @Test
+    void shouldGetStagesWithStatus_emptyList() {
+        List<StageDto> expected = new ArrayList<>();
+        Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+        final List<StageDto> stagesOfProjectWithFilter = stageService.getStagesOfProjectWithFilter(anyLong(), ON_HOLD);
+        Assertions.assertEquals(expected, stagesOfProjectWithFilter);
+        Mockito.verify(projectRepository).getProjectById(anyLong());
+    }
+
+    @Test
+    void shouldGetStagesWithStatus() {
+        List<StageDto> expected = List.of(StageDto.builder()
+                .stageId(1L)
+                .stageName("stage")
+                .status(IN_PROGRESS)
+                .projectId(1L)
+                .build());
+        Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+        final List<StageDto> stagesOfProjectWithFilter = stageService.getStagesOfProjectWithFilter(anyLong(), IN_PROGRESS);
+        Assertions.assertEquals(expected, stagesOfProjectWithFilter);
         Mockito.verify(projectRepository).getProjectById(anyLong());
     }
 }

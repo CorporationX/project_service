@@ -11,6 +11,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage.StageStatus;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -31,7 +32,6 @@ public class StageService {
     private final StageRolesMapper stageRolesMapper;
     private final UserContext userContext;
     private final StageInvitationRepository stageInvitationRepository;
-
 
 
     public StageDto createStage(StageDto stageDto) {
@@ -59,7 +59,7 @@ public class StageService {
                 .toList();
     }
 
-    public StageDto updateStage(Long stageId, StageRolesDto stageRolesDto){
+    public StageDto updateStage(Long stageId, StageRolesDto stageRolesDto) {
         Stage stageToUpdate = stageRepository.getById(stageId);
         Project project = projectRepository.getProjectById(stageToUpdate.getProject().getId());
 
@@ -81,7 +81,7 @@ public class StageService {
                     .toList();
 
             for (TeamMember teamMember : teamMembers) {
-                if(executorsCount == 0){
+                if (executorsCount == 0) {
                     break;
                 }
                 sendStageInvitation(stageId, teamMember.getId());
@@ -97,6 +97,14 @@ public class StageService {
 
     }
 
+    public List<StageDto> getStagesOfProjectWithFilter(Long projectId, StageStatus status) {
+        List<Stage> stages = projectRepository.getProjectById(projectId).getStages();
+        return stages.stream()
+                .filter(stage -> stage.getStatus().equals(status))
+                .map(stageMapper::toDto)
+                .toList();
+    }
+
 
     private List<StageRoles> updateStageRoles(StageRolesDto stageRolesDto, Stage stage) {
         List<StageRoles> stageRoles = stage.getStageRoles();
@@ -105,8 +113,9 @@ public class StageService {
 
         return stageRoles;
     }
-    private void sendStageInvitation (long stageId, long invitedTeamMember){
-            TeamMember author = TeamMember.builder().id(userContext.getUserId()).build();
+
+    private void sendStageInvitation(long stageId, long invitedTeamMember) {
+        TeamMember author = TeamMember.builder().id(userContext.getUserId()).build();
         StageInvitation stageInvitation = StageInvitation.builder()
                 .author(author)
                 .invited(TeamMember.builder().id(invitedTeamMember).build())
