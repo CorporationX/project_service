@@ -26,7 +26,7 @@ public class InternshipController {
     public List<InternshipDto> gettingAllInternships() {
         return internshipService.gettingAllInternships();
     }
-
+    
     public InternshipDto getInternshipById(Long id) {
         return internshipService.getInternshipById(id);
     }
