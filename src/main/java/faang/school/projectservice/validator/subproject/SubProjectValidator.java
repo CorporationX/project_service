@@ -12,10 +12,12 @@ import org.springframework.stereotype.Component;
 public class SubProjectValidator {
     private final SubProjectService subProjectService;
     private final UserServiceClient userServiceClient;
+    private final String NAME="Name";
+    private final String DESCRIPTION="Description";
 
     public void validateCreateProjectDto(SubProjectCreateDto subProjectCreateDto) {
-        validateStringData(subProjectCreateDto.getName(),"Name");
-        validateStringData(subProjectCreateDto.getDescription(),"Description");
+        validateRequiredFields(subProjectCreateDto.getName(),NAME);
+        validateRequiredFields(subProjectCreateDto.getDescription(),DESCRIPTION);
 
         validateOwnerId(subProjectCreateDto.getOwnerId());
         validateParentProject(subProjectCreateDto.getParentProjectId());
@@ -31,13 +33,13 @@ public class SubProjectValidator {
         subProjectService.getProjectById(projectId);
     }
 
-    private void validateStringData(String str,String message) {
-        if (str == null) {
+    private void validateRequiredFields(String fieldData, String message) {
+        if (fieldData == null) {
             throw new DataValidationException(message+" can't be null");
         }
 
-        int discLen = str.length();
-        if (discLen == 0 || discLen >= 4096) {
+        int contentLength = fieldData.length();
+        if (contentLength == 0 || contentLength >= 4096) {
             throw new DataValidationException("You wrote wrong"+ message+", pls revise it");
         }
     }

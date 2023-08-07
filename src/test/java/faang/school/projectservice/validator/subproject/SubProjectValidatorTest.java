@@ -23,7 +23,6 @@ class SubProjectValidatorTest {
     private UserServiceClient userServiceClient;
     @InjectMocks
     private SubProjectValidator validatorClass;
-    private Method validateProjectId;
     private Method validateOwnerId;
     private Method validateParentProject;
     private Method validateStringData;
@@ -39,26 +38,6 @@ class SubProjectValidatorTest {
         validatorClass = new SubProjectValidator(subProjectService, userServiceClient);
 
         when(subProjectService.isExistProjectById(rightId)).thenReturn(false);
-    }
-
-    @Test
-    public void testValidateProjectId() throws NoSuchMethodException {
-        validateProjectId = validatorClass.getClass().getDeclaredMethod("validateProjectId", Long.class);
-        validateProjectId.setAccessible(true);
-
-        assertDoesNotThrow(() -> validateProjectId.invoke(validatorClass, rightId));
-
-        try {
-            validateProjectId.invoke(validatorClass, -rightId);
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof DataValidationException);
-        }
-
-        try {
-            validateProjectId.invoke(validatorClass, 2 * rightId);
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof DataValidationException);
-        }
     }
 
     @Test
@@ -95,13 +74,10 @@ class SubProjectValidatorTest {
 
     @Test
     public void testValidateStringData() throws NoSuchMethodException {
-        validateStringData = validatorClass.getClass().getDeclaredMethod("validateStringData", String.class, String.class);
+        validateStringData = validatorClass.getClass().getDeclaredMethod("validateRequiredFields", String.class, String.class);
         validateStringData.setAccessible(true);
 
         assertDoesNotThrow(() -> validateStringData.invoke(validatorClass, List.of(str, str).toArray()));
-
-        assertThrows(NullPointerException.class,
-                () -> validateStringData.invoke(validatorClass, List.of(null, str).toArray()));
 
         try {
             validateStringData.invoke(validatorClass, List.of("", str).toArray());
@@ -116,9 +92,6 @@ class SubProjectValidatorTest {
         validateId.setAccessible(true);
 
         assertDoesNotThrow(() -> validateId.invoke(validatorClass, rightId));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> validateId.invoke(validatorClass, null));
 
         try {
             validateId.invoke(validatorClass, -rightId);

@@ -21,8 +21,8 @@ public class SubProjectService {
         Project project = subProjectMapper.toEntity(subProjectCreateDto);
         prepareProjectForCreate(project);
 
-        projectRepository.save(project);
-        return subProjectCreateDto;
+        Project newProject = projectRepository.save(project);
+        return subProjectMapper.toDto(newProject);
     }
 
     public Project getProjectById(long projectId) {
