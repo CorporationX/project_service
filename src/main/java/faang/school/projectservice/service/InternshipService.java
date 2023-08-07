@@ -1,7 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.InternshipDto;
+import faang.school.projectservice.dto.client.InternshipFilterDto;
 import faang.school.projectservice.exceptions.InternshipValidationException;
+import faang.school.projectservice.filters.InternshipFilters.InternshipFilter;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.InternshipMapper;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Period;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static faang.school.projectservice.model.InternshipStatus.COMPLETED;
 import static faang.school.projectservice.model.InternshipStatus.IN_PROGRESS;
@@ -26,6 +29,7 @@ public class InternshipService {
     private final InternshipRepository internshipRepository;
     private final TaskRepository taskRepository;
     private final InternshipMapper internshipMapper;
+    private final List <InternshipFilter> internshipFilters;
 
     // Стажировка ВСЕГДА относится к какому-то одному проекту.
 //                internshipDto.getProjectId() > 1 &&
@@ -53,69 +57,66 @@ public class InternshipService {
         return internshipMapper.toInternshipDto(internshipRepository.save(internshipMapper.toInternship(internshipDto)));
     }
 
+    public List<InternshipDto> gettingAllInternshipsAccordingToFilters(InternshipFilterDto internshipFilterDto) {
+        Stream<Internship> internshipStream = internshipRepository.findAll().stream();
+        List <Internship> listOfInternshipFilters = internshipFilters.stream()
+                .filter(internshipFilter -> internshipFilter.isInternshipDtoValid(internshipFilterDto))
+                .flatMap(internshipFilter -> internshipFilter.filterInternshipDto(internshipStream, internshipFilterDto)).toList();
+        return listOfInternshipFilters.stream().map(internshipMapper::toInternshipDto).toList();
+    }
 
     public List <InternshipDto> gettingAllInternships (){
         return internshipRepository.findAll().stream()
                 .map(internshipMapper::toInternshipDto).toList();
     }
 
-//    public InternshipDto getInternshipById(Long id){
-//        //return internshipMapper.toInternshipDto(internshipRepository.getReferenceById(id));
-//        return internshipMapper.toInternshipDto(internshipRepository.getById(id));
-//    }
-//}
+    public InternshipDto getInternshipById(Long id){
+        //return internshipMapper.toInternshipDto(internshipRepository.getReferenceById(id));
+        return internshipMapper.toInternshipDto(internshipRepository.getById(id));
+    }
 
+    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
+        Internship internship = internshipRepository.findById(internshipDto.getId())
+                .orElseThrow(() -> new InternshipValidationException("Invalid internship Id"));
+        Project project = internship.getProject();
+        internshipBusinessValidation(internshipDto);
+        if (internship.getStatus().equals(COMPLETED)) {
+            for (TeamMember teamMember : internship.getInterns()) {
+                for (Stage stage : teamMember.getStages()) {
+                    for (Task task : stage.getTasks()) {
+                        if (task.getStatus().equals(TaskStatus.DONE)) {
+                            //team member обладает списком ролей , по логике значит
+                            //у него мб несколько ролей, значит у него ужес разу все роли
+                            //как жить ?
+                            //сложно, но можно❤️)))
+                        }
+                    }
+                }
 
+            }
 
-//    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
-//        Internship internship = internshipRepository.findById(internshipDto.getId())
-//                .orElseThrow(() -> new InternshipValidationException("Invalid internship Id"));
-//        Project project = internship.getProject();
-//        internshipBusinessValidation(internshipDto);
-//        if (internship.getStatus().equals(COMPLETED)) {
-//            for(TeamMember teamMember : internship.getInterns()) {
-//                for(Stage stage : teamMember.getStages()){
-//                    for(Task task : stage.getTasks()) {
-//                        if(task.getStatus().equals(TaskStatus.DONE)) {
-//                            //team member обладает списком ролей , по логике значит
-//                            //у него мб несколько ролей, значит у него ужес разу все роли
-//                            //как жить ?
-//                        }
-//                    }
-//                }
-//            }
-//
-//        })
-//        if (internship.getStatus().equals(IN_PROGRESS)) {
-//            List<TeamMember> interns = internship.getInterns();
-//            interns.forEach(intern -> {
-//                List<TaskStatus> tasksOfIntern = taskRepository.findAllByProjectIdAndPerformerId(internship.getProject().getId(), intern.getId())
-//                        .stream()
-//                        .map(task -> task.getStatus())
-//                        .toList();
-//                if (tasksOfIntern.stream().allMatch(task -> task.equals(TaskStatus.DONE))) {
-//                    //переписать будто стажер получает статус как у ментора
-//                    intern.addRole(TeamRole.JUNIOR);
-//                    intern.addRole(TeamRole.INTERN);
-//
-//                } else {
-//                    project.getTeam().getTeamMembers().remove(intern);
-//                }
-//            });
-//        }
-//        return internshipDto;
-//    }
-//
-//    public List<InternshipDto> filterByInternshipStatusAndRole(InternshipDto internshipDto) {
-//
-//    }
-//}
+        }
 
+        if (internship.getStatus().equals(IN_PROGRESS)) {
+            List<TeamMember> interns = internship.getInterns();
+            interns.forEach(intern -> {
+                List<TaskStatus> tasksOfIntern = taskRepository.findAllByProjectIdAndPerformerId(internship.getProject().getId(), intern.getId())
+                        .stream()
+                        .map(task -> task.getStatus())
+                        .toList();
+                if (tasksOfIntern.stream().allMatch(task -> task.equals(TaskStatus.DONE))) {
+                    //переписать будто стажер получает статус как у ментора
+                    intern.addRole(TeamRole.JUNIOR);
+                    intern.addRole(TeamRole.INTERN);
 
-
-
-
-
+                } else {
+                    project.getTeam().getTeamMembers().remove(intern);
+                }
+            });
+        }
+        return internshipDto;
+    }
+}
 
 
 

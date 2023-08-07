@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.InternshipDto;
+import faang.school.projectservice.dto.client.InternshipFilterDto;
 import faang.school.projectservice.exceptions.InternshipValidationException;
 import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +22,15 @@ public class InternshipController {
         return internshipService.internshipCreation(internshipDto);
     }
 
+
     public List<InternshipDto> gettingAllInternships() {
         return internshipService.gettingAllInternships();
     }
+    
+    public InternshipDto getInternshipById(Long id) {
+        return internshipService.getInternshipById(id);
+    }
 
-//    public InternshipDto getInternshipById(Long id) {
-//        return internshipService.getInternshipById(id);
-//    }
 
 //    public InternshipDto internshipUpdate(Long id, InternshipDto internshipDto) {
 //        if (internshipCommonValidation(internshipDto)) {
@@ -44,6 +47,9 @@ public class InternshipController {
         }
     }
 
+    public  List<InternshipDto> gettingAllInternshipsAccordingToFilters (InternshipFilterDto internshipFilterDto) {
+        return internshipService.gettingAllInternshipsAccordingToFilters(internshipFilterDto);
+    }
 
     private boolean internshipCommonValidation(InternshipDto internshipDto) {
         return internshipDto.getName() == null &&
