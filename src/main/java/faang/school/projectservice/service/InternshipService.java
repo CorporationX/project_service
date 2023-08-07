@@ -75,7 +75,6 @@ public class InternshipService {
         return internshipMapper.toInternshipDto(internshipRepository.getById(id));
     }
 
-
     public InternshipDto internshipUpdate(InternshipDto internshipDto) {
         Internship internship = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new InternshipValidationException("Invalid internship Id"));

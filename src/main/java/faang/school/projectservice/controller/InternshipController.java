@@ -31,6 +31,7 @@ public class InternshipController {
         return internshipService.getInternshipById(id);
     }
 
+
 //    public InternshipDto internshipUpdate(Long id, InternshipDto internshipDto) {
 //        if (internshipCommonValidation(internshipDto)) {
 //            throw new InternshipValidationException("Validation parameters did not passed!");
