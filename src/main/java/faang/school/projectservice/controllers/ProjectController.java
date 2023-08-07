@@ -22,7 +22,7 @@ public class ProjectController {
 
     @PostMapping("/project")
     public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
-        validateProject(projectDto);
+//        validateProject(projectDto);
         return projectService.createProject(projectDto);
     }
 

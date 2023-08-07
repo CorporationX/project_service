@@ -1,17 +1,20 @@
 package faang.school.projectservice.service;
 
 
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mappers.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filter.ProjectFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -50,6 +53,10 @@ class ProjectServiceTest {
                 .ownerId(1L)
                 .visibility(ProjectVisibility.valueOf("PUBLIC"))
                 .build();
+
+        ProjectFilter projectFilter = Mockito.mock(ProjectFilter.class);
+        List<ProjectFilter> projectFilters = List.of(projectFilter);
+        projectService = new ProjectService(projectRepository, projectMapper, projectFilters);
     }
 
     @Test
@@ -84,4 +91,5 @@ class ProjectServiceTest {
         projectService.getAllProject();
         verify(projectRepository).findAll();
     }
+
 }
