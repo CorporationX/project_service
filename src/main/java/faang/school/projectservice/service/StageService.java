@@ -93,14 +93,23 @@ public class StageService {
     }
 
     private Stage setNewFieldsForStage(Stage stageFromRepository, StageDtoForUpdate stageDto) {
-        Map<String, Long> teamRolesMap = stageDto.getTeamRoles().stream().collect(Collectors.groupingBy(TeamRole::toString, Collectors.counting()));
+        List<TeamRole> teamRolesFromStageFromRepository = new ArrayList<>();
+        stageFromRepository.getStageRoles().forEach(stageRoles -> {
+            for (int i = 0; i < stageRoles.getCount(); i++) {
+                teamRolesFromStageFromRepository.add(stageRoles.getTeamRole());
+            }
+        });
+        teamRolesFromStageFromRepository.addAll(stageDto.getTeamRoles());
+        Map<String, Long> teamRolesMap = teamRolesFromStageFromRepository.stream().collect(Collectors.groupingBy(TeamRole::toString, Collectors.counting()));
         List<StageRoles> newStageRoles = new ArrayList<>();
 
         for (Map.Entry<String, Long> entry : teamRolesMap.entrySet()) {
             Integer count = Math.toIntExact(entry.getValue());
             newStageRoles.add(StageRoles.builder().teamRole(TeamRole.valueOf(entry.getKey())).count(count).build());
         }
+
         stageFromRepository.setStageRoles(newStageRoles);
+        stageFromRepository.getStageRoles().forEach(stageRole -> stageRole.setStage(stageFromRepository));
         stageFromRepository.setStageName(stageDto.getStageName());
         stageFromRepository.setStatus(stageDto.getStatus());
 
