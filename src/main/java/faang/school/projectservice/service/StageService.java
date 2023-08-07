@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -95,13 +96,13 @@ public class StageService {
     }
 
     private Stage setNewFieldsForStage(Stage stageFromRepository, StageDtoForUpdate stageDto) {
-        List<TeamRole> teamRolesFromStageFromRepository = new ArrayList<>();
-        stageFromRepository.getStageRoles().forEach(stageRoles -> {
-            for(int i = 0; i < stageRoles.getCount(); i++){
-                teamRolesFromStageFromRepository.add(stageRoles.getTeamRole());
-            }
-        });
+        List<TeamRole> teamRolesFromStageFromRepository = stageFromRepository.getStageRoles().stream()
+                .flatMap(stageRoles -> IntStream.range(0, stageRoles.getCount())
+                        .mapToObj(i -> stageRoles.getTeamRole()))
+                .collect(Collectors.toList());
+
         teamRolesFromStageFromRepository.addAll(stageDto.getTeamRoles());
+
         Map<String, Long> teamRolesMap = teamRolesFromStageFromRepository.stream().collect(Collectors.groupingBy(TeamRole::toString, Collectors.counting()));
         List<StageRoles> newStageRoles = new ArrayList<>();
 
@@ -110,13 +111,11 @@ public class StageService {
             newStageRoles.add(StageRoles.builder().teamRole(TeamRole.valueOf(entry.getKey())).count(count).build());
         }
 
-        for (StageRoles stageRoles : newStageRoles) {
-            for (StageRoles stageRolesFromRepo : stageFromRepository.getStageRoles()) {
-                if (stageRolesFromRepo.getTeamRole().toString().equals(stageRoles.getTeamRole().toString())) {
-                    stageRolesRepository.delete(stageRolesFromRepo);
-                }
-            }
-        }
+        newStageRoles.forEach(stageRoles ->
+                stageFromRepository.getStageRoles().stream()
+                        .filter(stageRolesFromRepo -> stageRolesFromRepo.getTeamRole().toString().equals(stageRoles.getTeamRole().toString()))
+                        .forEach(stageRolesRepository::delete)
+        );
 
         stageFromRepository.setStageRoles(newStageRoles);
         stageFromRepository.getStageRoles().forEach(stageRole -> stageRole.setStage(stageFromRepository));
