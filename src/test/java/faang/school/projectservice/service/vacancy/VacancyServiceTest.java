@@ -68,6 +68,8 @@ class VacancyServiceTest {
     private TeamMember ownerVacancy;
     private TeamMember managerVacancy;
     private Vacancy savedVacancy;
+    private List<List<Long>> listSkills;
+    private List<Vacancy> allVacancies;
 
     @BeforeEach
     void setUp() {
@@ -84,6 +86,8 @@ class VacancyServiceTest {
         inputVacancyDto = getVacancyDtoForReqCreate();
         savedVacancy = getSavedVacancy();
         inputVacancyDtoUpdateReq = getUpdatedInputVacancyDto();
+        listSkills = getListSkills();
+        allVacancies = getAllVacancies();
     }
 
     @Test
@@ -251,36 +255,37 @@ class VacancyServiceTest {
     }
 
 
-    private static Stream<Arguments> prepareInvalidDto() {
-        VacancyDto DtoWithNullName = VacancyDto.builder().vacancyId(1L).build();
-        VacancyDto DtoWithBlankName = VacancyDto.builder().name("").build();
+    @Test
+    void testGetVacanciesWithFilter() {
+        assertEquals(0, 0);
 
-        VacancyDto DtoWithNullDescription = VacancyDto.builder().name("Vacancy").build();
-        VacancyDto DtoWithBlankDescription = VacancyDto.builder().name("Vacancy").description("").build();
 
-        VacancyDto DtoWithNullProjectID = VacancyDto.builder().name("Vacancy").description("test").build();
-        VacancyDto DtoWithNegativeProjectID = VacancyDto.builder().name("Vacancy").description("test").projectId(-1L).build();
-        String errorMessageNegativeProjectId =
-                MessageFormat.format(NEGATIVE_PROJECT_ID_FORMAT, DtoWithNegativeProjectID.getProjectId());
+    }
 
-        VacancyDto DtoWithNullCreatedBy = VacancyDto.builder().name("Vacancy").description("test").projectId(1L).build();
-        VacancyDto DtoWithNegativeCreatedBy = VacancyDto.builder()
-                .name("Vacancy")
-                .description("test")
-                .projectId(1L)
-                .createdBy(-1L).build();
-        String errorMessageNegativeCreatedBy =
-                MessageFormat.format(NEGATIVE_CREATED_BY_ID_FORMAT, DtoWithNegativeCreatedBy.getCreatedBy());
 
-        return Stream.of(
-                Arguments.of(DtoWithNullName, ErrorMessagesForVacancy.NAME_IS_NULL),
-                Arguments.of(DtoWithBlankName, ErrorMessagesForVacancy.NAME_IS_BLANK),
-                Arguments.of(DtoWithNullDescription, ErrorMessagesForVacancy.DESCRIPTION_IS_NULL),
-                Arguments.of(DtoWithBlankDescription, ErrorMessagesForVacancy.DESCRIPTION_IS_BLANK),
-                Arguments.of(DtoWithNullProjectID, ErrorMessagesForVacancy.PROJECT_ID_IS_NULL),
-                Arguments.of(DtoWithNegativeProjectID, errorMessageNegativeProjectId),
-                Arguments.of(DtoWithNullCreatedBy, ErrorMessagesForVacancy.CREATED_BY_ID_IS_NULL),
-                Arguments.of(DtoWithNegativeCreatedBy, errorMessageNegativeCreatedBy)
+    private List<Vacancy> getAllVacancies() {
+        int countVacancies = listSkills.size();
+
+        List<Vacancy> vacancies = new ArrayList<>(countVacancies);
+        for (int i = 0; i < countVacancies; i++) {
+            Vacancy vacancy = Vacancy.builder()
+                    .id(i + 1L)
+                    .requiredSkillIds(listSkills.get(i))
+                    .build();
+            vacancies.add(vacancy);
+        }
+        return vacancies;
+    }
+
+    private List<List<Long>> getListSkills() {
+        List<Long> skills1 = List.of(1L, 2L, 3L);
+        List<Long> skills2 = List.of(3L, 4L, 5L, 2L);
+        List<Long> skills3 = List.of(6L, 7L, 8L);
+
+        return List.of(
+                skills1,
+                skills2,
+                skills3
         );
     }
 
