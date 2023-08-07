@@ -53,9 +53,9 @@ public class InternshipServiceTest {
     public void saveNewInternshipWithWrongDateTest() {
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> internshipService.saveNewInternship(InternshipDto.builder()
-                        .projectId(1L)
+                        .projectId(2L)
                         .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(4, ChronoUnit.MONTHS))
-                        .internsId(List.of(1L))
+                        .internsId(List.of(2L))
                         .build()));
         assertEquals(exception.getMessage(), "Internship cannot last more than 3 months!");
     }
@@ -64,8 +64,8 @@ public class InternshipServiceTest {
     public void saveNewInternshipWithoutMentorTest() {
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> internshipService.saveNewInternship(InternshipDto.builder()
-                        .projectId(1L)
-                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                        .projectId(2L)
+                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                         .mentorId(null)
                         .build()));
         assertEquals("There is not mentor for internship!", exception.getMessage());

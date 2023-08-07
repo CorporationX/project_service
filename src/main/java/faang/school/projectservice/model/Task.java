@@ -36,7 +36,7 @@ public class Task {
     private Long performerUserId;
 
     @Column(name = "reporter_user_id", nullable = false)
-    private Long reporterUserId;
+        private Long reporterUserId;
 
     @Column(name = "minutes_tracked")
     private Integer minutesTracked;

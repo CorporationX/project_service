@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.client.InternshipFilterDto;
 import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -20,9 +19,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InternshipService {
     private final InternshipRepository internshipRepository;
-    private final InternshipMapper internshipMapper;
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
+    private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> filterList;
 
     public InternshipDto saveNewInternship(InternshipDto internshipDto) { //1 создать стажировку
@@ -45,7 +44,7 @@ public class InternshipService {
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setInterns(getListOfInterns(internshipDto.getInternsId())); //50
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            List<TeamMember> interns = internsDoneTasks(internshipDto.getInternsId()); //60
+            List<TeamMember> interns = internsDoneTasks(internshipDto.getInternsId(), new Task()); //60
             TeamRole role = TeamRole.DEVELOPER;
             for (TeamMember intern : interns) {
                 intern.setRoles(List.of(role));
@@ -54,7 +53,7 @@ public class InternshipService {
         } else {
             return internshipMapper.toDto(internshipRepository.save(internship));
         }
-        return null;
+        return internshipDto;
     }
 
     public List<TeamMember> getListOfInterns(List<Long> interns) { //2.1
@@ -67,29 +66,27 @@ public class InternshipService {
         return secondListOfInterns;
     }
 
-    public List<TeamMember> internsDoneTasks(List<Long> interns) { //2.2
-        int sizeOfListInterns = interns.size();
-        List<TeamMember> secondListOfInterns = new ArrayList<>(sizeOfListInterns);
-        for (Long aLong : interns) {
+    public List<TeamMember> internsDoneTasks(List<Long> allInternsOnInternship, Task task) { //2.2
+        int sizeOfListInterns = allInternsOnInternship.size();
+        List<TeamMember> listWithThePassedParticipants = new ArrayList<>(sizeOfListInterns);
+        for (Long aLong : allInternsOnInternship) {
             TeamMember intern = teamMemberRepository.findById(aLong);
-            if (checkTaskDone(intern)) { //72
-                secondListOfInterns.add(intern);
+            if (checkTaskDone(allInternsOnInternship, task)) { //72
+                listWithThePassedParticipants.add(intern);
             }
         }
-        return secondListOfInterns;
+        return listWithThePassedParticipants;
     }
 
-    public boolean checkTaskDone(TeamMember member) { //2.3
-        List<Stage> stages = member.getStages();
-        for (Stage stage : stages) {
-            List<Task> tasks = stage.getTasks();
-            for (Task task : tasks) {
-                if (!task.getStatus().equals(TaskStatus.DONE)) {
-                    return false;
+    public boolean checkTaskDone(List<Long> interns, Task task) { //2.3
+        for (Long aLong : interns) {
+            if (aLong.longValue() == task.getPerformerUserId()) {
+                if (task.getStatus().equals(TaskStatus.DONE)) {
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     public List<InternshipDto> findInternshipsByStatusWithFilter(long projectId, InternshipFilterDto filterDto) { //3 получить все стажировки по статусу

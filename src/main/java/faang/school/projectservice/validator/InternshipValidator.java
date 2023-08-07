@@ -8,6 +8,7 @@ import faang.school.projectservice.model.InternshipStatus;
 import java.time.temporal.ChronoUnit;
 
 public class InternshipValidator {
+
     public static void validateControllerInternship(InternshipDto internshipDto) {
         if (internshipDto == null) {
             throw new DataValidationException("There is not internship!");
@@ -22,9 +23,9 @@ public class InternshipValidator {
     public static void validateServiceSaveInternship(InternshipDto internshipDto) {
 
         if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate().plus(3, ChronoUnit.MONTHS))) {
-            throw new DataValidationException("Internship cannot last more than 3 months!");
+            throw new DataValidationException("Internship cannot last more than 3 months!"); //?
         }
-        if (internshipDto.getMentorId() == null) {
+        if (internshipDto.getMentorId() == null || internshipDto.getMentorId() < 1) {
             throw new DataValidationException("There is not mentor for internship!");
         }
         if (internshipDto.getInternsId() == null || internshipDto.getInternsId().isEmpty()) {
@@ -37,7 +38,7 @@ public class InternshipValidator {
 
     public static void validateServiceUpdateInternship(Internship oldInternship, InternshipDto internshipDto) {
         if (oldInternship.getStatus() == null || oldInternship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            throw new DataValidationException("Internship is over!");
+            throw new DataValidationException("Internship is over!");//?
         }
         if (oldInternship.getInterns().size() < internshipDto.getInternsId().size()) {
             throw new DataValidationException("Can't add new interns!");

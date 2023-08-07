@@ -10,33 +10,34 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
 
-    @PostMapping("/saveInternship")
+    @PostMapping("/internship")
     public InternshipDto saveNewInternship(@RequestBody InternshipDto internshipDto) {
-        InternshipValidator.validateControllerInternship(internshipDto);
+        InternshipValidator.validateServiceSaveInternship(internshipDto);
         return internshipService.saveNewInternship(internshipDto);
     }
 
-    @PutMapping("/updateInternship/{id}")
-    public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto,@PathVariable Long id) {
+    @PutMapping("/internship/{id}")
+    public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto, @PathVariable Long id) {
         InternshipValidator.validateControllerInternship(internshipDto);
         return internshipService.updateInternship(internshipDto, id);
     }
 
-    @GetMapping("/findInternshipsWithFilter/{projectId}")
-    public List<InternshipDto> findInternshipsWithFilter(@RequestBody InternshipFilterDto filterDto,@PathVariable Long projectId) {
+    @GetMapping("/internshipsWithFilter/{projectId}")
+    public List<InternshipDto> findInternshipsWithFilter(@RequestBody InternshipFilterDto filterDto, @PathVariable Long projectId) {
         return internshipService.findInternshipsByStatusWithFilter(projectId, filterDto);
     }
 
-    @GetMapping("/getAllInternship")
+    @GetMapping("/allInternship")
     public List<InternshipDto> getAllInternships() {
         return internshipService.getAllInternships();
     }
 
-    @GetMapping("/findAllInternshipById/{id}")
+    @GetMapping("/allInternship/{id}")
     public InternshipDto findAllInternshipById(@PathVariable Long id) {
         return internshipService.findAllInternshipById(id);
     }
