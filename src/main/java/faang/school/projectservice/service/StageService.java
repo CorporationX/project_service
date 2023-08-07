@@ -2,14 +2,15 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageDtoForUpdate;
+import faang.school.projectservice.dto.invitation.StageInvitationDto;
+import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -33,6 +34,8 @@ public class StageService {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final StageValidator stageValidator;
+    private final StageInvitationService stageInvitationService;
+    private final StageRolesRepository stageRolesRepository;
     @Transactional
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
@@ -86,7 +89,7 @@ public class StageService {
         Stage stageAfterUpdate = setNewFieldsForStage(stageFromRepository, stageDto);
         log.debug("Stage after update is successfully retrieved");
 
-        sendStageInvitation(stageFromRepository, newTeamRoles, author);
+        sendStageInvitation(stageAfterUpdate, newTeamRoles, author);
         log.debug("Stage invitation is successfully sent");
 
         return stageMapper.toDto(stageRepository.save(stageAfterUpdate));
@@ -95,7 +98,7 @@ public class StageService {
     private Stage setNewFieldsForStage(Stage stageFromRepository, StageDtoForUpdate stageDto) {
         List<TeamRole> teamRolesFromStageFromRepository = new ArrayList<>();
         stageFromRepository.getStageRoles().forEach(stageRoles -> {
-            for (int i = 0; i < stageRoles.getCount(); i++) {
+            for(int i = 0; i < stageRoles.getCount(); i++){
                 teamRolesFromStageFromRepository.add(stageRoles.getTeamRole());
             }
         });
@@ -108,6 +111,14 @@ public class StageService {
             newStageRoles.add(StageRoles.builder().teamRole(TeamRole.valueOf(entry.getKey())).count(count).build());
         }
 
+        for (StageRoles stageRoles : newStageRoles) {
+            for (StageRoles stageRolesFromRepo : stageFromRepository.getStageRoles()) {
+                if (stageRolesFromRepo.getTeamRole().toString().equals(stageRoles.getTeamRole().toString())) {
+                    stageRolesRepository.delete(stageRolesFromRepo);
+                }
+            }
+        }
+
         stageFromRepository.setStageRoles(newStageRoles);
         stageFromRepository.getStageRoles().forEach(stageRole -> stageRole.setStage(stageFromRepository));
         stageFromRepository.setStageName(stageDto.getStageName());
@@ -116,9 +127,9 @@ public class StageService {
         return stageFromRepository;
     }
 
-    private void sendStageInvitation(Stage stageFromRepository, List<TeamRole> newTemRoles, TeamMember author) {
+    private void sendStageInvitation(Stage stage, List<TeamRole> newTemRoles, TeamMember author) {
         if (!newTemRoles.isEmpty()) {
-            Project projectFromRepository = projectRepository.getProjectById(stageFromRepository.getProject().getId());
+            Project projectFromRepository = projectRepository.getProjectById(stage.getProject().getId());
 
             newTemRoles
                     .forEach(teamRole ->
@@ -127,12 +138,11 @@ public class StageService {
                                     .flatMap(team -> team.getTeamMembers()
                                             .stream())
                                     .filter(teamMember -> teamMember.getRoles().contains(teamRole))
-                                    .forEach(teamMember -> StageInvitation.builder()
+                                    .forEach(teamMember -> stageInvitationService.sendInvitation(StageInvitationDto.builder()
                                             .invited(teamMember)
                                             .author(author)
-                                            .stage(stageFromRepository)
-                                            .status(StageInvitationStatus.PENDING)
-                                            .build()));
+                                            .stage(stage)
+                                            .build())));
         }
     }
 
