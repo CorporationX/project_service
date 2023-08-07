@@ -107,7 +107,7 @@ public class StageService {
         List<StageRoles> newStageRoles = new ArrayList<>();
 
         for (Map.Entry<String, Long> entry : teamRolesMap.entrySet()) {
-            Integer count = Math.toIntExact(entry.getValue());
+            int count = Math.toIntExact(entry.getValue());
             newStageRoles.add(StageRoles.builder().teamRole(TeamRole.valueOf(entry.getKey())).count(count).build());
         }
 
@@ -145,11 +145,11 @@ public class StageService {
     }
 
     private List<TeamRole> findNewTeamRoles(Stage stageFromRepository, List<TeamRole> teamRoles) {
-
-        stageFromRepository.getExecutors()
-                .forEach(teamMember -> teamMember.getRoles()
-                        .forEach(teamRole -> teamRoles
-                                .removeIf(role -> role.equals(teamRole))));
+        List<TeamRole> rolesToRemove = stageFromRepository.getExecutors()
+                .stream()
+                .flatMap(teamMember -> teamMember.getRoles().stream())
+                .toList();
+        teamRoles.removeIf(rolesToRemove::contains);
 
         return teamRoles;
     }

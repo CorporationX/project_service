@@ -34,14 +34,14 @@ public class StageController {
     private final StageService stageService;
 
     @Operation(summary = "Create stage")
-    @PostMapping("/stages")
+    @PostMapping()
     public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
         log.debug("Received request to create stage: {}", stageDto);
         return stageService.createStage(stageDto);
     }
 
     @Operation(summary = "Filter stages by status")
-    @PostMapping("/filterStatus")
+    @GetMapping("/filterStatus")
     public List<StageDto> getAllStagesByStatus(@RequestParam(value = "status")
                                                @Parameter(description = "Status of stages", example = "created")
                                                @NotEmpty String status) {
@@ -50,8 +50,8 @@ public class StageController {
     }
 
     @Operation(summary = "Delete stage")
-    @DeleteMapping("/deleteStage/{stageId}")
-    public void deleteStage(@PathVariable("stageId")
+    @DeleteMapping("/delete/{stageId}")
+    public void deleteStage(@PathVariable
                             @Parameter(description = "Stage ID", example = "1")
                             @NotNull Long stageId) {
         log.debug("Received request to delete stage by ID: {}", stageId);
@@ -66,17 +66,16 @@ public class StageController {
     }
 
     @Operation(summary = "Get all stages")
-    @GetMapping("/allStages")
+    @GetMapping("/list")
     public List<StageDto> getAllStages() {
         log.debug("Received request to get all stages");
         return stageService.getAllStages();
     }
 
     @Operation(summary = "Get stage by ID")
-    @PostMapping("/stageById/{stageId}")
-    public StageDto getStageById(@PathVariable("stageId")
-                                 @Parameter(description = "Stage ID", example = "1")
-                                 @NotNull Long stageId) {
+    @PostMapping("/Id/{stageId}")
+    public StageDto getStageById(@Parameter(description = "Stage ID", example = "1")
+                                 @PathVariable @NotNull Long stageId) {
         log.debug("Received request to get stage by ID: {}", stageId);
         return stageService.getStageById(stageId);
     }
