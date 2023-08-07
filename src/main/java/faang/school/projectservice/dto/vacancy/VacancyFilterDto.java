@@ -11,7 +11,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class VacancyFilterDto {
-    // Получить все вакансии с фильтрами по позиции и названию.
     private String namePattern;
     private List<Long> skillsPattern;
 }

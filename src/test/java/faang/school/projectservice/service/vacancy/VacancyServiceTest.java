@@ -1,10 +1,13 @@
 package faang.school.projectservice.service.vacancy;
 
-import faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDtoGetReq;
 import faang.school.projectservice.dto.vacancy.VacancyDtoUpdateReq;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
+import faang.school.projectservice.filters.vacancy.FilterByName;
+import faang.school.projectservice.filters.vacancy.FilterBySkill;
+import faang.school.projectservice.filters.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -14,7 +17,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.provider.Arguments;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,7 +88,7 @@ class VacancyServiceTest {
         savedVacancy = getSavedVacancy();
         inputVacancyDtoUpdateReq = getUpdatedInputVacancyDto();
         listSkills = getListSkills();
-        allVacancies = getAllVacancies();
+        allVacancies = getAllSavedVacancies();
     }
 
     @Test
@@ -257,30 +258,69 @@ class VacancyServiceTest {
 
     @Test
     void testGetVacanciesWithFilter() {
-        assertEquals(0, 0);
+        List<VacancyFilter> vacancyFilters = getVacancyFilter();
+        vacancyService = new VacancyService(
+                vacancyRepository, vacancyMapper, projectRepository, teamMemberRepository, vacancyFilters);
+        VacancyFilterDto vacancyFilterDto = getVacancyFilterDto();
+        Mockito.when(vacancyRepository.findAll()).thenReturn(allVacancies);
+        List<VacancyDto> expetedResult = getExpectedvacanciesAfterFilter();
 
+        List<VacancyDto> result = vacancyService.getVacaniesByFilter(vacancyFilterDto);
+
+        assertEquals(expetedResult, result);
 
     }
 
 
-    private List<Vacancy> getAllVacancies() {
+    private List<Vacancy> getAllSavedVacancies() {
         int countVacancies = listSkills.size();
 
         List<Vacancy> vacancies = new ArrayList<>(countVacancies);
         for (int i = 0; i < countVacancies; i++) {
             Vacancy vacancy = Vacancy.builder()
                     .id(i + 1L)
+                    .name("Vacancy " + (i + 1))
+                    .description("Description for vacancy " + (i + 1))
                     .requiredSkillIds(listSkills.get(i))
+                    .status(VacancyStatus.OPEN)
                     .build();
             vacancies.add(vacancy);
         }
         return vacancies;
     }
 
+    private List<VacancyFilter> getVacancyFilter() {
+        FilterByName filter1 = new FilterByName();
+        FilterBySkill filter2 = new FilterBySkill();
+        return List.of(filter1, filter2);
+    }
+
+    private VacancyFilterDto getVacancyFilterDto() {
+        List<Long> needSkill = List.of(2L, 3L);
+        return VacancyFilterDto.builder()
+                .skillsPattern(needSkill).build();
+    }
+
+    private List<VacancyDto> getExpectedvacanciesAfterFilter() {
+        VacancyDto vacancyDto1 = VacancyDto.builder()
+                .vacancyId(1L)
+                .name("Vacancy 1")
+                .description("Description for vacancy 1")
+                .build();
+        VacancyDto vacancyDto2 = VacancyDto.builder()
+                .vacancyId(2L)
+                .name("Vacancy 2")
+                .description("Description for vacancy 2")
+                .build();
+
+        return List.of(vacancyDto1,
+                vacancyDto2);
+    }
+
     private List<List<Long>> getListSkills() {
         List<Long> skills1 = List.of(1L, 2L, 3L);
         List<Long> skills2 = List.of(3L, 4L, 5L, 2L);
-        List<Long> skills3 = List.of(6L, 7L, 8L);
+        List<Long> skills3 = List.of(6L, 7L, 8L, 2L);
 
         return List.of(
                 skills1,

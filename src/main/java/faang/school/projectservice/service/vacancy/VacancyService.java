@@ -107,13 +107,6 @@ public class VacancyService {
         }
     }
 
-    private void checkProjectIsExist(Long projectId) {
-        if (!projectRepository.existsById(projectId)) {
-            String errorMessage = MessageFormat.format(PROJECT_NOT_EXIST_FORMAT, projectId);
-            throw new VacancyValidateException(errorMessage);
-        }
-    }
-
     private void checkCreatorVacancy(Long creatorId) {
         TeamMember owner = teamMemberRepository.findById(creatorId);
         if (!owner.getRoles().contains(TeamRole.OWNER)) {
