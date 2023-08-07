@@ -21,7 +21,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
-import jakarta.transaction.Transactional;
+import  org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +47,7 @@ public class StageService {
         return stageMapper.toStageDto(stage);
     }
 
+    @Transactional
     public void deleteStage(Long stageId1, DeleteStageDto deleteStageDto, Long stageId2) {
         Stage stage = stageRepository.getById(stageId1);
         List<Task> tasks = stage.getTasks();
@@ -65,6 +66,7 @@ public class StageService {
         stageRepository.delete(stage);
     }
 
+    @Transactional(readOnly = true)
     public List<StageDto> getAllStage(ProjectDto projectDto) {
         if (projectDto.getName().isBlank()) {
             throw new ProjectException("Name cannot be empty");
@@ -76,11 +78,13 @@ public class StageService {
         return projectDto.getStageList();
     }
 
+    @Transactional(readOnly = true)
     public StageDto getStageById(Long id) {
         Stage stage = stageRepository.getById(id);
         return stageMapper.toStageDto(stage);
     }
 
+    @Transactional(readOnly = true)
     public List<StageDto> filterByStatus(StageFilterDto stageFilterDto) {
         List<Stage> stages = stageRepository.findAll();
         Stream<Stage> projectStream = stages.stream();
@@ -91,6 +95,7 @@ public class StageService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public void updateStageRoles(Long id, StageRolesDto stageRoles) {
         Stage stage = stageRepository.getById(id);
         int countTeamRoles = getTotalTeamRoles(stageRoles, stage);

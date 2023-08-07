@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.filter;
 
-import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,5 +16,4 @@ import java.util.List;
 @Builder
 public class StageFilterDto {
     private TaskStatus taskStatus;
-    private List<Task> tasks;
 }

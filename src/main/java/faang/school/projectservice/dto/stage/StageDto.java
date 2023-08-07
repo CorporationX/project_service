@@ -1,9 +1,7 @@
 package faang.school.projectservice.dto.stage;
 
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.task.TaskDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,8 +18,7 @@ import java.util.List;
 public class StageDto {
     private Long stageId;
     private String stageName;
-    private Project project;
-    private List<Task> tasks;
-    private List<StageRoles> stageRoles;
-    private List<TeamMember> executors;
+    private ProjectDto project;
+    private List<TaskDto> tasks;
+    private List<StageRolesDto> stageRoles;
 }
