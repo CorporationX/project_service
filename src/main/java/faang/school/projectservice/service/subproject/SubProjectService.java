@@ -1,59 +1,46 @@
 package faang.school.projectservice.service.subproject;
 
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectUpdateDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class SubProjectService {
-    private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
     private final MomentService momentService;
+    private final SubProjectValidator subProjectValidator;
     private final ProjectMapper projectMapper;
+    private final MomentMapper momentMapper;
 
-    public long updateStatusSubProject(StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
-        Project project = getProjectById(statusSubprojectUpdateDto.getId());
+    public ProjectDto updateStatusSubProject(StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
+        Project project = projectService.getProjectById(statusSubprojectUpdateDto.getId());
         ProjectStatus status = statusSubprojectUpdateDto.getStatus();
 
-        validateSubProjectStatus(project,status);
+        subProjectValidator.validateSubProjectStatus(project, status);
+        updateDataSubproject(project, status);
+
+        return projectMapper.toProjectDto(project);
+    }
+
+    private void updateDataSubproject(Project project, ProjectStatus status) {
+        if (status == ProjectStatus.COMPLETED &&
+                project.getVisibility() != ProjectVisibility.PRIVATE) {
+            momentService.createMoment(momentMapper.toMomentDtoCompleted(project));
+        }
 
         project.setStatus(status);
         project.setUpdatedAt(LocalDateTime.now());
-
-        return momentService.createMoment(projectMapper.toProjectDto(project));
-    }
-
-    public Project getProjectById(long projectId) {
-        return projectRepository.getProjectById(projectId);
-    }
-
-    public boolean isExistProjectById(long projectId) {
-        return projectRepository.existsById(projectId);
-    }
-
-    private boolean checkStatusChildren(List<Project> projects) {
-        for (Project project : projects) {
-            if (project.getStatus() != ProjectStatus.COMPLETED) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void validateSubProjectStatus(Project project, ProjectStatus status){
-        if (status == ProjectStatus.COMPLETED && project.getChildren() != null) {
-            if (!checkStatusChildren(project.getChildren())) {
-                throw new DataValidationException("You can make the project completed only after finishing all subprojects");
-            }
-        }
     }
 }

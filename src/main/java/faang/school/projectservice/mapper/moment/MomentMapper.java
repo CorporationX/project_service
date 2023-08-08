@@ -1,18 +1,36 @@
 package faang.school.projectservice.mapper.moment;
 
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import org.mapstruct.InjectionStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
+import faang.school.projectservice.model.TeamMember;
+import org.mapstruct.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
         injectionStrategy = InjectionStrategy.FIELD)
 public interface MomentMapper {
+
+    Moment toMoment(MomentDto momentDto);
+
+    MomentDto toMomentDto(Moment moment);
+
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "projectId", source = "id")
     @Mapping(target = "createdBy", source = "ownerId")
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    Moment toEntity(Project project);
+    @Mapping(target = "name", constant = "Выполнены все подпроекты")
+    @Mapping(target = "userIds", source = "teams", qualifiedByName = "teamsUserToIdList")
+    MomentDto toMomentDtoCompleted(Project project);
+
+    @Named("teamsUserToIdList")
+    default List<Long> teamsUserToIdList(Project project, Moment moment) {
+        return project.getTeams() != null ? project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .map(TeamMember::getUserId)
+                .collect(Collectors.toList())
+                : Collections.emptyList();
+    }
 }

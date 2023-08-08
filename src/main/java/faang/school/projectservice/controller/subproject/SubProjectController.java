@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.subproject;
 
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectUpdateDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
@@ -17,8 +18,8 @@ public class SubProjectController {
     private final SubProjectValidator subProjectValidator;
 
     @PutMapping("/update/status")
-    public void updateStatusSubProject(@RequestBody StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
+    public ProjectDto updateStatusSubProject(@RequestBody StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
         subProjectValidator.validateStatusSubprojectUpdateDto(statusSubprojectUpdateDto);
-        subProjectService.updateStatusSubProject(statusSubprojectUpdateDto);
+        return subProjectService.updateStatusSubProject(statusSubprojectUpdateDto);
     }
 }
