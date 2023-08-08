@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,7 +47,7 @@ public class InternshipController {
         }
     }
 
-    public  List<InternshipDto> gettingAllInternshipsAccordingToFilters (InternshipFilterDto internshipFilterDto) {
+    public List<InternshipDto> gettingAllInternshipsAccordingToFilters (InternshipFilterDto internshipFilterDto) {
         return internshipService.gettingAllInternshipsAccordingToFilters(internshipFilterDto);
     }
 

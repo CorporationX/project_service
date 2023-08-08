@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Period;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static faang.school.projectservice.model.InternshipStatus.COMPLETED;
@@ -39,7 +41,7 @@ public class InternshipService {
         if (internshipDto.getProjectId() == null) {
             throw new InternshipValidationException("Invalid project id");
         }
-        if (internshipDto.getInternsId().size() == 0) {
+        if (internshipDto.getInternsId().isEmpty()) {
             throw new InternshipValidationException("Empty list of interns");
         }
         if (Period.between(internshipDto.getStartDate().toLocalDate(),
@@ -57,12 +59,25 @@ public class InternshipService {
         return internshipMapper.toInternshipDto(internshipRepository.save(internshipMapper.toInternship(internshipDto)));
     }
 
+//    public Set<InternshipDto> gettingAllInternshipsAccordingToFilters(InternshipFilterDto internshipFilterDto) {
+//        Stream<Internship> internshipStream = internshipRepository.findAll().stream();
+//        Set <Internship> listOfInternshipFilters = internshipFilters.stream()
+//                .filter(internshipFilter -> internshipFilter.isInternshipDtoValid(internshipFilterDto))
+//                .flatMap(internshipFilter -> internshipFilter.filterInternshipDto(internshipStream, internshipFilterDto))
+//                .collect(Collectors.toSet());
+//        return listOfInternshipFilters.stream().map(internshipMapper::toInternshipDto).collect(Collectors.toSet());
+//    }
+
     public List<InternshipDto> gettingAllInternshipsAccordingToFilters(InternshipFilterDto internshipFilterDto) {
         Stream<Internship> internshipStream = internshipRepository.findAll().stream();
-        List <Internship> listOfInternshipFilters = internshipFilters.stream()
+        List <InternshipFilter> listOfInternshipFilters = internshipFilters.stream()
                 .filter(internshipFilter -> internshipFilter.isInternshipDtoValid(internshipFilterDto))
-                .flatMap(internshipFilter -> internshipFilter.filterInternshipDto(internshipStream, internshipFilterDto)).toList();
-        return listOfInternshipFilters.stream().map(internshipMapper::toInternshipDto).toList();
+                .toList();
+        //.flatMap(internshipFilter -> internshipFilter.filterInternshipDto(internshipStream, internshipFilterDto))
+        for (InternshipFilter filter: internshipFilters){
+            internshipStream = filter.filterInternshipDto(internshipStream, internshipFilterDto);
+        }
+        return internshipStream.map(internshipMapper::toInternshipDto).toList();
     }
 
     public List <InternshipDto> gettingAllInternships (){

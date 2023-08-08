@@ -17,6 +17,4 @@ public class InternshipNameFilter implements InternshipFilter {
         return internshipStream.filter(internship ->
                 internship.getName().contains(internshipFilterDto.getName()));
     }
-
-    ;
 }

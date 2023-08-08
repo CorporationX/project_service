@@ -8,7 +8,8 @@ import java.util.stream.Stream;
 public interface InternshipFilter {
     boolean isInternshipDtoValid(InternshipFilterDto internshipFilterDto);
 
-    Stream<Internship> filterInternshipDto(Stream <Internship> internshipStream, InternshipFilterDto internshipFilterDto);
+    Stream<Internship> filterInternshipDto(Stream <Internship> internshipStream,
+                                           InternshipFilterDto internshipFilterDto);
 
 
 }
