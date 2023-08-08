@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filters.ProjectFilter;
 import faang.school.projectservice.filters.ProjectFilterByName;
 import faang.school.projectservice.filters.ProjectFilterByStatus;
@@ -188,7 +189,7 @@ class ProjectServiceTest {
         List<ProjectDto> filteredProjectsResult =
                 List.of(projectMapper.toDto(project2), projectMapper.toDto(project));
 
-        List<ProjectDto> projectsWithFilter = projectService.getProjectByNameAndStatus(projectFilterDto, 1L);
+        List<ProjectDto> projectsWithFilter = projectService.getByFilters(projectFilterDto, 1L);
         Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
     }
 
@@ -225,8 +226,19 @@ class ProjectServiceTest {
     }
 
     @Test
+    void getProjectById_EntityNotFoundException() {
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(10L));
+    }
+
+    @Test
     void deleteProjectById() {
-        projectJpaRepository.deleteById(1L);
+        projectService.deleteProjectById(1L);
         Mockito.verify(projectJpaRepository, Mockito.times(1)).deleteById(1L);
+    }
+
+    @Test
+    void deleteNotExistProjectById() {
+        projectService.deleteProjectById(10L);
+        Mockito.verify(projectJpaRepository, Mockito.times(1)).deleteById(10L);
     }
 }

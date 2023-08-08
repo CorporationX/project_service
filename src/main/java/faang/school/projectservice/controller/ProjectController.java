@@ -24,22 +24,22 @@ public class ProjectController {
         return projectService.updateStatusAndDescription(projectDto, id);
     }
 
-    @PostMapping("/{userId}")
-    public List<ProjectDto> getProjectsByNameAndStatus(@RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
-        return projectService.getProjectByNameAndStatus(projectFilterDto, userId);
+    @PostMapping("/{userId}/get-by-filters")
+    public List<ProjectDto> getByFilters(@RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
+        return projectService.getByFilters(projectFilterDto, userId);
     }
 
-    @GetMapping("/getProjectsByNameAndStatus")
+    @GetMapping("/all")
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProject();
     }
 
-    @DeleteMapping("/deleteProjectById/{userId}")
+    @DeleteMapping("/{userId}")
     public void deleteProjectById(@PathVariable long id) {
         projectService.deleteProjectById(id);
     }
 
-    @GetMapping("/getProjectById/{userId}")
+    @GetMapping("/{userId}")
     public ProjectDto getProjectById(@PathVariable long userId) {
         return projectService.getProjectById(userId);
     }

@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filters.ProjectFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -53,7 +54,7 @@ public class ProjectService {
         return mapper.toDto(projectRepository.save(project));
     }
 
-    public List<ProjectDto> getProjectByNameAndStatus(ProjectFilterDto projectFilterDto, long userId) {
+    public List<ProjectDto> getByFilters(ProjectFilterDto projectFilterDto, long userId) {
         Stream<Project> projects = getAvailableProjectsForCurrentUser(userId).stream();
 
         List<ProjectFilter> listApplicableFilters = filters.stream()
@@ -94,6 +95,9 @@ public class ProjectService {
 
     public ProjectDto getProjectById(Long userId) {
         Project projectById = projectRepository.getProjectById(userId);
+        if (projectById == null) {
+            throw new EntityNotFoundException("This project is null");
+        }
         return mapper.toDto(projectById);
     }
 
