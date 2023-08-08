@@ -2,6 +2,7 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
+import faang.school.projectservice.dto.SubtaskActionDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -14,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -41,40 +41,6 @@ class StageValidatorTest {
     }
 
     @Test
-    void testValidateStageDtoIsNullThrowDataValidationException() {
-        assertThrows(DataValidationException.class, () -> stageValidator.validateStage(null));
-    }
-
-    @Test
-    void testValidateStageDtoStageNameIsNullThrowDataValidationException() {
-        stageDto.setStageName(null);
-        assertThrows(DataValidationException.class, () -> stageValidator.validateStage(stageDto));
-    }
-
-    @Test
-    void testValidateStageDtoStageNameIsBlankThrowDataValidationException() {
-        stageDto.setStageName("");
-        assertThrows(DataValidationException.class, () -> stageValidator.validateStage(stageDto));
-    }
-
-    @Test
-    void testValidateStageDtoStageRolesIsNullThrowDataValidationException() {
-        stageDto.setStageRoles(null);
-        assertThrows(DataValidationException.class, () -> stageValidator.validateStage(stageDto));
-    }
-
-    @Test
-    void testValidateStageDtoStageRolesIsEmptyThrowDataValidationException() {
-        stageDto.setStageRoles(Collections.emptyList());
-        assertThrows(DataValidationException.class, () -> stageValidator.validateStage(stageDto));
-    }
-
-    @Test
-    void testValidateStageDtoDoesNotThrowDataValidationException() {
-        assertDoesNotThrow(() -> stageValidator.validateStage(stageDto));
-    }
-
-    @Test
     void testValidateStageDtoForProjectCompletedAndCancelledThrowDataValidationException() {
         Mockito.when(projectRepository.getProjectById(1L))
                 .thenReturn(Project.builder().id(1L).status(ProjectStatus.COMPLETED).build());
@@ -91,5 +57,16 @@ class StageValidatorTest {
         Mockito.when(projectRepository.getProjectById(1L))
                 .thenReturn(Project.builder().id(1L).status(ProjectStatus.CREATED).build());
         assertDoesNotThrow(() -> stageValidator.validateStageDtoForProjectCompletedAndCancelled(stageDto));
+    }
+
+    @Test
+    void testValidateNewStageIdDoesNotThrow() {
+        assertDoesNotThrow(() -> stageValidator.validateNewStageId(SubtaskActionDto.CASCADE, 1L));
+    }
+
+    @Test
+    void testValidateNewStageIdThrowDataValidationException() {
+        assertThrows(DataValidationException.class,
+                () -> stageValidator.validateNewStageId(SubtaskActionDto.MOVE_TO_NEXT_STAGE, null));
     }
 }

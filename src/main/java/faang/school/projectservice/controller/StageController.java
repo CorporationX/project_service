@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.SubtaskActionDto;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.validator.StageValidator;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,8 +30,7 @@ public class StageController {
     private final StageValidator stageValidator;
 
     @PostMapping
-    public StageDto createStage(@RequestBody StageDto stageDto) {
-        stageValidator.validateStage(stageDto);
+    public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.createStage(stageDto);
     }
 
@@ -38,6 +38,7 @@ public class StageController {
     public void deleteStage(@PathVariable long oldStageId,
                             @RequestBody SubtaskActionDto subtaskActionDto,
                             @RequestParam("newStageId") @Nullable Long newStageId) {
+        stageValidator.validateNewStageId(subtaskActionDto, newStageId);
         stageService.deleteStage(oldStageId, subtaskActionDto, newStageId);
     }
 

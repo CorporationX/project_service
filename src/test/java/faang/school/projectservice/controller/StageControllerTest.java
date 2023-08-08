@@ -55,25 +55,34 @@ class StageControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(stageController).build();
         objectMapper.registerModule(new JavaTimeModule());
 
+        List<StageRolesDto> stageRoles = List.of(
+                StageRolesDto.builder()
+                        .id(1L)
+                        .teamRole(TeamRole.DEVELOPER)
+                        .count(3)
+                        .build(),
+                StageRolesDto.builder()
+                        .id(2L)
+                        .teamRole(TeamRole.DESIGNER)
+                        .count(3)
+                        .build(),
+                StageRolesDto.builder()
+                        .id(3L)
+                        .teamRole(TeamRole.TESTER)
+                        .count(3)
+                        .build()
+        );
         stageDto = StageDto.builder()
                 .stageName("stageName")
                 .projectId(1L)
-                .stageRoles(List.of(
-                        StageRolesDto.builder().id(1L).build(),
-                        StageRolesDto.builder().id(2L).build(),
-                        StageRolesDto.builder().id(3L).build()
-                ))
+                .stageRoles(stageRoles)
                 .build();
 
         stageCreated = StageDto.builder()
                 .stageId(1L)
                 .stageName("stageName")
                 .projectId(1L)
-                .stageRoles(List.of(
-                        StageRolesDto.builder().id(1L).build(),
-                        StageRolesDto.builder().id(2L).build(),
-                        StageRolesDto.builder().id(3L).build()
-                ))
+                .stageRoles(stageRoles)
                 .build();
     }
 

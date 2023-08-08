@@ -8,6 +8,6 @@ DROP TABLE project_stage;
 DROP TABLE project_stage_roles;
 DROP TABLE campaign;
 DROP TABLE donation;
-DROP TABLE project_stage_stage_roles;
+DROP TABLE role_to_stage;
 
 DELETE FROM databasechangelog;

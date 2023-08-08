@@ -31,7 +31,7 @@ public class Stage {
     private Project project;
 
     @ManyToMany
-    @JoinTable(name = "project_stage_stage_roles",
+    @JoinTable(name = "role_to_stage",
             joinColumns = @JoinColumn(name = "stage_id"),
             inverseJoinColumns = @JoinColumn(name = "stage_roles_id"))
     private List<StageRoles> stageRoles;

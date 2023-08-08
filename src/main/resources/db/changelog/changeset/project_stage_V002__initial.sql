@@ -35,7 +35,7 @@ create table if not exists project_stage_executors
 
 create index project_stage_executors_stage_id_idx on project_stage_executors (stage_id);
 
-create table if not exists project_stage_stage_roles
+create table if not exists role_to_stage
 (
     id              bigserial primary key,
     stage_id        bigint not null,

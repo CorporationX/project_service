@@ -3,6 +3,7 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,9 +39,21 @@ class StageMapperTest {
                 .stageName("stageName")
                 .projectId(1L)
                 .stageRoles(List.of(
-                        StageRolesDto.builder().id(1L).build(),
-                        StageRolesDto.builder().id(2L).build(),
-                        StageRolesDto.builder().id(3L).build()
+                        StageRolesDto.builder()
+                                .id(1L)
+                                .teamRole(TeamRole.DEVELOPER)
+                                .count(3)
+                                .build(),
+                        StageRolesDto.builder()
+                                .id(2L)
+                                .teamRole(TeamRole.DESIGNER)
+                                .count(3)
+                                .build(),
+                        StageRolesDto.builder()
+                                .id(3L)
+                                .teamRole(TeamRole.TESTER)
+                                .count(3)
+                                .build()
                 ))
                 .build();
 
@@ -49,9 +62,21 @@ class StageMapperTest {
                 .stageName("stageName")
                 .project(Project.builder().id(1L).build())
                 .stageRoles(List.of(
-                        StageRoles.builder().id(1L).build(),
-                        StageRoles.builder().id(2L).build(),
-                        StageRoles.builder().id(3L).build()
+                        StageRoles.builder()
+                                .id(1L)
+                                .teamRole(TeamRole.DEVELOPER)
+                                .count(3)
+                                .build(),
+                        StageRoles.builder()
+                                .id(2L)
+                                .teamRole(TeamRole.DESIGNER)
+                                .count(3)
+                                .build(),
+                        StageRoles.builder()
+                                .id(3L)
+                                .teamRole(TeamRole.TESTER)
+                                .count(3)
+                                .build()
                 ))
                 .build();
     }
