@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.dto.client.InternshipFilterDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.*;
@@ -21,11 +22,12 @@ public class InternshipService {
     private final InternshipRepository internshipRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
+    private final InternshipValidator internshipValidator;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> filterList;
 
     public InternshipDto saveNewInternship(InternshipDto internshipDto) { //1 создать стажировку
-        InternshipValidator.validateServiceSaveInternship(internshipDto);
+        internshipValidator.validateServiceSaveInternship(internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
         List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
                 .map(teamMemberRepository::findById).toList();
@@ -38,16 +40,15 @@ public class InternshipService {
         return internshipMapper.toDto(internship);
     }
 
-    public InternshipDto updateInternship(InternshipDto internshipDto, long id) { //2 обновить стажировку
-        Internship oldInternship = internshipRepository.getById(id);
-        InternshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
+    public InternshipDto updateInternship(InternshipDto internshipDto, long id) { //2 обновить стажировку+
+        Internship oldInternship = internshipRepository.findById(id).orElseThrow(() -> new DataValidationException("There is not internship with this id"));
+        internshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setInterns(getListOfInterns(internshipDto.getInternsId())); //50
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
             List<TeamMember> interns = internsDoneTasks(internshipDto.getInternsId(), new Task()); //60
-            TeamRole role = TeamRole.DEVELOPER;
             for (TeamMember intern : interns) {
-                intern.setRoles(List.of(role));
+                intern.setRoles(List.of(TeamRole.DEVELOPER));
             }
             internshipRepository.deleteById(id);
         } else {
@@ -71,16 +72,18 @@ public class InternshipService {
         List<TeamMember> listWithThePassedParticipants = new ArrayList<>(sizeOfListInterns);
         for (Long aLong : allInternsOnInternship) {
             TeamMember intern = teamMemberRepository.findById(aLong);
-            if (checkTaskDone(allInternsOnInternship, task)) { //72
+            if (checkTaskDone(intern)) { //72
                 listWithThePassedParticipants.add(intern);
             }
         }
         return listWithThePassedParticipants;
     }
 
-    public boolean checkTaskDone(List<Long> interns, Task task) { //2.3
-        for (Long aLong : interns) {
-            if (aLong.longValue() == task.getPerformerUserId()) {
+    public boolean checkTaskDone(TeamMember teamMember) { //2.3+
+        Project project = teamMember.getTeam().getProject();
+        List<Task> tasks = project.getTasks();
+        for (Task task : tasks) {
+            if (task.getPerformerUserId().equals(teamMember.getUserId())) {
                 if (task.getStatus().equals(TaskStatus.DONE)) {
                     return true;
                 }
@@ -89,7 +92,7 @@ public class InternshipService {
         return false;
     }
 
-    public List<InternshipDto> findInternshipsByStatusWithFilter(long projectId, InternshipFilterDto filterDto) { //3 получить все стажировки по статусу
+    public List<InternshipDto> findInternshipsByStatusWithFilter(long projectId, InternshipFilterDto filterDto) { //3 получить все стажировки по статусу+
         List<InternshipDto> listOfInternship = getAllInternships();
         listOfInternship.removeIf(dto -> !dto.getProjectId().equals(projectId));
         filter(filterDto, listOfInternship);
@@ -102,12 +105,12 @@ public class InternshipService {
                 .forEach(f -> f.apply(dtoList, filter));
     }
 
-    public List<InternshipDto> getAllInternships() { //4 получить все стажировки
+    public List<InternshipDto> getAllInternships() { //4 получить все стажировки+
         List<Internship> listOfInternship = internshipRepository.findAll();
         return listOfInternship.stream().map(internshipMapper::toDto).toList();
     }
 
-    public InternshipDto findAllInternshipById(long id) { //5 получить стажировку по id
-        return internshipMapper.toDto(internshipRepository.getById(id));
+    public InternshipDto findAllInternshipById(long id) { //5 получить стажировку по id+
+        return internshipMapper.toDto(internshipRepository.findById(id).orElseThrow(() -> new DataValidationException("There is not internship with this id")));
     }
 }

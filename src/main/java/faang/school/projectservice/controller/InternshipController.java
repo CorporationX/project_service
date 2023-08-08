@@ -14,16 +14,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
+    private final InternshipValidator internshipValidator;
 
     @PostMapping("/internship")
     public InternshipDto saveNewInternship(@RequestBody InternshipDto internshipDto) {
-        InternshipValidator.validateServiceSaveInternship(internshipDto);
+        internshipValidator.validateServiceSaveInternship(internshipDto);
         return internshipService.saveNewInternship(internshipDto);
     }
 
     @PutMapping("/internship/{id}")
     public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto, @PathVariable Long id) {
-        InternshipValidator.validateControllerInternship(internshipDto);
+        internshipValidator.validateControllerInternship(internshipDto);
         return internshipService.updateInternship(internshipDto, id);
     }
 

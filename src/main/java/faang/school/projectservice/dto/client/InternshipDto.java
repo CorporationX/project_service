@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.client;
 
 import faang.school.projectservice.model.InternshipStatus;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -14,10 +15,12 @@ import java.util.List;
 @Builder
 @NotNull(message = "There is not internship!")
 public class InternshipDto {
-    @NotNull(message = "Incorrect name of internship!")
+    @NotNull(message = "Internship name can not be null!")
+    @NotBlank(message = "Internship name can not be blank!")
     private String name;
     private Long id;
     @NotNull(message = "There is not mentor for internship!")
+    @Min(1)
     private Long mentorId;
     @NotNull(message = "There is not project for create internship!")
     @Min(1)
