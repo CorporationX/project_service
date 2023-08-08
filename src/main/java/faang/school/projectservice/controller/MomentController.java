@@ -21,7 +21,7 @@ public class MomentController {
 
     @PostMapping
     public MomentDto create(@Valid @RequestBody MomentDto momentDto) {
-        log.debug("Received request to create moment: {}", momentDto);
+        log.debug("Received request to create the moment: {}", momentDto);
         return momentService.create(momentDto);
     }
 }

@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.exception.DataValidateInviteException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +21,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MomentValidatorTest {
     private static final Long PROJECT_ID = 1L;
-    @Mock
-    private MomentRepository momentRepository;
     @Mock
     private ProjectRepository projectRepository;
     @InjectMocks
