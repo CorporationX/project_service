@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidException;
 import faang.school.projectservice.service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,30 +29,30 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
+    public ProjectDto createProject(@Valid @RequestBody ProjectDto projectDto) {
         return projectService.createProject(projectDto);
     }
 
     @PutMapping
-    public ProjectDto updateProject(@RequestBody ProjectDto projectDto,
+    public ProjectDto updateProject(@Valid @RequestBody ProjectDto projectDto,
                                     @PathVariable long projectId) {
         return projectService.updateProject(projectDto, projectId);
     }
 
     @PostMapping
-    public List<ProjectDto> getProjects(@RequestBody ProjectFilterDto projectFilter) {
+    public List<ProjectDto> getProjects(@Valid @RequestBody ProjectFilterDto projectFilter) {
         return projectService.getProjects(projectFilter);
     }
 
     @PostMapping("/subproject")
-    public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
-        validateSubProject(projectDto);
+    public ProjectDto createSubProject(@Valid @RequestBody ProjectDto projectDto) {
+        //validateSubProject(projectDto);
         return projectService.createSubProject(projectDto);
     }
 
-    private void validateSubProject(ProjectDto projectDto) {
+    /*private void validateSubProject(ProjectDto projectDto) {
         if (projectDto.getName().isBlank()) {
             throw new DataValidException("Enter project name, please");
         }
-    }
+    }*/
 }

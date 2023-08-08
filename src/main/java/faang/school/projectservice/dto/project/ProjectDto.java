@@ -3,6 +3,9 @@ package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,8 +18,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectDto {
+    @NotNull
     private Long id;
+    @NotBlank
+    @Size(max = 128, message = "Project's name length can't be more than 128 symbols")
     private String name;
+    @NotBlank
+    @Size(max = 4096, message = "Project's description length can't be more than 4096 symbols")
     private String description;
     private Long parentId;
     private List<Long> childrenId;
