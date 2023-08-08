@@ -1,8 +1,8 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
-    id("jacoco")
 }
 
 group = "faang.school"
@@ -75,19 +75,19 @@ tasks.bootJar {
 
 tasks.test {
     finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+    finalizedBy(tasks.jacocoTestCoverageVerification)
 }
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test) // tests are required to run before generating the report
     reports {
-        xml.required.set(false)
-        csv.required.set(false)
         html.required.set(true)
     }
 
     classDirectories.setFrom(files(classDirectories.files.map {
         fileTree(it).apply {
-            exclude("faang/school/projectservice/entity/**",
+            exclude(
+                    "faang/school/projectservice/entity/**",
                     "faang/school/projectservice/dto/**",
                     "faang/school/projectservice/config/**",
                     "faang/school/projectservice/filter/**",
@@ -105,7 +105,8 @@ tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
             element = "CLASS"
-            excludes = listOf("faang.school.projectservice.entity.**",
+            excludes = listOf(
+                    "faang.school.projectservice.entity.**",
                     "faang.school.projectservice.dto.**",
                     "faang.school.projectservice.config.**",
                     "faang.school.projectservice.filter.**",
