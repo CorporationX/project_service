@@ -19,11 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -96,24 +94,23 @@ public class StageService {
     }
 
     private Stage setNewFieldsForStage(Stage stageFromRepository, StageDtoForUpdate stageDto) {
-        List<TeamRole> teamRolesFromStageFromRepository = stageFromRepository.getStageRoles().stream()
-                .flatMap(stageRoles -> IntStream.range(0, stageRoles.getCount())
-                        .mapToObj(i -> stageRoles.getTeamRole()))
+
+        Map<String, Long> teamRolesMap = stageDto.getTeamRoles()
+                .stream()
+                .collect(Collectors.groupingBy(TeamRole::toString, Collectors.counting()));
+
+        List<StageRoles> newStageRoles = teamRolesMap.entrySet()
+                .stream()
+                .map(entry ->
+                        StageRoles.builder()
+                                .teamRole(TeamRole.valueOf(entry.getKey()))
+                                .count(Math.toIntExact(entry.getValue()))
+                                .build())
                 .collect(Collectors.toList());
-
-        teamRolesFromStageFromRepository.addAll(stageDto.getTeamRoles());
-
-        Map<String, Long> teamRolesMap = teamRolesFromStageFromRepository.stream().collect(Collectors.groupingBy(TeamRole::toString, Collectors.counting()));
-        List<StageRoles> newStageRoles = new ArrayList<>();
-
-        for (Map.Entry<String, Long> entry : teamRolesMap.entrySet()) {
-            int count = Math.toIntExact(entry.getValue());
-            newStageRoles.add(StageRoles.builder().teamRole(TeamRole.valueOf(entry.getKey())).count(count).build());
-        }
 
         newStageRoles.forEach(stageRoles ->
                 stageFromRepository.getStageRoles().stream()
-                        .filter(stageRolesFromRepo -> stageRolesFromRepo.getTeamRole().toString().equals(stageRoles.getTeamRole().toString()))
+                        .filter(stageRolesFromRepo -> stageRolesFromRepo.getTeamRole().equals(stageRoles.getTeamRole()))
                         .forEach(stageRolesRepository::delete)
         );
 
