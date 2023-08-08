@@ -15,7 +15,7 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
         "WHERE tm.userId = :userId " +
         "AND t.project.id = :projectId"
     )
-    TeamMember findByUserIdAndProjectId(long userId, long projectId);
+    TeamMember findByIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
 }
