@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,12 +61,12 @@ class GlobalExceptionHandlerTest {
         MethodArgumentNotValidException exception = new MethodArgumentNotValidException(parameter,
                 bindingResult);
 
-        Map<String, String> errorResponseMap = handler.handleMethodArgumentNotValidException(exception);
+        ErrorResponseDto response = handler.handleMethodArgumentNotValidException(exception, webRequest);
 
         assertAll(() -> {
-            assertEquals(1, errorResponseMap.size());
-            assertEquals("field", errorResponseMap.keySet().stream().findFirst().orElse(""));
-            assertEquals("Field error message", errorResponseMap.get("field"));
+            assertEquals("/someUri", response.getPath());
+            assertEquals("{field=Field error message}", response.getError());
+            assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
         });
     }
 

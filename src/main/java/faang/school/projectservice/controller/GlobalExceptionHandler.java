@@ -24,13 +24,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ErrorResponseDto handleMethodArgumentNotValidException(MethodArgumentNotValidException e,
+                                                                  HttpServletRequest request) {
         log.error("Method argument validation exception occurred", e);
-        return e.getBindingResult().getAllErrors().stream()
+        Map<String, String> errors = e.getBindingResult().getAllErrors().stream()
                 .collect(Collectors.toMap(
                         error -> ((FieldError) error).getField(),
                         error -> Objects.requireNonNullElse(error.getDefaultMessage(), ""))
                 );
+
+        return ErrorResponseDto.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(errors.toString())
+                .path(request.getRequestURI())
+                .build();
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

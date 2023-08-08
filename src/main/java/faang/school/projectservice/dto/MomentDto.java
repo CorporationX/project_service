@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,11 +25,14 @@ public class MomentDto {
 
     private String description;
 
+    @NotNull(message = "Date is required")
     private LocalDateTime date;
 
     @NotNull(message = "Projects are required")
     @Size(min = 1, message = "At least one project is required")
     private List<Long> projectIds;
+
+    private List<Long> userIds;
 
     private String imageId;
 }

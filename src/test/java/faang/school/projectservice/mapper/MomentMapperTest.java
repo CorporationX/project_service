@@ -30,6 +30,7 @@ class MomentMapperTest {
                 .description("description")
                 .date(now)
                 .projects(List.of(Project.builder().id(1L).build()))
+                .userIds(List.of(1L))
                 .imageId("imageId")
                 .build();
 
@@ -39,6 +40,7 @@ class MomentMapperTest {
                 .description("description")
                 .date(now)
                 .projectIds(List.of(1L))
+                .userIds(List.of(1L))
                 .imageId("imageId")
                 .build();
     }
