@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 @Builder
 @Data
-@Component
 public class StageInvitationDto {
     @Min(0)
     private Long id;

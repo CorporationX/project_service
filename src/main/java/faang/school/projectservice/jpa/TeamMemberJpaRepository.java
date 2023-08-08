@@ -18,5 +18,5 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
-    TeamRole addRole(TeamRole role);
+    //TeamRole addRole(TeamRole role);
 }

@@ -98,14 +98,14 @@ public class InternshipService {
         if (internship.getStatus().equals(IN_PROGRESS)) {
             List<TeamMember> interns = internship.getInterns();
             interns.forEach(intern -> {
-                List<TaskStatus> tasksOfIntern = taskRepository.findAllByProjectIdAndPerformerId(internship.getProject().getId(), intern.getId())
+                List<TaskStatus> tasksOfIntern = taskRepository.findAllByProjectAndPerformerUserId(internship.getProject(), intern.getId())
                         .stream()
                         .map(task -> task.getStatus())
                         .toList();
                 if (tasksOfIntern.stream().allMatch(task -> task.equals(TaskStatus.DONE))) {
                     //переписать будто стажер получает статус как у ментора
-                    intern.addRole(TeamRole.JUNIOR);
-                    intern.addRole(TeamRole.INTERN);
+//                    intern.addRole(TeamRole.JUNIOR);
+//                    intern.addRole(TeamRole.INTERN);
 
                 } else {
                     //project.getTeam().getTeamMembers().remove(intern);
