@@ -1,7 +1,8 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.exception.DataValidateInviteException;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -14,7 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +34,22 @@ class MomentValidatorTest {
         momentDto = MomentDto.builder()
                 .projectIds(List.of(PROJECT_ID))
                 .build();
+
+        when(projectRepository.existsById(PROJECT_ID)).thenReturn(true);
+    }
+
+    @Test
+    void validateMomentProjects_shouldInvokeProjectRepositoryExistsById() {
+        validator.validateMomentProjects(momentDto);
+        verify(projectRepository).existsById(PROJECT_ID);
+    }
+
+    @Test
+    void validateMomentProjects_shouldThrowEntityNotFoundException() {
+        when(projectRepository.existsById(PROJECT_ID)).thenReturn(false);
+        assertThrows(EntityNotFoundException.class,
+                () -> validator.validateMomentProjects(momentDto),
+                "Project with id " + PROJECT_ID + " does not exist");
     }
 
     @Test
@@ -41,7 +59,7 @@ class MomentValidatorTest {
     }
 
     @Test
-    void validateMomentProjects_shouldThrowException() {
+    void validateMomentProjects_shouldThrowDataValidationException() {
         Project project = Project.builder()
                 .id(PROJECT_ID)
                 .status(ProjectStatus.CANCELLED)
@@ -49,8 +67,14 @@ class MomentValidatorTest {
 
         when(projectRepository.findAllByIds(momentDto.getProjectIds())).thenReturn(List.of(project));
 
-        assertThrows(DataValidateInviteException.class,
+        assertThrows(DataValidationException.class,
                 () -> validator.validateMomentProjects(momentDto),
                 "Moment must not have closed projects");
+    }
+
+    @Test
+    void validateMomentProjects_shouldNotThrowAnyException() {
+        validator.validateMomentProjects(momentDto);
+        assertDoesNotThrow(() -> validator.validateMomentProjects(momentDto));
     }
 }
