@@ -12,8 +12,8 @@ import java.util.List;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface InternshipMapper {
 
-    @Mapping(target = "projectId", source = "project", qualifiedByName = "mapProjectToId")
-    @Mapping(target = "mentorId", source = "mentorId", qualifiedByName = "mapMentorToId")
+    @Mapping(target = "projectId", source = "project.id")
+    @Mapping(target = "mentorId", source = "mentorId.id")
     @Mapping(target = "interns", source = "interns", qualifiedByName = "mapInternsToIds")
     @Mapping(target = "schedule", source = "schedule", qualifiedByName = "mapScheduleToId")
     InternshipDto toDto(Internship internship);
@@ -22,16 +22,6 @@ public interface InternshipMapper {
     @Mapping(target = "interns", source = "interns", ignore = true)
     @Mapping(target = "schedule", source = "schedule", ignore = true)
     Internship toEntity(InternshipDto internshipDto);
-
-    @Named("mapProjectToId")
-    default Long mapProjectToId(Project project) {
-        return project.getId();
-    }
-
-    @Named("mapMentorToId")
-    default Long mapMentorToId(TeamMember mentor) {
-        return mentor.getId();
-    }
 
     @Named("mapInternsToIds")
     default List<Long> mapInternsToIds(List<TeamMember> interns) {

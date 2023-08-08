@@ -6,40 +6,46 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.internship.InternshipService;
 import faang.school.projectservice.validator.internship.InternshipValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService service;
+    private final InternshipValidator validator;
 
-    public InternshipDto createInternship(InternshipDto internshipDto) {
-        InternshipValidator.internshipControllerValidation(internshipDto);
+    @PostMapping
+    public InternshipDto createInternship(@RequestBody InternshipDto internshipDto) {
+        validator.internshipControllerValidation(internshipDto);
         return service.createInternship(internshipDto);
     }
 
-    public InternshipDto updateInternship(long id, InternshipDto internshipDto) {
+    @PutMapping
+    public InternshipDto updateInternship(@RequestParam long id, @RequestBody InternshipDto internshipDto) {
         if (id < 1) {
             throw new DataValidationException("ID error!");
         }
-        InternshipValidator.internshipControllerValidation(internshipDto);
+        validator.internshipControllerValidation(internshipDto);
         return service.updateInternship(id, internshipDto);
     }
 
-    public InternshipDto findInternshipById(long id) {
+    @GetMapping
+    public InternshipDto findInternshipById(@RequestParam long id) {
         if (id < 1) {
             throw new DataValidationException("ID error!");
         }
         return service.findInternshipById(id);
     }
 
+    @GetMapping
     public List<InternshipDto> findAllInternships() {
         return service.findAllInternships();
     }
 
-    public List<InternshipDto> findInternshipsWithFilter(long projectId, InternshipFilterDto filterDto) {
+    @GetMapping
+    public List<InternshipDto> findInternshipsWithFilter(@RequestParam long projectId, @RequestBody InternshipFilterDto filterDto) {
         return service.findInternshipsWithFilter(projectId, filterDto);
     }
 

@@ -2,7 +2,6 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.filter.internship.InternshipStatusFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
@@ -10,6 +9,7 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validator.internship.InternshipValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,45 +20,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipServiceTest {
     @Mock
-    private InternshipRepository internshipRepository = Mockito.mock(InternshipRepository.class);;
+    private InternshipRepository internshipRepository;
     @Mock
-    private TeamMemberRepository teamMemberRepository = Mockito.mock(TeamMemberRepository.class);
+    private TeamMemberRepository teamMemberRepository;
     @Mock
-    private InternshipMapper internshipMapper = Mockito.mock(InternshipMapper.class);
+    private InternshipMapper internshipMapper;
+    @Mock
+    private InternshipValidator validator;
+
     @InjectMocks
     private InternshipService service;
-
-    @Test
-    public void createInternship_WithNoInterns_ThrowsDataValidationException_Test() {
-        DataValidationException exception = assertThrows(DataValidationException.class, () -> service.createInternship(new InternshipDto()));
-        assertEquals(exception.getMessage(), "No interns!");
-    }
-
-    @Test
-    public void createInternship_Duration_ThrowsDataValidationException_Test() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> service.createInternship(InternshipDto.builder().interns(List.of(1L))
-                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(4, ChronoUnit.MONTHS)).build()));
-        assertEquals(exception.getMessage(), "Internship's duration is too long!");
-    }
-
-    @Test
-    public void createInternship_Mentor_ThrowsDataValidationException_Test() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> service.createInternship(InternshipDto.builder().interns(List.of(1L))
-                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                        .mentorId(null).build()));
-        assertEquals(exception.getMessage(), "Internship has no mentor!");
-    }
 
     @Test
     public void createInternship_Test() {
@@ -67,35 +47,6 @@ public class InternshipServiceTest {
                 .mentorId(anyLong()).build();
         InternshipDto res = service.createInternship(internshipDto);
         Mockito.verify(internshipRepository).save(internshipMapper.toEntity(internshipDto));
-    }
-
-    @Test
-    public void updateInternship_AlreadyOver_ThrowsDataValidationException_Test() {
-        InternshipDto internshipDto = InternshipDto.builder().interns(List.of(1L))
-                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                .mentorId(anyLong()).build();
-        long id = 1;
-        Internship old = Internship.builder().status(InternshipStatus.COMPLETED).build();
-
-        when(internshipRepository.getById(id)).thenReturn(old);
-
-        DataValidationException exception = assertThrows(DataValidationException.class, () -> service.updateInternship(id, internshipDto));
-        assertEquals(exception.getMessage(), "Internship already over!");
-    }
-
-    @Test
-    public void updateInternship_TryToAddNewIntern_ThrowsDataValidationException_Test() {
-        InternshipDto internshipDto = InternshipDto.builder()
-                .interns(List.of(1L, 2L, 3L))
-                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                .mentorId(anyLong()).build();
-        long id = 1;
-        Internship old = Internship.builder().status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
-
-        when(internshipRepository.getById(id)).thenReturn(old);
-
-        DataValidationException exception = assertThrows(DataValidationException.class, () -> service.updateInternship(id, internshipDto));
-        assertEquals(exception.getMessage(), "Can't add new intern!");
     }
 
     @Test
@@ -108,7 +59,7 @@ public class InternshipServiceTest {
         Internship old = Internship.builder().name("OLD").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
         Internship internship = Internship.builder().name("NEW").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
 
-        when(internshipRepository.getById(id)).thenReturn(old);
+        when(internshipRepository.findById(id)).thenReturn(Optional.ofNullable(old));
         when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
 
         service.updateInternship(id, internshipDto);
@@ -126,7 +77,7 @@ public class InternshipServiceTest {
         Internship old = Internship.builder().name("OLD").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
         Internship internship = Internship.builder().name("NEW").status(InternshipStatus.COMPLETED).interns(List.of()).build();
 
-        when(internshipRepository.getById(id)).thenReturn(old);
+        when(internshipRepository.findById(id)).thenReturn(Optional.ofNullable(old));
         when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
 
         service.updateInternship(id, internshipDto);
