@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 @Component
@@ -15,7 +14,7 @@ public class VacancyStatusFilter implements VacancyFilter {
     }
 
     @Override
-    public List<Vacancy> apply(Stream<Vacancy> vacancies, VacancyFilterDto filter) {
-        return vacancies.filter(vac -> vac.getStatus() == filter.getVacancyStatus()).toList();
+    public Stream<Vacancy> apply(Stream<Vacancy> vacancies, VacancyFilterDto filter) {
+        return vacancies.filter(vac -> vac.getStatus() == filter.getVacancyStatus());
     }
 }
