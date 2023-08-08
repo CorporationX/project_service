@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
@@ -16,23 +17,17 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/subproject")
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/subProject/create")
+    @PostMapping("/create")
     public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
         validateSubProject(projectDto);
         return projectService.createSubProject(projectDto);
     }
 
-    @PostMapping("/subProjects/create")
-    public List<ProjectDto> createSubProjects(@RequestBody List<ProjectDto> projectsDtos) {
-        validateProjectsList(projectsDtos);
-        projectsDtos.forEach(this::validateSubProject);
-        return projectService.createSubProjects(projectsDtos);
-    }
-
-    @PutMapping("/subProject/update")
+    @PutMapping("/update")
     public Timestamp updateSubProject(@RequestBody ProjectDto projectDto) {
         validateSubProject(projectDto);
         return projectService.updateSubProject(projectDto);
@@ -49,12 +44,6 @@ public class SubProjectController {
         }
         if (projectDto.getParentProjectId() == null) {
             throw new DataValidationException("SubProject must have parentProjectId");
-        }
-    }
-
-    private void validateProjectsList(List<ProjectDto> projectDtos) {
-        if (projectDtos.isEmpty()) {
-            throw new DataValidationException("List of project is empty");
         }
     }
 }

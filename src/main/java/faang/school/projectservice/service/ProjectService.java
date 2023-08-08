@@ -18,8 +18,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,26 +39,31 @@ public class ProjectService {
     private final MomentRepository momentRepository;
     private final List<ProjectFilter> projectFilters;
 
+    @Transactional
     public ProjectDto createSubProject(ProjectDto projectDto) {
         validateSubProject(projectDto);
-        validateProjectNotExist(projectDto);
-        validateParentProjectExist(projectDto);
+
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+            Project project = projectRepository.getProjectById(projectDto.getId());
+            return subProjectMapper.toDto(project);
+        }
+//        validateProjectNotExist(projectDto);
         checkSubProjectNotPrivateOnPublicProject(projectDto);
         Project subProject = subProjectMapper.toEntity(projectDto);
-        subProject.setChildren(projectRepository.findAllByIds(projectDto.getChildrenIds()));
-        Project parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
+        Project parentProject = getParentProject(projectDto);
         subProject.setParentProject(parentProject);
         subProject.setStatus(ProjectStatus.CREATED);
-        List<Stage> stages = projectDto.getStagesId().stream()
-                .map(stageRepository::getById)
-                .toList();
-        subProject.setStages(stages);
-        parentProject.getChildren().add(subProject);
+//        List<Stage> stages = projectDto.getStagesId().stream()
+//                .map(stageRepository::getById)
+//                .toList();
+//        subProject.setStages(stages);
+//        parentProject.getChildren().add(subProject);
         projectRepository.save(subProject);
         projectRepository.save(parentProject);
         return subProjectMapper.toDto(subProject);
     }
 
+    @Transactional
     public List<ProjectDto> createSubProjects(List<ProjectDto> projectsDtos) {
         projectsDtos.forEach(this::validateSubProject);
         return projectsDtos.stream()
@@ -64,7 +71,7 @@ public class ProjectService {
                 .toList();
     }
 
-    public Timestamp updateSubProject(ProjectDto projectDto) {
+    public LocalDateTime updateSubProject(ProjectDto projectDto) {
         Project projectToUpdate = projectRepository.getProjectById(projectDto.getId());
 
         if (projectDto.getStatus() != null && projectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
@@ -75,7 +82,7 @@ public class ProjectService {
             projectRepository.save(projectToUpdate);
             Moment projectMoment = createMoment(projectDto, projectToUpdate);
             momentRepository.save(projectMoment);
-            return Timestamp.valueOf(projectToUpdate.getUpdatedAt());
+            return projectToUpdate.getUpdatedAt();
         }
 
         List<Project> subProjects = projectRepository.findAllByIds(projectDto.getChildrenIds());
@@ -89,7 +96,7 @@ public class ProjectService {
         projectToUpdate.setChildren(subProjects);
         updateAllNeededFields(projectDto, projectToUpdate);
         projectRepository.save(projectToUpdate);
-        return Timestamp.valueOf(projectToUpdate.getUpdatedAt());
+        return projectToUpdate.getUpdatedAt();
     }
 
     public List<ProjectDto> getProjectChildrenWithFilter(ProjectFilterDto projectFilterDto, long projectId) {
@@ -209,23 +216,24 @@ public class ProjectService {
 
     private void checkSubProjectNotPrivateOnPublicProject(ProjectDto projectDto) {
         Project parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
-        if (parentProject.getVisibility().equals(ProjectVisibility.PUBLIC) && projectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
-            throw new DataValidationException(String.format("Private SubProject; %s, cant be with a public Parent Project: %s", projectDto.getName(), parentProject.getName()));
+        if (parentProject.getVisibility().equals(ProjectVisibility.PRIVATE) && projectDto.getVisibility().equals(ProjectVisibility.PUBLIC)) {
+            throw new DataValidationException(String.format("Public SubProject: %s, cant be with a private parent Project with id: %d", projectDto.getName(), parentProject.getId()));
         }
     }
 
-    private void validateParentProjectExist(ProjectDto projectDto) {
+    private Project getParentProject(ProjectDto projectDto) {
         Project parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
         if (parentProject == null) {
             throw new EntityNotFoundException(String.format("Parent project not found by id: %s", projectDto.getParentProjectId()));
         }
+        return parentProject;
     }
 
-    private void validateProjectNotExist(ProjectDto projectDto) {
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new DataValidationException(String.format("Project %s is already exist", projectDto.getName()));
-        }
-    }
+//    private ProjectDto validateProjectNotExist(ProjectDto projectDto) {
+//        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+//            throw new DataValidationException(String.format("Project %s is already exist", projectDto.getName()));
+//        }
+//    }
 
     private void checkSubProjectStatusCompleteOrCancelled(Project subProject) {
         if (subProject.getStatus() != ProjectStatus.COMPLETED && subProject.getStatus() != ProjectStatus.CANCELLED) {
