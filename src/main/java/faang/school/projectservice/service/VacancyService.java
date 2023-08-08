@@ -16,6 +16,7 @@ import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.VacancyFilters.VacancyFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,13 +25,15 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class VacancyService {
-    private static final int VACANCY_PLACES = 5;
     private final VacancyRepository vacancyRepository;
     private final ProjectRepository projectRepository;
     private final VacancyMapper vacancyMapper;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final List<VacancyFilter> filters;
+
+    @Value("${vacancy.places}")
+    private int vacancyPlaces;
 
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         validateVacancy(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
@@ -40,7 +43,7 @@ public class VacancyService {
     public VacancyDto updateVacancy(VacancyDto vacancyDto) {
         if (vacancyDto.getStatus() == VacancyStatus.CLOSED) {
             Vacancy vacancyToUpdate = getVacancy(vacancyDto.getId());
-            if (vacancyToUpdate.getCandidates().size() < VACANCY_PLACES) {
+            if (vacancyToUpdate.getCandidates().size() < vacancyPlaces) {
                 throw new IllegalArgumentException("There are not enough candidates for this vacancy to close");
             }
         }
