@@ -73,7 +73,7 @@ public class StageController {
     }
 
     @Operation(summary = "Get stage by ID")
-    @PostMapping("/Id/{stageId}")
+    @GetMapping("/Id/{stageId}")
     public StageDto getStageById(@Parameter(description = "Stage ID", example = "1")
                                  @PathVariable @NotNull Long stageId) {
         log.debug("Received request to get stage by ID: {}", stageId);
