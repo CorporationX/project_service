@@ -75,14 +75,17 @@ public class VacancyService {
         return vacancyMapper.toDtoGetReq(vacancy);
     }
 
-    public List<VacancyDto> getVacaniesByFilter(VacancyFilterDto filterDto) {
+    public List<VacancyDto> getVacanciesByFilter(VacancyFilterDto filterDto) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
 
-        return vacancyFilters.stream()
-                .filter(filter -> filter.isApplicable(filterDto)) // применим фильтр если он передан в Дто
-                .flatMap(filter -> filter.apply(vacancies, filterDto))
-                .map(vacancyMapper::toDto)
-                .toList();
+        List<VacancyFilter> listApplicableFilters =
+                vacancyFilters.stream().filter(curFilter -> curFilter.isApplicable(filterDto)).toList();
+
+        for (VacancyFilter curFilter : listApplicableFilters) {
+            vacancies = curFilter.apply(vacancies, filterDto);
+        }
+
+        return vacancies.map(vacancyMapper::toDto).toList();
     }
 
     private void deleteCandidateFromTeamMember(Long userId, Long projectId) {

@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.vacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDtoGetReq;
 import faang.school.projectservice.dto.vacancy.VacancyDtoUpdateReq;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +12,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/vacancy")
@@ -43,6 +46,13 @@ public class VacancyController {
                     "если они не были приняты в команду")
     public void deleteVacancy(@NotNull @PathVariable("id") Long vacancyId) {
         vacancyService.deleteVacancy(vacancyId);
+    }
+
+    @GetMapping("/filteredVacancies")
+    @Operation(summary = "Получить отфильтрованные вакансии",
+            description = "Фильтрация осуществляется по переданным фильтрам.")
+    public List<VacancyDto> getVacancyByFilter(@NotNull @RequestBody VacancyFilterDto vacancyFilter) {
+        return vacancyService.getVacanciesByFilter(vacancyFilter);
     }
 
     @GetMapping("/{id}")

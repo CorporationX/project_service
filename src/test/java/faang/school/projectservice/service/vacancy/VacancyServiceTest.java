@@ -257,18 +257,18 @@ class VacancyServiceTest {
 
 
     @Test
-    void testGetVacanciesWithFilter() {
-        List<VacancyFilter> vacancyFilters = getVacancyFilter();
+    void testGetVacanciesByFilter() {
+        List<VacancyFilter> vacancyFilters = getVacancyFilters();
         vacancyService = new VacancyService(
                 vacancyRepository, vacancyMapper, projectRepository, teamMemberRepository, vacancyFilters);
         VacancyFilterDto vacancyFilterDto = getVacancyFilterDto();
         Mockito.when(vacancyRepository.findAll()).thenReturn(allVacancies);
-        List<VacancyDto> expetedResult = getExpectedvacanciesAfterFilter();
+        List<VacancyDto> expectedResult = getExpectedVacanciesAfterFilter();
 
-        List<VacancyDto> result = vacancyService.getVacaniesByFilter(vacancyFilterDto);
+        List<VacancyDto> result = vacancyService.getVacanciesByFilter(vacancyFilterDto);
 
-        assertEquals(expetedResult, result);
-
+        assertEquals(expectedResult, result);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).findAll();
     }
 
 
@@ -289,32 +289,29 @@ class VacancyServiceTest {
         return vacancies;
     }
 
-    private List<VacancyFilter> getVacancyFilter() {
+    private List<VacancyFilter> getVacancyFilters() {
         FilterByName filter1 = new FilterByName();
         FilterBySkill filter2 = new FilterBySkill();
         return List.of(filter1, filter2);
     }
 
     private VacancyFilterDto getVacancyFilterDto() {
+        String namePattern = "2";
         List<Long> needSkill = List.of(2L, 3L);
         return VacancyFilterDto.builder()
-                .skillsPattern(needSkill).build();
+                .namePattern(namePattern)
+                .skillsPattern(needSkill)
+                .build();
     }
 
-    private List<VacancyDto> getExpectedvacanciesAfterFilter() {
-        VacancyDto vacancyDto1 = VacancyDto.builder()
-                .vacancyId(1L)
-                .name("Vacancy 1")
-                .description("Description for vacancy 1")
-                .build();
-        VacancyDto vacancyDto2 = VacancyDto.builder()
+    private List<VacancyDto> getExpectedVacanciesAfterFilter() {
+        VacancyDto vacancyDto = VacancyDto.builder()
                 .vacancyId(2L)
                 .name("Vacancy 2")
                 .description("Description for vacancy 2")
                 .build();
 
-        return List.of(vacancyDto1,
-                vacancyDto2);
+        return List.of(vacancyDto);
     }
 
     private List<List<Long>> getListSkills() {

@@ -22,7 +22,7 @@ public class FilterBySkill implements VacancyFilter {
     }
 
     private boolean compareSkills(List<Long> vacancySkills, List<Long> requiredSkills) {
-        // complexity O(N^2)
+        // complexity O(N*K)
         for (Long requiredId : requiredSkills) {
             if (!vacancySkills.contains(requiredId)) {
                 return false;

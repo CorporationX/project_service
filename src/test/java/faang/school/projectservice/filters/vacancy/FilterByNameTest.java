@@ -4,8 +4,6 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,27 +12,18 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockitoExtension.class)
-class FilterBySkillTest {
+class FilterByNameTest {
     private static final int COUNT = 3;
-    private List<Long> skills1;
-    private List<Long> skills2;
-    private List<Long> skills3;
-    private List<List<Long>> listSkills;
     private List<Vacancy> vacancyList;
     private VacancyFilterDto filterDto;
 
-    private final FilterBySkill filter = new FilterBySkill();
+    private final FilterByName filter = new FilterByName();
 
     @BeforeEach
     void setUp() {
-        skills1 = List.of(1L, 3L, 2L);
-        skills2 = List.of(3L, 4L, 5L, 2L);
-        skills3 = List.of(6L, 7L, 8L);
-        listSkills = List.of(skills1, skills2, skills3);
         vacancyList = getVacancyList();
         filterDto = VacancyFilterDto.builder()
-                .skillsPattern(List.of(2L, 3L)).build();
+                .namePattern("Vacancy").build();
     }
 
     @Test
@@ -57,8 +46,11 @@ class FilterBySkillTest {
         for (int i = 0; i < COUNT; i++) {
             Vacancy vacancy = Vacancy.builder()
                     .id(i + 1L)
-                    .requiredSkillIds(listSkills.get(i))
+                    .name("Vacancy " + (i + 1))
                     .build();
+            if (i == 1) {
+                vacancy.setName("What is your name?");
+            }
             vacancies.add(vacancy);
         }
         return vacancies;
@@ -67,11 +59,11 @@ class FilterBySkillTest {
     private List<Vacancy> getExpectedVacanciesAfterFilter() {
         Vacancy vacancy1 = Vacancy.builder()
                 .id(1L)
-                .requiredSkillIds(skills1)
+                .name("Vacancy 1")
                 .build();
         Vacancy vacancy2 = Vacancy.builder()
-                .id(2L)
-                .requiredSkillIds(skills2)
+                .id(3L)
+                .name("Vacancy 3")
                 .build();
 
         return List.of(vacancy1,
