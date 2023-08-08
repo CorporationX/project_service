@@ -66,11 +66,11 @@ public class VacancyService {
         if (vacancies.isEmpty()) {
             return new ArrayList<>();
         }
-
-        filters.stream()
+        return filters.stream()
                 .filter(f -> f.isApplicable(filter))
-                .forEach(f -> f.apply(vacancies.stream(), filter));
-        return vacancies.stream().map(vacancyMapper::toDto).toList();
+                .flatMap(f -> f.apply(vacancies.stream(), filter))
+                .map(vacancyMapper::toDto)
+                .toList();
     }
 
     private void validateVacancy(Long updaterId, Long projectId) {

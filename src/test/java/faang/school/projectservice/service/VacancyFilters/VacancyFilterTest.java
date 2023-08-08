@@ -57,7 +57,7 @@ class VacancyFilterTest {
                 .status(VacancyStatus.OPEN)
                 .build();
 
-        List<Vacancy> result = vacancyFilter.apply(Stream.of(vacancy), filter);
+        List<Vacancy> result = vacancyFilter.apply(Stream.of(vacancy), filter).toList();
 
         assertAll(
                 () -> assertEquals(1, result.size()),

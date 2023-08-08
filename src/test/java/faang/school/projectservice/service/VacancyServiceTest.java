@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mappper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.TeamMember;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,6 +39,9 @@ class VacancyServiceTest {
     TeamMemberRepository teamMemberRepository;
 
     @Mock
+    TeamMemberJpaRepository teamMemberJpaRepository;
+
+    @Mock
     VacancyRepository vacancyRepository;
 
     @Mock
@@ -44,9 +49,6 @@ class VacancyServiceTest {
 
     @Mock
     VacancyMapper vacancyMapper;
-
-    @Mock
-    List<VacancyFilter> filters;
 
     @InjectMocks
     VacancyService vacancyService;
@@ -208,20 +210,30 @@ class VacancyServiceTest {
 
     @Nested
     class PositiveTestsGroupD {
+        VacancyFilter filterMock = Mockito.mock(VacancyFilter.class);
+        List<VacancyFilter> filters = List.of(filterMock);
+
         @BeforeEach
         public void setUp() {
+            vacancyService = new VacancyService(vacancyRepository, projectRepository, vacancyMapper,
+                    teamMemberRepository, teamMemberJpaRepository, filters);
             Mockito.when(vacancyRepository.findAll()).thenReturn(List.of(new Vacancy()));
-            vacancyService.getVacancies(new VacancyFilterDto());
         }
 
         @Test
         public void testGetVacanciesCallFindAll() {
+            vacancyService.getVacancies(new VacancyFilterDto());
             Mockito.verify(vacancyRepository).findAll();
         }
 
         @Test
-        public void testGetVacanciesCallStream() {
-            Mockito.verify(filters).stream();
+        public void testGetVacanciesFiltersCorrectly() {
+            Mockito.when(filters.get(0).isApplicable(new VacancyFilterDto())).thenReturn(true);
+            Mockito.when(filters.get(0).apply(Mockito.any(), Mockito.any()))
+                    .thenReturn(Stream.empty());
+
+            List<VacancyDto> result = vacancyService.getVacancies(new VacancyFilterDto());
+            assertEquals(new ArrayList<>(), result);
         }
     }
 }
