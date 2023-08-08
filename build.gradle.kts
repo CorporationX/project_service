@@ -1,5 +1,4 @@
 plugins {
-    //id 'jacoco'
     jacoco
     java
     id("org.springframework.boot") version "3.0.6"

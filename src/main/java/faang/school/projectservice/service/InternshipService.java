@@ -31,7 +31,7 @@ public class InternshipService {
     private final InternshipMapper internshipMapper;
     private final List <InternshipFilter> internshipFilters;
 
-    // Стажировка ВСЕГДА относится к какому-то одному проекту.
+// Стажировка ВСЕГДА относится к какому-то одному проекту.
 //                internshipDto.getProjectId() > 1 &&
 //                        internshipDto.getProjectId() < 1
 
@@ -92,9 +92,7 @@ public class InternshipService {
                         }
                     }
                 }
-
             }
-
         }
 
         if (internship.getStatus().equals(IN_PROGRESS)) {
@@ -110,13 +108,14 @@ public class InternshipService {
                     intern.addRole(TeamRole.INTERN);
 
                 } else {
-                    project.getTeam().getTeamMembers().remove(intern);
+                    //project.getTeam().getTeamMembers().remove(intern);
                 }
             });
         }
         return internshipDto;
-    }
-}
+    }}
+
+
 
 
 
