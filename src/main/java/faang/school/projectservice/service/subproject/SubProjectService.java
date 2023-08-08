@@ -8,6 +8,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -29,6 +30,7 @@ public class SubProjectService {
             changeAllVisibilityInSubproject(project);
         }
 
+        project.setUpdatedAt(LocalDateTime.now());
         project.setVisibility(visibility);
     }
 
