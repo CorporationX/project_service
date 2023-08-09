@@ -19,8 +19,8 @@ public class MomentDto {
     private String name;
     private String description;
     private LocalDateTime date;
-    private List<Resource> resource;
-    private List<Project> projects;
+    private List<Long> resourceIds;
+    private List<Long> projectIds;
     private List<Long> userIds;
     private String imageId;
     private LocalDateTime createdAt;
