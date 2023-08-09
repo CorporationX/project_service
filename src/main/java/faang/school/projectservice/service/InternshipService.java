@@ -8,22 +8,14 @@ import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Period;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static faang.school.projectservice.model.InternshipStatus.COMPLETED;
-import static faang.school.projectservice.model.InternshipStatus.IN_PROGRESS;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +67,7 @@ public class InternshipService {
         List<InternshipFilter> listOfInternshipFilters = internshipFilters.stream()
                 .filter(internshipFilter -> internshipFilter.isInternshipDtoValid(internshipFilterDto))
                 .toList();
-        //.flatMap(internshipFilter -> internshipFilter.filterInternshipDto(internshipStream, internshipFilterDto))
+
         for (InternshipFilter filter : listOfInternshipFilters) {
             internshipStream = filter.filterInternshipDto(internshipStream, internshipFilterDto);
         }
@@ -138,7 +130,8 @@ public class InternshipService {
             }
         }
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
-    }}
+    }
+}
 
 
 //
@@ -199,13 +192,6 @@ public class InternshipService {
 //    }
 //}
 //
-
-
-
-
-
-
-
 
 
 //    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
@@ -269,10 +255,6 @@ public class InternshipService {
 //        }
 //        return internshipDto;
 //    }
-
-
-
-
 
 
 //    Internship internship = internshipRepository.findById(internshipDto.getId())
