@@ -1,10 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
-import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -38,7 +38,7 @@ public class StageService {
     private final StageValidator stageValidator;
     private final StageInvitationService stageInvitationService;
     private final StageRolesRepository stageRolesRepository;
-    private final StageRolesMapper stageRolesMapper;
+
     @Transactional
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
@@ -99,7 +99,7 @@ public class StageService {
     }
 
     public Stage setNewFieldsForStage(Stage stage, StageDto stageDto) {
-        List<TeamRole> teamRoles = getStageRoles(stageDto);
+        List<TeamRole> teamRoles = getTeamRoles(stageDto);
 
         Map<String, Long> stageDtoTeamRolesMap = getMapTeamRoles(teamRoles);
 
@@ -142,7 +142,7 @@ public class StageService {
 
 
     public List<TeamRole> findNewTeamRoles(Stage stage, StageDto stageDto) {
-        List<TeamRole> teamRoles = getStageRoles(stageDto);
+        List<TeamRole> teamRoles = getTeamRoles(stageDto);
 
         List<TeamRole> rolesToRemove = stage.getExecutors()
                 .stream()
@@ -153,11 +153,11 @@ public class StageService {
         return teamRoles;
     }
 
-    private List<TeamRole> getStageRoles(StageDto stageDto) {
-        List<StageRoles> stageDtoStageRoles = stageDto.getStageRolesDto().stream().map(stageRolesMapper::toEntity).toList();
+    private List<TeamRole> getTeamRoles(StageDto stageDto) {
+        List<StageRolesDto> stageDtoStageRoles = stageDto.getStageRolesDto().stream().toList();
 
         return stageDtoStageRoles.stream()
-                .flatMap(stageRoles -> Collections.nCopies(stageRoles.getCount(), stageRoles.getTeamRole()).stream())
+                .flatMap(stageRoles -> Collections.nCopies(stageRoles.getCount(), TeamRole.valueOf(stageRoles.getTeamRole())).stream())
                 .collect(Collectors.toList());
     }
 
