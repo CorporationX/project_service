@@ -56,7 +56,7 @@ public class InternshipValidatorTest {
         DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 internshipValidator.validateServiceSaveInternship(InternshipDto
                         .builder()
-                        .name("best")
+                        .name("faang-internship")
                         .projectId(1L)
                         .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(4, ChronoUnit.MONTHS))
                         .build()));
@@ -68,7 +68,7 @@ public class InternshipValidatorTest {
         DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 internshipValidator.validateServiceSaveInternship(InternshipDto
                         .builder()
-                        .name("best")
+                        .name("faang-internship")
                         .projectId(1L)
                         .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                         .mentorId(null)
@@ -81,7 +81,7 @@ public class InternshipValidatorTest {
         DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 internshipValidator.validateServiceSaveInternship(InternshipDto
                         .builder()
-                        .name("best")
+                        .name("faang-internship")
                         .projectId(1L)
                         .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
                         .mentorId(1L)
@@ -97,12 +97,12 @@ public class InternshipValidatorTest {
                                 .status(InternshipStatus.COMPLETED)
                                 .build(),
                         InternshipDto.builder()
-                        .name("best")
-                        .projectId(1L)
-                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
-                        .mentorId(1L)
-                        .internsId(List.of(1L))
-                        .build()));
+                                .name("faang-internship")
+                                .projectId(1L)
+                                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                                .mentorId(1L)
+                                .internsId(List.of(1L))
+                                .build()));
         assertEquals(exception.getMessage(), "Internship is over!");
     }
 
@@ -113,7 +113,7 @@ public class InternshipValidatorTest {
                                 .status(InternshipStatus.IN_PROGRESS)
                                 .build(),
                         InternshipDto.builder()
-                                .name("best")
+                                .name("faang-internship")
                                 .projectId(1L)
                                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
                                 .mentorId(1L)

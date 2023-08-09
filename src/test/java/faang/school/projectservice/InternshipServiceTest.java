@@ -2,7 +2,6 @@ package faang.school.projectservice;
 
 import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.dto.client.InternshipFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.filter.InternshipStatusFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
@@ -60,7 +59,7 @@ public class InternshipServiceTest {
                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
                 .mentorId(1L)
                 .internsId(List.of(1L))
-                .name("best")
+                .name("faang-internship")
                 .build();
         Mockito.when(teamMemberRepository.findById(Mockito.anyLong())).thenReturn(new TeamMember());
         Mockito.when(internshipMapper.toEntity(internshipDto)).thenReturn(new Internship());

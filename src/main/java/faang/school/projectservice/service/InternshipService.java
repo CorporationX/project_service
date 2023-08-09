@@ -40,8 +40,9 @@ public class InternshipService {
         return internshipMapper.toDto(internship);
     }
 
-    public InternshipDto updateInternship(InternshipDto internshipDto, long id) { //2 обновить стажировку+
-        Internship oldInternship = internshipRepository.findById(id).orElseThrow(() -> new DataValidationException("There is not internship with this id"));
+    public InternshipDto updateInternship(InternshipDto internshipDto, long id) { //2 обновить стажировку
+        Internship oldInternship = internshipRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("There is not internship with this id"));
         internshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setInterns(getListOfInterns(internshipDto.getInternsId()));
@@ -70,7 +71,7 @@ public class InternshipService {
         List<TeamMember> listWithThePassedParticipants = new ArrayList<>();
         for (Long aLong : allInternsOnInternship) {
             TeamMember intern = teamMemberRepository.findById(aLong);
-            if (checkTaskDone(intern)) { //72
+            if (checkTaskDone(intern)) {
                 listWithThePassedParticipants.add(intern);
             }
         }
@@ -90,7 +91,7 @@ public class InternshipService {
         return false;
     }
 
-    public List<InternshipDto> findInternshipsByStatusWithFilter(long projectId, InternshipFilterDto filterDto) { //3 получить все стажировки по статусу+
+    public List<InternshipDto> findInternshipsByStatusWithFilter(long projectId, InternshipFilterDto filterDto) { //3 получить все стажировки по статусу
         List<InternshipDto> listOfInternship = getAllInternships();
         listOfInternship.removeIf(dto -> !dto.getProjectId().equals(projectId));
         filter(filterDto, listOfInternship);
@@ -103,12 +104,13 @@ public class InternshipService {
                 .forEach(f -> f.apply(dtoList, filter));
     }
 
-    public List<InternshipDto> getAllInternships() { //4 получить все стажировки+
+    public List<InternshipDto> getAllInternships() { //4 получить все стажировки
         List<Internship> listOfInternship = internshipRepository.findAll();
         return listOfInternship.stream().map(internshipMapper::toDto).toList();
     }
 
-    public InternshipDto findAllInternshipById(long id) { //5 получить стажировку по id+
-        return internshipMapper.toDto(internshipRepository.findById(id).orElseThrow(() -> new DataValidationException("There is not internship with this id")));
+    public InternshipDto findAllInternshipById(long id) { //5 получить стажировку по id
+        return internshipMapper.toDto(internshipRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("There is not internship with this id")));
     }
 }

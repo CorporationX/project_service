@@ -22,6 +22,7 @@ public class InternshipValidator {
             throw new DataValidationException("Internship relation project error!");
         }
     }
+
     public void validateServiceSaveInternship(InternshipDto internshipDto) {
         if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate().plus(3, ChronoUnit.MONTHS))) {
             throw new DataValidationException("Internship cannot last more than 3 months!"); //?
