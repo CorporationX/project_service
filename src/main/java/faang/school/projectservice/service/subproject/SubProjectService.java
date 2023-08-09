@@ -37,7 +37,7 @@ public class SubProjectService {
     private void updateDataSubproject(Project project, ProjectStatus status) {
         if (status == ProjectStatus.COMPLETED &&
                 project.getVisibility() != ProjectVisibility.PRIVATE) {
-            momentService.createMoment(momentMapper.toMomentDtoCompleted(project));
+            momentService.createMoment(momentMapper.toMomentDto(project));
         }
 
         project.setStatus(status);

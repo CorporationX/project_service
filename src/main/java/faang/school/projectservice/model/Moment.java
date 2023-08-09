@@ -13,8 +13,10 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.List;
+
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -47,7 +49,7 @@ public class Moment {
             joinColumns = @JoinColumn(name = "moment_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    private List<Project> projects;
+    private List<Long> projectIds;
 
     @ElementCollection
     private List<Long> userIds;

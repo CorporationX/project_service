@@ -13,9 +13,9 @@ import java.util.List;
 @AllArgsConstructor
 public class MomentDto {
     private Long id;
-    private Long projectId;
     private String name;
     private String description;
+    private List<Long> projectIds;
     private Long createdBy;
     private List<Long> userIds;
 }

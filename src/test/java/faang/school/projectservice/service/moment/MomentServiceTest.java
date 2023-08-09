@@ -14,6 +14,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,8 +26,6 @@ class MomentServiceTest {
     private MomentRepository momentRepository;
     @Mock
     private MomentMapper momentMapper;
-    @Mock
-    private ProjectService projectService;
     private Moment moment = new Moment();
     private Project project = new Project();
     private MomentDto momentDto = new MomentDto();
@@ -39,22 +39,18 @@ class MomentServiceTest {
 
     @Test
     public void testCreateMoment() {
-        momentDto.setProjectId(rightId);
+        List<Long> projectIds = Stream.of(rightId).toList();
+        momentDto.setProjectIds(projectIds);
 
         Mockito.when(momentMapper.toMoment(momentDto))
                 .thenReturn(moment);
-        Mockito.when(projectService.getProjectById(momentDto.getProjectId()))
-                .thenReturn(project);
 
         momentService.createMoment(momentDto);
 
         assertTrue(moment.getCreatedAt().isBefore(LocalDateTime.now()));
-        assertEquals(1, moment.getProjects().size());
 
         Mockito.verify(momentMapper, Mockito.times(1))
                 .toMoment(momentDto);
-        Mockito.verify(projectService, Mockito.times(1))
-                .getProjectById(momentDto.getProjectId());
         Mockito.verify(momentRepository, Mockito.times(1))
                 .save(moment);
     }

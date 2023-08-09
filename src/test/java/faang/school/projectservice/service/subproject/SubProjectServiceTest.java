@@ -65,7 +65,7 @@ class SubProjectServiceTest {
     }
 
     @Test
-    public void testUpdateStatusSubProject_True() {
+    public void testUpdateStatusSubProject() {
         Project childCompiled = Project.builder()
                 .status(ProjectStatus.COMPLETED)
                 .build();
@@ -82,6 +82,8 @@ class SubProjectServiceTest {
 
         Mockito.verify(subProjectValidator, Mockito.times(1))
                 .validateSubProjectStatus(project.getId());
+        Mockito.verify(momentMapper,Mockito.times(1))
+                        .toMomentDto(projectCompleted);
 
         assertTrue(project.getUpdatedAt().isBefore(LocalDateTime.now()));
     }

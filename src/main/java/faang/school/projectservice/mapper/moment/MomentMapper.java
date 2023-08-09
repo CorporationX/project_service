@@ -10,6 +10,7 @@ import org.mapstruct.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
         injectionStrategy = InjectionStrategy.FIELD)
@@ -20,18 +21,22 @@ public interface MomentMapper {
     MomentDto toMomentDto(Moment moment);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "projectId", source = "id")
+    @Mapping(target = "projectIds", source = "id", qualifiedByName = "idToList")
     @Mapping(target = "createdBy", source = "ownerId")
     @Mapping(target = "name", constant = "Выполнены все подпроекты")
     @Mapping(target = "userIds", source = "teams", qualifiedByName = "teamsUserToIdList")
-    MomentDto toMomentDtoCompleted(Project project);
+    MomentDto toMomentDto(Project project);
 
     @Named("teamsUserToIdList")
     default List<Long> teamsUserToIdList(List<Team> teams) {
         return teams != null ? teams.stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getUserId)
-                .collect(Collectors.toList())
-                : Collections.emptyList();
+                .collect(Collectors.toList()) : Collections.emptyList();
+    }
+
+    @Named("idToList")
+    default List<Long> idToList(Long id) {
+        return Stream.of(id).toList();
     }
 }
