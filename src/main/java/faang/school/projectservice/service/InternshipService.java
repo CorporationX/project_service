@@ -44,9 +44,9 @@ public class InternshipService {
         Internship oldInternship = internshipRepository.findById(id).orElseThrow(() -> new DataValidationException("There is not internship with this id"));
         internshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
-        internship.setInterns(getListOfInterns(internshipDto.getInternsId())); //50
+        internship.setInterns(getListOfInterns(internshipDto.getInternsId()));
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            List<TeamMember> interns = internsDoneTasks(internshipDto.getInternsId(), new Task()); //60
+            List<TeamMember> interns = internsDoneTasks(internshipDto.getInternsId());
             for (TeamMember intern : interns) {
                 intern.setRoles(List.of(TeamRole.DEVELOPER));
             }
@@ -57,19 +57,17 @@ public class InternshipService {
         return internshipDto;
     }
 
-    public List<TeamMember> getListOfInterns(List<Long> interns) { //2.1
-        int sizeOfListInterns = interns.size();
-        List<TeamMember> secondListOfInterns = new ArrayList<>(sizeOfListInterns);
-        for (Long aLong : interns) {
+    public List<TeamMember> getListOfInterns(List<Long> allInternsOnInternship) { //2.1
+        List<TeamMember> secondListOfInterns = new ArrayList<>();
+        for (Long aLong : allInternsOnInternship) {
             TeamMember intern = teamMemberRepository.findById(aLong);
             secondListOfInterns.add(intern);
         }
         return secondListOfInterns;
     }
 
-    public List<TeamMember> internsDoneTasks(List<Long> allInternsOnInternship, Task task) { //2.2
-        int sizeOfListInterns = allInternsOnInternship.size();
-        List<TeamMember> listWithThePassedParticipants = new ArrayList<>(sizeOfListInterns);
+    public List<TeamMember> internsDoneTasks(List<Long> allInternsOnInternship) { //2.2
+        List<TeamMember> listWithThePassedParticipants = new ArrayList<>();
         for (Long aLong : allInternsOnInternship) {
             TeamMember intern = teamMemberRepository.findById(aLong);
             if (checkTaskDone(intern)) { //72

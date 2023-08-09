@@ -70,7 +70,7 @@ public class InternshipValidatorTest {
                         .builder()
                         .name("best")
                         .projectId(1L)
-                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                         .mentorId(null)
                         .build()));
         assertEquals(exception.getMessage(), "There is not mentor for internship!");

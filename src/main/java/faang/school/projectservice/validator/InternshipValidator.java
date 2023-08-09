@@ -37,7 +37,7 @@ public class InternshipValidator {
     public void validateServiceUpdateInternship(Internship oldInternship, InternshipDto internshipDto) {
         validateServiceSaveInternship(internshipDto);
         if (oldInternship.getStatus() == null || oldInternship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            throw new DataValidationException("Internship is over!");//?
+            throw new DataValidationException("Internship is over!"); //?
         }
         if (oldInternship.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
             throw new DataValidationException("Can't add new interns!");
