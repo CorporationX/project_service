@@ -8,7 +8,7 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.MomentService;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectNameFilter;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;

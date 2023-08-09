@@ -1,11 +1,13 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.dto.MomentFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,9 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MomentServiceTest {
@@ -34,6 +34,8 @@ class MomentServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private MomentMapper momentMapper;
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
     @InjectMocks
     private MomentService momentService;
 
