@@ -2,9 +2,11 @@ package faang.school.projectservice.filters.InternshipFilters;
 
 import faang.school.projectservice.dto.client.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
+@Component
 public class InternshipNameFilter implements InternshipFilter {
 
     @Override
