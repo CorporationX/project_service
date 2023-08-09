@@ -6,6 +6,7 @@ import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +35,8 @@ class MomentServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private MomentMapper momentMapper;
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
     @InjectMocks
     private MomentService momentService;
 
@@ -158,6 +161,59 @@ class MomentServiceTest {
                 DataValidationException.class,
                 () -> momentService.update(momentId, momentDto)
         );
+    }
+
+    @Test
+    public void testUpdate() {
+        Long momentId = 1L;
+
+        Project project = Project.builder()
+                .id(1L)
+                .name("Project 1")
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        MomentDto momentDto = MomentDto.builder()
+                .id(momentId)
+                .name("Changed moment")
+                .description("Changed description")
+                .projectIds(List.of(project.getId()))
+                .userIds(List.of(2L, 3L))
+                .build();
+
+        Moment newMoment = Moment.builder()
+                .id(momentId)
+                .name("Changed moment")
+                .description("Changed description")
+                .projects(List.of(project))
+                .userIds(List.of(2L, 3L))
+                .build();
+
+        Moment moment = Moment.builder()
+                .id(momentId)
+                .name("First moment")
+                .description("description")
+                .projects(List.of(project))
+                .userIds(List.of(2L))
+                .build();
+
+        when(momentRepository.findById(momentId)).thenReturn(Optional.of(moment));
+        when(teamMemberRepository.findById(3L)).thenReturn(TeamMember.builder()
+                .id(3L)
+                .team(Team.builder()
+                        .id(22L)
+                        .project(project)
+                        .build())
+                .build());
+        when(momentMapper.toEntity(momentDto)).thenReturn(newMoment);
+        when(momentRepository.save(newMoment)).thenReturn(newMoment);
+        when(momentMapper.toDto(newMoment)).thenReturn(momentDto);
+        momentService.update(momentId, momentDto);
+        verify(momentRepository).findById(momentId);
+        verify(teamMemberRepository).findById(3L);
+        verify(momentMapper).toEntity(momentDto);
+        verify(momentRepository).save(newMoment);
+        verify(momentMapper).toDto(newMoment);
     }
 
     @Test
