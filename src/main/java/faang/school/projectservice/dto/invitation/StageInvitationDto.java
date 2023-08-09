@@ -11,14 +11,14 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StageInvitationDto {
-    @Min(0)
+    @Min(1)
     private Long id;
 
-    private StageInvitationStatus status;
+    private String status;
 
-    private Stage stage;
+    private Long stageId;
 
-    private TeamMember author;
+    private Long authorId;
 
-    private TeamMember invited;
+    private Long invitedId;
 }
