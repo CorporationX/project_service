@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StageInvitationFilterDto {
-    private StageInvitationStatus statusPattern;
+    private String statusPattern;
     private String stagePattern;
     private Long authorPattern;
     private Long invitedPattern;

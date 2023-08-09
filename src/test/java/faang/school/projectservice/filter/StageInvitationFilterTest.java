@@ -37,7 +37,7 @@ public class StageInvitationFilterTest {
 
     @Test
     public void testIsApplicableWithStatusPattern() {
-        filterDto.setStatusPattern(StageInvitationStatus.PENDING);
+        filterDto.setStatusPattern(StageInvitationStatus.PENDING.toString());
         boolean isApplicable = stageInvitationStatusFilter.isApplicable(filterDto);
         assertTrue(isApplicable);
     }
@@ -52,7 +52,7 @@ public class StageInvitationFilterTest {
     @Test
     public void testApplyWithMatchingStatus() {
         StageInvitationFilterDto filterDto = new StageInvitationFilterDto();
-        filterDto.setStatusPattern(StageInvitationStatus.ACCEPTED);
+        filterDto.setStatusPattern(StageInvitationStatus.ACCEPTED.toString());
 
         StageInvitation invitation1 = mock(StageInvitation.class);
         when(invitation1.getStatus()).thenReturn(StageInvitationStatus.ACCEPTED);
@@ -70,7 +70,7 @@ public class StageInvitationFilterTest {
     @Test
     public void testApplyWithNoMatchingStatus() {
         StageInvitationFilterDto filterDto = new StageInvitationFilterDto();
-        filterDto.setStatusPattern(StageInvitationStatus.ACCEPTED);
+        filterDto.setStatusPattern(StageInvitationStatus.ACCEPTED.toString());
 
         StageInvitation invitation1 = mock(StageInvitation.class);
         when(invitation1.getStatus()).thenReturn(StageInvitationStatus.REJECTED);
