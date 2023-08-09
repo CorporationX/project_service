@@ -1,8 +1,9 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.dto.MomentFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.service.MomentService;
+import faang.school.projectservice.service.moment.MomentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,13 @@ public class MomentController {
     public Page<MomentDto> getAllMoments(@RequestParam(value = "page") int page,
                                          @RequestParam(value = "pageSize") int pageSize) {
         return momentService.getAllMoments(page, pageSize);
+    }
+
+    @PostMapping("/moments/byFilter")
+    public Page<MomentDto> getAllMoments(@RequestBody MomentFilterDto filter,
+                                         @RequestParam(value = "page") int page,
+                                         @RequestParam(value = "pageSize") int pageSize) {
+        return momentService.getAllMoments(page, pageSize, filter);
     }
 
     @GetMapping("/moments/{id}")

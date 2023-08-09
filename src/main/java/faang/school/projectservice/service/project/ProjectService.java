@@ -9,7 +9,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.MomentService;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

@@ -1,20 +1,24 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.dto.MomentFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.moment.filter.MomentFilter;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +26,8 @@ public class MomentService {
     private final MomentRepository momentRepository;
     private final TeamMemberRepository teamMemberJpaRepository;
     private final ProjectRepository projectRepository;
-    private final ProjectService projectService;
     private final MomentMapper momentMapper;
+    private final List<MomentFilter> momentFilters;
 
     public Moment createMomentCompletedForSubProject(Project subProject) {
         Moment moment = new Moment();
@@ -48,6 +52,17 @@ public class MomentService {
         MomentDto checkedDto = checkNewProjects(oldMoment, momentDto);
         Moment newMoment = checkNewMembers(oldMoment, checkedDto);
         return momentMapper.toDto(momentRepository.save(newMoment));
+    }
+
+    public Page<MomentDto> getAllMoments(int page, int pageSize, MomentFilterDto filters) {
+        Stream<Moment> momentStream = momentRepository.findAll(PageRequest.of(page, pageSize))
+                .stream();
+        List<MomentDto> momentDtoList = momentFilters.stream()
+                .filter(momentFilter -> momentFilter.isApplicable(filters))
+                .flatMap(momentFilter -> momentFilter.apply(momentStream, filters))
+                .map(momentMapper::toDto)
+                .toList();
+        return new PageImpl<>(momentDtoList);
     }
 
     public Page<MomentDto> getAllMoments(int page, int pageSize) {
