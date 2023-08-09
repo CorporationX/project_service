@@ -20,10 +20,11 @@ public class InternshipService {
     private final InternshipRepository internshipRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
+    private final InternshipValidator internshipValidator;
     private final InternshipMapper internshipMapper;
 
     public InternshipDto saveNewInternship(InternshipDto internshipDto) {
-        InternshipValidator.validateServiceSaveInternship(internshipDto);
+        internshipValidator.validateServiceSaveInternship(internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
         List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
                 .map(teamMemberRepository::findById).toList();

@@ -7,8 +7,6 @@ import java.util.List;
 
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class InternshipDto {
     private String name;
     private Long id;

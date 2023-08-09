@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
+    private final InternshipValidator internshipValidator;
 
     @PostMapping("/saveInternship")
     public InternshipDto saveNewInternship(@RequestBody InternshipDto internshipDto) {
-        InternshipValidator.validateControllerInternship(internshipDto);
+        internshipValidator.validateControllerInternship(internshipDto);
         return internshipService.saveNewInternship(internshipDto);
     }
 }
