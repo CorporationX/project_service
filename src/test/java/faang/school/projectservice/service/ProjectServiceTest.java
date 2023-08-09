@@ -144,8 +144,8 @@ class ProjectServiceTest {
 
     @Test
     void testCreateProjectThrowsException() {
-        Mockito.when(projectRepository
-                .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(true);
+//        Mockito.when(projectRepository
+//                .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(true);
         DataAlreadyExistingException dataAlreadyExistingException = Assertions
                 .assertThrows(DataAlreadyExistingException.class, () -> projectService.create(projectDto));
         Assertions.assertEquals(String.format("User with id: %d already exist project %s",
