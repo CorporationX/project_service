@@ -20,7 +20,10 @@ public class SubProjectValidator {
         validateStatus(statusSubprojectUpdateDto.getStatus());
     }
 
-    public void validateSubProjectStatus(Project project, ProjectStatus status) {
+    public void validateSubProjectStatus(long projectId) {
+        Project project = projectService.getProjectById(projectId);
+        ProjectStatus status = project.getStatus();
+
         if (status == ProjectStatus.COMPLETED && project.getChildren() != null) {
             if (!checkStatusChildren(project.getChildren())) {
                 throw new DataValidationException("You can make the project completed only after finishing all subprojects");

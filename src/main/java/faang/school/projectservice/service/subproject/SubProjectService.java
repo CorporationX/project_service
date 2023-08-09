@@ -25,12 +25,12 @@ public class SubProjectService {
     private final MomentMapper momentMapper;
 
     public ProjectDto updateStatusSubProject(StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
+        subProjectValidator.validateSubProjectStatus(statusSubprojectUpdateDto.getId());
+
         Project project = projectService.getProjectById(statusSubprojectUpdateDto.getId());
         ProjectStatus status = statusSubprojectUpdateDto.getStatus();
 
-        subProjectValidator.validateSubProjectStatus(project, status);
         updateDataSubproject(project, status);
-
         return projectMapper.toProjectDto(project);
     }
 

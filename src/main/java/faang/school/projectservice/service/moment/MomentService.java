@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ public class MomentService {
         Project project = projectService.getProjectById(momentDto.getProjectId());
 
         moment.setCreatedAt(LocalDateTime.now());
-        moment.getProjects().add(project);
+        moment.setProjects(Stream.of(project).collect(Collectors.toList()));
 
         Moment newMoment = momentRepository.save(moment);
         return momentMapper.toMomentDto(newMoment);

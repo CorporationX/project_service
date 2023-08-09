@@ -3,6 +3,7 @@ package faang.school.projectservice.mapper.moment;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.*;
 
@@ -26,8 +27,8 @@ public interface MomentMapper {
     MomentDto toMomentDtoCompleted(Project project);
 
     @Named("teamsUserToIdList")
-    default List<Long> teamsUserToIdList(Project project, Moment moment) {
-        return project.getTeams() != null ? project.getTeams().stream()
+    default List<Long> teamsUserToIdList(List<Team> teams) {
+        return teams != null ? teams.stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getUserId)
                 .collect(Collectors.toList())
