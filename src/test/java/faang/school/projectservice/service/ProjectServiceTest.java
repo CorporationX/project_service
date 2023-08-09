@@ -88,10 +88,9 @@ class ProjectServiceTest {
     @Test
     void testCreateProject() {
         when(projectRepository.existsByOwnerUserIdAndName(anyLong(), anyString())).thenReturn(false);
-        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectRepository.save(any())).thenReturn(project);
         when(projectMapper.toEntity(projectDto)).thenReturn(project);
         when(projectMapper.toDto(project)).thenReturn(projectDto);
-        projectService.createProject(projectDto);
         assertEquals(ProjectStatus.CREATED, projectService.createProject(projectDto).getStatus());
     }
 

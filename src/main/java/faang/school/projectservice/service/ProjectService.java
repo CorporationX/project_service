@@ -32,7 +32,7 @@ public class ProjectService {
         }
         log.info("Project creation started {}", projectDto.getId());
         projectDto.setStatus(ProjectStatus.CREATED);
-        projectDto.setCreatedAt(LocalDateTime.now());
+
         return projectMapper.toDto(projectRepository.save(projectMapper.toEntity(projectDto)));
     }
 
