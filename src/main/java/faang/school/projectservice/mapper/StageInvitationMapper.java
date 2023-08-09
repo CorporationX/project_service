@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.List;
 @Component
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageInvitationMapper {
-    StageInvitationMapper INSTANCE = Mappers.getMapper(StageInvitationMapper.class);
 
     @Mapping(target = "stageId", source = "stage.stageId")
     @Mapping(target = "authorId", source = "author.id")
