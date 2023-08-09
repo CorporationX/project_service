@@ -24,7 +24,6 @@ public class CreateVacancyDto {
     @NotNull
     private Long projectId;
     private Integer count;
-    private Long createdBy;
     private Double salary;
     private WorkSchedule workSchedule;
     private List<Long> requiredSkillIds;

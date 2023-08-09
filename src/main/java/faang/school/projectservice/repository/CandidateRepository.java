@@ -13,7 +13,7 @@ import java.util.List;
 public interface CandidateRepository extends JpaRepository<Candidate, Long> {
 
     @Query("""
-            SELECT count(c) FROM Candidate c
+            SELECT count(c.id) FROM Candidate c
             WHERE c.candidateStatus = :status
             AND c.vacancy.id = :vacancyId
             AND c.id IN (:ids)

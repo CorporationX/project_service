@@ -1,15 +1,17 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.Vacancy.CreateVacancyDto;
 import faang.school.projectservice.dto.Vacancy.ExtendedVacancyDto;
+import faang.school.projectservice.dto.Vacancy.UpdateCandidateRequestDto;
 import faang.school.projectservice.dto.Vacancy.UpdateVacancyDto;
 import faang.school.projectservice.exception.DataValidException;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
-import faang.school.projectservice.model.CandidateStatus;
-import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +28,9 @@ public class VacancyService {
     private final CandidateRepository candidateRepository;
     private final VacancyMapper vacancyMapper;
     private final ProjectRepository projectRepository;
-
+    private final TeamRepository teamRepository;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
+    private final UserContext userContext;
 
     @Transactional
     public ExtendedVacancyDto create(CreateVacancyDto vacancyDto) {
@@ -34,6 +39,7 @@ public class VacancyService {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         vacancy.setStatus(VacancyStatus.OPEN);
         vacancy.setCandidates(new ArrayList<>());
+        vacancy.setCreatedBy(userContext.getUserId());
         return saveEntity(vacancy);
     }
 
@@ -45,6 +51,7 @@ public class VacancyService {
         return vacancyRepository.findById(vacancyDto.getId())
                 .map(vacancy -> {
                     vacancyMapper.updateFromDto(vacancyDto, vacancy);
+                    vacancy.setUpdatedBy(userContext.getUserId());
                     return saveEntity(vacancy);
                 })
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -66,8 +73,8 @@ public class VacancyService {
     }
 
     private void validateStatusOfVacancyCreator(CreateVacancyDto vacancyDto) {
-        Long ownerProjectId = projectRepository.getProjectById(vacancyDto.getProjectId()).getOwnerId();
-        if (vacancyDto.getCreatedBy() != ownerProjectId) {
+        Long projectOwnerId = projectRepository.getProjectById(vacancyDto.getProjectId()).getOwnerId();
+        if (userContext.getUserId() != projectOwnerId) {
             throw new DataValidException(String.format(
                     "Status in project %s should be \"OWNER\" for create vacancy.", vacancyDto.getProjectId())
             );
@@ -75,18 +82,65 @@ public class VacancyService {
     }
 
     private void validateAvailableCloseStatus(UpdateVacancyDto vacancyDto) {
-//        считаем кандидатов с нужным статусом в списке кандидатов
-        if (vacancyDto.getCount() < getCountAcceptedCandidate(vacancyDto)) {
-            throw new DataValidException("Count of accepted candidate less than required");
+        if (vacancyDto.getCount() < getCountAcceptedCandidate(vacancyDto.getId(), vacancyDto.getCandidateIds())) {
+            throw new DataValidException("Vacancy can't be closed. Count of accepted candidate less than required");
         }
     }
 
-    private int getCountAcceptedCandidate(UpdateVacancyDto vacancyDto) {
+    private int getCountAcceptedCandidate(Long vacancyId, List<Long> candidateIds) {
         return candidateRepository.countAllByVacancyIdAndStatusAndId(
-                vacancyDto.getId(),
+                vacancyId,
                 CandidateStatus.ACCEPTED,
-                vacancyDto.getCandidates());
-
+                candidateIds
+        );
     }
 
+    @Transactional
+    public void changeCandidateStatus(UpdateCandidateRequestDto updateCandidate) {
+        Vacancy vacancy = vacancyRepository.findById(updateCandidate.getVacancyId())
+                .orElseThrow(() -> new EntityNotFoundException("Vacancy not found"));
+        Candidate candidate = candidateRepository.findById(updateCandidate.getCandidateId())
+                .orElseThrow(() -> new EntityNotFoundException("Candidate not found"));
+        Long userId = candidate.getUserId();
+        validateExistingCandidateInVacancy(updateCandidate, vacancy);
+        candidate.setCandidateStatus(updateCandidate.getCandidateStatus());
+        if (updateCandidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED)) {
+            convertCandidateInTeamMember(updateCandidate, userId, vacancy);
+        }
+    }
+
+    private void validateExistingCandidateInVacancy(UpdateCandidateRequestDto updateCandidate, Vacancy vacancy) {
+        if (!vacancyMapper.toCandidateIds(vacancy.getCandidates()).contains(updateCandidate.getCandidateId()))
+            throw new DataValidException(String.format(
+                    "Candidate is not found in vacancy with id %s.", updateCandidate.getVacancyId())
+            );
+    }
+
+
+    private void convertCandidateInTeamMember(UpdateCandidateRequestDto updateCandidate, Long userId, Vacancy vacancy) {
+        Team team = teamRepository.findById(updateCandidate.getTeamId())
+                .orElseThrow(() -> new EntityNotFoundException("Team not found"));
+        ValidateConsistRequiredTeamInProject(vacancy, team);
+        TeamMember newTeamMember = TeamMember
+                .builder()
+                .team(team)
+                .roles(new ArrayList<>(List.of(updateCandidate.getRole())))
+                .userId(userId)
+                .build();
+        teamMemberJpaRepository.save(newTeamMember);
+        if (vacancy.getCount() < getCountAcceptedCandidate(vacancy.getId(),
+                vacancy.getCandidates().stream().map(Candidate::getId).toList())) {
+            vacancy.setStatus(VacancyStatus.CLOSED);
+            saveEntity(vacancy);
+        }
+    }
+
+    private void ValidateConsistRequiredTeamInProject(Vacancy vacancy, Team team) {
+        List<Team> teams = vacancy.getProject().getTeams();
+        if (!teams.contains(team)) {
+            throw new DataValidException(String.format(
+                    "Team with id %s is not found in project.", team.getId())
+            );
+        }
+    }
 }

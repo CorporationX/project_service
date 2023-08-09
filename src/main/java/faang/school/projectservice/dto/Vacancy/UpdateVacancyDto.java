@@ -23,10 +23,8 @@ public class UpdateVacancyDto {
     private String name;
     @NotBlank
     private String description;
-    private List<Long> candidates;
+    private List<Long> candidateIds;;
     private Integer count;
-    private LocalDateTime updatedAt;
-    private Long updatedBy;
     private VacancyStatus status;
     private Double salary;
     private WorkSchedule workSchedule;

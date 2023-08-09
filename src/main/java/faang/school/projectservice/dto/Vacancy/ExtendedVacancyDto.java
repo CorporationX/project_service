@@ -25,8 +25,8 @@ public class ExtendedVacancyDto {
     private String name;
     @NotBlank
     private String description;
-    private Project project;
-    private List<Candidate> candidates;
+    private Long projectId;
+    private List<Long> candidateIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long createdBy;
