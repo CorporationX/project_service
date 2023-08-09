@@ -4,25 +4,24 @@ import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.service.InternshipService;
 import faang.school.projectservice.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/internship/v1")
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
+    private final InternshipValidator internshipValidator;
 
-    @PostMapping("/saveInternship")
+    @PostMapping("/internship")
     public InternshipDto saveNewInternship(@RequestBody InternshipDto internshipDto) {
-        InternshipValidator.validateControllerInternship(internshipDto);
+        internshipValidator.validateControllerInternship(internshipDto);
         return internshipService.saveNewInternship(internshipDto);
     }
 
-    @PutMapping("/updateInternship")
-    public InternshipDto updateInternship(InternshipDto internshipDto, long id) {
-        InternshipValidator.validateControllerInternship(internshipDto);
+    @PutMapping("/internship/{id}")
+    public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto,@PathVariable long id) {
+        internshipValidator.validateControllerInternship(internshipDto);
         return internshipService.updateInternship(internshipDto, id);
     }
 }

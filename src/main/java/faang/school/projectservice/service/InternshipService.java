@@ -1,9 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.InternshipDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -20,10 +20,11 @@ public class InternshipService {
     private final InternshipRepository internshipRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
+    private final InternshipValidator internshipValidator;
     private final InternshipMapper internshipMapper;
 
     public InternshipDto saveNewInternship(InternshipDto internshipDto) {
-        InternshipValidator.validateServiceSaveInternship(internshipDto);
+        internshipValidator.validateServiceSaveInternship(internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
         List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
                 .map(teamMemberRepository::findById).toList();
@@ -37,8 +38,8 @@ public class InternshipService {
     }
 
     public InternshipDto updateInternship(InternshipDto internshipDto, long id) {
-        Internship oldInternship = internshipRepository.getById(id);
-        InternshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
+        Internship oldInternship = internshipRepository.findById(id).orElseThrow(() -> new DataValidationException("There is not internship with this id"));
+        internshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setInterns(getListOfInterns(internshipDto.getInternsId())); //50
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
@@ -51,41 +52,39 @@ public class InternshipService {
         } else {
             return internshipMapper.toDto(internshipRepository.save(internship));
         }
-        return null;
+        return internshipDto;
     }
 
-    public List<TeamMember> getListOfInterns(List<Long> interns) {
-        int sizeOfListInterns = interns.size();
-        List<TeamMember> secondListOfInterns = new ArrayList<>(sizeOfListInterns);
-        for (Long aLong : interns) {
+    public List<TeamMember> getListOfInterns(List<Long> allInternsOnInternship) {
+        List<TeamMember> secondListOfInterns = new ArrayList<>();
+        for (Long aLong : allInternsOnInternship) {
             TeamMember intern = teamMemberRepository.findById(aLong);
             secondListOfInterns.add(intern);
         }
         return secondListOfInterns;
     }
 
-    public List<TeamMember> internsDoneTasks(List<Long> interns) {
-        int sizeOfListInterns = interns.size();
-        List<TeamMember> secondListOfInterns = new ArrayList<>(sizeOfListInterns);
-        for (Long aLong : interns) {
+    public List<TeamMember> internsDoneTasks(List<Long> allInternsOnInternship) {
+        List<TeamMember> secondListOfInterns = new ArrayList<>();
+        for (Long aLong : allInternsOnInternship) {
             TeamMember intern = teamMemberRepository.findById(aLong);
-            if (checkTaskDone(intern)) { //72
+            if (checkTaskDone(intern)) {
                 secondListOfInterns.add(intern);
             }
         }
         return secondListOfInterns;
     }
 
-    public boolean checkTaskDone(TeamMember member) {
-        List<Stage> stages = member.getStages();
-        for (Stage stage : stages) {
-            List<Task> tasks = stage.getTasks();
-            for (Task task : tasks) {
-                if (!task.getStatus().equals(TaskStatus.DONE)) {
-                    return false;
+    public boolean checkTaskDone(TeamMember teamMember) {
+        Project project = teamMember.getTeam().getProject();
+        List<Task> tasks = project.getTasks();
+        for (Task task : tasks) {
+            if (task.getPerformerUserId().equals(teamMember.getUserId())) {
+                if (task.getStatus().equals(TaskStatus.DONE)) {
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 }
