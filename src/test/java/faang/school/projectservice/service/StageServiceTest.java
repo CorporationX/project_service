@@ -1,18 +1,23 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage.StageStatus;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,24 +47,24 @@ class StageServiceTest {
     private StageRepository stageRepository;
     @Mock
     private TeamMemberRepository teamMemberRepository;
+    @Mock
+    private StageRolesRepository stageRolesRepository;
+    @Mock
+    private ProjectRepository projectRepository;
     @Spy
     private StageMapper stageMapper;
-    @Mock
-    private StageDto stageDto;
-    @Mock
-    private Stage stage;
     @Mock
     StageValidator stageValidator;
     @Mock
     TeamMember author;
+    private StageDto stageDto;
+    private Stage stage;
     private Stage stageWithStatusCreated;
     private Stage stageWithStatusIn_Progress;
     private String status;
     private Long stageId;
     private Long authorId;
     private Stage stageFromRepositoryWithWrongStatus;
-    @Mock
-    private List<TeamRole> teamRoles;
 
     @BeforeEach
     void setUp() {
@@ -77,6 +82,33 @@ class StageServiceTest {
         stageFromRepositoryWithWrongStatus = Stage.builder()
                 .status(StageStatus.CANCELLED)
                 .build();
+        stage = Stage.builder()
+                .stageName("stageName")
+                .project(Project.builder().id(1L).build())
+                .status(StageStatus.CREATED)
+                .stageRoles(List.of(StageRoles.builder().teamRole(TeamRole.DEVELOPER).count(1).build()))
+                .executors(List.of(author))
+                .build();
+        stageDto = StageDto.builder()
+                .stageName("stageName")
+                .projectId(1L)
+                .status("CREATED")
+                .stageRolesDto(List.of(StageRolesDto.builder().teamRole("OWNER").count(1).build()))
+                .build();
+        Project project = Project.builder()
+                .id(1L)
+                .teams(List.of(Team.builder()
+                        .id(1L)
+                        .teamMembers(List.of(TeamMember.builder()
+                                .id(1L)
+                                .team(Team.builder().id(1L).build())
+                                .roles(List.of(TeamRole.MANAGER))
+                                .build()))
+                        .build()))
+                .build();
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+
+
     }
 
     @Test
@@ -142,15 +174,12 @@ class StageServiceTest {
     }
 
     @Test
-    @Disabled
+//    @Disabled
     void testMethodUpdateStage() {
 
         when(stageRepository.getById(stageId)).thenReturn(stage);
         doNothing().when(stageValidator).isCompletedOrCancelled(any(Stage.class));
         when(teamMemberRepository.findById(authorId)).thenReturn(author);
-        when(stageService.findNewTeamRoles(stage, stageDto)).thenReturn(teamRoles);
-        when(stageService.setNewFieldsForStage(stage, stageDto)).thenReturn(stage);
-        doNothing().when(stageService).sendStageInvitation(stage, teamRoles, author);
         when(stageRepository.save(any(Stage.class))).thenReturn(stage);
         when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
 
@@ -159,9 +188,6 @@ class StageServiceTest {
         verify(stageRepository, times(1)).getById(stageId);
         verify(stageValidator, times(1)).isCompletedOrCancelled(any(Stage.class));
         verify(teamMemberRepository, times(1)).findById(authorId);
-        verify(stageService, times(1)).findNewTeamRoles(stage, stageDto);
-        verify(stageService, times(1)).setNewFieldsForStage(stage, stageDto);
-        verify(stageService, times(1)).sendStageInvitation(stage, teamRoles, author);
         verify(stageRepository, times(1)).save(any(Stage.class));
         verify(stageMapper, times(1)).toDto(stage);
 
@@ -179,10 +205,5 @@ class StageServiceTest {
     void testMethodFindTeamMemberById_ThrowExceptionAndMessage() {
         when(teamMemberRepository.findById(authorId)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class, () -> teamMemberRepository.findById(authorId), String.format("Team member doesn't exist by id: %s", authorId));
-    }
-
-    @Test
-    void testMethodFindTeamMemberById() {
-
     }
 }

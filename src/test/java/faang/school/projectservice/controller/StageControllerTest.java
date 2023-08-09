@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.service.StageService;
@@ -30,11 +31,15 @@ class StageControllerTest {
     Long authorId;
     StageDto stageDtoWithListStageRoles;
     StageDto stageDtoForUpdate;
+    @Mock
+    UserContext userContext;
+
 
     @BeforeEach
     void setUp() {
         stageId = 1L;
-        authorId = 2L;
+        authorId = userContext.getUserId();
+
         status = "created";
         stageDtoForUpdate = StageDto.builder()
                 .stageName("stageName")
@@ -73,7 +78,7 @@ class StageControllerTest {
 
     @Test
     void testMethodUpdateStage() {
-        stageController.updateStage(stageDtoForUpdate, stageId, authorId);
+        stageController.updateStage(stageDtoForUpdate, stageId);
 
         verify(stageService, times(1)).updateStage(stageDtoForUpdate, stageId, authorId);
         verifyNoMoreInteractions(stageService);
