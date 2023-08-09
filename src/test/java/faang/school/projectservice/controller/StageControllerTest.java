@@ -1,9 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.StageDtoForUpdate;
 import faang.school.projectservice.dto.StageRolesDto;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,17 +27,20 @@ class StageControllerTest {
     StageService stageService;
     String status;
     Long stageId;
+    Long authorId;
     StageDto stageDtoWithListStageRoles;
-    StageDtoForUpdate stageDtoForUpdate;
+    StageDto stageDtoForUpdate;
 
     @BeforeEach
     void setUp() {
         stageId = 1L;
+        authorId = 2L;
         status = "created";
-        stageDtoForUpdate = StageDtoForUpdate.builder()
-                .stageId(1L)
+        stageDtoForUpdate = StageDto.builder()
                 .stageName("stageName")
-                .teamRoles(List.of(TeamRole.valueOf("OWNER")))
+                .stageRolesDto(List.of(StageRolesDto.builder().teamRole("OWNER").build()))
+                .projectId(1L)
+                .status("CREATED")
                 .build();
         stageDtoWithListStageRoles = StageDto.builder()
                 .stageRolesDto(List.of(StageRolesDto.builder().teamRole("OWNER").build()))
@@ -72,9 +73,9 @@ class StageControllerTest {
 
     @Test
     void testMethodUpdateStage() {
-        stageController.updateStage(stageDtoForUpdate);
+        stageController.updateStage(stageDtoForUpdate, stageId, authorId);
 
-        verify(stageService, times(1)).updateStage(stageDtoForUpdate);
+        verify(stageService, times(1)).updateStage(stageDtoForUpdate, stageId, authorId);
         verifyNoMoreInteractions(stageService);
     }
 

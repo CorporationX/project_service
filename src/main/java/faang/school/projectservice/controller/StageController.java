@@ -1,7 +1,6 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.StageDtoForUpdate;
 import faang.school.projectservice.service.StageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -60,9 +59,11 @@ public class StageController {
 
     @Operation(summary = "Update stage")
     @PutMapping("/stage")
-    public StageDto updateStage(@Valid @RequestBody StageDtoForUpdate stageDto) {
-        log.debug("Received request to update stage: {}", stageDto);
-        return stageService.updateStage(stageDto);
+    public StageDto updateStage(@Valid @RequestBody StageDto stageDto,
+                                @RequestParam(value = "stageId") @NotNull Long stageId,
+                                @RequestParam(value = "authorId") @NotNull Long authorId) {
+        log.debug("Received request to update stage: {} + stageId: {} + authorId: {}", stageDto, stageId, authorId);
+        return stageService.updateStage(stageDto, stageId, authorId);
     }
 
     @Operation(summary = "Get all stages")

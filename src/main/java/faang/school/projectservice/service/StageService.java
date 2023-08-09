@@ -1,16 +1,17 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.StageDtoForUpdate;
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage.StageStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +38,7 @@ public class StageService {
     private final StageValidator stageValidator;
     private final StageInvitationService stageInvitationService;
     private final StageRolesRepository stageRolesRepository;
+    private final StageRolesMapper stageRolesMapper;
     @Transactional
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
@@ -72,18 +75,18 @@ public class StageService {
     }
 
     @Transactional
-    public StageDto updateStage(StageDtoForUpdate stageDto) {
+    public StageDto updateStage(StageDto stageDto, Long stageId, Long authorId) {
 
-        Stage stage = stageRepository.getById(stageDto.getStageId());
+        Stage stage = stageRepository.getById(stageId);
         log.debug("Stage from repository is successfully retrieved");
 
         stageValidator.isCompletedOrCancelled(stage);
         log.debug("Stage is not completed or cancelled");
 
-        TeamMember author = teamMemberRepository.findById(stageDto.getAuthorId());
-        List<TeamRole> stageDtoTeamRoles = stageDto.getTeamRoles();
+        TeamMember author = teamMemberRepository.findById(authorId);
+        log.debug("Author from repository is successfully retrieved");
 
-        List<TeamRole> newTeamRoles = findNewTeamRoles(stage, stageDtoTeamRoles);
+        List<TeamRole> newTeamRoles = findNewTeamRoles(stage, stageDto);
         log.debug("New team roles are successfully retrieved");
 
         Stage stageAfterUpdate = setNewFieldsForStage(stage, stageDto);
@@ -95,9 +98,10 @@ public class StageService {
         return stageMapper.toDto(stageRepository.save(stageAfterUpdate));
     }
 
-    private Stage setNewFieldsForStage(Stage stage, StageDtoForUpdate stageDto) {
+    public Stage setNewFieldsForStage(Stage stage, StageDto stageDto) {
+        List<TeamRole> teamRoles = getStageRoles(stageDto);
 
-        Map<String, Long> stageDtoTeamRolesMap = getMapTeamRoles(stageDto);
+        Map<String, Long> stageDtoTeamRolesMap = getMapTeamRoles(teamRoles);
 
         List<StageRoles> newStageRoles = getStageRoles(stageDtoTeamRolesMap);
 
@@ -106,7 +110,7 @@ public class StageService {
         stage.setStageRoles(newStageRoles);
         stage.getStageRoles().forEach(stageRole -> stageRole.setStage(stage));
         stage.setStageName(stageDto.getStageName());
-        stage.setStatus(stageDto.getStatus());
+        stage.setStatus(StageStatus.valueOf(stageDto.getStatus()));
 
         return stage;
     }
@@ -130,13 +134,34 @@ public class StageService {
                 .collect(Collectors.toList());
     }
 
-    private Map<String, Long> getMapTeamRoles(StageDtoForUpdate stageDto) {
-        return stageDto.getTeamRoles()
+    private Map<String, Long> getMapTeamRoles(List<TeamRole> teamRoles) {
+        return teamRoles
                 .stream()
                 .collect(Collectors.groupingBy(TeamRole::toString, Collectors.counting()));
     }
 
-    private void sendStageInvitation(Stage stage, List<TeamRole> newTeamRoles, TeamMember author) {
+
+    public List<TeamRole> findNewTeamRoles(Stage stage, StageDto stageDto) {
+        List<TeamRole> teamRoles = getStageRoles(stageDto);
+
+        List<TeamRole> rolesToRemove = stage.getExecutors()
+                .stream()
+                .flatMap(teamMember -> teamMember.getRoles().stream())
+                .toList();
+        teamRoles.removeIf(rolesToRemove::contains);
+
+        return teamRoles;
+    }
+
+    private List<TeamRole> getStageRoles(StageDto stageDto) {
+        List<StageRoles> stageDtoStageRoles = stageDto.getStageRolesDto().stream().map(stageRolesMapper::toEntity).toList();
+
+        return stageDtoStageRoles.stream()
+                .flatMap(stageRoles -> Collections.nCopies(stageRoles.getCount(), stageRoles.getTeamRole()).stream())
+                .collect(Collectors.toList());
+    }
+
+    public void sendStageInvitation(Stage stage, List<TeamRole> newTeamRoles, TeamMember author) {
         if (!newTeamRoles.isEmpty()) {
             List<TeamMember> projectTeamMembers = getTeamMembers(stage);
             sendingInvitation(stage, newTeamRoles, author, projectTeamMembers);
@@ -164,15 +189,5 @@ public class StageService {
                 .map(Team::getTeamMembers)
                 .flatMap(Collection::stream)
                 .toList();
-    }
-
-    private List<TeamRole> findNewTeamRoles(Stage stage, List<TeamRole> teamRoles) {
-        List<TeamRole> rolesToRemove = stage.getExecutors()
-                .stream()
-                .flatMap(teamMember -> teamMember.getRoles().stream())
-                .toList();
-        teamRoles.removeIf(rolesToRemove::contains);
-
-        return teamRoles;
     }
 }
