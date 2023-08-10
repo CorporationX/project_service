@@ -82,7 +82,7 @@ public class VacancyService {
     }
 
     private void validateAvailableCloseStatus(UpdateVacancyDto vacancyDto) {
-        if (vacancyDto.getCount() < getCountAcceptedCandidate(vacancyDto.getId(), vacancyDto.getCandidateIds())) {
+        if (vacancyDto.getCount() > getCountAcceptedCandidate(vacancyDto.getId(), vacancyDto.getCandidateIds())) {
             throw new DataValidException("Vacancy can't be closed. Count of accepted candidate less than required");
         }
     }
