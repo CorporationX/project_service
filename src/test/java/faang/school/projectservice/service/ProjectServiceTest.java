@@ -124,7 +124,7 @@ class ProjectServiceTest {
         Mockito.when(projectRepository.getProjectById(id))
                 .thenReturn(Project.builder().build());
 
-        projectService.updateStatusAndDescription(projectDto, id);
+        projectService.update(projectDto, id);
 
         Mockito.verify(projectRepository, Mockito.times(1))
                 .save(projectMapper.toEntity(projectDto));
@@ -137,7 +137,7 @@ class ProjectServiceTest {
 
     @Test
     void updateStatusAndDescriptionProjectNotFound() {
-        assertThrows(DataValidationException.class, () -> projectService.updateStatusAndDescription(new ProjectDto(), null));
+        assertThrows(DataValidationException.class, () -> projectService.update(new ProjectDto(), null));
     }
 
     @Test

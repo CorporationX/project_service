@@ -26,6 +26,6 @@ public class GlobalExceptionHandler {
         log.error(e.getMessage());
 
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
-                e.getMessage()), HttpStatus.BAD_REQUEST);
+                e.getMessage()), HttpStatus.NOT_FOUND);
     }
 }

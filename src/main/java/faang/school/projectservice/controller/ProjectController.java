@@ -14,14 +14,14 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/createProject")
+    @PostMapping("/")
     public ProjectDto create(@RequestBody ProjectDto projectDto) {
         return projectService.create(projectDto);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/")
     public ProjectDto changeStatus(@RequestBody ProjectDto projectDto, Long id) {
-        return projectService.updateStatusAndDescription(projectDto, id);
+        return projectService.update(projectDto, id);
     }
 
     @PostMapping("/{userId}/get-by-filters")

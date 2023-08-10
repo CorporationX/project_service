@@ -36,12 +36,13 @@ public class ProjectService {
         }
 
         projectDto.setStatus(ProjectStatus.CREATED);
-        projectDto.setCreatedAt(LocalDateTime.now());
-        projectDto.setUpdatedAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        projectDto.setCreatedAt(now);
+        projectDto.setUpdatedAt(now);
         return mapper.toDto(projectRepository.save(mapper.toEntity(projectDto)));
     }
 
-    public ProjectDto updateStatusAndDescription(ProjectDto projectDto, Long id) {
+    public ProjectDto update(ProjectDto projectDto, Long id) {
         if (id == null) {
             throw new DataValidationException("Project doesn't exist");
         }
