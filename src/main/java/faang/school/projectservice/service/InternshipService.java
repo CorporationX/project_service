@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
+
     private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipRepository internshipRepository;
