@@ -26,27 +26,27 @@ public class StageController {
         return stageService.updateStage(stageId, stageRolesDto);
     }
 
-    @DeleteMapping("/{stageId}")
+    @DeleteMapping("/delete/{stageId}")
     public void deleteStageWithTasks(@PathVariable long stageId) {
         stageService.deleteStageWithTasks(stageId);
     }
 
-    @DeleteMapping("/delete/{stageId}")
+    @DeleteMapping("/close/{stageId}")
     public void deleteStageCloseTasks(@PathVariable long stageId) {
         stageService.deleteStageCloseTasks(stageId);
     }
 
-    @DeleteMapping("/{stageId}/{stageToUpdateId}")
+    @DeleteMapping("/delete/{stageId}/transfer/{stageToUpdateId}")
     public void deleteStageTransferTasks(@PathVariable long stageId, @PathVariable long stageToUpdateId) {
         stageService.deleteStageTransferTasks(stageId, stageToUpdateId);
     }
 
-    @GetMapping("/project/{projectId}")
+    @GetMapping("/search/project/{projectId}")
     public List<StageDto> getAllProjectStages(@PathVariable long projectId) {
         return stageService.getAllProjectStages(projectId);
     }
 
-    @GetMapping("/{stageId}")
+    @GetMapping("/search/{stageId}")
     public StageDto getStageById(@PathVariable long stageId) {
         return stageService.getStageById(stageId);
     }

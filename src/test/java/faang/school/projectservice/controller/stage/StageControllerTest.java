@@ -75,7 +75,7 @@ class StageControllerTest {
 
         Mockito.when(stageService.getAllProjectStages(2L)).thenReturn(stageDtos);
 
-        mockMvc.perform(get("/api/v1/stages/project/2"))
+        mockMvc.perform(get("/api/v1/stages/search/project/2"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(stageDtos)));
     }
@@ -84,7 +84,7 @@ class StageControllerTest {
     public void testGetStageById() throws Exception {
         Mockito.when(stageService.getStageById(1L)).thenReturn(stageDto);
 
-        mockMvc.perform(get("/api/v1/stages/1"))
+        mockMvc.perform(get("/api/v1/stages/search/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(stageDto)));
     }
