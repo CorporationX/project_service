@@ -1,9 +1,5 @@
 package faang.school.projectservice.model;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -27,6 +24,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "project")
@@ -99,4 +100,7 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Vacancy> vacancies;
+
+    @ManyToMany(mappedBy = "projects")
+    private List<Moment> moments;
 }
