@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.ResponseInternshipDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
 import faang.school.projectservice.service.InternshipService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
