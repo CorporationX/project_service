@@ -2,13 +2,13 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.dto.client.InternshipFilterDto;
+import faang.school.projectservice.dto.client.InternshipUpdateDto;
 import faang.school.projectservice.exceptions.InternshipValidationException;
 import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +23,30 @@ public class InternshipController {
         return internshipService.internshipCreation(internshipDto);
     }
 
+    public InternshipDto updateInternship(InternshipUpdateDto internshipUpdateDto, Long idInternship) {
+        if (internshipUpdateCommonValidation(internshipUpdateDto)) {
+            throw new InternshipValidationException("Updated validation parameters did not passed!");
+        }
+        internshipValidationId(idInternship);
+        return internshipService.updateInternship(internshipUpdateDto, idInternship);
+    }
+
+    public InternshipDto updateInternBeforeInternshipEnd(Long idInternship, Long internsId) {
+        internshipValidationId(internsId);
+        internshipValidationId(idInternship);
+        return internshipService.updateInternBeforeInternshipEnd(idInternship,internsId);
+    }
+
+
+    public InternshipDto deleteIntern(Long idInternship, Long internsId) {
+        internshipValidationId(internsId);
+        internshipValidationId(idInternship);
+        return internshipService.deleteIntern(idInternship,internsId);
+    }
+
+    public List<InternshipDto> gettingAllInternshipsAccordingToFilters(InternshipFilterDto internshipFilterDto) {
+        return internshipService.gettingAllInternshipsAccordingToFilters(internshipFilterDto);
+    }
 
     public List<InternshipDto> gettingAllInternships() {
         return internshipService.gettingAllInternships();
@@ -32,23 +56,12 @@ public class InternshipController {
         return internshipService.getInternshipById(id);
     }
 
-//    public InternshipDto internshipUpdate(Long id, InternshipDto internshipDto) {
-//        if (internshipCommonValidation(internshipDto)) {
-//            throw new InternshipValidationException("Validation parameters did not passed!");
-//        }
-//        internshipValidationId(id);
-//        return internshipService.internshipUpdate(internshipDto);
-//    }
 
     //ID проверяем отдельно, тк он приходит позже
     private void internshipValidationId(Long id) {
         if (id == null || id < 1) {
             throw new InternshipValidationException("Invalid id");
         }
-    }
-
-    public List<InternshipDto> gettingAllInternshipsAccordingToFilters (InternshipFilterDto internshipFilterDto) {
-        return internshipService.gettingAllInternshipsAccordingToFilters(internshipFilterDto);
     }
 
     private boolean internshipCommonValidation(InternshipDto internshipDto) {
@@ -59,6 +72,18 @@ public class InternshipController {
                 internshipDto.getMentorId() == null &&
                 //internshipDto.getInternsId() == null &&
                 internshipDto.getProjectId() == null;
-                //internshipDto.getStatus() == null &&
+        //internshipDto.getStatus() == null &&
+    }
+
+    private boolean internshipUpdateCommonValidation(InternshipUpdateDto internshipUpdateDto) {
+        return internshipUpdateDto.getProjectId() == null &&
+                internshipUpdateDto.getMentorId() == null &&
+                internshipUpdateDto.getEndDate() == null &&
+                internshipUpdateDto.getStatus() == null &&
+                internshipUpdateDto.getDescription() == null &&
+                internshipUpdateDto.getName() == null &&
+                internshipUpdateDto.getUpdatedAt() == null &&
+                internshipUpdateDto.getUpdatedBy() == null &&
+                internshipUpdateDto.getScheduleId() == null;
     }
 }

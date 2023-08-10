@@ -1,12 +1,11 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.client.InternshipDto;
+import faang.school.projectservice.dto.client.InternshipUpdateDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Schedule;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.InternshipRepository;
-import lombok.RequiredArgsConstructor;
 import org.mapstruct.*;
 import org.springframework.stereotype.Component;
 
@@ -33,9 +32,9 @@ public interface InternshipMapper {
 
     @Mapping(target = "project", source = "projectId", qualifiedByName = "toProject")
     @Mapping(target = "mentorId", source = "mentorId", qualifiedByName = "toTeamMember")
-    @Mapping(target = "interns", source = "internsId", qualifiedByName = "toTeamMemberList")
+    //@Mapping(target = "interns", source = "internsId", qualifiedByName = "toTeamMemberList")
     @Mapping(target = "schedule", source = "scheduleId", qualifiedByName = "toSchedule")
-    void update(InternshipDto internshipDto,@MappingTarget Internship internship);
+    void update(InternshipUpdateDto internshipUpdateDto, @MappingTarget Internship internship);
 
     @Named("toProject")
     default Project toProject(Long projectId){

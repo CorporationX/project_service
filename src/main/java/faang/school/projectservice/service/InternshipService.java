@@ -2,9 +2,9 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.dto.client.InternshipFilterDto;
+import faang.school.projectservice.dto.client.InternshipUpdateDto;
 import faang.school.projectservice.exceptions.InternshipValidationException;
 import faang.school.projectservice.filters.InternshipFilters.InternshipFilter;
-import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.*;
@@ -23,44 +23,45 @@ public class InternshipService {
     private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipRepository internshipRepository;
-    private final TaskRepository taskRepository;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> internshipFilters;
-
-// Стажировка ВСЕГДА относится к какому-то одному проекту.
-//                internshipDto.getProjectId() > 1 &&
-//                        internshipDto.getProjectId() < 1
-
-    private void internshipBusinessValidation(InternshipDto internshipDto) {
-        if (internshipDto.getProjectId() == null) {
-            throw new InternshipValidationException("Invalid project id");
-        }
-        if (internshipDto.getInternsId().isEmpty()) {
-            throw new InternshipValidationException("Empty list of interns");
-        }
-        if (Period.between(internshipDto.getStartDate().toLocalDate(),
-                internshipDto.getEndDate().toLocalDate()).getMonths() > 3) {
-            throw new InternshipValidationException("Invalid internship period");
-        }
-        if (teamMemberJpaRepository.findByUserIdAndProjectId(internshipDto.getMentorId(),
-                internshipDto.getProjectId()) == null) {
-            throw new InternshipValidationException("Invalid mentor");
-        }
-    }
 
     public InternshipDto internshipCreation(InternshipDto internshipDto) {
         internshipBusinessValidation(internshipDto);
         return internshipMapper.toInternshipDto(internshipRepository.save(internshipMapper.toInternship(internshipDto)));
     }
 
-//    public Set<InternshipDto> gettingAllInternshipsAccordingToFilters(InternshipFilterDto internshipFilterDto) {
-//        Stream<Internship> internshipStream = internshipRepository.findAll().stream();
-//        Set <Internship> listOfInternshipFilters = internshipFilters.stream()
-//                .filter(internshipFilter -> internshipFilter.isInternshipDtoValid(internshipFilterDto))
-//                .flatMap(internshipFilter -> internshipFilter.filterInternshipDto(internshipStream, internshipFilterDto))
-//                .collect(Collectors.toSet());
-//        return listOfInternshipFilters.stream().map(internshipMapper::toInternshipDto).collect(Collectors.toSet());
-//    }
+    public InternshipDto updateInternship(InternshipUpdateDto internshipUpdateDto, Long idInternship) {
+        Internship internship = ifInternshipRepositoryContainsInternshipId(idInternship);
+
+        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
+            for (TeamMember teamMember : internship.getInterns()) {
+                updateInterns(teamMember, internship);
+            }
+        }
+        internshipMapper.update(internshipUpdateDto, internship);
+        return internshipMapper.toInternshipDto(internshipRepository.save(internship));
+    }
+
+    public InternshipDto updateInternBeforeInternshipEnd(Long idInternship, Long internsId) {
+        Internship internship = ifInternshipRepositoryContainsInternshipId(idInternship);
+        TeamMember teamMember = teamMemberRepository.findById(internsId);
+
+        isInternshipContainsTeamMember(internship, teamMember);
+        updateInterns(teamMember, internship);
+
+        return internshipMapper.toInternshipDto(internshipRepository.save(internship));
+    }
+
+    public InternshipDto deleteIntern(Long idInternship, Long internsId) {
+        Internship internship = ifInternshipRepositoryContainsInternshipId(idInternship);
+        TeamMember teamMember = teamMemberRepository.findById(internsId);
+
+        isInternshipContainsTeamMember(internship, teamMember);
+        internship.getInterns().remove(teamMember);
+
+        return internshipMapper.toInternshipDto(internshipRepository.save(internship));
+    }
 
     public List<InternshipDto> gettingAllInternshipsAccordingToFilters(InternshipFilterDto internshipFilterDto) {
         Stream<Internship> internshipStream = internshipRepository.findAll().stream();
@@ -84,58 +85,120 @@ public class InternshipService {
         return internshipMapper.toInternshipDto(internshipRepository.getById(id));
     }
 
-    //Обновить стажировку.
-    // Если стажировка завершена, то стажирующиеся должны получить
-    // новые роли на проекте, если прошли, и быть удалены из списка участников проекта,
-    // если не прошли. Участник считается прошедшим стажировку, если все запланированные
-    // задачи выполнены. После старта стажировки нельзя добавлять новых стажёров.
-    // Стажировку можно пройти досрочно или досрочно быть уволенным.
+    private void internshipBusinessValidation(InternshipDto internshipDto) {
+        if (internshipDto.getProjectId() == null) {
+            throw new InternshipValidationException("Invalid project id");
+        }
+        if (internshipDto.getInternsId().isEmpty()) {
+            throw new InternshipValidationException("Empty list of interns");
+        }
+        if (Period.between(internshipDto.getStartDate().toLocalDate(),
+                internshipDto.getEndDate().toLocalDate()).getMonths() > 3) {
+            throw new InternshipValidationException("Invalid internship period");
+        }
+        if (teamMemberJpaRepository.findByUserIdAndProjectId(internshipDto.getMentorId(),
+                internshipDto.getProjectId()) == null) {
+            throw new InternshipValidationException("Invalid mentor");
+        }
+    }
 
-
-    //1 какая мб причина досрочно быть уволенным?
-    //2 teamMemberRepository.deleteById(teamMember.getId()); удаление в принципе из репозитория?
-    //то есть удаление в принципе из бд ... и как такой челв принципе потом сможет добавляться на другие стажировки?
-    //3 После старта стажировки нельзя добавлять новых стажёров - как бы мы их добавляли?
-    //4 Нужно ли пeредавать InternshipDto
-    //5 Можно ли использовать update у Mapper'a
-
-    public InternshipDto updateInternship(InternshipDto internshipDto, Long idInternship) {
-        Internship internship = internshipRepository.findById(idInternship)
+    private Internship ifInternshipRepositoryContainsInternshipId(Long idInternship) {
+        return internshipRepository.findById(idInternship)
                 .orElseThrow(() -> new InternshipValidationException("There is not internship with this id"));
+    }
 
+    private void isInternshipContainsTeamMember(Internship internship, TeamMember teamMember) {
+        if (!internship.getInterns().contains(teamMember)) {
+            throw new InternshipValidationException("There is not intern with this id");
+        }
+    }
+
+    private void updateInterns(TeamMember teamMember, Internship internship) {
         Project project = internship.getProject();
-
-        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            for (TeamMember teamMember : internship.getInterns()) {
-                List<Task> teamMemberTask = project.getTasks().stream()
-                        .filter(task -> task.getPerformerUserId().equals(teamMember.getId()))
-                        .toList();
-
-                boolean flag = false;
-
-                for (Task task : teamMemberTask) {
-                    if (task.getStatus() != TaskStatus.DONE) {
-                        teamMemberRepository.deleteById(teamMember.getId());
-                        flag = true;
-                        break;
-                    }
-                }
-
-                if (!flag) {
-                    teamMember.getRoles().remove(TeamRole.INTERN);
-                    for (TeamRole role : internship.getMentorId().getRoles()) {
-                        teamMember.getRoles().add(role);
-                    }
-                }
+        List<Task> teamMemberTask = project.getTasks().stream()
+                .filter(task -> task.getPerformerUserId().equals(teamMember.getId()))
+                .toList();
+        boolean flag = false;
+        for (Task task : teamMemberTask) {
+            if (task.getStatus() != TaskStatus.DONE) {
+                internship.getInterns().remove(teamMember);
+                flag = true;
+                break;
             }
         }
-        return internshipMapper.toInternshipDto(internshipRepository.save(internship));
+        if (!flag) {
+            teamMember.getRoles().remove(TeamRole.INTERN);
+            teamMember.getRoles().add(TeamRole.JUNIOR);
+        }
     }
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+// Стажировка ВСЕГДА относится к какому-то одному проекту.
+//                internshipDto.getProjectId() > 1 &&
+//                        internshipDto.getProjectId() < 1
 
+//----------------------------------------------------------------------------------------------------------------------
+//Trials to create Update method for Internship:
+
+//Обновить стажировку.
+// Если стажировка завершена, то стажирующиеся должны получить
+// новые роли на проекте, если прошли, и быть удалены из списка участников проекта,
+// если не прошли. Участник считается прошедшим стажировку, если все запланированные
+// задачи выполнены. После старта стажировки нельзя добавлять новых стажёров.
+// Стажировку можно пройти досрочно или досрочно быть уволенным.
+
+//1 какая мб причина досрочно быть уволенным?
+//2 teamMemberRepository.deleteById(teamMember.getId()); удаление в принципе из репозитория?
+//то есть удаление в принципе из бд ... и как такой челв принципе потом сможет добавляться на другие стажировки?
+//3 После старта стажировки нельзя добавлять новых стажёров - как бы мы их добавляли?
+//4 Нужно ли пeредавать InternshipDto
+//5 Можно ли использовать update у Mapper'a
+
+//    public Set<InternshipDto> gettingAllInternshipsAccordingToFilters(InternshipFilterDto internshipFilterDto) {
+//        Stream<Internship> internshipStream = internshipRepository.findAll().stream();
+//        Set <Internship> listOfInternshipFilters = internshipFilters.stream()
+//                .filter(internshipFilter -> internshipFilter.isInternshipDtoValid(internshipFilterDto))
+//                .flatMap(internshipFilter -> internshipFilter.filterInternshipDto(internshipStream, internshipFilterDto))
+//                .collect(Collectors.toSet());
+//        return listOfInternshipFilters.stream().map(internshipMapper::toInternshipDto).collect(Collectors.toSet());
+//    }
+
+//    public InternshipDto updateInternship(InternshipDto internshipDto, Long idInternship) {
+//        Internship internship = internshipRepository.findById(idInternship)
+//                .orElseThrow(() -> new InternshipValidationException("There is not internship with this id"));
 //
+//        Project project = internship.getProject();
 //
+//        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
+//            for (TeamMember teamMember : internship.getInterns()) {
+//                List<Task> teamMemberTask = project.getTasks().stream()
+//                        .filter(task -> task.getPerformerUserId().equals(teamMember.getId()))
+//                        .toList();
+//
+//                boolean flag = false;
+//
+//                for (Task task : teamMemberTask) {
+//                    if (task.getStatus() != TaskStatus.DONE) {
+//                        teamMemberRepository.deleteById(teamMember.getId());
+//                        flag = true;
+//                        break;
+//                    }
+//                }
+//
+//                if (!flag) {
+//                    teamMember.getRoles().remove(TeamRole.INTERN);
+//                    for (TeamRole role : internship.getMentorId().getRoles()) {
+//                        teamMember.getRoles().add(role);
+//                    }
+//                }
+//            }
+//        }
+//        return internshipMapper.toInternshipDto(internshipRepository.save(internship));
+//    }
+//}
+
+
 //    public List<TeamMember> getListOfInterns(List<Long> allInternsOnInternship) {
 //        List<TeamMember> secondListOfInterns = new ArrayList<>();
 //        for (Long aLong : allInternsOnInternship) {
@@ -191,7 +254,6 @@ public class InternshipService {
 //        }
 //    }
 //}
-//
 
 
 //    public InternshipDto internshipUpdate(InternshipDto internshipDto) {
@@ -255,7 +317,6 @@ public class InternshipService {
 //        }
 //        return internshipDto;
 //    }
-
 
 //    Internship internship = internshipRepository.findById(internshipDto.getId())
 //            .orElseThrow(() -> new IllegalArgumentException("Invalid internship"));
