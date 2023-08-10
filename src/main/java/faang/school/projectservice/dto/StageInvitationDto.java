@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 
 @Builder
 @Data
