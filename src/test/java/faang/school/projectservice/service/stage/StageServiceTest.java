@@ -196,6 +196,11 @@ class StageServiceTest {
         Stage stageToTransfer = new Stage();
         stageToTransfer.setStageId(stageToTransferDto.getStageId());
 
+        Stage expectedChanges = Stage.builder()
+                .stageId(stageToTransferDto.getStageId())
+                .tasks(List.of(Task.builder().id(1L).build()))
+                .build();
+
         Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
         Mockito.when(stageRepository.getById(2L)).thenReturn(stageToTransfer);
 
@@ -203,6 +208,7 @@ class StageServiceTest {
 
         Mockito.verify(stageRepository, Mockito.times(1)).save(stageToTransfer);
         Mockito.verify(stageRepository, Mockito.times(1)).delete(stage);
+        assertEquals(expectedChanges,stageToTransfer);
     }
 
     @Test
