@@ -2,7 +2,6 @@ package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -32,15 +31,11 @@ public class ProjectRepository {
         return projectJpaRepository.existsByOwnerIdAndName(userId, name);
     }
 
-    public Project save(Project project) {
+    public Project save(Project project){
         return projectJpaRepository.save(project);
     }
 
-    public boolean existsById(Long id) {
+    public boolean existsById(Long id){
         return projectJpaRepository.existsById(id);
-    }
-
-    public List<Project> findAllByVisibilityOrOwnerId(ProjectVisibility visibility, Long ownerId) {
-        return projectJpaRepository.findAllByVisibilityOrOwnerId(visibility, ownerId);
     }
 }
