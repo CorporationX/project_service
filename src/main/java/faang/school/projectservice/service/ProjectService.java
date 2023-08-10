@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.PrivateAccessException;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -97,6 +97,14 @@ public class ProjectService {
             throw new PrivateAccessException("This project is private");
         }
         return projectMapper.toDto(projectById);
+    }
+
+    public Project getProjectByIdFromRepo(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+
+    public boolean isProjectExist(Long projectId) {
+        return projectRepository.existsById(projectId);
     }
 
     private List<Project> getAvailableProjectsForCurrentUser(long userId) {

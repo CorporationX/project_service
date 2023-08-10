@@ -48,6 +48,3 @@ services:
   user-service:
     host: http://localhost
     port: 8080
-
-vacancy:
-  places: 5
