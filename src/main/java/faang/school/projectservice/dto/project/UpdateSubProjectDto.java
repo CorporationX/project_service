@@ -6,19 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @Builder
-public class ProjectDto {
+public class UpdateSubProjectDto {
     private Long id;
     private String name;
     private String description;
     private long ownerId;
     private Long parentProjectId;
-//    private List<Long> childrenIds;
     private ProjectStatus status;
     private ProjectVisibility visibility;
-    private List<Long> stagesId;
 }

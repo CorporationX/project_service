@@ -1,105 +1,56 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
+import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.SubProjectMapper;
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.filters.ProjectFilter;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-@Builder
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final SubProjectMapper subProjectMapper;
-    private final StageRepository stageRepository;
-    private final MomentRepository momentRepository;
     private final List<ProjectFilter> projectFilters;
 
     @Transactional
-    public ProjectDto createSubProject(ProjectDto projectDto) {
-        validateSubProject(projectDto);
-
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            Project project = projectRepository.getProjectById(projectDto.getId());
-            return subProjectMapper.toDto(project);
-        }
-//        validateProjectNotExist(projectDto);
-        checkSubProjectNotPrivateOnPublicProject(projectDto);
-        Project subProject = subProjectMapper.toEntity(projectDto);
-        Project parentProject = getParentProject(projectDto);
+    public SubProjectDto createSubProject(SubProjectDto subProjectDto) {
+        checkProjectNotExist(subProjectDto);
+        checkSubProjectNotPublicOnPrivateProject(subProjectDto.getParentProjectId(), subProjectDto.getVisibility(), subProjectDto.getName());
+        Project subProject = subProjectMapper.toEntity(subProjectDto);
+        Project parentProject = projectRepository.getProjectById(subProjectDto.getParentProjectId());
         subProject.setParentProject(parentProject);
         subProject.setStatus(ProjectStatus.CREATED);
-//        List<Stage> stages = projectDto.getStagesId().stream()
-//                .map(stageRepository::getById)
-//                .toList();
-//        subProject.setStages(stages);
-//        parentProject.getChildren().add(subProject);
         projectRepository.save(subProject);
-        projectRepository.save(parentProject);
         return subProjectMapper.toDto(subProject);
     }
 
-    @Transactional
-    public List<ProjectDto> createSubProjects(List<ProjectDto> projectsDtos) {
-        projectsDtos.forEach(this::validateSubProject);
-        return projectsDtos.stream()
-                .map(this::createSubProject)
-                .toList();
-    }
+    public LocalDateTime updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
+        Project projectToUpdate = projectRepository.getProjectById(updateSubProjectDto.getId());
 
-    public LocalDateTime updateSubProject(ProjectDto projectDto) {
-        Project projectToUpdate = projectRepository.getProjectById(projectDto.getId());
-
-        if (projectDto.getStatus() != null && projectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
-            List<Project> allProjects = projectRepository.findAllByIds(projectDto.getChildrenIds());
-            allProjects.forEach(this::checkSubProjectStatusCompleteOrCancelled);
-            projectToUpdate.setChildren(allProjects);
-            updateAllNeededFields(projectDto, projectToUpdate);
-            projectRepository.save(projectToUpdate);
-            Moment projectMoment = createMoment(projectDto, projectToUpdate);
-            momentRepository.save(projectMoment);
-            return projectToUpdate.getUpdatedAt();
+        if (updateSubProjectDto.getStatus() == ProjectStatus.COMPLETED) {
+            return closeSubProject(updateSubProjectDto, projectToUpdate);
         }
-
-        List<Project> subProjects = projectRepository.findAllByIds(projectDto.getChildrenIds());
-
-        if (projectDto.getVisibility() != null && projectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
-            subProjects.forEach(subProject -> {
-                subProject.setVisibility(ProjectVisibility.PRIVATE);
-                projectRepository.save(subProject);
-            });
-        }
-        projectToUpdate.setChildren(subProjects);
-        updateAllNeededFields(projectDto, projectToUpdate);
+        checkUpdatedVisibility(updateSubProjectDto, projectToUpdate);
+        setAllNeededFields(updateSubProjectDto, projectToUpdate);
         projectRepository.save(projectToUpdate);
         return projectToUpdate.getUpdatedAt();
     }
 
-    public List<ProjectDto> getProjectChildrenWithFilter(ProjectFilterDto projectFilterDto, long projectId) {
+    public List<SubProjectDto> getProjectChildrenWithFilter(ProjectFilterDto projectFilterDto, long projectId) {
         Project project = projectRepository.getProjectById(projectId);
         Stream<Project> subProjectsStream = project.getChildren().stream();
         List<ProjectFilter> applicableFilters = projectFilters.stream()
@@ -112,131 +63,75 @@ public class ProjectService {
                 .toList();
     }
 
-    public Moment createMoment(ProjectDto projectDto, Project project) {
-        Moment moment = Moment.builder()
-                .name(projectDto.getName() + " project tasks")
-                .description(String.format("All tasks are completed in %s project", projectDto.getName()))
-                .resource(project.getResources())
-                .projects(new ArrayList<>(project.getChildren()))
-                .userIds(collectAllUsersIdOnProject(project))
-                .imageId(project.getCoverImageId())
-                .createdBy(projectDto.getOwnerId())
-                .updatedBy(project.getOwnerId())
-                .build();
-        moment.getProjects().add(project);
-        return moment;
+    private LocalDateTime closeSubProject(UpdateSubProjectDto updateSubProjectDto, Project projectToUpdate) {
+        projectToUpdate.getChildren().forEach(this::checkProjectStatusCompleteOrCancelled);
+        setAllNeededFields(updateSubProjectDto, projectToUpdate);
+        projectRepository.save(projectToUpdate);
+        return projectToUpdate.getUpdatedAt();
     }
 
-    public List<Long> collectAllUsersIdOnProject(Project project) {
-        Set<Long> userIds = new HashSet<>();
-        if (project.getTeams() != null && !project.getTeams().isEmpty()) {
-            if (project.getChildren() != null && !project.getChildren().isEmpty()) {
-                collectTeamUserIds(project, userIds);
-                collectChildrenMomentUserIds(project, userIds);
+    private void checkUpdatedVisibility(UpdateSubProjectDto updateSubProjectDto, Project projectToUpdate) {
+        ProjectVisibility newVisibility = updateSubProjectDto.getVisibility();
+        String projectName = projectToUpdate.getName();
+
+        if (newVisibility == ProjectVisibility.PUBLIC) {
+            if (updateSubProjectDto.getParentProjectId() != null) {
+                checkSubProjectNotPublicOnPrivateProject(updateSubProjectDto.getParentProjectId(), newVisibility, projectName);
             } else {
-                collectTeamUserIds(project, userIds);
+                checkSubProjectNotPublicOnPrivateProject(projectToUpdate.getParentProject().getId(), newVisibility, projectName);
             }
-        } else if (project.getChildren() != null && !project.getChildren().isEmpty()) {
-            collectChildrenMomentUserIds(project, userIds);
         }
-        return new ArrayList<>(userIds);
+        if (newVisibility == ProjectVisibility.PRIVATE) {
+            makeAllSubprojectPrivate(projectToUpdate);
+        }
     }
 
-    public Project changeParentProject(ProjectDto projectDto, Project projectToUpdate) {
-        if (!Objects.equals(projectDto.getParentProjectId(), projectToUpdate.getParentProject().getId())) {
-            Project newParentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
+    private void makeAllSubprojectPrivate(Project project) {
+        List<Project> children = project.getChildren();
+
+        if (children != null && !children.isEmpty()) {
+            children.forEach(this::makeAllSubprojectPrivate);
+        }
+        project.setVisibility(ProjectVisibility.PRIVATE);
+        projectRepository.save(project);
+    }
+
+    private void setAllNeededFields(UpdateSubProjectDto updateSubProjectDto, Project projectToUpdate) {
+        if (updateSubProjectDto.getParentProjectId() != null) {
+            Project newParentProject = projectRepository.getProjectById(updateSubProjectDto.getParentProjectId());
             projectToUpdate.setParentProject(newParentProject);
         }
-        return projectToUpdate;
-    }
-
-    private void updateAllNeededFields(ProjectDto projectDto, Project projectToUpdate) {
-        changeParentProject(projectDto, projectToUpdate);
-        setAllNeededFields(projectDto, projectToUpdate);
-    }
-
-    private void setAllNeededFields(ProjectDto projectDto, Project projectToUpdate) {
-        projectToUpdate.setName(projectToUpdate.getName());
-
-        if (projectDto.getDescription() != null) {
-            projectToUpdate.setDescription(projectDto.getDescription());
+        if (updateSubProjectDto.getName() != null) {
+            projectToUpdate.setName(updateSubProjectDto.getName());
         }
-        if (projectDto.getOwnerId() <= 0) {
-            throw new DataValidationException("Owner id cant be less then 1");
+        if (updateSubProjectDto.getDescription() != null) {
+            projectToUpdate.setDescription(updateSubProjectDto.getDescription());
         }
-
-        projectToUpdate.setOwnerId(projectDto.getOwnerId());
-
-        if (projectDto.getStatus() != null) {
-            projectToUpdate.setStatus(projectDto.getStatus());
+        if (updateSubProjectDto.getStatus() != null) {
+            projectToUpdate.setStatus(updateSubProjectDto.getStatus());
         }
-        if (projectDto.getStagesId() != null) {
-            List<Stage> stages = projectDto.getStagesId().stream()
-                    .map(stageRepository::getById)
-                    .toList();
-            projectToUpdate.setStages(stages);
-        }
-        if (projectDto.getVisibility() != null) {
-            checkSubProjectNotPrivateOnPublicProject(projectDto);
-            projectToUpdate.setVisibility(projectDto.getVisibility());
+        if (updateSubProjectDto.getVisibility() != null) {
+            projectToUpdate.setVisibility(updateSubProjectDto.getVisibility());
         }
     }
 
-    private void collectTeamUserIds(Project project, Set<Long> collectIn) {
-        project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream()
-                        .map(TeamMember::getId))
-                .forEach(collectIn::add);
-    }
-
-    private void collectChildrenMomentUserIds(Project project, Set<Long> collectIn) {
-        project.getChildren().stream()
-                .flatMap(subProject -> momentRepository.findAllByProjectId(subProject.getId()).stream())
-                .flatMap(subProjectMoment -> subProjectMoment.getUserIds().stream())
-                .forEach(collectIn::add);
-    }
-
-    private void validateSubProject(ProjectDto projectDto) {
-        if (projectDto.getOwnerId() <= 0) {
-            throw new DataValidationException("Owner id cant be less then 1");
-        }
-        if (projectDto.getChildrenIds() == null) {
-            throw new DataValidationException("Subprojects can be empty but not null");
-        }
-        if (projectDto.getStatus() == null) {
-            throw new DataValidationException("Project status cant be null");
-        }
-        if (projectDto.getVisibility() == null) {
-            throw new DataValidationException(String.format("Visibility of subProject '%s' must be specified as 'private' or 'public'.", projectDto.getName()));
-        }
-        if (projectDto.getParentProjectId() <= 0) {
-            throw new DataValidationException("ParentProjectId cant be less 0 or 0");
+    private void checkSubProjectNotPublicOnPrivateProject(long parentProjectId, ProjectVisibility visibility, String projectName) {
+        Project parentProject = projectRepository.getProjectById(parentProjectId);
+        boolean isParentProjectPrivate = parentProject.getVisibility().equals(ProjectVisibility.PRIVATE);
+        boolean isSubProjectPublic = visibility.equals(ProjectVisibility.PUBLIC);
+        if (isParentProjectPrivate && isSubProjectPublic) {
+            throw new DataValidationException(String.format("Public SubProject: %s, cant be with a private parent Project with id: %d", projectName, parentProject.getId()));
         }
     }
 
-    private void checkSubProjectNotPrivateOnPublicProject(ProjectDto projectDto) {
-        Project parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
-        if (parentProject.getVisibility().equals(ProjectVisibility.PRIVATE) && projectDto.getVisibility().equals(ProjectVisibility.PUBLIC)) {
-            throw new DataValidationException(String.format("Public SubProject: %s, cant be with a private parent Project with id: %d", projectDto.getName(), parentProject.getId()));
+    private void checkProjectNotExist(SubProjectDto SubProjectDto) {
+        if (projectRepository.existsByOwnerUserIdAndName(SubProjectDto.getOwnerId(), SubProjectDto.getName())) {
+            throw new DataAlreadyExistingException(String.format("Project %s is already exist", SubProjectDto.getName()));
         }
     }
 
-    private Project getParentProject(ProjectDto projectDto) {
-        Project parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
-        if (parentProject == null) {
-            throw new EntityNotFoundException(String.format("Parent project not found by id: %s", projectDto.getParentProjectId()));
-        }
-        return parentProject;
-    }
-
-//    private ProjectDto validateProjectNotExist(ProjectDto projectDto) {
-//        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-//            throw new DataValidationException(String.format("Project %s is already exist", projectDto.getName()));
-//        }
-//    }
-
-    private void checkSubProjectStatusCompleteOrCancelled(Project subProject) {
-        if (subProject.getStatus() != ProjectStatus.COMPLETED && subProject.getStatus() != ProjectStatus.CANCELLED) {
+    private void checkProjectStatusCompleteOrCancelled(Project project) {
+        if (project.getStatus() != ProjectStatus.COMPLETED && project.getStatus() != ProjectStatus.CANCELLED) {
             throw new DataValidationException("Can't close project if subProject status are not complete or cancelled");
         }
     }
