@@ -9,6 +9,7 @@ public enum TeamRole {
     DESIGNER,
     TESTER,
     ANALYST,
+    JUNIOR,
     INTERN;
 
     public static List<TeamRole> getAll() {
