@@ -16,22 +16,19 @@ public class InternshipController {
     private final InternshipService service;
     private final InternshipValidator validator;
 
-    @PostMapping
+    @PostMapping("/createInternship")
     public InternshipDto createInternship(@RequestBody InternshipDto internshipDto) {
         validator.internshipControllerValidation(internshipDto);
         return service.createInternship(internshipDto);
     }
 
-    @PutMapping
+    @PutMapping("/updateInternship")
     public InternshipDto updateInternship(@RequestParam long id, @RequestBody InternshipDto internshipDto) {
-        if (id < 1) {
-            throw new DataValidationException("ID error!");
-        }
         validator.internshipControllerValidation(internshipDto);
         return service.updateInternship(id, internshipDto);
     }
 
-    @GetMapping
+    @GetMapping("/findInternship")
     public InternshipDto findInternshipById(@RequestParam long id) {
         if (id < 1) {
             throw new DataValidationException("ID error!");
@@ -39,12 +36,12 @@ public class InternshipController {
         return service.findInternshipById(id);
     }
 
-    @GetMapping
+    @GetMapping("/findAllInternships")
     public List<InternshipDto> findAllInternships() {
         return service.findAllInternships();
     }
 
-    @GetMapping
+    @GetMapping("/findInternshipWithFilter")
     public List<InternshipDto> findInternshipsWithFilter(@RequestParam long projectId, @RequestBody InternshipFilterDto filterDto) {
         return service.findInternshipsWithFilter(projectId, filterDto);
     }

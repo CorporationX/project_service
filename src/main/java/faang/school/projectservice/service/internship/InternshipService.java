@@ -30,9 +30,9 @@ public class InternshipService {
     }
 
     public InternshipDto updateInternship(long id, InternshipDto internshipDto) {
-        Internship old = internshipRepository.findById(id).orElseThrow(() -> new DataValidationException("not found"));
-        validator.updateInternshipServiceValidation(old, internshipDto);
-        Internship internship = internshipMapper.toEntity(internshipDto);
+        Internship internship = internshipMapper.toEntity(findInternshipById(id));
+        validator.updateInternshipServiceValidation(internship, internshipDto);
+        internship = internshipMapper.toEntity(internshipDto);
         internship.setInterns(getInterns(internshipDto.getInterns()));
 
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
@@ -48,7 +48,8 @@ public class InternshipService {
     }
 
     public InternshipDto findInternshipById(long id) {
-        return internshipMapper.toDto(internshipRepository.findById(id).orElseThrow(() -> new DataValidationException("not found")));
+        return internshipMapper.toDto(internshipRepository.findById(id).orElseThrow(() ->
+                new DataValidationException("Internship not found! Incorrect internship id")));
     }
 
     public List<InternshipDto> findAllInternships() {
