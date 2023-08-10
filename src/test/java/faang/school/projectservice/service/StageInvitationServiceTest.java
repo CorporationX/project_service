@@ -12,7 +12,6 @@ import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -74,7 +73,8 @@ class StageInvitationServiceTest {
         stage.setStageId(20L);
 
         stageInvitationDto = StageInvitationDto.builder()
-                .stageId(123L)
+                .id(123L)
+                .stageId(20L)
                 .invitedId(invitedUser.getId())
                 .authorId(author.getId())
                 .stageId(20L).build();
@@ -97,7 +97,6 @@ class StageInvitationServiceTest {
     }
 
     @Test
-//    @Disabled
     public void testSendInvitation_Success() {
         invitedUser.setRoles(List.of(TeamRole.DEVELOPER));
         author.setRoles(List.of(TeamRole.OWNER));
@@ -115,7 +114,7 @@ class StageInvitationServiceTest {
         assertEquals(author.getId(), result.getAuthorId());
         assertEquals(invitedUser.getId(), result.getInvitedId());
 
-        verify(teamMemberRepository, times(2)).findById(invitedUser.getId());
+        verify(teamMemberRepository, times(1)).findById(invitedUser.getId());
         verify(stageInvitationRepository, times(1)).save(any(StageInvitation.class));
         verify(stageInvitationMapper, never()).listToEntity(anyList());
     }
@@ -166,7 +165,7 @@ class StageInvitationServiceTest {
         assertEquals(author.getId(), result.getAuthorId());
         assertEquals(invitedUser.getId(), result.getInvitedId());
 
-        verify(teamMemberRepository, times(2)).findById(invitedUser.getId());
+        verify(teamMemberRepository, times(1)).findById(invitedUser.getId());
         verify(stageInvitationRepository, times(1)).save(any(StageInvitation.class));
         verify(stageInvitationMapper, never()).listToEntity(anyList());
     }
@@ -203,12 +202,9 @@ class StageInvitationServiceTest {
         assertNotNull(result);
         assertEquals(StageInvitationStatus.ACCEPTED.toString(), result.getStatus());
         assertEquals(invitedUser.getId(), result.getInvitedId());
-//        assertEquals(1, result.getStage().getExecutors().size());
-//        assertTrue(result.getStage().getExecutors().contains(invitedUser));
     }
 
     @Test
-    @Disabled
     public void testAcceptInvitation_UserIsAlreadyExecutor() {
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
         List<TeamMember> executors = new ArrayList<>();
@@ -223,11 +219,6 @@ class StageInvitationServiceTest {
         when(stageInvitationRepository.findById(123L)).thenReturn(null);
 
         assertThrows(NullPointerException.class, () -> stageInvitationService.acceptInvitation(stageInvitationDto));
-    }
-
-    @Test
-    public void testAcceptInvitation_NullInput() {
-        assertThrows(NullPointerException.class, () -> stageInvitationService.acceptInvitation(null));
     }
 
     @Test

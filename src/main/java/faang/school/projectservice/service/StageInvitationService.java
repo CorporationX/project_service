@@ -49,9 +49,8 @@ public class StageInvitationService {
             TeamMember author = stage.getExecutors().stream()
                     .filter(teamMember -> teamMember.getRoles().contains(TeamRole.OWNER))
                     .toList().get(0);
-            TeamMember invited = teamMemberRepository.findById(stageInvitationDto.getInvitedId());
             stageInvitation.setAuthor(author);
-            stageInvitation.setInvited(invited);
+            stageInvitation.setInvited(invitedUser);
             return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
         } else {
             throw new DataValidateInviteException("User is already executor for this stage");
