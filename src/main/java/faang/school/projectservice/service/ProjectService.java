@@ -1,5 +1,9 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.mapper.project.UpdateProjectMapper;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ResponseProjectDto;
 import faang.school.projectservice.mapper.project.CreateProjectMapper;
@@ -17,8 +21,30 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
-    private final TeamMemberRepository teamMemberRepository;
+    private final UpdateProjectMapper updateProjectMapper;
+      private final TeamMemberRepository teamMemberRepository;
     private final CreateProjectMapper createProjectMapper;
+
+    @Transactional
+    public UpdateProjectDto update(UpdateProjectDto dto) {
+        Project project = projectRepository.getProjectById(dto.getId());
+
+        updateEntityFields(dto, project);
+
+        project.setUpdatedAt(LocalDateTime.now());
+
+        return updateProjectMapper.toDto(project);
+    }
+
+    private void updateEntityFields(UpdateProjectDto dto, Project project) {
+        if (dto.getDescription() != null) {
+            project.setDescription(dto.getDescription());
+        }
+
+        if (dto.getStatus() != null) {
+            project.setStatus(dto.getStatus());
+        }
+
 
     @Transactional
     public ResponseProjectDto create(CreateProjectDto dto, long userId) {

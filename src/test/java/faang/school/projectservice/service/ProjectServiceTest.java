@@ -1,5 +1,10 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.mapper.project.UpdateProjectMapper;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ResponseProjectDto;
 import faang.school.projectservice.mapper.project.CreateProjectMapper;
@@ -15,6 +20,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +39,8 @@ import static org.mockito.Mockito.when;
 class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
+    @Spy
+    private UpdateProjectMapper updateProjectMapper = UpdateProjectMapper.INSTANCE;
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Spy
@@ -37,7 +49,26 @@ class ProjectServiceTest {
     private ProjectService projectService;
 
     @Test
-    void createWithExistingName() {
+    void updateTest() {
+        Project project = Project.builder()
+                .id(1L)
+                .status(ProjectStatus.CREATED)
+                .description("Default")
+                .updatedAt(LocalDateTime.now().minusDays(1))
+                .build();
+
+        UpdateProjectDto updateProjectDto =
+                new UpdateProjectDto(1L, ProjectStatus.COMPLETED, "NotDefault");
+
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+
+        UpdateProjectDto result = projectService.update(updateProjectDto);
+
+        assertNotNull(result);
+        assertEquals(ProjectStatus.COMPLETED, result.getStatus());
+        assertEquals("NotDefault", result.getDescription());
+
+      void createWithExistingName() {
         CreateProjectDto dto = CreateProjectDto.builder()
                 .name("Existing")
                 .build();
