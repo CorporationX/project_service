@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 
 @Component
 public class InternshipValidator {
+    private static final int MAX_INTERNSHIP_DURATION_MONTHS = 3;
 
     public void validateControllerInternship(InternshipDto internshipDto) {
         if (internshipDto == null) {
@@ -18,14 +19,11 @@ public class InternshipValidator {
         if (internshipDto.getName() == null || internshipDto.getName().isBlank()) {
             throw new DataValidationException("Internship name can not be blank or null!");
         }
-        if (internshipDto.getProjectId() == null || internshipDto.getProjectId() < 1) {
-            throw new DataValidationException("Internship relation project error!");
-        }
     }
 
     public void validateServiceSaveInternship(InternshipDto internshipDto) {
-        if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate().plus(3, ChronoUnit.MONTHS))) {
-            throw new DataValidationException("Internship cannot last more than 3 months!"); //?
+        if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate().plus(MAX_INTERNSHIP_DURATION_MONTHS, ChronoUnit.MONTHS))) {
+            throw new DataValidationException("Internship cannot last more than " + MAX_INTERNSHIP_DURATION_MONTHS + " months!");
         }
         if (internshipDto.getMentorId() == null || internshipDto.getMentorId() < 1) {
             throw new DataValidationException("There is not mentor for internship!");
@@ -38,7 +36,7 @@ public class InternshipValidator {
     public void validateServiceUpdateInternship(Internship oldInternship, InternshipDto internshipDto) {
         validateServiceSaveInternship(internshipDto);
         if (oldInternship.getStatus() == null || oldInternship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            throw new DataValidationException("Internship is over!"); //?
+            throw new DataValidationException("Internship is over!");
         }
         if (oldInternship.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
             throw new DataValidationException("Can't add new interns!");

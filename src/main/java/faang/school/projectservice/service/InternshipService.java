@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -26,39 +27,37 @@ public class InternshipService {
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> filterList;
 
-    public InternshipDto saveNewInternship(InternshipDto internshipDto) { //1 создать стажировку
+    public InternshipDto saveNewInternship(InternshipDto internshipDto) {
         internshipValidator.validateServiceSaveInternship(internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
         List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
                 .map(teamMemberRepository::findById).toList();
-        internship.setInterns(teamMembers); // set интерны
+        internship.setInterns(teamMembers);
         TeamMember teamMember = teamMemberRepository.findById(internshipDto.getMentorId());
-        internship.setMentor(teamMember); // set ментор
+        internship.setMentor(teamMember);
         Project project = projectRepository.getProjectById(internshipDto.getProjectId());
-        internship.setProject(project); // set проект
+        internship.setProject(project);
         internshipRepository.save(internship);
         return internshipMapper.toDto(internship);
     }
 
-    public InternshipDto updateInternship(InternshipDto internshipDto, long id) { //2 обновить стажировку
-        Internship oldInternship = internshipRepository.findById(id)
+    public InternshipDto updateInternship(InternshipDto internshipDto, long id) {
+        Internship internship = internshipRepository.findById(id)
                 .orElseThrow(() -> new DataValidationException("There is not internship with this id"));
-        internshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
-        Internship internship = internshipMapper.toEntity(internshipDto);
-        internship.setInterns(getListOfInterns(internshipDto.getInternsId()));
-        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
+        internshipValidator.validateServiceUpdateInternship(internship, internshipDto);
+        Internship internshipForUpdate = internshipMapper.toEntity(internshipDto);
+        internshipForUpdate.setInterns(getListOfInterns(internshipDto.getInternsId()));
+        if (internshipForUpdate.getStatus().equals(InternshipStatus.COMPLETED)) {
             List<TeamMember> interns = internsDoneTasks(internshipDto.getInternsId());
-            for (TeamMember intern : interns) {
-                intern.setRoles(List.of(TeamRole.DEVELOPER));
-            }
+            interns.forEach(intern -> intern.setRoles(List.of(TeamRole.DEVELOPER)));
             internshipRepository.deleteById(id);
         } else {
-            return internshipMapper.toDto(internshipRepository.save(internship));
+            return internshipMapper.toDto(internshipRepository.save(internshipForUpdate));
         }
         return internshipDto;
     }
 
-    public List<TeamMember> getListOfInterns(List<Long> allInternsOnInternship) { //2.1
+    public List<TeamMember> getListOfInterns(List<Long> allInternsOnInternship) {
         List<TeamMember> secondListOfInterns = new ArrayList<>();
         for (Long aLong : allInternsOnInternship) {
             TeamMember intern = teamMemberRepository.findById(aLong);
@@ -67,49 +66,51 @@ public class InternshipService {
         return secondListOfInterns;
     }
 
-    public List<TeamMember> internsDoneTasks(List<Long> allInternsOnInternship) { //2.2
+    public List<TeamMember> internsDoneTasks(List<Long> allInternsOnInternship) {
         List<TeamMember> listWithThePassedParticipants = new ArrayList<>();
-        for (Long aLong : allInternsOnInternship) {
+        Iterator<Long> iterator = allInternsOnInternship.iterator();
+
+        while (iterator.hasNext()) {
+            Long aLong = iterator.next();
             TeamMember intern = teamMemberRepository.findById(aLong);
-            if (checkTaskDone(intern)) {
+            if (checkTasksDone(intern)) {
                 listWithThePassedParticipants.add(intern);
+            } else {
+                iterator.remove();
             }
         }
         return listWithThePassedParticipants;
     }
 
-    public boolean checkTaskDone(TeamMember teamMember) { //2.3+
-        Project project = teamMember.getTeam().getProject();
+    public Project getProject(TeamMember teamMember) {
+        return teamMember.getTeam().getProject();
+    }
+    public boolean checkTasksDone(TeamMember teamMember) {
+        Project project = getProject(teamMember);
         List<Task> tasks = project.getTasks();
-        for (Task task : tasks) {
-            if (task.getPerformerUserId().equals(teamMember.getUserId())) {
-                if (task.getStatus().equals(TaskStatus.DONE)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return tasks.stream()
+                .anyMatch(task -> task.getPerformerUserId().equals(teamMember.getUserId()) && task.getStatus().equals(TaskStatus.DONE));
     }
 
-    public List<InternshipDto> findInternshipsByStatusWithFilter(long projectId, InternshipFilterDto filterDto) { //3 получить все стажировки по статусу
+    public List<InternshipDto> findInternshipsWithFilter(long projectId, InternshipFilterDto filterDto) {
         List<InternshipDto> listOfInternship = getAllInternships();
         listOfInternship.removeIf(dto -> !dto.getProjectId().equals(projectId));
         filter(filterDto, listOfInternship);
         return listOfInternship;
     }
 
-    public void filter(InternshipFilterDto filter, List<InternshipDto> dtoList) { //3.1
+    public void filter(InternshipFilterDto filter, List<InternshipDto> dtoList) {
         filterList.stream()
                 .filter(f -> f.isApplicable(filter))
                 .forEach(f -> f.apply(dtoList, filter));
     }
 
-    public List<InternshipDto> getAllInternships() { //4 получить все стажировки
+    public List<InternshipDto> getAllInternships() {
         List<Internship> listOfInternship = internshipRepository.findAll();
         return listOfInternship.stream().map(internshipMapper::toDto).toList();
     }
 
-    public InternshipDto findAllInternshipById(long id) { //5 получить стажировку по id
+    public InternshipDto findInternshipById(long id) {
         return internshipMapper.toDto(internshipRepository.findById(id)
                 .orElseThrow(() -> new DataValidationException("There is not internship with this id")));
     }
