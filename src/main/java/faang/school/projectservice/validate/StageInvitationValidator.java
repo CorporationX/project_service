@@ -14,21 +14,6 @@ public class StageInvitationValidator {
     private TeamMemberRepository teamMemberRepository;
     private StageRepository stageRepository;
 
-    public void validateStageInvitationDto(StageInvitationDto stageInvitationDto) {
-        if (stageInvitationDto == null) {
-            throw new DataValidationException("StageInvitationDto is null");
-        }
-        if (stageInvitationDto.getAuthorId() == null) {
-            throw new DataValidationException("AuthorId is null");
-        }
-        if (stageInvitationDto.getInvitedId() == null) {
-            throw new DataValidationException("InvitedId is null");
-        }
-        if (stageInvitationDto.getStageId() == null) {
-            throw new DataValidationException("StageId is null");
-        }
-    }
-
     public void validateExecutors(StageInvitationDto stageInvitationDto) {
         Stage stage = stageRepository.getById(stageInvitationDto.getStageId());
         teamMemberRepository.findById(stageInvitationDto.getInvitedId());
