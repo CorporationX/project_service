@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -28,29 +29,27 @@ public class InternshipService {
         Internship internship = internshipMapper.toEntity(internshipDto);
         List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
                 .map(teamMemberRepository::findById).toList();
-        internship.setInterns(teamMembers); // set интерны
+        internship.setInterns(teamMembers);
         TeamMember teamMember = teamMemberRepository.findById(internshipDto.getMentorId());
-        internship.setMentor(teamMember); // set ментор
+        internship.setMentor(teamMember);
         Project project = projectRepository.getProjectById(internshipDto.getProjectId());
-        internship.setProject(project); // set проект
+        internship.setProject(project);
         internshipRepository.save(internshipMapper.toEntity(internshipDto));
         return internshipMapper.toDto(internship);
     }
 
     public InternshipDto updateInternship(InternshipDto internshipDto, long id) {
-        Internship oldInternship = internshipRepository.findById(id).orElseThrow(() -> new DataValidationException("There is not internship with this id"));
-        internshipValidator.validateServiceUpdateInternship(oldInternship, internshipDto);
-        Internship internship = internshipMapper.toEntity(internshipDto);
-        internship.setInterns(getListOfInterns(internshipDto.getInternsId())); //50
-        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            List<TeamMember> interns = internsDoneTasks(internshipDto.getInternsId()); //60
-            TeamRole role = TeamRole.DEVELOPER;
-            for (TeamMember intern : interns) {
-                intern.setRoles(List.of(role));
-            }
+        Internship Internship = internshipRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("There is not internship with this id"));
+        internshipValidator.validateServiceUpdateInternship(Internship, internshipDto);
+        Internship internshipForUpdate = internshipMapper.toEntity(internshipDto);
+        internshipForUpdate.setInterns(getListOfInterns(internshipDto.getInternsId()));
+        if (internshipForUpdate.getStatus().equals(InternshipStatus.COMPLETED)) {
+            List<TeamMember> interns = internsDoneTasks(internshipDto.getInternsId());
+            interns.forEach(intern -> intern.setRoles(List.of(TeamRole.DEVELOPER)));
             internshipRepository.deleteById(id);
         } else {
-            return internshipMapper.toDto(internshipRepository.save(internship));
+            return internshipMapper.toDto(internshipRepository.save(internshipForUpdate));
         }
         return internshipDto;
     }
@@ -65,26 +64,28 @@ public class InternshipService {
     }
 
     public List<TeamMember> internsDoneTasks(List<Long> allInternsOnInternship) {
-        List<TeamMember> secondListOfInterns = new ArrayList<>();
-        for (Long aLong : allInternsOnInternship) {
+        List<TeamMember> listWithThePassedParticipants = new ArrayList<>();
+        Iterator<Long> iterator = allInternsOnInternship.iterator();
+
+        while (iterator.hasNext()) {
+            Long aLong = iterator.next();
             TeamMember intern = teamMemberRepository.findById(aLong);
-            if (checkTaskDone(intern)) {
-                secondListOfInterns.add(intern);
+            if (checkTasksDone(intern)) {
+                listWithThePassedParticipants.add(intern);
+            } else {
+                iterator.remove();
             }
         }
-        return secondListOfInterns;
+        return listWithThePassedParticipants;
     }
 
-    public boolean checkTaskDone(TeamMember teamMember) {
-        Project project = teamMember.getTeam().getProject();
+    public Project getProject(TeamMember teamMember) {
+        return teamMember.getTeam().getProject();
+    }
+    public boolean checkTasksDone(TeamMember teamMember) {
+        Project project = getProject(teamMember);
         List<Task> tasks = project.getTasks();
-        for (Task task : tasks) {
-            if (task.getPerformerUserId().equals(teamMember.getUserId())) {
-                if (task.getStatus().equals(TaskStatus.DONE)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return tasks.stream()
+                .anyMatch(task -> task.getPerformerUserId().equals(teamMember.getUserId()) && task.getStatus().equals(TaskStatus.DONE));
     }
 }

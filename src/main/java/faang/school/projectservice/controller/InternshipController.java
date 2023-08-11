@@ -7,20 +7,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/internship/v1")
+@RequestMapping("/v1/internship")
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
     private final InternshipValidator internshipValidator;
 
-    @PostMapping("/internship")
+    @PostMapping("/")
     public InternshipDto saveNewInternship(@RequestBody InternshipDto internshipDto) {
         internshipValidator.validateControllerInternship(internshipDto);
         return internshipService.saveNewInternship(internshipDto);
     }
 
-    @PutMapping("/internship/{id}")
-    public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto,@PathVariable long id) {
+    @PutMapping("/{id}")
+    public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto, @PathVariable Long id) {
         internshipValidator.validateControllerInternship(internshipDto);
         return internshipService.updateInternship(internshipDto, id);
     }
