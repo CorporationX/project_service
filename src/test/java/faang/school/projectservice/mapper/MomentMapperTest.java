@@ -40,7 +40,7 @@ class MomentMapperTest {
                 .description("description")
                 .date(now)
                 .projectIds(List.of(1L))
-                .userIds(List.of(1L))
+                .teamMemberIds(List.of(1L))
                 .imageId("imageId")
                 .build();
     }

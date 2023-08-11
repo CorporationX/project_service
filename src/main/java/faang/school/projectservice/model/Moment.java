@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -55,8 +56,13 @@ public class Moment {
     )
     private List<Project> projects;
 
-    @ElementCollection
-    private List<Long> userIds;
+    @ManyToMany()
+    @JoinTable(
+            name = "moment_member",
+            joinColumns = @JoinColumn(name = "moment_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<TeamMember> teamMembers;
 
     @Column(name = "image_id")
     private String imageId;
