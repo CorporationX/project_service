@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -163,6 +164,7 @@ class ProjectServiceTest {
                 .id(1L)
                 .build();
     }
+
     @Test
     void testCreateProject() {
         projectDto.setName("Project^%$^*^^£     C++, Python/C# Мой проект.    ");
@@ -295,6 +297,28 @@ class ProjectServiceTest {
         Assertions.assertThrows(PrivateAccessException.class,
                 () -> projectService.getProjectById(1L, 1L));
     }
+
+    @Test
+    void createProjectThrowExceptionWhenNameNullOrBlank() {
+        ProjectDto failedProjectDto = ProjectDto.builder().build();
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.create(failedProjectDto));
+
+        assertEquals("Project can't be created with empty name", exception.getMessage());
+    }
+
+    @Test
+    void createProjectThrowExceptionWhenDescriptionNullOrBlank() {
+        ProjectDto failedProjectDto = ProjectDto.builder()
+                .name("Hello")
+                .description("  ")
+                .build();
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.create(failedProjectDto));
+
+        assertEquals("Project can't be created with empty description", exception.getMessage());
+    }
+
     @Test
     void createSubProjectThrowExceptionWhenProjectIsAlreadyExist() {
         when(projectRepository.existsByOwnerUserIdAndName(subProjectDto.getOwnerId(), subProjectDto.getName()))
@@ -354,7 +378,6 @@ class ProjectServiceTest {
     }
 
     @Test
-
     void updateSubProjectThrowEntityNotFoundException() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> testProjectService.updateSubProject(updateSubProjectDto));
 
