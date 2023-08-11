@@ -18,7 +18,7 @@ public interface StageInvitationMapper {
     @Mapping(source = "stageId", target = "stage.stageId")
     @Mapping(source = "authorId", target = "author.id")
     @Mapping(source = "invitedId", target = "invited.id")
-    StageInvitation toModel(StageInvitationDto stageInvitationDto);
+    StageInvitation toEntity(StageInvitationDto stageInvitationDto);
 
     @Mapping(source = "stage.stageId", target = "stageId")
     @Mapping(source = "author.id", target = "authorId")
@@ -28,7 +28,7 @@ public interface StageInvitationMapper {
     @Mapping(source = "stageId", target = "stage.stageId")
     @Mapping(source = "authorId", target = "author.id")
     @Mapping(source = "invitedId", target = "invited.id")
-    List<StageInvitation> toModelList(List<StageInvitationDto> stageInvitationDtoList);
+    List<StageInvitation> toEntityList(List<StageInvitationDto> stageInvitationDtoList);
 
 
 }

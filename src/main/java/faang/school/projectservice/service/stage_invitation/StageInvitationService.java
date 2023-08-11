@@ -3,13 +3,10 @@ package faang.school.projectservice.service.stage_invitation;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.stage_invitation.StageInvitationMapper;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +20,7 @@ public class StageInvitationService {
 
     public StageInvitationDto create(StageInvitationDto invitationDto) {
         validate(invitationDto);
-        return mapper.toDTO(SIRepository.save(mapper.toModel(invitationDto)));
+        return mapper.toDTO(SIRepository.save(mapper.toEntity(invitationDto)));
     }
 
     private void validate(StageInvitationDto invitationDto) {

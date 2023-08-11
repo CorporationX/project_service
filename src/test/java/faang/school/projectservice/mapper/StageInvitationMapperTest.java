@@ -40,17 +40,17 @@ public class StageInvitationMapperTest {
     }
 
     @Test
-    public void testModelToDto() {
+    public void testEntityToDto() {
         Assertions.assertEquals(invitationDto, mapper.toDTO(invitation));
     }
 
     @Test
     public void testDtoToModel() {
-        Assertions.assertEquals(invitation, mapper.toModel(invitationDto));
+        Assertions.assertEquals(invitation, mapper.toEntity(invitationDto));
     }
 
     @Test
-    public void testModelListToDtoList() {
+    public void testEntityListToDtoList() {
         List<StageInvitation> invitationList = List.of(invitation);
         List<StageInvitationDto> invitationDtoList = List.of(invitationDto);
         Assertions.assertEquals(invitationDtoList.get(0), mapper.toDTOList(invitationList).get(0));
@@ -60,6 +60,6 @@ public class StageInvitationMapperTest {
     public void testDtoListToModelList() {
         List<StageInvitation> invitationList = List.of(invitation);
         List<StageInvitationDto> invitationDtoList = List.of(invitationDto);
-        Assertions.assertEquals(invitationList.get(0), mapper.toModelList(invitationDtoList).get(0));
+        Assertions.assertEquals(invitationList.get(0), mapper.toEntityList(invitationDtoList).get(0));
     }
 }

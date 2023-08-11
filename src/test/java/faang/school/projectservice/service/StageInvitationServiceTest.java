@@ -48,7 +48,7 @@ public class StageInvitationServiceTest {
                 .executors(List.of(TeamMember.builder().id(1L).build()))
                 .build());
         service.create(validInvitationDto);
-        Mockito.verify(repository).save(mapper.toModel(validInvitationDto));
+        Mockito.verify(repository).save(mapper.toEntity(validInvitationDto));
     }
 
     @Test
