@@ -1,21 +1,29 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
-import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.PrivateAccessException;
+import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.mapper.SubProjectMapperImpl;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.exception.DataAlreadyExistingException;
+import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.filters.ProjectFilter;
 import faang.school.projectservice.service.filters.ProjectFilterByName;
 import faang.school.projectservice.service.filters.ProjectFilterByStatus;
 import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.repository.ProjectRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,11 +32,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,21 +50,95 @@ class ProjectServiceTest {
     private ProjectRepository projectRepository;
     @Spy
     private SubProjectMapper subProjectMapper = new SubProjectMapperImpl();
+    @Spy
+    private ProjectMapper mockProjectMapper = new ProjectMapperImpl();
     @InjectMocks
     private ProjectService projectService;
     ProjectJpaRepository projectJpaRepository;
     private ProjectService testProjectService;
     private SubProjectDto subProjectDto;
     private UpdateSubProjectDto updateSubProjectDto;
-    private Project project;
+    private Project subProject;
     private Project onlyWithIdProject;
+    private TeamMember teamMemberCurrentUser;
+    private Team teamWithCurrentUser;
+    private Team team;
+    private TeamMember teamMember;
+    ProjectDto projectDto;
+    Project project;
+    Project project1;
+    Project project2;
+    Project project3;
 
     @BeforeEach
     void setUp() {
         List<ProjectFilter> projectFilters = new ArrayList<>(List.of(new ProjectFilterByName(), new ProjectFilterByStatus()));
         projectJpaRepository = Mockito.mock(ProjectJpaRepository.class);
         ProjectRepository testProjectRepository = new ProjectRepository(projectJpaRepository);
-        testProjectService = new ProjectService(testProjectRepository, subProjectMapper, projectFilters);
+        testProjectService = new ProjectService(testProjectRepository, mockProjectMapper, subProjectMapper, projectFilters);
+        teamMember = TeamMember.builder()
+                .userId(2L)
+                .build();
+        team = Team.builder()
+                .teamMembers(List.of(teamMember))
+                .build();
+        teamMemberCurrentUser = TeamMember.builder()
+                .userId(1L)
+                .build();
+        teamWithCurrentUser = Team.builder()
+                .teamMembers(List.of(teamMemberCurrentUser))
+                .build();
+        projectDto = ProjectDto.builder()
+                .id(1L)
+                .name("Project")
+                .description("new Project")
+                .ownerId(1L)
+                .build();
+        LocalDateTime now = LocalDateTime.now();
+        project = Project.builder()
+                .id(1L)
+                .name("Project")
+                .description("new Project")
+                .ownerId(1L)
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(teamWithCurrentUser))
+                .status(ProjectStatus.CREATED)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        project1 = Project.builder()
+                .id(2L)
+                .name("Project1")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(team))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        project2 = Project.builder()
+                .id(3L)
+                .name("Project2")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .teams(List.of(team))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        project3 = Project.builder()
+                .id(4L)
+                .name("Project3")
+                .description("new Project")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(team))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
         this.subProjectDto = SubProjectDto.builder()
                 .name("Faang")
                 .description("This is Faang")
@@ -71,7 +155,7 @@ class ProjectServiceTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .status(ProjectStatus.CREATED)
                 .build();
-        this.project = Project.builder()
+        this.subProject = Project.builder()
                 .id(2L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(new ArrayList<>())
@@ -79,6 +163,160 @@ class ProjectServiceTest {
         this.onlyWithIdProject = Project.builder()
                 .id(1L)
                 .build();
+    }
+
+    @Test
+    void testCreateProject() {
+        projectDto.setName("Project^%$^*^^£     C++, Python/C# Мой проект.    ");
+        Mockito.when(projectRepository
+                .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
+        Assertions.assertEquals(ProjectStatus.CREATED, projectService.create(projectDto).getStatus());
+        Mockito.verify(projectRepository).save(any());
+        Assertions.assertEquals("project c++, python/c# мой проект.", projectService.create(projectDto).getName());
+    }
+
+    @Test
+    void testSetDefaultVisibilityProject() {
+        Mockito.when(projectRepository
+                .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
+        Assertions.assertEquals(ProjectVisibility.PUBLIC, projectService.create(projectDto).getVisibility());
+    }
+
+    @Test
+    void testSetPrivateVisibilityProject() {
+        projectDto.setVisibility(ProjectVisibility.PRIVATE);
+        Mockito.when(projectRepository
+                .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
+        Assertions.assertEquals(ProjectVisibility.PRIVATE, projectService.create(projectDto).getVisibility());
+    }
+
+    @Test
+    void testCreateProjectThrowsException() {
+        Mockito.when(projectRepository
+                .existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(true);
+        DataAlreadyExistingException dataAlreadyExistingException = Assertions
+                .assertThrows(DataAlreadyExistingException.class, () -> projectService.create(projectDto));
+        Assertions.assertEquals(String.format("User with id: %d already exist project %s",
+                projectDto.getOwnerId(), projectDto.getName()), dataAlreadyExistingException.getMessage());
+    }
+
+    @Test
+    void testUpdateStatus() {
+        long projectId = projectDto.getId();
+        projectDto.setStatus(ProjectStatus.IN_PROGRESS);
+        Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectDto).getStatus());
+        Mockito.verify(projectRepository).save(any());
+        Assertions.assertEquals(project.getDescription(), projectService.update(projectDto).getDescription());
+    }
+
+    @Test
+    void testUpdateThrowsDataNotExistingException() {
+        long projectId = projectDto.getId();
+        Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(null);
+        Assertions.assertThrows(DataNotFoundException.class, () -> projectService.update(projectDto));
+    }
+
+    @Test
+    void testUpdateDescription() {
+        long projectId = projectDto.getId();
+        projectDto.setDescription("New Description");
+
+        Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        Assertions.assertEquals("New Description", projectService.update(projectDto).getDescription());
+        Mockito.verify(projectRepository).save(any());
+        Assertions.assertEquals(project.getStatus(), projectService.update(projectDto).getStatus());
+    }
+
+    @Test
+    void testUpdateStatusAndDescription() {
+        long projectId = projectDto.getId();
+        projectDto.setStatus(ProjectStatus.IN_PROGRESS);
+        projectDto.setDescription("New Description");
+
+        Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        Assertions.assertEquals(ProjectStatus.IN_PROGRESS, projectService.update(projectDto).getStatus());
+
+        Mockito.verify(projectRepository).save(any());
+        String descriptionResult = projectService.update(projectDto).getDescription();
+        Assertions.assertEquals("New Description", descriptionResult);
+    }
+
+    @Test
+    void testGetProjectsWithFilter() {
+        List<Project> projects = List.of(project, project1, project2, project3);
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        List<ProjectFilter> filters = List.of(new ProjectFilterByName(), new ProjectFilterByStatus());
+        ProjectFilterDto projectFilterDto = ProjectFilterDto.builder()
+                .projectNamePattern("Proj")
+                .status(ProjectStatus.CREATED)
+                .build();
+        projectService = new ProjectService(projectRepository, mockProjectMapper, subProjectMapper, filters);
+        List<ProjectDto> filteredProjectsResult =
+                List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
+
+        List<ProjectDto> projectsWithFilter = projectService.getProjectsWithFilter(projectFilterDto, 1L);
+        Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
+    }
+
+    @Test
+    void testGetAllProjects() {
+        List<Project> projects = List.of(project, project1, project2, project3);
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        List<ProjectDto> projectsExpected =
+                List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
+
+        List<ProjectDto> projectsResult = projectService.getAllProjects(1L);
+        Assertions.assertEquals(projectsExpected, projectsResult);
+    }
+
+    @Test
+    void testGetEmptyListProjects() {
+        List<Project> projects = List.of(project1, project3);
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        List<ProjectDto> projectsExpected = new ArrayList<>();
+
+        List<ProjectDto> projectsResult = projectService.getAllProjects(1L);
+        Assertions.assertEquals(projectsExpected, projectsResult);
+    }
+
+    @Test
+    void getProjectById() {
+        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
+        Assertions.assertEquals(mockProjectMapper.toDto(project),
+                projectService.getProjectById(1L, 1L));
+    }
+
+    @Test
+    void getProjectByIdThrowsPrivateAccessException() {
+        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project3);
+        Assertions.assertThrows(PrivateAccessException.class,
+                () -> projectService.getProjectById(1L, 1L));
+    }
+
+    @Test
+    void createProjectThrowExceptionWhenNameNullOrBlank() {
+        ProjectDto failedProjectDto = ProjectDto.builder().build();
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.create(failedProjectDto));
+
+        assertEquals("Project can't be created with empty name", exception.getMessage());
+    }
+
+    @Test
+    void createProjectThrowExceptionWhenDescriptionNullOrBlank() {
+        ProjectDto failedProjectDto = ProjectDto.builder()
+                .name("Hello")
+                .description("  ")
+                .build();
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.create(failedProjectDto));
+
+        assertEquals("Project can't be created with empty description", exception.getMessage());
     }
 
     @Test
@@ -120,7 +358,7 @@ class ProjectServiceTest {
         when(projectRepository.existsByOwnerUserIdAndName(subProjectDto.getOwnerId(), subProjectDto.getName()))
                 .thenReturn(false);
         when(projectRepository.getProjectById(subProjectDto.getParentProjectId()))
-                .thenReturn(project);
+                .thenReturn(subProject);
 
         SubProjectDto result = projectService.createSubProject(subProjectDto);
 
@@ -132,7 +370,7 @@ class ProjectServiceTest {
         when(projectRepository.existsByOwnerUserIdAndName(subProjectDto.getOwnerId(), subProjectDto.getName()))
                 .thenReturn(false);
         when(projectRepository.getProjectById(subProjectDto.getParentProjectId()))
-                .thenReturn(project);
+                .thenReturn(subProject);
 
         projectService.createSubProject(subProjectDto);
 
@@ -140,7 +378,6 @@ class ProjectServiceTest {
     }
 
     @Test
-
     void updateSubProjectThrowEntityNotFoundException() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> testProjectService.updateSubProject(updateSubProjectDto));
 

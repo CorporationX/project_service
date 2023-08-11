@@ -22,12 +22,12 @@ import java.util.List;
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/create")
+    @PostMapping("/")
     public SubProjectDto createSubProject(@Valid @RequestBody SubProjectDto subProjectDto) {
         return projectService.createSubProject(subProjectDto);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/")
     public LocalDateTime updateSubProject(@RequestBody UpdateSubProjectDto updateSubProjectDto) {
         return projectService.updateSubProject(updateSubProjectDto);
     }

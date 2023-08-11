@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class ProjectFilterDto {
-    @Size(max = 255, message = "Project name pattern length must be less than 255 characters")
+    @Size(max = 255, message = "Project name pattern length can't be more than 255 symbols")
     private String projectNamePattern;
     private ProjectStatus status;
 }
