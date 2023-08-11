@@ -36,4 +36,9 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
+
+    public TeamRole addRole(TeamRole teamRole) {
+        roles.add(teamRole);
+        return teamRole;
+    }
 }
