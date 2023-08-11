@@ -59,6 +59,21 @@ public class VacancyService {
                 );
     }
 
+    @Transactional
+    public void changeCandidateStatus(UpdateCandidateRequestDto updateCandidate) {
+        Vacancy vacancy = vacancyRepository.findById(updateCandidate.getVacancyId())
+                .orElseThrow(() -> new EntityNotFoundException("Vacancy not found"));
+        Candidate candidate = candidateRepository.findById(updateCandidate.getCandidateId())
+                .orElseThrow(() -> new EntityNotFoundException("Candidate not found"));
+        Long userId = candidate.getUserId();
+        validateExistingCandidateInVacancy(updateCandidate, vacancy);
+        candidate.setCandidateStatus(updateCandidate.getCandidateStatus());
+        candidateRepository.save(candidate);
+        if (updateCandidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED)) {
+            convertCandidateInTeamMember(updateCandidate, userId, vacancy);
+        }
+    }
+
     private ExtendedVacancyDto saveEntity(Vacancy vacancy) {
         vacancy = vacancyRepository.save(vacancy);
         return vacancyMapper.toDto(vacancy);
@@ -95,27 +110,12 @@ public class VacancyService {
         );
     }
 
-    @Transactional
-    public void changeCandidateStatus(UpdateCandidateRequestDto updateCandidate) {
-        Vacancy vacancy = vacancyRepository.findById(updateCandidate.getVacancyId())
-                .orElseThrow(() -> new EntityNotFoundException("Vacancy not found"));
-        Candidate candidate = candidateRepository.findById(updateCandidate.getCandidateId())
-                .orElseThrow(() -> new EntityNotFoundException("Candidate not found"));
-        Long userId = candidate.getUserId();
-        validateExistingCandidateInVacancy(updateCandidate, vacancy);
-        candidate.setCandidateStatus(updateCandidate.getCandidateStatus());
-        if (updateCandidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED)) {
-            convertCandidateInTeamMember(updateCandidate, userId, vacancy);
-        }
-    }
-
     private void validateExistingCandidateInVacancy(UpdateCandidateRequestDto updateCandidate, Vacancy vacancy) {
         if (!vacancyMapper.toCandidateIds(vacancy.getCandidates()).contains(updateCandidate.getCandidateId()))
             throw new DataValidException(String.format(
                     "Candidate is not found in vacancy with id %s.", updateCandidate.getVacancyId())
             );
     }
-
 
     private void convertCandidateInTeamMember(UpdateCandidateRequestDto updateCandidate, Long userId, Vacancy vacancy) {
         Team team = teamRepository.findById(updateCandidate.getTeamId())
@@ -128,7 +128,7 @@ public class VacancyService {
                 .userId(userId)
                 .build();
         teamMemberJpaRepository.save(newTeamMember);
-        if (vacancy.getCount() < getCountAcceptedCandidate(vacancy.getId(),
+        if (vacancy.getCount() <= getCountAcceptedCandidate(vacancy.getId(),
                 vacancy.getCandidates().stream().map(Candidate::getId).toList())) {
             vacancy.setStatus(VacancyStatus.CLOSED);
             saveEntity(vacancy);
