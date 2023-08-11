@@ -57,7 +57,7 @@ class ProjectServiceTest {
     private ProjectService testProjectService;
     private SubProjectDto subProjectDto;
     private UpdateSubProjectDto updateSubProjectDto;
-    private Project project;
+    private Project subProject;
     private Project onlyWithIdProject;
     private TeamMember teamMemberCurrentUser;
     private Team teamWithCurrentUser;
@@ -74,7 +74,7 @@ class ProjectServiceTest {
         List<ProjectFilter> projectFilters = new ArrayList<>(List.of(new ProjectFilterByName(), new ProjectFilterByStatus()));
         projectJpaRepository = Mockito.mock(ProjectJpaRepository.class);
         ProjectRepository testProjectRepository = new ProjectRepository(projectJpaRepository);
-        testProjectService = new ProjectService(testProjectRepository, subProjectMapper, projectFilters);
+        testProjectService = new ProjectService(testProjectRepository, mockProjectMapper, subProjectMapper, projectFilters);
         teamMember = TeamMember.builder()
                 .userId(2L)
                 .build();
@@ -154,7 +154,7 @@ class ProjectServiceTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .status(ProjectStatus.CREATED)
                 .build();
-        this.project = Project.builder()
+        this.subProject = Project.builder()
                 .id(2L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(new ArrayList<>())
@@ -251,7 +251,7 @@ class ProjectServiceTest {
                 .projectNamePattern("Proj")
                 .status(ProjectStatus.CREATED)
                 .build();
-        projectService = new ProjectService(mockProjectMapper, projectRepository, filters);
+        projectService = new ProjectService(projectRepository, mockProjectMapper, subProjectMapper, filters);
         List<ProjectDto> filteredProjectsResult =
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
@@ -334,7 +334,7 @@ class ProjectServiceTest {
         when(projectRepository.existsByOwnerUserIdAndName(subProjectDto.getOwnerId(), subProjectDto.getName()))
                 .thenReturn(false);
         when(projectRepository.getProjectById(subProjectDto.getParentProjectId()))
-                .thenReturn(project);
+                .thenReturn(subProject);
 
         SubProjectDto result = projectService.createSubProject(subProjectDto);
 
@@ -346,7 +346,7 @@ class ProjectServiceTest {
         when(projectRepository.existsByOwnerUserIdAndName(subProjectDto.getOwnerId(), subProjectDto.getName()))
                 .thenReturn(false);
         when(projectRepository.getProjectById(subProjectDto.getParentProjectId()))
-                .thenReturn(project);
+                .thenReturn(subProject);
 
         projectService.createSubProject(subProjectDto);
 

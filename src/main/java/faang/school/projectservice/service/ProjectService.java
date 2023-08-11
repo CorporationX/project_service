@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
@@ -29,7 +30,7 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    private final SubProjectMapper subProjectMapper
+    private final SubProjectMapper subProjectMapper;
     private final List<ProjectFilter> filters;
 
     public ProjectDto create(ProjectDto projectDto) {
@@ -159,7 +160,7 @@ public class ProjectService {
     public List<SubProjectDto> getProjectChildrenWithFilter(ProjectFilterDto projectFilterDto, long projectId) {
         Project project = projectRepository.getProjectById(projectId);
         Stream<Project> subProjectsStream = project.getChildren().stream();
-        List<ProjectFilter> applicableFilters = projectFilters.stream()
+        List<ProjectFilter> applicableFilters = filters.stream()
                 .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
                 .toList();
         for (ProjectFilter filter : applicableFilters) {
