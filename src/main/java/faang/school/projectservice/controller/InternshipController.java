@@ -18,6 +18,7 @@ public class InternshipController {
 
     @PostMapping("/")
     public InternshipDto saveNewInternship(@RequestBody InternshipDto internshipDto) {
+        internshipValidator.validateControllerInternship(internshipDto);
         return internshipService.saveNewInternship(internshipDto);
     }
 
