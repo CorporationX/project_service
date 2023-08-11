@@ -19,8 +19,10 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,10 +36,14 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
-    private ProjectJpaRepository projectJpaRepository;
+    @Mock
     private ProjectRepository projectRepository;
-    private SubProjectMapper subProjectMapper;
+    @Spy
+    private SubProjectMapper subProjectMapper = new SubProjectMapperImpl();
+    @InjectMocks
     private ProjectService projectService;
+    ProjectJpaRepository projectJpaRepository;
+    private ProjectService testProjectService;
     private SubProjectDto subProjectDto;
     private UpdateSubProjectDto updateSubProjectDto;
     private Project project;
@@ -45,12 +51,10 @@ class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        projectJpaRepository = Mockito.mock(ProjectJpaRepository.class);
-        projectRepository = new ProjectRepository(projectJpaRepository);
-        subProjectMapper = new SubProjectMapperImpl();
         List<ProjectFilter> projectFilters = new ArrayList<>(List.of(new ProjectFilterByName(), new ProjectFilterByStatus()));
-        projectService = new ProjectService(projectRepository, subProjectMapper, projectFilters);
+        projectJpaRepository = Mockito.mock(ProjectJpaRepository.class);
+        ProjectRepository testProjectRepository = new ProjectRepository(projectJpaRepository);
+        testProjectService = new ProjectService(testProjectRepository, subProjectMapper, projectFilters);
         this.subProjectDto = SubProjectDto.builder()
                 .name("Faang")
                 .description("This is Faang")
@@ -89,10 +93,7 @@ class ProjectServiceTest {
 
     @Test
     void createSubProjectThrowEntityNotFoundException() {
-        when(projectRepository.existsByOwnerUserIdAndName(1L, "Faang"))
-                .thenReturn(false);
-
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> projectService.createSubProject(subProjectDto));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> testProjectService.createSubProject(subProjectDto));
 
         assertEquals("Project not found by id: 2", exception.getMessage());
     }
@@ -103,11 +104,11 @@ class ProjectServiceTest {
 
         when(projectRepository.existsByOwnerUserIdAndName(1L, "Faang"))
                 .thenReturn(false);
-        when(projectJpaRepository.findById(2L))
-                .thenReturn(Optional.of(Project.builder()
+        when(projectRepository.getProjectById(2L))
+                .thenReturn(Project.builder()
                         .id(10L)
                         .visibility(ProjectVisibility.PRIVATE)
-                        .build()));
+                        .build());
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(subProjectDto));
 
@@ -118,8 +119,8 @@ class ProjectServiceTest {
     void createSubProjectTest() {
         when(projectRepository.existsByOwnerUserIdAndName(subProjectDto.getOwnerId(), subProjectDto.getName()))
                 .thenReturn(false);
-        when(projectJpaRepository.findById(subProjectDto.getParentProjectId()))
-                .thenReturn(Optional.of(project));
+        when(projectRepository.getProjectById(subProjectDto.getParentProjectId()))
+                .thenReturn(project);
 
         SubProjectDto result = projectService.createSubProject(subProjectDto);
 
@@ -130,17 +131,18 @@ class ProjectServiceTest {
     void createSubProjectInvokesGetProjectById() {
         when(projectRepository.existsByOwnerUserIdAndName(subProjectDto.getOwnerId(), subProjectDto.getName()))
                 .thenReturn(false);
-        when(projectJpaRepository.findById(subProjectDto.getParentProjectId()))
-                .thenReturn(Optional.of(project));
+        when(projectRepository.getProjectById(subProjectDto.getParentProjectId()))
+                .thenReturn(project);
 
         projectService.createSubProject(subProjectDto);
 
-        verify(projectJpaRepository, times(2)).findById(subProjectDto.getParentProjectId());
+        verify(projectRepository, times(2)).getProjectById(subProjectDto.getParentProjectId());
     }
 
     @Test
+
     void updateSubProjectThrowEntityNotFoundException() {
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> projectService.updateSubProject(updateSubProjectDto));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> testProjectService.updateSubProject(updateSubProjectDto));
 
         assertEquals("Project not found by id: 3", exception.getMessage());
     }
@@ -158,8 +160,8 @@ class ProjectServiceTest {
                 .children(List.of(first, second))
                 .build();
 
-        when(projectJpaRepository.findById(updateSubProjectDto.getId()))
-                .thenReturn(Optional.of(returnProject));
+        when(projectRepository.getProjectById(updateSubProjectDto.getId()))
+                .thenReturn(returnProject);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.updateSubProject(updateSubProjectDto));
 
@@ -183,8 +185,8 @@ class ProjectServiceTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        when(projectJpaRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.of(returnProject));
+        when(projectRepository.getProjectById(Mockito.anyLong()))
+                .thenReturn(returnProject);
 
         LocalDateTime expected = returnProject.getUpdatedAt();
 
@@ -203,8 +205,8 @@ class ProjectServiceTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        when(projectJpaRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.of(returnProject));
+        when(projectRepository.getProjectById(Mockito.anyLong()))
+                .thenReturn(returnProject);
 
         LocalDateTime expected = returnProject.getUpdatedAt();
 
@@ -226,8 +228,8 @@ class ProjectServiceTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        when(projectJpaRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.of(returnProject));
+        when(projectRepository.getProjectById(Mockito.anyLong()))
+                .thenReturn(returnProject);
 
         LocalDateTime expected = returnProject.getUpdatedAt();
 
@@ -271,8 +273,8 @@ class ProjectServiceTest {
                 .children(new ArrayList<>(List.of(firstChildren, secondChildren)))
                 .build();
 
-        when(projectJpaRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.of(returnProject));
+        when(projectRepository.getProjectById(Mockito.anyLong()))
+                .thenReturn(returnProject);
 
         LocalDateTime result = projectService.updateSubProject(updateSubProjectDto);
 
@@ -325,7 +327,7 @@ class ProjectServiceTest {
         Mockito.when(projectJpaRepository.findById(10L))
                 .thenReturn(Optional.of(mainProject));
 
-        List<SubProjectDto> result = projectService.getProjectChildrenWithFilter(projectFilterDto, 10L);
+        List<SubProjectDto> result = testProjectService.getProjectChildrenWithFilter(projectFilterDto, 10L);
 
         assertEquals(expected, result);
         assertEquals(1, result.size());
