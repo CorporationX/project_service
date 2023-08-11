@@ -3,12 +3,15 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filters.ProjectFilter;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +23,11 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Builder
 public class ProjectService {
-    private final ProjectMapper mapper;
+    private final ProjectJpaRepository projectJpaRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectMapper mapper;
     private final List<ProjectFilter> filters;
 
     public ProjectDto create(ProjectDto projectDto) {
@@ -31,12 +36,13 @@ public class ProjectService {
         }
 
         projectDto.setStatus(ProjectStatus.CREATED);
-        projectDto.setCreatedAt(LocalDateTime.now());
-        projectDto.setUpdatedAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        projectDto.setCreatedAt(now);
+        projectDto.setUpdatedAt(now);
         return mapper.toDto(projectRepository.save(mapper.toEntity(projectDto)));
     }
 
-    public ProjectDto updateStatusAndDescription(ProjectDto projectDto, Long id) {
+    public ProjectDto update(ProjectDto projectDto, Long id) {
         if (id == null) {
             throw new DataValidationException("Project doesn't exist");
         }
@@ -49,7 +55,7 @@ public class ProjectService {
         return mapper.toDto(projectRepository.save(project));
     }
 
-    public List<ProjectDto> getProjectByNameAndStatus(ProjectFilterDto projectFilterDto, long userId) {
+    public List<ProjectDto> getByFilters(ProjectFilterDto projectFilterDto, long userId) {
         Stream<Project> projects = getAvailableProjectsForCurrentUser(userId).stream();
 
         List<ProjectFilter> listApplicableFilters = filters.stream()
@@ -88,8 +94,15 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    public ProjectDto getProjectById(long projectId) {
-        Project projectById = projectRepository.getProjectById(projectId);
+    public ProjectDto getProjectById(Long userId) {
+        Project projectById = projectRepository.getProjectById(userId);
+        if (projectById == null) {
+            throw new EntityNotFoundException("This project is null");
+        }
         return mapper.toDto(projectById);
+    }
+
+    public void deleteProjectById(Long id) {
+        projectJpaRepository.deleteById(id);
     }
 }

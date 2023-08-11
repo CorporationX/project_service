@@ -1,6 +1,7 @@
 package faang.school.projectservice.exceptionhandler;
 
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataValidationException.class)
-    public ResponseEntity<ErrorResponse> handleException(DataValidationException e){
+    public ResponseEntity<ErrorResponse> handleDataValidationException(DataValidationException e){
         log.error(e.getMessage());
 
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
                 e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(DataValidationException e){
+        log.error(e.getMessage());
+
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()), HttpStatus.NOT_FOUND);
     }
 }

@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 public class ProjectDto {
 
     @NotNull
-    @Size(min = 1, message = "User id cannot be 0")
     private Long id;
 
     @NotEmpty

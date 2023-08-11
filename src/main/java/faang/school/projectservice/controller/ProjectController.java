@@ -14,27 +14,32 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/createProject")
+    @PostMapping("/")
     public ProjectDto create(@RequestBody ProjectDto projectDto) {
         return projectService.create(projectDto);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/")
     public ProjectDto changeStatus(@RequestBody ProjectDto projectDto, Long id) {
-        return projectService.updateStatusAndDescription(projectDto, id);
+        return projectService.update(projectDto, id);
     }
 
-    @PostMapping("/{userId}")
-    public List<ProjectDto> getProjectsByNameAndStatus(@RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
-        return projectService.getProjectByNameAndStatus(projectFilterDto, userId);
+    @PostMapping("/{userId}/get-by-filters")
+    public List<ProjectDto> getByFilters(@RequestBody ProjectFilterDto projectFilterDto, @PathVariable long userId) {
+        return projectService.getByFilters(projectFilterDto, userId);
     }
 
-    @GetMapping("/getProjectsByNameAndStatus")
+    @GetMapping("/all")
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProject();
     }
 
-    @GetMapping("/getProjectById/{userId}")
+    @DeleteMapping("/{userId}")
+    public void deleteProjectById(@PathVariable long id) {
+        projectService.deleteProjectById(id);
+    }
+
+    @GetMapping("/{userId}")
     public ProjectDto getProjectById(@PathVariable long userId) {
         return projectService.getProjectById(userId);
     }

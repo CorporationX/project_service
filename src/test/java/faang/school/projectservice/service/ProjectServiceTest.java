@@ -3,9 +3,11 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filters.ProjectFilter;
 import faang.school.projectservice.filters.ProjectFilterByName;
 import faang.school.projectservice.filters.ProjectFilterByStatus;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -37,6 +39,9 @@ class ProjectServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
+    private ProjectJpaRepository projectJpaRepository;
 
     @Spy
     private ProjectMapperImpl projectMapper = new ProjectMapperImpl();
@@ -123,7 +128,7 @@ class ProjectServiceTest {
         Mockito.when(projectRepository.getProjectById(id))
                 .thenReturn(Project.builder().build());
 
-        projectService.updateStatusAndDescription(projectDto, id);
+        projectService.update(projectDto, id);
 
         Mockito.verify(projectRepository, Mockito.times(1))
                 .save(projectMapper.toEntity(projectDto));
@@ -136,7 +141,7 @@ class ProjectServiceTest {
 
     @Test
     void updateStatusAndDescriptionProjectNotFound() {
-        assertThrows(DataValidationException.class, () -> projectService.updateStatusAndDescription(new ProjectDto(), null));
+        assertThrows(DataValidationException.class, () -> projectService.update(new ProjectDto(), null));
     }
 
     @Test
@@ -184,11 +189,11 @@ class ProjectServiceTest {
                 .status(ProjectStatus.CREATED)
                 .build();
 
-        projectService = new ProjectService(projectMapper, projectRepository, filters);
+        projectService = ProjectService.builder().mapper(projectMapper).projectRepository(projectRepository).filters(filters).build();
         List<ProjectDto> filteredProjectsResult =
                 List.of(projectMapper.toDto(project2), projectMapper.toDto(project));
 
-        List<ProjectDto> projectsWithFilter = projectService.getProjectByNameAndStatus(projectFilterDto, 1L);
+        List<ProjectDto> projectsWithFilter = projectService.getByFilters(projectFilterDto, 1L);
         Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
     }
 
@@ -215,10 +220,31 @@ class ProjectServiceTest {
 
     @Test
     void getProjectById() {
+        ProjectDto projectDto = new ProjectDto();
+        projectDto.setId(1L);
         Project build = Project.builder().id(1L).build();
         Mockito.when(projectRepository.getProjectById(build.getId()))
                 .thenReturn(build);
 
+        assertEquals(projectDto, projectService.getProjectById(1L));
+    }
+
+    @Test
+    void getProjectById_EntityNotFoundException() {
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(10L));
+    }
+
+    @Test
+    void deleteProjectById() {
+        projectService.deleteProjectById(1L);
+        Mockito.verify(projectJpaRepository, Mockito.times(1)).deleteById(1L);
+    }
+
+    @Test
+    void deleteNotExistProjectById() {
+        projectService.deleteProjectById(10L);
+        Mockito.verify(projectJpaRepository, Mockito.times(1)).deleteById(10L);
+    
         Assertions.assertEquals(projectDto, projectService.getProjectById(projectDto.getId()));
       
     void getProjectById() {
