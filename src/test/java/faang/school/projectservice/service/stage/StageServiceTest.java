@@ -1,17 +1,23 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
+import faang.school.projectservice.mapper.stage.StageRolesMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TaskService;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,19 +48,68 @@ public class StageServiceTest {
     @Spy
     private StageMapperImpl stageMapper;
 
+    @Spy
+    private StageRolesMapperImpl stageRolesMapper;
+
+    private StageDto stageDto;
     private Project project;
+    private List<Team> teams;
+    private Team team;
+    private Team teamOne;
+    private TeamMember teamMember;
+    private TeamMember teamMember1;
+    private TeamMember teamMemberTwo;
+    private TeamMember teamMemberThree;
+
+    private StageRolesDto stageRolesDto;
     private Stage stage;
     private Stage stageOne;
     private List<Task> tasks;
 
     @BeforeEach
     void init() {
-        project = Project.builder().build();
-
         stage = Stage.builder()
                 .stageId(1L)
                 .stageName("stage")
-                .project(Project.builder().id(1L).status(ProjectStatus.CANCELLED).build())
+                .project(Project.builder()
+                        .id(1L)
+                        .status(ProjectStatus.CANCELLED)
+                        .build())
+                .build();
+
+        teamMember = TeamMember.builder()
+                .id(1L)
+                .stages(new ArrayList<>(List.of(Stage.builder().stageId(1L).build())))
+                .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
+                .build();
+
+        teamMember1 = TeamMember.builder()
+                .id(2L)
+                .stages(new ArrayList<>(List.of(Stage.builder().stageId(1L).build())))
+                .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
+                .build();
+        team = Team.builder()
+                .teamMembers(List.of(teamMember1,teamMember))
+                .build();
+
+        stage.setExecutors(new ArrayList<>(List.of(teamMember, teamMember1)));
+
+        StageRolesDto stageRolesDto = StageRolesDto.builder()
+                .teamRole(TeamRole.DEVELOPER)
+                .count(1)
+                .build();
+        stageDto = StageDto.builder()
+                .stageId(1L)
+                .stageName("Name")
+                .projectId(2L)
+                .stageRoles(List.of(stageRolesDto))
+                .build();
+
+
+        project = Project.builder()
+                .id(1L)
+                .ownerId(1L)
+                .teams(List.of(team))
                 .build();
 
         tasks = new ArrayList<>();
@@ -120,5 +175,39 @@ public class StageServiceTest {
         Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
         stageService.findAllStagesOfProject(anyLong());
         Mockito.verify(projectRepository).getProjectById(anyLong());
+    }
+
+    @Test
+    public void testUpdateStage_IfHasAllExecutorsInStage() {
+        stageRolesDto = StageRolesDto.builder()
+                .id(1L)
+                .teamRole(TeamRole.DEVELOPER)
+                .count(2)
+                .build();
+
+        StageRoles entity = StageRoles.builder()
+                .id(1L)
+                .teamRole(TeamRole.DEVELOPER)
+                .count(2)
+                .build();
+
+
+        stageDto.setStageRoles(List.of(stageRolesDto));
+        stageDto.setExecutorIds(List.of(1L, 2L));
+
+        stage.setStageRoles(new ArrayList<>(List.of(StageRoles.builder()
+                .id(1L)
+                .teamRole(TeamRole.DEVELOPER)
+                .count(1)
+                .build())));
+
+        //Mockito.when(stageRolesMapper.toEntity(any())).thenReturn(entity);
+        Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+        Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
+
+        StageDto createdStageDto = stageService.updateStage(1L, stageRolesDto);
+
+        Mockito.verify(stageRepository, Mockito.times(1)).save(stage);
+        Assertions.assertEquals(stageDto, createdStageDto);
     }
 }
