@@ -19,20 +19,26 @@ public interface MomentMapper {
     @Mapping(source = "teamMembers", target = "teamMemberIds", qualifiedByName = "toTeamMemberIds")
     MomentDto toDto(Moment moment);
     @Mapping(source = "projectIds", target = "projects", qualifiedByName = "toProjects")
+    @Mapping(source = "teamMemberIds", target = "teamMembers", qualifiedByName = "toTeamMembers")
     Moment toEntity(MomentDto momentDto);
 
     @Named("toProjectIds")
-    default List<Long> projectsToIds(List<Project> projects) {
+    default List<Long> toProjectIds(List<Project> projects) {
         return projects.stream().map(Project::getId).toList();
     }
 
     @Named("toProjects")
-    default List<Project> idsToProjects(List<Long> ids) {
+    default List<Project> toProjects(List<Long> ids) {
         return ids.stream().map(id -> Project.builder().id(id).build()).toList();
     }
 
     @Named("toTeamMemberIds")
-    default List<Long> teamMembersToIds(List<TeamMember> teamMembers) {
+    default List<Long> toTeamMemberIds(List<TeamMember> teamMembers) {
         return teamMembers.stream().map(TeamMember::getId).toList();
+    }
+
+    @Named("toTeamMembers")
+    default List<TeamMember> toTeamMembers(List<Long> ids) {
+        return ids.stream().map(id -> TeamMember.builder().id(id).build()).toList();
     }
 }

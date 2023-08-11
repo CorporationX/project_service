@@ -3,6 +3,7 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +31,7 @@ class MomentMapperTest {
                 .description("description")
                 .date(now)
                 .projects(List.of(Project.builder().id(1L).build()))
-                .userIds(List.of(1L))
+                .teamMembers(List.of(TeamMember.builder().id(1L).build()))
                 .imageId("imageId")
                 .build();
 

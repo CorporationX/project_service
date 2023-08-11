@@ -10,6 +10,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.validator.MomentValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -41,6 +43,8 @@ class MomentServiceTest {
     private MomentRepository momentRepository;
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private TeamRepository teamRepository;
     @Mock
     private TeamMemberJpaRepository teamMemberJpaRepository;
     @Mock
@@ -69,10 +73,12 @@ class MomentServiceTest {
                 .description("Description")
                 .date(LocalDateTime.of(2023, 1, 1, 0, 0))
                 .projects(new ArrayList<>(List.of(Project.builder().id(1L).build())))
-                .userIds(new ArrayList<>(List.of(1L)))
+                .teamMembers(new ArrayList<>(List.of(TeamMember.builder().id(1L).build())))
                 .imageId("imageId")
                 .build();
 
+        when(mapper.toEntity(momentDto)).thenReturn(moment);
+        when(teamRepository.findById(Mockito.any())).thenReturn(Optional.empty());
         when(momentRepository.save(Mockito.any())).thenReturn(moment);
         when(momentRepository.findById(Mockito.any())).thenReturn(Optional.of(moment));
     }

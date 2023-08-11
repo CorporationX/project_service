@@ -35,7 +35,8 @@ public class MomentService {
         momentValidator.validateMomentProjects(momentDto);
 
         Moment moment = momentMapper.toEntity(momentDto);
-        moment.setTeamMembers(getTeamMembersFromProjects(moment.getProjects()));
+        List<TeamMember> teamMembers = getTeamMembersFromProjects(moment.getProjects());
+        moment.setTeamMembers(teamMembers);
 
         log.info("Moment (id = {}) successfully created and saved to database", moment.getId());
         return momentMapper.toDto(momentRepository.save(moment));
@@ -48,73 +49,62 @@ public class MomentService {
                 .orElseThrow(() -> new EntityNotFoundException("Moment with id = " + id + " does not exist"));
 
         moment.setName(momentDto.getName());
+        moment.setDate(momentDto.getDate());
+
         if (Objects.nonNull(momentDto.getDescription())) {
             moment.setDescription(momentDto.getDescription());
         }
-        moment.setDate(momentDto.getDate());
-        if (hasDifferentProjects(moment, momentDto)) {
-            updateProjects(momentDto.getProjectIds(), moment);
-        }
+
         if (hasDifferentTeamMembers(moment, momentDto.getTeamMemberIds())) {
-            updateTeamMembers(momentDto.getTeamMemberIds(), moment);
+            updateTeamMembers(moment, momentDto.getTeamMemberIds());
+        }
+
+        if (hasDifferentProjects(moment, momentDto.getProjectIds())) {
+            updateProjects(moment, momentDto.getProjectIds());
         }
 
         log.info("Moment (id = {}) successfully updated and saved to database", moment.getId());
         return momentMapper.toDto(moment);
     }
 
-    private boolean hasDifferentProjects(Moment moment, MomentDto momentDto) {
-        return !getProjectIds(moment.getProjects()).equals(momentDto.getProjectIds());
+    private void updateTeamMembers(Moment moment, List<Long> teamMemberIds) {
+        List<TeamMember> newTeamMembers = teamMemberIds.stream()
+                .map(teamMemberJpaRepository::getTeamMemberById)
+                .toList();
+
+        moment.getTeamMembers().clear();
+        moment.getProjects().clear();
+
+        moment.getTeamMembers().addAll(newTeamMembers);
+        moment.getProjects().addAll(getProjectsFromTeamMembers(newTeamMembers));
+    }
+
+    private void updateProjects(Moment moment, List<Long> projectIds) {
+        List<Project> newProjects = projectIds.stream()
+                .map(projectRepository::getProjectById)
+                .toList();
+
+        moment.getProjects().clear();
+        moment.getTeamMembers().clear();
+
+        moment.getProjects().addAll(newProjects);
+        moment.getTeamMembers().addAll(getTeamMembersFromProjects(newProjects));
     }
 
     private boolean hasDifferentTeamMembers(Moment moment, List<Long> teamMemberIds) {
         return Objects.nonNull(teamMemberIds)
                 && !teamMemberIds.isEmpty()
-                && !getTeamMemberIds(moment.getTeamMembers()).equals(teamMemberIds);
+                && !moment.getTeamMembers().stream()
+                .map(TeamMember::getId)
+                .toList().equals(teamMemberIds);
     }
 
-    private void updateProjects(List<Long> projectIds, Moment moment) {
-        List<Long> existingProjectIds = getProjectIds(moment.getProjects());
-
-        List<Project> addedProjects = projectIds.stream()
-                .filter(projectId -> !existingProjectIds.contains(projectId))
-                .map(projectRepository::getProjectById)
-                .toList();
-
-        moment.getProjects().addAll(addedProjects);
-        moment.getTeamMembers().addAll(getTeamMembersFromProjects(addedProjects));
-
-        List<Project> removedProjects = moment.getProjects().stream()
-                .filter(project -> !projectIds.contains(project.getId()))
-                .toList();
-
-        moment.getProjects().removeAll(removedProjects);
-        moment.getTeamMembers().removeAll(getTeamMembersFromProjects(removedProjects));
+    private boolean hasDifferentProjects(Moment moment, List<Long> projectIds) {
+        return !moment.getProjects().stream()
+                .map(Project::getId)
+                .toList().equals(projectIds);
     }
 
-    private void updateTeamMembers(List<Long> teamMemberIds, Moment moment) {
-        List<Long> existingTeamMemberIds = getTeamMemberIds(moment.getTeamMembers());
-
-        List<TeamMember> addedTeamMembers = teamMemberIds.stream()
-                .filter(teamMemberId -> !existingTeamMemberIds.contains(teamMemberId))
-                .map(teamMemberJpaRepository::getTeamMemberById)
-                .toList();
-
-        moment.getTeamMembers().addAll(addedTeamMembers);
-        moment.getProjects().addAll(getProjectsFromTeamMembers(addedTeamMembers));
-
-//        List<TeamMember> removedTeamMembers = teamMemberIds.stream()
-//                .filter(userId -> !getTeamMemberIds(moment.getTeamMembers()).contains(userId))
-//                .map(teamMemberJpaRepository::getTeamMemberById)
-//                .toList();
-
-        List<TeamMember> removedTeamMembers = moment.getTeamMembers().stream()
-                .filter(teamMember -> !teamMemberIds.contains(teamMember.getId()))
-                .toList();
-
-        moment.getTeamMembers().removeAll(removedTeamMembers);
-        moment.getProjects().removeAll(getProjectsFromTeamMembers(removedTeamMembers));
-    }
 
     private List<Project> getProjectsFromTeamMembers(List<TeamMember> teamMembers) {
         return teamMembers.stream()
@@ -127,18 +117,7 @@ public class MomentService {
         return projects.stream()
                 .flatMap(project -> teamRepository.findTeamsByProjectId(project.getId()).stream())
                 .flatMap(team -> team.getTeamMembers().stream())
-                .toList();
-    }
-
-    private List<Long> getProjectIds(List<Project> projects) {
-        return projects.stream()
-                .map(Project::getId)
-                .toList();
-    }
-
-    private List<Long> getTeamMemberIds(List<TeamMember> teamMembers) {
-        return teamMembers.stream()
-                .map(TeamMember::getId)
+                .distinct()
                 .toList();
     }
 }
