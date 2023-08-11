@@ -171,7 +171,7 @@ public class ProjectService {
     }
 
     private LocalDateTime closeSubProject(UpdateSubProjectDto updateSubProjectDto, Project projectToUpdate) {
-        projectToUpdate.getChildren().forEach(this::checkProjectStatusCompleteOrCancelled);
+        projectToUpdate.getChildren().forEach(this::checkProjectStatusNotCompletedOrCancelled);
         setAllNeededFields(updateSubProjectDto, projectToUpdate);
         projectRepository.save(projectToUpdate);
         return projectToUpdate.getUpdatedAt();
@@ -237,7 +237,7 @@ public class ProjectService {
         }
     }
 
-    private void checkProjectStatusCompleteOrCancelled(Project project) {
+    private void checkProjectStatusNotCompletedOrCancelled(Project project) {
         if (project.getStatus() != ProjectStatus.COMPLETED && project.getStatus() != ProjectStatus.CANCELLED) {
             throw new DataValidationException("Can't close project if subProject status are not complete or cancelled");
         }
