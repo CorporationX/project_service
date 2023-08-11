@@ -23,7 +23,9 @@ public class StageInvitationService {
 
     public StageInvitationDto create(StageInvitationDto invitationDto) {
         validate(invitationDto);
-        return mapper.toDTO(repository.save(mapper.toModel(invitationDto)));
+        StageInvitation stageInvitation = mapper.toModel(invitationDto);
+        stageInvitation.setStatus(StageInvitationStatus.PENDING);
+        return mapper.toDTO(repository.save(stageInvitation));
     }
 
     private void validate(StageInvitationDto invitationDto) {

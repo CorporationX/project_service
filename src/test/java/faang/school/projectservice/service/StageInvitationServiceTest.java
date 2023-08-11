@@ -76,7 +76,8 @@ public class StageInvitationServiceTest {
 
         Mockito.when(repository.findById(1L)).thenReturn(validStageInvitation);
         Mockito.when(repository.save(validStageInvitation)).thenReturn(validStageInvitation);
-        Assertions.assertEquals(validInvitationDto.getStatus(), service.reject(1L, "message").getStatus());
-        Assertions.assertEquals(validInvitationDto.getDescription(), service.reject(1L, "message").getDescription());
+        StageInvitationDto result = service.reject(1L, "message");
+        Assertions.assertEquals(validInvitationDto.getStatus(), result.getStatus());
+        Assertions.assertEquals(validInvitationDto.getDescription(), result.getDescription());
     }
 }
