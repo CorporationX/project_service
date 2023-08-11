@@ -10,11 +10,9 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,7 +26,7 @@ public class StageInvitationService {
 
     public StageInvitationDto create(StageInvitationDto invitationDto) {
         validate(invitationDto);
-        return mapper.toDTO(repository.save(mapper.toModel(invitationDto)));
+        return mapper.toDTO(repository.save(mapper.toEntity(invitationDto)));
     }
 
     private void validate(StageInvitationDto invitationDto) {
