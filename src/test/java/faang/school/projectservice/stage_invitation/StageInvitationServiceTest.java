@@ -37,7 +37,6 @@ public class StageInvitationServiceTest {
     private StageInvitationMapperImpl mapper;
     @InjectMocks
     private StageInvitationService service;
-
     private StageInvitationDto validInvitationDto;
     private StageInvitationDto invalidInvitationDto;
 

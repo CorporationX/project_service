@@ -81,4 +81,15 @@ public class StageInvitationControllerTest {
         controller.getStageInvitationsWithFilters(filter);
         Mockito.verify(service, Mockito.times(1)).getStageInvitationsWithFilters(filter);
     }
+
+    @Test
+    public void testGetStageInvitationsForTeamMemberWithFilters() {
+        var filter = StageInvitationFilterDto.builder().build();
+        controller.getStageInvitationsForTeamMemberWithFilters(1L, filter);
+        Mockito.verify(service, Mockito.times(1)).getStageInvitationsWithFilters(StageInvitationFilterDto.builder().invitedId(1L).build());
+
+        filter = StageInvitationFilterDto.builder().invitedId(1L).build();
+        controller.getStageInvitationsForTeamMemberWithFilters(2L, filter);
+        Mockito.verify(service, Mockito.times(1)).getStageInvitationsWithFilters(StageInvitationFilterDto.builder().invitedId(2L).build());
+    }
 }
