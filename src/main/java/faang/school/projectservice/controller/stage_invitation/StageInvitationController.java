@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.stage_invitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
 import lombok.RequiredArgsConstructor;
