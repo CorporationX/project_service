@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,13 +69,26 @@ public class StageServiceTest {
 
     @BeforeEach
     void init() {
+        ReflectionTestUtils.setField(stageMapper, "stageRolesMapper", stageRolesMapper);
+
         stage = Stage.builder()
                 .stageId(1L)
-                .stageName("stage")
+                .stageName("Name")
                 .project(Project.builder()
                         .id(1L)
                         .status(ProjectStatus.CANCELLED)
                         .build())
+                .executors(new ArrayList<>(List.of(TeamMember.builder()
+                        .id(1L)
+                        .stages(new ArrayList<>(List.of(Stage.builder().stageId(1L).build())))
+                        .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
+                        .build(),
+                        TeamMember.builder()
+                                .id(2L)
+                                .stages(new ArrayList<>(List.of(Stage.builder().stageId(1L).build())))
+                                .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
+                                .build()
+                        )))
                 .build();
 
         teamMember = TeamMember.builder()
@@ -92,8 +106,6 @@ public class StageServiceTest {
                 .teamMembers(List.of(teamMember1,teamMember))
                 .build();
 
-        stage.setExecutors(new ArrayList<>(List.of(teamMember, teamMember1)));
-
         StageRolesDto stageRolesDto = StageRolesDto.builder()
                 .teamRole(TeamRole.DEVELOPER)
                 .count(1)
@@ -101,7 +113,7 @@ public class StageServiceTest {
         stageDto = StageDto.builder()
                 .stageId(1L)
                 .stageName("Name")
-                .projectId(2L)
+                .projectId(1L)
                 .stageRoles(List.of(stageRolesDto))
                 .build();
 
@@ -120,7 +132,7 @@ public class StageServiceTest {
 
         stageOne = Stage.builder()
                 .stageId(1L)
-                .stageName("stage")
+                .stageName("Name")
                 .tasks(tasks)
                 .project(Project.builder()
                         .id(1L)
@@ -185,13 +197,6 @@ public class StageServiceTest {
                 .count(2)
                 .build();
 
-        StageRoles entity = StageRoles.builder()
-                .id(1L)
-                .teamRole(TeamRole.DEVELOPER)
-                .count(2)
-                .build();
-
-
         stageDto.setStageRoles(List.of(stageRolesDto));
         stageDto.setExecutorIds(List.of(1L, 2L));
 
@@ -201,7 +206,6 @@ public class StageServiceTest {
                 .count(1)
                 .build())));
 
-        //Mockito.when(stageRolesMapper.toEntity(any())).thenReturn(entity);
         Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
         Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
 
