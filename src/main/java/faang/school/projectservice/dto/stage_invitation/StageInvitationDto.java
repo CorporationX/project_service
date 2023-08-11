@@ -3,7 +3,6 @@ package faang.school.projectservice.dto.stage_invitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
 @Data
 @Builder

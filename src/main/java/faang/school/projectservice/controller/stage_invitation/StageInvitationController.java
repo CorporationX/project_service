@@ -19,17 +19,6 @@ public class StageInvitationController {
         return service.create(invitationDto);
     }
 
-    private void validate(StageInvitationDto invitationDto) {
-        if (invitationDto == null ||
-                invitationDto.getStageId() == null ||
-                invitationDto.getAuthorId() == null ||
-                invitationDto.getInvitedId() == null ||
-                invitationDto.getAuthorId() == invitationDto.getInvitedId()) {
-
-            throw new DataValidationException("StageInvitation is invalid");
-        }
-    }
-
     public StageInvitationDto accept(long invitationId) {
         return service.accept(invitationId);
     }
@@ -53,5 +42,17 @@ public class StageInvitationController {
                     .invitedId(invitedId).build();
         }
         return service.getStageInvitationsWithFilters(filterDto);
+    }
+
+
+    private void validate(StageInvitationDto invitationDto) {
+        if (invitationDto == null ||
+                invitationDto.getStageId() == null ||
+                invitationDto.getAuthorId() == null ||
+                invitationDto.getInvitedId() == null ||
+                invitationDto.getAuthorId() == invitationDto.getInvitedId()) {
+
+            throw new DataValidationException("StageInvitation is invalid");
+        }
     }
 }

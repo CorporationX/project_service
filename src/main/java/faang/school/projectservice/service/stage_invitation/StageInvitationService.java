@@ -35,19 +35,6 @@ public class StageInvitationService {
         return mapper.toDTO(repository.save(stageInvitation));
     }
 
-    private void validate(StageInvitationDto invitationDto) {
-        Stage stage = stageRepository.getById(invitationDto.getStageId());
-        TMRepository.findById(invitationDto.getInvitedId());
-        TMRepository.findById(invitationDto.getAuthorId());
-        if (!hasStageExecutor(stage, invitationDto.getAuthorId())) {
-            throw new DataValidationException("Author is not executor of stage");
-        }
-    }
-
-    private boolean hasStageExecutor(Stage stage, long executorId) {
-        return stage.getExecutors().stream().anyMatch(executor -> executor.getId() == executorId);
-    }
-
     public StageInvitationDto accept(long invitationId) {
         StageInvitation invitation = repository.findById(invitationId);
         Set<TeamMember> executors = invitation
@@ -77,5 +64,18 @@ public class StageInvitationService {
             stageInvitationStream = filter.apply(stageInvitationStream, filterDto);
         }
         return stageInvitationStream.map(mapper::toDTO).toList();
+    }
+
+    private void validate(StageInvitationDto invitationDto) {
+        Stage stage = stageRepository.getById(invitationDto.getStageId());
+        TMRepository.findById(invitationDto.getInvitedId());
+        TMRepository.findById(invitationDto.getAuthorId());
+        if (!hasStageExecutor(stage, invitationDto.getAuthorId())) {
+            throw new DataValidationException("Author is not executor of stage");
+        }
+    }
+
+    private boolean hasStageExecutor(Stage stage, long executorId) {
+        return stage.getExecutors().stream().anyMatch(executor -> executor.getId() == executorId);
     }
 }

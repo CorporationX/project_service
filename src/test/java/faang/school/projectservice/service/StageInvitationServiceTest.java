@@ -1,7 +1,11 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.stage_invitation.StageInvitationAuthorIdFilter;
+import faang.school.projectservice.filter.stage_invitation.StageInvitationFilter;
+import faang.school.projectservice.filter.stage_invitation.StageInvitationStageIdFilter;
 import faang.school.projectservice.mapper.stage_invitation.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -47,12 +51,15 @@ public class StageInvitationServiceTest {
                 .invitedId(2L)
                 .authorId(1L)
                 .build();
-        Mockito.when(stageRepository.getById(validInvitationDto.getStageId())).thenReturn(Stage.builder()
-                .stageId(1L)
-                .executors(List.of(TeamMember.builder().id(1L).build()))
-                .build());
+        Mockito.when(stageRepository.getById(validInvitationDto.getStageId()))
+                .thenReturn(Stage.builder()
+                        .stageId(1L)
+                        .executors(List.of(TeamMember.builder().id(1L).build()))
+                        .build());
         service.create(validInvitationDto);
-        Mockito.verify(repository).save(mapper.toEntity(validInvitationDto));
+        StageInvitation stageInvitation = mapper.toEntity(validInvitationDto);
+        stageInvitation.setStatus(StageInvitationStatus.PENDING);
+        Mockito.verify(repository, Mockito.times(1)).save(stageInvitation);
     }
 
     @Test
@@ -115,5 +122,33 @@ public class StageInvitationServiceTest {
         StageInvitationDto result = service.reject(1L, "message");
         Assertions.assertEquals(validInvitationDto.getStatus(), result.getStatus());
         Assertions.assertEquals(validInvitationDto.getDescription(), result.getDescription());
+    }
+
+    @Test
+    public void testGetStageInvitationsWithFilters() {
+        List<StageInvitationFilter> filters = List.of(new StageInvitationStageIdFilter(),
+                new StageInvitationAuthorIdFilter()
+        );
+        var testService = new StageInvitationService(repository, stageRepository, TMRepository, mapper, filters);
+        List<StageInvitation> stageInvitations = List.of(
+                StageInvitation.builder()
+                        .stage(Stage.builder().stageId(1L).build())
+                        .author(TeamMember.builder().id(1L).build())
+                        .build(),
+                StageInvitation.builder()
+                        .stage(Stage.builder().stageId(2L).build())
+                        .author(TeamMember.builder().id(1L).build())
+                        .build(),
+                StageInvitation.builder()
+                        .stage(Stage.builder().stageId(1L).build())
+                        .author(TeamMember.builder().id(3L).build())
+                        .build()
+        );
+        var filter = StageInvitationFilterDto.builder()
+                .stageId(1L)
+                .authorId(1L)
+                .build();
+        Mockito.when(repository.findAll()).thenReturn(stageInvitations);
+        Assertions.assertEquals(1, testService.getStageInvitationsWithFilters(filter).size());
     }
 }

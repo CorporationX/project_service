@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.controller.stage_invitation.StageInvitationController;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
 import org.junit.jupiter.api.Assertions;
@@ -94,5 +95,23 @@ public class StageInvitationControllerTest {
     @Test
     public void testRejectMessageIsNull() {
         Assertions.assertThrows(DataValidationException.class, () -> controller.reject(1L, null));
+    }
+
+    @Test
+    public void testGetStageInvitationsWithFilters() {
+        var filter = StageInvitationFilterDto.builder().build();
+        controller.getStageInvitationsWithFilters(filter);
+        Mockito.verify(service, Mockito.times(1)).getStageInvitationsWithFilters(filter);
+    }
+
+    @Test
+    public void testGetStageInvitationsForTeamMemberWithFilters() {
+        var filter = StageInvitationFilterDto.builder().build();
+        controller.getStageInvitationsForTeamMemberWithFilters(1L, filter);
+        Mockito.verify(service, Mockito.times(1)).getStageInvitationsWithFilters(StageInvitationFilterDto.builder().invitedId(1L).build());
+
+        filter = StageInvitationFilterDto.builder().invitedId(1L).build();
+        controller.getStageInvitationsForTeamMemberWithFilters(2L, filter);
+        Mockito.verify(service, Mockito.times(1)).getStageInvitationsWithFilters(StageInvitationFilterDto.builder().invitedId(2L).build());
     }
 }
