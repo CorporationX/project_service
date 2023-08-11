@@ -12,6 +12,9 @@ import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.ProjectRepository;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +29,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -201,12 +205,14 @@ class ProjectServiceTest {
 
     @Test
     void getProjectById() {
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setId(1L);
+       ProjectDto projectDto = new ProjectDto();
+       projectDto.setId(1L);
 
-        Mockito.when(projectRepository.getProjectById(projectDto.getId()))
-                .thenReturn(Project.builder().id(1L).build());
+       Mockito.when(projectRepository.getProjectById(projectDto.getId()))
+               .thenReturn(Project.builder().id(1L).build());
 
-        Assertions.assertEquals(projectMapper.toEntity(projectDto), projectMapper.toEntity(projectService.getProjectById(projectDto.getId())));
+       Assertions.assertEquals(projectMapper.toEntity(projectDto), projectMapper.toEntity(projectService.getProjectById(projectDto.getId())));
+       assertThrows(DataValidationException.class, () -> projectService.updateStatusAndDescription(new ProjectDto(), null));
+       Assert.assertThrows(DataValidationException.class, () -> projectService.create(projectDto));
     }
 }
