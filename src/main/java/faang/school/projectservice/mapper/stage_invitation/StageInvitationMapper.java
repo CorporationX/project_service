@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -30,5 +31,8 @@ public interface StageInvitationMapper {
     @Mapping(source = "invitedId", target = "invited.id")
     List<StageInvitation> toEntityList(List<StageInvitationDto> stageInvitationDtoList);
 
-
+    @Mapping(source = "stageId", target = "stage.stageId")
+    @Mapping(source = "authorId", target = "author.id")
+    @Mapping(source = "invitedId", target = "invited.id")
+    void update(StageInvitationDto stageInvitationDto, @MappingTarget StageInvitation stageInvitation);
 }

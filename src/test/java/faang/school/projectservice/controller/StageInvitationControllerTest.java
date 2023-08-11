@@ -73,4 +73,10 @@ public class StageInvitationControllerTest {
                 .build();
         Assertions.assertThrows(DataValidationException.class, () -> controller.create(invalidInvitationDto));
     }
+
+    @Test
+    public void testAccept(){
+        controller.accept(1L);
+        Mockito.verify(service, Mockito.times(1)).accept(1L);
+    }
 }

@@ -3,24 +3,30 @@ package faang.school.projectservice.service.stage_invitation;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.stage_invitation.StageInvitationMapper;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Service
 public class StageInvitationService {
-    private final StageInvitationRepository SIRepository;
+    private final StageInvitationRepository repository;
     private final StageRepository stageRepository;
     private final TeamMemberRepository TMRepository;
     private final StageInvitationMapper mapper;
 
     public StageInvitationDto create(StageInvitationDto invitationDto) {
         validate(invitationDto);
-        return mapper.toDTO(SIRepository.save(mapper.toEntity(invitationDto)));
+        return mapper.toDTO(repository.save(mapper.toEntity(invitationDto)));
     }
 
     private void validate(StageInvitationDto invitationDto) {
@@ -34,5 +40,18 @@ public class StageInvitationService {
 
     private boolean hasStageExecutor(Stage stage, long executorId) {
         return stage.getExecutors().stream().anyMatch(executor -> executor.getId() == executorId);
+    }
+
+    public StageInvitationDto accept(long invitationId) {
+        StageInvitation invitation = repository.findById(invitationId);
+        Set<TeamMember> executors = invitation
+                .getStage()
+                .getExecutors()
+                .stream()
+                .collect(Collectors.toSet());
+        executors.add(invitation.getInvited());
+        invitation.getStage().setExecutors(executors.stream().toList());
+        invitation.setStatus(StageInvitationStatus.ACCEPTED);
+        return mapper.toDTO(repository.save(invitation));
     }
 }
