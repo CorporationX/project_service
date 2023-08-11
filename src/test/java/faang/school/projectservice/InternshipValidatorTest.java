@@ -38,17 +38,6 @@ public class InternshipValidatorTest {
     }
 
     @Test
-    public void internshipValidationWithWrongProjectIdTest() {
-        DataValidationException exception = assertThrows(DataValidationException.class, () ->
-                internshipValidator.validateControllerInternship(InternshipDto
-                        .builder()
-                        .name("faang-internship")
-                        .projectId(null)
-                        .build()));
-        assertEquals(exception.getMessage(), "Internship relation project error!");
-    }
-
-    @Test
     public void internshipValidationWithWrongDateTest() {
         DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 internshipValidator.validateServiceSaveInternship(InternshipDto

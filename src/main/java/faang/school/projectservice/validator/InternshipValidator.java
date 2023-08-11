@@ -15,9 +15,6 @@ public class InternshipValidator {
         if (internshipDto.getName() == null || internshipDto.getName().isBlank()) {
             throw new DataValidationException("Incorrect name of internship!");
         }
-        if (internshipDto.getProjectId() == null || internshipDto.getProjectId() < 1) {
-            throw new DataValidationException("Internship relation project error!");
-        }
     }
     public void validateServiceSaveInternship(InternshipDto internshipDto) {
 

@@ -28,11 +28,11 @@ public class InternshipService {
         Internship internship = internshipMapper.toEntity(internshipDto);
         List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
                 .map(teamMemberRepository::findById).toList();
-        internship.setInterns(teamMembers); // set интерны
+        internship.setInterns(teamMembers);
         TeamMember teamMember = teamMemberRepository.findById(internshipDto.getMentorId());
-        internship.setMentor(teamMember); // set ментор
+        internship.setMentor(teamMember);
         Project project = projectRepository.getProjectById(internshipDto.getProjectId());
-        internship.setProject(project); // set проект
+        internship.setProject(project);
         internshipRepository.save(internshipMapper.toEntity(internshipDto));
         return internshipMapper.toDto(internship);
     }
