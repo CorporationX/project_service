@@ -40,5 +40,4 @@ public class ProjectService {
         Project project = mapper.toEntity(projectDto);
         return mapper.toDto(projectRepository.save(project));
     }
-
 }
