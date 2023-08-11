@@ -17,15 +17,15 @@ public class VacancyController {
     private final VacancyService vacancyService;
 
     @PostMapping
-    public ResponseEntity<ExtendedVacancyDto> create(@Valid @RequestBody CreateVacancyDto vacancyDto) {
+    public ExtendedVacancyDto create(@Valid @RequestBody CreateVacancyDto vacancyDto) {
         ExtendedVacancyDto newVacancy = vacancyService.create(vacancyDto);
-        return ResponseEntity.ok(newVacancy);
+        return newVacancy;
     }
 
     @PutMapping
-    public ResponseEntity<ExtendedVacancyDto> update(@Valid @RequestBody UpdateVacancyDto vacancyDto) {
+    public ExtendedVacancyDto update(@Valid @RequestBody UpdateVacancyDto vacancyDto) {
         ExtendedVacancyDto updated = vacancyService.update(vacancyDto);
-        return ResponseEntity.ok(updated);
+        return updated;
     }
 
     @PatchMapping

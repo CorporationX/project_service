@@ -62,9 +62,13 @@ public class VacancyService {
     @Transactional
     public void changeCandidateStatus(UpdateCandidateRequestDto updateCandidate) {
         Vacancy vacancy = vacancyRepository.findById(updateCandidate.getVacancyId())
-                .orElseThrow(() -> new EntityNotFoundException("Vacancy not found"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Vacancy with id %d not found", updateCandidate.getVacancyId())
+                ));
         Candidate candidate = candidateRepository.findById(updateCandidate.getCandidateId())
-                .orElseThrow(() -> new EntityNotFoundException("Candidate not found"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Candidate with id %d not found", updateCandidate.getCandidateId())
+                ));
         Long userId = candidate.getUserId();
         validateExistingCandidateInVacancy(updateCandidate, vacancy);
         candidate.setCandidateStatus(updateCandidate.getCandidateStatus());
@@ -119,8 +123,10 @@ public class VacancyService {
 
     private void convertCandidateInTeamMember(UpdateCandidateRequestDto updateCandidate, Long userId, Vacancy vacancy) {
         Team team = teamRepository.findById(updateCandidate.getTeamId())
-                .orElseThrow(() -> new EntityNotFoundException("Team not found"));
-        ValidateConsistRequiredTeamInProject(vacancy, team);
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Team with id %s not found", updateCandidate.getTeamId())
+                ));
+        validateConsistRequiredTeamInProject(vacancy, team);
         TeamMember newTeamMember = TeamMember
                 .builder()
                 .team(team)
@@ -135,7 +141,7 @@ public class VacancyService {
         }
     }
 
-    private void ValidateConsistRequiredTeamInProject(Vacancy vacancy, Team team) {
+    private void validateConsistRequiredTeamInProject(Vacancy vacancy, Team team) {
         List<Team> teams = vacancy.getProject().getTeams();
         if (!teams.contains(team)) {
             throw new DataValidException(String.format(
