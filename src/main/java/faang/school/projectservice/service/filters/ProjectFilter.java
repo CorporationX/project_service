@@ -6,7 +6,7 @@ import faang.school.projectservice.model.Project;
 import java.util.stream.Stream;
 
 public interface ProjectFilter {
-    boolean isApplicable(ProjectFilterDto projectFilterDto);
+    boolean isApplicable(ProjectFilterDto filterDto);
 
     Stream<Project> apply(Stream<Project> projectStream, ProjectFilterDto filterDto);
 }
