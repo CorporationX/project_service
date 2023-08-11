@@ -38,6 +38,7 @@ public class StageInvitationServiceTest {
 
     private StageInvitationDto validInvitationDto;
     private StageInvitationDto invalidInvitationDto;
+    private StageInvitation validStageInvitation;
 
     @Test
     public void testSuccessCreate() {
@@ -99,5 +100,20 @@ public class StageInvitationServiceTest {
         Assertions.assertTrue(stage.getExecutors().contains(member));
         Assertions.assertEquals(StageInvitationStatus.ACCEPTED, invitation.getStatus());
         Assertions.assertEquals(1, stage.getExecutors().size());
+    }
+
+    @Test
+    public void testReject() {
+        validStageInvitation = StageInvitation.builder().build();
+        validInvitationDto = StageInvitationDto.builder()
+                .description("message")
+                .status(StageInvitationStatus.REJECTED)
+                .build();
+
+        Mockito.when(repository.findById(1L)).thenReturn(validStageInvitation);
+        Mockito.when(repository.save(validStageInvitation)).thenReturn(validStageInvitation);
+        StageInvitationDto result = service.reject(1L, "message");
+        Assertions.assertEquals(validInvitationDto.getStatus(), result.getStatus());
+        Assertions.assertEquals(validInvitationDto.getDescription(), result.getDescription());
     }
 }

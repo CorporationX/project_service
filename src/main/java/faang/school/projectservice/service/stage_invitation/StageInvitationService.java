@@ -26,7 +26,9 @@ public class StageInvitationService {
 
     public StageInvitationDto create(StageInvitationDto invitationDto) {
         validate(invitationDto);
-        return mapper.toDTO(repository.save(mapper.toEntity(invitationDto)));
+        StageInvitation stageInvitation = mapper.toEntity(invitationDto);
+        stageInvitation.setStatus(StageInvitationStatus.PENDING);
+        return mapper.toDTO(repository.save(stageInvitation));
     }
 
     private void validate(StageInvitationDto invitationDto) {
@@ -52,6 +54,13 @@ public class StageInvitationService {
         executors.add(invitation.getInvited());
         invitation.getStage().setExecutors(executors.stream().toList());
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
+        return mapper.toDTO(repository.save(invitation));
+    }
+
+    public StageInvitationDto reject(long invitationId, String message){
+        StageInvitation invitation = repository.findById(invitationId);
+        invitation.setStatus(StageInvitationStatus.REJECTED);
+        invitation.setDescription(message);
         return mapper.toDTO(repository.save(invitation));
     }
 }

@@ -27,7 +27,14 @@ public class StageInvitationController {
         }
     }
 
-    public StageInvitationDto accept(long invitationId){
+    public StageInvitationDto accept(long invitationId) {
         return service.accept(invitationId);
+    }
+
+    public StageInvitationDto reject(long invitationId, String message){
+        if (message == null || message.isBlank()){
+            throw new DataValidationException("Rejection must contains message");
+        }
+        return service.reject(invitationId, message);
     }
 }

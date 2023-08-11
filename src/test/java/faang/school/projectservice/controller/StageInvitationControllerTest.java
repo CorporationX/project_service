@@ -75,8 +75,24 @@ public class StageInvitationControllerTest {
     }
 
     @Test
-    public void testAccept(){
+    public void testAccept() {
         controller.accept(1L);
         Mockito.verify(service, Mockito.times(1)).accept(1L);
+    }
+
+    @Test
+    public void testReject() {
+        controller.reject(1L, "message");
+        Mockito.verify(service, Mockito.times(1)).reject(1L, "message");
+    }
+
+    @Test
+    public void testRejectMessageIsBlank() {
+        Assertions.assertThrows(DataValidationException.class, () -> controller.reject(1L, " "));
+    }
+
+    @Test
+    public void testRejectMessageIsNull() {
+        Assertions.assertThrows(DataValidationException.class, () -> controller.reject(1L, null));
     }
 }
