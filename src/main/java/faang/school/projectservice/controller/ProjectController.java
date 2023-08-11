@@ -43,4 +43,15 @@ public class ProjectController {
     public ProjectDto getProjectById(@PathVariable long userId) {
         return projectService.getProjectById(userId);
     }
+
+    public ProjectDto create(ProjectDto projectDto) {
+        return projectService.create(projectDto);
+    }
+
+    public ProjectDto changeStatus(ProjectDto projectDto, Long id) {
+        if (id == null) {
+            throw new DataValidationException("Project id is null");
+        }
+        return projectService.updateStatusAndDescription(projectDto, id);
+    }
 }
