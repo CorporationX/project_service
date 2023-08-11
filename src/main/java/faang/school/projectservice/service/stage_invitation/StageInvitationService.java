@@ -13,6 +13,7 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ public class StageInvitationService {
     private final StageRepository stageRepository;
     private final TeamMemberRepository TMRepository;
     private final StageInvitationMapper mapper;
+    private final List<StageInvitationFilter> filters;
 
     public StageInvitationDto create(StageInvitationDto invitationDto) {
         validate(invitationDto);
@@ -62,5 +64,16 @@ public class StageInvitationService {
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(message);
         return mapper.toDTO(repository.save(invitation));
+    }
+
+    public List<StageInvitationDto> getStageInvitationsWithFilters(StageInvitationFilterDto filterDto) {
+        var stageInvitationStream = repository.findAll().stream();
+        List<StageInvitationFilter> filteredFilters = filters.stream()
+                .filter(filter -> filter.isApplicable(filterDto))
+                .toList();
+        for (StageInvitationFilter filter : filteredFilters) {
+            stageInvitationStream = filter.apply(stageInvitationStream, filterDto);
+        }
+        return stageInvitationStream.map(mapper::toDTO).toList();
     }
 }

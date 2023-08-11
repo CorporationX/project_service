@@ -6,6 +6,8 @@ import faang.school.projectservice.service.stage_invitation.StageInvitationServi
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Controller
 public class StageInvitationController {
@@ -36,5 +38,9 @@ public class StageInvitationController {
             throw new DataValidationException("Rejection must contains message");
         }
         return service.reject(invitationId, message);
+    }
+
+    public List<StageInvitationDto> getStageInvitationsWithFilters(StageInvitationFilterDto filterDto) {
+        return service.getStageInvitationsWithFilters(filterDto);
     }
 }
