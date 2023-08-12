@@ -10,7 +10,6 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.validator.MomentValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -44,8 +42,6 @@ class MomentServiceTest {
     @Mock
     private ProjectRepository projectRepository;
     @Mock
-    private TeamRepository teamRepository;
-    @Mock
     private TeamMemberJpaRepository teamMemberJpaRepository;
     @Mock
     private MomentMapper mapper;
@@ -67,18 +63,19 @@ class MomentServiceTest {
                 .imageId("imageId")
                 .build();
 
+        TeamMember teamMember = mock(TeamMember.class);
+        Project project = mock(Project.class);
+
         moment = Moment.builder()
-                .id(1L)
                 .name("Name")
                 .description("Description")
                 .date(LocalDateTime.of(2023, 1, 1, 0, 0))
-                .projects(new ArrayList<>(List.of(Project.builder().id(1L).build())))
-                .teamMembers(new ArrayList<>(List.of(TeamMember.builder().id(1L).build())))
+                .projects(new ArrayList<>(List.of(project)))
+                .teamMembers(new ArrayList<>(List.of(teamMember)))
                 .imageId("imageId")
                 .build();
 
         when(mapper.toEntity(momentDto)).thenReturn(moment);
-        when(teamRepository.findById(Mockito.any())).thenReturn(Optional.empty());
         when(momentRepository.save(Mockito.any())).thenReturn(moment);
         when(momentRepository.findById(Mockito.any())).thenReturn(Optional.of(moment));
     }
@@ -86,7 +83,7 @@ class MomentServiceTest {
     @Test
     void create_shouldInvokeValidatorValidateMomentProjectsMethod() {
         service.create(momentDto);
-        verify(validator).validateMomentProjects(momentDto);
+        verify(validator).validateToCreate(momentDto);
     }
 
     @Test
@@ -103,9 +100,9 @@ class MomentServiceTest {
     }
 
     @Test
-    void update_shouldInvokeValidatorValidateMomentProjectsMethod() {
+    void update_shouldInvokeValidatorValidateToCreateMethod() {
         service.update(1L, momentDto);
-        verify(validator).validateMomentProjects(momentDto);
+        verify(validator).validateToUpdate(momentDto);
     }
 
     @Test
@@ -135,32 +132,49 @@ class MomentServiceTest {
     void update_shouldUpdateMomentProjects() {
         momentDto.setProjectIds(List.of(1L, 2L));
 
+        Team mockTeam = mock(Team.class);
         Project mockProject1 = mock(Project.class);
         Project mockProject2 = mock(Project.class);
-        Team mockTeam = mock(Team.class);
-        TeamMember mockTeamMember = mock(TeamMember.class);
+
         mockProject1.setId(1L);
         mockProject2.setId(2L);
-        mockTeamMember.setId(1L);
+        mockProject1.setTeams(List.of(mockTeam));
+        mockProject2.setTeams(List.of(mockTeam));
 
-        when(mockProject1.getTeams()).thenReturn(List.of(mockTeam));
-        when(mockProject2.getTeams()).thenReturn(List.of(mockTeam));
-        when(mockTeam.getTeamMembers()).thenReturn(List.of(mockTeamMember));
-
-        when(projectRepository.findAllByIds(List.of(1L,  2L)))
+        when(projectRepository.findAllByIds(List.of(1L, 2L)))
                 .thenReturn(List.of(mockProject1, mockProject2));
-
-        System.out.println(moment.getProjects());
 
         service.update(1L, momentDto);
 
-        System.out.println(moment.getProjects());
-
-        verify(projectRepository).findAllByIds(momentDto.getProjectIds());
-
         assertAll(() -> {
             assertEquals(2, moment.getProjects().size());
-//            assertTrue(moment.getProjects().contains(Project.builder().id(2L).build()));
+            assertTrue(moment.getProjects().contains(mockProject1));
+            assertTrue(moment.getProjects().contains(mockProject2));
+        });
+    }
+
+    @Test
+    void update_shouldUpdateMomentTeamMembers() {
+        momentDto.setTeamMemberIds(List.of(1L, 2L));
+
+        TeamMember mockTeamMember1 = mock(TeamMember.class);
+        TeamMember mockTeamMember2 = mock(TeamMember.class);
+        Team mockTeam = mock(Team.class);
+
+        mockTeamMember1.setId(1L);
+        mockTeamMember2.setId(2L);
+        when(mockTeamMember1.getTeam()).thenReturn(mockTeam);
+        when(mockTeamMember2.getTeam()).thenReturn(mockTeam);
+
+        when(teamMemberJpaRepository.findAllById(List.of(1L, 2L)))
+                .thenReturn(List.of(mockTeamMember1, mockTeamMember2));
+
+        service.update(1L, momentDto);
+
+        assertAll(() -> {
+            assertEquals(2, moment.getTeamMembers().size());
+            assertTrue(moment.getTeamMembers().contains(mockTeamMember1));
+            assertTrue(moment.getTeamMembers().contains(mockTeamMember2));
         });
     }
 }

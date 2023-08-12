@@ -8,10 +8,28 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 @RequiredArgsConstructor
 public class MomentValidator {
     private final ProjectRepository projectRepository;
+
+    public void validateToCreate(MomentDto momentDto) {
+        if (Objects.isNull(momentDto.getProjectIds())) {
+            throw new DataValidationException("Projects are required");
+        }
+        if (momentDto.getProjectIds().isEmpty()) {
+            throw new DataValidationException("Moment must have at least one project");
+        }
+        validateMomentProjects(momentDto);
+    }
+
+    public void validateToUpdate(MomentDto momentDto) {
+        if (Objects.nonNull(momentDto.getProjectIds()) && !momentDto.getProjectIds().isEmpty()) {
+            validateMomentProjects(momentDto);
+        }
+    }
 
     public void validateMomentProjects(MomentDto momentDto) {
         momentDto.getProjectIds().forEach(id -> {

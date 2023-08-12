@@ -26,8 +26,6 @@ public class MomentDto {
     @NotNull(message = "Date is required")
     private LocalDateTime date;
 
-    @NotNull(message = "Projects are required")
-    @Size(min = 1, message = "At least one project is required")
     private List<Long> projectIds;
 
     private List<Long> teamMemberIds;
