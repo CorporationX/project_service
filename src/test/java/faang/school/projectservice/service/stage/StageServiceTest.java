@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -14,7 +15,10 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TaskService;
@@ -51,6 +55,11 @@ public class StageServiceTest {
 
     @Spy
     private StageRolesMapperImpl stageRolesMapper;
+
+    @Mock
+    private StageInvitationRepository stageInvitationRepository;
+    @Mock
+    private UserContext userContext;
 
     private StageDto stageDto;
     private Project project;
@@ -203,7 +212,7 @@ public class StageServiceTest {
         stage.setStageRoles(new ArrayList<>(List.of(StageRoles.builder()
                 .id(1L)
                 .teamRole(TeamRole.DEVELOPER)
-                .count(1)
+                .count(3)
                 .build())));
 
         Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
@@ -213,5 +222,64 @@ public class StageServiceTest {
 
         Mockito.verify(stageRepository, Mockito.times(1)).save(stage);
         Assertions.assertEquals(stageDto, createdStageDto);
+    }
+
+    @Test
+    public void testUpdateStage_DontHaveEnoughExecutorsInStage() {
+        StageRolesDto stageRolesDto = StageRolesDto.builder()
+                .id(1L)
+                .teamRole(TeamRole.DEVELOPER)
+                .count(4)
+                .build();
+
+        stageDto.setStageRoles(List.of(stageRolesDto));
+        stageDto.setExecutorIds(List.of(1L, 2L));
+
+        TeamMember projectMember1 = TeamMember.builder()
+                .id(3L)
+                .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
+                .build();
+
+        TeamMember projectMember2 = TeamMember.builder()
+                .id(4L)
+                .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
+                .build();
+
+        Team stageTeam = Team.builder().teamMembers(new ArrayList<>(List.of(teamMember, teamMember1))).build();
+        Team team = Team.builder().teamMembers(new ArrayList<>(List.of(projectMember1, projectMember2))).build();
+        project.setTeams(List.of(team, stageTeam));
+
+        stage.setExecutors(new ArrayList<>(List.of(teamMember, teamMember1)));
+        stage.setStageRoles(new ArrayList<>(List.of(StageRoles.builder().id(1L).teamRole(TeamRole.DEVELOPER).count(1).build())));
+        stage.setProject(Project.builder()
+                .id(1L)
+                .ownerId(1L)
+                .teams(List.of(team,stageTeam))
+                .build());
+
+        StageInvitation stageInvitation1 = StageInvitation.builder()
+                .author(TeamMember.builder().id(1L).build())
+                .invited(TeamMember.builder().id(3L).build())
+                .description("You are invited on the Project stage " + stage.getStageId())
+                .status(StageInvitationStatus.PENDING)
+                .build();
+
+        StageInvitation stageInvitation2 = StageInvitation.builder()
+                .author(TeamMember.builder().id(1L).build())
+                .invited(TeamMember.builder().id(4L).build())
+                .description("You are invited on the Project stage " + stage.getStageId())
+                .status(StageInvitationStatus.PENDING)
+                .build();
+
+        Mockito.when(stageRepository.getById(1L)).thenReturn(stage);
+        Mockito.when(userContext.getUserId()).thenReturn(1L);
+        Mockito.when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+
+        StageDto createdStageDto = stageService.updateStage(1L, stageRolesDto);
+
+        Assertions.assertEquals(stageDto, createdStageDto);
+        Mockito.verify(stageRepository, Mockito.times(1)).save(stage);
+        Mockito.verify(stageInvitationRepository, Mockito.times(1)).save(stageInvitation1);
+        Mockito.verify(stageInvitationRepository, Mockito.times(1)).save(stageInvitation2);
     }
 }
