@@ -22,12 +22,12 @@ public class StageInvitationController {
 
     private final StageInvitationService invitationService;
 
-    @PostMapping("/sendInvitation")
+    @PostMapping("/send-Invitation")
     public DtoStageInvitation sendAnInvitation(@Valid @RequestBody DtoStageInvitation invitationDto) {
         return invitationService.invitationHasBeenSent(invitationDto);
     }
 
-    @PostMapping("/acceptDeclineInvitation/")
+    @PostMapping("/process-invitation/")
     public DtoStatus acceptDeclineInvitation(@RequestParam @Pattern(regexp = "ACCEPTED|REJECTED|PENDING", message =
             "there is no such status, the status can be ACCEPTED REJECTED") String status,
                                              @Positive(message = "user id must be greater than 0")
@@ -36,11 +36,11 @@ public class StageInvitationController {
         return invitationService.acceptDeclineInvitation(status, idInvitation);
     }
 
-    @GetMapping("/all/{id}")
-    public List<DtoStageInvitation> getStageInvitation(@PathVariable("id") @Positive(message = "user id must be greater than 0")
-                                                       @Max(value = Long.MAX_VALUE, message = "user id the value cannot be empty or greater than 9223372036854775807") Long id
+    @GetMapping("/stage/{stageId}")
+    public List<DtoStageInvitation> getStageInvitation(@PathVariable("stageId") @Positive(message = "user id must be greater than 0")
+                                                       @Max(value = Long.MAX_VALUE, message = "user id the value cannot be empty or greater than 9223372036854775807") Long stageId
             , @RequestBody @Valid DtoStageInvitationFilter filter) {
 
-        return invitationService.getAllStageInvitation(id, filter);
+        return invitationService.getAllStageInvitation(stageId, filter);
     }
 }

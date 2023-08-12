@@ -13,6 +13,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,28 +30,27 @@ public class StageInvitationService {
     private final List<StageInvitationFilter> invitationFilter;
 
     public DtoStageInvitation invitationHasBeenSent(DtoStageInvitation dto) {
-        if (!invitationRepository.existsByAuthorAndInvitedAndStage(memberMapper.toTeamMember(dto.getIdAuthor()), memberMapper.toTeamMember(dto.getIdInvited())
-                , stageMapper.toStage(dto.getStage()))) {
+        if (!invitationRepository.existsByAuthorAndInvitedAndStage(memberMapper.toTeamMember(dto.getIdAuthor()), memberMapper.toTeamMember(dto.getIdInvited()),
+                stageMapper.toStage(dto.getStage()))) {
             throw new ValidException("check the data");
-        } else if (dto.getIdAuthor() == dto.getIdInvited()) {
+        }
+        if (dto.getIdAuthor() == dto.getIdInvited()) {
             throw new ValidException("repeated id");
         }
 
         return stageInvitationMapper.toDto(invitationRepository.save(stageInvitationMapper.toStageInvitation(dto)));
     }
 
+    @Transactional
     public DtoStatus acceptDeclineInvitation(String status, long idInvitation) {
         StageInvitation invitation = invitationRepository.findById(idInvitation);
 
         if (status.equals("ACCEPTED")) {
             invitation.setStatus(StageInvitationStatus.ACCEPTED);
-            invitationRepository.save(invitation);
         } else if (status.equals("REJECTED")) {
             invitation.setStatus(StageInvitationStatus.REJECTED);
-            invitationRepository.save(invitation);
         } else if (status.equals("PENDING")) {
             invitation.setStatus(StageInvitationStatus.PENDING);
-            invitationRepository.save(invitation);
         }
 
         return new DtoStatus(invitation.getStatus());
