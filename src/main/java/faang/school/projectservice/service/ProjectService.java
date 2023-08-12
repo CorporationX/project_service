@@ -4,12 +4,12 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
-import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
+import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.PrivateAccessException;
-import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -242,6 +242,7 @@ public class ProjectService {
             throw new DataValidationException("Can't close project if subProject status are not complete or cancelled");
         }
     }
+
     private void validateNameAndDescription(ProjectDto projectDto) {
         String name = projectDto.getName();
         String description = projectDto.getDescription();
@@ -251,5 +252,13 @@ public class ProjectService {
         if (description == null || description.isBlank()) {
             throw new DataValidationException("Project can't be created with empty description");
         }
+    }
+
+    public Project getProjectByIdFromRepo(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+
+    public boolean isProjectExist(Long projectId) {
+        return projectRepository.existsById(projectId);
     }
 }
