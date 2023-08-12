@@ -168,7 +168,6 @@ public class ProjectServiceTest {
                 .thenReturn(updatedProject);
 
         ProjectDto result = projectService.updateProject(updatedProjectDto, projectId);
-
         Assertions.assertEquals(updatedProjectDto, result);
         Mockito.verify(projectRepository, Mockito.times(1)).save(desiredProject);
         Mockito.verify(projectRepository, Mockito.times(1)).findById(projectId);
