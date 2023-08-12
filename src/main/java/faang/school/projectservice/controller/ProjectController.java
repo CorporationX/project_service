@@ -27,31 +27,19 @@ public class ProjectController {
         return projectService.getProject(projectId);
     }
 
-    @PostMapping
+    @PostMapping("/project")
     public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
         return projectService.createProject(projectDto);
     }
 
-    @PutMapping
+    @PutMapping("/{projectId}")
     public ProjectDto updateProject(@RequestBody ProjectDto projectDto,
-                                    @PathVariable long projectId) {
+                                    @PathVariable("projectId") long projectId) {
         return projectService.updateProject(projectDto, projectId);
     }
 
     @PostMapping
     public List<ProjectDto> getProjects(@RequestBody ProjectFilterDto projectFilter) {
         return projectService.getProjects(projectFilter);
-    }
-
-    @PostMapping("/subproject")
-    public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
-        validateSubProject(projectDto);
-        return projectService.createSubProject(projectDto);
-    }
-
-    private void validateSubProject(ProjectDto projectDto) {
-        if (projectDto.getName().isBlank()) {
-            throw new DataValidException("Enter project name, please");
-        }
     }
 }
