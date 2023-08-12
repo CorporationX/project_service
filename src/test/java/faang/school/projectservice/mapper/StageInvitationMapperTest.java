@@ -12,38 +12,39 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class StageInvitationMapperTest {
-    private final StageInvitationMapper stageInvitationMapper = StageInvitationMapper.INSTANCE;
+    @Spy
+    private StageInvitationMapperImpl stageInvitationMapper;
     private StageInvitationDto dto;
     private StageInvitation entity;
 
     @BeforeEach
     void setUp() {
         TeamMember invited = TeamMember.builder()
+                .id(1L)
                 .userId(1L)
                 .build();
 
         Stage stage = Stage.builder()
-                .stageName("Stage 1")
+                .stageId(1L)
                 .build();
 
         TeamMember author = TeamMember.builder()
+                .id(1L)
                 .userId(1L)
                 .roles(List.of(TeamRole.OWNER))
                 .build();
 
-        StageInvitation stageInvitation = StageInvitation.builder()
-                .author(author)
-                .build();
-
         dto = StageInvitationDto.builder()
                 .id(5L)
-                .stage(stage)
-                .invited(invited)
-                .status(StageInvitationStatus.PENDING)
+                .stageId(1L)
+                .invitedId(invited.getId())
+                .status("PENDING")
+                .authorId(1L)
                 .build();
 
         entity = StageInvitation.builder()
@@ -51,6 +52,7 @@ class StageInvitationMapperTest {
                 .stage(stage)
                 .invited(invited)
                 .status(StageInvitationStatus.PENDING)
+                .author(author)
                 .build();
     }
 
@@ -60,8 +62,8 @@ class StageInvitationMapperTest {
 
         assertNotNull(resultDto);
         assertEquals(dto.getId(), resultDto.getId());
-        assertEquals(dto.getStage(), resultDto.getStage());
-        assertEquals(dto.getInvited(), resultDto.getInvited());
+        assertEquals(dto.getStageId(), resultDto.getStageId());
+        assertEquals(dto.getInvitedId(), resultDto.getInvitedId());
         assertEquals(dto.getStatus(), resultDto.getStatus());
     }
 
@@ -71,8 +73,8 @@ class StageInvitationMapperTest {
 
         assertNotNull(resultEntity);
         assertEquals(entity.getId(), resultEntity.getId());
-        assertEquals(entity.getStage(), resultEntity.getStage());
-        assertEquals(entity.getInvited(), resultEntity.getInvited());
+        assertEquals(entity.getStage().getStageId(), resultEntity.getStage().getStageId());
+        assertEquals(entity.getInvited().getId(), resultEntity.getInvited().getId());
         assertEquals(entity.getStatus(), resultEntity.getStatus());
     }
 
@@ -88,8 +90,8 @@ class StageInvitationMapperTest {
 
         StageInvitationDto resultDto = resultDtoList.get(0);
         assertEquals(dto.getId(), resultDto.getId());
-        assertEquals(dto.getStage(), resultDto.getStage());
-        assertEquals(dto.getInvited(), resultDto.getInvited());
+        assertEquals(dto.getStageId(), resultDto.getStageId());
+        assertEquals(dto.getInvitedId(), resultDto.getInvitedId());
         assertEquals(dto.getStatus(), resultDto.getStatus());
     }
 
@@ -105,38 +107,27 @@ class StageInvitationMapperTest {
 
         StageInvitation resultEntity = resultEntityList.get(0);
         assertEquals(entity.getId(), resultEntity.getId());
-        assertEquals(entity.getStage(), resultEntity.getStage());
-        assertEquals(entity.getInvited(), resultEntity.getInvited());
+        assertEquals(entity.getStage().getStageId(), resultEntity.getStage().getStageId());
+        assertEquals(entity.getInvited().getId(), resultEntity.getInvited().getId());
         assertEquals(entity.getStatus(), resultEntity.getStatus());
     }
 
     @Test
     public void testUpdateDto() {
-        TeamMember newInvited = TeamMember.builder()
-                .userId(2L)
-                .build();
-
-        TeamMember newAuthor = TeamMember.builder()
-                .userId(2L)
-                .build();
-
-        Stage newStage = Stage.builder()
-                .stageName("Stage 2")
-                .build();
 
         StageInvitationDto updatedDto = StageInvitationDto.builder()
                 .id(10L)
-                .stage(newStage)
-                .invited(newInvited)
-                .author(newAuthor)
-                .status(StageInvitationStatus.ACCEPTED)
+                .stageId(1L)
+                .invitedId(1L)
+                .authorId(1L)
+                .status("ACCEPTED")
                 .build();
 
         stageInvitationMapper.updateDto(updatedDto, entity);
 
         assertEquals(updatedDto.getId(), entity.getId());
-        assertEquals(updatedDto.getStage(), entity.getStage());
-        assertEquals(updatedDto.getInvited(), entity.getInvited());
-        assertEquals(updatedDto.getStatus(), entity.getStatus());
+        assertEquals(updatedDto.getStageId(), entity.getStage().getStageId());
+        assertEquals(updatedDto.getInvitedId(), entity.getInvited().getId());
+        assertEquals(updatedDto.getStatus(), entity.getStatus().toString());
     }
 }

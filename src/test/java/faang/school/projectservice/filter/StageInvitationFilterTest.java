@@ -1,18 +1,22 @@
 package faang.school.projectservice.filter;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class StageInvitationFilterTest {
@@ -33,7 +37,7 @@ public class StageInvitationFilterTest {
 
     @Test
     public void testIsApplicableWithStatusPattern() {
-        filterDto.setStatusPattern(StageInvitationStatus.PENDING);
+        filterDto.setStatusPattern(StageInvitationStatus.PENDING.toString());
         boolean isApplicable = stageInvitationStatusFilter.isApplicable(filterDto);
         assertTrue(isApplicable);
     }
@@ -48,7 +52,7 @@ public class StageInvitationFilterTest {
     @Test
     public void testApplyWithMatchingStatus() {
         StageInvitationFilterDto filterDto = new StageInvitationFilterDto();
-        filterDto.setStatusPattern(StageInvitationStatus.ACCEPTED);
+        filterDto.setStatusPattern(StageInvitationStatus.ACCEPTED.toString());
 
         StageInvitation invitation1 = mock(StageInvitation.class);
         when(invitation1.getStatus()).thenReturn(StageInvitationStatus.ACCEPTED);
@@ -66,7 +70,7 @@ public class StageInvitationFilterTest {
     @Test
     public void testApplyWithNoMatchingStatus() {
         StageInvitationFilterDto filterDto = new StageInvitationFilterDto();
-        filterDto.setStatusPattern(StageInvitationStatus.ACCEPTED);
+        filterDto.setStatusPattern(StageInvitationStatus.ACCEPTED.toString());
 
         StageInvitation invitation1 = mock(StageInvitation.class);
         when(invitation1.getStatus()).thenReturn(StageInvitationStatus.REJECTED);
