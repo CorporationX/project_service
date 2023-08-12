@@ -21,31 +21,32 @@ import java.util.Map;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(DataAlreadyExistingException.class)
     public ResponseEntity<ErrorResponse> handlerDataAlreadyExistingException(DataAlreadyExistingException e) {
         log.error(e.getMessage());
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DataNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlerDataNotFoundException(DataNotFoundException e) {
         log.error(e.getMessage());
-        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND, e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(DataValidationException.class)
     public ResponseEntity<ErrorResponse> handlerDataValidationException(DataValidationException e) {
         log.error(e.getMessage());
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PrivateAccessException.class)
     public ResponseEntity<ErrorResponse> handlerPrivateAccessException(PrivateAccessException e) {
         log.error(e.getMessage());
-        ErrorResponse response = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -66,14 +67,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handlerRuntimeException(RuntimeException e) {
         log.error(e.getMessage());
-        ErrorResponse response = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlerEntityNotFoundException(EntityNotFoundException e) {
         log.error(e.getMessage());
-        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND, e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 }
