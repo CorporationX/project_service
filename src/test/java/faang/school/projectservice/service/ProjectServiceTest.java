@@ -1,11 +1,14 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.ProjectByFilterDto;
+import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
+import faang.school.projectservice.exception.CheckIfProjectExists;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project_filter.ProjectFilter;
 import faang.school.projectservice.filter.project_filter.ProjectNameFilter;
 import faang.school.projectservice.filter.project_filter.ProjectStatusFilter;
-
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -42,7 +45,7 @@ class ProjectServiceTest {
     private ProjectRepository projectRepository;
     @InjectMocks
     private ProjectService projectService;
-   @Spy
+    @Spy
     private ProjectMapper projectMapper;
 
     private TeamMember teamMember;
@@ -53,9 +56,12 @@ class ProjectServiceTest {
     private Project projectPrivate2;
     private Project project;
     private ProjectDto projectDto;
+    private ProjectByFilterDto projectByFilterDto;
+    private ProjectCreateDto projectCreateDto;
+    private ProjectUpdateDto projectUpdateDto;
 
     @BeforeEach
-    public void toSet() {
+    public void toBeforeEach() {
         teamMember = TeamMember.builder().id(1L).build();
         teamMember2 = TeamMember.builder().id(2L).build();
 
@@ -74,61 +80,60 @@ class ProjectServiceTest {
 
         project = Project.builder().id(1L).name("test").stages(list).children(listsProjectId).vacancies(listsVacancyId).resources(lists).teams(listsTeamId).tasks(listsTaskId).status(ProjectStatus.CREATED).build();
         projectDto = ProjectDto.builder().id(1L).name("test").stagesId(listId).childrenId(listId).vacanciesId(listId).resourcesId(listId).teamsId(listId).tasksId(listId).status(ProjectStatus.CREATED).ownerId(1L).build();
+        projectUpdateDto = ProjectUpdateDto.builder().name("test").stagesId(listId).childrenId(listId).vacanciesId(listId).resourcesId(listId).teamsId(listId).tasksId(listId).status(ProjectStatus.CREATED).ownerId(1L).build();
+        projectCreateDto = ProjectCreateDto.builder().name("test").childrenId(listId).resourcesId(listId).teamsId(listId).status(ProjectStatus.CREATED).ownerId(1L).build();
+        projectByFilterDto = ProjectByFilterDto.builder().name("test").status(ProjectStatus.CREATED).build();
     }
 
 
     @Test
     void testCreateProjectDataValidationException() {
-        ProjectDto projectDto = ProjectDto.builder().id(1L).name("test").ownerId(1L).build();
         when(projectRepository.existsByOwnerUserIdAndName(anyLong(), anyString())).thenReturn(true);
         assertThrows(DataValidationException.class,
-                () -> projectService.createProject(projectDto));
+                () -> projectService.createProject(projectCreateDto));
     }
 
     @Test
     void testCreateProject() {
         when(projectRepository.existsByOwnerUserIdAndName(anyLong(), anyString())).thenReturn(false);
         when(projectRepository.save(any())).thenReturn(project);
-        when(projectMapper.toEntity(projectDto)).thenReturn(project);
+        when(projectMapper.createDtoToProject(projectCreateDto)).thenReturn(project);
         when(projectMapper.toDto(project)).thenReturn(projectDto);
-        assertEquals(ProjectStatus.CREATED, projectService.createProject(projectDto).getStatus());
+        assertEquals(ProjectStatus.CREATED, projectService.createProject(projectCreateDto).getStatus());
     }
 
     @Test
     void testUpdateProject() {
         when(projectRepository.existsById(1L)).thenReturn(true);
         when(projectRepository.getProjectById(1L)).thenReturn(project);
-        projectService.updateProject(1L, projectDto);
-        verify(projectMapper).update(projectDto, project);
+        projectService.updateProject(1L, projectUpdateDto);
+        verify(projectMapper).update(projectUpdateDto, project);
         verify(projectRepository).save(project);
         assertEquals(projectMapper.toDto(project), projectService.getProjectById(1L));
     }
 
     @Test
-    void testGetAllProjectsByStatus() {
+    void testGetAllProjectsByFilter() {
         List<ProjectFilter> projectFilterList = List.of(new ProjectNameFilter(), new ProjectStatusFilter());
         when(projectRepository.existsById(1L)).thenReturn(true);
         when(projectRepository.findAll()).thenReturn(List.of(
                 projectPublic, projectPrivate, projectPublic2, projectPrivate2));
         projectService = new ProjectService(projectRepository, projectMapper, projectFilterList);
 
-        List<ProjectDto> projectsByStatus = projectService.getAllProjectsByStatus(
-                1L, ProjectDto.builder().status(ProjectStatus.IN_PROGRESS).name("test1").build());
+        List<ProjectDto> projectsByStatus = projectService.getAllProjectsByFilter(
+                1L, ProjectByFilterDto.builder().status(ProjectStatus.IN_PROGRESS).name("test1").build());
         assertEquals(2, projectsByStatus.size());
     }
 
     @Test
-    void testGetAllProjects() {
-        when(projectRepository.existsById(1L)).thenReturn(true);
-        when(projectRepository.getProjectById(1L)).thenReturn(project);
-        projectService.getAllProjects();
-        assertEquals(projectMapper.toDto(project), projectService.getProjectById(1L));
+    void testGetAllProjectsIsEmpty() {
+        assertEquals(new ArrayList<>(), projectService.getAllProjects());
     }
 
     @Test
     void testGetProjectByDataValidationException() {
         when(projectRepository.existsById(1L)).thenReturn(false);
-        assertThrows(DataValidationException.class, () -> projectService.getProjectById(1L));
+        assertThrows(CheckIfProjectExists.class, () -> projectService.getProjectById(1L));
     }
 
     @Test

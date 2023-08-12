@@ -1,6 +1,9 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.project.ProjectByFilterDto;
+import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +24,23 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping
-    public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
-        projectValidate(projectDto);
-        return projectService.createProject(projectDto);
+    public ProjectDto createProject(@RequestBody ProjectCreateDto projectCreateDto) {
+        projectValidate(projectCreateDto);
+        return projectService.createProject(projectCreateDto);
     }
 
     @PutMapping("/{id}")
-    public ProjectDto updateProject(@PathVariable long id, @RequestBody ProjectDto projectDto) {
-        projectValidate(projectDto);
-        return projectService.updateProject(id, projectDto);
+    public ProjectDto updateProject(@PathVariable long id, @RequestBody ProjectUpdateDto projectUpdateDto) {
+        return projectService.updateProject(id, projectUpdateDto);
     }
 
-    @GetMapping("/all/{id}")
-    public List<ProjectDto> getAllProjectsByStatus(@PathVariable long id, @RequestBody ProjectDto projectDto) {
-        projectValidate(projectDto);
-        return projectService.getAllProjectsByStatus(id, projectDto);
+    @PostMapping("/filter/{id}")
+    public List<ProjectDto> getAllProjectsByFilter(@PathVariable long id, @RequestBody ProjectByFilterDto projectByFilterDto) {
+        validateProjectFilter(projectByFilterDto);
+        return projectService.getAllProjectsByFilter(id, projectByFilterDto);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProjects();
     }
@@ -48,17 +50,23 @@ public class ProjectController {
         return projectService.getProjectById(id);
     }
 
-    private void projectValidate(ProjectDto projectDto) {
-        if (projectDto == null) {
+    private void validateProjectFilter(ProjectByFilterDto projectByFilterDto) {
+        if (projectByFilterDto == null) {
+            throw new DataValidationException("ProjectByFilterDto is null");
+        }
+    }
+
+    private void projectValidate(ProjectCreateDto projectCreateDto) {
+        if (projectCreateDto == null) {
             throw new DataValidationException("ProjectDto is null");
         }
-        if (projectDto.getName() == null || projectDto.getName().isBlank() && projectDto.getName().isEmpty()) {
+        if (projectCreateDto.getName() == null || projectCreateDto.getName().isBlank() && projectCreateDto.getName().isEmpty()) {
             throw new DataValidationException("Project name is empty");
         }
-        if (projectDto.getDescription() == null || projectDto.getDescription().isBlank() && projectDto.getDescription().isEmpty()) {
+        if (projectCreateDto.getDescription() == null || projectCreateDto.getDescription().isBlank() && projectCreateDto.getDescription().isEmpty()) {
             throw new DataValidationException("Project description is empty");
         }
-        if (projectDto.getOwnerId() == null) {
+        if (projectCreateDto.getOwnerId() == null) {
             throw new DataValidationException("Project owner id is empty");
         }
     }

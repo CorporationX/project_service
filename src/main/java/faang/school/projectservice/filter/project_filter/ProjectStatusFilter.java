@@ -1,18 +1,18 @@
 package faang.school.projectservice.filter.project_filter;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectByFilterDto;
 import faang.school.projectservice.model.Project;
 
 import java.util.stream.Stream;
 
 public class ProjectStatusFilter implements ProjectFilter {
     @Override
-    public boolean isApplicable(ProjectDto projectDto) {
-        return projectDto.getStatus() != null;
+    public boolean isApplicable(ProjectByFilterDto projectByFilterDto) {
+        return projectByFilterDto.getStatus() != null;
     }
 
     @Override
-    public Stream<Project> apply(Stream<Project> projectStream, ProjectDto projectDto) {
-        return projectStream.filter(project -> project.getStatus().equals(projectDto.getStatus()));
+    public Stream<Project> apply(Stream<Project> projectStream, ProjectByFilterDto projectByFilterDto) {
+        return projectStream.filter(project -> project.getStatus().equals(projectByFilterDto.getStatus()));
     }
 }

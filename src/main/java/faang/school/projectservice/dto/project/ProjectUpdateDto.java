@@ -8,16 +8,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProjectDto {
+public class ProjectUpdateDto {
 
-    private Long id;
     private String name;
     private String description;
     private BigInteger storageSize;
@@ -27,8 +25,6 @@ public class ProjectDto {
     private List<Long> childrenId;
     private List<Long> tasksId;
     private List<Long> resourcesId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private ProjectVisibility visibility;
     private ProjectStatus status;
     private String coverImageId;

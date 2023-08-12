@@ -1,6 +1,8 @@
 package faang.school.projectservice.mapper;
 
+import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Schedule;
@@ -21,6 +23,12 @@ import java.util.List;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
+    @Mapping(target = "children", source = "childrenId", qualifiedByName = "toChildren")
+    @Mapping(target = "resources", source = "resourcesId", qualifiedByName = "toResource")
+    @Mapping(target = "parentProject", source = "parentProjectId", qualifiedByName = "toProject")
+    @Mapping(target = "teams", source = "teamsId", qualifiedByName = "toTeams")
+    Project createDtoToProject(ProjectCreateDto projectCreateDto);
+
     @Mapping(target = "stagesId", source = "stages", qualifiedByName = "toStagesId")
     @Mapping(target = "scheduleId", source = "schedule.id")
     @Mapping(target = "teamsId", source = "teams", qualifiedByName = "toTeamsId")
@@ -49,7 +57,7 @@ public interface ProjectMapper {
     @Mapping(target = "tasks", source = "tasksId", qualifiedByName = "toTask")
     @Mapping(target = "vacancies", source = "vacanciesId", qualifiedByName = "toVacancies")
     @Mapping(target = "children", source = "childrenId", qualifiedByName = "toChildren")
-    void update(ProjectDto projectDto, @MappingTarget Project project);
+    void update(ProjectUpdateDto projectUpdateDto, @MappingTarget Project project);
 
     @Named(value = "toChildrenId")
     default List<Long> toChildrenId(List<Project> projects) {
