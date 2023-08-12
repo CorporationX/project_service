@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/subproject")
+    @PostMapping
     public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
         validateSubProject(projectDto);
         return projectService.createSubProject(projectDto);
