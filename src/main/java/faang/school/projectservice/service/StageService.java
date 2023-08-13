@@ -37,6 +37,8 @@ public class StageService {
 
     private final StageInvitationRepository stageInvitationRepository;
 
+    private final StageInvitationService stageInvitationService;
+
     private final StageValidator stageValidator;
 
     private final UserContext userContext;
@@ -114,7 +116,7 @@ public class StageService {
                 .author(TeamMember.builder().id(userContext.getUserId()).build())
                 .invited(teamMember)
                 .build();
-        stageInvitationRepository.save(invitation);
+        stageInvitationService.createStageInvitation(invitation);
     }
 
     private long getTotalTeamRoles(StageRolesDto stageRoles, Stage stage) {

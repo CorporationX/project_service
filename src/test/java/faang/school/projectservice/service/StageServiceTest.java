@@ -16,7 +16,8 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.StageValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +51,7 @@ class StageServiceTest {
     private TeamMemberJpaRepository teamMemberJpaRepository;
 
     @Mock
-    private StageInvitationRepository stageInvitationRepository;
+    private StageInvitationService stageInvitationService;
 
     @Spy
     private StageRolesMapperImpl stageRolesMapper;
@@ -242,8 +243,15 @@ class StageServiceTest {
         Mockito.when(userContext.getUserId()).thenReturn(1L);
 
         stageService.updateStageRoles(1L, stageRolesDto);
-        Mockito.verify(teamMemberJpaRepository, Mockito.times(1))
-                .saveAll(List.of(teamMember1, teamMember2, teamMember3));
+        Mockito.verify(stageInvitationService, Mockito.times(1))
+                .createStageInvitation(StageInvitation
+                        .builder()
+                        .description("Invitation to the stage " + stageGetById.getStageName())
+                        .status(StageInvitationStatus.PENDING)
+                        .stage(stageGetById)
+                        .author(TeamMember.builder().id(userContext.getUserId()).build())
+                        .invited(teamMember3)
+                        .build());
     }
 
     @Test
