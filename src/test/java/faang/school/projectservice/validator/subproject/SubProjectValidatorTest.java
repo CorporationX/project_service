@@ -2,6 +2,7 @@ package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.service.subproject.ProjectService;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,8 @@ class SubProjectValidatorTest {
     private SubProjectService subProjectService;
     @Mock
     private UserServiceClient userServiceClient;
+    @Mock
+    private ProjectService projectService;
     @InjectMocks
     private SubProjectValidator validatorClass;
     private Method validateOwnerId;
@@ -35,9 +38,9 @@ class SubProjectValidatorTest {
         MockitoAnnotations.openMocks(this);
         rightId = 1L;
         str = "Ane string";
-        validatorClass = new SubProjectValidator(subProjectService, userServiceClient);
+        validatorClass = new SubProjectValidator(projectService, subProjectService, userServiceClient);
 
-        when(subProjectService.isExistProjectById(rightId)).thenReturn(false);
+        when(projectService.isExistProjectById(rightId)).thenReturn(false);
     }
 
     @Test
@@ -62,7 +65,7 @@ class SubProjectValidatorTest {
         validateParentProject.setAccessible(true);
 
         assertDoesNotThrow(() -> validateParentProject.invoke(validatorClass, rightId));
-        Mockito.verify(subProjectService, Mockito.times(1))
+        Mockito.verify(projectService, Mockito.times(1))
                 .getProjectById(rightId);
 
         try {

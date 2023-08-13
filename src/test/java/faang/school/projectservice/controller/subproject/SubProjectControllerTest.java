@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.subproject;
 
-import faang.school.projectservice.dto.subproject.SubProjectCreateDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,26 +25,27 @@ class SubProjectControllerTest {
     @Spy
     private ObjectMapper objectMapper;
     private MockMvc mockMvc;
-    private SubProjectCreateDto subProjectCreateDto = SubProjectCreateDto.builder().build();
+    private SubProjectDto subProjectDto = SubProjectDto.builder().build();
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         MockitoAnnotations.openMocks(this);
 
         mockMvc = MockMvcBuilders.standaloneSetup(subProjectController).build();
     }
+
     @Test
     void testCreateSubProject() throws Exception {
-        Mockito.when(subProjectService.createProject(subProjectCreateDto)).thenReturn(subProjectCreateDto);
+        Mockito.when(subProjectService.createProject(subProjectDto)).thenReturn(subProjectDto);
         mockMvc.perform(post("/subproject/create")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(subProjectCreateDto)))
+                        .content(objectMapper.writeValueAsString(subProjectDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(subProjectCreateDto)));
+                .andExpect(content().json(objectMapper.writeValueAsString(subProjectDto)));
 
         Mockito.verify(subProjectValidator, Mockito.times(1))
-                .validateCreateProjectDto(subProjectCreateDto);
-        Mockito.verify(subProjectService,Mockito.times(1))
-                .createProject(subProjectCreateDto);
+                .validateCreateProjectDto(subProjectDto);
+        Mockito.verify(subProjectService, Mockito.times(1))
+                .createProject(subProjectDto);
     }
 }

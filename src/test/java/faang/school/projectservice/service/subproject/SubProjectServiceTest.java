@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.subproject.SubProjectCreateDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -22,7 +22,7 @@ class SubProjectServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private SubProjectMapper subProjectMapper;
-    private SubProjectCreateDto subProjectCreateDto;
+    private SubProjectDto subProjectDto;
     private Project project = new Project();
     private Project parentProject = new Project();
 
@@ -35,7 +35,7 @@ class SubProjectServiceTest {
         parentProject.setVisibility(ProjectVisibility.PUBLIC);
         project.setParentProject(parentProject);
 
-        subProjectCreateDto = subProjectCreateDto.builder()
+        subProjectDto = subProjectDto.builder()
                 .id(rightId)
                 .description("Disc")
                 .name("Name")
@@ -43,23 +43,23 @@ class SubProjectServiceTest {
                 .parentProjectId(rightId)
                 .build();
 
-        Mockito.when(subProjectMapper.toEntity(subProjectCreateDto))
+        Mockito.when(subProjectMapper.toEntity(subProjectDto))
                 .thenReturn(project);
     }
 
     @Test
     void testCreateProject() {
-        subProjectService.createProject(subProjectCreateDto);
+        subProjectService.createProject(subProjectDto);
 
         Mockito.verify(subProjectMapper, Mockito.times(1))
-                .toEntity(subProjectCreateDto);
+                .toEntity(subProjectDto);
         Mockito.verify(projectRepository, Mockito.times(1))
                 .save(project);
     }
 
     @Test
-    void testPrepareProjectForCreate(){
-        subProjectService.createProject(subProjectCreateDto);
+    void testPrepareProjectForCreate() {
+        subProjectService.createProject(subProjectDto);
 
         boolean timeTest = project.getCreatedAt().isBefore(LocalDateTime.now());
         assertTrue(timeTest);

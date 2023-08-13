@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper.subproject;
 
-import faang.school.projectservice.dto.subproject.SubProjectCreateDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
@@ -11,8 +11,8 @@ import org.mapstruct.ReportingPolicy;
         injectionStrategy = InjectionStrategy.FIELD)
 public interface SubProjectMapper {
     @Mapping(source = "parentProject.id", target = "parentProjectId")
-    SubProjectCreateDto toDto(Project project);
+    SubProjectDto toDto(Project project);
 
     @Mapping(source = "parentProjectId", target = "parentProject.id")
-    Project toEntity(SubProjectCreateDto subProjectCreateDto);
+    Project toEntity(SubProjectDto subProjectDto);
 }
