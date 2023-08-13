@@ -75,7 +75,7 @@ public class StageService {
         return project.getTeams()
                 .stream()
                 .flatMap(team -> team.getTeamMembers().stream())
-                .filter(teamMember -> !teamMember.getStages().contains(stageToUpdate))
+                .filter(teamMember -> stageToUpdate.getExecutors()==null || !stageToUpdate.getExecutors().contains(teamMember))
                 .filter(teamMember -> teamMember.getRoles().contains(stageRolesDto.getTeamRole()))
                 .toList().size();
     }
@@ -87,7 +87,7 @@ public class StageService {
         if (stageRolesDto.getCount() > countTeamMembers) {
             List<TeamMember> teamMembers = project.getTeams().stream()
                     .flatMap(team -> team.getTeamMembers().stream())
-                    .filter(teamMember -> teamMember.getStages().contains(stageToUpdate))
+                    .filter(teamMember -> teamMember.getStages() == null || teamMember.getStages().contains(stageToUpdate))
                     .filter(teamMember -> teamMember.getRoles().contains(stageRolesDto.getTeamRole()))
                     .distinct()
                     .toList();

@@ -102,12 +102,14 @@ public class StageServiceTest {
 
         teamMember = TeamMember.builder()
                 .id(1L)
+                .userId(1L)
                 .stages(new ArrayList<>(List.of(Stage.builder().stageId(1L).build())))
                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
 
         teamMember1 = TeamMember.builder()
                 .id(2L)
+                .userId(2L)
                 .stages(new ArrayList<>(List.of(Stage.builder().stageId(1L).build())))
                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
@@ -237,11 +239,13 @@ public class StageServiceTest {
 
         TeamMember projectMember1 = TeamMember.builder()
                 .id(3L)
+                .userId(3L)
                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
 
         TeamMember projectMember2 = TeamMember.builder()
                 .id(4L)
+                .userId(4L)
                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
 
@@ -260,14 +264,14 @@ public class StageServiceTest {
         StageInvitation stageInvitation1 = StageInvitation.builder()
                 .author(TeamMember.builder().id(1L).build())
                 .invited(TeamMember.builder().id(3L).build())
-                .description("You are invited on the Project stage " + stage.getStageId())
+                .description("You are invited on stage " + stage.getStageId())
                 .status(StageInvitationStatus.PENDING)
                 .build();
 
         StageInvitation stageInvitation2 = StageInvitation.builder()
                 .author(TeamMember.builder().id(1L).build())
                 .invited(TeamMember.builder().id(4L).build())
-                .description("You are invited on the Project stage " + stage.getStageId())
+                .description("You are invited on stage " + stage.getStageId())
                 .status(StageInvitationStatus.PENDING)
                 .build();
 
