@@ -1,8 +1,6 @@
 package faang.school.projectservice.service;
 
-import static org.junit.jupiter.api.Assertions.*;
 import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.filters.mappers.StageInvitationMapper;
 import faang.school.projectservice.filters.mappers.StageInvitationMapperImpl;
 import faang.school.projectservice.filters.stageInvites.FilterStageInviteDto;
 import faang.school.projectservice.filters.stageInvites.StageInviteFilter;
@@ -37,7 +35,7 @@ class StageInvitationServiceTest {
     @Mock
     private StageInvitationRepository repository;
     @Spy
-    private StageInvitationMapper mapper = new StageInvitationMapperImpl();
+    private StageInvitationMapperImpl mapper;
     private List<StageInviteFilter> filters;
     @Mock
     private StageInvitationDto dto;

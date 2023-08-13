@@ -31,14 +31,18 @@ public class StageInvitationService {
     public StageInvitationDto sendInvite(StageInvitationDto stageInvitationDto, Long currentUserId) {
         validateCurrentUser(currentUserId, stageInvitationDto.getStage());
         validateInvited(stageInvitationDto.getInvited(), stageInvitationDto.getStage());
+
         StageInvitation stageInvitation = stageInvitationMapper.dtoToEntity(stageInvitationDto);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
+
         TeamMember author = stageInvitationDto.getStage().getExecutors().stream()
                 .filter(teamMember -> teamMember.getRoles().contains(TeamRole.OWNER))
                 .toList().get(0);
+
         TeamMember invited = stageInvitationDto.getInvited();
         stageInvitation.setAuthor(author);
         stageInvitation.setInvited(invited);
+
         return stageInvitationMapper.entityToDto(stageInvitationRepository.save(stageInvitation));
     }
 
