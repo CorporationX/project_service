@@ -1,11 +1,13 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.Vacancy.CreateVacancyDto;
-import faang.school.projectservice.dto.Vacancy.ExtendedVacancyDto;
-import faang.school.projectservice.dto.Vacancy.UpdateCandidateRequestDto;
-import faang.school.projectservice.dto.Vacancy.UpdateVacancyDto;
+import faang.school.projectservice.dto.Vacancy.*;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.ResponseInternshipDto;
 import faang.school.projectservice.exception.DataValidException;
+import faang.school.projectservice.filter.internship.InternshipFilter;
+import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.*;
@@ -14,12 +16,13 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,8 @@ public class VacancyService {
     private final TeamRepository teamRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final UserContext userContext;
+    private final List<VacancyFilter> vacancyFilters;
+
 
     @Transactional
     public ExtendedVacancyDto create(CreateVacancyDto vacancyDto) {
@@ -148,5 +153,24 @@ public class VacancyService {
                     "Team with id %s is not found in project.", team.getId())
             );
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ExtendedVacancyDto> findByFilter(VacancyFilterDto filters) {
+        Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
+
+        List<VacancyFilter> vacancyFilterList = vacancyFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .toList();
+
+        for (VacancyFilter filter : vacancyFilterList) {
+            vacancies = filter.apply(vacancies, filters);
+        }
+        return vacancies.map(vacancyMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ExtendedVacancyDto> findAll() {
+        return vacancyMapper.entityListToDtoList(vacancyRepository.findAll());
     }
 }
