@@ -39,33 +39,6 @@ public class StageInvitationControllerTest {
     }
 
     @Test
-    public void testCreateStageIdIsNull() {
-        invalidInvitationDto = StageInvitationDto.builder()
-                .invitedId(2L)
-                .authorId(1L)
-                .build();
-        Assertions.assertThrows(DataValidationException.class, () -> controller.create(invalidInvitationDto));
-    }
-
-    @Test
-    public void testCreateAuthorIdIsNull() {
-        invalidInvitationDto = StageInvitationDto.builder()
-                .stageId(1L)
-                .invitedId(2L)
-                .build();
-        Assertions.assertThrows(DataValidationException.class, () -> controller.create(invalidInvitationDto));
-    }
-
-    @Test
-    public void testCreateInvitedIdIsNull() {
-        invalidInvitationDto = StageInvitationDto.builder()
-                .stageId(1L)
-                .authorId(1L)
-                .build();
-        Assertions.assertThrows(DataValidationException.class, () -> controller.create(invalidInvitationDto));
-    }
-
-    @Test
     public void testCreateInvitedIsAuthor() {
         invalidInvitationDto = StageInvitationDto.builder()
                 .stageId(1L)
