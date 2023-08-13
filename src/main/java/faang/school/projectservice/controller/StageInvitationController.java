@@ -6,7 +6,9 @@ import faang.school.projectservice.filters.stageInvites.FilterStageInviteDto;
 import faang.school.projectservice.service.StageInvitationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/invites")
@@ -39,8 +42,8 @@ public class StageInvitationController {
     }
 
     @GetMapping("/{userId}")
-    public List<StageInvitationDto> getFilteredInvites(@PathVariable @Valid @Min(0) Long userId,
-                                                       @Valid FilterStageInviteDto filterStageInviteDto){
+    public List<StageInvitationDto> getFilteredInvites(@NotNull @PathVariable Long userId,
+                                                       FilterStageInviteDto filterStageInviteDto){
         return service.getFilteredInvites(userId, filterStageInviteDto);
     }
 }

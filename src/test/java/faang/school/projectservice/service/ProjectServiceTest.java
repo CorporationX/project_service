@@ -9,7 +9,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project_filter.ProjectFilter;
 import faang.school.projectservice.filter.project_filter.ProjectNameFilter;
 import faang.school.projectservice.filter.project_filter.ProjectStatusFilter;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -46,7 +46,7 @@ class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
     @Spy
-    private ProjectMapper projectMapper;
+    private ProjectMapperImpl projectMapper;
 
     private TeamMember teamMember;
     private TeamMember teamMember2;

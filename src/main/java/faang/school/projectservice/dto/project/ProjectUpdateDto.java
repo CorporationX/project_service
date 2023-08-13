@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,11 +16,11 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ProjectUpdateDto {
-
     private String name;
     private String description;
     private BigInteger storageSize;
     private BigInteger maxStorageSize;
+    @NotNull
     private Long ownerId;
     private Long parentProjectId;
     private List<Long> childrenId;
