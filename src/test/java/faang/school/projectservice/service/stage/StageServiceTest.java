@@ -240,6 +240,7 @@ public class StageServiceTest {
         TeamMember projectMember1 = TeamMember.builder()
                 .id(3L)
                 .userId(3L)
+                .stages(new ArrayList<>(List.of(Stage.builder().stageId(2L).build())))
                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
 
@@ -265,6 +266,7 @@ public class StageServiceTest {
                 .author(TeamMember.builder().id(1L).build())
                 .invited(TeamMember.builder().id(3L).build())
                 .description("You are invited on stage " + stage.getStageId())
+                .stage(Stage.builder().stageId(1L).build())
                 .status(StageInvitationStatus.PENDING)
                 .build();
 
@@ -272,6 +274,7 @@ public class StageServiceTest {
                 .author(TeamMember.builder().id(1L).build())
                 .invited(TeamMember.builder().id(4L).build())
                 .description("You are invited on stage " + stage.getStageId())
+                .stage(Stage.builder().stageId(1L).build())
                 .status(StageInvitationStatus.PENDING)
                 .build();
 
