@@ -37,9 +37,10 @@ import java.util.stream.Stream;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class VacancyServiceTest {
@@ -314,7 +315,6 @@ class VacancyServiceTest {
         Assertions.assertThrows(DataValidException.class, () -> vacancyService.changeCandidateStatus(updateCandidate));
     }
 
-
     static Stream<VacancyFilter> argsProvider1() {
         return Stream.of(
                 new VacancyNameFilter(),
@@ -377,5 +377,29 @@ class VacancyServiceTest {
         List<ExtendedVacancyDto> results = vacancyService.findAll();
 
         assertEquals(2, results.size());
+    }
+
+    @Test
+    public void testFindById() {
+        List<Candidate> candidates = new ArrayList<>();
+
+        Vacancy vacancy = Vacancy
+                .builder()
+                .id(1L)
+                .candidates(candidates)
+                .build();
+        when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
+
+        ExtendedVacancyDto result = vacancyService.findById(1L);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testDelete() {
+        Long vacancyId = 1L;
+        doNothing().when(vacancyRepository).deleteById(vacancyId);
+        vacancyService.delete(vacancyId);
+        verify(vacancyRepository, times(1)).deleteById(vacancyId);
     }
 }
