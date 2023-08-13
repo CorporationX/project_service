@@ -44,4 +44,15 @@ public class VacancyController {
     public List<ExtendedVacancyDto> getAll() {
         return vacancyService.findAll();
     }
+
+    @GetMapping("/{id}")
+    public ExtendedVacancyDto getById(@PathVariable Long id) {
+        return vacancyService.findById(id);
+    }
+
+    @DeleteMapping
+    public ResponseEntity delete(@PathVariable Long id) {
+        vacancyService.delete(id);
+        return ResponseEntity.ok().build();
+    }
 }

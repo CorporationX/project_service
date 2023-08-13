@@ -173,4 +173,16 @@ public class VacancyService {
     public List<ExtendedVacancyDto> findAll() {
         return vacancyMapper.entityListToDtoList(vacancyRepository.findAll());
     }
+
+    @Transactional(readOnly = true)
+    public ExtendedVacancyDto findById(Long id) {
+        return vacancyMapper.toDto(
+                vacancyRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("The vacancy with id " + id + " is not found")));
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        vacancyRepository.deleteById(id);
+    }
 }
