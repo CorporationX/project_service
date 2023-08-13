@@ -2,7 +2,7 @@ package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.service.subproject.SubProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SubProjectValidatorTest {
     @Mock
-    private SubProjectService subProjectService;
+    private ProjectService projectService;
     @Mock
     private UserServiceClient userServiceClient;
     @InjectMocks
@@ -30,7 +30,7 @@ class SubProjectValidatorTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         rightId = 1L;
-        validatorClass = new SubProjectValidator(subProjectService, userServiceClient);
+        validatorClass = new SubProjectValidator(projectService, userServiceClient);
     }
 
     @Test

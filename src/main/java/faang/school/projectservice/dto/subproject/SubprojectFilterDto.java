@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.subproject;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubprojectFilterDto {
-    private long id;
-    private long requesterId;
+    @NotNull
+    private Long id;
+    @NotNull
+    private Long requesterId;
     private String nameFilter;
     private String statusFilter;
 }
