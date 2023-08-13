@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,7 +18,7 @@ class SubProjectServiceTest {
     @InjectMocks
     private SubProjectService subProjectService;
     @Mock
-    private ProjectRepository projectRepository;
+    private ProjectService projectService;
     private Project project;
     private Project parentProject;
     private VisibilitySubprojectUpdateDto visibilitySubprojectUpdateDto;
@@ -43,7 +43,7 @@ class SubProjectServiceTest {
                 .visibility(ProjectVisibility.PRIVATE)
                 .build();
 
-        Mockito.when(projectRepository.getProjectById(projectId))
+        Mockito.when(projectService.getProjectById(projectId))
                 .thenReturn(project);
 
         subProjectService.updateVisibilitySubProject(visibilitySubprojectUpdateDto);
@@ -65,7 +65,7 @@ class SubProjectServiceTest {
         project.setVisibility(ProjectVisibility.PRIVATE);
         parentProject.setVisibility(ProjectVisibility.PUBLIC);
 
-        Mockito.when(projectRepository.getProjectById(projectId))
+        Mockito.when(projectService.getProjectById(projectId))
                 .thenReturn(project);
 
         assertDoesNotThrow(() -> subProjectService.updateVisibilitySubProject(visibilitySubprojectUpdateDto));
@@ -82,7 +82,7 @@ class SubProjectServiceTest {
         project.setVisibility(ProjectVisibility.PRIVATE);
         parentProject.setVisibility(ProjectVisibility.PRIVATE);
 
-        Mockito.when(projectRepository.getProjectById(projectId))
+        Mockito.when(projectService.getProjectById(projectId))
                 .thenReturn(project);
 
         assertThrows(DataValidationException.class,

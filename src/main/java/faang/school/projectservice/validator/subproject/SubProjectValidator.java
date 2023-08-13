@@ -3,6 +3,7 @@ package faang.school.projectservice.validator.subproject;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class SubProjectValidator {
+    private final ProjectService projectService;
     private final SubProjectService subProjectService;
     public void validateUpdateVisibilitySubprojectDto(VisibilitySubprojectUpdateDto visibilitySubprojectUpdateDto){
         validateProjectId(visibilitySubprojectUpdateDto.getId());
@@ -18,7 +20,7 @@ public class SubProjectValidator {
 
     private void validateProjectId(Long id) {
         validateId(id);
-        if (subProjectService.isExistProjectById(id)) {
+        if (projectService.isExistProjectById(id)) {
             throw new DataValidationException("Can't be exist two project with equals id");
         }
     }
