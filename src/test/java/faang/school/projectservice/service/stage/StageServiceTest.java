@@ -52,7 +52,6 @@ public class StageServiceTest {
     private StageService stageService;
     @Spy
     private StageMapperImpl stageMapper;
-
     @Spy
     private StageRolesMapperImpl stageRolesMapper;
 
@@ -63,14 +62,9 @@ public class StageServiceTest {
 
     private StageDto stageDto;
     private Project project;
-    private List<Team> teams;
     private Team team;
-    private Team teamOne;
     private TeamMember teamMember;
     private TeamMember teamMember1;
-    private TeamMember teamMemberTwo;
-    private TeamMember teamMemberThree;
-
     private StageRolesDto stageRolesDto;
     private Stage stage;
     private Stage stageOne;
@@ -88,16 +82,16 @@ public class StageServiceTest {
                         .status(ProjectStatus.CANCELLED)
                         .build())
                 .executors(new ArrayList<>(List.of(TeamMember.builder()
-                        .id(1L)
-                        .stages(new ArrayList<>(List.of(Stage.builder().stageId(1L).build())))
-                        .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
-                        .build(),
+                                .id(1L)
+                                .stages(new ArrayList<>(List.of(Stage.builder().stageId(1L).build())))
+                                .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
+                                .build(),
                         TeamMember.builder()
                                 .id(2L)
                                 .stages(new ArrayList<>(List.of(Stage.builder().stageId(1L).build())))
                                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                                 .build()
-                        )))
+                )))
                 .build();
 
         teamMember = TeamMember.builder()
@@ -114,7 +108,7 @@ public class StageServiceTest {
                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
         team = Team.builder()
-                .teamMembers(List.of(teamMember1,teamMember))
+                .teamMembers(List.of(teamMember1, teamMember))
                 .build();
 
         StageRolesDto stageRolesDto = StageRolesDto.builder()
@@ -259,7 +253,7 @@ public class StageServiceTest {
         stage.setProject(Project.builder()
                 .id(1L)
                 .ownerId(1L)
-                .teams(List.of(team,stageTeam))
+                .teams(List.of(team, stageTeam))
                 .build());
 
         StageInvitation stageInvitation1 = StageInvitation.builder()
