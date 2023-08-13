@@ -15,9 +15,10 @@ import java.util.stream.Stream;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
         injectionStrategy = InjectionStrategy.FIELD)
 public interface MomentMapper {
-
+    @Mapping(target = "projects", source = "projectIds", qualifiedByName = "idsToProjectList")
     Moment toMoment(MomentDto momentDto);
 
+    @Mapping(target = "projectIds", source = "projects", qualifiedByName = "projectsToIdList")
     MomentDto toMomentDto(Moment moment);
 
     @Mapping(target = "id", ignore = true)
@@ -33,6 +34,23 @@ public interface MomentMapper {
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getUserId)
                 .collect(Collectors.toList()) : Collections.emptyList();
+    }
+
+    @Named("projectsToIdList")
+    default List<Long> projectsToIdList(List<Project> projects) {
+        return projects != null ? projects.stream()
+                .map(Project::getId)
+                .toList() : Collections.emptyList();
+    }
+
+    @Named("idsToProjectList")
+    default List<Project> idsToProjectList(List<Long> projectIds) {
+        return projectIds != null ? projectIds.stream()
+                .map(projectId -> {
+                    Project project = new Project();
+                    project.setId(projectId);
+                    return project;
+                }).toList() : Collections.emptyList();
     }
 
     @Named("idToList")
