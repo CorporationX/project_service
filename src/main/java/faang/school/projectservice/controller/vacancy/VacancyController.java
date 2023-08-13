@@ -39,4 +39,9 @@ public class VacancyController {
     public List<ExtendedVacancyDto> getAllByFilter(@Valid @RequestBody VacancyFilterDto vacancyFilterDto) {
         return vacancyService.findByFilter(vacancyFilterDto);
     }
+
+    @GetMapping
+    public List<ExtendedVacancyDto> getAll() {
+        return vacancyService.findAll();
+    }
 }

@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 public class VacancyDescriptionFilter implements VacancyFilter {
     @Override
     public boolean isApplicable(VacancyFilterDto filters) {
-        return filters.getDescription() != null;
+        return filters.getDescriptionPattern() != null;
     }
 
     @Override
     public Stream<Vacancy> apply(Stream<Vacancy> vacancies, VacancyFilterDto filters) {
-        return vacancies.filter(vacancy -> vacancy.getDescription().contains(filters.getDescription()));
+        return vacancies.filter(vacancy -> vacancy.getDescription().contains(filters.getDescriptionPattern()));
     }
 }
 

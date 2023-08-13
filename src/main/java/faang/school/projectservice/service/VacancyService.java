@@ -169,8 +169,8 @@ public class VacancyService {
         return vacancies.map(vacancyMapper::toDto).toList();
     }
 
-//    @Transactional(readOnly = true)
-//    public List<ExtendedVacancyDto> findAll() {
-//        return vacancyMapper.entityListToDtoList(vacancyRepository.findAll());
-//    }
+    @Transactional(readOnly = true)
+    public List<ExtendedVacancyDto> findAll() {
+        return vacancyMapper.entityListToDtoList(vacancyRepository.findAll());
+    }
 }
