@@ -1,7 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
@@ -44,6 +46,8 @@ class MomentServiceTest {
     @Mock
     private TeamMemberJpaRepository teamMemberJpaRepository;
     @Mock
+    private List<MomentFilter> filters;
+    @Mock
     private MomentMapper mapper;
     @Mock
     private MomentValidator validator;
@@ -51,6 +55,7 @@ class MomentServiceTest {
     private MomentService service;
     private MomentDto momentDto;
     private Moment moment;
+    private MomentFilterDto momentFilter;
 
     @BeforeEach
     void setUp() {
@@ -74,6 +79,8 @@ class MomentServiceTest {
                 .teamMembers(new ArrayList<>(List.of(teamMember)))
                 .imageId("imageId")
                 .build();
+
+        momentFilter = MomentFilterDto.builder().build();
 
         when(mapper.toEntity(momentDto)).thenReturn(moment);
         when(momentRepository.save(Mockito.any())).thenReturn(moment);
@@ -176,5 +183,62 @@ class MomentServiceTest {
             assertTrue(moment.getTeamMembers().contains(mockTeamMember1));
             assertTrue(moment.getTeamMembers().contains(mockTeamMember2));
         });
+    }
+
+    @Test
+    void getAllWithFilter_shouldInvokeRepositoryFindAllMethod() {
+        service.getAllWithFilter(momentFilter);
+        verify(momentRepository).findAll();
+    }
+
+    @Test
+    void getAllWithFilter_shouldInvokeFilterApplyMethod() {
+        when(momentRepository.findAll()).thenReturn(List.of(moment));
+
+        service.getAllWithFilter(momentFilter);
+        filters.forEach(filter -> verify(filter).apply(List.of(moment), momentFilter));
+    }
+
+    @Test
+    void getAllWithFilter_shouldInvokeMapperToDtoMethod() {
+        when(momentRepository.findAll()).thenReturn(List.of(moment));
+
+        service.getAllWithFilter(momentFilter);
+        verify(mapper).toDto(moment);
+    }
+
+    @Test
+    void getAll_shouldInvokeRepositoryFindAllMethod() {
+        service.getAll();
+        verify(momentRepository).findAll();
+    }
+
+    @Test
+    void getAll_shouldInvokeMapperToDtoMethod() {
+        when(momentRepository.findAll()).thenReturn(List.of(moment));
+
+        service.getAll();
+        verify(mapper).toDto(moment);
+    }
+
+    @Test
+    void getById_shouldThrowEntityNotFoundException() {
+        when(momentRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class,
+                () -> service.getById(1L),
+                "Moment with id = 1 does not exist");
+    }
+
+    @Test
+    void getById_shouldInvokeRepositoryFindByIdMethod() {
+        service.getById(1L);
+        verify(momentRepository).findById(1L);
+    }
+
+    @Test
+    void getById_shouldInvokeMapperToDtoMethod() {
+        service.getById(1L);
+        verify(mapper).toDto(moment);
     }
 }

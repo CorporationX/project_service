@@ -1,7 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
@@ -30,6 +32,7 @@ public class MomentService {
     private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final MomentValidator momentValidator;
     private final MomentMapper momentMapper;
+    private final List<MomentFilter> filters;
 
     @Transactional
     public MomentDto create(MomentDto momentDto) {
@@ -69,6 +72,33 @@ public class MomentService {
         return momentMapper.toDto(moment);
     }
 
+    @Transactional(readOnly = true)
+    public List<MomentDto> getAllWithFilter(MomentFilterDto filterDto) {
+        List<Moment> moments = momentRepository.findAll();
+        filters.stream()
+                .filter(filter -> filter.isApplicable(filterDto))
+                .forEach(filter -> filter.apply(moments, filterDto));
+
+        return moments.stream()
+                .map(momentMapper::toDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MomentDto> getAll() {
+        return momentRepository.findAll().stream()
+                .map(momentMapper::toDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public MomentDto getById(Long id) {
+        Moment moment = momentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Moment with id = " + id + " does not exist"));
+
+        return momentMapper.toDto(moment);
+    }
+
     private void updateProjects(Moment moment, MomentDto momentDto,
                                 Set<TeamMember> teamMembers, Set<Project> projects) {
         if (hasDifferentProjects(moment, momentDto.getProjectIds())) {
@@ -89,7 +119,7 @@ public class MomentService {
     private void updateTeamMembers(Moment moment, MomentDto momentDto,
                                    Set<TeamMember> teamMembers, Set<Project> projects) {
         if (hasDifferentTeamMembers(moment, momentDto.getTeamMemberIds())) {
-                List<TeamMember> oldTeamMembers = moment.getTeamMembers().stream()
+            List<TeamMember> oldTeamMembers = moment.getTeamMembers().stream()
                         .filter(teamMember -> !teamMembers.contains(teamMember))
                         .toList();
             List<TeamMember> newTeemMembers = teamMemberJpaRepository.findAllById(momentDto.getTeamMemberIds());

@@ -1,11 +1,10 @@
 package faang.school.projectservice.dto.moment;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 
 import java.util.List;
 
@@ -14,8 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MomentFilterDto {
-    @Min(value = 1, message = "Month must be greater than 0")
-    @Max(value = 12, message = "Month must not be greater than 12")
+    @Range(min = 1, max = 12, message = "Month must be between 1 and 12")
     private Integer month;
     private List<Long> projectIds;
 }
