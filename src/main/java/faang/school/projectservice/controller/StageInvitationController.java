@@ -36,11 +36,11 @@ public class StageInvitationController {
         return invitationService.acceptDeclineInvitation(status, idInvitation);
     }
 
-    @GetMapping("/stage/{stageId}")
-    public List<DtoStageInvitation> getStageInvitation(@PathVariable("stageId") @Positive(message = "user id must be greater than 0")
-                                                       @Max(value = Long.MAX_VALUE, message = "user id the value cannot be empty or greater than 9223372036854775807") Long stageId
+    @GetMapping("/stage/{userId}")
+    public List<DtoStageInvitation> getStageInvitation(@PathVariable("userId") @Positive(message = "user id must be greater than 0")
+                                                       @Max(value = Long.MAX_VALUE, message = "user id the value cannot be empty or greater than 9223372036854775807") Long userId
             , @RequestBody @Valid DtoStageInvitationFilter filter) {
 
-        return invitationService.getAllStageInvitation(stageId, filter);
+        return invitationService.getAllStageInvitation(userId, filter);
     }
 }

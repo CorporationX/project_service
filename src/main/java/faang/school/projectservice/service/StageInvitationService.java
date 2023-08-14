@@ -56,9 +56,9 @@ public class StageInvitationService {
         return new DtoStatus(invitation.getStatus());
     }
 
-    public List<DtoStageInvitation> getAllStageInvitation(long id, DtoStageInvitationFilter filters) {
+    public List<DtoStageInvitation> getAllStageInvitation(long userId, DtoStageInvitationFilter filters) {
         List<StageInvitation> stageInvitations = invitationRepository.findAll().stream()
-                .filter(invitation -> invitation.getInvited().getId() == id).toList();
+                .filter(invitation -> invitation.getInvited().getId() == userId).toList();
 
         return invitationFilter.stream().filter(filter -> filter.isApplication(filters))
                 .flatMap(filter -> filter.apply(stageInvitations.stream(), filters))
