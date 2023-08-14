@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SubprojectDtoForCreate {
+public class SubprojectDtoReqCreate {
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Long subprojectId;
 
     @NotBlank(message = "name cannot be null or empty")
@@ -27,8 +30,10 @@ public class SubprojectDtoForCreate {
     @NotNull(message = "ownerId cannot be null")
     private Long ownerId;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Long parentProjectId;
 
+    @NotNull
     private List<Long> childrenIds;
 
     @Builder.Default
@@ -37,5 +42,6 @@ public class SubprojectDtoForCreate {
     @Builder.Default
     private ProjectVisibility visibility = ProjectVisibility.PUBLIC;
 
+    @NotNull
     private List<Long> stagesIds;
 }
