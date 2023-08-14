@@ -11,9 +11,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -27,7 +25,6 @@ public class ProjectService {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("You can't create project with name existed");
         }
-        projectDto.setCreatedAt(LocalDateTime.now());
         projectDto.setStatus(ProjectStatus.CREATED);
         Project project = projectRepository.save(projectMapper.toProject(projectDto));
         return projectMapper.toProjectDto(project);
