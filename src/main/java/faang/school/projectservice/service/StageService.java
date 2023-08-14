@@ -33,7 +33,6 @@ public class StageService {
     private final StageInvitationRepository stageInvitationRepository;
 
 
-
     public StageDto createStage(StageDto stageDto) {
         validationStageDto(stageDto);
         Stage saved = stageRepository.save(stageMapper.toEntity(stageDto));
@@ -59,36 +58,11 @@ public class StageService {
                 .toList();
     }
 
-    public StageDto updateStage(Long stageId, StageRolesDto stageRolesDto){
+    public StageDto updateStage(Long stageId, StageRolesDto stageRolesDto) {
         Stage stageToUpdate = stageRepository.getById(stageId);
         Project project = projectRepository.getProjectById(stageToUpdate.getProject().getId());
 
-        Integer countTeamMembers = project.getTeams()
-                .stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .filter(teamMember -> teamMember.getStages().contains(stageToUpdate))
-                .filter(teamMember -> teamMember.getRoles().contains(stageRolesDto.getTeamRole()))
-                .toList().size();
-
-        int executorsCount = stageRolesDto.getCount() - countTeamMembers;
-
-        if (stageRolesDto.getCount() > countTeamMembers) {
-            List<TeamMember> teamMembers = project.getTeams().stream()
-                    .flatMap(team -> team.getTeamMembers().stream())
-                    .filter(teamMember -> !stageToUpdate.getStageRoles().contains(teamMember))
-                    .filter(teamMember -> teamMember.getRoles().contains(stageRolesDto.getTeamRole()))
-                    .distinct()
-                    .toList();
-
-            for (TeamMember teamMember : teamMembers) {
-                if(executorsCount == 0){
-                    break;
-                }
-                sendStageInvitation(stageId, teamMember.getId());
-                executorsCount--;
-            }
-        }
-
+        sendInvitation(project, stageRolesDto, stageToUpdate);
         List<StageRoles> stageRoles = updateStageRoles(stageRolesDto, stageToUpdate);
         stageToUpdate.setStageRoles(stageRoles);
 
@@ -97,6 +71,36 @@ public class StageService {
 
     }
 
+    private Integer countTeamMembers(Project project, StageRolesDto stageRolesDto, Stage stageToUpdate) {
+        return project.getTeams()
+                .stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(teamMember -> stageToUpdate.getExecutors()==null || stageToUpdate.getExecutors().contains(teamMember))
+                .filter(teamMember -> teamMember.getRoles().contains(stageRolesDto.getTeamRole()))
+                .toList().size();
+    }
+
+    private void sendInvitation(Project project, StageRolesDto stageRolesDto, Stage stageToUpdate) {
+        Integer countTeamMembers = countTeamMembers(project, stageRolesDto, stageToUpdate);
+        int executorsCount = stageRolesDto.getCount() - countTeamMembers;
+
+        if (stageRolesDto.getCount() > countTeamMembers) {
+            List<TeamMember> teamMembers = project.getTeams().stream()
+                    .flatMap(team -> team.getTeamMembers().stream())
+                    .filter(teamMember -> teamMember.getStages() == null || !teamMember.getStages().contains(stageToUpdate))
+                    .filter(teamMember -> teamMember.getRoles().contains(stageRolesDto.getTeamRole()))
+                    .distinct()
+                    .toList();
+
+            for (TeamMember teamMember : teamMembers) {
+                if (executorsCount == 0) {
+                    break;
+                }
+                sendStageInvitation(stageToUpdate.getStageId(), teamMember.getId());
+                executorsCount--;
+            }
+        }
+    }
 
     private List<StageRoles> updateStageRoles(StageRolesDto stageRolesDto, Stage stage) {
         List<StageRoles> stageRoles = stage.getStageRoles();
@@ -105,12 +109,14 @@ public class StageService {
 
         return stageRoles;
     }
-    private void sendStageInvitation (long stageId, long invitedTeamMember){
-            TeamMember author = TeamMember.builder().id(userContext.getUserId()).build();
+
+    private void sendStageInvitation(long stageId, long invitedTeamMember) {
+        TeamMember author = TeamMember.builder().id(userContext.getUserId()).build();
         StageInvitation stageInvitation = StageInvitation.builder()
                 .author(author)
                 .invited(TeamMember.builder().id(invitedTeamMember).build())
                 .description("You are invited on stage " + stageId)
+                .stage(Stage.builder().stageId(stageId).build())
                 .status(StageInvitationStatus.PENDING)
                 .build();
 
