@@ -1,8 +1,8 @@
 package faang.school.projectservice.repository;
 
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -28,7 +28,7 @@ public class ProjectRepository {
     }
 
     public boolean existsByOwnerUserIdAndName(Long userId, String name) {
-        return projectJpaRepository.existsByOwnerUserIdAndName(userId, name);
+        return projectJpaRepository.existsByOwnerIdAndName(userId, name);
     }
 
     public Project save(Project project){
