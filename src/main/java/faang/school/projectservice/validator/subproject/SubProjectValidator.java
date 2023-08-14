@@ -33,10 +33,11 @@ public class SubProjectValidator {
 
     private boolean checkStatusChildren(List<Project> projects) {
         for (Project project : projects) {
-            if (project.getStatus() != ProjectStatus.COMPLETED ||
-                    project.getStatus() != ProjectStatus.CANCELLED) {
-                return false;
+            if (project.getStatus() == ProjectStatus.COMPLETED ||
+                    project.getStatus() == ProjectStatus.CANCELLED) {
+                continue;
             }
+            return false;
         }
         return true;
     }
