@@ -34,7 +34,7 @@ class SubProjectControllerTest {
 
     @Test
     void testCreateSubProject() throws Exception {
-        mockMvc.perform(put("/subproject/update_visibility")
+        mockMvc.perform(put("/subproject/visibility")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(visibilitySubprojectUpdateDto)))
                 .andExpect(status().isOk());

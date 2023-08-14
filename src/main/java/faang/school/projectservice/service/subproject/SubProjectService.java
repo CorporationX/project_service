@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class SubProjectService {
 
     private void updateSubProjectVisibility(Project project,Project parentProject, ProjectVisibility visibility) {
         if (visibility == ProjectVisibility.PUBLIC && parentProject.getVisibility() == ProjectVisibility.PRIVATE) {
-            throw new DataValidationException("Ypu can't make public project in private project");
+            throw new DataValidationException("You can't make public project in private project");
         }
 
         if (visibility == ProjectVisibility.PRIVATE) {
