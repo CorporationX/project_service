@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.subproject.StatusSubprojectUpdateDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -24,11 +24,11 @@ public class SubProjectService {
     private final ProjectMapper projectMapper;
     private final MomentMapper momentMapper;
 
-    public ProjectDto updateStatusSubProject(StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
-        subProjectValidator.validateSubProjectStatus(statusSubprojectUpdateDto.getId());
+    public ProjectDto updateStatusSubProject(StatusSubprojectDto statusSubprojectDto) {
+        subProjectValidator.validateSubProjectStatus(statusSubprojectDto.getId());
 
-        Project project = projectService.getProjectById(statusSubprojectUpdateDto.getId());
-        ProjectStatus status = statusSubprojectUpdateDto.getStatus();
+        Project project = projectService.getProjectById(statusSubprojectDto.getId());
+        ProjectStatus status = statusSubprojectDto.getStatus();
 
         updateDataSubproject(project, status);
         return projectMapper.toProjectDto(project);

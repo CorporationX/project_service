@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.subproject;
 
-import faang.school.projectservice.dto.subproject.StatusSubprojectUpdateDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -15,9 +15,9 @@ import java.util.List;
 public class SubProjectValidator {
     private final ProjectService projectService;
 
-    public void validateStatusSubprojectUpdateDto(StatusSubprojectUpdateDto statusSubprojectUpdateDto) {
-        validateProjectId(statusSubprojectUpdateDto.getId());
-        validateStatus(statusSubprojectUpdateDto.getStatus());
+    public void validateStatusSubprojectUpdateDto(StatusSubprojectDto statusSubprojectDto) {
+        validateProjectId(statusSubprojectDto.getId());
+        validateStatus(statusSubprojectDto.getStatus());
     }
 
     public void validateSubProjectStatus(long projectId) {
@@ -33,7 +33,8 @@ public class SubProjectValidator {
 
     private boolean checkStatusChildren(List<Project> projects) {
         for (Project project : projects) {
-            if (project.getStatus() != ProjectStatus.COMPLETED) {
+            if (project.getStatus() != ProjectStatus.COMPLETED ||
+                    project.getStatus() != ProjectStatus.CANCELLED) {
                 return false;
             }
         }

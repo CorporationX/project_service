@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.subproject;
 
-import faang.school.projectservice.dto.subproject.StatusSubprojectUpdateDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +24,7 @@ class SubProjectControllerTest {
     @Spy
     private ObjectMapper objectMapper;
     private MockMvc mockMvc;
-    private StatusSubprojectUpdateDto statusSubprojectUpdateDto = StatusSubprojectUpdateDto.builder().build();
+    private StatusSubprojectDto statusSubprojectDto = StatusSubprojectDto.builder().build();
 
     @BeforeEach
     void setUp() {
@@ -36,12 +36,12 @@ class SubProjectControllerTest {
     void testCreateSubProject() throws Exception {
         mockMvc.perform(put("/subproject/update/status")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(statusSubprojectUpdateDto)))
+                        .content(objectMapper.writeValueAsString(statusSubprojectDto)))
                 .andExpect(status().isOk());
 
         Mockito.verify(subProjectValidator, Mockito.times(1))
-                .validateStatusSubprojectUpdateDto(statusSubprojectUpdateDto);
+                .validateStatusSubprojectUpdateDto(statusSubprojectDto);
         Mockito.verify(subProjectService, Mockito.times(1))
-                .updateStatusSubProject(statusSubprojectUpdateDto);
+                .updateStatusSubProject(statusSubprojectDto);
     }
 }

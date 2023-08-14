@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class StatusSubprojectUpdateDto {
+public class StatusSubprojectDto {
     @NotNull
     private Long id;
     @NotNull

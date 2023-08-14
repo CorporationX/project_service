@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.subproject.StatusSubprojectUpdateDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -33,8 +33,8 @@ class SubProjectServiceTest {
     private ProjectMapper projectMapper;
     @Mock
     private MomentMapper momentMapper;
-    private StatusSubprojectUpdateDto updateStatusSubprojectDtoCOMPLETED;
-    private StatusSubprojectUpdateDto updateStatusSubprojectDto;
+    private StatusSubprojectDto updateStatusSubprojectDtoCOMPLETED;
+    private StatusSubprojectDto updateStatusSubprojectDto;
     private Project project = new Project();
     private Project projectCompleted = new Project();
 
@@ -50,12 +50,12 @@ class SubProjectServiceTest {
         idCompleted = 2L;
         projectCompleted.setId(rightId);
 
-        updateStatusSubprojectDto = StatusSubprojectUpdateDto.builder()
+        updateStatusSubprojectDto = StatusSubprojectDto.builder()
                 .id(rightId)
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
 
-        updateStatusSubprojectDtoCOMPLETED = StatusSubprojectUpdateDto.builder()
+        updateStatusSubprojectDtoCOMPLETED = StatusSubprojectDto.builder()
                 .id(idCompleted)
                 .status(ProjectStatus.COMPLETED)
                 .build();
