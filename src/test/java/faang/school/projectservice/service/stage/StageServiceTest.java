@@ -11,6 +11,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TaskService;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ public class StageServiceTest {
     @Mock
     private StageRepository stageRepository;
     @Mock
-    TaskService taskService;
+    private TaskService taskService;
     @InjectMocks
     private StageService stageService;
     @Spy
