@@ -56,7 +56,7 @@ class StageServiceTest {
         when(projectRepository.getProjectById(anyLong()))
                 .thenReturn(project);
         StageDto stageDto = StageDto.builder()
-                .stageId(new Random().nextLong())
+                .projectId(new Random().nextLong())
                 .build();
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> stageService.create(stageDto));
