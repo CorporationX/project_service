@@ -2,11 +2,13 @@ package faang.school.projectservice.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
 
 @Data
 @Entity
+@Builder
 @Table(name = "internship")
 public class Offer {
 
@@ -35,5 +37,5 @@ public class Offer {
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    private InternshipStatus status;
+    private OfferStatus status;
 }

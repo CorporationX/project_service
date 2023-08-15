@@ -1,6 +1,6 @@
 package faang.school.projectservice.dto.offer;
 
-import faang.school.projectservice.model.InternshipStatus;
+import faang.school.projectservice.model.OfferStatus;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -17,5 +17,5 @@ public class OfferDto {
     private Long createdBy;
     @NonNull
     private Long teamId;
-    private InternshipStatus status;
+    private OfferStatus status;
 }
