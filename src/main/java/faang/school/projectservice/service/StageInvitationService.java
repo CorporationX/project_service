@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +31,14 @@ public class StageInvitationService {
     private final List<StageInvitationFilter> invitationFilter;
 
     public DtoStageInvitation invitationHasBeenSent(DtoStageInvitation dto) {
-        if (!invitationRepository.existsByAuthorAndInvitedAndStage(memberMapper.toTeamMember(dto.getIdAuthor()), memberMapper.toTeamMember(dto.getIdInvited()),
+
+        if (invitationRepository.existsByAuthorAndInvitedAndStage(memberMapper.toTeamMember(dto.getIdAuthor()),
+                memberMapper.toTeamMember(dto.getIdInvited()),
                 stageMapper.toStage(dto.getStage()))) {
-            throw new ValidException("check the data");
+            throw new ValidException("the invitation has already been sent!");
         }
-        if (dto.getIdAuthor() == dto.getIdInvited()) {
+
+        if (Objects.equals(dto.getIdAuthor(), dto.getIdInvited())) {
             throw new ValidException("repeated id");
         }
 

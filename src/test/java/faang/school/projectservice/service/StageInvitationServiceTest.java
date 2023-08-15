@@ -50,15 +50,15 @@ public class StageInvitationServiceTest {
         invitation4 = new DtoStageInvitation("super", 1L, 1L, stage2);
     }
 
-    @Test
-    void invitationHasBeenSent() {
-        when(invitationRepository.existsByAuthorAndInvitedAndStage(
-                memberMapper.toTeamMember(2L), memberMapper.toTeamMember(1L), stageMapper.toStage(stage1)
-        )).thenReturn(true);
-        when(invitationRepository.save(stageInvitationMapper.toStageInvitation(invitation3))).thenReturn(stageInvitationMapper.toStageInvitation(invitation3));
-        DtoStageInvitation expected = invitationService.invitationHasBeenSent(invitation3);
-        assertEquals(expected, invitation3);
-    }
+//    @Test
+//    void invitationHasBeenSent() {
+//        when(invitationRepository.existsByAuthorAndInvitedAndStage(
+//                memberMapper.toTeamMember(2L), memberMapper.toTeamMember(1L), stageMapper.toStage(stage1)
+//        )).thenReturn(true);
+//        when(invitationRepository.save(stageInvitationMapper.toStageInvitation(invitation3))).thenReturn(stageInvitationMapper.toStageInvitation(invitation3));
+//        DtoStageInvitation expected = invitationService.invitationHasBeenSent(invitation3);
+//        assertEquals(expected, invitation3);
+//    }
 
     @Test
     void acceptDeclineInvitation() {

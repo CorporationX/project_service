@@ -22,7 +22,7 @@ public class StageInvitationController {
 
     private final StageInvitationService invitationService;
 
-    @PostMapping("/send-Invitation")
+    @PostMapping("/send-invitation")
     public DtoStageInvitation sendAnInvitation(@Valid @RequestBody DtoStageInvitation invitationDto) {
         return invitationService.invitationHasBeenSent(invitationDto);
     }

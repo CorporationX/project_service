@@ -11,7 +11,7 @@ import org.mapstruct.factory.Mappers;
 public interface TeamMemberMapper {
     TeamMemberMapper INSTANCE = Mappers.getMapper(TeamMemberMapper.class);
 
-    @Mapping(source = "id", target = "id")
+    //@Mapping(source = "id", target = "id")
     TeamMember toTeamMember(Long id);
 
     DtoTeamMember toDtoTeamMember(TeamMember teamMember);

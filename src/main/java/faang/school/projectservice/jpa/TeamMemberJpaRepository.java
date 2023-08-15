@@ -18,4 +18,9 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     TeamMember findByIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
+
+    @Query(
+            "SELECT * FROM "
+    )
+    boolean findByIdAndId(long authorId, long invitedId);
 }
