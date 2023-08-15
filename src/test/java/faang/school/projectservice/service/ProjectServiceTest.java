@@ -54,6 +54,8 @@ class ProjectServiceTest {
     private Project projectPublic2;
     private Project projectPrivate;
     private Project projectPrivate2;
+    private Project projectPrivate3;
+    private Project projectPrivate4;
     private Project project;
     private ProjectDto projectDto;
     private ProjectByFilterDto projectByFilterDto;
@@ -77,6 +79,8 @@ class ProjectServiceTest {
         projectPublic2 = Project.builder().visibility(ProjectVisibility.PUBLIC).id(4L).name("test2").status(ProjectStatus.CREATED).teams(listsTeamId).build();
         projectPrivate = Project.builder().visibility(ProjectVisibility.PRIVATE).id(9L).name("test1").status(ProjectStatus.IN_PROGRESS).teams(listsTeamId).build();
         projectPrivate2 = Project.builder().visibility(ProjectVisibility.PRIVATE).id(7L).name("test2").status(ProjectStatus.CREATED).teams(listsTeamId).build();
+        projectPrivate3 = Project.builder().visibility(ProjectVisibility.PRIVATE).id(7L).name("test1").status(ProjectStatus.IN_PROGRESS).teams(listsTeamId).build();
+        projectPrivate4 = Project.builder().visibility(ProjectVisibility.PRIVATE).id(7L).name("test1").status(ProjectStatus.IN_PROGRESS).teams(listsTeamId).build();
 
         project = Project.builder().id(1L).name("test").stages(list).children(listsProjectId).vacancies(listsVacancyId).resources(lists).teams(listsTeamId).tasks(listsTaskId).status(ProjectStatus.CREATED).build();
         projectDto = ProjectDto.builder().id(1L).name("test").stagesId(listId).childrenId(listId).vacanciesId(listId).resourcesId(listId).teamsId(listId).tasksId(listId).status(ProjectStatus.CREATED).ownerId(1L).build();
@@ -84,7 +88,6 @@ class ProjectServiceTest {
         projectCreateDto = ProjectCreateDto.builder().name("test").childrenId(listId).resourcesId(listId).teamsId(listId).status(ProjectStatus.CREATED).ownerId(1L).build();
         projectByFilterDto = ProjectByFilterDto.builder().name("test").status(ProjectStatus.CREATED).build();
     }
-
 
     @Test
     void testCreateProjectDataValidationException() {
@@ -117,12 +120,12 @@ class ProjectServiceTest {
         List<ProjectFilter> projectFilterList = List.of(new ProjectNameFilter(), new ProjectStatusFilter());
         when(projectRepository.existsById(1L)).thenReturn(true);
         when(projectRepository.findAll()).thenReturn(List.of(
-                projectPublic, projectPrivate, projectPublic2, projectPrivate2));
+                projectPublic, projectPrivate, projectPublic2, projectPrivate2, projectPrivate3, projectPrivate4));
         projectService = new ProjectService(projectRepository, projectMapper, projectFilterList);
 
         List<ProjectDto> projectsByStatus = projectService.getAllProjectsByFilter(
                 1L, ProjectByFilterDto.builder().status(ProjectStatus.IN_PROGRESS).name("test1").build());
-        assertEquals(2, projectsByStatus.size());
+        assertEquals(4, projectsByStatus.size());
     }
 
     @Test
