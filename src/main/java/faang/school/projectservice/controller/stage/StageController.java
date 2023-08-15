@@ -6,10 +6,7 @@ import faang.school.projectservice.service.stage.StageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,9 +16,9 @@ public class StageController {
 
     private final StageService service;
 
-    @PostMapping
+    @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public StageDto create(StageDto stageDto) {
+    public StageDto create(@RequestBody StageDto stageDto) {
         validateStage(stageDto);
         log.info("Creating stage: {}", stageDto);
         return service.create(stageDto);
