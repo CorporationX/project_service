@@ -2,11 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.Vacancy.*;
-import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.internship.ResponseInternshipDto;
 import faang.school.projectservice.exception.DataValidException;
-import faang.school.projectservice.filter.internship.InternshipFilter;
-import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
@@ -16,9 +12,9 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,7 +151,6 @@ public class VacancyService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ExtendedVacancyDto> findByFilter(VacancyFilterDto filters) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
 
@@ -169,8 +164,17 @@ public class VacancyService {
         return vacancies.map(vacancyMapper::toDto).toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ExtendedVacancyDto> findAll() {
         return vacancyMapper.entityListToDtoList(vacancyRepository.findAll());
+    }
+
+    public ExtendedVacancyDto findById(Long id) {
+        return vacancyMapper.toDto(
+                vacancyRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("The vacancy with id " + id + " is not found")));
+    }
+
+    public void delete(Long id) {
+        vacancyRepository.deleteById(id);
     }
 }

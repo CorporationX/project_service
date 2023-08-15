@@ -1,8 +1,6 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.dto.Vacancy.*;
-import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.internship.ResponseInternshipDto;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,5 +41,16 @@ public class VacancyController {
     @GetMapping
     public List<ExtendedVacancyDto> getAll() {
         return vacancyService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ExtendedVacancyDto getById(@PathVariable Long id) {
+        return vacancyService.findById(id);
+    }
+
+    @DeleteMapping
+    public ResponseEntity delete(@PathVariable Long id) {
+        vacancyService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }
