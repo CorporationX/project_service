@@ -3,15 +3,12 @@ package faang.school.projectservice.mapper.vacancy;
 import faang.school.projectservice.dto.Vacancy.CreateVacancyDto;
 import faang.school.projectservice.dto.Vacancy.ExtendedVacancyDto;
 import faang.school.projectservice.dto.Vacancy.UpdateVacancyDto;
-import faang.school.projectservice.dto.internship.ResponseInternshipDto;
 import faang.school.projectservice.model.Candidate;
-import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface VacancyMapper {
@@ -39,7 +36,6 @@ public interface VacancyMapper {
     }
 
     List<ExtendedVacancyDto> entityListToDtoList(List<Vacancy> vacancies);
-
 
     @Named("toCandidateIds")
     default List<Long> toCandidateIds(List<Candidate> candidates) {

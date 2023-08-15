@@ -27,5 +27,4 @@ public class CreateVacancyDto {
     private Double salary;
     private WorkSchedule workSchedule;
     private List<Long> requiredSkillIds;
-
 }

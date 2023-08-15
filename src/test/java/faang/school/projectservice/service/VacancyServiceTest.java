@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.Vacancy.*;
-import faang.school.projectservice.dto.internship.ResponseInternshipDto;
 import faang.school.projectservice.exception.DataValidException;
 import faang.school.projectservice.filter.vacancy.VacancyDescriptionFilter;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
@@ -34,13 +33,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class VacancyServiceTest {
@@ -99,8 +96,17 @@ class VacancyServiceTest {
         when(projectRepository.getProjectById(anyLong())).thenReturn(vacancyProject);
         when(userContext.getUserId()).thenReturn(2L);
 
+        Vacancy expected = Vacancy
+                .builder()
+                .id(5L)
+                .createdBy(2L)
+                .status(VacancyStatus.OPEN)
+                .candidates(new ArrayList<>())
+                .build();
+
         vacancyService.create(vacancyDto);
-        Mockito.verify(vacancyRepository, Mockito.times(1)).save(any());
+
+        Mockito.verify(vacancyRepository, Mockito.times(1)).save(expected);
     }
 
     @Test
@@ -160,7 +166,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    void TestChangeCandidateStatus_CandidateIsNotFoundInVacancy() {
+    void testChangeCandidateStatus_CandidateIsNotFoundInVacancy() {
         Candidate inVacancy = Candidate
                 .builder()
                 .id(1L)
@@ -196,7 +202,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    void TestChangeCandidateStatus_teamMemberSave_closeVacancy() {
+    void testChangeCandidateStatus_closeVacancy() {
         Project project = Project
                 .builder()
                 .id(3L)
@@ -260,7 +266,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    void TestChangeCandidateStatus_targetTeamNotFoundInProject() {
+    void testChangeCandidateStatus_targetTeamNotFoundInProject() {
         Project project = Project
                 .builder()
                 .id(3L)

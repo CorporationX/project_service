@@ -1,7 +1,5 @@
 package faang.school.projectservice.dto.Vacancy;
 
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.TeamRole;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
