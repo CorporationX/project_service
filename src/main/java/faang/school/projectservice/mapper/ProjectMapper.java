@@ -213,4 +213,16 @@ public interface ProjectMapper {
         }
         return oneStages;
     }
+//    default <FROM, TO> List<TO> mapList(List<FROM> toMap, Function<FROM, TO> mapper) {
+//        if (toMap == null) {
+//            return new ArrayList<>();
+//        }
+//
+//        List<TO> result = new ArrayList<>(toMap.size());
+//        for (int i = 0; i < toMap.size(); ++i) {
+//            var mapped = mapper.apply(toMap.get(i));
+//            result.add(mapped);
+//        }
+//        return result;
+//    }
 }

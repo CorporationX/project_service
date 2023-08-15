@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class StageDto {
 
     private Long stageId;
     @NotBlank(message = "Stage name can't be blank")
+    @Size(max = 128, message = "The name must be up to 128 characters")
     private String stageName;
     @NotNull
     private Long projectId;
