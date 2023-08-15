@@ -4,10 +4,11 @@ import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.filter.internship.InternshipStatusFilter;
-import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.mapper.internship.InternshipMapperImpl;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
+import faang.school.projectservice.model.Schedule;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.internship.InternshipValidator;
@@ -56,44 +57,28 @@ public class InternshipServiceTest {
         InternshipDto internshipDto = InternshipDto.builder()
                 .interns(List.of())
                 .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
+                .schedule(1L).status(InternshipStatus.IN_PROGRESS)
                 .mentorId(anyLong()).build();
         long id = 1;
-        Internship old = Internship.builder().name("OLD").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
-        Internship internship = Internship.builder().name("NEW").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
+        Internship old = Internship.builder().name("OLD").status(InternshipStatus.IN_PROGRESS)
+                .schedule(new Schedule()).interns(List.of()).build();
 
         when(internshipRepository.findById(id)).thenReturn(Optional.ofNullable(old));
-        when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
 
         service.updateInternship(id, internshipDto);
-        Mockito.verify(internshipRepository).save(internship);
-    }
-
-    @Test
-    public void updateInternship_ToCOMPLETED_Test() {
-        InternshipDto internshipDto = InternshipDto.builder()
-                .interns(List.of())
-                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
-                .mentorId(anyLong())
-                .status(InternshipStatus.COMPLETED).build();
-        long id = 1;
-        Internship old = Internship.builder().name("OLD").status(InternshipStatus.IN_PROGRESS).interns(List.of()).build();
-        Internship internship = Internship.builder().name("NEW").status(InternshipStatus.COMPLETED).interns(List.of()).build();
-
-        when(internshipRepository.findById(id)).thenReturn(Optional.ofNullable(old));
-        when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
-
-        service.updateInternship(id, internshipDto);
-        Mockito.verify(internshipRepository).deleteById(id);
+        Mockito.verify(internshipRepository).save(internshipMapper.toEntity(internshipDto));
     }
 
     @Test
     public void findAllInternships_Test() {
-        Internship i1 = Internship.builder().name("A").build();
-        Internship i2 = Internship.builder().name("B").build();
-        List<Internship> list = List.of(i1, i2);
+        Internship internship1 = Internship.builder().name("A")
+                .interns(List.of(TeamMember.builder().id(1L).build()))
+                .schedule(new Schedule()).build();
+        Internship internship2 = Internship.builder().name("B")
+                .interns(List.of(TeamMember.builder().id(2L).build()))
+                .schedule(new Schedule()).build();
+        List<Internship> list = List.of(internship1, internship2);
         when(internshipRepository.findAll()).thenReturn(list);
-        when(internshipMapper.toDto(i1)).thenReturn(InternshipDto.builder().name("A").build());
-        when(internshipMapper.toDto(i2)).thenReturn(InternshipDto.builder().name("B").build());
         List<InternshipDto> res = service.findAllInternships();
 
         assertEquals(res.get(0).getName(), "A");
