@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.filter.internship.InternshipStatusFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
+import faang.school.projectservice.mapper.internship.InternshipMapperImpl;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -32,8 +34,8 @@ public class InternshipServiceTest {
     private InternshipRepository internshipRepository;
     @Mock
     private TeamMemberRepository teamMemberRepository;
-    @Mock
-    private InternshipMapper internshipMapper;
+    @Spy
+    private InternshipMapperImpl internshipMapper;
     @Mock
     private InternshipValidator validator;
 

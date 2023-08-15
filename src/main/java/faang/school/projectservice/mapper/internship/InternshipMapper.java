@@ -18,7 +18,8 @@ public interface InternshipMapper {
     @Mapping(target = "schedule", source = "schedule", qualifiedByName = "mapScheduleToId")
     InternshipDto toDto(Internship internship);
 
-    @Mapping(target = "mentorId", source = "mentorId", ignore = true)
+    @Mapping(target = "project", source = "projectId", qualifiedByName = "idToProject")
+    @Mapping(target = "mentorId", source = "mentorId", qualifiedByName = "idToMentor")
     @Mapping(target = "interns", source = "interns", qualifiedByName = "idsToInterns")
     @Mapping(target = "schedule", source = "schedule", qualifiedByName = "idToSchedule")
     Internship toEntity(InternshipDto internshipDto);
@@ -31,6 +32,20 @@ public interface InternshipMapper {
     @Named("mapScheduleToId")
     default Long mapScheduleToId(Schedule schedule) {
         return schedule.getId();
+    }
+
+    @Named("idToProject")
+    default Project idToProject(Long id) {
+        Project res = new Project();
+        res.setId(id);
+        return res;
+    }
+
+    @Named("idToMentor")
+    default TeamMember idToMentor(Long id) {
+        TeamMember res = new TeamMember();
+        res.setId(id);
+        return res;
     }
 
     @Named("idsToInterns")

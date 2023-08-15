@@ -33,14 +33,17 @@ public class InternshipService {
         Internship internship = internshipMapper.toEntity(findInternshipById(id));
         validator.updateInternshipServiceValidation(internship, internshipDto);
         internship = internshipMapper.toEntity(internshipDto);
-        internship.setInterns(getInterns(internshipDto.getInterns()));
 
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            List<TeamMember> interns = internsResults(internshipDto.getInterns());
+            List<TeamMember> interns = internshipDto.getInterns().stream().map(teamMemberRepository::findById).toList();
+            List<TeamMember> acceptedInterns = internsResults(interns);
             for (TeamMember intern : interns) {
-                intern.setRoles(List.of(TeamRole.DEVELOPER));
+                if (acceptedInterns.contains(intern)) {
+                    intern.setRoles(List.of(TeamRole.DEVELOPER));
+                } else {
+                    intern.setRoles(List.of());
+                }
             }
-            internshipRepository.deleteById(id);
         } else {
             return internshipMapper.toDto(internshipRepository.save(internship));
         }
@@ -64,10 +67,9 @@ public class InternshipService {
         return list;
     }
 
-    public List<TeamMember> internsResults(List<Long> interns) {
+    private List<TeamMember> internsResults(List<TeamMember> interns) {
         List<TeamMember> res = new ArrayList<>(interns.size());
-        interns.forEach(internId -> {
-            TeamMember intern = teamMemberRepository.findById(internId);
+        interns.forEach(intern -> {;
             if (isAllTAsksDone(intern)) {
                 res.add(intern);
             }
@@ -76,7 +78,7 @@ public class InternshipService {
         return res;
     }
 
-    public boolean isAllTAsksDone(TeamMember member) {
+    private boolean isAllTAsksDone(TeamMember member) {
         Project project = member.getTeam().getProject();
         List<Task> tasks = project.getTasks();
         for (Task task : tasks) {
@@ -88,15 +90,6 @@ public class InternshipService {
         }
 
         return true;
-    }
-
-    public List<TeamMember> getInterns(List<Long> interns) {
-        List<TeamMember> res = new ArrayList<>(interns.size());
-        interns.forEach(internId -> {
-            res.add(teamMemberRepository.findById(internId));
-        });
-
-        return res;
     }
 
     private void filter(InternshipFilterDto filter, List<InternshipDto> dtoList) {
