@@ -7,8 +7,10 @@ import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
+import faang.school.projectservice.util.exception.DataValidationException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +34,6 @@ public class InternshipService {
 
         projectRepository.findById(dto.getProjectId()).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Project not found by id: %s", dto.getProjectId()))); // validation
-
 
         Internship entity = mapper.toEntity(dto);
 
