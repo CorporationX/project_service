@@ -1,29 +1,35 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.exception.DataValidException;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.SubProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/subprojects")
 public class SubProjectController {
-    private final ProjectService projectService;
+    private final SubProjectService subProjectService;
 
     @PostMapping
-    public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
-        validateSubProject(projectDto);
-        return projectService.createSubProject(projectDto);
+    public SubProjectDto createSubProject(@RequestBody @Valid SubProjectDto subProjectDto) {
+        return subProjectService.createSubProject(subProjectDto);
     }
 
-    private void validateSubProject(ProjectDto projectDto) {
-        if (projectDto.getName().isBlank()) {
-            throw new DataValidException("Enter project name, please");
-        }
+    @PutMapping
+    public SubProjectDto updateSubProject(@RequestBody @Valid SubProjectDto subProjectDto){
+        return subProjectService.updateSubProject(subProjectDto);
+    }
+
+    @GetMapping("/{id}")
+    public List<SubProjectDto> getSubProjects(@RequestBody ProjectFilterDto projectFilter, @PathVariable("id") long projectId) {
+        return subProjectService.getSubProjects(projectFilter, projectId);
     }
 }
