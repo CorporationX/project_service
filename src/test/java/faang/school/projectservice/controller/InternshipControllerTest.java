@@ -41,8 +41,8 @@ public class InternshipControllerTest {
     @Test
     void create_StartDateAndEndDateAreAfterBeforeNow_ShouldThrowException() {
         DataValidationException e = Assertions.assertThrows(DataValidationException.class, () -> {
-            internshipController.create(buildInternshipDto(() -> LocalDateTime.now().minusMonths(4),
-                    () -> LocalDateTime.now().minusMonths(2)));
+            internshipController.create(buildInternshipDto(LocalDateTime.now().minusMonths(4),
+                    LocalDateTime.now().minusMonths(2)));
         });
         Assertions.assertEquals("Start date and end date must be in the future", e.getMessage());
     }
@@ -50,8 +50,8 @@ public class InternshipControllerTest {
     @Test
     void create_StartDateIsAfterEndDate_ShouldThrowException() {
         DataValidationException e = Assertions.assertThrows(DataValidationException.class, () -> {
-            internshipController.create(buildInternshipDto(() -> LocalDateTime.now().plusMonths(4),
-                    () -> LocalDateTime.now().plusMonths(2)));
+            internshipController.create(buildInternshipDto(LocalDateTime.now().plusMonths(4),
+                    LocalDateTime.now().plusMonths(2)));
         });
         Assertions.assertEquals("Start date must be before end date", e.getMessage());
     }
@@ -59,8 +59,8 @@ public class InternshipControllerTest {
     @Test
     void create_DurationIsLongerThan3Months_ShouldThrowException() {
         DataValidationException e = Assertions.assertThrows(DataValidationException.class, () -> {
-            internshipController.create(buildInternshipDto(() -> LocalDateTime.now().plusMonths(4),
-                    () -> LocalDateTime.now().plusMonths(8)));
+            internshipController.create(buildInternshipDto(LocalDateTime.now().plusMonths(4),
+                    LocalDateTime.now().plusMonths(8)));
         });
         Assertions.assertEquals("Internship duration must be less than 3 months", e.getMessage());
     }
@@ -68,17 +68,14 @@ public class InternshipControllerTest {
     @Test
     void create_InternsAreEmpty_ShouldThrowException() {
         DataValidationException e = Assertions.assertThrows(DataValidationException.class, () -> {
-            internshipController.create(buildInternshipDto(() -> LocalDateTime.now().plusMonths(2),
-                    () -> LocalDateTime.now().plusMonths(4)));
+            internshipController.create(buildInternshipDto(LocalDateTime.now().plusMonths(2),
+                    LocalDateTime.now().plusMonths(4)));
         });
         Assertions.assertEquals("Same mentor and intern with id 1", e.getMessage());
     }
 
-    private InternshipDto buildInternshipDto(Supplier<LocalDateTime> startDate,
-                                             Supplier<LocalDateTime> endDate) {
-        LocalDateTime startDate1 = startDate.get();
-        LocalDateTime endDate1 = endDate.get();
-
+    private InternshipDto buildInternshipDto(LocalDateTime startDate1,
+                                             LocalDateTime endDate1) {
         return InternshipDto.builder()
                 .mentorId(1L)
                 .projectId(1L)
