@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage.StageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,19 +29,19 @@ public class StageController {
 
     private void validateStage(StageDto stageDto) {
         if (stageDto.getStageId() != null) {
-            throw new IllegalArgumentException("Stage must have id");
+            throw new DataValidationException("Stage must have id");
         }
         if (stageDto.getProjectId() == null) {
-            throw new IllegalArgumentException("Stage must have project");
+            throw new DataValidationException("Stage must have project");
         }
         if (stageDto.getStageName() == null || stageDto.getStageName().isEmpty()) {
-            throw new IllegalArgumentException("Stage name must not be empty");
+            throw new DataValidationException("Stage name must not be empty");
         }
         if (stageDto.getStageRoleIds() == null || stageDto.getStageRoleIds().isEmpty()) {
-            throw new IllegalArgumentException("Stage must have at least one role");
+            throw new DataValidationException("Stage must have at least one role");
         }
         if (stageDto.getTeamMemberIds() == null || stageDto.getTeamMemberIds().isEmpty()) {
-            throw new IllegalArgumentException("Stage must have at least one team member");
+            throw new DataValidationException("Stage must have at least one team member");
         }
     }
 }

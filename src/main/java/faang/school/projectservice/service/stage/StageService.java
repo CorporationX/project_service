@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
@@ -33,7 +34,7 @@ public class StageService {
 
     public StageDto create(StageDto stageDto) {
         if (!isProjectActive(stageDto)) {
-            throw new IllegalStateException("Project is not active");
+            throw new DataValidationException("Project is not active");
         }
         checkUnnecessaryExecutorsExist(stageDto);
         Stage stage = save(stageDto);
@@ -61,7 +62,7 @@ public class StageService {
                     if (rolesCount.containsKey(role)) {
                         int count = rolesCount.get(role);
                         if (count == 0) {
-                            throw new IllegalStateException("Unnecessary role: " + role);
+                            throw new DataValidationException("Unnecessary role: " + role);
                         }
                         rolesCount.put(role, count - 1);
                     }
