@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.stage;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.service.stage.StageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/stage")
+@Slf4j
 public class StageController {
 
     private final StageService service;
@@ -20,11 +22,12 @@ public class StageController {
     @ResponseStatus(HttpStatus.CREATED)
     public StageDto create(StageDto stageDto) {
         validateStage(stageDto);
+        log.info("Creating stage: {}", stageDto);
         return service.create(stageDto);
     }
 
     private void validateStage(StageDto stageDto) {
-        if (stageDto.getId() != null) {
+        if (stageDto.getStageId() != null) {
             throw new IllegalArgumentException("Stage must have id");
         }
         if (stageDto.getProjectId() == null) {
