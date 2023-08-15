@@ -21,6 +21,7 @@ public interface StageMapper {
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "stageRoles", ignore = true)
     @Mapping(target = "executors", ignore = true)
+    @Mapping(target = "tasks", ignore = true)
     Stage toEntity(StageDto dto);
 
     @Named("mapStageRoles")

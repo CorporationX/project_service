@@ -52,11 +52,13 @@ public class StageService {
 
     private void checkUnnecessaryExecutorsExist(StageDto stageDto) {
         Map<TeamRole, Integer> rolesCount = new HashMap<>();
-        List<TeamMember> members = getExecutors(stageDto);
-        getStageRoles(stageDto)
-                .forEach(stageRoles -> rolesCount.put(stageRoles.getTeamRole(), stageRoles.getCount()));
+        List<TeamMember> executors = getExecutors(stageDto);
+        List<StageRoles> stageRoles = getStageRoles(stageDto);
+        stageRoles
+                .forEach(stageRole ->
+                        rolesCount.put(stageRole.getTeamRole(), stageRole.getCount()));
 
-        members.stream()
+        executors.stream()
                 .flatMap(teamMember -> teamMember.getRoles().stream())
                 .forEach(role -> {
                     if (rolesCount.containsKey(role)) {
@@ -65,6 +67,8 @@ public class StageService {
                             throw new DataValidationException("Unnecessary role: " + role);
                         }
                         rolesCount.put(role, count - 1);
+                    } else {
+                        throw new DataValidationException("Unnecessary role: " + role);
                     }
                 });
     }
@@ -83,7 +87,7 @@ public class StageService {
 
     private boolean isProjectActive(StageDto stageDto) {
         return projectRepository
-                .getProjectById(stageDto.getStageId())
+                .getProjectById(stageDto.getProjectId())
                 .isProjectStatusActive();
     }
 
