@@ -21,8 +21,6 @@ public final class ErrorMessagesForVacancy {
     public static final String VACANCY_CANT_BE_CHANGED_FORMAT = "Vacancy cannot be changed. " +
             "The user role does not allow you to make changes. User roles {0}. Required roles one of MANAGER or OWNER";
 
-
-
     private ErrorMessagesForVacancy() {
         throw new UnsupportedOperationException("This is the util class and cannot be instantiated");
     }

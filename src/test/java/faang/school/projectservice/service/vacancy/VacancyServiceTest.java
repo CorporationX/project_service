@@ -1,10 +1,13 @@
 package faang.school.projectservice.service.vacancy;
 
-import faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDtoGetReq;
 import faang.school.projectservice.dto.vacancy.VacancyDtoUpdateReq;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
+import faang.school.projectservice.filters.vacancy.FilterByName;
+import faang.school.projectservice.filters.vacancy.FilterBySkill;
+import faang.school.projectservice.filters.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -14,7 +17,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.provider.Arguments;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,6 +69,8 @@ class VacancyServiceTest {
     private TeamMember ownerVacancy;
     private TeamMember managerVacancy;
     private Vacancy savedVacancy;
+    private List<List<Long>> listSkills;
+    private List<Vacancy> allVacancies;
 
     @BeforeEach
     void setUp() {
@@ -84,6 +87,8 @@ class VacancyServiceTest {
         inputVacancyDto = getVacancyDtoForReqCreate();
         savedVacancy = getSavedVacancy();
         inputVacancyDtoUpdateReq = getUpdatedInputVacancyDto();
+        listSkills = getListSkills();
+        allVacancies = getAllSavedVacancies();
     }
 
     @Test
@@ -251,36 +256,73 @@ class VacancyServiceTest {
     }
 
 
-    private static Stream<Arguments> prepareInvalidDto() {
-        VacancyDto DtoWithNullName = VacancyDto.builder().vacancyId(1L).build();
-        VacancyDto DtoWithBlankName = VacancyDto.builder().name("").build();
+    @Test
+    void testGetVacanciesByFilter() {
+        List<VacancyFilter> vacancyFilters = getVacancyFilters();
+        vacancyService = new VacancyService(
+                vacancyRepository, vacancyMapper, projectRepository, teamMemberRepository, vacancyFilters);
+        VacancyFilterDto vacancyFilterDto = getVacancyFilterDto();
+        Mockito.when(vacancyRepository.findAll()).thenReturn(allVacancies);
+        List<VacancyDto> expectedResult = getExpectedVacanciesAfterFilter();
 
-        VacancyDto DtoWithNullDescription = VacancyDto.builder().name("Vacancy").build();
-        VacancyDto DtoWithBlankDescription = VacancyDto.builder().name("Vacancy").description("").build();
+        List<VacancyDto> result = vacancyService.getVacanciesByFilter(vacancyFilterDto);
 
-        VacancyDto DtoWithNullProjectID = VacancyDto.builder().name("Vacancy").description("test").build();
-        VacancyDto DtoWithNegativeProjectID = VacancyDto.builder().name("Vacancy").description("test").projectId(-1L).build();
-        String errorMessageNegativeProjectId =
-                MessageFormat.format(NEGATIVE_PROJECT_ID_FORMAT, DtoWithNegativeProjectID.getProjectId());
+        assertEquals(expectedResult, result);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).findAll();
+    }
 
-        VacancyDto DtoWithNullCreatedBy = VacancyDto.builder().name("Vacancy").description("test").projectId(1L).build();
-        VacancyDto DtoWithNegativeCreatedBy = VacancyDto.builder()
-                .name("Vacancy")
-                .description("test")
-                .projectId(1L)
-                .createdBy(-1L).build();
-        String errorMessageNegativeCreatedBy =
-                MessageFormat.format(NEGATIVE_CREATED_BY_ID_FORMAT, DtoWithNegativeCreatedBy.getCreatedBy());
 
-        return Stream.of(
-                Arguments.of(DtoWithNullName, ErrorMessagesForVacancy.NAME_IS_NULL),
-                Arguments.of(DtoWithBlankName, ErrorMessagesForVacancy.NAME_IS_BLANK),
-                Arguments.of(DtoWithNullDescription, ErrorMessagesForVacancy.DESCRIPTION_IS_NULL),
-                Arguments.of(DtoWithBlankDescription, ErrorMessagesForVacancy.DESCRIPTION_IS_BLANK),
-                Arguments.of(DtoWithNullProjectID, ErrorMessagesForVacancy.PROJECT_ID_IS_NULL),
-                Arguments.of(DtoWithNegativeProjectID, errorMessageNegativeProjectId),
-                Arguments.of(DtoWithNullCreatedBy, ErrorMessagesForVacancy.CREATED_BY_ID_IS_NULL),
-                Arguments.of(DtoWithNegativeCreatedBy, errorMessageNegativeCreatedBy)
+    private List<Vacancy> getAllSavedVacancies() {
+        int countVacancies = listSkills.size();
+
+        List<Vacancy> vacancies = new ArrayList<>(countVacancies);
+        for (int i = 0; i < countVacancies; i++) {
+            Vacancy vacancy = Vacancy.builder()
+                    .id(i + 1L)
+                    .name("Vacancy " + (i + 1))
+                    .description("Description for vacancy " + (i + 1))
+                    .requiredSkillIds(listSkills.get(i))
+                    .status(VacancyStatus.OPEN)
+                    .build();
+            vacancies.add(vacancy);
+        }
+        return vacancies;
+    }
+
+    private List<VacancyFilter> getVacancyFilters() {
+        FilterByName filter1 = new FilterByName();
+        FilterBySkill filter2 = new FilterBySkill();
+        return List.of(filter1, filter2);
+    }
+
+    private VacancyFilterDto getVacancyFilterDto() {
+        String namePattern = "2";
+        List<Long> needSkill = List.of(2L, 3L);
+        return VacancyFilterDto.builder()
+                .namePattern(namePattern)
+                .skillsPattern(needSkill)
+                .build();
+    }
+
+    private List<VacancyDto> getExpectedVacanciesAfterFilter() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .vacancyId(2L)
+                .name("Vacancy 2")
+                .description("Description for vacancy 2")
+                .build();
+
+        return List.of(vacancyDto);
+    }
+
+    private List<List<Long>> getListSkills() {
+        List<Long> skills1 = List.of(1L, 2L, 3L);
+        List<Long> skills2 = List.of(3L, 4L, 5L, 2L);
+        List<Long> skills3 = List.of(6L, 7L, 8L, 2L);
+
+        return List.of(
+                skills1,
+                skills2,
+                skills3
         );
     }
 

@@ -1,7 +1,11 @@
 package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.WorkSchedule;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;

@@ -3,7 +3,9 @@ package faang.school.projectservice.service.vacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDtoGetReq;
 import faang.school.projectservice.dto.vacancy.VacancyDtoUpdateReq;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
+import faang.school.projectservice.filters.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.*;
 
@@ -27,6 +30,7 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final List<VacancyFilter> vacancyFilters;
 
     @Transactional
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
@@ -51,7 +55,6 @@ public class VacancyService {
 
         // готовы к обновлению
         vacancyMapper.updateEntityFromDto(vacancyDto, vacancyForUpdate);
-        vacancyForUpdate.setUpdatedAt(LocalDateTime.now());
 
         return vacancyMapper.toDto(vacancyRepository.save(vacancyForUpdate));
     }
@@ -69,6 +72,19 @@ public class VacancyService {
     public VacancyDtoGetReq getVacancy(Long vacancyId) {
         Vacancy vacancy = getVacancyById(vacancyId);
         return vacancyMapper.toDtoGetReq(vacancy);
+    }
+
+    public List<VacancyDto> getVacanciesByFilter(VacancyFilterDto filterDto) {
+        Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
+
+        List<VacancyFilter> listApplicableFilters =
+                vacancyFilters.stream().filter(curFilter -> curFilter.isApplicable(filterDto)).toList();
+
+        for (VacancyFilter curFilter : listApplicableFilters) {
+            vacancies = curFilter.apply(vacancies, filterDto);
+        }
+
+        return vacancies.map(vacancyMapper::toDto).toList();
     }
 
     private void deleteCandidateFromTeamMember(Long userId, Long projectId) {
@@ -89,13 +105,6 @@ public class VacancyService {
                 vacancy.getId(), MIN_COUNT_MEMBERS);
 
         if (vacancy.getCandidates().size() < MIN_COUNT_MEMBERS) {
-            throw new VacancyValidateException(errorMessage);
-        }
-    }
-
-    private void checkProjectIsExist(Long projectId) {
-        if (!projectRepository.existsById(projectId)) {
-            String errorMessage = MessageFormat.format(PROJECT_NOT_EXIST_FORMAT, projectId);
             throw new VacancyValidateException(errorMessage);
         }
     }
