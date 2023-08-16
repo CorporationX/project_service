@@ -14,4 +14,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V007__create_internship.sql
   - include:
-      file: db/changelog/changeset/project_V008__create_offer.sql
+      file: db/changelog/changeset/project_V008__alter_candidate_add_vacancy.sql
+  - include:
+      file: db/changelog/changeset/project_V009__create_offer.sql
