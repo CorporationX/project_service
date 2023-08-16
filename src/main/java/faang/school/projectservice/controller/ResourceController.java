@@ -23,7 +23,7 @@ public class ResourceController {
     public ResourceDto uploadFile(
             @RequestPart("file") MultipartFile file,
             @RequestPart("resourceDto") ResourceDto resourceDto) {
-        return resourceService.createResource(resourceDto, file);
+        return resourceService.uploadFile(resourceDto, file);
     }
 
     @PutMapping("/upload/{id}")
@@ -31,7 +31,7 @@ public class ResourceController {
             @PathVariable long id,
             @RequestPart("file") MultipartFile file,
             @RequestPart("resourceDto") ResourceDto resourceDto) {
-        return resourceService.updateResource(id, resourceDto, file);
+        return resourceService.updateFile(id, resourceDto, file);
     }
 
     @DeleteMapping("/{id}")

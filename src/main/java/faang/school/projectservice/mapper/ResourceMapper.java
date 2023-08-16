@@ -5,6 +5,7 @@ import faang.school.projectservice.model.Resource;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD,
@@ -16,4 +17,6 @@ public interface ResourceMapper {
 
     @Mapping(source = "projectId", target = "project.id")
     Resource toEntity(ResourceDto resourceDto);
+
+    void update(ResourceDto resourceDto, @MappingTarget Resource resource);
 }
