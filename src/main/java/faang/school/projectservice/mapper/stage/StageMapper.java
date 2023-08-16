@@ -24,6 +24,8 @@ public interface StageMapper {
     @Mapping(target = "tasks", ignore = true)
     Stage toEntity(StageDto dto);
 
+    List<StageDto> toDtoList(List<Stage> stages);
+
     @Named("mapStageRoles")
     static List<Long> mapStageRoles(List<StageRoles> stageRoles) {
         return stageRoles.stream()
