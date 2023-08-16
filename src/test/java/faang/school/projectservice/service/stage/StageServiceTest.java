@@ -1,14 +1,14 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.stage.ActionWithTasks;
+import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageRolesRepository;
+import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -41,6 +41,8 @@ class StageServiceTest {
     TeamMemberJpaRepository teamMemberRepository;
     @Mock
     StageRolesRepository stageRolesRepository;
+    @Mock
+    TaskRepository taskRepository;
     @Spy
     StageMapperImpl stageMapper;
 
@@ -133,6 +135,62 @@ class StageServiceTest {
                         .build());
         StageDto stageDto = stageService.getStageById(stageId);
         assertEquals(stageDto.getStageId(), stageId);
+    }
+
+    @Test
+    @DisplayName("Delete stage by id. Action: Delete")
+    void deleteStageDeleteTasks() {
+        when(stageRepository.getById(anyLong()))
+                .thenReturn(new Stage());
+        List<Long> ids = List.of(new Random().nextLong(), new Random().nextLong(), new Random().nextLong());
+        StageDeleteDto stageToDeleteDto = StageDeleteDto.builder()
+                .stageId(new Random().nextLong())
+                .tasksId(ids)
+                .action(ActionWithTasks.DELETE)
+                .build();
+        stageService.deleteStageById(stageToDeleteDto);
+
+        verify(taskRepository).deleteAllById(ids);
+        verify(stageRepository).delete(any(Stage.class));
+    }
+
+    @Test
+    @DisplayName("Delete stage by id. Action: Closed")
+    void deleteStageClosedTasks() {
+        List<Long> ids = List.of(new Random().nextLong(), new Random().nextLong(), new Random().nextLong());
+        List<Task> tasks = List.of(new Task(), new Task(), new Task());
+        StageDeleteDto stageToDeleteDto = StageDeleteDto.builder()
+                .stageId(new Random().nextLong())
+                .tasksId(ids)
+                .action(ActionWithTasks.CLOSED)
+                .build();
+        when(stageRepository.getById(anyLong()))
+                .thenReturn(new Stage());
+        when(taskRepository.findAllById(anyList()))
+                .thenReturn(tasks);
+        stageService.deleteStageById(stageToDeleteDto);
+        verify(taskRepository).saveAll(tasks);
+        verify(stageRepository).delete(any(Stage.class));
+    }
+
+    @Test
+    @DisplayName("Delete stage by id. Action: Transfer")
+    void deleteStageTransferTasks() {
+        List<Long> ids = List.of(new Random().nextLong(), new Random().nextLong(), new Random().nextLong());
+        List<Task> tasks = List.of(new Task(), new Task(), new Task());
+        StageDeleteDto stageToDeleteDto = StageDeleteDto.builder()
+                .stageId(new Random().nextLong())
+                .tasksId(ids)
+                .action(ActionWithTasks.TRANSFER)
+                .toTransferStageId(new Random().nextLong())
+                .build();
+        when(stageRepository.getById(anyLong()))
+                .thenReturn(new Stage());
+        when(taskRepository.findAllById(anyList()))
+                .thenReturn(tasks);
+        stageService.deleteStageById(stageToDeleteDto);
+        verify(taskRepository).saveAll(tasks);
+        verify(stageRepository).delete(any(Stage.class));
     }
 
     private static Stream<Arguments> getRandomIds() {

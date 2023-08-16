@@ -76,7 +76,6 @@ public class StageService {
             case DELETE -> deleteTasks(stageToDeleteDto);
             case CLOSED -> closeTasks(stageToDeleteDto);
             case TRANSFER -> transferTasks(stageToDeleteDto);
-            default -> throw new DataValidationException("Invalid action");
         }
     }
 
@@ -105,6 +104,7 @@ public class StageService {
                     tasks.add(task);
                 });
         taskRepository.saveAll(tasks);
+
         log.info("Tasks closed {}", stageToDeleteDto.getTasksId());
     }
 
