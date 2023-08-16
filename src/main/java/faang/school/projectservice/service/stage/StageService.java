@@ -50,6 +50,12 @@ public class StageService {
         return stageMapper.toDtoList(stages);
     }
 
+    public StageDto getStageById(Long stageId) {
+        Stage stage = stageRepository.getById(stageId);
+        log.info("Stage retrieved: {}", stage);
+        return stageMapper.toDto(stage);
+    }
+
 
     private Stage save(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
