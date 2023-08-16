@@ -44,7 +44,7 @@ public class Resource {
     @ElementCollection(targetClass = TeamRole.class)
     @CollectionTable(name = "resource_allowed_roles",
             joinColumns = @JoinColumn(name = "resource_id"))
-    @Column(name = "role_id")
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private List<TeamRole> allowedRoles;
 
@@ -60,11 +60,11 @@ public class Resource {
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
     private TeamMember createdBy;
 
     @ManyToOne
-    @JoinColumn(name = "updated_by")
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
     private TeamMember updatedBy;
 
     @UpdateTimestamp

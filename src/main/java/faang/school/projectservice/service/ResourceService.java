@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -45,7 +46,8 @@ public class ResourceService {
 
         fileStore.uploadFile(file, key);
 
-        return resourceMapper.toDto(resourceRepository.save(resource));
+        Resource entity = resourceRepository.save(resource);
+        return resourceMapper.toDto(entity);
     }
 
     public ResourceDto updateResource(long id, ResourceDto resourceDto, MultipartFile file) {
@@ -96,8 +98,11 @@ public class ResourceService {
         resource.setSize(BigInteger.valueOf(file.getSize()));
 
         if (resourceDto.getId() == null) {
-            resource.setAllowedRoles(teamMember.getRoles());
-            resource.setCreatedBy(TeamMember.builder().id(userContext.getUserId()).build());
+            List<TeamRole> roles = new ArrayList<>(teamMember.getRoles());
+            resource.setAllowedRoles(roles);
+            TeamMember createdBy = TeamMember.builder().id(userContext.getUserId()).build();
+            resource.setCreatedBy(createdBy);
+            resource.setUpdatedBy(createdBy);
         } else {
             List<TeamRole> roles = Stream.concat(teamMember.getRoles().stream(), resource.getAllowedRoles().stream())
                     .distinct()
