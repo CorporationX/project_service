@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.ResourceCreateDto;
+import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.model.Resource;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
@@ -8,9 +8,9 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ResourceCreateMapper {
+public interface ResourceMapper {
 
-    ResourceCreateDto toResourceCreateDto(Resource resource);
+    ResourceDto toDto(Resource resource);
 
-    Resource toResource(ResourceCreateDto resourceCreateDto);
+    Resource toEntity(ResourceDto resourceDto);
 }
