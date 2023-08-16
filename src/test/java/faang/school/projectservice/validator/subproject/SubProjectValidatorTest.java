@@ -1,5 +1,11 @@
 package faang.school.projectservice.validator.subproject;
 
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.subproject.ProjectService;
@@ -19,13 +25,15 @@ import static org.mockito.Mockito.when;
 
 class SubProjectValidatorTest {
     @Mock
-    private SubProjectService subProjectService;
-    @Mock
     private UserServiceClient userServiceClient;
+    @Mock
+    private SubProjectService subProjectService;
     @Mock
     private ProjectService projectService;
     @InjectMocks
-    private SubProjectValidator validatorClass;
+    private SubProjectValidator subProjectValidator;
+    private Method validateProjectId;
+    private Method validateStatus;
     private Method validateOwnerId;
     private Method validateParentProject;
     private Method validateStringData;
@@ -38,9 +46,108 @@ class SubProjectValidatorTest {
         MockitoAnnotations.openMocks(this);
         rightId = 1L;
         str = "Ane string";
-        validatorClass = new SubProjectValidator(projectService, subProjectService, userServiceClient);
+
+        subProjectValidator = new SubProjectValidator(projectService);
 
         when(projectService.isExistProjectById(rightId)).thenReturn(false);
+    }
+
+    @Test
+    public void testValidateProjectId() throws NoSuchMethodException {
+        validateProjectId = subProjectValidator.getClass().getDeclaredMethod("validateProjectId", Long.class);
+        validateProjectId.setAccessible(true);
+
+        assertDoesNotThrow(() -> validateProjectId.invoke(subProjectValidator, rightId));
+
+        try {
+            validateProjectId.invoke(subProjectValidator, -rightId);
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof DataValidationException);
+        }
+
+        try {
+            validateProjectId.invoke(subProjectValidator, 2 * rightId);
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof DataValidationException);
+        }
+    }
+
+    @Test
+    public void testValidateStatus() throws NoSuchMethodException {
+        validateStatus = subProjectValidator.getClass().getDeclaredMethod("validateStatus", ProjectStatus.class);
+        validateStatus.setAccessible(true);
+
+        assertDoesNotThrow(() -> validateStatus.invoke(subProjectValidator, ProjectStatus.CREATED));
+    }
+
+    @Test
+    public void testValidateId() throws NoSuchMethodException {
+        validateId = subProjectValidator.getClass().getDeclaredMethod("validateId", Long.class);
+        validateId.setAccessible(true);
+
+        assertDoesNotThrow(() -> validateId.invoke(subProjectValidator, rightId));
+
+        try {
+            validateId.invoke(subProjectValidator, -rightId);
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof DataValidationException);
+        }
+    }
+
+    @Test
+    public void testValidateSubProjectStatus_True() {
+        Long withoutChildId = 10L;
+        Long completedId = 11L;
+        Long inProgressId = 12L;
+
+        Project projectChildrenCompleted = Project.builder()
+                .status(ProjectStatus.COMPLETED)
+                .build();
+
+        Project projectWithOutChildren = Project.builder()
+                .id(withoutChildId)
+                .status(ProjectStatus.COMPLETED)
+                .build();
+        Project projectCompleted = Project.builder()
+                .id(completedId)
+                .status(ProjectStatus.COMPLETED)
+                .children(List.of(projectChildrenCompleted))
+                .build();
+        Project projectInProgress = Project.builder()
+                .id(inProgressId)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        Mockito.when(projectService.getProjectById(withoutChildId))
+                .thenReturn(projectWithOutChildren);
+        Mockito.when(projectService.getProjectById(completedId))
+                .thenReturn(projectCompleted);
+        Mockito.when(projectService.getProjectById(inProgressId))
+                .thenReturn(projectInProgress);
+
+        assertDoesNotThrow(() -> subProjectValidator.validateSubProjectStatus(projectWithOutChildren.getId()));
+        assertDoesNotThrow(() -> subProjectValidator.validateSubProjectStatus(projectCompleted.getId()));
+        assertDoesNotThrow(() -> subProjectValidator.validateSubProjectStatus(projectInProgress.getId()));
+    }
+
+    @Test
+    public void testValidateSubProjectStatus_Throw() {
+        Long completedId = 11L;
+
+        Project projectChildrenInProgress = Project.builder()
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        Project projectCompleted = Project.builder()
+                .id(completedId)
+                .status(ProjectStatus.COMPLETED)
+                .children(List.of(projectChildrenInProgress))
+                .build();
+
+        Mockito.when(projectService.getProjectById(completedId))
+                .thenReturn(projectCompleted);
+
+        assertThrows(DataValidationException.class,
+                () -> subProjectValidator.validateSubProjectStatus(projectCompleted.getId()));
     }
 
     @Test
@@ -102,4 +209,5 @@ class SubProjectValidatorTest {
             assertTrue(e.getCause() instanceof DataValidationException);
         }
     }
+
 }

@@ -1,6 +1,8 @@
 package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
+import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +14,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class SubProjectControllerTest {
@@ -25,6 +27,8 @@ class SubProjectControllerTest {
     @Spy
     private ObjectMapper objectMapper;
     private MockMvc mockMvc;
+    private StatusSubprojectDto statusSubprojectDto = StatusSubprojectDto.builder().build();
+    private VisibilitySubprojectUpdateDto visibilitySubprojectUpdateDto = VisibilitySubprojectUpdateDto.builder().build();
     private SubProjectDto subProjectDto = SubProjectDto.builder().build();
 
     @BeforeEach
@@ -47,5 +51,27 @@ class SubProjectControllerTest {
                 .validateCreateProjectDto(subProjectDto);
         Mockito.verify(subProjectService, Mockito.times(1))
                 .createProject(subProjectDto);
+    }
+
+    @Test
+    void testCreateSubProjectStatus() throws Exception {
+        mockMvc.perform(put("/subproject/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(statusSubprojectDto)))
+                .andExpect(status().isOk());
+
+        Mockito.verify(subProjectService, Mockito.times(1))
+                .updateStatusSubProject(statusSubprojectDto);
+    }
+
+    @Test
+    void testCreateSubProjectVisibility() throws Exception {
+        mockMvc.perform(put("/subproject/visibility")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(visibilitySubprojectUpdateDto)))
+                .andExpect(status().isOk());
+
+        Mockito.verify(subProjectService, Mockito.times(1))
+                .updateVisibilitySubProject(visibilitySubprojectUpdateDto);
     }
 }
