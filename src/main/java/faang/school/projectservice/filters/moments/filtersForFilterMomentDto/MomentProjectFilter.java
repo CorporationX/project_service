@@ -16,7 +16,7 @@ public class MomentProjectFilter implements MomentFilter {
 
     @Override
     public Stream<Moment> apply(Stream<Moment> moments, FilterMomentDto filterDto) {
-        return moments.filter(moment -> moment.getProject().stream().anyMatch(project ->
+        return moments.filter(moment -> moment.getProjects().stream().anyMatch(project ->
                 project.getName().contains(filterDto.getProjectPattern())));
     }
 }

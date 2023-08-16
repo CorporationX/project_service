@@ -12,6 +12,7 @@ import faang.school.projectservice.messages.ErrorMessages;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -60,9 +61,9 @@ public class MomentService {
         Project project = projectRepository.getProjectById(idProject);
         validateCurrentUser(project, currentUserId);
         Stream<Moment> allMoments = momentRepository.findAll().stream()
-                .filter(moment -> moment.getProject().stream()
-                            .map(Project::getId)
-                            .anyMatch(id -> id.equals(idProject)));
+                .filter(moment -> moment.getProjects().stream()
+                        .map(Project::getId)
+                        .anyMatch(id -> id.equals(idProject)));
         List<MomentFilter> requiredFilters = momentFilter.stream()
                 .filter(filter -> filter.isApplicable(filterMomentDto))
                 .toList();
@@ -86,27 +87,39 @@ public class MomentService {
                         String.format("moment with %d wasn't found", momentId))));
     }
 
-    private void validateCurrentUser(Project project, Long userId){
-        if(project.getTeam().getTeamMembers().stream()
-                .map(TeamMember::getUserId)
-                .noneMatch(teamUserId -> teamUserId.equals(userId))){
-            throw new InvalidCurrentUserException(ErrorMessages.INVALID_CURRENT_USER);
+    private void validateCurrentUser(Project project, Long userId) {
+        for (Team team : project.getTeams()) {
+            boolean isUserInProject = team.getTeamMembers().stream()
+                    .map(TeamMember::getUserId)
+                    .anyMatch(teamUserId -> teamUserId.equals(userId));
+            if (!isUserInProject){
+                throw new InvalidCurrentUserException(ErrorMessages.INVALID_CURRENT_USER);
+            }
         }
     }
 
-    private void validateUserByMoment(Long momentId, Long currentUserId){
+    private void validateUserByMoment(Long momentId, Long currentUserId) {
         Moment currentMoment = validateMoment(momentId);
-        List<Project> momentProjects = currentMoment.getProject().stream()
-                .filter(project -> project.getTeam().getTeamMembers().stream()
-                        .map(TeamMember::getUserId)
-                        .anyMatch(teamUserId -> teamUserId.equals(currentUserId)))
+        List<Project> momentProjects = currentMoment.getProjects().stream()
+                .filter(project -> {
+                    boolean isUserInMoment = false;
+                    for(Team team : project.getTeams()) {
+                        isUserInMoment = team.getTeamMembers().stream()
+                                .map(TeamMember::getUserId)
+                                .anyMatch(teamUserId -> teamUserId.equals(currentUserId));
+                        if(isUserInMoment){
+                           return true;
+                        }
+                    }
+                    return false;
+                })
                 .toList();
-        if(momentProjects.size() < 1){
+        if (momentProjects.size() < 1) {
             throw new InvalidCurrentUserException(ErrorMessages.INVALID_CURRENT_USER);
         }
     }
 
-    private Moment validateMoment(Long momentId){
+    private Moment validateMoment(Long momentId) {
         return momentRepository.findById(momentId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.NO_SUCH_MOMENTS));
     }

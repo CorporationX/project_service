@@ -10,13 +10,10 @@ import org.springframework.lang.NonNull;
 @Builder
 @Data
 public class StageInvitationDto {
-
     private Long id;
     @NonNull
     private String description;
-    @NonNull
-    private Stage stage;
-    @NonNull
-    private TeamMember invited;
     private StageInvitationStatus status;
+    private Long stageId;
+    private Long invitedId;
 }

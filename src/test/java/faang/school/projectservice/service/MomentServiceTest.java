@@ -66,8 +66,8 @@ class MomentServiceTest {
         project = new Project();
         project.setStatus(ProjectStatus.CREATED);
         project.setId(100L);
-        project.setTeam(team);
-        moment.setProject(List.of(project));
+        project.setTeams(List.of(team));
+        moment.setProjects(List.of(project));
     }
 
     @Test
@@ -108,7 +108,7 @@ class MomentServiceTest {
 
     @Test
     void getFilteredMomentsReturnsValidList() {
-        Moment invalidMoment = Moment.builder().name("First").description("invalid").project(List.of(project)).build();
+        Moment invalidMoment = Moment.builder().name("First").description("invalid").projects(List.of(project)).build();
         Mockito.when(momentRepository.findAll()).thenReturn(List.of(moment, invalidMoment));
         Mockito.when(projectRepository.getProjectById(100L)).thenReturn(project);
 
