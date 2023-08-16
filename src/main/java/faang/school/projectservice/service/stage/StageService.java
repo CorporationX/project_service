@@ -116,6 +116,11 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
+    @Transactional(readOnly = true)
+    public Stage getEntityStageById(long stageId) {
+        return stageRepository.getById(stageId);
+    }
+
     private int executorsNeeded(Stage stage, StageRolesDto stageRolesDto) {
         TeamRole teamRole = stageRolesDto.getTeamRole();
         List<TeamMember> stageExecutors = stage.getExecutors();
