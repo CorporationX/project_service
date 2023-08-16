@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FilterByNameTest {
-    private static final int COUNT = 3;
+    private static final int COUNT_VACANCIES = 3;
     private List<Vacancy> vacancyList;
     private VacancyFilterDto filterDto;
 
@@ -42,8 +42,8 @@ class FilterByNameTest {
     }
 
     private List<Vacancy> getVacancyList() {
-        List<Vacancy> vacancies = new ArrayList<>(COUNT);
-        for (int i = 0; i < COUNT; i++) {
+        List<Vacancy> vacancies = new ArrayList<>(COUNT_VACANCIES);
+        for (int i = 0; i < COUNT_VACANCIES; i++) {
             Vacancy vacancy = Vacancy.builder()
                     .id(i + 1L)
                     .name("Vacancy " + (i + 1))

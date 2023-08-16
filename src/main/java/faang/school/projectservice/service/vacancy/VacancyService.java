@@ -55,7 +55,6 @@ public class VacancyService {
 
         // готовы к обновлению
         vacancyMapper.updateEntityFromDto(vacancyDto, vacancyForUpdate);
-        vacancyForUpdate.setUpdatedAt(LocalDateTime.now());
 
         return vacancyMapper.toDto(vacancyRepository.save(vacancyForUpdate));
     }

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class FilterBySkillTest {
-    private static final int COUNT = 3;
+    private static final int COUNT_VACANCIES = 3;
     private List<Long> skills1;
     private List<Long> skills2;
     private List<Long> skills3;
@@ -53,8 +53,8 @@ class FilterBySkillTest {
     }
 
     private List<Vacancy> getVacancyList() {
-        List<Vacancy> vacancies = new ArrayList<>(COUNT);
-        for (int i = 0; i < COUNT; i++) {
+        List<Vacancy> vacancies = new ArrayList<>(COUNT_VACANCIES);
+        for (int i = 0; i < COUNT_VACANCIES; i++) {
             Vacancy vacancy = Vacancy.builder()
                     .id(i + 1L)
                     .requiredSkillIds(listSkills.get(i))
