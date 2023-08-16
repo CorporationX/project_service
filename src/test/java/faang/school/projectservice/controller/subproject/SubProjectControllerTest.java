@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.subproject;
 
+import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
@@ -24,6 +25,7 @@ class SubProjectControllerTest {
     @Spy
     private ObjectMapper objectMapper;
     private MockMvc mockMvc;
+    private StatusSubprojectDto statusSubprojectDto = StatusSubprojectDto.builder().build();
     private VisibilitySubprojectUpdateDto visibilitySubprojectUpdateDto = VisibilitySubprojectUpdateDto.builder().build();
 
     @BeforeEach
@@ -33,7 +35,20 @@ class SubProjectControllerTest {
     }
 
     @Test
-    void testCreateSubProject() throws Exception {
+    void testCreateSubProjectStatus() throws Exception {
+        mockMvc.perform(put("/subproject/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(statusSubprojectDto)))
+                .andExpect(status().isOk());
+
+        Mockito.verify(subProjectValidator, Mockito.times(1))
+                .validateStatusSubprojectUpdateDto(statusSubprojectDto);
+        Mockito.verify(subProjectService, Mockito.times(1))
+                .updateStatusSubProject(statusSubprojectDto);
+    }
+
+    @Test
+    void testCreateSubProjectVisibility() throws Exception {
         mockMvc.perform(put("/subproject/visibility")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(visibilitySubprojectUpdateDto)))

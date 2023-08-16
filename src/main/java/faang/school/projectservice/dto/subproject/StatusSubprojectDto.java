@@ -1,7 +1,7 @@
-package faang.school.projectservice.dto.project;
+package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,11 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectDto {
+public class StatusSubprojectDto {
+    @NotNull
     private Long id;
-    private String name;
-    private String description;
-    private Long ownerId;
+    @NotNull
     private ProjectStatus status;
-    private ProjectVisibility visibility;
 }

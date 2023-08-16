@@ -1,5 +1,7 @@
 package faang.school.projectservice.controller.subproject;
 
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
@@ -15,6 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubProjectController {
     private final SubProjectService subProjectService;
     private final SubProjectValidator subProjectValidator;
+
+    @PutMapping("/status")
+    public ProjectDto updateStatusSubProject(@RequestBody StatusSubprojectDto statusSubprojectDto) {
+        subProjectValidator.validateStatusSubprojectUpdateDto(statusSubprojectDto);
+        return subProjectService.updateStatusSubProject(statusSubprojectDto);
+    }
 
     @PutMapping("/visibility")
     public void updateVisibilitySubProject(@RequestBody VisibilitySubprojectUpdateDto updateStatusSubprojectDto) {

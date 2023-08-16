@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
+
     public Project getProjectById(long projectId) {
         return projectRepository.getProjectById(projectId);
     }
