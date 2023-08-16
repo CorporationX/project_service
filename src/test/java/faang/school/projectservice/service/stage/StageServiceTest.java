@@ -107,7 +107,7 @@ class StageServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getRandomIds")
+    @MethodSource("getRandomIdsAndProject")
     @DisplayName("Get stages by project id")
     void getStagesByProjectId(Long projectId, List<Stage> stages) {
         when(projectRepository.getProjectById(projectId))
@@ -120,7 +120,45 @@ class StageServiceTest {
 
     }
 
+    @ParameterizedTest
+    @MethodSource("getRandomIds")
+    @DisplayName("Get stage by id")
+    void getStageById(Long stageId) {
+        when(stageRepository.getById(stageId))
+                .thenReturn(Stage.builder()
+                        .stageId(stageId)
+                        .stageRoles(new ArrayList<>())
+                        .project(new Project())
+                        .executors(new ArrayList<>())
+                        .build());
+        StageDto stageDto = stageService.getStageById(stageId);
+        assertEquals(stageDto.getStageId(), stageId);
+    }
+
     private static Stream<Arguments> getRandomIds() {
+        return Stream.of(
+                Arguments.of(
+                        new Random().nextLong()
+                ),
+                Arguments.of(
+                        new Random().nextLong()
+                ),
+                Arguments.of(
+                        new Random().nextLong()
+                ),
+                Arguments.of(
+                        new Random().nextLong()
+                ),
+                Arguments.of(
+                        new Random().nextLong()
+                ),
+                Arguments.of(
+                        new Random().nextLong()
+                )
+        );
+    }
+
+    private static Stream<Arguments> getRandomIdsAndProject() {
         Stage stage = Stage.builder()
                 .project(Project.builder()
                         .id(new Random().nextLong())
