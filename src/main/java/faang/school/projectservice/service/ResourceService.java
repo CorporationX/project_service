@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.ProjectStorageCapacityExceededException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
@@ -15,6 +14,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.util.FileStore;
+import faang.school.projectservice.validator.ResourcesValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,8 +28,8 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
-    private static final int MAX_PROJECT_FILE_SIZE = 2_097_152_000;
     private final TeamMemberRepository teamMemberRepository;
+    private final ResourcesValidator resourcesValidator;
     private final ResourceRepository resourceRepository;
     private final ProjectRepository projectRepository;
     private final ResourceMapper resourceMapper;
@@ -67,7 +67,7 @@ public class ResourceService {
         Resource resource = getResourceById(id);
         Project project = projectRepository.getProjectById(resource.getProject().getId());
 
-        checkRightsToDelete(resource, project);
+        resourcesValidator.checkRightsToDelete(resource, project, userContext.getUserId());
 
         fileStore.deleteFile(resource.getKey());
 
@@ -80,21 +80,10 @@ public class ResourceService {
         resourceRepository.save(resource);
     }
 
-    private void checkRightsToDelete(Resource resource, Project project) {
-        if (resource.getCreatedBy().getId() != userContext.getUserId()) {
-
-        }
-
-        if (project.getOwnerId() != userContext.getUserId()) {
-
-        }
-    }
-
     private Resource getResourceById(long id) {
         return resourceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Resource not found"));
     }
-
 
     private Resource fillResource(ResourceDto resourceDto, MultipartFile file, String key) {
         TeamMember teamMember = teamMemberRepository.findById(userContext.getUserId());
@@ -113,6 +102,7 @@ public class ResourceService {
             List<TeamRole> roles = Stream.concat(teamMember.getRoles().stream(), resource.getAllowedRoles().stream())
                     .distinct()
                     .toList();
+
             resource.setAllowedRoles(roles);
             resource.setUpdatedBy(TeamMember.builder().id(userContext.getUserId()).build());
             resource.setUpdatedAt(null);
@@ -124,16 +114,8 @@ public class ResourceService {
     private void updateProjectStorageCapacity(MultipartFile file, Project project) {
         long newStorageCapacity = project.getStorageSize().intValue() + file.getSize();
 
-        checkStorageCapacity(newStorageCapacity);
+        resourcesValidator.checkStorageCapacity(newStorageCapacity);
 
         project.setStorageSize(project.getStorageSize().add(BigInteger.valueOf(file.getSize())));
     }
-
-    private static void checkStorageCapacity(long newStorageCapacity) {
-        if (newStorageCapacity > MAX_PROJECT_FILE_SIZE) {
-            log.error("throw ProjectStorageCapacityExceededException");
-            throw new ProjectStorageCapacityExceededException("Project storage capacity exceeded");
-        }
-    }
-
 }
