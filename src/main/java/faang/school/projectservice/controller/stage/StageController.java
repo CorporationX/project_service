@@ -49,7 +49,7 @@ public class StageController {
     public void deleteStageById(@PathVariable Long stageId, @RequestBody StageDeleteDto stageDeleteDto) {
         validateDeleteDto(stageDeleteDto);
         log.info("Deleting stage: {}", stageId);
-        service.deleteStageById(stageId);
+        service.deleteStageById(stageDeleteDto);
     }
 
     private void validateDeleteDto(StageDeleteDto stageDeleteDto) {
