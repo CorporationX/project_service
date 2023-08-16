@@ -12,6 +12,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,15 @@ public class StageService {
         log.info("Created stage: {}", stage);
         return stageMapper.toDto(stage);
     }
+
+    public List<StageDto> getStagesByProjectId(Long projectId) {
+        List<Stage> stages = projectRepository
+                .getProjectById(projectId)
+                .getStages();
+        log.info("Stages retrieved for project: {}", projectId);
+        return stageMapper.toDtoList(stages);
+    }
+
 
     private Stage save(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
