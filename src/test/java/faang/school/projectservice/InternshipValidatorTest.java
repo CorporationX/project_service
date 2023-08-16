@@ -72,7 +72,7 @@ public class InternshipValidatorTest {
                         .builder()
                         .name("faang-internship")
                         .projectId(1L)
-                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                         .mentorId(1L)
                         .internsId(null)
                         .build()));
@@ -88,7 +88,7 @@ public class InternshipValidatorTest {
                         InternshipDto.builder()
                                 .name("faang-internship")
                                 .projectId(1L)
-                                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                                 .mentorId(1L)
                                 .internsId(List.of(1L))
                                 .build()));
@@ -104,7 +104,7 @@ public class InternshipValidatorTest {
                         InternshipDto.builder()
                                 .name("faang-internship")
                                 .projectId(1L)
-                                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                                .startDate(LocalDateTime.now()).endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                                 .mentorId(1L)
                                 .internsId(List.of(1L))
                                 .build()));
