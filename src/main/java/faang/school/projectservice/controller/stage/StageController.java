@@ -55,7 +55,6 @@ public class StageController {
     private void validateDeleteDto(StageDeleteDto stageDeleteDto) {
         validateId(stageDeleteDto.getProjectId());
         validateId(stageDeleteDto.getStageId());
-        validateList(stageDeleteDto.getTasksId());
         validateEnum(stageDeleteDto.getAction(), ActionWithTasks.class);
     }
 
