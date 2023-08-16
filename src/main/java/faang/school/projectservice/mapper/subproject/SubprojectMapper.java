@@ -14,6 +14,7 @@ import java.util.List;
 public interface SubprojectMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "visibility", ignore = true)
     Project toEntityFromDtoCreate(SubprojectDtoReqCreate dtoForCreate);
 
     @Mapping(target = "subprojectId", source = "id")

@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
+import faang.school.projectservice.exceptions.SubprojectException;
 import faang.school.projectservice.mapper.subproject.SubprojectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -17,8 +18,10 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 
+import static faang.school.projectservice.commonMessage.SubprojectErrMessage.ERR_VISIBILITY_PARENT_PROJECT_FORMAT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -67,7 +70,21 @@ class SubprojectServiceTest {
     }
 
     @Test
-    void testCreateSubproject_WhenParentProjectNotExist() {
+    void testCreateSubproject_WhenParentVisibilityPublicAndRequiredVisibilityPrivate_shouldThrowException() {
+        Long parentId = ValuesForTest.PARENT.getId();
+        ProjectVisibility requiredVisibility = ProjectVisibility.PRIVATE;
+        subprojectDtoReqCreate.setVisibility(requiredVisibility);
+        Mockito.when(projectRepository.getProjectById(parentId)).thenReturn(parentProject);
+        String expectedMessage = MessageFormat.format(ERR_VISIBILITY_PARENT_PROJECT_FORMAT, requiredVisibility);
+
+        Exception exception = assertThrows(SubprojectException.class,
+                () -> subprojectService.createSubproject(parentId, subprojectDtoReqCreate));
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void testCreateSubproject_WhenParentProjectNotExist_shouldThrowException() {
         Long parentId = ValuesForTest.PARENT.getId();
         String expectedMessage = String.format("Project not found by id: %s", parentId);
         Mockito.when(projectRepository.getProjectById(parentId))
@@ -84,6 +101,7 @@ class SubprojectServiceTest {
                 .id(ValuesForTest.PARENT.getId())
                 .name(ValuesForTest.PARENT.getValue())
                 .children(new ArrayList<>())
+                .visibility(ProjectVisibility.PUBLIC)
                 .build();
     }
 
