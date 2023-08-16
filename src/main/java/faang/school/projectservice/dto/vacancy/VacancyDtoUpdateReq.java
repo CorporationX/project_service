@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VacancyDtoReqUpdate {
+public class VacancyDtoUpdateReq {
     @NotNull(message = "VacancyId cannot be null")
     private Long vacancyId;
 

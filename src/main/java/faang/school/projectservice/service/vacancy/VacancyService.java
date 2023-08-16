@@ -1,7 +1,8 @@
 package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDtoReqUpdate;
+import faang.school.projectservice.dto.vacancy.VacancyDtoGetReq;
+import faang.school.projectservice.dto.vacancy.VacancyDtoUpdateReq;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.*;
@@ -38,7 +39,7 @@ public class VacancyService {
     }
 
     @Transactional
-    public VacancyDto updateVacancy(Long vacancyId, VacancyDtoReqUpdate vacancyDto) {
+    public VacancyDto updateVacancy(Long vacancyId, VacancyDtoUpdateReq vacancyDto) {
         Vacancy vacancyForUpdate = getVacancyById(vacancyId);
 
         checkRoleUserForPossibilityUpdateVacancy(vacancyDto.getUpdatedBy());
@@ -62,6 +63,12 @@ public class VacancyService {
         List<Long> usersID = vacancy.getCandidates().stream().map(Candidate::getUserId).toList();
         usersID.forEach(candidateId -> deleteCandidateFromTeamMember(candidateId, projectId));
         vacancyRepository.delete(vacancy);
+    }
+
+    @Transactional
+    public VacancyDtoGetReq getVacancy(Long vacancyId) {
+        Vacancy vacancy = getVacancyById(vacancyId);
+        return vacancyMapper.toDtoGetReq(vacancy);
     }
 
     private void deleteCandidateFromTeamMember(Long userId, Long projectId) {

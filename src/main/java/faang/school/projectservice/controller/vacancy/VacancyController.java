@@ -1,7 +1,8 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDtoReqUpdate;
+import faang.school.projectservice.dto.vacancy.VacancyDtoGetReq;
+import faang.school.projectservice.dto.vacancy.VacancyDtoUpdateReq;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,7 +33,7 @@ public class VacancyController {
             description = "Вакансию может обновить менеджер или владелец. " +
                     "Закрыть вакансию возможно когда набрано 5 и более участников.")
     public VacancyDto updateVacancy(@NotNull @PathVariable("id") Long vacancyId,
-                                    @Valid @RequestBody VacancyDtoReqUpdate vacancyDto) {
+                                    @Valid @RequestBody VacancyDtoUpdateReq vacancyDto) {
         return vacancyService.updateVacancy(vacancyId, vacancyDto);
     }
 
@@ -42,5 +43,12 @@ public class VacancyController {
                     "если они не были приняты в команду")
     public void deleteVacancy(@NotNull @PathVariable("id") Long vacancyId) {
         vacancyService.deleteVacancy(vacancyId);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Получить полную информацию о вакансии",
+            description = "Получить полную информацию о вакансии.")
+    public VacancyDtoGetReq getVacancy(@NotNull @PathVariable("id") Long vacancyId) {
+        return vacancyService.getVacancy(vacancyId);
     }
 }

@@ -2,7 +2,8 @@ package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDtoReqUpdate;
+import faang.school.projectservice.dto.vacancy.VacancyDtoGetReq;
+import faang.school.projectservice.dto.vacancy.VacancyDtoUpdateReq;
 import faang.school.projectservice.exception.vacancy.VacancyValidateException;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.*;
@@ -22,9 +23,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static faang.school.projectservice.commonMessages.vacancy.ErrorMessagesForVacancy.*;
@@ -35,6 +38,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class VacancyServiceTest {
     private static final Long VACANCY_ID = 1L;
     private static final int DEFAULT_COUNT_CANDIDATES = 5;
+    private static final LocalDateTime CREATED_AT = LocalDateTime.now();
+    private static final LocalDateTime UPDATED_AT = LocalDateTime.now();
+
     @Mock
     private VacancyRepository vacancyRepository;
 
@@ -51,7 +57,7 @@ class VacancyServiceTest {
     private VacancyService vacancyService;
 
     private VacancyDto inputVacancyDto;
-    private VacancyDtoReqUpdate inputVacancyDtoReqUpdate;
+    private VacancyDtoUpdateReq inputVacancyDtoUpdateReq;
 
     private String vacancyName;
     private String vacancyDescription;
@@ -77,7 +83,7 @@ class VacancyServiceTest {
 
         inputVacancyDto = getVacancyDtoForReqCreate();
         savedVacancy = getSavedVacancy();
-        inputVacancyDtoReqUpdate = getUpdatedInputVacancyDto();
+        inputVacancyDtoUpdateReq = getUpdatedInputVacancyDto();
     }
 
     @Test
@@ -126,13 +132,13 @@ class VacancyServiceTest {
 
     @Test
     void testUpdateVacancy_WhenDataIsValid() {
-        vacancyMapper.updateEntityFromDto(inputVacancyDtoReqUpdate, savedVacancy);
+        vacancyMapper.updateEntityFromDto(inputVacancyDtoUpdateReq, savedVacancy);
         Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
         Mockito.when(teamMemberRepository.findById(updatedBy)).thenReturn(managerVacancy);
         Mockito.when(vacancyRepository.save(savedVacancy)).thenReturn(savedVacancy);
         VacancyDto expectedVacancyDto = getExpectedVacancyDtoAfterUpdated();
 
-        VacancyDto result = vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoReqUpdate);
+        VacancyDto result = vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoUpdateReq);
 
         assertEquals(expectedVacancyDto, result);
         Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
@@ -142,15 +148,15 @@ class VacancyServiceTest {
 
     @Test
     void testUpdateVacancy_WhenNeedCloseVacancyAndIsPossible() {
-        inputVacancyDtoReqUpdate.setStatus(VacancyStatus.CLOSED);
-        vacancyMapper.updateEntityFromDto(inputVacancyDtoReqUpdate, savedVacancy);
+        inputVacancyDtoUpdateReq.setStatus(VacancyStatus.CLOSED);
+        vacancyMapper.updateEntityFromDto(inputVacancyDtoUpdateReq, savedVacancy);
         Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
         Mockito.when(teamMemberRepository.findById(updatedBy)).thenReturn(managerVacancy);
         Mockito.when(vacancyRepository.save(savedVacancy)).thenReturn(savedVacancy);
         VacancyDto expectedVacancyDto = getExpectedVacancyDtoAfterUpdated();
         expectedVacancyDto.setStatus(VacancyStatus.CLOSED);
 
-        VacancyDto result = vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoReqUpdate);
+        VacancyDto result = vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoUpdateReq);
 
         assertEquals(expectedVacancyDto, result);
         Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
@@ -161,14 +167,14 @@ class VacancyServiceTest {
     @Test
     void testUpdateVacancy_WhenNeedCloseVacancyAndIsImpossible_ShouldThrowException() {
         savedVacancy.getCandidates().remove(0);
-        inputVacancyDtoReqUpdate.setStatus(VacancyStatus.CLOSED);
-        vacancyMapper.updateEntityFromDto(inputVacancyDtoReqUpdate, savedVacancy);
+        inputVacancyDtoUpdateReq.setStatus(VacancyStatus.CLOSED);
+        vacancyMapper.updateEntityFromDto(inputVacancyDtoUpdateReq, savedVacancy);
         Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
         Mockito.when(teamMemberRepository.findById(updatedBy)).thenReturn(managerVacancy);
         String expectedMessage = MessageFormat.format(VACANCY_CANT_BE_CLOSED_FORMAT, VACANCY_ID, 5);
 
         Exception exception = assertThrows(VacancyValidateException.class,
-                () -> vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoReqUpdate));
+                () -> vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoUpdateReq));
 
         assertEquals(expectedMessage, exception.getMessage());
         Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
@@ -178,13 +184,13 @@ class VacancyServiceTest {
     @Test
     void testUpdateVacancy_WhenNotSupportedRoleUserForChanged_ShouldThrowException() {
         TeamMember someTeamMember = TeamMember.builder().roles(List.of(TeamRole.ANALYST)).build();
-        vacancyMapper.updateEntityFromDto(inputVacancyDtoReqUpdate, savedVacancy);
+        vacancyMapper.updateEntityFromDto(inputVacancyDtoUpdateReq, savedVacancy);
         Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
         Mockito.when(teamMemberRepository.findById(updatedBy)).thenReturn(someTeamMember);
         String expectedMessage = MessageFormat.format(VACANCY_CANT_BE_CHANGED_FORMAT, someTeamMember.getRoles());
 
         Exception exception = assertThrows(VacancyValidateException.class,
-                () -> vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoReqUpdate));
+                () -> vacancyService.updateVacancy(VACANCY_ID, inputVacancyDtoUpdateReq));
 
         assertEquals(expectedMessage, exception.getMessage());
         Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
@@ -217,6 +223,29 @@ class VacancyServiceTest {
 
         Exception exception = assertThrows(VacancyValidateException.class,
                 () -> vacancyService.deleteVacancy(VACANCY_ID));
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+
+    @Test
+    void testGetVacancy_WhenVacancyExists() {
+        VacancyDtoGetReq expectedDto = getExpectedDtoForGetReq();
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
+
+        VacancyDtoGetReq resultDto = vacancyService.getVacancy(VACANCY_ID);
+
+        assertEquals(expectedDto, resultDto);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
+    }
+
+    @Test
+    void testGetVacancy_WhenVacancyNotFoundById_ShouldThrowException() {
+        String expectedMessage = MessageFormat.format(VACANCY_NOT_EXIST_FORMAT, VACANCY_ID);
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(VacancyValidateException.class,
+                () -> vacancyService.getVacancy(VACANCY_ID));
 
         assertEquals(expectedMessage, exception.getMessage());
     }
@@ -289,6 +318,25 @@ class VacancyServiceTest {
                 .createdBy(createdBy).build();
     }
 
+    private VacancyDtoGetReq getExpectedDtoForGetReq() {
+        List<Long> candidateId = LongStream.rangeClosed(1, DEFAULT_COUNT_CANDIDATES).boxed().toList();
+        return VacancyDtoGetReq.builder()
+                .vacancyId(VACANCY_ID)
+                .name(vacancyName)
+                .description(vacancyDescription)
+                .projectId(project.getId())
+                .candidatesId(candidateId)
+                .createdAt(CREATED_AT)
+                .updatedAt(UPDATED_AT)
+                .createdBy(createdBy)
+                .updatedBy(updatedBy)
+                .status(VacancyStatus.OPEN)
+                .salary(500.0)
+                .workSchedule(WorkSchedule.ON_CALL)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
+    }
+
     private VacancyDto getExpectedVacancyDto() {
         return VacancyDto.builder()
                 .vacancyId(VACANCY_ID)
@@ -306,8 +354,14 @@ class VacancyServiceTest {
                 .name(vacancyName)
                 .description(vacancyDescription)
                 .project(project)
-                .createdBy(createdBy)
                 .candidates(getCandidates(DEFAULT_COUNT_CANDIDATES))
+                .createdAt(CREATED_AT)
+                .updatedAt(UPDATED_AT)
+                .createdBy(createdBy)
+                .updatedBy(updatedBy)
+                .salary(500.0)
+                .workSchedule(WorkSchedule.ON_CALL)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
                 .status(VacancyStatus.OPEN)
                 .build();
     }
@@ -320,14 +374,14 @@ class VacancyServiceTest {
         return vacancyMapper.toDto(expectedVacancy);
     }
 
-    private VacancyDtoReqUpdate getUpdatedInputVacancyDto() {
-        vacancyName = StringValuesForTesting.UPDATED_NAME.getValue();
-        vacancyDescription = StringValuesForTesting.UPDATED_DESCRIPTION.getValue();
+    private VacancyDtoUpdateReq getUpdatedInputVacancyDto() {
+        String updatedVacancyName = StringValuesForTesting.UPDATED_NAME.getValue();
+        String updatedVacancyDescription = StringValuesForTesting.UPDATED_DESCRIPTION.getValue();
 
-        return VacancyDtoReqUpdate.builder()
+        return VacancyDtoUpdateReq.builder()
                 .vacancyId(VACANCY_ID)
-                .name(vacancyName)
-                .description(vacancyDescription)
+                .name(updatedVacancyName)
+                .description(updatedVacancyDescription)
                 .updatedBy(updatedBy)
                 .status(VacancyStatus.OPEN)
                 .build();
