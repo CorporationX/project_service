@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.StageRolesDto;
+import faang.school.projectservice.dto.stage_roles.StageRolesDto;
 import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;

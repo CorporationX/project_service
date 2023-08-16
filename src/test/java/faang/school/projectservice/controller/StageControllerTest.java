@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.StageRolesDto;
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage_roles.StageRolesDto;
 import faang.school.projectservice.service.StageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

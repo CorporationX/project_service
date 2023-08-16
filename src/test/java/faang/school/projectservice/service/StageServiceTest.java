@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.StageRolesDto;
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage_roles.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
@@ -107,8 +107,6 @@ class StageServiceTest {
                         .build()))
                 .build();
         when(projectRepository.getProjectById(1L)).thenReturn(project);
-
-
     }
 
     @Test
@@ -183,7 +181,8 @@ class StageServiceTest {
         when(stageRepository.save(any(Stage.class))).thenReturn(stage);
         when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
 
-        stageService.updateStage(stageDto, stageId, authorId);
+        StageRolesDto stageRolesDto = StageRolesDto.builder().teamRole("OWNER").count(1).build();
+        stageService.updateStage(stageRolesDto, stageId, authorId);
 
         verify(stageRepository, times(1)).getById(stageId);
         verify(stageValidator, times(1)).isCompletedOrCancelled(any(Stage.class));

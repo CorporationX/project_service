@@ -1,5 +1,6 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.stage;
 
+import faang.school.projectservice.dto.stage_roles.StageRolesDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -18,6 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 @Schema(description = "Info about stage")
 public class StageDto {
+    @Schema(description = "ID of stage")
+    private Long stageId;
     @Schema(description = "Name of stage")
     @NotEmpty(message = "Stage name can not be empty")
     private String stageName;
