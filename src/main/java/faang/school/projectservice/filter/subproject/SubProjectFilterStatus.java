@@ -8,13 +8,13 @@ import java.util.stream.Stream;
 
 public class SubProjectFilterStatus implements SubprojectFilter {
     @Override
-    public boolean isApplicable(SubprojectFilterDto filters) {
-        return filters.getStatusFilter() != null;
+    public boolean isApplicable(SubprojectFilterDto filter) {
+        return filter.getStatusFilter() != null;
     }
 
     @Override
-    public void apply(Stream<Project> projects, SubprojectFilterDto filters) {
-        projects.filter(project -> project.getStatus().equals(filters.getStatusFilter()))
+    public Stream<Project> apply(Stream<Project> projects, SubprojectFilterDto filters) {
+        return projects.filter(project -> project.getStatus().equals(filters.getStatusFilter()))
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC ||
                         project.getOwnerId() == filters.getRequesterId());
     }

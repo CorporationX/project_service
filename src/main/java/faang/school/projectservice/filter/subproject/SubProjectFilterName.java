@@ -13,8 +13,8 @@ public class SubProjectFilterName implements SubprojectFilter {
     }
 
     @Override
-    public void apply(Stream<Project> projects, SubprojectFilterDto filters) {
-        projects.filter(project -> project.getName().equals(filters.getNameFilter()))
+    public Stream<Project> apply(Stream<Project> projects, SubprojectFilterDto filters) {
+        return projects.filter(project -> project.getName().equals(filters.getNameFilter()))
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC ||
                         project.getOwnerId() == filters.getRequesterId());
     }

@@ -19,14 +19,14 @@ public class SubProjectService {
     private final List<SubprojectFilter> subprojectFilters;
     private final ProjectMapper projectMapper;
 
-    public List<ProjectDto> getAllSubProject(SubprojectFilterDto subprojectFilterDto) {
-        Project project = projectService.getProjectById(subprojectFilterDto.getId());
+    public List<ProjectDto> getAllSubProject(SubprojectFilterDto filters) {
+        Project project = projectService.getProjectById(filters.getId());
         Stream<Project> subprojects = project.getChildren().stream();
 
-        subprojectFilters.stream()
-                .filter(filter -> filter.isApplicable(subprojectFilterDto))
-                .forEach(filter -> filter.apply(subprojects, subprojectFilterDto));
-
-        return projectMapper.toListProjectDto(subprojects.toList());
+        return subprojectFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(subprojects, filters))
+                .map(projectMapper::toProjectDto)
+                .toList();
     }
 }

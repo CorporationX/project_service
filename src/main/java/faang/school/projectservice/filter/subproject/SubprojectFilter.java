@@ -8,5 +8,5 @@ import java.util.stream.Stream;
 public interface SubprojectFilter {
     boolean isApplicable(SubprojectFilterDto filters);
 
-    void apply(Stream<Project> projects, SubprojectFilterDto filters);
+    Stream<Project> apply(Stream<Project> projects, SubprojectFilterDto filters);
 }
