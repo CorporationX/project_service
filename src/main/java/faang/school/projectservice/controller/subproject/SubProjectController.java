@@ -16,17 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/subproject")
 public class SubProjectController {
     private final SubProjectService subProjectService;
-    private final SubProjectValidator subProjectValidator;
 
     @PutMapping("/status")
     public ProjectDto updateStatusSubProject(@RequestBody StatusSubprojectDto statusSubprojectDto) {
-        subProjectValidator.validateStatusSubprojectUpdateDto(statusSubprojectDto);
         return subProjectService.updateStatusSubProject(statusSubprojectDto);
     }
 
     @PutMapping("/visibility")
     public void updateVisibilitySubProject(@RequestBody VisibilitySubprojectUpdateDto updateStatusSubprojectDto) {
-        subProjectValidator.validateUpdateVisibilitySubprojectDto(updateStatusSubprojectDto);
         subProjectService.updateVisibilitySubProject(updateStatusSubprojectDto);
     }
 }

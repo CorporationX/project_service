@@ -1,18 +1,15 @@
 package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
+import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
-import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -121,7 +118,7 @@ class SubProjectServiceTest {
     }
 
     @Test
-    void testUpdateVisibilitySubProjectToPublic_True() {
+    void testUpdateVisibilitySubProjectToPublic() {
         visibilitySubprojectUpdateDto = VisibilitySubprojectUpdateDto.builder()
                 .id(projectId)
                 .visibility(ProjectVisibility.PUBLIC)
@@ -134,23 +131,8 @@ class SubProjectServiceTest {
                 .thenReturn(project);
 
         assertDoesNotThrow(() -> subProjectService.updateVisibilitySubProject(visibilitySubprojectUpdateDto));
+        Mockito.verify(subProjectValidator, Mockito.times(1))
+                        .validateVisibility(project.getVisibility(), parentProject.getVisibility());
         assertEquals(ProjectVisibility.PUBLIC, project.getVisibility());
-    }
-
-    @Test
-    void testUpdateVisibilitySubProjectToPublic_Throw() {
-        visibilitySubprojectUpdateDto = VisibilitySubprojectUpdateDto.builder()
-                .id(projectId)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-
-        project.setVisibility(ProjectVisibility.PRIVATE);
-        parentProject.setVisibility(ProjectVisibility.PRIVATE);
-
-        Mockito.when(projectService.getProjectById(projectId))
-                .thenReturn(project);
-
-        assertThrows(DataValidationException.class,
-                () -> subProjectService.updateVisibilitySubProject(visibilitySubprojectUpdateDto));
     }
 }

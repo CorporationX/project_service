@@ -20,8 +20,6 @@ class SubProjectControllerTest {
     private SubProjectController subProjectController;
     @Mock
     private SubProjectService subProjectService;
-    @Mock
-    private SubProjectValidator subProjectValidator;
     @Spy
     private ObjectMapper objectMapper;
     private MockMvc mockMvc;
@@ -41,8 +39,6 @@ class SubProjectControllerTest {
                         .content(objectMapper.writeValueAsString(statusSubprojectDto)))
                 .andExpect(status().isOk());
 
-        Mockito.verify(subProjectValidator, Mockito.times(1))
-                .validateStatusSubprojectUpdateDto(statusSubprojectDto);
         Mockito.verify(subProjectService, Mockito.times(1))
                 .updateStatusSubProject(statusSubprojectDto);
     }
@@ -54,8 +50,6 @@ class SubProjectControllerTest {
                         .content(objectMapper.writeValueAsString(visibilitySubprojectUpdateDto)))
                 .andExpect(status().isOk());
 
-        Mockito.verify(subProjectValidator, Mockito.times(1))
-                .validateUpdateVisibilitySubprojectDto(visibilitySubprojectUpdateDto);
         Mockito.verify(subProjectService, Mockito.times(1))
                 .updateVisibilitySubProject(visibilitySubprojectUpdateDto);
     }
