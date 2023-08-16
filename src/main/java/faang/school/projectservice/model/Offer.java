@@ -30,7 +30,7 @@ public class Offer {
     @NotNull
     private Long createdBy;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "team_id")
     @NotNull
     private Team team;

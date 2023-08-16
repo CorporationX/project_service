@@ -35,4 +35,8 @@ public class Team {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    @OneToMany(mappedBy = "team")
+    @Column(name = "offer_id")
+    private List<Offer> offers;
 }
