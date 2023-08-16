@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 class VacancyServiceTest {
     private static final Long VACANCY_ID = 1L;
+    private static final int DEFAULT_COUNT_CANDIDATES = 5;
     @Mock
     private VacancyRepository vacancyRepository;
 
@@ -191,6 +192,36 @@ class VacancyServiceTest {
     }
 
 
+    @Test
+    void testDeleteVacancy() {
+        List<TeamMember> members = getTeamMembers(DEFAULT_COUNT_CANDIDATES);
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(savedVacancy));
+        for (int i = 0; i < members.size(); i++) {
+            Mockito.when(teamMemberRepository.findByUserIdAndProjectId(1L + i, projectId))
+                    .thenReturn(members.get(i));
+        }
+
+        vacancyService.deleteVacancy(VACANCY_ID);
+
+        Mockito.verify(vacancyRepository, Mockito.times(1)).findById(VACANCY_ID);
+        Mockito.verify(teamMemberRepository, Mockito.times(2)).deleteEntity(Mockito.any());
+        Mockito.verify(teamMemberRepository, Mockito.times(5))
+                .findByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong());
+        Mockito.verify(vacancyRepository, Mockito.times(1)).delete(savedVacancy);
+    }
+
+    @Test
+    void testDeleteVacancy_WhenVacancyNotFoundById_ShouldThrowException() {
+        String expectedMessage = MessageFormat.format(VACANCY_NOT_EXIST_FORMAT, VACANCY_ID);
+        Mockito.when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(VacancyValidateException.class,
+                () -> vacancyService.deleteVacancy(VACANCY_ID));
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+
     private static Stream<Arguments> prepareInvalidDto() {
         VacancyDto DtoWithNullName = VacancyDto.builder().vacancyId(1L).build();
         VacancyDto DtoWithBlankName = VacancyDto.builder().name("").build();
@@ -224,11 +255,28 @@ class VacancyServiceTest {
         );
     }
 
-    private List<Candidate> getCandidates() {
-        int count = 5;
+    private List<TeamMember> getTeamMembers(int count) {
+        List<TeamMember> teamMembers = new ArrayList<>(count);
+        for (int i = 1; i < count + 1; i++) {
+            TeamMember teamMember = TeamMember.builder()
+                    .userId((long) i)
+                    .build();
+
+            if (i == 1 || i == 2) {
+                teamMember.setRoles(List.of(TeamRole.INTERN, TeamRole.ANALYST));
+            } else {
+                teamMember.setRoles(List.of(TeamRole.ANALYST, TeamRole.DESIGNER));
+            }
+
+            teamMembers.add(teamMember);
+        }
+        return teamMembers;
+    }
+
+    private List<Candidate> getCandidates(int count) {
         List<Candidate> candidates = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            candidates.add(Candidate.builder().id(i + 1L).build());
+            candidates.add(Candidate.builder().id(i + 1L).userId(i + 1L).build());
         }
         return candidates;
     }
@@ -259,7 +307,7 @@ class VacancyServiceTest {
                 .description(vacancyDescription)
                 .project(project)
                 .createdBy(createdBy)
-                .candidates(getCandidates())
+                .candidates(getCandidates(DEFAULT_COUNT_CANDIDATES))
                 .status(VacancyStatus.OPEN)
                 .build();
     }
