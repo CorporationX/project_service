@@ -1,5 +1,7 @@
 package faang.school.projectservice.controller.stage;
 
+import faang.school.projectservice.dto.stage.ActionWithTasks;
+import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage.StageService;
@@ -42,17 +44,40 @@ public class StageController {
         return service.getStageById(stageId);
     }
 
+    @DeleteMapping("/{stageId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteStageById(@PathVariable Long stageId, @RequestBody StageDeleteDto stageDeleteDto) {
+        validateDeleteDto(stageDeleteDto);
+        log.info("Deleting stage: {}", stageId);
+        service.deleteStageById(stageId);
+    }
+
+    private void validateDeleteDto(StageDeleteDto stageDeleteDto) {
+        validateId(stageDeleteDto.getProjectId());
+        validateId(stageDeleteDto.getStageId());
+        validateList(stageDeleteDto.getTasksId());
+        validateEnum(stageDeleteDto.getAction(), ActionWithTasks.class);
+    }
+
+    private <T> void validateEnum(T obj, Class<? extends T> enumClass) {
+        if (!enumClass.isInstance(obj)) {
+            throw new DataValidationException("Invalid enum");
+        }
+    }
+
     private void validateStage(StageDto stageDto) {
         validateId(stageDto.getStageId());
         validateId(stageDto.getProjectId());
+        validateList(stageDto.getStageRoleIds());
+        validateList(stageDto.getTeamMemberIds());
         if (stageDto.getStageName() == null || stageDto.getStageName().isEmpty()) {
             throw new DataValidationException("Stage name must not be empty");
         }
-        if (stageDto.getStageRoleIds() == null || stageDto.getStageRoleIds().isEmpty()) {
-            throw new DataValidationException("Stage must have at least one role");
-        }
-        if (stageDto.getTeamMemberIds() == null || stageDto.getTeamMemberIds().isEmpty()) {
-            throw new DataValidationException("Stage must have at least one team member");
+    }
+
+    private void validateList(List<?> list) {
+        if (list == null || list.isEmpty()) {
+            throw new DataValidationException("List must not be empty");
         }
     }
 
