@@ -37,6 +37,5 @@ public class Team {
     private Project project;
 
     @OneToMany(mappedBy = "team")
-    @Column(name = "offer_id")
     private List<Offer> offers;
 }

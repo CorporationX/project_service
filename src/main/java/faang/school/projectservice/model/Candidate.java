@@ -25,6 +25,5 @@ public class Candidate {
     private Vacancy vacancy;
 
     @OneToMany(mappedBy = "candidate")
-    @Column(name = "offer_id")
     private List<Offer> offers;
 }
