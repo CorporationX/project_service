@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.ResourceRepository;
@@ -23,25 +22,23 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
     private final TeamMemberRepository teamMemberRepository;
-    private final ResourcesValidator resourcesValidator;
     private final ResourceRepository resourceRepository;
+    private final ResourcesValidator resourcesValidator;
     private final ProjectRepository projectRepository;
     private final ResourceMapper resourceMapper;
-    private final UserContext userContext;
     private final FileStore fileStore;
 
-    public ResourceDto createResource(ResourceDto resourceDto, MultipartFile file) {
+    public ResourceDto uploadFile(ResourceDto resourceDto, MultipartFile file, long userId) {
         Project project = projectRepository.getProjectById(resourceDto.getProjectId());
         String key = resourceDto.getProjectId() + "_" + project.getName() + "/" + file.getOriginalFilename();
 
-        Resource resource = fillResource(resourceDto, file, key);
+        Resource resource = fillResourceCreate(resourceDto, file, key, userId);
         updateProjectStorageCapacity(file, project);
 
         fileStore.uploadFile(file, key);
@@ -50,26 +47,25 @@ public class ResourceService {
         return resourceMapper.toDto(entity);
     }
 
-    public ResourceDto updateResource(long id, ResourceDto resourceDto, MultipartFile file) {
+    public ResourceDto updateFile(long id, ResourceDto resourceDto, MultipartFile file, long userId) {
         Resource resource = getResourceById(id);
-
         Project project = projectRepository.getProjectById(resourceDto.getProjectId());
         updateProjectStorageCapacity(file, project);
 
         String key = resourceDto.getProjectId() + "_" + project.getName() + "/" + file.getOriginalFilename();
 
         fileStore.deleteFile(resource.getKey());
-
-        resource = fillResource(resourceDto, file, key);
+        fillResourceUpdate(resourceDto, resource, file, key, userId);
+        fileStore.uploadFile(file, key);
 
         return resourceMapper.toDto(resourceRepository.save(resource));
     }
 
-    public void deleteResource(long id) {
+    public void deleteResource(long id, long userId) {
         Resource resource = getResourceById(id);
         Project project = projectRepository.getProjectById(resource.getProject().getId());
 
-        resourcesValidator.checkRightsToDelete(resource, project, userContext.getUserId());
+        resourcesValidator.checkRightsToDelete(resource, project, userId);
 
         fileStore.deleteFile(resource.getKey());
 
@@ -87,33 +83,43 @@ public class ResourceService {
                 .orElseThrow(() -> new EntityNotFoundException("Resource not found"));
     }
 
-    private Resource fillResource(ResourceDto resourceDto, MultipartFile file, String key) {
-        TeamMember teamMember = teamMemberRepository.findById(userContext.getUserId());
+    private Resource fillResourceCreate(ResourceDto resourceDto, MultipartFile file, String key, long userId) {
+        TeamMember teamMember = teamMemberRepository.findById(userId);
+
         Resource resource = resourceMapper.toEntity(resourceDto);
 
+        TeamMember createdBy = TeamMember.builder().id(userId).build();
+        resource.setCreatedBy(createdBy);
+        resource.setUpdatedBy(createdBy);
+
+        fillResource(resource, file, key, teamMember);
+
+        return resource;
+    }
+
+    private void fillResourceUpdate(ResourceDto resourceDto, Resource resource, MultipartFile file, String key, long userId) {
+        TeamMember teamMember = teamMemberRepository.findById(userId);
+
+        resourceMapper.update(resourceDto, resource);
+
+        List<TeamRole> roles = new ArrayList<>(teamMember.getRoles());
+
+        resource.setAllowedRoles(roles);
+        resource.setUpdatedBy(TeamMember.builder().id(userId).build());
+        resource.setUpdatedAt(null);
+
+        fillResource(resource, file, key, teamMember);
+    }
+
+    private void fillResource(Resource resource, MultipartFile file, String key, TeamMember teamMember) {
+        List<TeamRole> roles = new ArrayList<>(teamMember.getRoles());
+
+        resource.setAllowedRoles(roles);
         resource.setName(file.getOriginalFilename());
         resource.setKey(key);
         resource.setType(ResourceType.getResourceType(file.getContentType()));
         resource.setStatus(ResourceStatus.ACTIVE);
         resource.setSize(BigInteger.valueOf(file.getSize()));
-
-        if (resourceDto.getId() == null) {
-            List<TeamRole> roles = new ArrayList<>(teamMember.getRoles());
-            resource.setAllowedRoles(roles);
-            TeamMember createdBy = TeamMember.builder().id(userContext.getUserId()).build();
-            resource.setCreatedBy(createdBy);
-            resource.setUpdatedBy(createdBy);
-        } else {
-            List<TeamRole> roles = Stream.concat(teamMember.getRoles().stream(), resource.getAllowedRoles().stream())
-                    .distinct()
-                    .toList();
-
-            resource.setAllowedRoles(roles);
-            resource.setUpdatedBy(TeamMember.builder().id(userContext.getUserId()).build());
-            resource.setUpdatedAt(null);
-        }
-
-        return resource;
     }
 
     private void updateProjectStorageCapacity(MultipartFile file, Project project) {
@@ -122,5 +128,6 @@ public class ResourceService {
         resourcesValidator.checkStorageCapacity(newStorageCapacity);
 
         project.setStorageSize(project.getStorageSize().add(BigInteger.valueOf(file.getSize())));
+        projectRepository.save(project);
     }
 }
