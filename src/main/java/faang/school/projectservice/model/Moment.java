@@ -54,7 +54,7 @@ public class Moment {
             joinColumns = @JoinColumn(name = "moment_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    private List<Project> project;
+    private List<Project> projects;
 
     @ElementCollection
     private List<Long> userIds;
@@ -64,6 +64,7 @@ public class Moment {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
@@ -71,9 +72,9 @@ public class Moment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @NotNull
+    @Column(name = "created_by")
     private Long createdBy;
 
-    @NotNull
+    @Column(name = "updated_by")
     private Long updatedBy;
 }

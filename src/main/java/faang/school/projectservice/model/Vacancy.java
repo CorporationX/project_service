@@ -1,5 +1,8 @@
 package faang.school.projectservice.model;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -10,15 +13,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
@@ -27,6 +32,9 @@ import org.springframework.data.annotation.LastModifiedBy;
 @Entity
 @Table(name = "vacancy")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Vacancy {
 
     @Id
@@ -39,8 +47,11 @@ public class Vacancy {
     @NotBlank
     private String description;
 
-    @OneToMany
-    @JoinColumn(name = "vacancy")
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @OneToMany(mappedBy = "vacancy")
     private List<Candidate> candidates;
 
     @CreationTimestamp
@@ -72,4 +83,3 @@ public class Vacancy {
     @Column(name = "skill_id")
     private List<Long> requiredSkillIds;
 }
-
