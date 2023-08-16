@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.dto.client.InternshipFilterDto;
 import faang.school.projectservice.service.InternshipService;
 import faang.school.projectservice.validator.InternshipValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,19 +18,19 @@ public class InternshipController {
     private final InternshipValidator internshipValidator;
 
     @PostMapping("/")
-    public InternshipDto saveNewInternship(@RequestBody InternshipDto internshipDto) {
+    public InternshipDto saveNewInternship(@Valid @RequestBody InternshipDto internshipDto) {
         internshipValidator.validateControllerInternship(internshipDto);
         return internshipService.saveNewInternship(internshipDto);
     }
 
     @PutMapping("/{id}")
-    public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto, @PathVariable Long id) {
+    public InternshipDto updateInternship(@Valid @RequestBody InternshipDto internshipDto, @Valid @PathVariable Long id) {
         internshipValidator.validateControllerInternship(internshipDto);
         return internshipService.updateInternship(internshipDto, id);
     }
 
     @PostMapping("/{projectId}/get-by-filter")
-    public List<InternshipDto> findInternshipsWithFilter(@RequestBody InternshipFilterDto filterDto, @PathVariable Long projectId) {
+    public List<InternshipDto> findInternshipsWithFilter(@RequestBody InternshipFilterDto filterDto, @Valid @PathVariable Long projectId) {
         return internshipService.findInternshipsWithFilter(projectId, filterDto);
     }
 
@@ -39,7 +40,7 @@ public class InternshipController {
     }
 
     @GetMapping("/{id}")
-    public InternshipDto findAllInternshipById(@PathVariable Long id) {
+    public InternshipDto findAllInternshipById(@Valid @PathVariable Long id) {
         return internshipService.findInternshipById(id);
     }
 }
