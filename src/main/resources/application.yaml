@@ -50,6 +50,9 @@ services:
 #      secretKey: password
 #      region: http://127.0.0.1:9000/
 #      bucket-name: user-bucket
+  servlet:
+    multipart:
+      max-file-size: 5MB
 
   payment-service:
     host: http://localhost

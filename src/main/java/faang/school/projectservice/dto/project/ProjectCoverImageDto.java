@@ -8,6 +8,5 @@ import lombok.Data;
 public class ProjectCoverImageDto {
     private Long projectId;
     private String fileId;
-//    private String smallFileId;
 }
 

@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -27,14 +28,14 @@ public class FileStorageService {
     private String bucketName;
     private final AmazonS3 amazonS3;
 
-    public String uploadFile(byte[] resizedFile, MultipartFile file, long projectId, String size) {
+    public String uploadFile(byte[] resizedFile, MultipartFile file, long projectId) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(resizedFile);
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(inputStream.available());
 
-        String objectKey = "p" + projectId + "_" + size + "_" + file.getOriginalFilename();
+        String objectKey = "p" + projectId + "_" + UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         try {
             amazonS3.putObject(bucketName, objectKey, inputStream, metadata);
         } catch (AmazonServiceException ase) {
