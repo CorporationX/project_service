@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
+import java.util.Objects;
 
 import static faang.school.projectservice.commonMessage.SubprojectErrMessage.ERR_VISIBILITY_PARENT_PROJECT_FORMAT;
 
@@ -39,15 +40,16 @@ public class SubprojectService {
     }
 
     private void setVisibilitySubproject(Project subproject, ProjectVisibility visibility) {
-        if (visibility == null) {
-            subproject.setVisibility(ProjectVisibility.PUBLIC);
-            return;
-        }
+        ProjectVisibility visibilityToSet = Objects.isNull(visibility)
+                ? ProjectVisibility.PUBLIC
+                : visibility;
+
         if (isParentVisibilityPublic(subproject.getParentProject()) && visibility == ProjectVisibility.PRIVATE) {
             String errorMessage = MessageFormat.format(ERR_VISIBILITY_PARENT_PROJECT_FORMAT, visibility);
             throw new SubprojectException(errorMessage);
         }
-        subproject.setVisibility(visibility);
+
+        subproject.setVisibility(visibilityToSet);
     }
 
     private boolean isParentVisibilityPublic(Project parentProject) {
