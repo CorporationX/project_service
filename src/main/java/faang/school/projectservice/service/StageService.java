@@ -83,7 +83,7 @@ public class StageService {
         long countTeamRoles = getTeamRolesCount(stageRolesDto, stage);
         log.debug("Team roles count is successfully retrieved, count: " + countTeamRoles);
 
-        if (countTeamRoles < stageRolesDto.getCount()) {
+        if (countTeamRoles >= stageRolesDto.getCount()) {
             throw new DataValidationException(stageRolesDto.getTeamRole() + " enough, no more needed");
         }
         inviteTeamMemberToStage(stage, stageRolesDto, authorId, countTeamRoles);
@@ -109,7 +109,6 @@ public class StageService {
                 stageRoles.add(newStageRole);
             }
         }
-
         stage.setStageRoles(stageRoles);
         stageRepository.save(stage);
     }

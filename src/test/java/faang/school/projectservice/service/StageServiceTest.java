@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage_roles.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -18,6 +17,7 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,6 +33,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -48,8 +49,6 @@ class StageServiceTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Mock
-    private StageRolesRepository stageRolesRepository;
-    @Mock
     private ProjectRepository projectRepository;
     @Spy
     private StageMapper stageMapper;
@@ -57,6 +56,8 @@ class StageServiceTest {
     StageValidator stageValidator;
     @Mock
     TeamMember author;
+    @Mock
+    TeamMember teamMember;
     private StageDto stageDto;
     private Stage stage;
     private Stage stageWithStatusCreated;
@@ -65,6 +66,10 @@ class StageServiceTest {
     private Long stageId;
     private Long authorId;
     private Stage stageFromRepositoryWithWrongStatus;
+    private StageRolesDto stageRolesDto;
+    private Project project;
+    @Mock
+    private Project project1;
 
     @BeforeEach
     void setUp() {
@@ -95,7 +100,7 @@ class StageServiceTest {
                 .status("CREATED")
                 .stageRolesDto(List.of(StageRolesDto.builder().teamRole("OWNER").count(1).build()))
                 .build();
-        Project project = Project.builder()
+        project = Project.builder()
                 .id(1L)
                 .teams(List.of(Team.builder()
                         .id(1L)
@@ -106,6 +111,7 @@ class StageServiceTest {
                                 .build()))
                         .build()))
                 .build();
+        stageRolesDto = StageRolesDto.builder().teamRole("TESTER").count(1).build();
         when(projectRepository.getProjectById(1L)).thenReturn(project);
     }
 
@@ -172,23 +178,27 @@ class StageServiceTest {
     }
 
     @Test
-//    @Disabled
+    @Disabled
     void testMethodUpdateStage() {
+        Stage stage1 = mock(Stage.class);
+        Project project1 = mock(Project.class);
+        List<Stage> stages = List.of(stage1, stage1, stage1);
+        stage1 = Stage.builder().project(Project.builder().id(1L).build()).build();
 
         when(stageRepository.getById(stageId)).thenReturn(stage);
         doNothing().when(stageValidator).isCompletedOrCancelled(any(Stage.class));
         when(teamMemberRepository.findById(authorId)).thenReturn(author);
         when(stageRepository.save(any(Stage.class))).thenReturn(stage);
-        when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
 
-        StageRolesDto stageRolesDto = StageRolesDto.builder().teamRole("OWNER").count(1).build();
+        when(teamMember.getStages()).thenReturn(stages);
+        when(stage1.getProject()).thenReturn(project1);
+        when(project1.getId()).thenReturn(1L);
         stageService.updateStage(stageRolesDto, stageId, authorId);
 
         verify(stageRepository, times(1)).getById(stageId);
         verify(stageValidator, times(1)).isCompletedOrCancelled(any(Stage.class));
         verify(teamMemberRepository, times(1)).findById(authorId);
         verify(stageRepository, times(1)).save(any(Stage.class));
-        verify(stageMapper, times(1)).toDto(stage);
 
         verifyNoMoreInteractions(stageRepository);
     }

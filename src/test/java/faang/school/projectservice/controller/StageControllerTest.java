@@ -30,7 +30,7 @@ class StageControllerTest {
     Long stageId;
     Long authorId;
     StageDto stageDtoWithListStageRoles;
-    StageDto stageDtoForUpdate;
+    StageRolesDto stageRolesDto;
     @Mock
     UserContext userContext;
 
@@ -41,11 +41,9 @@ class StageControllerTest {
         authorId = userContext.getUserId();
 
         status = "created";
-        stageDtoForUpdate = StageDto.builder()
-                .stageName("stageName")
-                .stageRolesDto(List.of(StageRolesDto.builder().teamRole("OWNER").build()))
-                .projectId(1L)
-                .status("CREATED")
+        stageRolesDto = StageRolesDto.builder()
+                .teamRole("OWNER")
+                .count(1)
                 .build();
         stageDtoWithListStageRoles = StageDto.builder()
                 .stageRolesDto(List.of(StageRolesDto.builder().teamRole("OWNER").build()))
@@ -78,9 +76,9 @@ class StageControllerTest {
 
     @Test
     void testMethodUpdateStage() {
-        stageController.updateStage(stageDtoForUpdate, stageId);
+        stageController.updateStage(stageRolesDto, stageId);
 
-        verify(stageService, times(1)).updateStage(stageDtoForUpdate, stageId, authorId);
+        verify(stageService, times(1)).updateStage(stageRolesDto, stageId, authorId);
         verifyNoMoreInteractions(stageService);
     }
 

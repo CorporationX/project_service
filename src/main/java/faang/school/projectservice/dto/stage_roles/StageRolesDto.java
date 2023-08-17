@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Schema(description = "Info about stage roles")
 public class StageRolesDto {
+    @Schema(description = "Stage role ID")
+    private Long id;
     @Schema(description = "Team role")
     @NotEmpty(message = "Team role can not be empty")
     private String teamRole;
