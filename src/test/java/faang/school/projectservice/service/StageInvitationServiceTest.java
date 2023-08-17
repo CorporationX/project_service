@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.invitation.DtoStage;
 import faang.school.projectservice.dto.invitation.DtoStageInvitation;
 import faang.school.projectservice.dto.invitation.DtoStageInvitationFilter;
-import faang.school.projectservice.dto.invitation.DtoStatus;
 import faang.school.projectservice.filter.stageInvitation.FilterAuthor;
 import faang.school.projectservice.filter.stageInvitation.FilterStatus;
 import faang.school.projectservice.mapper.invitationMaper.StageInvitationMapper;
@@ -76,11 +75,11 @@ public class StageInvitationServiceTest {
     void acceptDeclineInvitation() {
         when(invitationRepository.findById(1L)).thenReturn(stageInvitationMapper.toStageInvitation(invitation1));
         invitation1.setStatus(StageInvitationStatus.ACCEPTED);
-        DtoStatus expected = invitationService.acceptDeclineInvitation("ACCEPTED", 1L);
-        assertEquals(expected.getStatus(), invitation1.getStatus());
+        StageInvitationStatus expected = invitationService.acceptDeclineInvitation("ACCEPTED", 1L);
+        assertEquals(expected, invitation1.getStatus());
         invitation1.setStatus(StageInvitationStatus.REJECTED);
-        DtoStatus expected2 = invitationService.acceptDeclineInvitation("REJECTED", 1L);
-        assertEquals(expected2.getStatus(), invitation1.getStatus());
+        StageInvitationStatus expected2 = invitationService.acceptDeclineInvitation("REJECTED", 1L);
+        assertEquals(expected2, invitation1.getStatus());
     }
 
     @Test

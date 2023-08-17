@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.invitation.DtoStage;
 import faang.school.projectservice.dto.invitation.DtoStageInvitation;
 import faang.school.projectservice.dto.invitation.DtoStageInvitationFilter;
-import faang.school.projectservice.dto.invitation.DtoStatus;
 import faang.school.projectservice.exception.ValidException;
 import faang.school.projectservice.filter.stageInvitation.StageInvitationFilter;
 import faang.school.projectservice.mapper.invitationMaper.StageInvitationMapper;
@@ -44,7 +43,7 @@ public class StageInvitationService {
     }
 
     @Transactional
-    public DtoStatus acceptDeclineInvitation(String status, long idInvitation) {
+    public StageInvitationStatus acceptDeclineInvitation(String status, long idInvitation) {
         StageInvitation invitation = invitationRepository.findById(idInvitation);
 
         if (status.equals("ACCEPTED")) {
@@ -55,7 +54,7 @@ public class StageInvitationService {
             invitation.setStatus(StageInvitationStatus.PENDING);
         }
 
-        return new DtoStatus(invitation.getStatus());
+        return invitation.getStatus();
     }
 
     public List<DtoStageInvitation> getAllStageInvitation(long userId, DtoStageInvitationFilter filters) {
