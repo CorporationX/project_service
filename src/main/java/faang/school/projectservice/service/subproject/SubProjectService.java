@@ -2,28 +2,20 @@ package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
-import faang.school.projectservice.dto.subproject.VisibilitySubprojectUpdateDto;
+import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.moment.MomentService;
-import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
-import faang.school.projectservice.dto.subproject.SubProjectDto;
-import faang.school.projectservice.mapper.subproject.SubProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +25,12 @@ public class SubProjectService {
     private final SubProjectValidator subProjectValidator;
     private final ProjectMapper projectMapper;
     private final MomentMapper momentMapper;
+
+    public ProjectDto createProject(ProjectDto projectDto) {
+        subProjectValidator.validateCreateProjectDto(projectDto);
+        prepareProjectForCreate(projectDto);
+        return projectService.createProject(projectDto);
+    }
 
     public ProjectDto updateStatusSubProject(StatusSubprojectDto statusSubprojectDto) {
         subProjectValidator.validateSubProjectStatus(statusSubprojectDto.getId());
@@ -44,12 +42,23 @@ public class SubProjectService {
         return projectMapper.toProjectDto(project);
     }
 
-    public void updateVisibilitySubProject(VisibilitySubprojectUpdateDto updateStatusSubprojectDto) {
+    public void updateVisibilitySubProject(VisibilitySubprojectDto updateStatusSubprojectDto) {
         Project project = projectService.getProjectById(updateStatusSubprojectDto.getId());
         Project parentProject = project.getParentProject();
         ProjectVisibility visibility = updateStatusSubprojectDto.getVisibility();
 
-        updateVisibilitySubProject(project,parentProject, visibility);
+        updateVisibilitySubProject(project, parentProject, visibility);
+    }
+
+    private void prepareProjectForCreate(ProjectDto projectDto) {
+        Project parentProject = projectService.getProjectById(projectDto.getParentProjectId());
+        ProjectVisibility parentVisibility = parentProject.getVisibility();
+
+        if (projectDto.getVisibility()!=null){
+            subProjectValidator.validateVisibility(projectDto.getVisibility(), parentVisibility);
+        } else {
+            projectDto.setVisibility(parentVisibility);
+        }
     }
 
     private void updateStatusSubproject(Project project, ProjectStatus status) {
@@ -89,21 +98,5 @@ public class SubProjectService {
                 stack.push(subproject);
             }
         }
-    }
-
-    public SubProjectDto createProject(SubProjectDto subProjectDto) {
-        Project project = subProjectMapper.toEntity(subProjectDto);
-        prepareProjectForCreate(project);
-
-        Project newProject = projectRepository.save(project);
-        return subProjectMapper.toDto(newProject);
-    }
-
-    private void prepareProjectForCreate(Project project) {
-        project.setCreatedAt(LocalDateTime.now());
-        project.setStatus(ProjectStatus.CREATED);
-
-        ProjectVisibility parentVisibility = project.getParentProject().getVisibility();
-        project.setVisibility(parentVisibility);
     }
 }

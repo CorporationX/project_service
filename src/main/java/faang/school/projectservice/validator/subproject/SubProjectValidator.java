@@ -1,15 +1,12 @@
 package faang.school.projectservice.validator.subproject;
 
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.subproject.SubProjectDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.service.subproject.ProjectService;
-import faang.school.projectservice.service.subproject.SubProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubProjectValidator {
     private final ProjectService projectService;
-    private final SubProjectService subProjectService;
     private final UserServiceClient userServiceClient;
-    private final String NAME = "Name";
-    private final String DESCRIPTION = "Description";
 
     public void validateVisibility(ProjectVisibility visibility, ProjectVisibility parentVisibility) {
         if (visibility == ProjectVisibility.PUBLIC && parentVisibility == ProjectVisibility.PRIVATE) {
@@ -51,12 +45,9 @@ public class SubProjectValidator {
         return true;
     }
 
-    public void validateCreateProjectDto(SubProjectDto subProjectDto) {
-        validateRequiredFields(subProjectDto.getName(), NAME);
-        validateRequiredFields(subProjectDto.getDescription(), DESCRIPTION);
-
-        validateOwnerId(subProjectDto.getOwnerId());
-        validateParentProject(subProjectDto.getParentProjectId());
+    public void validateCreateProjectDto(ProjectDto projectDto) {
+        validateOwnerId(projectDto.getOwnerId());
+        validateParentProject(projectDto.getParentProjectId());
     }
 
     private void validateOwnerId(Long ownerId) {
@@ -69,16 +60,7 @@ public class SubProjectValidator {
         projectService.getProjectById(projectId);
     }
 
-    private void validateRequiredFields(String fieldData, String message) {
-        if (fieldData == null) {
-            throw new DataValidationException(message + " can't be null");
-        }
 
-        int contentLength = fieldData.length();
-        if (contentLength == 0 || contentLength >= 4096) {
-            throw new DataValidationException("You wrote wrong" + message + ", pls revise it");
-        }
-    }
 
     private void validateId(Long id) {
         if (id == null || id < 0) {
