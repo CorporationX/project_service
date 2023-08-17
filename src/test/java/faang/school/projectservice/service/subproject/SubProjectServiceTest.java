@@ -10,6 +10,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -159,7 +160,7 @@ class SubProjectServiceTest {
 
     @Test
     void testCreateProject() {
-        subProjectService.createProject(projectDto);
+        subProjectService.createSubProject(projectDto);
 
         Mockito.verify(subProjectValidator, Mockito.times(1))
                 .validateCreateProjectDto(projectDto);
@@ -169,14 +170,14 @@ class SubProjectServiceTest {
 
     @Test
     void testPrepareProjectForCreate_NullVisibility() {
-        subProjectService.createProject(projectDto);
+        subProjectService.createSubProject(projectDto);
         assertEquals(parentProject.getVisibility(), project.getVisibility());
     }
 
     @Test
     void testPrepareProjectForCreate_NotNullVisibility() {
         projectDto.setVisibility(ProjectVisibility.PRIVATE);
-        subProjectService.createProject(projectDto);
+        subProjectService.createSubProject(projectDto);
         Mockito.verify(subProjectValidator, Mockito.times(1))
                 .validateVisibility(projectDto.getVisibility(), parentProject.getVisibility());
     }

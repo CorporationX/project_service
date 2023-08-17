@@ -15,7 +15,7 @@ public class SubProjectController {
 
     @PostMapping("/create")
     public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
-        return subProjectService.createProject(projectDto);
+        return subProjectService.createSubProject(projectDto);
     }
 
     @PutMapping("/status")

@@ -9,6 +9,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class SubProjectService {
     private final ProjectMapper projectMapper;
     private final MomentMapper momentMapper;
 
-    public ProjectDto createProject(ProjectDto projectDto) {
+    public ProjectDto createSubProject(ProjectDto projectDto) {
         subProjectValidator.validateCreateProjectDto(projectDto);
         prepareProjectForCreate(projectDto);
         return projectService.createProject(projectDto);
