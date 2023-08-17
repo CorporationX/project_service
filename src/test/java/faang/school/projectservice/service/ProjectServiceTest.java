@@ -20,6 +20,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
