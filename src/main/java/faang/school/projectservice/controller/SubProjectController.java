@@ -4,6 +4,8 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.SubProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.project.ProjectService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,24 +15,34 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name="SubProjects", description = "API для управления подпроектами.")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/subprojects")
 public class SubProjectController {
     private final ProjectService projectService;
 
+    @Operation(
+            summary = "Создать подпроект",
+            tags = { "subprojects", "post" })
     @PostMapping
     public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
         validateProjectId(projectDto);
         return projectService.createSubProject(projectDto);
     }
 
+    @Operation(
+            summary = "Обновить подпроект",
+            tags = { "subprojects", "put" })
     @PutMapping
     public ProjectDto updateSubProject(@RequestBody ProjectDto projectDto) {
         validateProjectId(projectDto);
         return projectService.updateSubProject(projectDto);
     }
 
+    @Operation(
+            summary = "Получить подпроекты с применением фильтров",
+            tags = { "subprojects", "post" })
     @PostMapping("/filter")
     public List<ProjectDto> getFilteredSubProjects(@RequestBody SubProjectFilterDto filtersDto) {
         validateSubProjectFilterId(filtersDto);
