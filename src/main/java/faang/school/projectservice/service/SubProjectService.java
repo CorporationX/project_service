@@ -1,12 +1,10 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.exception.DataValidException;
 import faang.school.projectservice.exception.StatusException;
 import faang.school.projectservice.filter.project.ProjectFilter;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -31,7 +29,6 @@ public class SubProjectService {
     private final MomentRepository momentRepository;
     private final List<ProjectFilter> projectFilters;
 
-
     @Transactional
     public SubProjectDto createSubProject(SubProjectDto subProjectDto) {
         validateParentProjectExist(subProjectDto);
@@ -43,8 +40,6 @@ public class SubProjectService {
         Project parentProject = projectRepository.getProjectById(subProjectDto.getParentId());
         subProject.setParentProject(parentProject);
         subProject.setStatus(ProjectStatus.CREATED);
-        subProject.setCreatedAt(LocalDateTime.now());
-        subProject.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(subProject);
         parentProject.getChildren().add(subProject);
         projectRepository.save(parentProject);
@@ -60,8 +55,7 @@ public class SubProjectService {
     private void validateVisibilityConsistency(SubProjectDto subProjectDto) {
         Project parentProject = projectRepository.getProjectById(subProjectDto.getParentId());
         if (!subProjectDto.getVisibility().equals(parentProject.getVisibility())) {
-            throw new DataValidException("The visibility of the subproject must be - " +
-                    parentProject.getVisibility() + " like the parent project");
+            throw new DataValidException(String.format("The visibility of the subproject must be %s like the parent project", parentProject.getVisibility()));
         }
     }
 
@@ -71,33 +65,33 @@ public class SubProjectService {
         boolean subProjectExists = parentProject.getChildren().stream().anyMatch(
                 subProject -> subProject.getName().equals(subProjectName));
         if (subProjectExists) {
-            throw new DataValidException("Subproject with name " + subProjectName + " already exists");
+            throw new DataValidException(String.format("Subproject with name %s already exists", subProjectName));
         }
     }
 
     @Transactional
-    public SubProjectDto updateSubProject(SubProjectDto subProjectDto){
+    public SubProjectDto updateSubProject(SubProjectDto subProjectDto) {
         Project subProject = projectRepository.getProjectById(subProjectDto.getId());
         checkStatusesOfChildren(subProject, subProjectDto.getStatus());
-        if(subProjectDto.getStatus().equals(ProjectStatus.COMPLETED)){
+        if (subProjectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
             closeChildren(subProject);
         }
         setChildrenVisibility(subProject, subProjectDto.getVisibility());
 
         subProject.setVisibility(subProjectDto.getVisibility());
         subProject.setStatus(subProjectDto.getStatus());
-        subProject.setUpdatedAt(LocalDateTime.now());
-        projectRepository.save(subProject);
         return subProjectMapper.toDto(subProject);
     }
 
-    private void checkStatusesOfChildren(Project subproject, ProjectStatus status){
+    private void checkStatusesOfChildren(Project subproject, ProjectStatus status) {
         subproject.getChildren().stream().filter(child -> !child.getStatus().equals(status)).
-            forEach(child -> {throw new StatusException("All subprojects of this project should have the same status");});
+                forEach(child -> {
+                    throw new StatusException("All subprojects of this project should have the same status");
+                });
     }
 
     @Transactional
-    private void closeChildren(Project subProject){
+    private void closeChildren(Project subProject) {
         Moment moment = Moment.builder().name("Выполнены все проекты").build();
         List<Long> userIds = subProject.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
@@ -108,7 +102,7 @@ public class SubProjectService {
     }
 
     @Transactional
-    private void setChildrenVisibility(Project subproject, ProjectVisibility visibility){
+    private void setChildrenVisibility(Project subproject, ProjectVisibility visibility) {
         subproject.getChildren().stream()
                 .peek(child -> child.setVisibility(visibility))
                 .forEach(child -> projectRepository.save(child));

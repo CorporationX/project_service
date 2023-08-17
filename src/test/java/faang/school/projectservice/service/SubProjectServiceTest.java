@@ -101,7 +101,7 @@ public class SubProjectServiceTest {
         when(projectRepository.getProjectById(anyLong())).thenReturn(projectVisibility);
         DataValidException exception = assertThrows(DataValidException.class,
                 () -> subProjectService.createSubProject(subProjectDto));
-        assertEquals("The visibility of the subproject must be - " +
+        assertEquals("The visibility of the subproject must be " +
                 ProjectVisibility.PRIVATE + " like the parent project", exception.getMessage());
     }
 
@@ -124,18 +124,11 @@ public class SubProjectServiceTest {
 
     @Test
     void createSubProjectTest() {
-        SubProjectDto projectDto = SubProjectDto.builder().name("subproject").description("new subproject")
-                .parentId(2L).childrenId(List.of(10L)).visibility(ProjectVisibility.PUBLIC)
-                .status(ProjectStatus.CREATED).build();
-        Project project = Project.builder().id(2L).visibility(ProjectVisibility.PUBLIC)
-                .children(new ArrayList<>()).build();
-        List<Project> children = List.of(Project.builder().id(10L).build());
-        Project projectFromDto = Project.builder().name("subproject").description("new subproject")
-                .parentProject(project).children(children).visibility(ProjectVisibility.PUBLIC)
-                .status(ProjectStatus.CREATED).build();
-        SubProjectDto resultDto = SubProjectDto.builder().name("subproject").description("new subproject")
-                .parentId(2L).childrenId(List.of(10L)).visibility(ProjectVisibility.PUBLIC)
-                .status(ProjectStatus.CREATED).build();
+        SubProjectDto projectDto = createSubProjectDto("subproject", "new subproject", 2L, List.of(10L), ProjectVisibility.PUBLIC, ProjectStatus.CREATED);
+        Project project = createProject(2L, "subproject", ProjectVisibility.PUBLIC, new ArrayList<>());
+        List<Project> children = List.of(createProject(10L, "childProject", ProjectVisibility.PUBLIC, new ArrayList<>()));
+        Project projectFromDto = createProject(null, "subproject", ProjectVisibility.PUBLIC, children);
+        SubProjectDto resultDto = createSubProjectDto("subproject", "new subproject", 2L, List.of(10L), ProjectVisibility.PUBLIC, ProjectStatus.CREATED);
 
         when(projectRepository.existsById(anyLong())).thenReturn(true);
         when(projectRepository.getProjectById(2L)).thenReturn(project);
@@ -196,5 +189,25 @@ public class SubProjectServiceTest {
                 () -> assertEquals(1, result.size()),
                 () -> assertEquals(project1, result.get(0))
         );
+    }
+
+    private SubProjectDto createSubProjectDto(String name, String description, Long parentId, List<Long> childrenId, ProjectVisibility visibility, ProjectStatus status) {
+        return SubProjectDto.builder()
+                .name(name)
+                .description(description)
+                .parentId(parentId)
+                .childrenId(childrenId)
+                .visibility(visibility)
+                .status(status)
+                .build();
+    }
+
+    private Project createProject(Long id, String name, ProjectVisibility visibility, List<Project> children) {
+        return Project.builder()
+                .id(id)
+                .name(name)
+                .visibility(visibility)
+                .children(children)
+                .build();
     }
 }

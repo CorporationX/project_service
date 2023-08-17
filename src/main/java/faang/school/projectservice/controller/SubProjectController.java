@@ -28,7 +28,7 @@ public class SubProjectController {
         return subProjectService.updateSubProject(subProjectDto);
     }
 
-    @GetMapping("/{id}")
+    @PostMapping("/{id}/search-by-filter")
     public List<SubProjectDto> getSubProjects(@RequestBody ProjectFilterDto projectFilter, @PathVariable("id") long projectId) {
         return subProjectService.getSubProjects(projectFilter, projectId);
     }
