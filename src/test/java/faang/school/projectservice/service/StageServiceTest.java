@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class StageServiceTest {
     @Mock
@@ -64,6 +65,7 @@ class StageServiceTest {
     private TeamMember teamMember3;
     private Stage stage5;
     private Stage stage2;
+
     @BeforeEach
     public void setUp() {
         stage5 = Stage
@@ -126,6 +128,7 @@ class StageServiceTest {
                 .count(2)
                 .build();
     }
+
     @Test
     public void createStage_projectUnavailable() {
         stage = Stage.builder()
@@ -141,20 +144,7 @@ class StageServiceTest {
         verify(stageRepository, times(0)).save(stage);
         assertEquals("Project with id 1 unavailable", projectException.getMessage());
     }
-    @Test
-    public void createStage_validStage() {
-        stage = Stage.builder()
-                .stageId(2L)
-                .stageName("")
-                .project(Project.builder()
-                        .id(1L)
-                        .status(ProjectStatus.CREATED)
-                        .build())
-                .build();
-        StageException stageException = assertThrows(StageException.class, () -> stageService.createStage(StageMapper.INSTANCE.toStageDto(stage)));
-        verify(stageRepository, times(0)).save(stage);
-        assertEquals("Name cannot be empty", stageException.getMessage());
-    }
+
     @Test
     public void createStage_correctAnswer() {
         stage = Stage.builder()
@@ -165,11 +155,29 @@ class StageServiceTest {
                         .status(ProjectStatus.CREATED)
                         .build())
                 .build();
-        when(projectRepository.getProjectById(anyLong())).thenReturn(stage.getProject());
+        StageDto stageDto1 = StageDto.builder()
+                .stageId(2L)
+                .stageName("stage1")
+                .project(ProjectDto.builder()
+                        .id(3L)
+                        .status(ProjectStatus.CREATED)
+                        .build())
+                .build();
+        Project project = Project.builder()
+                .id(3L)
+                .status(ProjectStatus.CREATED)
+                .build();
+        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+        when(stageRepository.getById(anyLong())).thenReturn(stage);
+        when(stageMapper.toStage(stageDto1)).thenReturn(stage);
+        when(stageMapper.toStageDto(stage)).thenReturn(stageDto1);
         when(stageRepository.save(any())).thenReturn(stage);
-        stageService.createStage(StageMapper.INSTANCE.toStageDto(stage));
+        StageDto stageDto2 = stageService.createStage(stageDto1);
+
         verify(stageRepository, times(1)).save(any());
+        assertEquals(stageDto2, stageDto1);
     }
+
     @Test
     public void deleteStage_cascade() {
         stage = Stage.builder()
@@ -186,6 +194,7 @@ class StageServiceTest {
         verify(taskRepository, times(1)).deleteAll(stage.getTasks());
         verify(stageRepository, times(1)).delete(stage);
     }
+
     @Test
     public void deleteStage_close() {
         stage = Stage.builder()
@@ -201,6 +210,7 @@ class StageServiceTest {
         stageService.deleteStage(2L, DeleteStageDto.CLOSE, null);
         verify(stageRepository, times(1)).delete(stage);
     }
+
     @Test
     public void deleteStage_move() {
         List<Task> tasks = new ArrayList<>();
@@ -234,6 +244,7 @@ class StageServiceTest {
         stage.setTasks(new ArrayList<>());
         verify(stageRepository, times(1)).delete(stage);
     }
+
     @Test
     public void getAllStage_correctAnswer() {
         ProjectDto project = ProjectDto.builder()
@@ -245,6 +256,7 @@ class StageServiceTest {
         List<StageDto> stageSize = stageService.getAllStage(project);
         assertEquals(2, stageSize.size());
     }
+
     @Test
     public void getAllStage_invalidStatus() {
         ProjectDto project = ProjectDto.builder()
@@ -256,6 +268,7 @@ class StageServiceTest {
         ProjectException projectException = assertThrows(ProjectException.class, () -> stageService.getAllStage(project));
         assertEquals("The project must have a status", projectException.getMessage());
     }
+
     @Test
     public void getStageById_correctAnswer() {
         StageDto stageDto = StageDto.builder()
@@ -272,6 +285,7 @@ class StageServiceTest {
         when(stageRepository.getById(9L)).thenReturn(stage);
         assertEquals("stage2", stageService.getStageById((9L)).getStageName());
     }
+
     @Test
     void testUpdateStageRolesNegative() {
         stage1 = Stage
@@ -285,6 +299,7 @@ class StageServiceTest {
         when(stageRepository.getById(1L)).thenReturn(stage1);
         assertThrows(RuntimeException.class, () -> stageService.updateStageRoles(1L, stageRolesDto));
     }
+
     @Test
     void testUpdateStageRoles() {
         when(stageRepository.getById(1L)).thenReturn(stage5);

@@ -39,6 +39,7 @@ public class StageService {
     private final ProjectMapper projectMapper;
     private final TaskRepository taskRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
+
     @Transactional
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageRepository.save(stageMapper.toStage(validStage(stageDto)));
@@ -99,10 +100,11 @@ public class StageService {
         int countTeamRoles = getTotalTeamRoles(stageRoles, stage);
         if (countTeamRoles >= stageRoles.getCount()) {
             throw new StageException(stageRoles.getTeamRole().name() + " no longer required");
-        } else {
-            invitationMembersToStage(stageRoles, stage, countTeamRoles);
         }
+
+        invitationMembersToStage(stageRoles, stage, countTeamRoles);
     }
+
     private void invitationMembersToStage(StageRolesDto stageRoles, Stage stageById, int countTeamRoles) {
         List<TeamMember> teamMembersInProject = teamMemberJpaRepository.findByProjectId(stageById.getProject().getId());
         teamMembersInProject.stream()
@@ -114,6 +116,7 @@ public class StageService {
         changeStageRolesToActual(stageRoles, stageById, countTeamRoles);
         teamMemberJpaRepository.saveAll(teamMembersInProject);
     }
+
     private void changeStageRolesToActual(StageRolesDto stageRoles, Stage stageById, int countTeamRoles) {
         stageById.getStageRoles().stream()
                 .filter(stageRole -> stageRole.getTeamRole().equals(stageRoles.getTeamRole()))
@@ -121,26 +124,23 @@ public class StageService {
                 .ifPresent(stageRole -> stageRole.setCount(stageRole.getCount() - countTeamRoles + stageRoles.getCount()));
         stageRepository.save(stageById);
     }
+
     private int getTotalTeamRoles(StageRolesDto stageRoles, Stage stageById) {
         return stageById.getStageRoles().stream()
                 .filter(stageRole -> stageRole.getTeamRole().equals(stageRoles.getTeamRole()))
                 .mapToInt(StageRoles::getCount)
                 .sum();
     }
+
     private StageDto validStage(StageDto stage) {
-        if (stage.getStageId() == null) {
-            throw new StageException("Invalid ID");
-        }
-        if (stage.getStageName().isBlank()) {
-            throw new StageException("Name cannot be empty");
-        }
         Project project = projectRepository.getProjectById(stage.getProject().getId());
-        boolean projectInProgress = project.getStatus().equals(ProjectStatus.IN_PROGRESS);
-        boolean projectCreated = project.getStatus().equals(ProjectStatus.CREATED);
-        if (projectInProgress || projectCreated) {
-            return stageMapper.toStageDto(stageRepository.getById(stage.getStageId()));
-        } else {
+        boolean projectCancelled = project.getStatus().equals(ProjectStatus.CANCELLED);
+        boolean projectCompleted = project.getStatus().equals(ProjectStatus.COMPLETED);
+        boolean projectOnHold = project.getStatus().equals(ProjectStatus.ON_HOLD);
+        if (projectCancelled || projectCompleted || projectOnHold) {
             throw new ProjectException(MessageFormat.format("Project with id {0} unavailable", project.getId()));
+
         }
+        return stageMapper.toStageDto(stageRepository.getById(stage.getStageId()));
     }
 }

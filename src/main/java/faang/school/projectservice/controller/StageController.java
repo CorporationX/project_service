@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,16 +21,18 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("api/v1/likes")
 public class StageController {
     private final StageService stageService;
+
     @PostMapping
     public StageDto createStage(@RequestBody StageDto stage) {
         return stageService.createStage(stage);
     }
 
-    @DeleteMapping("/{stageId1}")
-    public void deleteStage(@PathVariable Long stageId1, @RequestBody DeleteStageDto deleteStageDto, @RequestParam("id2") Long stageId2) {
-        stageService.deleteStage(stageId1, deleteStageDto, stageId2);
+    @DeleteMapping("/{stageToDelete}")
+    public void deleteStage(@PathVariable Long stageToDelete, @RequestBody DeleteStageDto deleteStageDto, @RequestParam("id2") Long stageToTransfer) {
+        stageService.deleteStage(stageToDelete, deleteStageDto, stageToTransfer);
     }
 
     @GetMapping
@@ -42,7 +45,7 @@ public class StageController {
         return stageService.getStageById(id);
     }
 
-    @PostMapping
+    @PostMapping("/by-filter")
     public List<StageDto> filterByStatus(@RequestBody StageFilterDto stageFilterDto) {
         return stageService.filterByStatus(stageFilterDto);
     }
