@@ -51,8 +51,7 @@ public class Vacancy {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @OneToMany
-    @JoinColumn(name = "vacancy")
+    @OneToMany(mappedBy = "vacancy")
     private List<Candidate> candidates;
 
     @CreationTimestamp
@@ -78,6 +77,8 @@ public class Vacancy {
 
     @Enumerated(EnumType.STRING)
     private WorkSchedule workSchedule;
+
+    private Integer count;
 
     @ElementCollection
     @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))

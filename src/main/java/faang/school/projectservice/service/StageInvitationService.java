@@ -11,11 +11,12 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -27,29 +28,29 @@ public class StageInvitationService {
     private final StageInvitationMapper stageInvitationMapper;
     private final List<StageInvitationFilter> filters;
     private final TeamMemberRepository teamMemberRepository;
+    private final StageRepository stageRepository;
 
     @Transactional
-    public StageInvitationDto sendInvitation(@NonNull StageInvitationDto stageInvitationDto) {
-        Long invitedUserId = stageInvitationDto.getInvited().getUserId();
-        TeamMember invitedUser = teamMemberRepository.findById(invitedUserId);
+    public StageInvitationDto sendInvitation(StageInvitationDto stageInvitationDto) {
+        TeamMember invitedUser = teamMemberRepository.findById(stageInvitationDto.getInvitedId());
 
         if (invitedUser.getRoles().contains(TeamRole.OWNER) || invitedUser.getRoles().contains(TeamRole.MANAGER)) {
             throw new DataValidateInviteException("Can't send invitation to user with OWNER or MANAGER role");
         }
+        Stage stage = stageRepository.getById(stageInvitationDto.getStageId());
 
-        List<TeamMember> executors = stageInvitationDto.getStage().getExecutors();
+        List<TeamMember> executors = stage.getExecutors();
         boolean isUserAlreadyExecutor = executors.stream()
                 .anyMatch(executor -> executor.getId().equals(invitedUser.getId()));
 
         if (!isUserAlreadyExecutor) {
             StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
             stageInvitation.setStatus(StageInvitationStatus.PENDING);
-            TeamMember author = stageInvitationDto.getStage().getExecutors().stream()
+            TeamMember author = stage.getExecutors().stream()
                     .filter(teamMember -> teamMember.getRoles().contains(TeamRole.OWNER))
                     .toList().get(0);
-            TeamMember invited = stageInvitationDto.getInvited();
             stageInvitation.setAuthor(author);
-            stageInvitation.setInvited(invited);
+            stageInvitation.setInvited(invitedUser);
             return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
         } else {
             throw new DataValidateInviteException("User is already executor for this stage");
@@ -57,7 +58,7 @@ public class StageInvitationService {
     }
 
     @Transactional
-    public StageInvitationDto acceptInvitation(@NonNull StageInvitationDto stageInvitationDto) {
+    public StageInvitationDto acceptInvitation(StageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
         stageInvitationMapper.updateDto(stageInvitationDto, stageInvitation);
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
@@ -78,7 +79,7 @@ public class StageInvitationService {
     }
 
     @Transactional
-    public StageInvitationDto rejectInvitation(@NonNull StageInvitationDto stageInvitationDto) {
+    public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
 
         if (stageInvitation == null) {
