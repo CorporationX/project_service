@@ -37,19 +37,12 @@ calculations_messages_processing:
 
 services:
   s3:
-#    endpoint: http://localhost:9000
-    region: http://127.0.0.1:9000/
-
     accessKey: user
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    region: http://127.0.0.1:9000/
 
-#    aws:
-#      accessKey: user
-#      secretKey: password
-#      region: http://127.0.0.1:9000/
-#      bucket-name: user-bucket
   servlet:
     multipart:
       max-file-size: 5MB

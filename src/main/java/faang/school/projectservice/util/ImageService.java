@@ -22,7 +22,7 @@ public class ImageService {
             int height = originalImage.getHeight();
             int width = originalImage.getWidth();
             boolean isSquare = height == width;
-            if((isSquare && height > MAX_HEIGHT) || width > MAX_WIDTH || height > MAX_HEIGHT) {
+            if ((isSquare && height > MAX_HEIGHT) || width > MAX_WIDTH || height > MAX_HEIGHT) {
                 getNewSize(originalImage, true, height, width);
             }
             BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);

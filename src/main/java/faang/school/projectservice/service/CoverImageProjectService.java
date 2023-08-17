@@ -38,7 +38,6 @@ public class CoverImageProjectService {
         if (project.getCoverImageId() == null) {
             throw new DataValidException("User with id " + projectId + " doesn't has an avatar");
         }
-
         CoverImageFromAwsDto cover = fileStorageService.receiveFile(project.getCoverImageId());
         return cover;
     }
