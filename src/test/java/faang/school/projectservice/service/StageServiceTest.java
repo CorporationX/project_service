@@ -1,9 +1,12 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage_roles.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -20,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -30,8 +35,10 @@ import org.mockito.quality.Strictness;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -52,12 +59,18 @@ class StageServiceTest {
     private ProjectRepository projectRepository;
     @Spy
     private StageMapper stageMapper;
+    @Spy
+    private StageRolesMapper stageRolesMapper;
     @Mock
-    StageValidator stageValidator;
+    private StageValidator stageValidator;
     @Mock
-    TeamMember author;
+    private TeamMember author;
     @Mock
-    TeamMember teamMember;
+    private StageInvitationService stageInvitationService;
+    @Mock
+    private StageRolesRepository stageRolesRepository;
+    @Captor
+    private ArgumentCaptor<StageInvitationDto> captor;
     private StageDto stageDto;
     private Stage stage;
     private Stage stageWithStatusCreated;
@@ -68,8 +81,7 @@ class StageServiceTest {
     private Stage stageFromRepositoryWithWrongStatus;
     private StageRolesDto stageRolesDto;
     private Project project;
-    @Mock
-    private Project project1;
+    TeamMember teamMember;
 
     @BeforeEach
     void setUp() {
@@ -88,6 +100,7 @@ class StageServiceTest {
                 .status(StageStatus.CANCELLED)
                 .build();
         stage = Stage.builder()
+                .stageId(1L)
                 .stageName("stageName")
                 .project(Project.builder().id(1L).build())
                 .status(StageStatus.CREATED)
@@ -105,13 +118,19 @@ class StageServiceTest {
                 .teams(List.of(Team.builder()
                         .id(1L)
                         .teamMembers(List.of(TeamMember.builder()
-                                .id(1L)
-                                .team(Team.builder().id(1L).build())
-                                .roles(List.of(TeamRole.MANAGER))
-                                .build()))
+                                        .id(1L)
+                                        .team(Team.builder().id(1L).build())
+                                        .roles(List.of(TeamRole.MANAGER))
+                                        .build(),
+                                TeamMember.builder()
+                                        .id(1L)
+                                        .team(Team.builder().id(1L).build())
+                                        .roles(List.of(TeamRole.DEVELOPER))
+                                        .build()))
                         .build()))
                 .build();
-        stageRolesDto = StageRolesDto.builder().teamRole("TESTER").count(1).build();
+        stageRolesDto = StageRolesDto.builder().teamRole("DEVELOPER").count(2).build();
+        teamMember = TeamMember.builder().id(1L).stages(List.of(stage)).build();
         when(projectRepository.getProjectById(1L)).thenReturn(project);
     }
 
@@ -211,8 +230,85 @@ class StageServiceTest {
     }
 
     @Test
-    void testMethodFindTeamMemberById_ThrowExceptionAndMessage() {
-        when(teamMemberRepository.findById(authorId)).thenThrow(EntityNotFoundException.class);
-        assertThrows(EntityNotFoundException.class, () -> teamMemberRepository.findById(authorId), String.format("Team member doesn't exist by id: %s", authorId));
+    public void testGetTeamMembers() {
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        List<TeamMember> teamMembers = stageService.getTeamMembers(1L);
+        verify(projectRepository, times(1)).getProjectById(1L);
+        assertEquals(2, teamMembers.size());
+    }
+
+    @Test
+    public void testGetTeamRolesCount() {
+        long count = stageService.getTeamRolesCount(stageRolesDto, stage);
+        assertEquals(1, count);
+    }
+
+    @Test
+    public void testSendStageInvitation() {
+        StageInvitationDto stageInvitationDto = StageInvitationDto.builder()
+                .stageId(stage.getStageId())
+                .authorId(authorId)
+                .invitedId(teamMember.getId())
+                .build();
+
+        stageService.sendStageInvitation(stage, authorId, teamMember);
+        verify(stageInvitationService, times(1)).sendInvitation(stageInvitationDto);
+    }
+
+    @Test
+    public void testSendStageInvitationArguments() {
+        stageService.sendStageInvitation(stage, authorId, teamMember);
+        verify(stageInvitationService).sendInvitation(captor.capture());
+
+        StageInvitationDto capturedDto = captor.getValue();
+        assertEquals(stage.getStageId(), capturedDto.getStageId());
+        assertEquals(authorId, capturedDto.getAuthorId());
+        assertEquals(teamMember.getId(), capturedDto.getInvitedId());
+    }
+
+    @Test
+    @Disabled
+    public void testInviteTeamMemberToStage() {
+        long countTeamRoles = 1L;
+        Stage stage1 = mock(Stage.class);
+        Project project1 = mock(Project.class);
+        TeamMember teamMember1 = mock(TeamMember.class);
+
+        when(stage1.getProject()).thenReturn(project1);
+        when(project1.getId()).thenReturn(456L);
+
+        when(project1.getTeams()).thenReturn(new ArrayList<>());
+        when(teamMember1.getStages()).thenReturn(new ArrayList<>());
+
+
+        stageService.inviteTeamMemberToStage(stage, stageRolesDto, authorId, countTeamRoles);
+
+        verify(stageService, times(1)).sendStageInvitation(eq(stage1), eq(authorId), eq(teamMember1));
+    }
+
+    @Test
+    public void testUpdateStageRoles() {
+        StageRoles stageRole1 = mock(StageRoles.class);
+        StageRoles stageRole2 = mock(StageRoles.class);
+        StageRolesDto stageRolesDto1 = mock(StageRolesDto.class);
+        Stage stage1 = mock(Stage.class);
+
+        when(stageRolesDto1.getTeamRole()).thenReturn("DEVELOPER");
+        when(stageRolesDto1.getCount()).thenReturn(2);
+
+        List<StageRoles> stageRoles = new ArrayList<>();
+        stageRoles.add(stageRole1);
+        stageRoles.add(stageRole2);
+
+        when(stage1.getStageRoles()).thenReturn(stageRoles);
+        when(stageRole1.getTeamRole()).thenReturn(TeamRole.DEVELOPER);
+        when(stageRole1.getCount()).thenReturn(1);
+        when(stageRolesMapper.toEntity(stageRolesDto1)).thenReturn(new StageRoles());
+
+        stageService.updateStageRoles(stageRolesDto, stage);
+
+        verify(stageRolesRepository, times(1)).save(any(StageRoles.class));
+        verify(stageRolesRepository, times(1)).save(any(StageRoles.class));
+        verify(stageRepository, times(1)).save(stage);
     }
 }

@@ -76,7 +76,7 @@ class StageControllerTest {
 
     @Test
     void testMethodUpdateStage() {
-        stageController.updateStage(stageRolesDto, stageId);
+        stageController.updateStage(stageRolesDto, stageId, authorId);
 
         verify(stageService, times(1)).updateStage(stageRolesDto, stageId, authorId);
         verifyNoMoreInteractions(stageService);

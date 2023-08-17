@@ -95,7 +95,7 @@ public class StageService {
         return stageRolesDto;
     }
 
-    private void updateStageRoles(StageRolesDto stageRolesDto, Stage stage) {
+    public void updateStageRoles(StageRolesDto stageRolesDto, Stage stage) {
         List<StageRoles> stageRoles = stage.getStageRoles();
         for (StageRoles stageRole : stageRoles) {
             if (stageRole.getTeamRole().equals(TeamRole.valueOf(stageRolesDto.getTeamRole()))) {
@@ -113,7 +113,7 @@ public class StageService {
         stageRepository.save(stage);
     }
 
-    private void inviteTeamMemberToStage(Stage stage, StageRolesDto stageRolesDto, Long authorId, long countTeamRoles) {
+    public void inviteTeamMemberToStage(Stage stage, StageRolesDto stageRolesDto, Long authorId, long countTeamRoles) {
         Long projectId = stage.getProject().getId();
         List<TeamMember> projectTeamMembers = getTeamMembers(projectId);
         projectTeamMembers.stream().filter(teamMember -> teamMember.getStages().stream()
@@ -123,7 +123,7 @@ public class StageService {
                 .forEach(teamMember -> sendStageInvitation(stage, authorId, teamMember));
     }
 
-    private long getTeamRolesCount(StageRolesDto stageRolesDto, Stage stage) {
+    public long getTeamRolesCount(StageRolesDto stageRolesDto, Stage stage) {
         return stage.getStageRoles()
                 .stream()
                 .filter(stageRole ->
@@ -131,7 +131,7 @@ public class StageService {
                 .count();
     }
 
-    private List<TeamMember> getTeamMembers(Long projectId) {
+    public List<TeamMember> getTeamMembers(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
 
         return project.getTeams()
@@ -142,13 +142,11 @@ public class StageService {
     }
 
 
-    private void sendStageInvitation(Stage stage, Long authorId, TeamMember teamMember) {
+    public void sendStageInvitation(Stage stage, Long authorId, TeamMember teamMember) {
         stageInvitationService.sendInvitation(StageInvitationDto.builder()
-                .stage(stage)
-                .author(TeamMember.builder()
-                        .id(authorId)
-                        .build())
-                .invited(teamMember)
+                .stageId(stage.getStageId())
+                .authorId(authorId)
+                .invitedId(teamMember.getId())
                 .build());
     }
 }

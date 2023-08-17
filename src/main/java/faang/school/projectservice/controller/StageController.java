@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage_roles.StageRolesDto;
 import faang.school.projectservice.service.StageService;
@@ -33,7 +32,6 @@ import java.util.List;
 @Slf4j
 public class StageController {
     private final StageService stageService;
-    private final UserContext userContext;
 
     @Operation(summary = "Create stage")
     @PostMapping()
@@ -63,8 +61,8 @@ public class StageController {
     @Operation(summary = "Update stage")
     @PutMapping("/stage")
     public StageRolesDto updateStage(@Valid @RequestBody StageRolesDto stageRolesDto,
-                                @RequestParam(value = "stageId") @NotNull Long stageId) {
-        Long authorId = userContext.getUserId();
+                                     @RequestParam(value = "stageId") @NotNull Long stageId,
+                                     @RequestParam(value = "authorId") @NotNull Long authorId) {
         log.debug("Received request to update stage: {} + stageId: {} + authorId: {}", stageRolesDto, stageId, authorId);
         return stageService.updateStage(stageRolesDto, stageId, authorId);
     }
