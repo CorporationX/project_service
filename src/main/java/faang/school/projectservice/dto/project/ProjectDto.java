@@ -39,5 +39,6 @@ public class ProjectDto {
 
     @NotNull
     private ProjectStatus status;
+    @NotNull
     private List<Long> stageIds;
 }

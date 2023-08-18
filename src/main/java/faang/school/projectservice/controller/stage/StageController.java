@@ -1,8 +1,10 @@
 package faang.school.projectservice.controller.stage;
 
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.ActionWithTasks;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage.StageService;
 import lombok.RequiredArgsConstructor;
@@ -52,13 +54,19 @@ public class StageController {
         service.deleteStageById(stageDeleteDto);
     }
 
+    @GetMapping("/get-stages-by-status")
+    @ResponseStatus(HttpStatus.OK)
+    public List<StageDto> getStagesByStatus(@RequestBody ProjectDto project, @RequestBody StageFilterDto stageFilterDto) {
+        return service.getStagesByStatus(project, stageFilterDto);
+    }
+
     private void validateDeleteDto(StageDeleteDto stageDeleteDto) {
         validateId(stageDeleteDto.getProjectId());
         validateId(stageDeleteDto.getStageId());
         validateEnum(stageDeleteDto.getAction(), ActionWithTasks.class);
     }
 
-    private <T> void validateEnum(T obj, Class<? extends T> enumClass) {
+    private <T> void validateEnum(T obj, Class<? extends Enum> enumClass) {
         if (!enumClass.isInstance(obj)) {
             throw new DataValidationException("Invalid enum");
         }
