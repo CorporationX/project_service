@@ -5,6 +5,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class MomentValidator {
     private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
 
     public void validateToCreate(MomentDto momentDto) {
         if (Objects.isNull(momentDto.getProjectIds())) {
@@ -32,11 +34,7 @@ public class MomentValidator {
     }
 
     public void validateMomentProjects(MomentDto momentDto) {
-        momentDto.getProjectIds().forEach(id -> {
-            if (!projectRepository.existsById(id)) {
-                throw new EntityNotFoundException("Project with id " + id + " does not exist");
-            }
-        });
+        momentDto.getProjectIds().forEach(projectService::validateProjectId);
 
         boolean hasClosedProjects = projectRepository.findAllByIds(momentDto.getProjectIds())
                 .stream()

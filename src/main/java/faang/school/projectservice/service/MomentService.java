@@ -50,14 +50,9 @@ public class MomentService {
     public MomentDto update(Long id, MomentDto momentDto) {
         momentValidator.validateToUpdate(momentDto);
 
-        Moment moment = momentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Moment with id = " + id + " does not exist"));
+        Moment moment = getMoment(id);
 
-        moment.setName(momentDto.getName());
-        moment.setDate(momentDto.getDate());
-        if (Objects.nonNull(momentDto.getDescription())) {
-            moment.setDescription(momentDto.getDescription());
-        }
+        updateMoment(moment, momentDto);
 
         Set<Project> projects = new HashSet<>(moment.getProjects());
         Set<TeamMember> teamMembers = new HashSet<>(moment.getTeamMembers());
@@ -93,15 +88,20 @@ public class MomentService {
 
     @Transactional(readOnly = true)
     public MomentDto getById(Long id) {
-        Moment moment = momentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Moment with id = " + id + " does not exist"));
+        return momentMapper.toDto(getMoment(id));
+    }
 
-        return momentMapper.toDto(moment);
+    private void updateMoment(Moment moment, MomentDto momentDto) {
+        moment.setName(momentDto.getName());
+        moment.setDate(momentDto.getDate());
+        if (Objects.nonNull(momentDto.getDescription())) {
+            moment.setDescription(momentDto.getDescription());
+        }
     }
 
     private void updateProjects(Moment moment, MomentDto momentDto,
                                 Set<TeamMember> teamMembers, Set<Project> projects) {
-        if (hasDifferentProjects(moment, momentDto.getProjectIds())) {
+        if (hasOtherProjects(moment, momentDto.getProjectIds())) {
             List<Project> oldProjects = moment.getProjects();
             List<Project> newProjects = projectRepository.findAllByIds(momentDto.getProjectIds());
 
@@ -118,7 +118,7 @@ public class MomentService {
 
     private void updateTeamMembers(Moment moment, MomentDto momentDto,
                                    Set<TeamMember> teamMembers, Set<Project> projects) {
-        if (hasDifferentTeamMembers(moment, momentDto.getTeamMemberIds())) {
+        if (hasOtherTeamMembers(moment, momentDto.getTeamMemberIds())) {
             List<TeamMember> oldTeamMembers = moment.getTeamMembers().stream()
                         .filter(teamMember -> !teamMembers.contains(teamMember))
                         .toList();
@@ -137,14 +137,14 @@ public class MomentService {
         }
     }
 
-    private boolean hasDifferentTeamMembers(Moment moment, List<Long> teamMemberIds) {
+    private boolean hasOtherTeamMembers(Moment moment, List<Long> teamMemberIds) {
         return Objects.nonNull(teamMemberIds)
                 && !moment.getTeamMembers().stream()
                 .map(TeamMember::getId)
                 .toList().equals(teamMemberIds);
     }
 
-    private boolean hasDifferentProjects(Moment moment, List<Long> projectIds) {
+    private boolean hasOtherProjects(Moment moment, List<Long> projectIds) {
         return Objects.nonNull(projectIds)
                 && !moment.getProjects().stream()
                 .map(Project::getId)
@@ -164,5 +164,10 @@ public class MomentService {
                 .flatMap(team -> team.getTeamMembers().stream())
                 .distinct()
                 .toList();
+    }
+
+    private Moment getMoment(Long id) {
+        return momentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Moment with id = " + id + " does not exist"));
     }
 }

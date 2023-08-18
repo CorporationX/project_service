@@ -37,7 +37,7 @@ public class MomentController {
         return momentService.update(id, momentDto);
     }
 
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public List<MomentDto> getAllWithFilter(@Valid @RequestBody MomentFilterDto momentFilterDto) {
         log.debug("Received request to get moments with filter: {}", momentFilterDto);
         return momentService.getAllWithFilter(momentFilterDto);

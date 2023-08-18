@@ -6,25 +6,34 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class MomentValidatorTest {
     private static final Long PROJECT_ID = 1L;
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private ProjectService projectService;
     @InjectMocks
     private MomentValidator validator;
     private MomentDto momentDto;
@@ -39,14 +48,16 @@ class MomentValidatorTest {
     }
 
     @Test
-    void validateMomentProjects_shouldInvokeProjectRepositoryExistsById() {
+    void validateMomentProjects_shouldInvokeProjectServiceValidateProjectId() {
         validator.validateMomentProjects(momentDto);
-        verify(projectRepository).existsById(PROJECT_ID);
+        verify(projectService).validateProjectId(PROJECT_ID);
     }
 
     @Test
     void validateMomentProjects_shouldThrowEntityNotFoundException() {
         when(projectRepository.existsById(PROJECT_ID)).thenReturn(false);
+        doThrow(EntityNotFoundException.class).when(projectService).validateProjectId(PROJECT_ID);
+
         assertThrows(EntityNotFoundException.class,
                 () -> validator.validateMomentProjects(momentDto),
                 "Project with id " + PROJECT_ID + " does not exist");
