@@ -69,8 +69,7 @@ public class ResourceService {
 
         fileStore.deleteFile(resource.getKey());
 
-        project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
-        projectRepository.save(project);
+        subtractCapacity(project, resource);
 
         resource.setKey(null);
         resource.setSize(null);
@@ -88,9 +87,8 @@ public class ResourceService {
 
         Resource resource = resourceMapper.toEntity(resourceDto);
 
-        TeamMember createdBy = TeamMember.builder().id(userId).build();
-        resource.setCreatedBy(createdBy);
-        resource.setUpdatedBy(createdBy);
+        resource.setCreatedBy(teamMember);
+        resource.setUpdatedBy(teamMember);
 
         fillResource(resource, file, key, teamMember);
 
@@ -105,7 +103,7 @@ public class ResourceService {
         List<TeamRole> roles = new ArrayList<>(teamMember.getRoles());
 
         resource.setAllowedRoles(roles);
-        resource.setUpdatedBy(TeamMember.builder().id(userId).build());
+        resource.setUpdatedBy(teamMember);
         resource.setUpdatedAt(null);
 
         fillResource(resource, file, key, teamMember);
@@ -128,6 +126,17 @@ public class ResourceService {
         resourcesValidator.checkStorageCapacity(newStorageCapacity);
 
         project.setStorageSize(project.getStorageSize().add(BigInteger.valueOf(file.getSize())));
+        projectRepository.save(project);
+    }
+
+    private void subtractCapacity(Project project, Resource resource) {
+        BigInteger newSizeCapacity = project.getStorageSize().subtract(resource.getSize());
+
+        if (newSizeCapacity.compareTo(BigInteger.ZERO) < 0) {
+            newSizeCapacity = BigInteger.ZERO;
+        }
+
+        project.setStorageSize(newSizeCapacity);
         projectRepository.save(project);
     }
 }
