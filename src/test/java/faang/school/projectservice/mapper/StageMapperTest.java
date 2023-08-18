@@ -39,8 +39,8 @@ class StageMapperTest {
         stageRoles1 = StageRoles.builder().teamRole(TeamRole.OWNER).count(1).build();
         stageRoles2 = StageRoles.builder().teamRole(TeamRole.MANAGER).count(2).build();
 
-        stageRolesDto1 = StageRolesDto.builder().teamRole("OWNER").count(1).build();
-        stageRolesDto2 = StageRolesDto.builder().teamRole("MANAGER").count(2).build();
+        stageRolesDto1 = StageRolesDto.builder().teamRole(TeamRole.OWNER).count(1).build();
+        stageRolesDto2 = StageRolesDto.builder().teamRole(TeamRole.MANAGER).count(2).build();
 
         stage = Stage.builder()
                 .stageName("stageName")

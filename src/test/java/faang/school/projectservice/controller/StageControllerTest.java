@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage_roles.StageRolesDto;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,11 +43,11 @@ class StageControllerTest {
 
         status = "created";
         stageRolesDto = StageRolesDto.builder()
-                .teamRole("OWNER")
+                .teamRole(TeamRole.OWNER)
                 .count(1)
                 .build();
         stageDtoWithListStageRoles = StageDto.builder()
-                .stageRolesDto(List.of(StageRolesDto.builder().teamRole("OWNER").build()))
+                .stageRolesDto(List.of(StageRolesDto.builder().teamRole(TeamRole.OWNER).build()))
                 .build();
     }
 

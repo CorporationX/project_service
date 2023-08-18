@@ -111,7 +111,7 @@ class StageServiceTest {
                 .stageName("stageName")
                 .projectId(1L)
                 .status("CREATED")
-                .stageRolesDto(List.of(StageRolesDto.builder().teamRole("OWNER").count(1).build()))
+                .stageRolesDto(List.of(StageRolesDto.builder().teamRole(TeamRole.OWNER).count(1).build()))
                 .build();
         project = Project.builder()
                 .id(1L)
@@ -129,7 +129,7 @@ class StageServiceTest {
                                         .build()))
                         .build()))
                 .build();
-        stageRolesDto = StageRolesDto.builder().teamRole("DEVELOPER").count(2).build();
+        stageRolesDto = StageRolesDto.builder().teamRole(TeamRole.DEVELOPER).count(2).build();
         teamMember = TeamMember.builder().id(1L).stages(List.of(stage)).build();
         when(projectRepository.getProjectById(1L)).thenReturn(project);
     }
@@ -280,7 +280,6 @@ class StageServiceTest {
         when(project1.getTeams()).thenReturn(new ArrayList<>());
         when(teamMember1.getStages()).thenReturn(new ArrayList<>());
 
-
         stageService.inviteTeamMemberToStage(stage, stageRolesDto, authorId, countTeamRoles);
 
         verify(stageService, times(1)).sendStageInvitation(eq(stage1), eq(authorId), eq(teamMember1));
@@ -292,23 +291,29 @@ class StageServiceTest {
         StageRoles stageRole2 = mock(StageRoles.class);
         StageRolesDto stageRolesDto1 = mock(StageRolesDto.class);
         Stage stage1 = mock(Stage.class);
+        StageRoles stageRole3 = StageRoles.builder().teamRole(TeamRole.valueOf("DEVELOPER")).count(2).build();
 
-        when(stageRolesDto1.getTeamRole()).thenReturn("DEVELOPER");
-        when(stageRolesDto1.getCount()).thenReturn(2);
 
         List<StageRoles> stageRoles = new ArrayList<>();
         stageRoles.add(stageRole1);
         stageRoles.add(stageRole2);
 
         when(stage1.getStageRoles()).thenReturn(stageRoles);
-        when(stageRole1.getTeamRole()).thenReturn(TeamRole.DEVELOPER);
-        when(stageRole1.getCount()).thenReturn(1);
+        when(stageRole1.getTeamRole().equals(stageRolesDto1.getTeamRole())).thenReturn(true);
+        when(stageRole1.getCount() < stageRole2.getCount()).thenReturn(true);
+        doNothing().when(stageRole1).setCount(stageRolesDto1.getCount());
+        when(stageRolesRepository.save(stageRole1)).thenReturn(stageRole1);
+        when(stageRole1.getTeamRole().equals(stageRole2.getTeamRole())).thenReturn(false);
         when(stageRolesMapper.toEntity(stageRolesDto1)).thenReturn(new StageRoles());
+        when(stageRolesRepository.save(stageRole2)).thenReturn(stageRole2);
+        when(stageRepository.save(stage1)).thenReturn(stage1);
 
         stageService.updateStageRoles(stageRolesDto, stage);
 
         verify(stageRolesRepository, times(1)).save(any(StageRoles.class));
+        verify(stageRolesMapper, times(1)).toEntity(stageRolesDto1);
         verify(stageRolesRepository, times(1)).save(any(StageRoles.class));
         verify(stageRepository, times(1)).save(stage);
+
     }
 }

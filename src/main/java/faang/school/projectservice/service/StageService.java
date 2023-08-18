@@ -9,7 +9,6 @@ import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -98,7 +97,7 @@ public class StageService {
     public void updateStageRoles(StageRolesDto stageRolesDto, Stage stage) {
         List<StageRoles> stageRoles = stage.getStageRoles();
         for (StageRoles stageRole : stageRoles) {
-            if (stageRole.getTeamRole().equals(TeamRole.valueOf(stageRolesDto.getTeamRole()))) {
+            if (stageRole.getTeamRole().equals(stageRolesDto.getTeamRole())) {
                 if (stageRole.getCount() < stageRolesDto.getCount()) {
                     stageRole.setCount(stageRolesDto.getCount());
                     stageRolesRepository.save(stageRole);
@@ -118,7 +117,7 @@ public class StageService {
         List<TeamMember> projectTeamMembers = getTeamMembers(projectId);
         projectTeamMembers.stream().filter(teamMember -> teamMember.getStages().stream()
                         .noneMatch(stage1 -> stage1.getStageId().equals(stage.getStageId())))
-                .filter(teamMember -> teamMember.getRoles().contains(TeamRole.valueOf(stageRolesDto.getTeamRole())))
+                .filter(teamMember -> teamMember.getRoles().contains(stageRolesDto.getTeamRole()))
                 .limit(stageRolesDto.getCount() - countTeamRoles)
                 .forEach(teamMember -> sendStageInvitation(stage, authorId, teamMember));
     }
@@ -127,7 +126,7 @@ public class StageService {
         return stage.getStageRoles()
                 .stream()
                 .filter(stageRole ->
-                        stageRole.getTeamRole().equals(TeamRole.valueOf(stageRolesDto.getTeamRole())))
+                        stageRole.getTeamRole().equals(stageRolesDto.getTeamRole()))
                 .count();
     }
 
