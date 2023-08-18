@@ -25,6 +25,13 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+jira:
+  api:
+    base-url: https://project1test.atlassian.net
+    username: demonserker@gmail.com
+    secret: ATATT3xFfGF0HWslAte2MJUZxmWHTnoIJA9Ib15S0nM3rXFoG1lUYhrOnPoEqkKcuxJpaWid-TvzPsgmu_ArxktJDetBdljSPFrtExPZoPJKvbfKia8ihAuV2JN2JgZKa4eodlxxl8Io6Gbi8EBAiX3PJaUJOK5BZXXVhQJU0HwSxmTLpzWoVM8=92339E1D
+    issue-url: /rest/api/2/issue/
+
 server:
   port: 8082
 
