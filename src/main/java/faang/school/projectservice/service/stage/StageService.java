@@ -1,9 +1,12 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.ActionWithTasks;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filters.stage.StageFilter;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -35,6 +39,7 @@ public class StageService {
 
     private final StageMapper stageMapper;
 
+    private final List<StageFilter> filters;
     public StageDto create(StageDto stageDto) {
         if (!isProjectActive(stageDto)) {
             throw new DataValidationException("Project is not active");
@@ -65,6 +70,25 @@ public class StageService {
         stageRepository.delete(stageToDelete);
 
         log.info("Stage deleted: {}", stageToDelete);
+    }
+
+    public List<StageDto> getStagesByStatus(ProjectDto projectDto, StageFilterDto filterDto) {
+        List<Stage> stages = projectDto.getStageIds().stream()
+                .map(stageRepository::getById)
+                .toList();
+
+        List<Stage> filteredStages = filter(stages, filterDto);
+        log.info("Project's {} stages filtered by status: {}", projectDto.getId(), filterDto.getStatus());
+
+        return stageMapper.toDtoList(filteredStages);
+    }
+
+    private List<Stage> filter(List<Stage> stages, StageFilterDto filterDto) {
+        Stream<Stage> stageStream = stages.stream();
+        filters.stream()
+                .filter(filter -> filter.isApplicable(filterDto))
+                .forEach(filter -> filter.apply(stageStream, filterDto));
+        return stageStream.toList();
     }
 
     private void actionWithTasks(StageDeleteDto stageToDeleteDto) {
@@ -115,7 +139,6 @@ public class StageService {
 
         log.info("Tasks deleted {}", stageToDeleteDto.getTasksId());
     }
-
 
     private Stage save(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
