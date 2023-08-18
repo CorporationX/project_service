@@ -54,7 +54,7 @@ public class Resource {
     private ResourceType type;
 
     @Enumerated(EnumType.STRING)
-    private ResourceStatus status;
+    private ResourceStatus status = ResourceStatus.ACTIVE;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
