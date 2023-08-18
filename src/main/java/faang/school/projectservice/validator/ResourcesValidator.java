@@ -20,7 +20,7 @@ public class ResourcesValidator {
     }
 
     public void checkRightsToDelete(Resource resource, Project project, long userId) {
-        if (resource.getCreatedBy().getId() != userId) {
+        if (resource.getCreatedBy().getUserId() != userId) {
             throw new UserNorAccessRightDeleteException("The user does not have the right to delete");
         }
 
