@@ -1,9 +1,13 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.ActionWithTasks;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filters.stage.StageFilter;
+import faang.school.projectservice.filters.stage.StatusFilter;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
@@ -11,6 +15,7 @@ import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage.StageStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -45,6 +51,8 @@ class StageServiceTest {
     TaskRepository taskRepository;
     @Spy
     StageMapperImpl stageMapper;
+    @Mock
+    List<StageFilter> filters;
 
     @InjectMocks
     StageService stageService;
@@ -191,6 +199,36 @@ class StageServiceTest {
         stageService.deleteStageById(stageToDeleteDto);
         verify(taskRepository).saveAll(tasks);
         verify(stageRepository).delete(any(Stage.class));
+    }
+
+    @Test
+    @DisplayName("Get project's stages by status")
+    void getStagesByStatus() {
+
+        Stage stage = Stage.builder()
+                .tasks(List.of(
+                        Task.builder()
+                                .status(TaskStatus.DONE)
+                                .build(),
+                        Task.builder()
+                                .status(TaskStatus.CANCELLED)
+                                .build()
+
+                ))
+                .stageRoles(new ArrayList<>())
+                .executors(new ArrayList<>())
+                .build();
+
+        when(stageRepository.getById(anyLong()))
+                .thenReturn(stage);
+        StageFilterDto filter = new StageFilterDto();
+        filter.setStatus(StageStatus.CLOSED);
+        List<StageDto> stageDtos = stageService.getStagesByStatus(
+                ProjectDto.builder()
+                        .stageIds(List.of(new Random().nextLong()))
+                        .build(),
+                filter
+        );
     }
 
     private static Stream<Arguments> getRandomIds() {
