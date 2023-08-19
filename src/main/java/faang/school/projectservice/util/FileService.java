@@ -3,24 +3,22 @@ package faang.school.projectservice.util;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.exceptions.FileUploadException;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class FileService {
-    @Setter
     @Value("${aws.bucket-name}")
     private String bucketName;
     private final AmazonS3 amazonS3;

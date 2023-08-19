@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -31,10 +32,10 @@ public class ProjectFileService {
     private final ResourceMapper resourceMapper;
 
     @Transactional
-    public ResourceDto upload(MultipartFile multipartFile, long projectId, long teamMemberId) {
+    public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long teamMemberId) {
         Project project = projectRepository.getProjectById(projectId);
-        TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         validateTeamMember(project, teamMemberId);
+        TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
 
         String objectKey = fileService.upload(multipartFile, projectId);
 
@@ -47,25 +48,33 @@ public class ProjectFileService {
                 .project(project)
                 .build();
 
-        updateProjectStorage(resource);
+        updateProjectStorage(resource);// написать валидацию на сторедж перед тем как загружать файл
         resourceRepository.save(resource);
 
         return resourceMapper.toDto(resource);
     }
 
     @Transactional
-    public void delete(long resourceId, long teamMemberId) {
+    public void deleteFile(long resourceId, long teamMemberId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        validateTeamMember(resource.getProject(), teamMemberId);
+        validateIfUserCanChangeFile(resource, teamMemberId);
 
-        if (canDeleteResource(resource, teamMemberId)) {
+        if (!resource.getStatus().equals(ResourceStatus.DELETED)) {
             fileService.delete(resource.getKey());
 
             resource.setStatus(ResourceStatus.DELETED);
-            resourceRepository.save(resource);
             updateProjectStorage(resource);
+            resourceRepository.save(resource);
         }
     }
+
+    public InputStream getFile(long resourceId, long teamMemberId) {
+        Resource resource = resourceRepository.getReferenceById(resourceId);
+        validateTeamMember(resource.getProject(), teamMemberId);
+
+        return fileService.getFile(resource.getKey());
+    }
+
 
     private void validateTeamMember(Project project, long teamMemberId) {
         List<Long> projectMembers = project.getTeams().stream()
@@ -94,11 +103,13 @@ public class ProjectFileService {
         projectRepository.save(project);
     }
 
+    private void validateIfUserCanChangeFile(Resource resource, long teamMemberId) {
+        boolean notAProjectManager = !userIsProjectManager(resource.getProject(), teamMemberId);
+        boolean notAFileCreator = !userIsFileCreator(resource, teamMemberId);
 
-    private boolean canDeleteResource(Resource resource, long teamMemberId) {
-        return userIsProjectManager(resource.getProject(), teamMemberId) ||
-                userIsFileCreator(resource, teamMemberId) &&
-                        !resource.getStatus().equals(ResourceStatus.DELETED);
+        if (notAProjectManager && notAFileCreator) {
+            throw new InvalidCurrentUserException("You should be creator of a file or a project manager to change files");
+        }
     }
 
     private boolean userIsProjectManager(Project project, long teamMemberId) {
