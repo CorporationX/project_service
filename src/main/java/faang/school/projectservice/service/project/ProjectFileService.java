@@ -1,6 +1,5 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.exceptions.InvalidCurrentUserException;
 import faang.school.projectservice.jpa.ResourceRepository;
@@ -29,7 +28,6 @@ public class ProjectFileService {
     private final ResourceRepository resourceRepository;
     private final FileService fileService;
     private final TeamMemberRepository teamMemberRepository;
-    private final UserContext userContext;
     private final ResourceMapper resourceMapper;
 
     @Transactional
@@ -89,12 +87,13 @@ public class ProjectFileService {
 
         if (resource.getStatus().equals(ResourceStatus.DELETED)) {
             project.setStorageSize(storageSize.add(resourceSize));
-        } else {
+        } else if (resourceSize.compareTo(storageSize) <= 0) {
             project.setStorageSize(storageSize.subtract(resourceSize));
         }
 
         projectRepository.save(project);
     }
+
 
     private boolean canDeleteResource(Resource resource, long teamMemberId) {
         return userIsProjectManager(resource.getProject(), teamMemberId) ||

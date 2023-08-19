@@ -17,5 +17,5 @@ import java.time.LocalDateTime;
 @ToString(callSuper = true)
 public class ResourceUpdateDto extends ResourceDto {
     private LocalDateTime updatedAt;
-    private Long updatedBy;
+    private Long updatedById;
 }
