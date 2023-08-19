@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.stage_roles.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.List;
 
-import static faang.school.projectservice.mapper.StageMapper.stageRolesMapper;
+
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ import static faang.school.projectservice.mapper.StageMapper.stageRolesMapper;
 public class StageService {
     private final StageRepository stageRepository;
     private final StageMapper stageMapper;
+    private final StageRolesMapper stageRolesMapper;
     private final ProjectRepository projectRepository;
     private final StageValidator stageValidator;
     private final StageInvitationService stageInvitationService;

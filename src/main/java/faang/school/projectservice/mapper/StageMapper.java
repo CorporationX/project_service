@@ -1,38 +1,19 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage_roles.StageRolesDto;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
-import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
-import org.mapstruct.factory.Mappers;
 
-import java.util.List;
-
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        unmappedSourcePolicy = ReportingPolicy.IGNORE, uses = StageRolesMapper.class,
-        injectionStrategy = InjectionStrategy.FIELD)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = StageRolesMapper.class)
 public interface StageMapper {
-    StageRolesMapper stageRolesMapper = Mappers.getMapper(StageRolesMapper.class);
+
     @Mapping(target = "projectId", source = "project.id")
-    @Mapping(target = "stageRolesDto", source = "stageRoles", qualifiedByName = "mapListRolesToListRolesDto")
+    @Mapping(target = "stageRolesDto", source = "stageRoles")
     StageDto toDto(Stage stage);
 
     @Mapping(target = "project.id", source = "projectId")
-    @Mapping(target = "stageRoles", source = "stageRolesDto", qualifiedByName = "mapListRolesDtoToListRoles")
+    @Mapping(target = "stageRoles", source = "stageRolesDto")
     Stage toEntity(StageDto stageDto);
-
-    @Named("mapListRolesDtoToListRoles")
-    default List<StageRoles> toList(List<StageRolesDto> stageRolesDto) {
-        return stageRolesDto.stream().map(stageRolesMapper::toEntity).toList();
-    }
-
-    @Named("mapListRolesToListRolesDto")
-    default List<StageRolesDto> toListDto(List<StageRoles> stageRoles) {
-        return stageRoles.stream().map(stageRolesMapper::toDto).toList();
-    }
 }
