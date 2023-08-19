@@ -40,11 +40,12 @@ public class StageService {
     private final StageMapper stageMapper;
 
     private final List<StageFilter> filters;
+
     public StageDto create(StageDto stageDto) {
         if (!isProjectActive(stageDto)) {
             throw new DataValidationException("Project is not active");
         }
-        checkUnnecessaryExecutorsExist(stageDto);
+        checkUnnecessaryExecutorsExist(stageRepository.getById(stageDto.getStageId()));
         Stage stage = save(stageDto);
         log.info("Created stage: {}", stage);
         return stageMapper.toDto(stage);
@@ -81,6 +82,57 @@ public class StageService {
         log.info("Project's {} stages filtered by status: {}", projectDto.getId(), filterDto.getStatus());
 
         return stageMapper.toDtoList(filteredStages);
+    }
+
+    public StageDto updateStage(StageDto stageDto) {
+        Stage updatedStage = getUpdatedStage(stageDto);
+        sendInvitesIfNeeded(updatedStage);
+        updatedStage = stageRepository.save(updatedStage);
+
+        log.info("Stage updated: {}", updatedStage);
+        return stageMapper.toDto(updatedStage);
+    }
+
+    private void sendInvitesIfNeeded(Stage updatedStage) {
+        Map<TeamRole, Integer> roles = updatedStage.getStageRoles().stream()
+                .collect(HashMap::new, (map, stageRoles) -> map.put(stageRoles.getTeamRole(), stageRoles.getCount()), HashMap::putAll);
+
+        updatedStage.getExecutors()
+                .forEach(executor -> executor.getRoles()
+                        .forEach(role -> {
+                            if (roles.containsKey(role) && roles.get(role) > 0) {
+                                roles.put(role, roles.get(role) - 1);
+                            } else {
+                                throw new DataValidationException("Role isn't available");
+                            }
+                        }));
+
+        roles.forEach((teamRole, count) -> {
+            if (count > 0) {
+                sendInvite(teamRole, updatedStage.getProject());
+            }
+        });
+    }
+
+    private void sendInvite(TeamRole teamRole, Project project) {
+        project.getTeams().forEach(team -> {
+            team.getTeamMembers().forEach(member -> {
+                if (member.getRoles().contains(teamRole)) {
+                    //TODO. Send invite
+                }
+            });
+        });
+    }
+
+    private Stage getUpdatedStage(StageDto stageDto) {
+        return Stage.builder()
+                .stageName(stageDto.getStageName())
+                .project(getProject(stageDto))
+                .stageRoles(getStageRoles(stageDto))
+                .tasks(getTasks(stageDto))
+                .executors(getExecutors(stageDto))
+                .tasks(getTasks(stageDto))
+                .build();
     }
 
     private List<Stage> filter(List<Stage> stages, StageFilterDto filterDto) {
@@ -148,10 +200,10 @@ public class StageService {
         return stageRepository.save(stage);
     }
 
-    private void checkUnnecessaryExecutorsExist(StageDto stageDto) {
+    private void checkUnnecessaryExecutorsExist(Stage stage) {
         Map<TeamRole, Integer> rolesCount = new HashMap<>();
-        List<TeamMember> executors = getExecutors(stageDto);
-        List<StageRoles> stageRoles = getStageRoles(stageDto);
+        List<TeamMember> executors = stage.getExecutors();
+        List<StageRoles> stageRoles = stage.getStageRoles();
         stageRoles
                 .forEach(stageRole ->
                         rolesCount.put(stageRole.getTeamRole(), stageRole.getCount()));
@@ -181,6 +233,10 @@ public class StageService {
 
     private List<TeamMember> getExecutors(StageDto stageDto) {
         return teamMemberJpaRepository.findAllById(stageDto.getTeamMemberIds());
+    }
+
+    private List<Task> getTasks(StageDto stageDto) {
+        return taskRepository.findAllById(stageDto.getTaskIds());
     }
 
     private boolean isProjectActive(StageDto stageDto) {

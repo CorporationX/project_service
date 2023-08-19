@@ -60,6 +60,16 @@ public class StageController {
         return service.getStagesByStatus(project, stageFilterDto);
     }
 
+
+    @PostMapping("/{stageId}")
+    @ResponseStatus(HttpStatus.OK)
+    public StageDto updateStage(@PathVariable Long stageId, @RequestBody StageDto stageDto) {
+        validateId(stageId);
+        validateStage(stageDto);
+        log.info("Updating stage: {}", stageId);
+        return service.updateStage(stageDto);
+    }
+
     private void validateDeleteDto(StageDeleteDto stageDeleteDto) {
         validateId(stageDeleteDto.getProjectId());
         validateId(stageDeleteDto.getStageId());

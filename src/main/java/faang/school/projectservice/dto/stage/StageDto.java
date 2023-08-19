@@ -13,4 +13,5 @@ public class StageDto {
     private Long projectId;
     private List<Long> stageRoleIds;
     private List<Long> teamMemberIds;
+    private List<Long> taskIds;
 }
