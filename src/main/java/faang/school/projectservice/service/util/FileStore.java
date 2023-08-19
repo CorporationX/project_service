@@ -3,6 +3,7 @@ package faang.school.projectservice.service.util;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FileStore {
@@ -24,7 +26,8 @@ public class FileStore {
         try {
             content = new ByteArrayInputStream(file.getBytes());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("error IOException");
+            throw new RuntimeException("error IOException");
         }
 
         ObjectMetadata metadata = new ObjectMetadata();
