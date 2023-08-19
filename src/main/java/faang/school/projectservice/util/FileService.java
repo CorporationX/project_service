@@ -3,6 +3,7 @@ package faang.school.projectservice.util;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.exceptions.FileUploadException;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -53,6 +54,19 @@ public class FileService {
     public void delete(String objectKey) {
         try {
             amazonS3.deleteObject(bucketName, objectKey);
+        } catch (AmazonServiceException ase) {
+            log.error("Amazon S3 couldn't process operation", ase);
+            throw ase;
+        } catch (SdkClientException sce) {
+            log.error("Amazon S3 couldn't be contacted for a response", sce);
+            throw sce;
+        }
+    }
+
+    public InputStream getFile(String objectKey) {
+        try {
+            S3Object object = amazonS3.getObject(bucketName, objectKey);
+            return object.getObjectContent();
         } catch (AmazonServiceException ase) {
             log.error("Amazon S3 couldn't process operation", ase);
             throw ase;
