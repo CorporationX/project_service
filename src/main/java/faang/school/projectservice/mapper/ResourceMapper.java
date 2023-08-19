@@ -18,5 +18,6 @@ public interface ResourceMapper {
     @Mapping(source = "projectId", target = "project.id")
     Resource toEntity(ResourceDto resourceDto);
 
+    @Mapping(source = "projectId", target = "project.id")
     void update(ResourceDto resourceDto, @MappingTarget Resource resource);
 }
