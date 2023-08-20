@@ -3,8 +3,8 @@ package faang.school.projectservice.service.subproject;
 import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
 import faang.school.projectservice.exception.SubprojectException;
 import faang.school.projectservice.mapper.subproject.SubprojectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.project.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.MessageFormat;
 import java.util.Objects;
 
-import static faang.school.projectservice.commonMessage.SubprojectErrMessage.ERR_VISIBILITY_PARENT_PROJECT_FORMAT;
+import static faang.school.projectservice.messages.SubprojectErrMessage.ERR_VISIBILITY_PARENT_PROJECT_FORMAT;
 
 @Service
 @RequiredArgsConstructor

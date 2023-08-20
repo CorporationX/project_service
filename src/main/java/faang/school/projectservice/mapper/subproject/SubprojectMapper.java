@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper.subproject;
 
 import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
