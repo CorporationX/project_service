@@ -2,10 +2,9 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.filters.stageInvites.FilterStageInviteDto;
+import faang.school.projectservice.filter.stageinvite.FilterStageInviteDto;
 import faang.school.projectservice.service.StageInvitationService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;

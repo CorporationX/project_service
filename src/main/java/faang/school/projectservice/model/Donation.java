@@ -1,6 +1,7 @@
 package faang.school.projectservice.model;
 
 import faang.school.projectservice.dto.client.Currency;
+import faang.school.projectservice.model.campaign.Campaign;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
