@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.resource;
 
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.model.resource.ResourceStatus;
+import faang.school.projectservice.model.resource.ResourceType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

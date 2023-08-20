@@ -1,8 +1,8 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.dto.resource.ResourceUpdateDto;
-import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.dto.resource.UpdateResourceDto;
+import faang.school.projectservice.model.resource.Resource;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,5 +19,5 @@ public interface ResourceMapper {
     @Mapping(source = "updatedBy.id", target = "updatedById")
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "createdBy.id", target = "createdById")
-    ResourceUpdateDto toUpdateDto(Resource resource);
+    UpdateResourceDto toUpdateDto(Resource resource);
 }

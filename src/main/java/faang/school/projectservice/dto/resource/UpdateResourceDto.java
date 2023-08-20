@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class ResourceUpdateDto extends ResourceDto {
+public class UpdateResourceDto extends ResourceDto {
     private LocalDateTime updatedAt;
     private Long updatedById;
 }

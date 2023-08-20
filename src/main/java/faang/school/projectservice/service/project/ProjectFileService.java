@@ -1,15 +1,16 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.exception.InvalidCurrentUserException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.resource.Resource;
+import faang.school.projectservice.model.resource.ResourceStatus;
+import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.util.FileService;
@@ -68,11 +69,15 @@ public class ProjectFileService {
         }
     }
 
-    public InputStream getFile(long resourceId, long teamMemberId) {
+    public GetResourceDto getFile(long resourceId, long teamMemberId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
         validateTeamMember(resource.getProject(), teamMemberId);
 
-        return fileService.getFile(resource.getKey());
+        return GetResourceDto.builder()
+                .name(resource.getName())
+                .type(resource.getType())
+                .inputStream(fileService.getFile(resource.getKey()))
+                .build();
     }
 
 
@@ -89,11 +94,11 @@ public class ProjectFileService {
         }
     }
 
-    private void validateProjectStorage(Project project, BigInteger fileSize){
-       if (fileSize.compareTo(project.getStorageSize()) <= 0){
-           throw new
-       }
-    }
+//    private void validateProjectStorage(Project project, BigInteger fileSize){
+//       if (fileSize.compareTo(project.getStorageSize()) <= 0){
+//           throw new
+//       }
+//    }
 
     private void updateProjectStorage(Resource resource) {
         Project project = resource.getProject();
