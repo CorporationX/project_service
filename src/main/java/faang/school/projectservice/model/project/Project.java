@@ -9,7 +9,7 @@ import faang.school.projectservice.model.resource.Resource;
 import faang.school.projectservice.model.Schedule;
 import faang.school.projectservice.model.task.Task;
 import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.Vacancy.Vacancy;
+import faang.school.projectservice.model.vacancy.Vacancy;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
