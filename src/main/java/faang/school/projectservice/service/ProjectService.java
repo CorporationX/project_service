@@ -67,19 +67,6 @@ public class ProjectService {
                         String.format("Project with id %d does not exist.", projectDto.getId())));
     }
 
-    @Transactional
-    public ProjectDto createSubProject(ProjectDto projectDto) {
-        validateParentProjectExist(projectDto);
-        validateVisibilityConsistency(projectDto);
-        validateSubProjectUnique(projectDto);
-        Project subProject = projectMapper.toEntity(projectDto);
-        Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
-        subProject.setParentProject(parentProject);
-        subProject.setStatus(ProjectStatus.CREATED);
-        Project savedSubProject = projectRepository.save(subProject);
-        parentProject.getChildren().add(savedSubProject);
-        return projectMapper.toDto(savedSubProject);
-    }
 
     private ProjectDto saveEntity(Project project) {
         project = projectRepository.save(project);
@@ -110,30 +97,6 @@ public class ProjectService {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getId(), projectDto.getName())) {
             throw new DataValidException(String
                     .format(PROJECT_FROM_USER_EXISTS, projectDto.getId()));
-        }
-    }
-
-    private void validateParentProjectExist(ProjectDto projectDto) {
-        if (!projectRepository.existsById(projectDto.getParentId())) {
-            throw new DataValidException("No such parent project");
-        }
-    }
-
-    private void validateVisibilityConsistency(ProjectDto projectDto) {
-        Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
-        if (!projectDto.getVisibility().equals(parentProject.getVisibility())) {
-            throw new DataValidException("The visibility of the subproject must be - " +
-                    parentProject.getVisibility() + " like the parent project");
-        }
-    }
-
-    private void validateSubProjectUnique(ProjectDto projectDto) {
-        Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
-        String subProjectName = projectDto.getName();
-        boolean subProjectExists = parentProject.getChildren().stream().anyMatch(
-                subProject -> subProject.getName().equals(subProjectName));
-        if (subProjectExists) {
-            throw new DataValidException("Subproject with name " + subProjectName + " already exists");
         }
     }
 }
