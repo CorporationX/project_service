@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.exceptions.InvalidCurrentUserException;
+import faang.school.projectservice.exception.InvalidCurrentUserException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
@@ -87,6 +87,12 @@ public class ProjectFileService {
             String errorMessage = String.format("The team member with id: %d is not on the project", teamMemberId);
             throw new InvalidCurrentUserException(errorMessage);
         }
+    }
+
+    private void validateProjectStorage(Project project, BigInteger fileSize){
+       if (fileSize.compareTo(project.getStorageSize()) <= 0){
+           throw new
+       }
     }
 
     private void updateProjectStorage(Resource resource) {

@@ -1,4 +1,4 @@
-package faang.school.projectservice.exceptions;
+package faang.school.projectservice.exception;
 
 public class FileUploadException extends RuntimeException {
     public FileUploadException(String message) {

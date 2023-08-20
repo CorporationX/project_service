@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.exceptions.ErrorResponse;
-import faang.school.projectservice.exceptions.InvalidUserException;
-import faang.school.projectservice.exceptions.MomentExistingException;
+import faang.school.projectservice.exception.ErrorResponse;
+import faang.school.projectservice.exception.InvalidUserException;
+import faang.school.projectservice.exception.MomentExistingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

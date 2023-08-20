@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.exceptions.InvalidUserException;
+import faang.school.projectservice.exception.InvalidUserException;
 import faang.school.projectservice.filters.mappers.StageInvitationMapper;
 import faang.school.projectservice.messages.ErrorMessages;
 import faang.school.projectservice.model.TeamMember;
