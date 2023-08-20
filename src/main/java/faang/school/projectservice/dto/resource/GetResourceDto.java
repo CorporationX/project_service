@@ -16,4 +16,5 @@ public class GetResourceDto {
     private String name;
     private ResourceType type;
     private InputStream inputStream;
+    private long size;
 }

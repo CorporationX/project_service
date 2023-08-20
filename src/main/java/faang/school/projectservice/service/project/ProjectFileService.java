@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -77,6 +76,7 @@ public class ProjectFileService {
                 .name(resource.getName())
                 .type(resource.getType())
                 .inputStream(fileService.getFile(resource.getKey()))
+                .size(resource.getSize().longValue())
                 .build();
     }
 
