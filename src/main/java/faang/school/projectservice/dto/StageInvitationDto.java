@@ -2,7 +2,7 @@ package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
-import jakarta.validation.constraints.Min;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.lang.NonNull;
@@ -10,12 +10,10 @@ import org.springframework.lang.NonNull;
 @Builder
 @Data
 public class StageInvitationDto {
-    @Min(0)
     private Long id;
     @NonNull
     private String description;
-    @NonNull
-    private Stage stage;
-    @NonNull
-    private TeamMember invited;
+    private StageInvitationStatus status;
+    private Long stageId;
+    private Long invitedId;
 }

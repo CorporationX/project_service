@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.subproject;
 
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.project.ProjectStatus;
+import faang.school.projectservice.model.project.ProjectVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

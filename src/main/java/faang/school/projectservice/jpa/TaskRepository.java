@@ -1,6 +1,6 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.task.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

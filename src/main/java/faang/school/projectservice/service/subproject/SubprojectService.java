@@ -1,13 +1,10 @@
 package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
-import faang.school.projectservice.dto.subproject.SubprojectUpdateDto;
-import faang.school.projectservice.exceptions.SubprojectException;
+import faang.school.projectservice.exception.SubprojectException;
 import faang.school.projectservice.mapper.subproject.SubprojectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.project.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
-import java.util.List;
+import java.util.Objects;
 
-import static faang.school.projectservice.commonMessage.SubprojectErrMessage.*;
+import static faang.school.projectservice.messages.SubprojectErrMessage.ERR_VISIBILITY_PARENT_PROJECT_FORMAT;
 
 @Service
 @RequiredArgsConstructor
@@ -42,9 +39,26 @@ public class SubprojectService {
         return subprojectMapper.toDtoReqCreate(projectRepository.save(newSubProject));
     }
 
+    private void setVisibilitySubproject(Project subproject, ProjectVisibility visibility) {
+        ProjectVisibility visibilityToSet = Objects.isNull(visibility)
+                ? ProjectVisibility.PUBLIC
+                : visibility;
+
+        if (isParentVisibilityPublic(subproject.getParentProject()) && visibility == ProjectVisibility.PRIVATE) {
+            String errorMessage = MessageFormat.format(ERR_VISIBILITY_PARENT_PROJECT_FORMAT, visibility);
+            throw new SubprojectException(errorMessage);
+        }
+
+        subproject.setVisibility(visibilityToSet);
+    }
+
+    private boolean isParentVisibilityPublic(Project parentProject) {
+        return parentProject.getVisibility() == ProjectVisibility.PUBLIC;
+    }
+
     public SubprojectDtoReqCreate updateSubproject(SubprojectUpdateDto subprojectDto) {
-// Надо ли проверять что у родительского проекта статус например закрыт, а я хочу сделать у подпроекта открыт.
-        // логично проверить и кинуть эксепшн, т.е если родительский проект закрыт, то ничего менять нельзя.
+// пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ.пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
         Project subprojectForUpdate = projectRepository.getProjectById(subprojectDto.getSubprojectId());
         checkIsSubproject(subprojectForUpdate);
 
@@ -53,7 +67,7 @@ public class SubprojectService {
             updateStatus(subprojectForUpdate, statusToUpdate);
         }
         if (isStatusForAllChildrenClosed(subprojectForUpdate)) {
-            // получить момет
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             List<Team> teams = subprojectForUpdate.getTeams();
             teams.
         }
@@ -75,9 +89,9 @@ public class SubprojectService {
         return parentProject.getVisibility() == ProjectVisibility.PUBLIC;
     }
 
-    //При этом проверить, все подпроекты текущего подпроекта имеют тот же статус. Т.е. нельзя закрыть проект,
-    // если у него есть все ещё открытые подпроекты. Нужно сначала закрывать все подпроекты,
-    // и только потом родительский проект
+    //пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ. пїЅ.пїЅ. пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ,
+    // пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ,
+    // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     private void setRequiredStatusForChildrenProjects(List<Project> childrenProjects, ProjectStatus requiredStatus) {
         if (requiredStatus != null) {
             for (Project curProject : childrenProjects) {
@@ -105,9 +119,9 @@ public class SubprojectService {
         }
     }
 
-    // Проверить, и если у проекта закрылись все его подпроекты, тогда получаем Moment,
-    // а участники проекта становятся участниками момента.
-    // Получается, что у проекта есть момент “Выполнены все подпроекты”.
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Moment,
+    // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
     private boolean isStatusForAllChildrenClosed(Project project) {
         return project.getChildren().stream().map(Project::getStatus).allMatch(status -> status == ProjectStatus.CANCELLED);
     }

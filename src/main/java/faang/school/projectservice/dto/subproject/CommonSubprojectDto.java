@@ -1,6 +1,8 @@
 package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.project.ProjectStatus;
+import faang.school.projectservice.model.project.ProjectVisibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

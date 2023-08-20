@@ -1,22 +1,21 @@
 package faang.school.projectservice.service;
 
-import static org.junit.jupiter.api.Assertions.*;
 import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.filters.mappers.StageInvitationMapper;
-import faang.school.projectservice.filters.mappers.StageInvitationMapperImpl;
-import faang.school.projectservice.filters.stageInvites.FilterStageInviteDto;
-import faang.school.projectservice.filters.stageInvites.StageInviteFilter;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteAuthorPattern;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteDescriptionFilter;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteInvitedFilter;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteStageFilter;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteStatusFilter;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteAuthorPattern;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteDescriptionFilter;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteInvitedFilter;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteStageFilter;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteStatusFilter;
+import faang.school.projectservice.filter.stageinvite.FilterStageInviteDto;
+import faang.school.projectservice.filter.stageinvite.StageInviteFilter;
+import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.service.stage.StageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +35,10 @@ class StageInvitationServiceTest {
     private FilterStageInviteDto filterStageInviteDto;
     @Mock
     private StageInvitationRepository repository;
+    @Mock
+    private StageService stageService;
     @Spy
-    private StageInvitationMapper mapper = new StageInvitationMapperImpl();
+    private StageInvitationMapperImpl mapper;
     private List<StageInviteFilter> filters;
     @Mock
     private StageInvitationDto dto;
@@ -49,36 +50,44 @@ class StageInvitationServiceTest {
     private TeamMember author;
     private StageInvitationService service;
     private StageInvitation stageInvitation;
+    private final Long STAGE_ID = 60L;
+    private final Long AUTHOR_ID = 25L;
+    private final Long INVITED_ID = 70L;
+    private final Long STAGE_INVITE_ID = 10L;
 
     @BeforeEach
     void setUp() {
         filters = List.of(new StageInviteAuthorPattern(), new StageInviteInvitedFilter(),
                 new StageInviteDescriptionFilter(), new StageInviteStageFilter(),
                 new StageInviteStatusFilter());
-        service = new StageInvitationService(repository, mapper, filters);
+        service = new StageInvitationService(repository, stageService, mapper, filters);
         filterStageInviteDto = FilterStageInviteDto.builder().stagePattern("stage")
-                .descriptionPattern("desc").invitedPattern(70L)
-                .authorPattern(25L).statusPattern(StageInvitationStatus.PENDING).build();
-        author = TeamMember.builder().userId(25L).roles(List.of(TeamRole.OWNER)).build();
+                .descriptionPattern("desc").invitedPattern(INVITED_ID)
+                .authorPattern(AUTHOR_ID).statusPattern(StageInvitationStatus.PENDING).build();
+        author = TeamMember.builder().userId(AUTHOR_ID).roles(List.of(TeamRole.OWNER)).build();
         List<TeamMember> team = new ArrayList<>();
         team.add(author);
-        stage = Stage.builder().stageName("stage").executors(team).build();
-        invited = TeamMember.builder().userId(70L).build();
-        dto = StageInvitationDto.builder().id(10L).description("description").stage(stage).invited(invited).build();
+        stage = Stage.builder().stageId(STAGE_ID).stageName("stage").executors(team).build();
+        invited = TeamMember.builder().userId(INVITED_ID).build();
+        dto = StageInvitationDto.builder().id(STAGE_INVITE_ID).description("description")
+                .stageId(STAGE_ID).invitedId(INVITED_ID).build();
         stageInvitation = mapper.dtoToEntity(dto);
         stageInvitation.setAuthor(author);
+        stageInvitation.setStage(stage);
     }
 
     @Test
     void sendInviteSaveInviteIntoDBTest(){
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
+        stageInvitation.setInvited(invited);
         Mockito.when(repository.save(stageInvitation)).thenReturn(stageInvitation);
         Mockito.when(repository.findById(dto.getId())).thenReturn(stageInvitation);
+        Mockito.when(stageService.getEntityStageById(STAGE_ID)).thenReturn(stage);
 
         service.sendInvite(dto, 25L);
 
-        assertEquals(repository.findById(dto.getId()).getInvited(), dto.getInvited());
-        assertEquals(repository.findById(dto.getId()).getStage(), dto.getStage());
+        assertEquals(repository.findById(dto.getId()).getInvited().getUserId(), dto.getInvitedId());
+        assertEquals(repository.findById(dto.getId()).getStage().getStageId(), dto.getStageId());
         assertEquals(repository.findById(dto.getId()).getDescription(), dto.getDescription());
         assertEquals(repository.findById(dto.getId()).getId(), dto.getId());
         assertEquals(stageInvitation.getInvited(), invited);
