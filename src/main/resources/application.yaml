@@ -35,15 +35,15 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+aws:
+  accessKey: user
+  secretKey: password
+  region: http://127.0.0.1:9000/
+  bucket-name: project-bucket
+
 springfox.documentation.swagger.v2.path: /api-docs
 
 services:
-  s3:
-    endpoint: http://localhost:9000
-    accessKey: user
-    secretKey: password
-    bucketName: projectbucket
-    isMocked: false
   payment-service:
     host: http://localhost
     port: 9080
