@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
-import faang.school.projectservice.exceptions.SubprojectException;
+import faang.school.projectservice.exception.SubprojectException;
 import faang.school.projectservice.mapper.subproject.SubprojectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
