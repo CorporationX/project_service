@@ -2,15 +2,15 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageInvitationDto;
 import faang.school.projectservice.exception.InvalidUserException;
-import faang.school.projectservice.filters.mappers.StageInvitationMapper;
+import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.messages.ErrorMessages;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.filters.stageInvites.FilterStageInviteDto;
-import faang.school.projectservice.filters.stageInvites.StageInviteFilter;
+import faang.school.projectservice.filter.stageinvite.FilterStageInviteDto;
+import faang.school.projectservice.filter.stageinvite.StageInviteFilter;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.stage.StageService;
 import jakarta.persistence.EntityNotFoundException;

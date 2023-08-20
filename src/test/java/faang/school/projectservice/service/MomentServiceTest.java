@@ -1,16 +1,16 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.dto.MomentDtoUpdate;
-import faang.school.projectservice.filters.moments.FilterMomentDto;
-import faang.school.projectservice.filters.moments.MomentFilter;
-import faang.school.projectservice.filters.moments.MomentMapper;
-import faang.school.projectservice.filters.moments.MomentMapperImpl;
-import faang.school.projectservice.filters.moments.filtersForFilterMomentDto.MomentDescriptionFilter;
-import faang.school.projectservice.filters.moments.filtersForFilterMomentDto.MomentNameFilter;
+import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentDtoUpdate;
+import faang.school.projectservice.filter.moment.FilterMomentDto;
+import faang.school.projectservice.filter.moment.MomentFilter;
+import faang.school.projectservice.filter.moment.MomentMapper;
+import faang.school.projectservice.filter.moment.MomentMapperImpl;
+import faang.school.projectservice.filter.moment.filtersForFilterMomentDto.MomentDescriptionFilter;
+import faang.school.projectservice.filter.moment.filtersForFilterMomentDto.MomentNameFilter;
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.project.ProjectStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
