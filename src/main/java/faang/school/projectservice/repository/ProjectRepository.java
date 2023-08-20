@@ -1,7 +1,7 @@
 package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.ProjectJpaRepository;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.project.Project;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

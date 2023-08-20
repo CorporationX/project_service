@@ -1,14 +1,14 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.filters.mappers.StageInvitationMapperImpl;
-import faang.school.projectservice.filters.stageInvites.FilterStageInviteDto;
-import faang.school.projectservice.filters.stageInvites.StageInviteFilter;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteAuthorPattern;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteDescriptionFilter;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteInvitedFilter;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteStageFilter;
-import faang.school.projectservice.filters.stageInvites.filtersForStagesInvitesDto.StageInviteStatusFilter;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteAuthorPattern;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteDescriptionFilter;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteInvitedFilter;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteStageFilter;
+import faang.school.projectservice.filter.stageinvite.invetedto.StageInviteStatusFilter;
+import faang.school.projectservice.filter.stageinvite.FilterStageInviteDto;
+import faang.school.projectservice.filter.stageinvite.StageInviteFilter;
+import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
