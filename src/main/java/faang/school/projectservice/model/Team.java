@@ -2,6 +2,7 @@ package faang.school.projectservice.model;
 
 import java.util.List;
 
+import faang.school.projectservice.model.project.Project;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

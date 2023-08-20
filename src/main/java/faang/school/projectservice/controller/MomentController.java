@@ -1,9 +1,9 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.dto.MomentDtoUpdate;
-import faang.school.projectservice.filters.moments.FilterMomentDto;
+import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentDtoUpdate;
+import faang.school.projectservice.filter.moment.FilterMomentDto;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

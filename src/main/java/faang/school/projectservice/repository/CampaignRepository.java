@@ -1,6 +1,6 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.model.Campaign;
+import faang.school.projectservice.model.campaign.Campaign;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
