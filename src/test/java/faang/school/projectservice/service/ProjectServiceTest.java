@@ -17,7 +17,7 @@ import faang.school.projectservice.model.resource.Resource;
 import faang.school.projectservice.model.task.Task;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.Vacancy.Vacancy;
+import faang.school.projectservice.model.vacancy.Vacancy;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;

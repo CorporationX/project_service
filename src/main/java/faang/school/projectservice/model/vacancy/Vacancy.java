@@ -1,4 +1,4 @@
-package faang.school.projectservice.model.Vacancy;
+package faang.school.projectservice.model.vacancy;
 
 import java.time.LocalDateTime;
 import java.util.List;

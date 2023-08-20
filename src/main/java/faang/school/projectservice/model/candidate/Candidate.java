@@ -1,6 +1,6 @@
 package faang.school.projectservice.model.candidate;
 
-import faang.school.projectservice.model.Vacancy.Vacancy;
+import faang.school.projectservice.model.vacancy.Vacancy;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
