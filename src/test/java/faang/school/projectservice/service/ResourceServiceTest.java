@@ -1,32 +1,30 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validator.ResourcesValidator;
 import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.service.util.FileStore;
 import faang.school.projectservice.mapper.ResourceMapper;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
-import org.springframework.web.multipart.MultipartFile;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.dto.ResourceDto;
-import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamRole;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.service.util.FileStore;
+import faang.school.projectservice.validator.ResourcesValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -37,7 +35,7 @@ class ResourceServiceTest {
     private ResourceService resourceService;
 
     @Mock
-    private TeamMemberRepository teamMemberRepository;
+    private TeamMemberService teamMemberService;
 
     @Mock
     private ResourceRepository resourceRepository;
@@ -46,7 +44,7 @@ class ResourceServiceTest {
     private ResourcesValidator resourcesValidator;
 
     @Mock
-    private ProjectRepository projectRepository;
+    private ProjectService projectService;
 
     @Mock
     private ResourceMapper resourceMapper;
@@ -109,13 +107,13 @@ class ResourceServiceTest {
 
     @Test
     void testUploadFile() {
-        Mockito.when(projectRepository.getProjectById(resourceDto.getProjectId())).thenReturn(project);
+        Mockito.when(projectService.getProjectEntityById(resourceDto.getProjectId())).thenReturn(project);
 
         Mockito.when(file.getOriginalFilename()).thenReturn("start.jpg");
         Mockito.when(file.getContentType()).thenReturn("image/jpeg");
         Mockito.when(file.getSize()).thenReturn(175381L);
 
-        Mockito.when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
+        Mockito.when(teamMemberService.getTeamMemberById(1L)).thenReturn(teamMember);
         resource.setProject(Project.builder().id(1L).build());
         Mockito.when(resourceMapper.toEntity(resourceDto)).thenReturn(resource);
 
@@ -124,16 +122,16 @@ class ResourceServiceTest {
         Mockito.verify(fileStore).uploadFile(file, resource.getKey());
         Mockito.verify(resourceRepository).save(resource);
 
-        Mockito.verify(projectRepository).save(projectNewStorageSize);
+        Mockito.verify(projectService).saveProject(projectNewStorageSize);
     }
 
     @Test
     void testUpdateFile() {
-        Mockito.when(projectRepository.getProjectById(resourceDto.getProjectId())).thenReturn(project);
+        Mockito.when(projectService.getProjectEntityById(resourceDto.getProjectId())).thenReturn(project);
 
         resource.setId(1L);
         Mockito.when(resourceRepository.findById(1L)).thenReturn(Optional.ofNullable(resource));
-        Mockito.when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
+        Mockito.when(teamMemberService.getTeamMemberById(1L)).thenReturn(teamMember);
         teamMember.setId(2L);
         resource.setUpdatedBy(teamMember);
 
@@ -153,7 +151,7 @@ class ResourceServiceTest {
         resourceFill.setId(1L);
 
         Mockito.when(resourceRepository.findById(1L)).thenReturn(Optional.ofNullable(resourceFill));
-        Mockito.when(projectRepository.getProjectById(resourceDto.getProjectId())).thenReturn(project);
+        Mockito.when(projectService.getProjectEntityById(resourceDto.getProjectId())).thenReturn(project);
 
         resourceService.deleteResource(1L, userId);
 
@@ -162,6 +160,6 @@ class ResourceServiceTest {
         resourceFill.setStatus(ResourceStatus.DELETED);
 
         Mockito.verify(resourceRepository).save(resourceFill);
-        Mockito.verify(projectRepository).save(project);
+        Mockito.verify(projectService).saveProject(project);
     }
 }

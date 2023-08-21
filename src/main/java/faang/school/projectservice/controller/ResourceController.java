@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.service.ResourceService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +26,7 @@ public class ResourceController {
     @PostMapping("/upload")
     public ResourceDto uploadFile(
             @RequestPart("file") MultipartFile file,
-            @RequestPart("resourceDto") ResourceDto resourceDto) {
+            @RequestPart("resourceDto") @Valid ResourceDto resourceDto) {
         return resourceService.uploadFile(resourceDto, file, userContext.getUserId());
     }
 
@@ -33,7 +34,7 @@ public class ResourceController {
     public ResourceDto updateFile(
             @PathVariable long id,
             @RequestPart("file") MultipartFile file,
-            @RequestPart("resourceDto") ResourceDto resourceDto) {
+            @RequestPart("resourceDto") @Valid ResourceDto resourceDto) {
         return resourceService.updateFile(id, resourceDto, file, userContext.getUserId());
     }
 

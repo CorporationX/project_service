@@ -10,12 +10,9 @@ import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.util.FileStore;
 import faang.school.projectservice.validator.ResourcesValidator;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,19 +20,18 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
-    private final TeamMemberRepository teamMemberRepository;
     private final ResourceRepository resourceRepository;
     private final ResourcesValidator resourcesValidator;
-    private final ProjectRepository projectRepository;
+    private final TeamMemberService teamMemberService;
+    private final ProjectService projectService;
     private final ResourceMapper resourceMapper;
     private final FileStore fileStore;
 
     public ResourceDto uploadFile(ResourceDto resourceDto, MultipartFile file, long userId) {
-        Project project = projectRepository.getProjectById(resourceDto.getProjectId());
+        Project project = projectService.getProjectEntityById(resourceDto.getProjectId());
         String key = resourceDto.getProjectId() + "_" + project.getName() + "/" + file.getOriginalFilename();
 
         Resource resource = fillResourceCreate(resourceDto, file, key, userId);
@@ -49,7 +45,7 @@ public class ResourceService {
 
     public ResourceDto updateFile(long id, ResourceDto resourceDto, MultipartFile file, long userId) {
         Resource resource = getResourceById(id);
-        Project project = projectRepository.getProjectById(resourceDto.getProjectId());
+        Project project = projectService.getProjectEntityById(resourceDto.getProjectId());
         updateProjectStorageCapacity(file, project);
 
         String key = resourceDto.getProjectId() + "_" + project.getName() + "/" + file.getOriginalFilename();
@@ -63,7 +59,7 @@ public class ResourceService {
 
     public void deleteResource(long id, long userId) {
         Resource resource = getResourceById(id);
-        Project project = projectRepository.getProjectById(resource.getProject().getId());
+        Project project = projectService.getProjectEntityById(id);
 
         resourcesValidator.checkRightsToDelete(resource, project, userId);
 
@@ -83,7 +79,7 @@ public class ResourceService {
     }
 
     private Resource fillResourceCreate(ResourceDto resourceDto, MultipartFile file, String key, long userId) {
-        TeamMember teamMember = teamMemberRepository.findById(userId);
+        TeamMember teamMember = teamMemberService.getTeamMemberById(userId);
 
         Resource resource = resourceMapper.toEntity(resourceDto);
 
@@ -96,7 +92,7 @@ public class ResourceService {
     }
 
     private void fillResourceUpdate(ResourceDto resourceDto, Resource resource, MultipartFile file, String key, long userId) {
-        TeamMember teamMember = teamMemberRepository.findById(userId);
+        TeamMember teamMember = teamMemberService.getTeamMemberById(userId);
 
         resourceMapper.update(resourceDto, resource);
 
@@ -126,7 +122,7 @@ public class ResourceService {
         resourcesValidator.checkStorageCapacity(newStorageCapacity);
 
         project.setStorageSize(project.getStorageSize().add(BigInteger.valueOf(file.getSize())));
-        projectRepository.save(project);
+        projectService.saveProject(project);
     }
 
     private void subtractCapacity(Project project, Resource resource) {
@@ -137,6 +133,6 @@ public class ResourceService {
         }
 
         project.setStorageSize(newSizeCapacity);
-        projectRepository.save(project);
+        projectService.saveProject(project);
     }
 }
