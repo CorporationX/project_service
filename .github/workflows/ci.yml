@@ -1,9 +1,9 @@
 name: ci
 on:
   push:
-    branches: [ "feature/pipline-BC-4693" ]
+    branches: [ "cerberus-master" ]
   pull_request:
-    branches: [ "feature/pipline-BC-4693" ]
+    branches: [ "cerberus-master" ]
 
 jobs:
   build:
