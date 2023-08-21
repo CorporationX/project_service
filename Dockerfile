@@ -1,8 +1,18 @@
 FROM openjdk:17-jdk-slim-buster
+
 WORKDIR /app
 
-COPY /build/libs/service.jar build/
+# Copy only the Gradle files first to leverage Docker's layer caching
+COPY build.gradle .
+COPY settings.gradle .
+COPY gradlew .
 
-WORKDIR /app/build
-EXPOSE 8082
-ENTRYPOINT java -jar service.jar
+# Build the application using Gradle
+RUN ./gradlew build
+
+# Copy the generated JAR file after the build
+COPY build/libs/AlexBot-1.0-SNAPSHOT.jar .
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "AlexBot-1.0-SNAPSHOT.jar"]

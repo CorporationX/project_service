@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.project.ProjectFileService;
@@ -22,32 +23,36 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/projects/")
 public class ProjectFileController {
     private final ProjectFileService projectFileService;
+    private final UserContext userContext;
 
-    @PostMapping("{projectId}/teamMember/{teamMemberId}/files/")
+    @PostMapping("{projectId}/files/")
     public ResourceDto uploadFile(@RequestParam("file") MultipartFile multipartFile,
-                                  @PathVariable long projectId,
-                                  @PathVariable long teamMemberId) {
-        return projectFileService.uploadFile(multipartFile, projectId, teamMemberId);
+                                  @PathVariable long projectId) {
+        long userId = userContext.getUserId();
+
+        return projectFileService.uploadFile(multipartFile, projectId, userId);
     }
 
-    @GetMapping("teamMember/{teamMemberId}/files/resource/{resourceId}/")
-    public ResponseEntity<InputStreamResource> getFile(@PathVariable long resourceId,
-                                                       @PathVariable long teamMemberId) {
-        GetResourceDto resourceDto = projectFileService.getFile(resourceId, teamMemberId);
+    @GetMapping("/files/resource/{resourceId}/download")
+    public ResponseEntity<InputStreamResource> downloadFile(@PathVariable long resourceId) {
+        long userId = userContext.getUserId();
+        GetResourceDto resourceDto = projectFileService.getFile(resourceId, userId);
         InputStreamResource inputStreamResource = new InputStreamResource(resourceDto.getInputStream());
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, resourceDto.getName());
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resourceDto.getName() + "\"");
 
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentLength(resourceDto.getSize())
-                .contentType(MediaType.parseMediaType(resourceDto.getType().toString()))
+                .contentType(MediaType.parseMediaType(resourceDto.getType()))
                 .body(inputStreamResource);
     }
 
-    @DeleteMapping("teamMember/{teamMemberId}/files/resource/{resourceId}/")
-    public void deleteFile(@PathVariable long resourceId, @PathVariable long teamMemberId) {
-        projectFileService.deleteFile(resourceId, teamMemberId);
+    @DeleteMapping("/files/resource/{resourceId}/delete/")
+    public void deleteFile(@PathVariable long resourceId) {
+        long userId = userContext.getUserId();
+
+        projectFileService.deleteFile(resourceId, userId);
     }
 }
