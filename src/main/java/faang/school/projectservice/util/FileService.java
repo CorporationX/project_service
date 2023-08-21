@@ -61,10 +61,9 @@ public class FileService {
         }
     }
 
-    public InputStream getFile(String objectKey) {
+    public S3Object getFile(String objectKey) {
         try {
-            S3Object object = amazonS3.getObject(bucketName, objectKey);
-            return object.getObjectContent();
+            return amazonS3.getObject(bucketName, objectKey);
         } catch (AmazonServiceException ase) {
             log.error("Amazon S3 couldn't process operation", ase);
             throw ase;

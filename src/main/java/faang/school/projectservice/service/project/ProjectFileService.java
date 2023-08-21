@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.exception.InvalidCurrentUserException;
@@ -40,10 +41,11 @@ public class ProjectFileService {
         String objectKey = fileService.upload(multipartFile, projectId);
 
         Resource resource = Resource.builder()
-                .name(multipartFile.getName())
+                .name(multipartFile.getOriginalFilename())
                 .key(objectKey)
                 .size(BigInteger.valueOf(multipartFile.getSize()))
                 .type(ResourceType.getResourceType(multipartFile.getContentType()))
+                .status(ResourceStatus.ACTIVE)
                 .createdBy(teamMember)
                 .project(project)
                 .build();
@@ -71,11 +73,12 @@ public class ProjectFileService {
     public GetResourceDto getFile(long resourceId, long teamMemberId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
         validateTeamMember(resource.getProject(), teamMemberId);
+        S3Object file = fileService.getFile(resource.getKey());
 
         return GetResourceDto.builder()
                 .name(resource.getName())
-                .type(resource.getType())
-                .inputStream(fileService.getFile(resource.getKey()))
+                .type(file.getObjectMetadata().getContentType())
+                .inputStream(file.getObjectContent())
                 .size(resource.getSize().longValue())
                 .build();
     }
@@ -84,7 +87,7 @@ public class ProjectFileService {
     private void validateTeamMember(Project project, long teamMemberId) {
         List<Long> projectMembers = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
-                .map(TeamMember::getId)
+                .map(TeamMember::getUserId)
                 .distinct()
                 .toList();
 

@@ -30,23 +30,23 @@ public class ProjectFileController {
         return projectFileService.uploadFile(multipartFile, projectId, teamMemberId);
     }
 
-    @GetMapping("teamMember/{teamMemberId}/files/resource/{resourceId}/")
-    public ResponseEntity<InputStreamResource> getFile(@PathVariable long resourceId,
-                                                       @PathVariable long teamMemberId) {
+    @GetMapping("teamMember/{teamMemberId}/files/resource/{resourceId}/download")
+    public ResponseEntity<InputStreamResource> downloadFile(@PathVariable long resourceId,
+                                                            @PathVariable long teamMemberId) {
         GetResourceDto resourceDto = projectFileService.getFile(resourceId, teamMemberId);
         InputStreamResource inputStreamResource = new InputStreamResource(resourceDto.getInputStream());
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, resourceDto.getName());
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resourceDto.getName() + "\"");
 
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentLength(resourceDto.getSize())
-                .contentType(MediaType.parseMediaType(resourceDto.getType().toString()))
+                .contentType(MediaType.parseMediaType(resourceDto.getType()))
                 .body(inputStreamResource);
     }
 
-    @DeleteMapping("teamMember/{teamMemberId}/files/resource/{resourceId}/")
+    @DeleteMapping("teamMember/{teamMemberId}/files/resource/{resourceId}/delete/")
     public void deleteFile(@PathVariable long resourceId, @PathVariable long teamMemberId) {
         projectFileService.deleteFile(resourceId, teamMemberId);
     }

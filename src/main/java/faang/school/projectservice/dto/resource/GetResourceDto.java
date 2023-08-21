@@ -14,7 +14,7 @@ import java.io.InputStream;
 @NoArgsConstructor
 public class GetResourceDto {
     private String name;
-    private ResourceType type;
+    private String type;
     private InputStream inputStream;
     private long size;
 }
