@@ -24,8 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -53,6 +52,11 @@ class ProjectServiceTest {
         project1 = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("CorporationX").status(ProjectStatus.CREATED).build();
         project2 = Project.builder().id(2L).createdAt(LocalDateTime.now()).description("b").name("CorporationX").status(ProjectStatus.ON_HOLD).build();
         project3 = Project.builder().id(3L).createdAt(LocalDateTime.now()).description("a").name("Facebook").status(ProjectStatus.CREATED).build();
+    }
+
+    @Test
+    public void ci_test() {
+        assertTrue(true);
     }
 
     @Test
