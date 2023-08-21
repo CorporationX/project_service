@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.resource;
 
-import faang.school.projectservice.model.resource.ResourceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

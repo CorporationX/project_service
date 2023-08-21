@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.exception.InvalidCurrentUserException;
+import faang.school.projectservice.exception.StorageSpaceExceededException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -36,6 +37,7 @@ public class ProjectFileService {
     public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long teamMemberId) {
         Project project = projectRepository.getProjectById(projectId);
         validateTeamMember(project, teamMemberId);
+        validateProjectStorage(project, BigInteger.valueOf(multipartFile.getSize()));
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
 
         String objectKey = fileService.upload(multipartFile, projectId);
@@ -50,7 +52,7 @@ public class ProjectFileService {
                 .project(project)
                 .build();
 
-        updateProjectStorage(resource);// написать валидацию на сторедж перед тем как загружать файл
+        updateProjectStorage(resource);
         resourceRepository.save(resource);
 
         return resourceMapper.toDto(resource);
@@ -97,11 +99,12 @@ public class ProjectFileService {
         }
     }
 
-//    private void validateProjectStorage(Project project, BigInteger fileSize){
-//       if (fileSize.compareTo(project.getStorageSize()) <= 0){
-//           throw new
-//       }
-//    }
+    private void validateProjectStorage(Project project, BigInteger fileSize) {
+        if (fileSize.compareTo(project.getStorageSize()) <= 0) {
+            String errorMessage = String.format("Storage %d has not enough space", project.getId());
+            throw new StorageSpaceExceededException(errorMessage);
+        }
+    }
 
     private void updateProjectStorage(Resource resource) {
         Project project = resource.getProject();
@@ -110,7 +113,7 @@ public class ProjectFileService {
 
         if (resource.getStatus().equals(ResourceStatus.DELETED)) {
             project.setStorageSize(storageSize.add(resourceSize));
-        } else if (resourceSize.compareTo(storageSize) <= 0) {
+        } else {
             project.setStorageSize(storageSize.subtract(resourceSize));
         }
 
