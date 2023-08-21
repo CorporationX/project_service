@@ -144,10 +144,11 @@ public class StageService {
 
 
     public void sendStageInvitation(Stage stage, Long authorId, TeamMember teamMember) {
-        stageInvitationService.sendInvitation(StageInvitationDto.builder()
+        StageInvitationDto stageInvitationDto = StageInvitationDto.builder()
                 .stageId(stage.getStageId())
                 .authorId(authorId)
                 .invitedId(teamMember.getId())
-                .build());
+                .build();
+        stageInvitationService.sendInvitation(stageInvitationDto);
     }
 }

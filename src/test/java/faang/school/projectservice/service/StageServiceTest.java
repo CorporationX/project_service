@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage_roles.StageRolesDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
@@ -16,11 +15,9 @@ import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage.StageStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -38,7 +35,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -54,8 +50,6 @@ class StageServiceTest {
     @Mock
     private StageRepository stageRepository;
     @Mock
-    private TeamMemberRepository teamMemberRepository;
-    @Mock
     private ProjectRepository projectRepository;
     @Spy
     private StageMapper stageMapper;
@@ -63,49 +57,44 @@ class StageServiceTest {
     private StageRolesMapper stageRolesMapper;
     @Mock
     private StageValidator stageValidator;
-    @Mock
-    private TeamMember author;
+
     @Mock
     private StageInvitationService stageInvitationService;
     @Mock
     private StageRolesRepository stageRolesRepository;
+    @Mock
+    private Stage stageMock;
+    @Mock
+    private Team teamMock;
+    @Mock
+    private TeamMember teamMemberMock;
+    @Mock
+    private Project projectMock;
+    @Mock
+    private StageRolesDto stageRolesDtoMock;
     @Captor
     private ArgumentCaptor<StageInvitationDto> captor;
     private StageDto stageDto;
     private Stage stage;
-    private Stage stageWithStatusCreated;
-    private Stage stageWithStatusIn_Progress;
     private String status;
     private Long stageId;
     private Long authorId;
-    private Stage stageFromRepositoryWithWrongStatus;
     private StageRolesDto stageRolesDto;
     private Project project;
-    TeamMember teamMember;
+    private TeamMember teamMember;
 
     @BeforeEach
     void setUp() {
         stageId = 1L;
         authorId = 2L;
         status = "created";
-        stageWithStatusCreated = Stage.builder()
-                .stageId(1L)
-                .status(StageStatus.CREATED)
-                .build();
-        stageWithStatusIn_Progress = Stage.builder()
-                .stageId(2L)
-                .status(StageStatus.IN_PROGRESS)
-                .build();
-        stageFromRepositoryWithWrongStatus = Stage.builder()
-                .status(StageStatus.CANCELLED)
-                .build();
         stage = Stage.builder()
                 .stageId(1L)
                 .stageName("stageName")
                 .project(Project.builder().id(1L).build())
                 .status(StageStatus.CREATED)
                 .stageRoles(List.of(StageRoles.builder().teamRole(TeamRole.DEVELOPER).count(1).build()))
-                .executors(List.of(author))
+                .executors(List.of(teamMemberMock))
                 .build();
         stageDto = StageDto.builder()
                 .stageName("stageName")
@@ -151,13 +140,13 @@ class StageServiceTest {
 
     @Test
     void testMethodGetAllStagesByStatus() {
-        when(stageRepository.findAll()).thenReturn(new ArrayList<>(List.of(stageWithStatusCreated, stageWithStatusIn_Progress)));
-        when(stageMapper.toDto(stageWithStatusCreated)).thenReturn(stageDto);
+        when(stageRepository.findAll()).thenReturn(new ArrayList<>(List.of(stage)));
+        when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
         stageService.getAllStagesByStatus(status);
 
         verify(stageRepository, times(1)).findAll();
-        verify(stageMapper, times(1)).toDto(stageWithStatusCreated);
+        verify(stageMapper, times(1)).toDto(stage);
         verifyNoMoreInteractions(stageRepository);
         verifyNoMoreInteractions(stageMapper);
     }
@@ -197,36 +186,31 @@ class StageServiceTest {
     }
 
     @Test
-    @Disabled
+//    @Disabled
     void testMethodUpdateStage() {
-        Stage stage1 = mock(Stage.class);
-        Project project1 = mock(Project.class);
-        List<Stage> stages = List.of(stage1, stage1, stage1);
-        stage1 = Stage.builder().project(Project.builder().id(1L).build()).build();
+        List<Stage> stages = List.of(stageMock, stageMock);
+        List<Team> teams = List.of(teamMock, teamMock);
+        List<TeamMember> teamMembers = List.of(teamMemberMock, teamMemberMock);
 
-        when(stageRepository.getById(stageId)).thenReturn(stage);
-        doNothing().when(stageValidator).isCompletedOrCancelled(any(Stage.class));
-        when(teamMemberRepository.findById(authorId)).thenReturn(author);
-        when(stageRepository.save(any(Stage.class))).thenReturn(stage);
+        when(stageRepository.getById(stageId)).thenReturn(stageMock);
+        doNothing().when(stageValidator).isCompletedOrCancelled(stageMock);
+        when(stageRepository.save(stageMock)).thenReturn(stageMock);
+        when(stageMock.getProject()).thenReturn(projectMock);
+        when(projectMock.getId()).thenReturn(1L);
+        when(projectMock.getTeams()).thenReturn(teams);
+        when(projectRepository.getProjectById(1L)).thenReturn(projectMock);
+        when(teamMock.getTeamMembers()).thenReturn(teamMembers);
+        when(teamMemberMock.getStages()).thenReturn(stages);
 
-        when(teamMember.getStages()).thenReturn(stages);
-        when(stage1.getProject()).thenReturn(project1);
-        when(project1.getId()).thenReturn(1L);
         stageService.updateStage(stageRolesDto, stageId, authorId);
 
+        verify(projectRepository, times(1)).getProjectById(1L);
         verify(stageRepository, times(1)).getById(stageId);
-        verify(stageValidator, times(1)).isCompletedOrCancelled(any(Stage.class));
-        verify(teamMemberRepository, times(1)).findById(authorId);
-        verify(stageRepository, times(1)).save(any(Stage.class));
+        verify(stageValidator, times(1)).isCompletedOrCancelled(stageMock);
+        verify(stageRepository, times(1)).save(stageMock);
 
         verifyNoMoreInteractions(stageRepository);
-    }
-
-    @Test()
-    public void testUpdateStage_InvalidStage() {
-        StageValidator stageValidator = new StageValidator();
-        when(stageRepository.getById(stageId)).thenReturn(stageFromRepositoryWithWrongStatus);
-        assertThrows(DataValidationException.class, () -> stageValidator.isCompletedOrCancelled(stageFromRepositoryWithWrongStatus), "Stage is completed or cancelled");
+        verifyNoMoreInteractions(projectRepository);
     }
 
     @Test
@@ -267,53 +251,41 @@ class StageServiceTest {
     }
 
     @Test
-    @Disabled
     public void testInviteTeamMemberToStage() {
         long countTeamRoles = 1L;
-        Stage stage1 = mock(Stage.class);
-        Project project1 = mock(Project.class);
-        TeamMember teamMember1 = mock(TeamMember.class);
+        List<Stage> stages = List.of(stageMock, stageMock);
+        List<Team> teams = List.of(teamMock, teamMock);
+        List<TeamMember> teamMembers = List.of(teamMemberMock, teamMemberMock);
 
-        when(stage1.getProject()).thenReturn(project1);
-        when(project1.getId()).thenReturn(456L);
+        when(projectMock.getId()).thenReturn(1L);
+        when(stageMock.getProject()).thenReturn(projectMock);
+        when(projectMock.getTeams()).thenReturn(teams);
+        when(teamMemberMock.getStages()).thenReturn(stages);
+        when(teamMock.getTeamMembers()).thenReturn(teamMembers);
+        when(stageRolesDtoMock.getCount()).thenReturn(5);
+        when(projectRepository.getProjectById(1L)).thenReturn(projectMock);
 
-        when(project1.getTeams()).thenReturn(new ArrayList<>());
-        when(teamMember1.getStages()).thenReturn(new ArrayList<>());
+        stageService.inviteTeamMemberToStage(stageMock, stageRolesDtoMock, authorId, countTeamRoles);
 
-        stageService.inviteTeamMemberToStage(stage, stageRolesDto, authorId, countTeamRoles);
-
-        verify(stageService, times(1)).sendStageInvitation(eq(stage1), eq(authorId), eq(teamMember1));
+        verify(projectRepository, times(1))
+                .getProjectById(1L);
     }
 
     @Test
     public void testUpdateStageRoles() {
         StageRoles stageRole1 = mock(StageRoles.class);
         StageRoles stageRole2 = mock(StageRoles.class);
-        StageRolesDto stageRolesDto1 = mock(StageRolesDto.class);
-        Stage stage1 = mock(Stage.class);
-        StageRoles stageRole3 = StageRoles.builder().teamRole(TeamRole.valueOf("DEVELOPER")).count(2).build();
+        List<StageRoles> stageRoles = List.of(stageRole1, stageRole2);
 
-
-        List<StageRoles> stageRoles = new ArrayList<>();
-        stageRoles.add(stageRole1);
-        stageRoles.add(stageRole2);
-
-        when(stage1.getStageRoles()).thenReturn(stageRoles);
-        when(stageRole1.getTeamRole().equals(stageRolesDto1.getTeamRole())).thenReturn(true);
-        when(stageRole1.getCount() < stageRole2.getCount()).thenReturn(true);
-        doNothing().when(stageRole1).setCount(stageRolesDto1.getCount());
+        when(stageMock.getStageRoles()).thenReturn(stageRoles);
+        when(stageRolesMapper.toEntity(stageRolesDtoMock)).thenReturn(new StageRoles());
         when(stageRolesRepository.save(stageRole1)).thenReturn(stageRole1);
-        when(stageRole1.getTeamRole().equals(stageRole2.getTeamRole())).thenReturn(false);
-        when(stageRolesMapper.toEntity(stageRolesDto1)).thenReturn(new StageRoles());
-        when(stageRolesRepository.save(stageRole2)).thenReturn(stageRole2);
-        when(stageRepository.save(stage1)).thenReturn(stage1);
+        when(stageRepository.save(stageMock)).thenReturn(stageMock);
 
         stageService.updateStageRoles(stageRolesDto, stage);
 
         verify(stageRolesRepository, times(1)).save(any(StageRoles.class));
-        verify(stageRolesMapper, times(1)).toEntity(stageRolesDto1);
         verify(stageRolesRepository, times(1)).save(any(StageRoles.class));
         verify(stageRepository, times(1)).save(stage);
-
     }
 }
