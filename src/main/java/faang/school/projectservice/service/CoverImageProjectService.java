@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @Service
 @RequiredArgsConstructor
 public class CoverImageProjectService {
@@ -32,24 +34,26 @@ public class CoverImageProjectService {
     }
 
     @Transactional(readOnly = true)
-    public CoverImageFromAwsDto getByProjectId(Long projectId) {
+    public CoverImageFromAwsDto getByProjectId(Long projectId) throws IOException {
         Project project = projectRepository.findById(projectId).orElseThrow(() ->
                 new DataValidException("Project with id " + projectId + " is not found"));
-        if (project.getCoverImageId() == null) {
-            throw new DataValidException("User with id " + projectId + " doesn't has an avatar");
+
+        String coverImageId = fileStorageService.uploadDefaultPicture();
+        if (project.getCoverImageId() != null) {
+            coverImageId = project.getCoverImageId();
         }
-        CoverImageFromAwsDto cover = fileStorageService.receiveFile(project.getCoverImageId());
-        return cover;
+        return fileStorageService.receiveFile(coverImageId);
     }
 
     @Transactional
     public ProjectCoverImageDto deleteByProjectId(Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow(() ->
                 new DataValidException("Project with id " + projectId + " is not found"));
-        if (project.getCoverImageId() == null) {
-            throw new DataValidException("Project with id " + projectId + " doesn't has an avatar");
+        if (project.getCoverImageId() != null) {
+            fileStorageService.deleteObject(project.getCoverImageId());
+            project.setCoverImageId(null);
+            projectRepository.save(project);
         }
-        fileStorageService.deleteObject(project.getCoverImageId());
         return new ProjectCoverImageDto(projectId, null);
     }
 }

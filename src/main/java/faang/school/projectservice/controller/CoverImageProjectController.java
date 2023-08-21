@@ -8,10 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/users/avatars/")
+@RequestMapping("api/v1/project/cover/")
 public class CoverImageProjectController {
     private final CoverImageProjectService coverImageProjectService;
     private final UserContext userContext;
@@ -22,7 +24,7 @@ public class CoverImageProjectController {
     }
 
     @GetMapping("/{id}")
-    public CoverImageFromAwsDto get(@PathVariable("id") Long projectId) {
+    public CoverImageFromAwsDto get(@PathVariable("id") Long projectId) throws IOException {
         return coverImageProjectService.getByProjectId(projectId);
     }
 

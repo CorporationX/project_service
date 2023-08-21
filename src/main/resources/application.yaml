@@ -53,3 +53,5 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+default-cover-pic: src/main/resources/default_cover_pic/dragonfly.jpeg
