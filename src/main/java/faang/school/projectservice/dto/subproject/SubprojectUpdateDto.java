@@ -11,9 +11,6 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class SubprojectUpdateDto {
-    @NotNull
-    private Long subprojectId;
-
     private ProjectStatus status;
 
     private ProjectVisibility visibility;

@@ -4,10 +4,12 @@ import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
 import faang.school.projectservice.dto.subproject.SubprojectUpdateDto;
 import faang.school.projectservice.exception.SubprojectException;
 import faang.school.projectservice.mapper.subproject.SubprojectMapper;
-import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.project.ProjectStatus;
 import faang.school.projectservice.model.project.ProjectVisibility;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class SubprojectService {
     private final ProjectRepository projectRepository;
     private final SubprojectMapper subprojectMapper;
     private final StageRepository stageRepository;
+    private final MomentRepository momentRepository;
 
     @Transactional
     public SubprojectDtoReqCreate createSubproject(Long parentProjectId, SubprojectDtoReqCreate subprojectDto) {
@@ -45,21 +48,48 @@ public class SubprojectService {
         return subprojectMapper.toDtoReqCreate(projectRepository.save(newSubProject));
     }
 
-    public SubprojectDtoReqCreate updateSubproject(SubprojectUpdateDto subprojectDto) {
-// ���� �� ��������� ��� � ������������� ������� ������ �������� ������, � � ���� ������� � ���������� ������.
-        // ������� ��������� � ������ �������, �.� ���� ������������ ������ ������, �� ������ ������ ������.
-        Project subprojectForUpdate = projectRepository.getProjectById(subprojectDto.getSubprojectId());
+    @Transactional
+    public SubprojectDtoReqCreate updateSubproject(Long subprojectId, SubprojectUpdateDto subprojectDto) {
+        Project subprojectForUpdate = projectRepository.getProjectById(subprojectId);
         checkIsSubproject(subprojectForUpdate);
+        checkPossibilityUpdateSubproject(subprojectForUpdate);
 
         ProjectStatus statusToUpdate = subprojectDto.getStatus();
-        if (statusToUpdate != null) {
+        if (Objects.nonNull(statusToUpdate)) {
             updateStatus(subprojectForUpdate, statusToUpdate);
         }
-        if (isStatusForAllChildrenClosed(subprojectForUpdate)) {
-            // �������� �����
-            List<Team> teams = subprojectForUpdate.getTeams();
-            teams.
+
+        if (isStatusCompletedForAllChildren(subprojectForUpdate)) {
+            createMomentWhenSubprojectCompleted(subprojectForUpdate);
         }
+
+        ProjectVisibility visibilityToUpdate = subprojectDto.getVisibility();
+        if (Objects.nonNull(visibilityToUpdate)) {
+            checkPossibleSetPrivateVisibilitySubproject(subprojectForUpdate, visibilityToUpdate);
+            subprojectForUpdate.setVisibility(visibilityToUpdate);
+            setVisibilityForChildren(subprojectForUpdate.getChildren(), visibilityToUpdate);
+        }
+
+        return subprojectMapper.toDtoReqCreate(subprojectForUpdate);
+    }
+
+    private void createMomentWhenSubprojectCompleted(Project subproject) {
+        List<Long> userIds = subproject.getTeams()
+                .stream()
+                .flatMap(team -> team.getTeamMembers()
+                        .stream()
+                        .map(TeamMember::getUserId))
+                .toList();
+
+        Moment newMoment = Moment.builder()
+                .name("Выполнены все подпроекты")
+                .description("Выполнены все подпроекты")
+                .projects(List.of(subproject.getParentProject()))
+                .userIds(userIds)
+                .build();
+
+        // могу я тут напрямую дергать репозиторий моментов? Или это нарушит принцип SOLID?
+        momentRepository.save(newMoment);
     }
 
     private void setVisibilitySubproject(Project subproject, ProjectVisibility visibility) {
@@ -67,27 +97,38 @@ public class SubprojectService {
                 ? ProjectVisibility.PUBLIC
                 : visibility;
 
-        if (isParentVisibilityPublic(subproject.getParentProject()) && visibility == ProjectVisibility.PRIVATE) {
-            String errorMessage = MessageFormat.format(ERR_VISIBILITY_PARENT_PROJECT_FORMAT, visibility);
-            throw new SubprojectException(errorMessage);
-        }
+        checkPossibleSetPrivateVisibilitySubproject(subproject, visibilityToSet);
 
         subproject.setVisibility(visibilityToSet);
+    }
+
+    private void checkPossibleSetPrivateVisibilitySubproject(Project subproject, ProjectVisibility visibilityToSet) {
+        if (isParentVisibilityPublic(subproject.getParentProject()) &&
+                visibilityToSet == ProjectVisibility.PRIVATE) {
+            String errorMessage = MessageFormat.format(ERR_VISIBILITY_PARENT_PROJECT_FORMAT, visibilityToSet);
+            throw new SubprojectException(errorMessage);
+        }
+    }
+
+    private void setVisibilityForChildren(List<Project> childrenSubprojects, ProjectVisibility visibilityToSet){
+        for (Project curChild : childrenSubprojects) {
+            curChild.setVisibility(visibilityToSet);
+            if (!curChild.getChildren().isEmpty()) {
+                setVisibilityForChildren(curChild.getChildren(), visibilityToSet);
+            }
+        }
     }
 
     private boolean isParentVisibilityPublic(Project parentProject) {
         return parentProject.getVisibility() == ProjectVisibility.PUBLIC;
     }
 
-    //��� ���� ���������, ��� ���������� �������� ���������� ����� ��� �� ������. �.�. ������ ������� ������,
-    // ���� � ���� ���� ��� ��� �������� ����������. ����� ������� ��������� ��� ����������,
-    // � ������ ����� ������������ ������
-    private void setRequiredStatusForChildrenProjects(List<Project> childrenProjects, ProjectStatus requiredStatus) {
+    private void setRequiredStatusForChildrenProjects(List<Project> childrenSubprojects, ProjectStatus requiredStatus) {
         if (Objects.nonNull(requiredStatus)) {
-            for (Project curProject : childrenProjects) {
-                curProject.setStatus(requiredStatus);
-                if (!curProject.getChildren().isEmpty()) {
-                    setRequiredStatusForChildrenProjects(curProject.getChildren(), requiredStatus);
+            for (Project curChild : childrenSubprojects) {
+                curChild.setStatus(requiredStatus);
+                if (!curChild.getChildren().isEmpty()) {
+                    setRequiredStatusForChildrenProjects(curChild.getChildren(), requiredStatus);
                 }
             }
         }
@@ -109,11 +150,8 @@ public class SubprojectService {
         }
     }
 
-    // ���������, � ���� � ������� ��������� ��� ��� ����������, ����� �������� Moment,
-    // � ��������� ������� ���������� ����������� �������.
-    // ����������, ��� � ������� ���� ������ ���������� ��� �����������.
-    private boolean isStatusForAllChildrenClosed(Project project) {
-        return project.getChildren().stream().map(Project::getStatus).allMatch(status -> status == ProjectStatus.CANCELLED);
+    private boolean isStatusCompletedForAllChildren(Project project) {
+        return project.getChildren().stream().map(Project::getStatus).allMatch(status -> status == ProjectStatus.COMPLETED);
     }
 
     private void checkIsSubproject(Project project) {
