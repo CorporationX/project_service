@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TeamMemberService {
 
-    private final TeamMemberRepository teamMemberRepository;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
 
-    public TeamMember getTeamMemberById(Long id) {
-        return teamMemberRepository.findById(id);
+    public TeamMember getTeamMemberByUserIdAndProjectId(Long userId, Long projectId) {
+        return teamMemberJpaRepository.findByUserIdAndProjectId(userId, projectId);
     }
 }

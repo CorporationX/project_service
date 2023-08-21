@@ -43,4 +43,3 @@ public class ResourceController {
         resourceService.deleteResource(id, userContext.getUserId());
     }
 }
-

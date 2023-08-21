@@ -1,5 +1,6 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ProjectStorageCapacityExceededException;
 import faang.school.projectservice.exception.UserNorAccessRightDeleteException;
 import faang.school.projectservice.model.Project;
@@ -24,6 +25,8 @@ class ResourcesValidatorTest {
 
     private Project project;
 
+    private TeamMember teamMember;
+
     private final long userId1 = 1L;
 
     private final long userId2 = 2L;
@@ -35,7 +38,10 @@ class ResourcesValidatorTest {
                 .ownerId(1L)
                 .build();
 
-        TeamMember teamMember = TeamMember.builder().userId(1L).build();
+        teamMember = TeamMember
+                .builder()
+                .userId(1L)
+                .build();
 
         resource = Resource
                 .builder()
@@ -74,5 +80,16 @@ class ResourcesValidatorTest {
     @Test
     void testCheckRightsToDeleteCheckProjectDoesNotThrowException() {
         assertDoesNotThrow(() -> resourcesValidator.checkRightsToDelete(resource, project, userId1));
+    }
+
+    @Test
+    void testCheckTeamMemberInProjectThrowException() {
+        assertThrows(DataValidationException.class,
+                () -> resourcesValidator.checkTeamMemberInProject(null));
+    }
+
+    @Test
+    void testCheckTeamMemberInProjectDoesNotThrowException() {
+        assertDoesNotThrow(() -> resourcesValidator.checkTeamMemberInProject(teamMember));
     }
 }

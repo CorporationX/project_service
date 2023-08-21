@@ -113,7 +113,7 @@ class ResourceServiceTest {
         Mockito.when(file.getContentType()).thenReturn("image/jpeg");
         Mockito.when(file.getSize()).thenReturn(175381L);
 
-        Mockito.when(teamMemberService.getTeamMemberById(1L)).thenReturn(teamMember);
+        Mockito.when(teamMemberService.getTeamMemberByUserIdAndProjectId(userId, 1L)).thenReturn(teamMember);
         resource.setProject(Project.builder().id(1L).build());
         Mockito.when(resourceMapper.toEntity(resourceDto)).thenReturn(resource);
 
@@ -131,7 +131,7 @@ class ResourceServiceTest {
 
         resource.setId(1L);
         Mockito.when(resourceRepository.findById(1L)).thenReturn(Optional.ofNullable(resource));
-        Mockito.when(teamMemberService.getTeamMemberById(1L)).thenReturn(teamMember);
+        Mockito.when(teamMemberService.getTeamMemberByUserIdAndProjectId(userId, 1L)).thenReturn(teamMember);
         teamMember.setId(2L);
         resource.setUpdatedBy(teamMember);
 

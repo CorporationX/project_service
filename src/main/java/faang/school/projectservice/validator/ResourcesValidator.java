@@ -1,9 +1,11 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ProjectStorageCapacityExceededException;
 import faang.school.projectservice.exception.UserNorAccessRightDeleteException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.TeamMember;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,12 @@ public class ResourcesValidator {
 
         if (project.getOwnerId() != userId) {
             throw new UserNorAccessRightDeleteException("The user does not have the right to delete");
+        }
+    }
+
+    public void checkTeamMemberInProject(TeamMember teamMember) {
+        if (teamMember == null) {
+            throw new DataValidationException("Team member is not in the project");
         }
     }
 }
