@@ -3,6 +3,7 @@ package faang.school.projectservice.service.project;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.UpdateResourceDto;
 import faang.school.projectservice.exception.InvalidCurrentUserException;
 import faang.school.projectservice.exception.StorageSpaceExceededException;
 import faang.school.projectservice.jpa.ResourceRepository;
@@ -34,11 +35,11 @@ public class ProjectFileService {
     private final ResourceMapper resourceMapper;
 
     @Transactional
-    public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long teamMemberId) {
+    public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long userId) {
         Project project = projectRepository.getProjectById(projectId);
-        validateTeamMember(project, teamMemberId);
+        validateTeamMember(project, userId);
         validateProjectStorage(project, BigInteger.valueOf(multipartFile.getSize()));
-        TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
+        TeamMember teamMember = teamMemberRepository.findById(userId);
 
         String objectKey = fileService.upload(multipartFile, projectId);
 
@@ -59,9 +60,16 @@ public class ProjectFileService {
     }
 
     @Transactional
-    public void deleteFile(long resourceId, long teamMemberId) {
+    public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId){
+        deleteFile(resourceId,userId);
+
+
+    }
+
+    @Transactional
+    public void deleteFile(long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        validateIfUserCanChangeFile(resource, teamMemberId);
+        validateIfUserCanChangeFile(resource, userId);
 
         if (!resource.getStatus().equals(ResourceStatus.DELETED)) {
             fileService.delete(resource.getKey());
@@ -72,9 +80,9 @@ public class ProjectFileService {
         }
     }
 
-    public GetResourceDto getFile(long resourceId, long teamMemberId) {
+    public GetResourceDto getFile(long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        validateTeamMember(resource.getProject(), teamMemberId);
+        validateTeamMember(resource.getProject(), userId);
         S3Object file = fileService.getFile(resource.getKey());
 
         return GetResourceDto.builder()
@@ -86,15 +94,15 @@ public class ProjectFileService {
     }
 
 
-    private void validateTeamMember(Project project, long teamMemberId) {
+    private void validateTeamMember(Project project, long userId) {
         List<Long> projectMembers = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getUserId)
                 .distinct()
                 .toList();
 
-        if (!projectMembers.contains(teamMemberId)) {
-            String errorMessage = String.format("The team member with id: %d is not on the project", teamMemberId);
+        if (!projectMembers.contains(userId)) {
+            String errorMessage = String.format("The team member with id: %d is not on the project", userId);
             throw new InvalidCurrentUserException(errorMessage);
         }
     }
@@ -120,24 +128,24 @@ public class ProjectFileService {
         projectRepository.save(project);
     }
 
-    private void validateIfUserCanChangeFile(Resource resource, long teamMemberId) {
-        boolean notAProjectManager = !userIsProjectManager(resource.getProject(), teamMemberId);
-        boolean notAFileCreator = !userIsFileCreator(resource, teamMemberId);
+    private void validateIfUserCanChangeFile(Resource resource, long userId) {
+        boolean notAProjectManager = !userIsProjectManager(resource.getProject(), userId);
+        boolean notAFileCreator = !userIsFileCreator(resource, userId);
 
         if (notAProjectManager && notAFileCreator) {
             throw new InvalidCurrentUserException("You should be creator of a file or a project manager to change files");
         }
     }
 
-    private boolean userIsProjectManager(Project project, long teamMemberId) {
+    private boolean userIsProjectManager(Project project, long userId) {
         return project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .distinct()
                 .anyMatch(teamMember ->
-                        teamMember.getRoles().contains(TeamRole.MANAGER) && teamMember.getId().equals(teamMemberId));
+                        teamMember.getRoles().contains(TeamRole.MANAGER) && teamMember.getUserId().equals(userId));
     }
 
-    private boolean userIsFileCreator(Resource resource, long teamMemberId) {
-        return resource.getCreatedBy().getId().equals(teamMemberId);
+    private boolean userIsFileCreator(Resource resource, long userId) {
+        return resource.getCreatedBy().getUserId().equals(userId);
     }
 }
