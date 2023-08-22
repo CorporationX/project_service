@@ -1,13 +1,14 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.stage.TaskAction;
+import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageRolesRepository;
+import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ public class StageService {
     private final ProjectRepository projectRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final StageRolesRepository stageRolesRepository;
+    private final TaskRepository taskRepository;
 
     private final StageMapper stageMapper;
 
@@ -56,12 +59,80 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
+    public void deleteStage(StageDeleteDto stageToDeleteDto) {
+        actionWithTasks(stageToDeleteDto);
+        Stage stageToDelete = stageRepository.getById(stageToDeleteDto.getStageId());
+        stageRepository.delete(stageToDelete);
+
+        log.info("Stage deleted: {}", stageToDelete);
+    }
+
+    private void actionWithTasks(StageDeleteDto stageToDeleteDto) {
+        if (stageToDeleteDto.getTasksId() == null || stageToDeleteDto.getTasksId().isEmpty()) {
+            return;
+        }
+        TaskAction action = stageToDeleteDto.getAction();
+        switch (action) {
+            case DELETE -> deleteTasks(stageToDeleteDto);
+            case CLOSE -> closeTasks(stageToDeleteDto);
+            case TRANSFER -> transferTasks(stageToDeleteDto);
+        }
+    }
+
+    private void transferTasks(StageDeleteDto stageToDeleteDto) {
+        log.info("Transferring tasks: {}", stageToDeleteDto.getTasksId());
+
+        Stage toTransferStage = stageRepository.getById(stageToDeleteDto.getToTransferStageId());
+        List<Task> tasks = new ArrayList<>();
+        taskRepository.findAllById(stageToDeleteDto.getTasksId())
+                .stream()
+                .filter(task ->
+                        task.getStatus() != TaskStatus.CANCELLED && task.getStatus() != TaskStatus.DONE)
+                .forEach(task -> {
+                    task.setStage(toTransferStage);
+                    tasks.add(task);
+                });
+        taskRepository.saveAll(tasks);
+
+        toTransferStage.getTasks().addAll(tasks);
+        save(toTransferStage);
+
+        log.info("Tasks transferred {}", stageToDeleteDto.getTasksId());
+    }
+
+    private void closeTasks(StageDeleteDto stageToDeleteDto) {
+        log.info("Closing tasks: {}", stageToDeleteDto.getTasksId());
+
+        List<Task> tasks = new ArrayList<>();
+        Stage stageToDelete = stageRepository.getById(stageToDeleteDto.getStageId());
+        stageToDelete.getTasks()
+                .forEach(task -> {
+                    task.setStatus(TaskStatus.CANCELLED);
+                    tasks.add(task);
+                });
+        taskRepository.saveAll(tasks);
+        save(stageToDelete);
+        log.info("Tasks closed {}", stageToDeleteDto.getTasksId());
+    }
+
+    private void deleteTasks(StageDeleteDto stageToDeleteDto) {
+        log.info("Deleting tasks: {}", stageToDeleteDto.getTasksId());
+
+        taskRepository.deleteAllById(stageToDeleteDto.getTasksId());
+
+        log.info("Tasks deleted {}", stageToDeleteDto.getTasksId());
+    }
+
 
     private Stage save(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
         stage.setStageRoles(getStageRoles(stageDto));
         stage.setExecutors(getExecutors(stageDto));
         stage.setProject(getProject(stageDto));
+        return stageRepository.save(stage);
+    }
+
+    private Stage save(Stage stage) {
         return stageRepository.save(stage);
     }
 
