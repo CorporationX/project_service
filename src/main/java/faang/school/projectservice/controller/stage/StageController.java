@@ -34,6 +34,14 @@ public class StageController {
         return service.getStagesByProjectId(projectId);
     }
 
+    @GetMapping("/{stageId}")
+    @ResponseStatus(HttpStatus.OK)
+    public StageDto getStageById(@PathVariable Long stageId) {
+        validateId(stageId);
+        log.info("Getting stage: {}", stageId);
+        return service.getStageById(stageId);
+    }
+
     private void validateStage(StageDto stageDto) {
         validateId(stageDto.getStageId());
         validateId(stageDto.getProjectId());
