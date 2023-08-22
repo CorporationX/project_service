@@ -6,20 +6,18 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.StageRoles;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class StageServiceValidator {
 
     public List<DataValidationException> getUnnecessaryExecutorsExist(List<TeamMember> members, List<StageRoles> roles) {
         List<DataValidationException> errors = new ArrayList<>();
-        Map<TeamRole, Integer> rolesCount = new HashMap<>();
+        Map<TeamRole, Integer> rolesCount = new EnumMap<>(TeamRole.class);
         roles
                 .forEach(stageRole ->
-                        rolesCount.put(stageRole.getTeamRole(), stageRole.getCount()));
+                        rolesCount.put(stageRole.getTeamRole(),
+                                rolesCount.getOrDefault(stageRole.getTeamRole(), 0) + stageRole.getCount()));
 
         members.stream()
                 .flatMap(teamMember -> teamMember.getRoles().stream())
