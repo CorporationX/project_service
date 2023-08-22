@@ -20,8 +20,8 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 
-import static faang.school.projectservice.commonMessage.SubprojectErrMessage.PARENT_STATUS_BLOCKED_CHANGED_SUBPROJECT_FORMAT;
-import static faang.school.projectservice.commonMessage.SubprojectErrMessage.PROJECT_IS_NOT_SUBPROJECT_FORMAT;
+import static faang.school.projectservice.messages.SubprojectErrMessage.PARENT_STATUS_BLOCKED_CHANGED_SUBPROJECT_FORMAT;
+import static faang.school.projectservice.messages.SubprojectErrMessage.PROJECT_IS_NOT_SUBPROJECT_FORMAT;
 import static faang.school.projectservice.messages.SubprojectErrMessage.ERR_VISIBILITY_PARENT_PROJECT_FORMAT;
 
 @Service
@@ -110,10 +110,10 @@ public class SubprojectService {
         }
     }
 
-    private void setVisibilityForChildren(List<Project> childrenSubprojects, ProjectVisibility visibilityToSet){
+    private void setVisibilityForChildren(List<Project> childrenSubprojects, ProjectVisibility visibilityToSet) {
         for (Project curChild : childrenSubprojects) {
             curChild.setVisibility(visibilityToSet);
-            if (!curChild.getChildren().isEmpty()) {
+            if (Objects.nonNull(curChild.getChildren())) {
                 setVisibilityForChildren(curChild.getChildren(), visibilityToSet);
             }
         }
@@ -127,7 +127,7 @@ public class SubprojectService {
         if (Objects.nonNull(requiredStatus)) {
             for (Project curChild : childrenSubprojects) {
                 curChild.setStatus(requiredStatus);
-                if (!curChild.getChildren().isEmpty()) {
+                if (Objects.nonNull(curChild.getChildren())) {
                     setRequiredStatusForChildrenProjects(curChild.getChildren(), requiredStatus);
                 }
             }
@@ -137,9 +137,8 @@ public class SubprojectService {
     private void updateStatus(Project project, ProjectStatus status) {
         if (status == ProjectStatus.CANCELLED || status == ProjectStatus.COMPLETED) {
             setRequiredStatusForChildrenProjects(project.getChildren(), status);
-        } else {
-            project.setStatus(status);
         }
+        project.setStatus(status);
     }
 
     private void checkPossibilityUpdateSubproject(Project subproject) {
