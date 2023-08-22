@@ -1,20 +1,27 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.ChangeTaskStatusDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.redis.TaskCompletedEvent;
 import faang.school.projectservice.exception.DataValidException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.publisher.TaskCompletedEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,6 +33,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
+    private final TaskCompletedEventPublisher taskCompletedEventPublisher;
 
     @Transactional
     public List<ProjectDto> getAllProjects(Long userId) {
@@ -67,6 +75,33 @@ public class ProjectService {
                         String.format("Project with id %d does not exist.", projectDto.getId())));
     }
 
+    @Transactional
+    public ChangeTaskStatusDto changeTaskStatus(ChangeTaskStatusDto changeTaskStatusDto, long executorId) {
+        Long projectId = changeTaskStatusDto.getProjectId();
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataValidException("Project with id " + projectId + " is not found"));
+        TaskCompletedEvent taskCompletedEvent = new TaskCompletedEvent();
+
+
+        project.getTasks().forEach(task -> {
+            if (Objects.equals(task.getId(), changeTaskStatusDto.getTaskId())) {
+                if (task.getPerformerUserId() != executorId) {
+                    throw new DataValidException("You are not performer of this task");
+                }
+                task.setStatus(changeTaskStatusDto.getTaskStatus());
+                taskCompletedEvent.setUserId(task.getPerformerUserId());
+            }
+        });
+
+        if (changeTaskStatusDto.getTaskStatus().equals(TaskStatus.DONE)) {
+            taskCompletedEvent.setProjectId(changeTaskStatusDto.getProjectId());
+            taskCompletedEvent.setTaskId(changeTaskStatusDto.getTaskId());
+        }
+
+        taskCompletedEventPublisher.publishMessage(taskCompletedEvent);
+
+        return changeTaskStatusDto;
+    }
 
     private ProjectDto saveEntity(Project project) {
         project = projectRepository.save(project);
