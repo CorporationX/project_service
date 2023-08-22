@@ -7,7 +7,6 @@ import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -16,9 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -31,6 +28,8 @@ public class StageService {
     private final StageRolesRepository stageRolesRepository;
 
     private final StageMapper stageMapper;
+
+    private final StageServiceValidator stageServiceValidator;
 
     public StageDto create(StageDto stageDto) {
         if (!isProjectActive(stageDto)) {
@@ -60,26 +59,24 @@ public class StageService {
     }
 
     private void checkUnnecessaryExecutorsExist(StageDto stageDto) {
-        Map<TeamRole, Integer> rolesCount = new HashMap<>();
-        List<TeamMember> executors = getExecutors(stageDto);
-        List<StageRoles> stageRoles = getStageRoles(stageDto);
-        stageRoles
-                .forEach(stageRole ->
-                        rolesCount.put(stageRole.getTeamRole(), stageRole.getCount()));
+        List<DataValidationException> errors = stageServiceValidator.getUnnecessaryExecutorsExist(
+            getExecutors(stageDto),
+            getStageRoles(stageDto)
+        );
+        if (!errors.isEmpty()) {
+            String errorsMessage = buildErrorsMessage(errors);
+            throw new DataValidationException(errorsMessage);
+        }
+    }
 
-        executors.stream()
-                .flatMap(teamMember -> teamMember.getRoles().stream())
-                .forEach(role -> {
-                    if (rolesCount.containsKey(role)) {
-                        int count = rolesCount.get(role);
-                        if (count == 0) {
-                            throw new DataValidationException("Unnecessary role: " + role);
-                        }
-                        rolesCount.put(role, count - 1);
-                    } else {
-                        throw new DataValidationException("Unnecessary role: " + role);
-                    }
-                });
+    private String buildErrorsMessage(List<DataValidationException> errors) {
+        StringBuilder builder = new StringBuilder();
+        for (DataValidationException exception : errors) {
+            builder
+                    .append(exception.getMessage())
+                    .append("\n");
+        }
+        return builder.toString();
     }
 
     private Project getProject(StageDto stageDto) {
