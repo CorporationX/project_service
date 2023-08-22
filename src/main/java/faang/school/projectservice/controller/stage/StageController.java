@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/stage")
@@ -24,13 +26,17 @@ public class StageController {
         return service.create(stageDto);
     }
 
+    @GetMapping("/{projectId}/stages")
+    @ResponseStatus(HttpStatus.OK)
+    public List<StageDto> getStages(@PathVariable Long projectId) {
+        validateId(projectId);
+        log.info("Getting stages for project: {}", projectId);
+        return service.getStagesByProjectId(projectId);
+    }
+
     private void validateStage(StageDto stageDto) {
-        if (stageDto.getStageId() != null) {
-            throw new DataValidationException("Stage must have id");
-        }
-        if (stageDto.getProjectId() == null) {
-            throw new DataValidationException("Stage must have project");
-        }
+        validateId(stageDto.getStageId());
+        validateId(stageDto.getProjectId());
         if (stageDto.getStageName() == null || stageDto.getStageName().isEmpty()) {
             throw new DataValidationException("Stage name must not be empty");
         }
@@ -39,6 +45,12 @@ public class StageController {
         }
         if (stageDto.getTeamMemberIds() == null || stageDto.getTeamMemberIds().isEmpty()) {
             throw new DataValidationException("Stage must have at least one team member");
+        }
+    }
+
+    private void validateId(Long id) {
+        if (id == null) {
+            throw new DataValidationException("Id must not be null");
         }
     }
 }

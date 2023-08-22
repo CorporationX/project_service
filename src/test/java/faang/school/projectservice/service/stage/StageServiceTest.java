@@ -24,9 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -106,6 +104,68 @@ class StageServiceTest {
                 .thenReturn(new ArrayList<>());
         stageService.create(stageDto);
         verify(stageRepository).save(any(Stage.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRandomIds")
+    @DisplayName("Get stages by project id")
+    void getStagesByProjectId(Long projectId, List<Stage> stages) {
+        when(projectRepository.getProjectById(projectId))
+                .thenReturn(Project.builder()
+                        .id(projectId)
+                        .stages(stages)
+                        .build());
+        List<StageDto> stageDtos = stageService.getStagesByProjectId(projectId);
+        assertEquals(stageDtos.size(), stages.size());
+
+    }
+
+    private static Stream<Arguments> getRandomIds() {
+        Stage stage = Stage.builder()
+                .project(Project.builder()
+                        .id(new Random().nextLong())
+                        .build())
+                .stageRoles(new ArrayList<>())
+                .executors(new ArrayList<>())
+                .build();
+        return Stream.of(
+                Arguments.of(
+                        new Random().nextLong(),
+                        List.of(stage)
+                ),
+                Arguments.of(
+                        new Random().nextLong(),
+                        List.of(stage, stage)
+                ),
+                Arguments.of(
+                        new Random().nextLong(),
+                        Collections.emptyList()
+                ),
+                Arguments.of(
+                        new Random().nextLong(),
+                        List.of(stage, stage, stage)
+                ),
+                Arguments.of(
+                        new Random().nextLong(),
+                        List.of(stage, stage, stage, stage)
+                ),
+                Arguments.of(
+                        new Random().nextLong(),
+                        List.of(stage, stage, stage, stage, stage)
+                ),
+                Arguments.of(
+                        new Random().nextLong(),
+                        List.of(stage, stage, stage, stage, stage, stage)
+                ),
+                Arguments.of(
+                        new Random().nextLong(),
+                        List.of(stage, stage, stage, stage, stage, stage, stage)
+                ),
+                Arguments.of(
+                        new Random().nextLong(),
+                        Collections.emptyList()
+                )
+        );
     }
 
     private static Stream<Arguments> getIncorrectStageRolesAndExecutors() {
