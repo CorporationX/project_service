@@ -11,6 +11,6 @@ public class StageDeleteDto {
     private Long stageId;
     private Long projectId;
     private List<Long> tasksId;
-    private ActionWithTasks action;
+    private TaskAction action;
     private Long toTransferStageId;
 }

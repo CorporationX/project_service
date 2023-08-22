@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.dto.stage.ActionWithTasks;
+import faang.school.projectservice.dto.stage.TaskAction;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -146,9 +146,9 @@ class StageServiceTest {
         StageDeleteDto stageToDeleteDto = StageDeleteDto.builder()
                 .stageId(new Random().nextLong())
                 .tasksId(ids)
-                .action(ActionWithTasks.DELETE)
+                .action(TaskAction.DELETE)
                 .build();
-        stageService.deleteStageById(stageToDeleteDto);
+        stageService.deleteStage(stageToDeleteDto);
 
         verify(taskRepository).deleteAllById(ids);
         verify(stageRepository).delete(any(Stage.class));
@@ -162,13 +162,13 @@ class StageServiceTest {
         StageDeleteDto stageToDeleteDto = StageDeleteDto.builder()
                 .stageId(new Random().nextLong())
                 .tasksId(ids)
-                .action(ActionWithTasks.CLOSED)
+                .action(TaskAction.CLOSE)
                 .build();
         when(stageRepository.getById(anyLong()))
                 .thenReturn(new Stage());
         when(taskRepository.findAllById(anyList()))
                 .thenReturn(tasks);
-        stageService.deleteStageById(stageToDeleteDto);
+        stageService.deleteStage(stageToDeleteDto);
         verify(taskRepository).saveAll(tasks);
         verify(stageRepository).delete(any(Stage.class));
     }
@@ -181,14 +181,14 @@ class StageServiceTest {
         StageDeleteDto stageToDeleteDto = StageDeleteDto.builder()
                 .stageId(new Random().nextLong())
                 .tasksId(ids)
-                .action(ActionWithTasks.TRANSFER)
+                .action(TaskAction.TRANSFER)
                 .toTransferStageId(new Random().nextLong())
                 .build();
         when(stageRepository.getById(anyLong()))
                 .thenReturn(new Stage());
         when(taskRepository.findAllById(anyList()))
                 .thenReturn(tasks);
-        stageService.deleteStageById(stageToDeleteDto);
+        stageService.deleteStage(stageToDeleteDto);
         verify(taskRepository).saveAll(tasks);
         verify(stageRepository).delete(any(Stage.class));
     }

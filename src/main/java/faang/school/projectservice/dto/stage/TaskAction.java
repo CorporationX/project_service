@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.stage;
 
-public enum ActionWithTasks {
+public enum TaskAction {
     DELETE,
-    CLOSED,
+    CLOSE,
     TRANSFER
 }

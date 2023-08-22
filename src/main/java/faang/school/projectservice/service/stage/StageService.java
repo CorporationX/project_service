@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.dto.stage.ActionWithTasks;
+import faang.school.projectservice.dto.stage.TaskAction;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -59,7 +59,7 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
-    public void deleteStageById(StageDeleteDto stageToDeleteDto) {
+    public void deleteStage(StageDeleteDto stageToDeleteDto) {
         actionWithTasks(stageToDeleteDto);
         Stage stageToDelete = stageRepository.getById(stageToDeleteDto.getStageId());
         stageRepository.delete(stageToDelete);
@@ -71,10 +71,10 @@ public class StageService {
         if (stageToDeleteDto.getTasksId() == null || stageToDeleteDto.getTasksId().isEmpty()) {
             return;
         }
-        ActionWithTasks action = stageToDeleteDto.getAction();
+        TaskAction action = stageToDeleteDto.getAction();
         switch (action) {
             case DELETE -> deleteTasks(stageToDeleteDto);
-            case CLOSED -> closeTasks(stageToDeleteDto);
+            case CLOSE -> closeTasks(stageToDeleteDto);
             case TRANSFER -> transferTasks(stageToDeleteDto);
         }
     }
@@ -85,11 +85,17 @@ public class StageService {
         Stage toTransferStage = stageRepository.getById(stageToDeleteDto.getToTransferStageId());
         List<Task> tasks = new ArrayList<>();
         taskRepository.findAllById(stageToDeleteDto.getTasksId())
+                .stream()
+                .filter(task ->
+                        task.getStatus() != TaskStatus.CANCELLED && task.getStatus() != TaskStatus.DONE)
                 .forEach(task -> {
                     task.setStage(toTransferStage);
                     tasks.add(task);
                 });
         taskRepository.saveAll(tasks);
+
+        toTransferStage.getTasks().addAll(tasks);
+        save(toTransferStage);
 
         log.info("Tasks transferred {}", stageToDeleteDto.getTasksId());
     }
@@ -98,13 +104,14 @@ public class StageService {
         log.info("Closing tasks: {}", stageToDeleteDto.getTasksId());
 
         List<Task> tasks = new ArrayList<>();
-        taskRepository.findAllById(stageToDeleteDto.getTasksId())
+        Stage stageToDelete = stageRepository.getById(stageToDeleteDto.getStageId());
+        stageToDelete.getTasks()
                 .forEach(task -> {
                     task.setStatus(TaskStatus.CANCELLED);
                     tasks.add(task);
                 });
         taskRepository.saveAll(tasks);
-
+        save(stageToDelete);
         log.info("Tasks closed {}", stageToDeleteDto.getTasksId());
     }
 
@@ -122,6 +129,10 @@ public class StageService {
         stage.setStageRoles(getStageRoles(stageDto));
         stage.setExecutors(getExecutors(stageDto));
         stage.setProject(getProject(stageDto));
+        return stageRepository.save(stage);
+    }
+
+    private Stage save(Stage stage) {
         return stageRepository.save(stage);
     }
 
