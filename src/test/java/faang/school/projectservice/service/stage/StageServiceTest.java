@@ -1,13 +1,11 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.ActionWithTasks;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filters.stage.StageFilter;
-import faang.school.projectservice.filters.stage.StatusFilter;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
@@ -26,11 +24,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -224,9 +224,7 @@ class StageServiceTest {
         StageFilterDto filter = new StageFilterDto();
         filter.setStatus(StageStatus.CLOSED);
         List<StageDto> stageDtos = stageService.getStagesByStatus(
-                ProjectDto.builder()
-                        .stageIds(List.of(new Random().nextLong()))
-                        .build(),
+                new Random().nextLong(),
                 filter
         );
     }

@@ -1,6 +1,5 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.ActionWithTasks;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
@@ -40,6 +39,7 @@ public class StageService {
     private final StageMapper stageMapper;
 
     private final List<StageFilter> filters;
+
     public StageDto create(StageDto stageDto) {
         if (!isProjectActive(stageDto)) {
             throw new DataValidationException("Project is not active");
@@ -72,13 +72,13 @@ public class StageService {
         log.info("Stage deleted: {}", stageToDelete);
     }
 
-    public List<StageDto> getStagesByStatus(ProjectDto projectDto, StageFilterDto filterDto) {
-        List<Stage> stages = projectDto.getStageIds().stream()
-                .map(stageRepository::getById)
-                .toList();
+    public List<StageDto> getStagesByStatus(Long projectId, StageFilterDto filterDto) {
+        List<Stage> stages = projectRepository
+                .getProjectById(projectId)
+                .getStages();
 
         List<Stage> filteredStages = filter(stages, filterDto);
-        log.info("Project's {} stages filtered by status: {}", projectDto.getId(), filterDto.getStatus());
+        log.info("Project's {} stages filtered by status: {}", projectId, filterDto.getStatus());
 
         return stageMapper.toDtoList(filteredStages);
     }

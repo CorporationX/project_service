@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller.stage;
 
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.ActionWithTasks;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
@@ -54,10 +53,10 @@ public class StageController {
         service.deleteStageById(stageDeleteDto);
     }
 
-    @GetMapping("/get-stages-by-status")
+    @GetMapping("/get-stages-by-status/{projectId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<StageDto> getStagesByStatus(@RequestBody ProjectDto project, @RequestBody StageFilterDto stageFilterDto) {
-        return service.getStagesByStatus(project, stageFilterDto);
+    public List<StageDto> getStagesByStatus(@PathVariable Long projectId, @RequestBody StageFilterDto stageFilterDto) {
+        return service.getStagesByStatus(projectId, stageFilterDto);
     }
 
     private void validateDeleteDto(StageDeleteDto stageDeleteDto) {
