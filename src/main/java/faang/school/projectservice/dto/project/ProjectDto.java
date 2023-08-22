@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -38,4 +39,6 @@ public class ProjectDto {
 
     @NotNull
     private ProjectStatus status;
+    @NotNull
+    private List<Long> stageIds;
 }

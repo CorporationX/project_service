@@ -2,6 +2,7 @@ package faang.school.projectservice.model.stage;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,4 +43,11 @@ public class Stage {
             joinColumns = @JoinColumn(name = "stage_id"),
             inverseJoinColumns = @JoinColumn(name = "executor_id"))
     private List<TeamMember> executors;
+
+    public StageStatus getStageStatus() {
+        return tasks.stream()
+                .allMatch(task ->
+                        task.getStatus().equals(TaskStatus.DONE) || task.getStatus().equals(TaskStatus.CANCELLED)
+                ) ? StageStatus.CLOSED : StageStatus.IN_PROGRESS;
+    }
 }
