@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
 import faang.school.projectservice.dto.subproject.SubprojectUpdateDto;
 import faang.school.projectservice.exception.SubprojectException;
 import faang.school.projectservice.mapper.subproject.SubprojectMapperImpl;
+import faang.school.projectservice.messages.SubprojectErrMessage;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.project.ProjectStatus;
 import faang.school.projectservice.model.project.ProjectVisibility;
@@ -23,6 +24,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.beans.Visibility;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,13 +142,13 @@ class SubprojectServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideStatusForParentProject")
-    void testUpdateSubproject_WhenParentProjectClosed_ShouldThrowException(ProjectStatus status) {
+    @MethodSource("provideParentProjectForTest")
+    void testUpdateSubproject_WhenParentProjectBlockedUpdate_ShouldThrowException(Project parentProject,
+                                                                                  String expectedMessage) {
         Project existsSubproject = getExistsSubproject();
-        existsSubproject.getParentProject().setStatus(status);
+        existsSubproject.setParentProject(parentProject);
         Mockito.when(projectRepository.getProjectById(subprojectId)).thenReturn(existsSubproject);
-        SubprojectUpdateDto updateDto = new SubprojectUpdateDto();
-        String expectedMessage = MessageFormat.format(PARENT_STATUS_BLOCKED_CHANGED_SUBPROJECT_FORMAT, status);
+        SubprojectUpdateDto updateDto = SubprojectUpdateDto.builder().visibility(ProjectVisibility.PRIVATE).build();
 
         Exception exception = assertThrows(SubprojectException.class,
                 () -> subprojectService.updateSubproject(subprojectId, updateDto));
@@ -169,10 +171,22 @@ class SubprojectServiceTest {
         Mockito.verify(momentRepository, Mockito.times(1)).save(Mockito.any());
     }
 
-    private static Stream<Arguments> provideStatusForParentProject() {
+    private static Stream<Arguments> provideParentProjectForTest() {
+        String errorMessageCanceled = MessageFormat.format(PARENT_STATUS_BLOCKED_CHANGED_SUBPROJECT_FORMAT,
+                ProjectStatus.CANCELLED);
+        String errorMessageCompleted = MessageFormat.format(PARENT_STATUS_BLOCKED_CHANGED_SUBPROJECT_FORMAT,
+                ProjectStatus.COMPLETED);
+        String errorMessageVisibility = MessageFormat.format(ERR_VISIBILITY_PARENT_PROJECT_FORMAT,
+                ProjectVisibility.PRIVATE);
+
+        Project parentCanceled = Project.builder().status(ProjectStatus.CANCELLED).build();
+        Project parentCompleted = Project.builder().status(ProjectStatus.COMPLETED).build();
+        Project parentPublic = Project.builder().status(ProjectStatus.CREATED).visibility(ProjectVisibility.PUBLIC).build();
+
         return Stream.of(
-                Arguments.of(ProjectStatus.CANCELLED),
-                Arguments.of(ProjectStatus.COMPLETED)
+                Arguments.of(parentCanceled, errorMessageCanceled),
+                Arguments.of(parentCompleted, errorMessageCompleted),
+                Arguments.of(parentPublic, errorMessageVisibility)
         );
     }
 
@@ -216,7 +230,7 @@ class SubprojectServiceTest {
         int endId = startId + countChild;
         for (int i = startId; i < endId; i++) {
             Project childProject = Project.builder()
-                    .id((long)i)
+                    .id((long) i)
                     .name("Nested Child " + i)
                     .visibility(ProjectVisibility.PUBLIC)
                     .status(ProjectStatus.CREATED)
