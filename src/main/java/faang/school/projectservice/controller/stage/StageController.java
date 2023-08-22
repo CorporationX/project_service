@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.stage.StageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ public class StageController {
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
     public StageDto create(@RequestBody StageDto stageDto) {
-        validateStage(stageDto);
+        validateExecutorsAndRoles(stageDto);
         log.info("Creating stage: {}", stageDto);
         return service.create(stageDto);
     }
@@ -32,7 +33,9 @@ public class StageController {
         return service.getStagesByProjectId(projectId);
     }
 
-    private void validateStage(StageDto stageDto) {
-
+    private void validateExecutorsAndRoles(StageDto stageDto) {
+        if (stageDto.getTeamMemberIds().size() < stageDto.getStageRoleIds().size()) {
+            throw new DataValidationException("Stage roles must not be greater than team members");
+        }
     }
 }
