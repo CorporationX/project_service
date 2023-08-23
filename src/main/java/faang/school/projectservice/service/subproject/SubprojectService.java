@@ -1,10 +1,11 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
+import faang.school.projectservice.dto.subproject.GeneralSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubprojectUpdateDto;
 import faang.school.projectservice.exception.SubprojectException;
 import faang.school.projectservice.mapper.subproject.SubprojectMapper;
 import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.project.ProjectStatus;
@@ -17,12 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
-import static faang.school.projectservice.messages.SubprojectErrMessage.PARENT_STATUS_BLOCKED_CHANGED_SUBPROJECT_FORMAT;
-import static faang.school.projectservice.messages.SubprojectErrMessage.PROJECT_IS_NOT_SUBPROJECT_FORMAT;
-import static faang.school.projectservice.messages.SubprojectErrMessage.ERR_VISIBILITY_PARENT_PROJECT_FORMAT;
+import static faang.school.projectservice.messages.SubprojectErrMessage.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class SubprojectService {
     private final MomentRepository momentRepository;
 
     @Transactional
-    public SubprojectDtoReqCreate createSubproject(Long parentProjectId, SubprojectDtoReqCreate subprojectDto) {
+    public GeneralSubprojectDto createSubproject(Long parentProjectId, GeneralSubprojectDto subprojectDto) {
         Project parentProject = projectRepository.getProjectById(parentProjectId);
 
         Project newSubProject = subprojectMapper.toEntityFromDtoCreate(subprojectDto);
@@ -49,7 +50,7 @@ public class SubprojectService {
     }
 
     @Transactional
-    public SubprojectDtoReqCreate updateSubproject(Long subprojectId, SubprojectUpdateDto subprojectDto) {
+    public GeneralSubprojectDto updateSubproject(Long subprojectId, SubprojectUpdateDto subprojectDto) {
         Project subprojectForUpdate = projectRepository.getProjectById(subprojectId);
         checkIsSubproject(subprojectForUpdate);
         checkPossibilityUpdateSubproject(subprojectForUpdate);
@@ -74,18 +75,22 @@ public class SubprojectService {
     }
 
     private void createMomentWhenSubprojectCompleted(Project subproject) {
-        List<Long> userIds = subproject.getTeams()
+        List<Team> teams = Optional.ofNullable(subproject.getTeams())
+                .orElse(Collections.emptyList());
+
+        List<Long> uniqueUserIds = teams
                 .stream()
                 .flatMap(team -> team.getTeamMembers()
                         .stream()
                         .map(TeamMember::getUserId))
+                .distinct()
                 .toList();
 
         Moment newMoment = Moment.builder()
                 .name("Выполнены все подпроекты")
                 .description("Выполнены все подпроекты")
                 .projects(List.of(subproject.getParentProject()))
-                .userIds(userIds)
+                .userIds(uniqueUserIds)
                 .build();
 
         // могу я тут напрямую дергать репозиторий моментов? Или это нарушит принцип SOLID?

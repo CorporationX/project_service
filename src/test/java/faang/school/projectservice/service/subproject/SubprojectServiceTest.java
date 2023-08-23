@@ -1,10 +1,12 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
+import faang.school.projectservice.dto.subproject.GeneralSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubprojectUpdateDto;
 import faang.school.projectservice.exception.SubprojectException;
 import faang.school.projectservice.mapper.subproject.SubprojectMapperImpl;
-import faang.school.projectservice.messages.SubprojectErrMessage;
+import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.project.ProjectStatus;
 import faang.school.projectservice.model.project.ProjectVisibility;
@@ -24,7 +26,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.beans.Visibility;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,14 +56,14 @@ class SubprojectServiceTest {
 
     private Project parentProject;
 
-    private SubprojectDtoReqCreate subprojectDtoReqCreate;
+    private GeneralSubprojectDto generalSubprojectDto;
 
     private Long subprojectId;
 
     @BeforeEach
     void setUp() {
         parentProject = getParentProject();
-        subprojectDtoReqCreate = getSubprojectDtoReqCreate();
+        generalSubprojectDto = getSubprojectDtoReqCreate();
         subprojectId = 11L;
     }
 
@@ -70,19 +71,19 @@ class SubprojectServiceTest {
     void testCreateSubproject_WhenInputDataIsValid() {
         Long existParentId = ValuesForTest.PARENT.getId();
         Mockito.when(projectRepository.getProjectById(existParentId)).thenReturn(parentProject);
-        Mockito.when(projectRepository.findAllByIds(subprojectDtoReqCreate.getChildrenIds())).thenReturn(new ArrayList<>());
-        Mockito.when(stageRepository.findAllByIds(subprojectDtoReqCreate.getStagesIds())).thenReturn(new ArrayList<>());
+        Mockito.when(projectRepository.findAllByIds(generalSubprojectDto.getChildrenIds())).thenReturn(new ArrayList<>());
+        Mockito.when(stageRepository.findAllByIds(generalSubprojectDto.getStagesIds())).thenReturn(new ArrayList<>());
         Mockito.when(projectRepository.save(Mockito.any())).thenReturn(getSubprojectAfterSave());
-        SubprojectDtoReqCreate expectedDto = getExpectedDtoAfterCreate();
+        GeneralSubprojectDto expectedDto = getExpectedDtoAfterCreate();
 
-        SubprojectDtoReqCreate resultDto = subprojectService.createSubproject(existParentId, subprojectDtoReqCreate);
+        GeneralSubprojectDto resultDto = subprojectService.createSubproject(existParentId, generalSubprojectDto);
 
         assertEquals(expectedDto, resultDto);
         Mockito.verify(projectRepository, Mockito.times(1)).getProjectById(existParentId);
         Mockito.verify(projectRepository, Mockito.times(1))
-                .findAllByIds(subprojectDtoReqCreate.getChildrenIds());
+                .findAllByIds(generalSubprojectDto.getChildrenIds());
         Mockito.verify(stageRepository, Mockito.times(1))
-                .findAllByIds(subprojectDtoReqCreate.getStagesIds());
+                .findAllByIds(generalSubprojectDto.getStagesIds());
         Mockito.verify(projectRepository, Mockito.times(2)).save(Mockito.any());
     }
 
@@ -90,12 +91,12 @@ class SubprojectServiceTest {
     void testCreateSubproject_WhenParentVisibilityPublicAndRequiredVisibilityPrivate_shouldThrowException() {
         Long parentId = ValuesForTest.PARENT.getId();
         ProjectVisibility requiredVisibility = ProjectVisibility.PRIVATE;
-        subprojectDtoReqCreate.setVisibility(requiredVisibility);
+        generalSubprojectDto.setVisibility(requiredVisibility);
         Mockito.when(projectRepository.getProjectById(parentId)).thenReturn(parentProject);
         String expectedMessage = MessageFormat.format(ERR_VISIBILITY_PARENT_PROJECT_FORMAT, requiredVisibility);
 
         Exception exception = assertThrows(SubprojectException.class,
-                () -> subprojectService.createSubproject(parentId, subprojectDtoReqCreate));
+                () -> subprojectService.createSubproject(parentId, generalSubprojectDto));
 
         assertEquals(expectedMessage, exception.getMessage());
     }
@@ -108,7 +109,7 @@ class SubprojectServiceTest {
                 .thenThrow(new EntityNotFoundException(String.format("Project not found by id: %s", parentId)));
 
         Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> subprojectService.createSubproject(parentId, subprojectDtoReqCreate));
+                () -> subprojectService.createSubproject(parentId, generalSubprojectDto));
 
         assertEquals(expectedMessage, exception.getMessage());
     }
@@ -157,18 +158,27 @@ class SubprojectServiceTest {
     }
 
     @Test
-    void testUpdateSubproject() {
+    void testUpdateSubproject_WhenAllValid() {
         Project existsSubproject = getExistsSubproject();
         Mockito.when(projectRepository.getProjectById(subprojectId)).thenReturn(existsSubproject);
         SubprojectUpdateDto updateDto = SubprojectUpdateDto.builder()
                 .status(ProjectStatus.COMPLETED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
+        GeneralSubprojectDto expectedDto = getExpectedDtoAfterUpdate();
+        Moment expectedMomentForSave = Moment.builder()
+                .name("Выполнены все подпроекты")
+                .description("Выполнены все подпроекты")
+                .projects(List.of(existsSubproject.getParentProject()))
+                .userIds(List.of(1L, 3L, 2L, 4L))
+                .build();
 
-        SubprojectDtoReqCreate result = subprojectService.updateSubproject(subprojectId, updateDto);
+        GeneralSubprojectDto result = subprojectService.updateSubproject(subprojectId, updateDto);
+
+        assertEquals(expectedDto, result);
 
         Mockito.verify(projectRepository, Mockito.times(1)).getProjectById(subprojectId);
-        Mockito.verify(momentRepository, Mockito.times(1)).save(Mockito.any());
+        Mockito.verify(momentRepository, Mockito.times(1)).save(expectedMomentForSave);
     }
 
     private static Stream<Arguments> provideParentProjectForTest() {
@@ -190,6 +200,18 @@ class SubprojectServiceTest {
         );
     }
 
+    private GeneralSubprojectDto getExpectedDtoAfterUpdate() {
+        return GeneralSubprojectDto.builder()
+                .subprojectId(subprojectId)
+                .name(ValuesForTest.SUBPROJECT.getName())
+                .parentProjectId(ValuesForTest.PARENT.getId())
+                .childrenIds(List.of(20L, 21L))
+                .visibility(ProjectVisibility.PUBLIC)
+                .status(ProjectStatus.COMPLETED)
+                .stagesIds(new ArrayList<>())
+                .build();
+    }
+
     private Project getParentProject() {
         return Project.builder()
                 .id(ValuesForTest.PARENT.getId())
@@ -200,6 +222,20 @@ class SubprojectServiceTest {
     }
 
     private Project getExistsSubproject() {
+        List<TeamMember> teamMembersFirst = List.of(
+                TeamMember.builder().userId(1L).build(),
+                TeamMember.builder().userId(3L).build()
+        );
+        List<TeamMember> teamMembersSecond = List.of(
+                TeamMember.builder().userId(2L).build(),
+                TeamMember.builder().userId(4L).build(),
+                TeamMember.builder().userId(3L).build()
+        );
+        Team firstTeam = Team.builder().teamMembers(teamMembersFirst).build();
+        Team secondTeam = Team.builder().teamMembers(teamMembersSecond).build();
+
+        List<Team> teams = List.of(firstTeam, secondTeam);
+
         List<Project> nestedLevel1ChildrenSet1 = getNestedChildSubprojects(100, 2);
         List<Project> nestedLevel1ChildrenSet2 = getNestedChildSubprojects(200, 2);
         List<Project> childSubprojects = List.of(
@@ -222,6 +258,7 @@ class SubprojectServiceTest {
                 .children(childSubprojects)
                 .visibility(ProjectVisibility.PUBLIC)
                 .status(ProjectStatus.CREATED)
+                .teams(teams)
                 .build();
     }
 
@@ -254,8 +291,8 @@ class SubprojectServiceTest {
                 .build();
     }
 
-    private SubprojectDtoReqCreate getSubprojectDtoReqCreate() {
-        return SubprojectDtoReqCreate.builder()
+    private GeneralSubprojectDto getSubprojectDtoReqCreate() {
+        return GeneralSubprojectDto.builder()
                 .name(ValuesForTest.DTO_INFO.getName())
                 .description("Description")
                 .ownerId(5L)
@@ -264,8 +301,8 @@ class SubprojectServiceTest {
                 .build();
     }
 
-    private SubprojectDtoReqCreate getExpectedDtoAfterCreate() {
-        return SubprojectDtoReqCreate.builder()
+    private GeneralSubprojectDto getExpectedDtoAfterCreate() {
+        return GeneralSubprojectDto.builder()
                 .subprojectId(ValuesForTest.DTO_INFO.getId())
                 .name(ValuesForTest.DTO_INFO.getName())
                 .description("Description")

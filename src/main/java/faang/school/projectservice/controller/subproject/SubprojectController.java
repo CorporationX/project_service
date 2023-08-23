@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.subproject;
 
-import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
+import faang.school.projectservice.dto.subproject.GeneralSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubprojectUpdateDto;
 import faang.school.projectservice.service.subproject.SubprojectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,15 +18,15 @@ public class SubprojectController {
 
     @PostMapping
     @Operation(summary = "Create subproject", description = "Create subproject")
-    public SubprojectDtoReqCreate createSubproject(
+    public GeneralSubprojectDto createSubproject(
             @RequestParam Long parentProjectId,
-            @Valid @RequestBody SubprojectDtoReqCreate subprojectDtoReqCreate) {
-        return subprojectService.createSubproject(parentProjectId, subprojectDtoReqCreate);
+            @Valid @RequestBody GeneralSubprojectDto generalSubprojectDto) {
+        return subprojectService.createSubproject(parentProjectId, generalSubprojectDto);
     }
 
     @PutMapping
     @Operation(summary = "Update subproject", description = "Update subproject")
-    public SubprojectDtoReqCreate updateSubproject(
+    public GeneralSubprojectDto updateSubproject(
             @RequestParam Long subprojectId,
             @RequestBody SubprojectUpdateDto subprojectUpdateDto) {
         return subprojectService.updateSubproject(subprojectId, subprojectUpdateDto);

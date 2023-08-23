@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SubprojectDtoReqCreate {
+public class GeneralSubprojectDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Long subprojectId;

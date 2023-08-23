@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper.subproject;
 
-import faang.school.projectservice.dto.subproject.SubprojectDtoReqCreate;
+import faang.school.projectservice.dto.subproject.GeneralSubprojectDto;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.Mapper;
@@ -17,13 +17,13 @@ public interface SubprojectMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "visibility", ignore = true)
-    Project toEntityFromDtoCreate(SubprojectDtoReqCreate dtoForCreate);
+    Project toEntityFromDtoCreate(GeneralSubprojectDto dtoForCreate);
 
     @Mapping(target = "subprojectId", source = "id")
     @Mapping(target = "parentProjectId", source = "parentProject.id")
     @Mapping(target = "childrenIds", source = "children", qualifiedByName = "getChildrenIds")
     @Mapping(target = "stagesIds", source = "stages", qualifiedByName = "getStagesIds")
-    SubprojectDtoReqCreate toDtoReqCreate(Project project);
+    GeneralSubprojectDto toDtoReqCreate(Project project);
 
     @Named("getChildrenIds")
     default List<Long> getChildrenIds(List<Project> children) {
