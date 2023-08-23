@@ -7,6 +7,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.event.InviteSentEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ public class StageInvitationMapperTest {
     private StageInvitationMapper mapper = new StageInvitationMapperImpl();
     private StageInvitation invitation;
     private StageInvitationDto invitationDto;
+    private InviteSentEvent event;
 
     @BeforeEach
     public void setUp() {
@@ -36,6 +38,11 @@ public class StageInvitationMapperTest {
                 .invitedId(3L)
                 .description("description")
                 .stageId(4L)
+                .build();
+
+        event = InviteSentEvent.builder()
+                .authorId(2L)
+                .invitedId(3L)
                 .build();
     }
 
@@ -61,5 +68,10 @@ public class StageInvitationMapperTest {
         List<StageInvitation> invitationList = List.of(invitation);
         List<StageInvitationDto> invitationDtoList = List.of(invitationDto);
         Assertions.assertEquals(invitationList.get(0), mapper.toEntityList(invitationDtoList).get(0));
+    }
+
+    @Test
+    public void testToEvent() {
+        Assertions.assertEquals(event, mapper.toEvent(invitationDto));
     }
 }

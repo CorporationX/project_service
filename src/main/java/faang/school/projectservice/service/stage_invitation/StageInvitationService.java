@@ -9,11 +9,14 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.InviteSentEventPublisher;
+import faang.school.projectservice.publisher.event.InviteSentEvent;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -27,12 +30,22 @@ public class StageInvitationService {
     private final TeamMemberRepository TMRepository;
     private final StageInvitationMapper mapper;
     private final List<StageInvitationFilter> filters;
+    private final InviteSentEventPublisher publisher;
 
+    @Transactional
     public StageInvitationDto create(StageInvitationDto invitationDto) {
         validate(invitationDto);
+
         StageInvitation stageInvitation = mapper.toEntity(invitationDto);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
-        return mapper.toDTO(repository.save(stageInvitation));
+        StageInvitationDto result = mapper.toDTO(repository.save(stageInvitation));
+
+        InviteSentEvent event = mapper.toEvent(invitationDto);
+        Stage stage = stageRepository.getById(invitationDto.getStageId());
+        event.setProjectId(stage.getProject().getId());
+        publisher.publish(event);
+
+        return result;
     }
 
     public StageInvitationDto accept(long invitationId) {
