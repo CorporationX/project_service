@@ -73,11 +73,17 @@ public class StageService {
     }
 
     public List<StageDto> getStagesByStatus(Long projectId, StageFilterDto filterDto) {
+        long size = filterDto.getSize();
+        long page = filterDto.getPage();
         List<Stage> stages = projectRepository
                 .getProjectById(projectId)
                 .getStages();
 
-        List<Stage> filteredStages = filter(stages, filterDto);
+        List<Stage> filteredStages = filter(stages, filterDto)
+                .stream()
+                .skip(size * page)
+                .limit(size)
+                .toList();
         log.info("Project's {} stages filtered by status: {}", projectId, filterDto.getStatus());
 
         return stageMapper.toDtoList(filteredStages);

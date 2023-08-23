@@ -6,4 +6,6 @@ import lombok.Data;
 @Data
 public class StageFilterDto {
     private StageStatus status;
+    private long size;
+    private long page;
 }
