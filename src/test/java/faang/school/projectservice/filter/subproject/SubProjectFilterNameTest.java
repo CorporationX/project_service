@@ -2,6 +2,7 @@ package faang.school.projectservice.filter.subproject;
 
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,10 @@ class SubProjectFilterNameTest {
 
     @BeforeEach
     public void setUp() {
+        projects.add(projectA);
+        projects.add(projectB);
+        projects.add(projectC);
+
         filterA = SubprojectFilterDto.builder()
                 .nameFilter("Project A")
                 .build();
@@ -46,5 +51,9 @@ class SubProjectFilterNameTest {
     void testApply() {
         assertEquals(2, subProjectFilterName.apply(projects.stream(), filterB).count());
         assertEquals(1, subProjectFilterName.apply(projects.stream(), filterA).count());
+
+        assertEquals("Project B", subProjectFilterName.apply(projects.stream(), filterB).findFirst().get().getName());
+        assertEquals("Project A", subProjectFilterName.apply(projects.stream(), filterA).findFirst().get().getName());
+
     }
 }

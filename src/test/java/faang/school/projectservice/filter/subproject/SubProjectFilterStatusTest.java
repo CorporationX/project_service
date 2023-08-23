@@ -52,5 +52,8 @@ class SubProjectFilterStatusTest {
     void testApply() {
         assertEquals(2, subProjectFilterStatus.apply(projects.stream(), filterProgress).count());
         assertEquals(1, subProjectFilterStatus.apply(projects.stream(), filterCompleted).count());
+
+        assertEquals(ProjectStatus.IN_PROGRESS, subProjectFilterStatus.apply(projects.stream(), filterProgress).findFirst().get().getStatus());
+        assertEquals(ProjectStatus.COMPLETED, subProjectFilterStatus.apply(projects.stream(), filterCompleted).findFirst().get().getStatus());
     }
 }
