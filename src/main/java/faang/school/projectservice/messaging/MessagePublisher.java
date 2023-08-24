@@ -1,5 +1,5 @@
 package faang.school.projectservice.messaging;
 
-public interface MessagePublisher {
-    <E> void publish(E event);
+public interface MessagePublisher<E> {
+    void publish(E event);
 }
