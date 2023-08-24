@@ -125,14 +125,12 @@ public class StageService {
     }
 
     private Stage getUpdatedStage(StageDto stageDto) {
-        return Stage.builder()
-                .stageName(stageDto.getStageName())
-                .project(getProject(stageDto))
-                .stageRoles(getStageRoles(stageDto))
-                .tasks(getTasks(stageDto))
-                .executors(getExecutors(stageDto))
-                .tasks(getTasks(stageDto))
-                .build();
+        Stage stage = stageMapper.toEntity(stageDto);
+        stage.setProject(getProject(stageDto));
+        stage.setStageRoles(getStageRoles(stageDto));
+        stage.setTasks(getTasks(stageDto));
+        stage.setExecutors(getExecutors(stageDto));
+        return stage;
     }
 
     private List<Stage> filter(List<Stage> stages, StageFilterDto filterDto) {
