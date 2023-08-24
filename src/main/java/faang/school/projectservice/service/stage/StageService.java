@@ -87,6 +87,7 @@ public class StageService {
     public StageDto updateStage(StageDto stageDto) {
         Stage updatedStage = getUpdatedStage(stageDto);
         sendInvitesIfNeeded(updatedStage);
+        checkUnnecessaryExecutorsExist(updatedStage);
         updatedStage = stageRepository.save(updatedStage);
 
         log.info("Stage updated: {}", updatedStage);
