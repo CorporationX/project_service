@@ -25,19 +25,19 @@ public class AmazonS3Config {
     @Value("${services.s3.endpoint}")
     private String endpoint;
 
-    @Bean
+    @Bean(name = "clientAmazonS3")
     public AmazonS3 amazons3() {
         AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
 
-        AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
+        AmazonS3 clientAmazonS3 = AmazonS3ClientBuilder.standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, null))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                 .build();
 
-        if (!amazonS3.doesBucketExistV2(bucketName)) {
-            amazonS3.createBucket(bucketName);
+        if (!clientAmazonS3.doesBucketExistV2(bucketName)) {
+            clientAmazonS3.createBucket(bucketName);
         }
 
-        return amazonS3;
+        return clientAmazonS3;
     }
 }

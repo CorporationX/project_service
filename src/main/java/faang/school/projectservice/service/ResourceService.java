@@ -14,6 +14,7 @@ import faang.school.projectservice.service.util.FileStore;
 import faang.school.projectservice.validator.ResourcesValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
@@ -30,6 +31,7 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
     private final FileStore fileStore;
 
+    @Transactional
     public ResourceDto uploadFile(ResourceDto resourceDto, MultipartFile file, long userId) {
         TeamMember teamMember = teamMemberService.getTeamMemberByUserIdAndProjectId(userId, resourceDto.getProjectId());
         Project project = projectService.getProjectEntityById(resourceDto.getProjectId());
@@ -37,33 +39,34 @@ public class ResourceService {
         resourcesValidator.checkTeamMemberInProject(teamMember);
 
         String key = resourceDto.getProjectId() + "_" + project.getName() + "/" + file.getOriginalFilename();
+        fileStore.uploadFile(file, key);
 
         Resource resource = fillResourceCreate(resourceDto, file, key, teamMember);
         updateProjectStorageCapacity(file, project);
-
-        fileStore.uploadFile(file, key);
 
         Resource entity = resourceRepository.save(resource);
         return resourceMapper.toDto(entity);
     }
 
+    @Transactional
     public ResourceDto updateFile(long id, ResourceDto resourceDto, MultipartFile file, long userId) {
         Resource resource = getResourceById(id);
         Project project = projectService.getProjectEntityById(resourceDto.getProjectId());
         TeamMember teamMember = teamMemberService.getTeamMemberByUserIdAndProjectId(userId, resourceDto.getProjectId());
 
         resourcesValidator.checkTeamMemberInProject(teamMember);
-        updateProjectStorageCapacity(file, project);
 
         String key = resourceDto.getProjectId() + "_" + project.getName() + "/" + file.getOriginalFilename();
-
         fileStore.deleteFile(resource.getKey());
-        fillResourceUpdate(resourceDto, resource, file, key, teamMember);
         fileStore.uploadFile(file, key);
+
+        updateProjectStorageCapacity(file, project);
+        fillResourceUpdate(resourceDto, resource, file, key, teamMember);
 
         return resourceMapper.toDto(resourceRepository.save(resource));
     }
 
+    @Transactional
     public void deleteResource(long id, long userId) {
         Resource resource = getResourceById(id);
         Project project = projectService.getProjectEntityById(id);
@@ -88,23 +91,15 @@ public class ResourceService {
     private Resource fillResourceCreate(ResourceDto resourceDto, MultipartFile file, String key,
                                         TeamMember teamMember) {
         Resource resource = resourceMapper.toEntity(resourceDto);
-
         resource.setCreatedBy(teamMember);
-        resource.setUpdatedBy(teamMember);
 
         fillResource(resource, file, key, teamMember);
-
         return resource;
     }
 
     private void fillResourceUpdate(ResourceDto resourceDto, Resource resource, MultipartFile file, String key,
-                                   TeamMember teamMember) {
+                                    TeamMember teamMember) {
         resourceMapper.update(resourceDto, resource);
-
-        List<TeamRole> roles = new ArrayList<>(teamMember.getRoles());
-
-        resource.setAllowedRoles(roles);
-        resource.setUpdatedBy(teamMember);
         resource.setUpdatedAt(null);
 
         fillResource(resource, file, key, teamMember);
@@ -113,6 +108,7 @@ public class ResourceService {
     private void fillResource(Resource resource, MultipartFile file, String key, TeamMember teamMember) {
         List<TeamRole> roles = new ArrayList<>(teamMember.getRoles());
 
+        resource.setUpdatedBy(teamMember);
         resource.setAllowedRoles(roles);
         resource.setName(file.getOriginalFilename());
         resource.setKey(key);

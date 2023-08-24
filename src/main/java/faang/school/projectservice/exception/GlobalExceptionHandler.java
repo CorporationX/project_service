@@ -45,15 +45,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-    @ExceptionHandler(ProjectStorageCapacityExceededException.class)
+    @ExceptionHandler(FileParseException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> handleProjectStorageCapacityExceededException(ProjectStorageCapacityExceededException ex) {
+    public ResponseEntity<String> handleProjectStorageCapacityExceededException(FileParseException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(UserNorAccessRightDeleteException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<String> handleUserNorAccessRightDeleteException(UserNorAccessRightDeleteException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 }
