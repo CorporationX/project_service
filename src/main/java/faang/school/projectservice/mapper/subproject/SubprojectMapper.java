@@ -17,13 +17,13 @@ public interface SubprojectMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "visibility", ignore = true)
-    Project toEntityFromDtoCreate(GeneralSubprojectDto dtoForCreate);
+    Project toEntityFromGeneralDto(GeneralSubprojectDto dtoForCreate);
 
     @Mapping(target = "subprojectId", source = "id")
     @Mapping(target = "parentProjectId", source = "parentProject.id")
     @Mapping(target = "childrenIds", source = "children", qualifiedByName = "getChildrenIds")
     @Mapping(target = "stagesIds", source = "stages", qualifiedByName = "getStagesIds")
-    GeneralSubprojectDto toDtoReqCreate(Project project);
+    GeneralSubprojectDto toGeneralDto(Project project);
 
     @Named("getChildrenIds")
     default List<Long> getChildrenIds(List<Project> children) {
