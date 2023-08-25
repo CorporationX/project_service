@@ -25,7 +25,7 @@ spring:
         calculations_channel:
           name: calculations_channel
         invitation_channel:
-          name: invitation_channel
+          name: stage_invitation_channel
 
 server:
   port: 8082
