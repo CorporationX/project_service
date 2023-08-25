@@ -1,8 +1,10 @@
 package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.subproject.GeneralSubprojectDto;
+import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.SubprojectUpdateDto;
 import faang.school.projectservice.exception.SubprojectException;
+import faang.school.projectservice.filter.subproject.SubprojectFilter;
 import faang.school.projectservice.mapper.subproject.SubprojectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Team;
@@ -24,8 +26,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import static faang.school.projectservice.messages.SubprojectErrMessage.*;
+import static faang.school.projectservice.messages.SubprojectErrMessage.ERR_VISIBILITY_PARENT_PROJECT_FORMAT;
+import static faang.school.projectservice.messages.SubprojectErrMessage.PARENT_STATUS_BLOCKED_CHANGED_SUBPROJECT_FORMAT;
+import static faang.school.projectservice.messages.SubprojectErrMessage.PROJECT_IS_NOT_SUBPROJECT_FORMAT;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -37,6 +42,7 @@ public class SubprojectService {
     private final SubprojectMapper subprojectMapper;
     private final StageRepository stageRepository;
     private final MomentRepository momentRepository;
+    private final List<SubprojectFilter> subprojectFilters;
 
     @Transactional
     public GeneralSubprojectDto createSubproject(Long parentProjectId, GeneralSubprojectDto subprojectDto) {
@@ -81,6 +87,35 @@ public class SubprojectService {
 
         log.info("Subproject with id:{0} ready to save");
         return subprojectMapper.toGeneralDto(projectRepository.save(subprojectForUpdate));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getAllSubprojectByFilter(Long subprojectId, SubprojectFilterDto filterDto) {
+        Project currentSubproject = getSubprojectFromRepository(subprojectId);
+        List<SubprojectFilter> listApplicableFilters = subprojectFilters.stream()
+                .filter(curFilter -> curFilter.isApplicable(filterDto))
+                .toList();
+
+        log.info(MessageFormat.format("Filtering of child subprojects for subproject id:{0} started", subprojectId));
+
+        if (listApplicableFilters.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            Stream<Project> childrenProjects = currentSubproject.getChildren()
+                    .stream()
+                    .filter(child -> child.getVisibility().equals(ProjectVisibility.PUBLIC));
+
+            for (SubprojectFilter curFilter : listApplicableFilters) {
+                childrenProjects = curFilter.apply(childrenProjects, filterDto);
+            }
+            return childrenProjects.map(Project::getId).toList();
+        }
+    }
+
+    private Project getSubprojectFromRepository(Long subprojectId) {
+        Project subproject = projectRepository.getProjectById(subprojectId);
+        checkIsSubproject(subproject);
+        return subproject;
     }
 
     private void createMomentWhenSubprojectCompleted(Project subproject) {
