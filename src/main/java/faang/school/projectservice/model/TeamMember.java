@@ -1,15 +1,19 @@
 package faang.school.projectservice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -32,6 +36,7 @@ public class TeamMember {
 
     @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "id")
+    @JsonBackReference
     private Team team;
 
     @ManyToMany(mappedBy = "executors")
