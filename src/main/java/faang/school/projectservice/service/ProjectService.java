@@ -52,6 +52,14 @@ public class ProjectService {
         return projectMapper.toProjectDto(projectRepository.getProjectById(id));
     }
 
+    public Project getProjectEntityById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
+
+    public void saveProject(Project project) {
+        projectRepository.save(project);
+    }
+
     private List<ProjectDto> filterProjects(ProjectFilterDto projectFilterDto, Stream<Project> projects) {
         List<ProjectFilter> stream = projectFilters.stream()
                 .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto)).toList();

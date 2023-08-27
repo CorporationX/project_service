@@ -119,6 +119,7 @@ tasks.jacocoTestCoverageVerification {
                     "faang.school.projectservice.model.**",
                     "faang.school.projectservice.client.**",
                     "faang.school.projectservice.repository.**",
+                    "faang.school.projectservice.controller.**",
                     "faang.school.projectservice.ProjectServiceApplication",
                     "com.json.student.**")
             limit {
