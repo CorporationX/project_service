@@ -47,7 +47,7 @@ class ProjectServiceTest {
         ProjectFilterStatus projectFilterStatus = new ProjectFilterStatus();
         List<ProjectFilter> projectFilters = List.of(projectTitleFilter, projectFilterStatus);
         projectService = new ProjectService(projectRepository, projectMapper, projectFilters);
-        projectDto = ProjectDto.builder().id(1L).privateProject(false).createdAt(LocalDateTime.now()).description("s").name("q").ownerId(1L).build();
+        projectDto = ProjectDto.builder().id(1L).description("s").name("q").ownerId(1L).build();
         project = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("q").build();
 
         project1 = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("CorporationX").status(ProjectStatus.CREATED).build();
@@ -63,7 +63,7 @@ class ProjectServiceTest {
 
     @Test
     public void testCreateProject() {
-        ProjectDto projectDto1 = ProjectDto.builder().id(1L).privateProject(true).createdAt(LocalDateTime.now()).description("s").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
+        ProjectDto projectDto1 = ProjectDto.builder().id(1L).description("s").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
         Mockito.when(projectRepository.save(Mockito.any(Project.class))).thenReturn(project);
         Mockito.when(projectMapper.toProject(projectDto)).thenReturn(project);
@@ -73,7 +73,7 @@ class ProjectServiceTest {
 
     @Test
     public void testUpdateProject() {
-        ProjectDto projectDtoForUpdate = ProjectDto.builder().id(1L).privateProject(true).createdAt(LocalDateTime.now()).description("new description").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
+        ProjectDto projectDtoForUpdate = ProjectDto.builder().id(1L).description("new description").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
         projectService.updateProject(1L, projectDtoForUpdate);
         Mockito.verify(projectRepository, Mockito.times(1)).save(projectMapper.toProject(projectDtoForUpdate));
