@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.dto.resource.UpdateResourceDto;
+import faang.school.projectservice.exception.FileUploadException;
 import faang.school.projectservice.exception.InvalidCurrentUserException;
 import faang.school.projectservice.exception.StorageSpaceExceededException;
 import faang.school.projectservice.jpa.ResourceRepository;
@@ -38,7 +39,7 @@ public class ProjectFileService {
     public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long userId) {
         Project project = projectRepository.getProjectById(projectId);
         validateTeamMember(project, userId);
-        validateProjectStorage(project, BigInteger.valueOf(multipartFile.getSize()));
+        validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
         TeamMember teamMember = teamMemberRepository.findById(userId);
 
         String objectKey = fileService.upload(multipartFile, projectId);
@@ -60,9 +61,10 @@ public class ProjectFileService {
     }
 
     @Transactional
-    public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId){
-        deleteFile(resourceId,userId);
-
+    public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
+        Resource resource = resourceRepository.getReferenceById(resourceId);
+        validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
+        validateIfUserCanChangeFile(resource, userId);
 
     }
 
@@ -102,16 +104,22 @@ public class ProjectFileService {
                 .toList();
 
         if (!projectMembers.contains(userId)) {
-            String errorMessage = String.format("The team member with id: %d is not on the project", userId);
+            String errorMessage = String.format(
+                    "The team member with id: %d is not on the project", userId);
             throw new InvalidCurrentUserException(errorMessage);
         }
     }
 
-    private void validateProjectStorage(Project project, BigInteger fileSize) {
-        if (fileSize.compareTo(project.getStorageSize()) <= 0) {
-            String errorMessage = String.format("Storage %d has not enough space", project.getId());
+    private void validateFreeStorageCapacity(Project project, BigInteger fileSize) {
+        if (fileSize.compareTo(project.getStorageSize()) > 0) {
+            String errorMessage = String.format(
+                    "Project %d storage has not enough space", project.getId());
             throw new StorageSpaceExceededException(errorMessage);
         }
+    }
+    private void validateStorageCapacityOnUpdate(Resource resource, BigInteger fileSize) {
+        BigInteger storageSize = resource.getProject().getStorageSize();
+
     }
 
     private void updateProjectStorage(Resource resource) {
@@ -133,7 +141,8 @@ public class ProjectFileService {
         boolean notAFileCreator = !userIsFileCreator(resource, userId);
 
         if (notAProjectManager && notAFileCreator) {
-            throw new InvalidCurrentUserException("You should be creator of a file or a project manager to change files");
+            throw new InvalidCurrentUserException(
+                    "You should be creator of a file or a project manager to change files");
         }
     }
 
@@ -147,5 +156,11 @@ public class ProjectFileService {
 
     private boolean userIsFileCreator(Resource resource, long userId) {
         return resource.getCreatedBy().getUserId().equals(userId);
+    }
+
+    private void validateFileOnUpdate(String resourceName, String fileOriginalName) {
+        if (!resourceName.equals(fileOriginalName)) {
+            throw new FileUploadException("File names don't match");
+        }
     }
 }
