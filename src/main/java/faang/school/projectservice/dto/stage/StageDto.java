@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.stage;
 
+import faang.school.projectservice.model.stage.StageStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.util.List;
 public class StageDto {
     private Long stageId;
     private String stageName;
+    private StageStatus status;
     private Long projectId;
     private List<StageRolesDto> stageRoles;
 }

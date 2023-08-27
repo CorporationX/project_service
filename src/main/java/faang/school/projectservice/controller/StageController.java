@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.stage.StageStatus;
 import faang.school.projectservice.service.StageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,6 +57,11 @@ public class StageController {
     @GetMapping("/{projectId}")
     public List<StageDto> findAllStagesOfProject(@PathVariable Long projectId) {
         return stageService.findAllStagesOfProject(projectId);
+    }
+
+    @GetMapping("/stage/{projectId}/{status}")
+    public List<StageDto> getStagesOfProjectWithFilter(@PathVariable Long projectId, @PathVariable StageStatus status) {
+        return stageService.getStagesOfProjectWithFilter(projectId, status);
     }
 
     @PutMapping("/stage/{stageId}")
