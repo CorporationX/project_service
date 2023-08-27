@@ -100,7 +100,7 @@ tasks.jacocoTestReport {
                     "faang/school/projectservice/model/**",
                     "faang/school/projectservice/repository/**",
                     "faang/school/projectservice/ProjectServiceApplication.class",
-                    "com/json/student/**",)
+                    "com/json/student/**")
         }
     }))
 }
