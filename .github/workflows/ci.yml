@@ -23,5 +23,8 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
+      - name: Set property to disable bean
+        run: echo "services.s3.isMocked=false" >> $GITHUB_ENV
+
       - name: Build Gradle
         run: ./gradlew build --no-daemon
