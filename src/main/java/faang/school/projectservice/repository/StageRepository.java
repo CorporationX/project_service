@@ -21,6 +21,10 @@ public class StageRepository {
         jpaRepository.delete(stage);
     }
 
+    public void deleteById(Long stageId) {
+        jpaRepository.deleteById(stageId);
+    }
+
     public Stage getById(Long stageId) {
         return jpaRepository.findById(stageId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("Stage not found by id: %s", stageId))
