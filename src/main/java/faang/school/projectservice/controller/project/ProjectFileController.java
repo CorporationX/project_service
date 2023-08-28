@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.UpdateResourceDto;
 import faang.school.projectservice.service.project.ProjectFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +33,14 @@ public class ProjectFileController {
         long userId = userContext.getUserId();
 
         return projectFileService.uploadFile(multipartFile, projectId, userId);
+    }
+
+    @PutMapping("/files/resource/{resourceId}/update")
+    public UpdateResourceDto updateFile(@RequestParam("file") MultipartFile multipartFile,
+                                        @PathVariable long resourceId) {
+        long userId = userContext.getUserId();
+
+        return projectFileService.updateFile(multipartFile, resourceId, userId);
     }
 
     @GetMapping("/files/resource/{resourceId}/download")

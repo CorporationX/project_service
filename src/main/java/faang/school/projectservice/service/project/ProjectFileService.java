@@ -24,7 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,9 +39,8 @@ public class ProjectFileService {
     @Transactional
     public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long userId) {
         Project project = projectRepository.getProjectById(projectId);
-        validateTeamMember(project, userId);
+        TeamMember teamMember = findTeamMember(project, userId);
         validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
-        TeamMember teamMember = teamMemberRepository.findById(userId);
 
         String objectKey = fileService.upload(multipartFile, projectId);
 
@@ -63,9 +63,22 @@ public class ProjectFileService {
     @Transactional
     public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
+        TeamMember updatedBy = teamMemberRepository.findById(userId);
         validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
         validateIfUserCanChangeFile(resource, userId);
+        validateStorageCapacityOnUpdate(resource, BigInteger.valueOf(multipartFile.getSize()));
 
+        fileService.delete(resource.getKey());
+        String key = fileService.upload(multipartFile, resource.getProject().getId());
+
+        resource.setUpdatedBy(updatedBy);
+        resource.setKey(key);
+        resource.setUpdatedAt(LocalDateTime.now());
+
+        updateProjectStorage(resource);
+        resourceRepository.save(resource);
+
+        return resourceMapper.toUpdateDto(resource);
     }
 
     @Transactional
@@ -84,7 +97,7 @@ public class ProjectFileService {
 
     public GetResourceDto getFile(long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        validateTeamMember(resource.getProject(), userId);
+        findTeamMember(resource.getProject(), userId);
         S3Object file = fileService.getFile(resource.getKey());
 
         return GetResourceDto.builder()
@@ -96,17 +109,18 @@ public class ProjectFileService {
     }
 
 
-    private void validateTeamMember(Project project, long userId) {
-        List<Long> projectMembers = project.getTeams().stream()
+    private TeamMember findTeamMember(Project project, long userId) {
+        Optional<TeamMember> matchingMember = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
-                .map(TeamMember::getUserId)
-                .distinct()
-                .toList();
+                .filter(teamMember -> teamMember.getUserId() == userId)
+                .findAny();
 
-        if (!projectMembers.contains(userId)) {
+        if (matchingMember.isEmpty()) {
             String errorMessage = String.format(
-                    "The team member with id: %d is not on the project", userId);
+                    "The user with id: %d is not on the project", userId);
             throw new InvalidCurrentUserException(errorMessage);
+        } else {
+            return matchingMember.get();
         }
     }
 
@@ -117,8 +131,18 @@ public class ProjectFileService {
             throw new StorageSpaceExceededException(errorMessage);
         }
     }
+
     private void validateStorageCapacityOnUpdate(Resource resource, BigInteger fileSize) {
         BigInteger storageSize = resource.getProject().getStorageSize();
+        BigInteger resourceSize = resource.getSize();
+        BigInteger storageCapacity = storageSize.add(resourceSize);
+
+        if (fileSize.compareTo(storageCapacity) > 0) {
+            String errorMessage = String.format(
+                    "Impossible to update %s, project %d storage has not enough space",
+                    resource.getName(), resource.getProject().getId());
+            throw new StorageSpaceExceededException(errorMessage);
+        }
 
     }
 
