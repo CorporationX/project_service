@@ -39,4 +39,7 @@ public class StageInvitation {
     @OneToOne
     @JoinColumn(name = "invited")
     private TeamMember invited;
+
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
 }

@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    jacoco
 }
 
 group = "faang.school"
@@ -70,4 +71,63 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
+}
+
+jacoco {
+    toolVersion = "0.8.9"
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoReportHtml"))
+    }
+}
+
+tasks.withType<JacocoReport> {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.map {
+            fileTree(it).apply {
+                exclude(
+                        "**/client/**",
+                        "**/config/**",
+                        "**/dto/**",
+                        "**/exception/**",
+                        "**/model/**",
+                        "**/repository/**",
+                        "**/ProjectServiceApplication.class"
+                )
+            }
+        }))
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            enabled = true
+            element = "CLASS"
+            excludes = listOf(
+                    "faang.school.projectservice.client.**",
+                    "faang.school.projectservice.config.**",
+                    "faang.school.projectservice.controller.**",
+                    "faang.school.projectservice.dto.**",
+                    "faang.school.projectservice.exception.**",
+                    "faang.school.projectservice.filter.**",
+                    "faang.school.projectservice.model.**",
+                    "faang.school.projectservice.repository.**",
+                    "faang.school.projectservice.ProjectServiceApplication",
+                    )
+            limit {
+                minimum = "0.0".toBigDecimal()
+            }
+        }
+    }
 }

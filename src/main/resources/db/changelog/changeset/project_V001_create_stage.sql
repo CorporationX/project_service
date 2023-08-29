@@ -2,6 +2,7 @@ create table if not exists project_stage
 (
     project_stage_id   bigserial primary key,
     project_stage_name varchar(255) not null,
+    status           VARCHAR(255) NOT NULL,
     project_id         bigint       not null,
 
     constraint fk_project

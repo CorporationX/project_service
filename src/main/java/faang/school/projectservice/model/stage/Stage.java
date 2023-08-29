@@ -33,7 +33,7 @@ public class Stage {
     @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
     private List<StageRoles> stageRoles;
 
-    @OneToMany(cascade = CascadeType.MERGE)
+    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "stage_id")
     private List<Task> tasks;
 
@@ -42,4 +42,8 @@ public class Stage {
             joinColumns = @JoinColumn(name = "stage_id"),
             inverseJoinColumns = @JoinColumn(name = "executor_id"))
     private List<TeamMember> executors;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StageStatus status;
 }

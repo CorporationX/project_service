@@ -36,4 +36,12 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
+
+    @ManyToMany
+    @JoinTable(
+            name = "moment_member",
+            joinColumns = @JoinColumn(name = "id"),
+            inverseJoinColumns = @JoinColumn(name = "moment_id")
+    )
+    private List<Moment> moments;
 }

@@ -71,6 +71,25 @@ CREATE TABLE IF NOT EXISTS task (
                                         FOREIGN KEY (project_id) REFERENCES project(id)
 );
 
+CREATE TABLE IF NOT EXISTS task (
+                                    id BIGSERIAL PRIMARY KEY,
+                                    name VARCHAR(255) NOT NULL,
+                                    description TEXT,
+                                    status VARCHAR(255),
+                                    performer_user_id BIGINT NOT NULL,
+                                    reporter_user_id BIGINT NOT NULL,
+                                    minutes_tracked INT,
+                                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                    parent_task_id BIGINT,
+                                    project_id BIGINT,
+                                    stage_id BIGINT,
+                                    CONSTRAINT fk_parent_task
+                                        FOREIGN KEY (parent_task_id) REFERENCES task(id),
+                                    CONSTRAINT fk_project
+                                        FOREIGN KEY (project_id) REFERENCES project(id)
+);
+
 CREATE TABLE IF NOT EXISTS schedule (
                                         id BIGSERIAL PRIMARY KEY,
                                         name VARCHAR(255) NOT NULL,
