@@ -3,6 +3,7 @@ package faang.school.projectservice.publisher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.redis.InviteSentEventDto;
+import faang.school.projectservice.exception.JsonSerializeException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class InviteSentEvent {
         try {
             json = objectMapper.writeValueAsString(event);
         } catch (JsonProcessingException e) {
-            throw new faang.school.projectservice.exception.JsonProcessingException(e.getMessage());
+            throw new JsonSerializeException("Failed to serialize event");
         }
         redisTemplate.convertAndSend(topicInvitation.getTopic(), json);
     }
