@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.publisher.InviteSentEvent;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,9 @@ class StageInvitationServiceTest {
 
     @Mock
     private StageInvitationRepository stageInvitationRepository;
+
+    @Mock
+    private InviteSentEvent inviteSentEvent;
 
     @Test
     void createStageInvitation() {
