@@ -18,7 +18,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/stages")
+@RequestMapping("/stages")
 public class StageController {
 
     private final StageService stageService;

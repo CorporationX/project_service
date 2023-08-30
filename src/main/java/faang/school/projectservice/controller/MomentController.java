@@ -19,7 +19,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/v1/moments")
+@RequestMapping("/moments")
 public class MomentController {
     private final MomentService momentService;
     private final UserContext userContext;
