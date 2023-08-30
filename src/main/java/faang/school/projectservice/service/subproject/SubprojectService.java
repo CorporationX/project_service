@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -99,7 +98,7 @@ public class SubprojectService {
                 .filter(curFilter -> curFilter.isApplicable(filterDto))
                 .toList();
 
-        log.info(MessageFormat.format("Filtering of child subprojects for subproject id:{0} started", subprojectId));
+        log.info("Filtering of child subprojects for subproject id:{} started", subprojectId);
 
         if (listApplicableFilters.isEmpty()) {
             return Collections.emptyList();
@@ -121,7 +120,8 @@ public class SubprojectService {
         return subproject;
     }
 
-    private Moment createMomentAllCompleted(Project subproject) {        List<Team> teams = Optional.ofNullable(subproject.getTeams())
+    private Moment createMomentAllCompleted(Project subproject) {
+        List<Team> teams = Optional.ofNullable(subproject.getTeams())
                 .orElse(Collections.emptyList());
 
         List<Long> uniqueUserIds = teams

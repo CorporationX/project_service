@@ -8,7 +8,6 @@ import faang.school.projectservice.filter.subproject.SubprojectFilter;
 import faang.school.projectservice.filter.subproject.SubprojectFilterByName;
 import faang.school.projectservice.filter.subproject.SubprojectFilterByStatus;
 import faang.school.projectservice.mapper.subproject.SubprojectMapperImpl;
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.project.Project;
