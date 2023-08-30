@@ -64,17 +64,6 @@ class CoverImageProjectServiceTest {
     }
 
     @Test
-    void coverImage_Default() {
-        Project project = new Project();
-
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-        when(fileStorageService.uploadDefaultPicture()).thenReturn("Default cover picture");
-
-
-
-           }
-
-    @Test
     void testGetByProject() throws IOException {
         Project project = new Project();
         project.setId(1L);
