@@ -59,31 +59,34 @@ public class SubprojectService {
         Project subprojectForUpdate = projectRepository.getProjectById(subprojectId);
         checkIsSubproject(subprojectForUpdate);
 
-        log.info(MessageFormat.format("Starting updating subproject with id:{0}", subprojectId));
+        log.info("Starting updating subproject with id:{}", subprojectId);
         checkPossibilityUpdateSubproject(subprojectForUpdate);
 
         ProjectStatus statusToUpdate = subprojectDto.getStatus();
         if (nonNull(statusToUpdate)) {
             updateStatus(subprojectForUpdate, statusToUpdate);
-        }
+            if (isCompletedOrCanceled(statusToUpdate)) {
+                updateStatusForChildrenProjects(subprojectForUpdate.getChildren(), statusToUpdate);
 
-        if (subprojectForUpdate.getStatus() == ProjectStatus.COMPLETED &&
-                isStatusCompletedForAllChildren(subprojectForUpdate)) {
-            createMomentWhenSubprojectCompleted(subprojectForUpdate);
+                if (statusToUpdate.equals(ProjectStatus.COMPLETED)) {
+                    Moment momentAllCompleted = createMomentAllCompleted(subprojectForUpdate);
+                    momentRepository.save(momentAllCompleted);
+                }
+            }
         }
 
         ProjectVisibility visibilityToUpdate = subprojectDto.getVisibility();
         if (nonNull(visibilityToUpdate)) {
             checkPossibleSetPrivateVisibilitySubproject(subprojectForUpdate, visibilityToUpdate);
             subprojectForUpdate.setVisibility(visibilityToUpdate);
-            setVisibilityForChildren(subprojectForUpdate.getChildren(), visibilityToUpdate);
+            updateVisibilityForChildren(subprojectForUpdate.getChildren(), visibilityToUpdate);
         }
 
-        log.info("Subproject with id:{0} ready to save");
+        log.info("Subproject with id:{} ready to save", subprojectId);
         return subprojectMapper.toGeneralDto(projectRepository.save(subprojectForUpdate));
     }
 
-    private void createMomentWhenSubprojectCompleted(Project subproject) {
+    private Moment createMomentAllCompleted(Project subproject) {
         List<Team> teams = Optional.ofNullable(subproject.getTeams())
                 .orElse(Collections.emptyList());
 
@@ -95,16 +98,13 @@ public class SubprojectService {
                 .distinct()
                 .toList();
 
-        Moment newMoment = Moment.builder()
+        return Moment.builder()
                 .name("Выполнены все подпроекты")
                 .description("Выполнены все подпроекты")
                 .projects(List.of(subproject.getParentProject()))
                 .userIds(uniqueUserIds)
                 .date(LocalDateTime.now())
                 .build();
-
-        // могу я тут напрямую дергать репозиторий моментов? Или это нарушит принцип SOLID?
-        momentRepository.save(newMoment);
     }
 
     private void setVisibilitySubproject(Project subproject, ProjectVisibility visibility) {
@@ -125,12 +125,12 @@ public class SubprojectService {
         }
     }
 
-    private void setVisibilityForChildren(List<Project> childrenSubprojects, ProjectVisibility visibilityToSet) {
+    private void updateVisibilityForChildren(List<Project> childrenSubprojects, ProjectVisibility visibilityToSet) {
         if (nonNull(childrenSubprojects)) {
             for (Project curChild : childrenSubprojects) {
                 curChild.setVisibility(visibilityToSet);
                 if (nonNull(curChild.getChildren())) {
-                    setVisibilityForChildren(curChild.getChildren(), visibilityToSet);
+                    updateVisibilityForChildren(curChild.getChildren(), visibilityToSet);
                 }
             }
         }
@@ -140,22 +140,23 @@ public class SubprojectService {
         return parentProject.getVisibility() == ProjectVisibility.PUBLIC;
     }
 
-    private void setRequiredStatusForChildrenProjects(List<Project> childrenSubprojects, ProjectStatus requiredStatus) {
+    private void updateStatusForChildrenProjects(List<Project> childrenSubprojects, ProjectStatus requiredStatus) {
         if (nonNull(childrenSubprojects)) {
             for (Project curChild : childrenSubprojects) {
                 curChild.setStatus(requiredStatus);
                 if (nonNull(curChild.getChildren())) {
-                    setRequiredStatusForChildrenProjects(curChild.getChildren(), requiredStatus);
+                    updateStatusForChildrenProjects(curChild.getChildren(), requiredStatus);
                 }
             }
         }
     }
 
     private void updateStatus(Project project, ProjectStatus status) {
-        if (status == ProjectStatus.CANCELLED || status == ProjectStatus.COMPLETED) {
-            setRequiredStatusForChildrenProjects(project.getChildren(), status);
-        }
         project.setStatus(status);
+    }
+
+    private boolean isCompletedOrCanceled(ProjectStatus requiredStatus) {
+        return requiredStatus == ProjectStatus.CANCELLED || requiredStatus == ProjectStatus.COMPLETED;
     }
 
     private void checkPossibilityUpdateSubproject(Project subproject) {
@@ -164,11 +165,6 @@ public class SubprojectService {
             String errorMessage = MessageFormat.format(PARENT_STATUS_BLOCKED_CHANGED_SUBPROJECT_FORMAT, parentStatus);
             throw new SubprojectException(errorMessage);
         }
-    }
-
-    private boolean isStatusCompletedForAllChildren(Project project) {
-        List<Project> children = Optional.ofNullable(project.getChildren()).orElse(new ArrayList<>());
-        return children.stream().map(Project::getStatus).allMatch(status -> status == ProjectStatus.COMPLETED);
     }
 
     private void checkIsSubproject(Project project) {

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/subproject")
+@RequestMapping("/subproject")
 @Tag(name = "Подпроекты")
 public class SubprojectController {
     private final SubprojectService subprojectService;
