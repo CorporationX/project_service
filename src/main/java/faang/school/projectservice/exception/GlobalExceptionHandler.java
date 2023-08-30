@@ -50,9 +50,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
-    @ExceptionHandler(JsonSerializeException.class)
+    @ExceptionHandler(SerializeJsonException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> handleJsonSerializeException(JsonSerializeException ex) {
+    public ResponseEntity<String> handleJsonSerializeException(SerializeJsonException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 }
