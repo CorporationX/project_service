@@ -1,10 +1,13 @@
 package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.subproject.GeneralSubprojectDto;
+import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.SubprojectUpdateDto;
 import faang.school.projectservice.exception.SubprojectException;
+import faang.school.projectservice.filter.subproject.SubprojectFilter;
+import faang.school.projectservice.filter.subproject.SubprojectFilterByName;
+import faang.school.projectservice.filter.subproject.SubprojectFilterByStatus;
 import faang.school.projectservice.mapper.subproject.SubprojectMapperImpl;
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.project.Project;
@@ -28,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -173,6 +177,44 @@ class SubprojectServiceTest {
         Mockito.verify(momentRepository, Mockito.times(1)).save(Mockito.any());
     }
 
+
+    @ParameterizedTest
+    @MethodSource("provideDataForTestFilter")
+    void testGetAllSubprojectByFilter_PositiveCase(SubprojectFilterDto filterDto, List<Long> expectedIds) {
+        Project existsSubproject = getExistsSubproject();
+        List<SubprojectFilter> filters = List.of(new SubprojectFilterByName(), new SubprojectFilterByStatus());
+        subprojectService = new SubprojectService(projectRepository, subprojectMapper,
+                stageRepository, momentRepository, filters);
+        Mockito.when(projectRepository.getProjectById(subprojectId)).thenReturn(existsSubproject);
+
+        List<Long> result = subprojectService.getAllSubprojectByFilter(subprojectId, filterDto);
+
+        assertEquals(expectedIds, result);
+    }
+
+    private static Stream<Arguments> provideDataForTestFilter() {
+        SubprojectFilterDto filterDto1 = SubprojectFilterDto.builder()
+                .name("Child")
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        List<Long> expectedIdsSet1 = List.of(20L);
+
+        SubprojectFilterDto filterDto2 = SubprojectFilterDto.builder()
+                .name("Child")
+                .build();
+        List<Long> expectedIdsSet2 = List.of(20L, 21L);
+
+        SubprojectFilterDto filterDto3 = SubprojectFilterDto.builder()
+                .build();
+        List<Long> expectedIdsSet3 = Collections.emptyList();
+
+        return Stream.of(
+                Arguments.of(filterDto1, expectedIdsSet1),
+                Arguments.of(filterDto2, expectedIdsSet2),
+                Arguments.of(filterDto3, expectedIdsSet3)
+        );
+    }
+
     private static Stream<Arguments> provideParentProjectForTest() {
         String errorMessageCanceled = MessageFormat.format(PARENT_STATUS_BLOCKED_CHANGED_SUBPROJECT_FORMAT,
                 ProjectStatus.CANCELLED);
@@ -235,11 +277,15 @@ class SubprojectServiceTest {
                         .id(20L)
                         .name("Child subproject 1")
                         .children(nestedLevel1ChildrenSet1)
+                        .visibility(ProjectVisibility.PUBLIC)
+                        .status(ProjectStatus.IN_PROGRESS)
                         .build(),
                 Project.builder()
                         .id(21L)
                         .name("Child subproject 2")
                         .children(nestedLevel1ChildrenSet2)
+                        .visibility(ProjectVisibility.PUBLIC)
+                        .status(ProjectStatus.CREATED)
                         .build()
         );
 

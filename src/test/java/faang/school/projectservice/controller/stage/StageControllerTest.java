@@ -62,7 +62,7 @@ class StageControllerTest {
 
         Mockito.when(stageService.create(stageDto)).thenReturn(stageDto1);
 
-        mockMvc.perform(post("/api/v1/stages")
+        mockMvc.perform(post("/stages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stageDto)))
                 .andExpect(status().isOk())
@@ -75,7 +75,7 @@ class StageControllerTest {
 
         Mockito.when(stageService.getAllProjectStages(2L)).thenReturn(stageDtos);
 
-        mockMvc.perform(get("/api/v1/stages/search/project/2"))
+        mockMvc.perform(get("/stages/search/project/2"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(stageDtos)));
     }
@@ -84,7 +84,7 @@ class StageControllerTest {
     public void testGetStageById() throws Exception {
         Mockito.when(stageService.getStageById(1L)).thenReturn(stageDto);
 
-        mockMvc.perform(get("/api/v1/stages/search/1"))
+        mockMvc.perform(get("/stages/search/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(stageDto)));
     }
@@ -119,7 +119,7 @@ class StageControllerTest {
 
         Mockito.when(stageService.updateStage(1L, stageRolesDto)).thenReturn(stageDto);
 
-        mockMvc.perform(put("/api/v1/stages/1")
+        mockMvc.perform(put("/stages/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stageRolesDto)))
                 .andExpect(status().isOk())
