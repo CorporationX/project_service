@@ -2,7 +2,6 @@ package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -12,11 +11,10 @@ import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Method;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SubProjectValidatorTest {
-    @Mock
-    private ProjectService projectService;
     @Mock
     private UserServiceClient userServiceClient;
     @InjectMocks
@@ -30,27 +28,7 @@ class SubProjectValidatorTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         rightId = 1L;
-        validatorClass = new SubProjectValidator(projectService, userServiceClient);
-    }
-
-    @Test
-    public void testValidateProjectId() throws NoSuchMethodException {
-        validateProjectId = validatorClass.getClass().getDeclaredMethod("validateProjectId", Long.class);
-        validateProjectId.setAccessible(true);
-
-        assertDoesNotThrow(() -> validateProjectId.invoke(validatorClass, rightId));
-
-        try {
-            validateProjectId.invoke(validatorClass, -rightId);
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof DataValidationException);
-        }
-
-        try {
-            validateProjectId.invoke(validatorClass, 2 * rightId);
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof DataValidationException);
-        }
+        validatorClass = new SubProjectValidator(userServiceClient);
     }
 
     @Test
