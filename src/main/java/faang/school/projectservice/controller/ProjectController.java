@@ -21,7 +21,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/projects")
+@RequestMapping("/projects")
 public class ProjectController {
     private final ProjectService projectService;
 
