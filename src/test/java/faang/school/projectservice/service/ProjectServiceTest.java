@@ -2,7 +2,8 @@ package faang.school.projectservice.service;
 
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.mappers.ProjectMapperImpl;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -80,7 +81,7 @@ class ProjectServiceTest {
     @Test
     void testGetProjectById() {
         when(projectRepository.getProjectById(1L)).thenReturn(project);
-        projectService.getProjectById(1L);
+        projectService.findProjectById(1L);
         verify(projectRepository).getProjectById(1L);
     }
 

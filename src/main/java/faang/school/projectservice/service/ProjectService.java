@@ -62,7 +62,7 @@ public class ProjectService {
         return projectMapper.toDto(projectRepository.save(project));
     }
 
-    public ProjectDto getProjectById(Long id) {
+    public ProjectDto findProjectById(Long id) {
         Project project = projectRepository.getProjectById(id);
         if (project == null) {
             throw new EntityNotFoundException("The project with that id does not exist");

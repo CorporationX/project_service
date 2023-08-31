@@ -23,7 +23,7 @@ public class ProjectController {
 
     @PostMapping()
     public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
-//        validateProject(projectDto);
+        validateProject(projectDto);
         return projectService.createProject(projectDto);
     }
 
@@ -34,8 +34,8 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ProjectDto getProjectById(@PathVariable Long id) {
-        return projectService.getProjectById(id);
+    public ProjectDto findProjectById(@PathVariable Long id) {
+        return projectService.findProjectById(id);
     }
 
     @GetMapping("/filter")
@@ -47,13 +47,6 @@ public class ProjectController {
     public List<ProjectDto> getAllProject() {
         return projectService.getAllProject();
     }
-
-//    @GetMapping("/{projectId}")
-//    public ProjectDto findProjectById(@PathVariable long projectId) {
-//        return projectService.findProjectById(projectId);
-//    }
-
-
 
     private void validateProject(ProjectDto projectDto) {
         if (projectDto.getName().isBlank() || projectDto.getName() == null) {
