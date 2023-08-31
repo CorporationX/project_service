@@ -73,7 +73,7 @@ public class ProjectFileService {
 
         resource.setUpdatedBy(updatedBy);
         resource.setKey(key);
-        resource.setUpdatedAt(LocalDateTime.now());
+        resource.setSize(BigInteger.valueOf(multipartFile.getSize()));
 
         updateProjectStorage(resource);
         resourceRepository.save(resource);
