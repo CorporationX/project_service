@@ -1,9 +1,7 @@
 package faang.school.projectservice.service;
 
 
-import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mappers.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;

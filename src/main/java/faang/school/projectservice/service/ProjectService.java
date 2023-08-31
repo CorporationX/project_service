@@ -1,17 +1,15 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.ProjectFilter;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,7 +38,7 @@ public class ProjectService {
         return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 
-    ctional
+    @Transactional
     public ProjectDto createProject(ProjectDto projectDto) {
         if (projectRepository.findAll().stream().anyMatch(x ->
                 x.getOwnerId().equals(projectDto.getOwnerId())
