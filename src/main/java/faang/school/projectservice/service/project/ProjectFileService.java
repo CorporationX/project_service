@@ -95,6 +95,7 @@ public class ProjectFileService {
         }
     }
 
+    @Transactional(readOnly = true)
     public GetResourceDto getFile(long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
         findTeamMember(resource.getProject(), userId);

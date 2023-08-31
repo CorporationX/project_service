@@ -35,7 +35,7 @@ public class ProjectFileController {
         return projectFileService.uploadFile(multipartFile, projectId, userId);
     }
 
-    @PutMapping("/files/resource/{resourceId}/update")
+    @PutMapping("/files/resource/{resourceId}/update/")
     public UpdateResourceDto updateFile(@RequestParam("file") MultipartFile multipartFile,
                                         @PathVariable long resourceId) {
         long userId = userContext.getUserId();
@@ -43,7 +43,7 @@ public class ProjectFileController {
         return projectFileService.updateFile(multipartFile, resourceId, userId);
     }
 
-    @GetMapping("/files/resource/{resourceId}/download")
+    @GetMapping("/files/resource/{resourceId}/download/")
     public ResponseEntity<InputStreamResource> downloadFile(@PathVariable long resourceId) {
         long userId = userContext.getUserId();
         GetResourceDto resourceDto = projectFileService.getFile(resourceId, userId);
