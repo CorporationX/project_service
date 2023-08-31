@@ -9,7 +9,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.filter.ProjectFilter;
+import faang.school.projectservice.filter.project.ProjectFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,11 +31,6 @@ public class ProjectService {
         if (!projectRepository.existsById(projectId)) {
             throw new EntityNotFoundException("Project with id " + projectId + " does not exist");
         }
-    }
-
-    @Transactional
-    public ProjectDto findProjectById(long id) {
-        return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 
     @Transactional

@@ -3,11 +3,12 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.filter.ProjectFilter;
+import faang.school.projectservice.filter.project.ProjectFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,8 +74,7 @@ class ProjectServiceTest {
 
     @Test
     void testUpdateProjectAndEntityNotFoundException() {
-        when(projectRepository.getProjectById(1L)).thenReturn(null);
-        assertThrows(RuntimeException.class,
+        assertThrows(EntityNotFoundException.class,
                 () -> projectService.updateProject(projectDto));
     }
 
@@ -90,5 +90,4 @@ class ProjectServiceTest {
         projectService.getAllProject();
         verify(projectRepository).findAll();
     }
-
 }
