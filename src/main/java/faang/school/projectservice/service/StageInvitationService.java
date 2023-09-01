@@ -27,23 +27,25 @@ public class StageInvitationService {
 
     public StageInvitationDto create(StageInvitationDto stageInvitationDto) {
         stageInvitationValidator.validateExecutors(stageInvitationDto);
-        return stageInvitationMapper.toDto(stageInvitationRepository
-                .save(stageInvitationMapper.toModel(stageInvitationDto)));
+        StageInvitation model = stageInvitationMapper.toModel(stageInvitationDto);
+        StageInvitation save = stageInvitationRepository.save(model);
+        return stageInvitationMapper.toDto(save);
     }
 
     public StageInvitationDto accept(long invitationId) {
-        StageInvitation toUpdate = stageInvitationRepository.findById(invitationId);
-        toUpdate.setStatus(StageInvitationStatus.ACCEPTED);
-        TeamMember teamMember = teamMemberRepository.findById(toUpdate.getInvited().getId());
-        toUpdate.getStage().getExecutors().add(teamMember);
-        return stageInvitationMapper.toDto(stageInvitationRepository.save(toUpdate));
+        StageInvitation invitation = stageInvitationRepository.findById(invitationId);
+        invitation.setStatus(StageInvitationStatus.ACCEPTED);
+        TeamMember teamMember = teamMemberRepository
+                .findById(invitation.getInvited().getId());
+        invitation.getStage().getExecutors().add(teamMember);
+        return stageInvitationMapper.toDto(stageInvitationRepository.save(invitation));
     }
 
     public StageInvitationDto reject(long invitationId, String message) {
-        StageInvitation toReject = stageInvitationRepository.findById(invitationId);
-        toReject.setStatus(StageInvitationStatus.REJECTED);
-        toReject.setDescription(message);
-        return stageInvitationMapper.toDto(stageInvitationRepository.save(toReject));
+        StageInvitation invitation = stageInvitationRepository.findById(invitationId);
+        invitation.setStatus(StageInvitationStatus.REJECTED);
+        invitation.setDescription(message);
+        return stageInvitationMapper.toDto(stageInvitationRepository.save(invitation));
     }
 
     public List<StageInvitationDto> getStageInvitationFilter(
