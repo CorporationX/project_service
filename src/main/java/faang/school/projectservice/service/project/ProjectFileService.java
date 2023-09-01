@@ -16,7 +16,6 @@ import faang.school.projectservice.model.resource.Resource;
 import faang.school.projectservice.model.resource.ResourceStatus;
 import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.util.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -33,7 +31,6 @@ public class ProjectFileService {
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
     private final FileService fileService;
-    private final TeamMemberRepository teamMemberRepository;
     private final ResourceMapper resourceMapper;
 
     @Transactional
@@ -63,12 +60,15 @@ public class ProjectFileService {
     @Transactional
     public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        TeamMember updatedBy = teamMemberRepository.findById(userId);
+        TeamMember updatedBy = findTeamMember(resource.getProject(),userId);
         validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
         validateIfUserCanChangeFile(resource, userId);
-        validateStorageCapacityOnUpdate(resource, BigInteger.valueOf(multipartFile.getSize()));
+        BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
+                resource, BigInteger.valueOf(multipartFile.getSize()));
 
         fileService.delete(resource.getKey());
+        resource.getProject().setStorageSize(storageCapacityOnUpdate);
+
         String key = fileService.upload(multipartFile, resource.getProject().getId());
 
         resource.setUpdatedBy(updatedBy);
@@ -133,7 +133,7 @@ public class ProjectFileService {
         }
     }
 
-    private void validateStorageCapacityOnUpdate(Resource resource, BigInteger fileSize) {
+    private BigInteger storageCapacityOnUpdate(Resource resource, BigInteger fileSize) {
         BigInteger storageSize = resource.getProject().getStorageSize();
         BigInteger resourceSize = resource.getSize();
         BigInteger storageCapacity = storageSize.add(resourceSize);
@@ -145,6 +145,7 @@ public class ProjectFileService {
             throw new StorageSpaceExceededException(errorMessage);
         }
 
+        return storageCapacity;
     }
 
     private void updateProjectStorage(Resource resource) {

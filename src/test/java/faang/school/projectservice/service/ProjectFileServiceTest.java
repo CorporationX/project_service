@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.dto.resource.UpdateResourceDto;
+import faang.school.projectservice.exception.FileUploadException;
 import faang.school.projectservice.exception.InvalidCurrentUserException;
 import faang.school.projectservice.exception.StorageSpaceExceededException;
 import faang.school.projectservice.jpa.ResourceRepository;
@@ -16,12 +17,13 @@ import faang.school.projectservice.model.resource.Resource;
 import faang.school.projectservice.model.resource.ResourceStatus;
 import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.project.ProjectFileService;
 import faang.school.projectservice.util.FileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -45,8 +47,6 @@ public class ProjectFileServiceTest {
     private ResourceRepository resourceRepository;
     @Mock
     private FileService fileService;
-    @Mock
-    private TeamMemberRepository teamMemberRepository;
     @Spy
     private ResourceMapperImpl resourceMapper;
     @InjectMocks
@@ -69,9 +69,15 @@ public class ProjectFileServiceTest {
                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
 
+        TeamMember projectManager = TeamMember.builder()
+                .id(2L)
+                .userId(2L)
+                .roles(new ArrayList<>(List.of(TeamRole.MANAGER)))
+                .build();
+
         team = Team.builder()
                 .id(1L)
-                .teamMembers(new ArrayList<>(List.of(teamMember)))
+                .teamMembers(new ArrayList<>(List.of(teamMember, projectManager)))
                 .build();
 
         project = Project.builder()
@@ -138,6 +144,7 @@ public class ProjectFileServiceTest {
 
         assertEquals(expectedDto, resourceDto);
         assertEquals(expectedProject, project);
+        Mockito.verify(fileService, Mockito.times(1)).upload(multipartFile, 1L);
         Mockito.verify(resourceRepository, Mockito.times(1)).save(resource);
     }
 
@@ -149,11 +156,11 @@ public class ProjectFileServiceTest {
         Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
 
         assertThrows(InvalidCurrentUserException.class,
-                () -> projectFileService.uploadFile(multipartFile, 1L, 2L));
+                () -> projectFileService.uploadFile(multipartFile, 1L, 3L));
     }
 
     @Test
-    public void testUploadFile_NotEnoughStorageSpace() {
+    public void testUploadFile_StorageExceeded() {
         MockMultipartFile multipartFile = new MockMultipartFile(
                 "testFile", "test.txt", "text/plain", "Test content!".getBytes());
 
@@ -163,38 +170,27 @@ public class ProjectFileServiceTest {
                 () -> projectFileService.uploadFile(multipartFile, 1L, 1L));
     }
 
-    @Test
-    public void testUpdateFile_Successful() {
-        MockMultipartFile multipartFile = new MockMultipartFile(
-                "testFile", "test.txt", "text/plain", "Test content".getBytes());
+
+    @ParameterizedTest
+    @ValueSource(ints = {1,2})
+    public void testUpdateFile_Successful(int userId) {
+        project.setStorageSize(BigInteger.valueOf(0L));
+
         MockMultipartFile multipartFileUpdated = new MockMultipartFile(
                 "testFile", "test.txt", "text/plain", "Test".getBytes());
-
-        String fileName = multipartFile.getOriginalFilename();
-        long size = multipartFile.getSize();
-        String key = String.format("p%d_%s_%s", 1L, size, fileName);
 
         String fileNameUpdated = multipartFileUpdated.getOriginalFilename();
         long sizeUpdated = multipartFileUpdated.getSize();
         String keyUpdated = String.format("p%d_%s_%s", 1L, sizeUpdated, fileNameUpdated);
 
-        Resource resource = Resource.builder()
-                .id(1L)
-                .status(ResourceStatus.ACTIVE)
-                .key(key)
-                .size(BigInteger.valueOf(size))
-                .project(project)
-                .createdBy(teamMember)
-                .name(fileName)
-                .build();
-
         UpdateResourceDto expectedOutput = UpdateResourceDto.builder()
                 .status(ResourceStatus.ACTIVE)
                 .name(fileNameUpdated)
                 .createdById(1L)
+                .type(ResourceType.TEXT)
                 .size(BigInteger.valueOf(sizeUpdated))
                 .key(keyUpdated)
-                .updatedById(1L)
+                .updatedById((long) userId)
                 .projectId(1L)
                 .build();
 
@@ -202,11 +198,55 @@ public class ProjectFileServiceTest {
 
         Mockito.when(resourceRepository.getReferenceById(1L)).thenReturn(resource);
         Mockito.when(fileService.upload(multipartFileUpdated, 1L)).thenReturn(keyUpdated);
-        Mockito.when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
 
-        UpdateResourceDto outputDto = projectFileService.updateFile(multipartFileUpdated, 1L, 1L);
+        UpdateResourceDto outputDto = projectFileService.updateFile(multipartFileUpdated, 1L, userId);
 
         assertEquals(expectedOutput, outputDto);
         assertEquals(expectedProject, project);
+        Mockito.verify(fileService, Mockito.times(1)).delete("p1_12_test.txt");
+        Mockito.verify(fileService, Mockito.times(1)).upload(multipartFileUpdated, 1L);
+        Mockito.verify(resourceRepository, Mockito.times(1)).save(resource);
+    }
+
+    @Test
+    public void testUpdateFile_FileNameDoesNotMatch() {
+        MockMultipartFile multipartFileUpdated = new MockMultipartFile(
+                "testFile", "file.txt", "text/plain", "Test".getBytes());
+
+        Mockito.when(resourceRepository.getReferenceById(1L)).thenReturn(resource);
+
+        assertThrows(FileUploadException.class,
+                () -> projectFileService.updateFile(multipartFileUpdated, 1L, 1L));
+
+    }
+
+    @Test
+    public void testUpdateFile_UserCantChangeFile() {
+        project.setStorageSize(BigInteger.valueOf(0L));
+        MockMultipartFile multipartFileUpdated = new MockMultipartFile(
+                "testFile", "test.txt", "text/plain", "Test".getBytes());
+
+        TeamMember createdBy = TeamMember.builder()
+                .id(3L)
+                .userId(3L)
+                .build();
+
+        resource.setCreatedBy(createdBy);
+        Mockito.when(resourceRepository.getReferenceById(1L)).thenReturn(resource);
+
+        assertThrows(InvalidCurrentUserException.class,
+                () -> projectFileService.updateFile(multipartFileUpdated, 1L, 1L));
+    }
+
+    @Test
+    public void testUpdateFile_StorageExceeded() {
+        project.setStorageSize(BigInteger.valueOf(0L));
+        MockMultipartFile multipartFileUpdated = new MockMultipartFile(
+                "testFile", "test.txt", "text/plain", "Test content!".getBytes());
+
+        Mockito.when(resourceRepository.getReferenceById(1L)).thenReturn(resource);
+
+        assertThrows(StorageSpaceExceededException.class,
+                () -> projectFileService.updateFile(multipartFileUpdated, 1L, 1L));
     }
 }
