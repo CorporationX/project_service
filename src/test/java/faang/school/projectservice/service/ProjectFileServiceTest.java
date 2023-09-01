@@ -130,9 +130,6 @@ public class ProjectFileServiceTest {
                 .createdById(1L)
                 .build();
 
-        MockMultipartFile multipartFile = new MockMultipartFile(
-                "testFile", "test.txt", "text/plain", "Test content".getBytes());
-
         String fileName = multipartFile.getOriginalFilename();
         long size = multipartFile.getSize();
         String key = String.format("p%d_%s_%s", 1L, size, fileName);
@@ -150,9 +147,6 @@ public class ProjectFileServiceTest {
 
     @Test
     public void testUploadFile_InvalidUser() {
-        MockMultipartFile multipartFile = new MockMultipartFile(
-                "testFile", "test.txt", "text/plain", "Test content".getBytes());
-
         Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
 
         assertThrows(InvalidCurrentUserException.class,
@@ -161,13 +155,13 @@ public class ProjectFileServiceTest {
 
     @Test
     public void testUploadFile_StorageExceeded() {
-        MockMultipartFile multipartFile = new MockMultipartFile(
+        MockMultipartFile bigFile = new MockMultipartFile(
                 "testFile", "test.txt", "text/plain", "Test content!".getBytes());
 
         Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
 
         assertThrows(StorageSpaceExceededException.class,
-                () -> projectFileService.uploadFile(multipartFile, 1L, 1L));
+                () -> projectFileService.uploadFile(bigFile, 1L, 1L));
     }
 
 
