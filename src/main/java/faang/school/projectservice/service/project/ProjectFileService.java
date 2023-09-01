@@ -60,7 +60,7 @@ public class ProjectFileService {
     @Transactional
     public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        TeamMember updatedBy = findTeamMember(resource.getProject(),userId);
+        TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
         validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
         validateIfUserCanChangeFile(resource, userId);
         BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
@@ -84,13 +84,16 @@ public class ProjectFileService {
     @Transactional
     public void deleteFile(long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
+        TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
         validateIfUserCanChangeFile(resource, userId);
 
         if (!resource.getStatus().equals(ResourceStatus.DELETED)) {
             fileService.delete(resource.getKey());
 
             resource.setStatus(ResourceStatus.DELETED);
+            resource.setUpdatedBy(updatedBy);
             updateProjectStorage(resource);
+
             resourceRepository.save(resource);
         }
     }
@@ -108,7 +111,6 @@ public class ProjectFileService {
                 .size(resource.getSize().longValue())
                 .build();
     }
-
 
     private TeamMember findTeamMember(Project project, long userId) {
         Optional<TeamMember> matchingMember = project.getTeams().stream()
