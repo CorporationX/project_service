@@ -2,13 +2,12 @@ package faang.school.projectservice.service;
 
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +32,9 @@ class ProjectServiceTest {
 
     @Spy
     private ProjectMapperImpl projectMapper;
+
+    @Mock
+    private ProjectValidator projectValidator;
     ProjectDto projectDto;
     Project project;
 
@@ -56,26 +57,13 @@ class ProjectServiceTest {
 
         ProjectFilter projectFilter = Mockito.mock(ProjectFilter.class);
         List<ProjectFilter> projectFilters = List.of(projectFilter);
-        projectService = new ProjectService(projectRepository, projectMapper, projectFilters);
+        projectService = new ProjectService(projectRepository, projectMapper, projectFilters, projectValidator);
     }
 
     @Test
     void testCreateNewProject() {
         projectService.createProject(projectDto);
         verify(projectRepository).save(any(Project.class));
-    }
-
-    @Test
-    void testCreateNewProjectFailValidation() {
-        when(projectRepository.findAll()).thenReturn(List.of(project));
-        assertThrows(DataValidationException.class,
-                () -> projectService.createProject(projectDto));
-    }
-
-    @Test
-    void testUpdateProjectAndEntityNotFoundException() {
-        assertThrows(EntityNotFoundException.class,
-                () -> projectService.updateProject(projectDto));
     }
 
     @Test

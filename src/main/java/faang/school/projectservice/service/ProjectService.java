@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -37,9 +36,7 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto createProject(ProjectDto projectDto) {
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new DataValidationException("The project with " + projectDto.getName() + " name already exists");
-        }
+        projectValidator.existProjectValidator(projectDto.getId());
         Project project = projectMapper.toEntity(projectDto);
         project.setStatus(ProjectStatus.CREATED);
         project.setVisibility(ProjectVisibility.valueOf(projectDto.getVisibility()));
