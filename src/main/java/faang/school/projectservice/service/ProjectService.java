@@ -4,12 +4,13 @@ import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
+    private final ProjectValidator projectValidator;
 
     public void validateProjectId(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
@@ -35,9 +37,7 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto createProject(ProjectDto projectDto) {
-        if (projectRepository.findAll().stream().anyMatch(x ->
-                x.getOwnerId().equals(projectDto.getOwnerId())
-                        && x.getName().equals(projectDto.getName()))) {
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("The project with " + projectDto.getName() + " name already exists");
         }
         Project project = projectMapper.toEntity(projectDto);
@@ -48,20 +48,16 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto updateProject(ProjectDto projectDto) {
+        projectValidator.existProjectValidator(projectDto.getId());
         Project project = projectRepository.getProjectById(projectDto.getId());
-        if (project == null) {
-            throw new EntityNotFoundException("The project with that id does not exist");
-        }
         projectMapper.updateProjectFromDto(projectDto, project);
         project.setUpdatedAt(LocalDateTime.now());
         return projectMapper.toDto(projectRepository.save(project));
     }
 
     public ProjectDto findProjectById(Long id) {
+        projectValidator.existProjectValidator(id);
         Project project = projectRepository.getProjectById(id);
-        if (project == null) {
-            throw new EntityNotFoundException("The project with that id does not exist");
-        }
         return projectMapper.toDto(project);
     }
 
@@ -76,6 +72,5 @@ public class ProjectService {
                 .flatMap(filter -> filter.apply(projectRepository.findAll().stream(), filters))
                 .map(projectMapper::toDto)
                 .toList();
-
     }
 }
