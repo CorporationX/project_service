@@ -2,7 +2,9 @@ package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
+import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
+import faang.school.projectservice.filter.subproject.SubprojectFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +30,8 @@ public class SubProjectService {
     private final SubProjectValidator subProjectValidator;
     private final ProjectMapper projectMapper;
     private final MomentMapper momentMapper;
+    private final List<SubprojectFilter> subprojectFilters;
+
 
     public ProjectDto createSubProject(ProjectDto projectDto) {
         subProjectValidator.validateCreateProjectDto(projectDto);
@@ -51,11 +57,22 @@ public class SubProjectService {
         updateVisibilitySubProject(project, parentProject, visibility);
     }
 
+    public List<ProjectDto> getAllSubProject(SubprojectFilterDto filters) {
+        Project project = projectService.getProjectById(filters.getId());
+        Stream<Project> subprojects = project.getChildren().stream();
+
+        return subprojectFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(subprojects, filters))
+                .map(projectMapper::toProjectDto)
+                .toList();
+    }
+
     private void prepareProjectForCreate(ProjectDto projectDto) {
         Project parentProject = projectService.getProjectById(projectDto.getParentProjectId());
         ProjectVisibility parentVisibility = parentProject.getVisibility();
 
-        if (projectDto.getVisibility()!=null){
+        if (projectDto.getVisibility() != null) {
             subProjectValidator.validateVisibility(projectDto.getVisibility(), parentVisibility);
         } else {
             projectDto.setVisibility(parentVisibility);

@@ -1,9 +1,10 @@
 package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
+import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,19 +14,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class SubProjectControllerTest {
     @InjectMocks
     private SubProjectController subProjectController;
     @Mock
-    private faang.school.projectservice.service.subproject.SubProjectService subProjectService;
+    private SubProjectService subProjectService;
+    @Mock
+    private SubProjectValidator subProjectValidator;
     @Spy
     private ObjectMapper objectMapper;
     private MockMvc mockMvc;
-    private StatusSubprojectDto statusSubprojectDto = StatusSubprojectDto.builder().build();
+    private SubprojectFilterDto subprojectFilterDto = SubprojectFilterDto.builder().build();
     private VisibilitySubprojectDto visibilitySubprojectDto = VisibilitySubprojectDto.builder().build();
     private SubProjectDto subProjectDto = SubProjectDto.builder().build();
     private ProjectDto projectDto = ProjectDto.builder().build();
@@ -34,7 +36,6 @@ class SubProjectControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
         mockMvc = MockMvcBuilders.standaloneSetup(subProjectController).build();
     }
 
@@ -43,6 +44,14 @@ class SubProjectControllerTest {
         mockMvc.perform(post("/subproject/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetAllSubProjects() throws Exception {
+        mockMvc.perform(get("/subproject/filter/list")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(subprojectFilterDto)))
                 .andExpect(status().isOk());
     }
 

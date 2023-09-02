@@ -1,6 +1,9 @@
 package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
@@ -15,8 +18,23 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class SubProjectValidator {
-    private final ProjectService projectService;
     private final UserServiceClient userServiceClient;
+    private final ProjectService projectService;
+
+    public void validateFilter(SubprojectFilterDto subprojectFilterDto) {
+        validateOwnerId(subprojectFilterDto.getRequesterId());
+    }
+
+    private void validateOwnerId(Long ownerId) {
+        validateId(ownerId);
+        userServiceClient.getUser(ownerId);
+    }
+
+    private void validateId(Long id) {
+        if (id == null || id < 0) {
+            throw new DataValidationException("It's wrong id, id can't be null");
+        }
+    }
 
     public void validateVisibility(ProjectVisibility visibility, ProjectVisibility parentVisibility) {
         if (visibility == ProjectVisibility.PUBLIC && parentVisibility == ProjectVisibility.PRIVATE) {
@@ -50,21 +68,8 @@ public class SubProjectValidator {
         validateParentProject(projectDto.getParentProjectId());
     }
 
-    private void validateOwnerId(Long ownerId) {
-        validateId(ownerId);
-        userServiceClient.getUser(ownerId);
-    }
-
     private void validateParentProject(Long projectId) {
         validateId(projectId);
         projectService.getProjectById(projectId);
-    }
-
-
-
-    private void validateId(Long id) {
-        if (id == null || id < 0) {
-            throw new DataValidationException("It's wrong id, id can't be null");
-        }
     }
 }
