@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
@@ -31,6 +32,7 @@ class SubProjectControllerTest {
     private VisibilitySubprojectDto visibilitySubprojectDto = VisibilitySubprojectDto.builder().build();
     private SubProjectDto subProjectDto = SubProjectDto.builder().build();
     private ProjectDto projectDto = ProjectDto.builder().build();
+    StatusSubprojectDto statusSubprojectDto = StatusSubprojectDto.builder().build();
 
 
     @BeforeEach

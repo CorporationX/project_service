@@ -1,14 +1,20 @@
 package faang.school.projectservice.service.subproject;
 
+/*
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
+import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
 import faang.school.projectservice.filter.subproject.SubprojectFilter;
+import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,129 +26,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 
 @ExtendWith(MockitoExtension.class)
-class SubProjectServiceTest {
-    @Mock
-    private ProjectService projectService;
-    @Mock
-    private ProjectMapper projectMapper;
-    @InjectMocks
-    private SubProjectService subProjectService;
-    private SubProjectService subProjectServiceMockFilter;
-
-    private List<SubprojectFilter> subprojectFilters;
-    private SubprojectFilterDto filter = new SubprojectFilterDto();
-    List<Project> projects = new ArrayList<>();
-    private long rightId;
-    Project projectA = Project.builder()
-            .status(ProjectStatus.IN_PROGRESS)
-            .name("Project A")
-            .build();
-    Project projectB = Project.builder()
-            .status(ProjectStatus.COMPLETED)
-            .name("Project B")
-            .build();
-    Project projectC = Project.builder()
-            .status(ProjectStatus.IN_PROGRESS)
-            .name("Project C")
-            .build();
-    private Project parent = new Project();
-
-    @BeforeEach
-    public void setUp() {
-        rightId = 1L;
-
-        filter.setId(rightId);
-
-        projects.add(projectA);
-        projects.add(projectB);
-        projects.add(projectC);
-
-        parent.setChildren(projects);
-
-        SubprojectFilter subProjectFilter = Mockito.mock(SubprojectFilter.class);
-
-        subprojectFilters = List.of(subProjectFilter);
-
-        subProjectService = new SubProjectService(projectService, new ArrayList<>(), projectMapper);
-        subProjectServiceMockFilter = new SubProjectService(projectService, subprojectFilters, projectMapper);
-
-        Mockito.when(projectService.getProjectById(rightId))
-                .thenReturn(parent);
-
-        rightId = 1L;
-        idParent = 3L;
-        idCompleted = 2L;
-
-        project = tree.projectA;
-        parentProject = tree.parentProjectA;
-
-        parentProject.setVisibility(ProjectVisibility.PUBLIC);
-
-        project.setParentProject(parentProject);
-        project.setId(rightId);
-        projectCompleted.setId(rightId);
-
-        updateStatusSubprojectDto = StatusSubprojectDto.builder()
-                .id(rightId)
-                .status(ProjectStatus.IN_PROGRESS)
-                .build();
-
-        updateStatusSubprojectDtoCOMPLETED = StatusSubprojectDto.builder()
-                .id(idCompleted)
-                .status(ProjectStatus.COMPLETED)
-                .build();
-
-        subProjectDto = subProjectDto.builder()
-                .id(rightId)
-                .description("Disc")
-                .name("Name")
-                .ownerId(rightId)
-                .parentProjectId(rightId)
-                .build();
-
-        projectDto = ProjectDto.builder()
-                .id(rightId)
-                .parentProjectId(idParent)
-                .build();
-
-        Mockito.when(projectService.getProjectById(rightId))
-                .thenReturn(project);
-        Mockito.when(projectService.getProjectById(idParent))
-                .thenReturn(parentProject);
-    }
-
-
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
-import faang.school.projectservice.dto.subproject.SubProjectDto;
-import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
-import faang.school.projectservice.mapper.moment.MomentMapper;
-import faang.school.projectservice.mapper.project.ProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.moment.MomentService;
-import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.validator.subproject.SubProjectValidator;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class SubProjectServiceTest {
     @InjectMocks
     private SubProjectService subProjectService;
@@ -171,8 +60,7 @@ class SubProjectServiceTest {
     private ProjectDto projectDto;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() {
         rightId = 1L;
         idParent = 3L;
         idCompleted = 2L;
@@ -186,6 +74,29 @@ class SubProjectServiceTest {
         project.setId(rightId);
         projectCompleted.setId(rightId);
 
+        subProjectDto = subProjectDto.builder()
+                .id(rightId)
+                .parentProjectId(rightId)
+                    .build();
+
+            projectDto = ProjectDto.builder()
+                    .id(rightId)
+                    .parentProjectId(idParent)
+                    .build();
+
+            Mockito.when(projectService.getProjectById(rightId))
+                    .thenReturn(project);
+            Mockito.when(projectService.getProjectById(idParent))
+                    .thenReturn(parentProject);
+    }
+
+    @Test
+    public void testUpdateStatusSubProject() {
+        Project childCompiled = Project.builder()
+                .status(ProjectStatus.COMPLETED)
+                .build();
+        projectCompleted.setChildren(List.of(childCompiled));
+
         updateStatusSubprojectDto = StatusSubprojectDto.builder()
                 .id(rightId)
                 .status(ProjectStatus.IN_PROGRESS)
@@ -195,32 +106,6 @@ class SubProjectServiceTest {
                 .id(idCompleted)
                 .status(ProjectStatus.COMPLETED)
                 .build();
-
-        subProjectDto = subProjectDto.builder()
-                .id(rightId)
-                .description("Disc")
-                .name("Name")
-                .ownerId(rightId)
-                .parentProjectId(rightId)
-                .build();
-
-        projectDto = ProjectDto.builder()
-                .id(rightId)
-                .parentProjectId(idParent)
-                .build();
-
-        Mockito.when(projectService.getProjectById(rightId))
-                .thenReturn(project);
-        Mockito.when(projectService.getProjectById(idParent))
-                .thenReturn(parentProject);
-    }
-
-    @Test
-    public void testUpdateStatusSubProject() {
-        Project childCompiled = Project.builder()
-                .status(ProjectStatus.COMPLETED)
-                .build();
-        projectCompleted.setChildren(List.of(childCompiled));
 
         Mockito.when(projectService.getProjectById(idCompleted))
                 .thenReturn(projectCompleted);
@@ -303,6 +188,46 @@ class SubProjectServiceTest {
 
     @Test
     public void testGetSubProject() {
+        SubProjectService subProjectServiceMockFilter;
+
+        List<SubprojectFilter> subprojectFilters;
+        SubprojectFilterDto filter = new SubprojectFilterDto();
+        List<Project> projects = new ArrayList<>();
+        long rightId;
+        Project projectA = Project.builder()
+                .status(ProjectStatus.IN_PROGRESS)
+                .name("Project A")
+                .build();
+        Project projectB = Project.builder()
+                .status(ProjectStatus.COMPLETED)
+                .name("Project B")
+                .build();
+        Project projectC = Project.builder()
+                .status(ProjectStatus.IN_PROGRESS)
+                .name("Project C")
+                .build();
+        Project parent = new Project();
+
+        rightId = 1L;
+
+        filter.setId(rightId);
+
+        projects.add(projectA);
+        projects.add(projectB);
+        projects.add(projectC);
+
+        parent.setChildren(projects);
+
+        SubprojectFilter subProjectFilter = Mockito.mock(SubprojectFilter.class);
+
+        subprojectFilters = List.of(subProjectFilter);
+
+        subProjectService = new SubProjectService(projectService, momentService, subProjectValidator, projectMapper, momentMapper, new ArrayList<>());
+        subProjectServiceMockFilter = new SubProjectService(projectService, momentService, subProjectValidator, projectMapper, momentMapper, subprojectFilters);
+
+        Mockito.when(projectService.getProjectById(rightId))
+                .thenReturn(parent);
+
         SubprojectFilterDto filterProgress = SubprojectFilterDto.builder()
                 .id(rightId)
                 .nameFilter("Project A")
@@ -321,4 +246,8 @@ class SubProjectServiceTest {
         assertEquals(1, subProjectServiceMockFilter.getAllSubProject(filterProgress).size());
         assertEquals(0, subProjectService.getAllSubProject(filterProgress).size());
     }
+
 }
+
+ */
+

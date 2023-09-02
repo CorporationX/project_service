@@ -39,7 +39,7 @@ class SubProjectValidatorTest {
         MockitoAnnotations.openMocks(this);
         rightId = 1L;
 
-        subProjectValidator = new SubProjectValidator(projectService, userServiceClient);
+        subProjectValidator = new SubProjectValidator(userServiceClient,projectService);
 
         when(projectService.isExistProjectById(rightId)).thenReturn(false);
     }
