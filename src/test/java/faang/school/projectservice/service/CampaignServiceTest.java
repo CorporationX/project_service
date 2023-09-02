@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,10 +60,14 @@ class CampaignServiceTest {
         campaign = new Campaign();
         campaign.setId(1L);
         campaign.setProject(project);
+        campaign.setTitle("Hello ");
+        campaign.setDescription("world!");
 
         campaignDto = new CampaignDto();
         campaignDto.setId(1L);
         campaignDto.setProjectId(project.getId());
+        campaignDto.setTitle("Hello ");
+        campaignDto.setDescription("world!");
 
         teamMember = new TeamMember();
         teamMember.setId(1L);
@@ -78,9 +83,6 @@ class CampaignServiceTest {
 
     @Test
     public void publish_Successful() {
-        Mockito.when(campaignRepository.findById(campaignDto.getId()))
-                .thenReturn(Optional.of(campaign));
-
         Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
                 .thenReturn(project);
 
@@ -93,14 +95,11 @@ class CampaignServiceTest {
         CampaignDto actual = campaignService.publish(campaignDto, 1L);
         Assertions.assertEquals(campaignDto, actual);
 
-        Mockito.verify(campaignRepository, Mockito.times(0)).save(campaign);
+        Mockito.verify(campaignRepository, Mockito.times(1)).save(campaign);
     }
 
     @Test
     public void publish_CampaignNotFound() {
-        Mockito.when(campaignRepository.findById(campaignDto.getId()))
-                .thenReturn(Optional.empty());
-
         Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
                 .thenReturn(project);
 
@@ -118,13 +117,35 @@ class CampaignServiceTest {
 
     @Test
     public void public_emptyTeamMember_throwException(){
-        Mockito.when(campaignRepository.findById(campaignDto.getId()))
-                .thenReturn(Optional.empty());
         Mockito.when(teamMemberRepository.findById(4L))
                 .thenReturn(TeamMember.builder().build());
         Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
                 .thenReturn(project);
         Assertions.assertThrows(DataValidationException.class,
                 () -> campaignService.publish(campaignDto, 4L));
+    }
+
+    @Test
+    public void update_Successful() {
+        Mockito.when(campaignRepository.findById(campaignDto.getId()))
+                .thenReturn(Optional.of(campaign));
+
+        Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
+                .thenReturn(project);
+
+        Mockito.lenient().when(userContext.getUserId())
+                .thenReturn(1L);
+
+        Mockito.when(teamMemberRepository.findById(1L))
+                .thenReturn(teamMember);
+
+        Mockito.when(campaignRepository.save(campaign))
+                .thenReturn(campaign);
+
+        CampaignDto actual = campaignService.update(campaignDto, 1L);
+
+        Assertions.assertEquals(campaignDto, actual);
+
+        Mockito.verify(campaignRepository, Mockito.times(1)).save(campaign);
     }
 }
