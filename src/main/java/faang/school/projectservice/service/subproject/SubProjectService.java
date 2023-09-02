@@ -32,7 +32,6 @@ public class SubProjectService {
     private final MomentMapper momentMapper;
     private final List<SubprojectFilter> subprojectFilters;
 
-
     public ProjectDto createSubProject(ProjectDto projectDto) {
         subProjectValidator.validateCreateProjectDto(projectDto);
         prepareProjectForCreate(projectDto);

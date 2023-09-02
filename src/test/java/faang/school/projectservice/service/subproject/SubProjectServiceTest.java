@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject;
 
-/*
+
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ class SubProjectServiceTest {
     private ProjectService projectService;
     @Mock
     private SubProjectValidator subProjectValidator;
-    @Mock
+    @Spy
     private ProjectMapper projectMapper;
     @Mock
     private MomentMapper momentMapper;
@@ -65,42 +66,53 @@ class SubProjectServiceTest {
         idParent = 3L;
         idCompleted = 2L;
 
-        project = tree.projectA;
         parentProject = tree.parentProjectA;
 
         parentProject.setVisibility(ProjectVisibility.PUBLIC);
 
-        project.setParentProject(parentProject);
-        project.setId(rightId);
-        projectCompleted.setId(rightId);
+        projectCompleted.setId(idCompleted);
 
         subProjectDto = subProjectDto.builder()
                 .id(rightId)
                 .parentProjectId(rightId)
-                    .build();
+                .build();
 
-            projectDto = ProjectDto.builder()
-                    .id(rightId)
-                    .parentProjectId(idParent)
-                    .build();
-
-            Mockito.when(projectService.getProjectById(rightId))
-                    .thenReturn(project);
-            Mockito.when(projectService.getProjectById(idParent))
-                    .thenReturn(parentProject);
+        projectDto = ProjectDto.builder()
+                .id(rightId)
+                .parentProjectId(idParent)
+                .build();
     }
 
     @Test
-    public void testUpdateStatusSubProject() {
-        Project childCompiled = Project.builder()
-                .status(ProjectStatus.COMPLETED)
-                .build();
-        projectCompleted.setChildren(List.of(childCompiled));
+    public void testUpdateStatusSubProject_Not_Completed() {
+        project = tree.projectA;
+        project.setParentProject(parentProject);
+        project.setId(rightId);
 
         updateStatusSubprojectDto = StatusSubprojectDto.builder()
                 .id(rightId)
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
+
+        Mockito.when(projectService.getProjectById(rightId))
+                .thenReturn(project);
+
+        assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDto));
+
+        assertEquals(ProjectStatus.IN_PROGRESS, project.getStatus());
+
+        Mockito.verify(subProjectValidator, Mockito.times(1))
+                .validateSubProjectStatus(project.getId());
+
+        assertTrue(project.getUpdatedAt().isBefore(LocalDateTime.now()));
+    }
+
+    @Test
+    public void testUpdateStatusSubProject_Completed() {
+        projectCompleted.setChildren(List.of(Project.builder()
+                .status(ProjectStatus.COMPLETED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build()));
 
         updateStatusSubprojectDtoCOMPLETED = StatusSubprojectDto.builder()
                 .id(idCompleted)
@@ -110,22 +122,23 @@ class SubProjectServiceTest {
         Mockito.when(projectService.getProjectById(idCompleted))
                 .thenReturn(projectCompleted);
 
-        assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDto));
         assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDtoCOMPLETED));
-
         assertEquals(ProjectStatus.COMPLETED, projectCompleted.getStatus());
-        assertEquals(ProjectStatus.IN_PROGRESS, project.getStatus());
 
         Mockito.verify(subProjectValidator, Mockito.times(1))
-                .validateSubProjectStatus(project.getId());
+                .validateSubProjectStatus(projectCompleted.getId());
         Mockito.verify(momentMapper, Mockito.times(1))
                 .toMomentDto(projectCompleted);
 
-        assertTrue(project.getUpdatedAt().isBefore(LocalDateTime.now()));
+        assertTrue(projectCompleted.getUpdatedAt().isBefore(LocalDateTime.now()));
     }
 
     @Test
     void testUpdateVisibilitySubProjectToPrivate_True() {
+        project = tree.projectA;
+        project.setParentProject(parentProject);
+        project.setId(rightId);
+
         visibilitySubprojectDto = VisibilitySubprojectDto.builder()
                 .id(rightId)
                 .visibility(ProjectVisibility.PRIVATE)
@@ -145,6 +158,10 @@ class SubProjectServiceTest {
 
     @Test
     void testUpdateVisibilitySubProjectToPublic() {
+        project = tree.projectA;
+        project.setParentProject(parentProject);
+        project.setId(rightId);
+
         visibilitySubprojectDto = VisibilitySubprojectDto.builder()
                 .id(rightId)
                 .visibility(ProjectVisibility.PUBLIC)
@@ -164,6 +181,15 @@ class SubProjectServiceTest {
 
     @Test
     void testCreateProject() {
+        project = tree.projectA;
+        project.setParentProject(parentProject);
+        project.setId(rightId);
+
+        Mockito.when(projectService.getProjectById(idParent))
+                .thenReturn(parentProject);
+        Mockito.when(projectService.getProjectById(idParent))
+                .thenReturn(parentProject);
+
         subProjectService.createSubProject(projectDto);
 
         Mockito.verify(subProjectValidator, Mockito.times(1))
@@ -174,12 +200,30 @@ class SubProjectServiceTest {
 
     @Test
     void testPrepareProjectForCreate_NullVisibility() {
+        project = tree.projectA;
+        project.setParentProject(parentProject);
+        project.setId(rightId);
+
+        Mockito.when(projectService.getProjectById(idParent))
+                .thenReturn(parentProject);
+        Mockito.when(projectService.getProjectById(idParent))
+                .thenReturn(parentProject);
+
         subProjectService.createSubProject(projectDto);
         assertEquals(parentProject.getVisibility(), project.getVisibility());
     }
 
     @Test
     void testPrepareProjectForCreate_NotNullVisibility() {
+        project = tree.projectA;
+        project.setParentProject(parentProject);
+        project.setId(rightId);
+
+        Mockito.when(projectService.getProjectById(idParent))
+                .thenReturn(parentProject);
+        Mockito.when(projectService.getProjectById(idParent))
+                .thenReturn(parentProject);
+
         projectDto.setVisibility(ProjectVisibility.PRIVATE);
         subProjectService.createSubProject(projectDto);
         Mockito.verify(subProjectValidator, Mockito.times(1))
@@ -188,12 +232,8 @@ class SubProjectServiceTest {
 
     @Test
     public void testGetSubProject() {
-        SubProjectService subProjectServiceMockFilter;
-
-        List<SubprojectFilter> subprojectFilters;
-        SubprojectFilterDto filter = new SubprojectFilterDto();
         List<Project> projects = new ArrayList<>();
-        long rightId;
+
         Project projectA = Project.builder()
                 .status(ProjectStatus.IN_PROGRESS)
                 .name("Project A")
@@ -208,32 +248,28 @@ class SubProjectServiceTest {
                 .build();
         Project parent = new Project();
 
-        rightId = 1L;
-
-        filter.setId(rightId);
-
         projects.add(projectA);
         projects.add(projectB);
         projects.add(projectC);
 
         parent.setChildren(projects);
 
+        List<SubprojectFilter> subprojectFilters;
+        SubprojectFilterDto filter = new SubprojectFilterDto();
         SubprojectFilter subProjectFilter = Mockito.mock(SubprojectFilter.class);
-
         subprojectFilters = List.of(subProjectFilter);
-
-        subProjectService = new SubProjectService(projectService, momentService, subProjectValidator, projectMapper, momentMapper, new ArrayList<>());
-        subProjectServiceMockFilter = new SubProjectService(projectService, momentService, subProjectValidator, projectMapper, momentMapper, subprojectFilters);
-
-        Mockito.when(projectService.getProjectById(rightId))
-                .thenReturn(parent);
-
+        filter.setId(rightId);
         SubprojectFilterDto filterProgress = SubprojectFilterDto.builder()
                 .id(rightId)
                 .nameFilter("Project A")
                 .statusFilter(ProjectStatus.IN_PROGRESS)
                 .build();
 
+        subProjectService = new SubProjectService(projectService, momentService, subProjectValidator, projectMapper, momentMapper, new ArrayList<>());
+        SubProjectService subProjectServiceMockFilter = new SubProjectService(projectService, momentService, subProjectValidator, projectMapper, momentMapper, subprojectFilters);
+
+        Mockito.when(projectService.getProjectById(rightId))
+                .thenReturn(parent);
         Mockito.when(subprojectFilters.get(0).isApplicable(filterProgress))
                 .thenReturn(true);
         Mockito.when(subprojectFilters.get(0).apply(any(), any()))
@@ -246,8 +282,4 @@ class SubProjectServiceTest {
         assertEquals(1, subProjectServiceMockFilter.getAllSubProject(filterProgress).size());
         assertEquals(0, subProjectService.getAllSubProject(filterProgress).size());
     }
-
 }
-
- */
-
