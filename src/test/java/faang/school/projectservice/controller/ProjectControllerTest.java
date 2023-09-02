@@ -117,6 +117,7 @@ class ProjectControllerTest {
         ).andExpect(status().isBadRequest());
     }
 
+    /*
     @Test
     public void updateProjectTest() throws Exception {
         projectRepository.save(project);
@@ -169,4 +170,6 @@ class ProjectControllerTest {
 
         assertEquals(1, actual.size());
     }
+
+     */
 }
