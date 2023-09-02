@@ -2,10 +2,11 @@ package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -27,6 +28,8 @@ class SubProjectValidatorTest {
     private UserServiceClient userServiceClient;
     @Mock
     private ProjectService projectService;
+    @Mock
+    private ProjectMapper projectMapper;
     @InjectMocks
     private SubProjectValidator subProjectValidator;
     private Method validateOwnerId;
@@ -38,10 +41,8 @@ class SubProjectValidatorTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         rightId = 1L;
-
-        subProjectValidator = new SubProjectValidator(userServiceClient,projectService);
-
-        when(projectService.isExistProjectById(rightId)).thenReturn(false);
+        when(projectService.isExistProjectById(rightId))
+                .thenReturn(false);
     }
 
     @Test
@@ -61,9 +62,9 @@ class SubProjectValidatorTest {
         Project projectCompleted = Project.builder().id(completedId).status(ProjectStatus.COMPLETED).children(List.of(projectChildrenCompleted)).build();
         Project projectInProgress = Project.builder().id(inProgressId).status(ProjectStatus.IN_PROGRESS).build();
 
-        Mockito.when(projectService.getProjectById(withoutChildId)).thenReturn(projectWithOutChildren);
-        Mockito.when(projectService.getProjectById(completedId)).thenReturn(projectCompleted);
-        Mockito.when(projectService.getProjectById(inProgressId)).thenReturn(projectInProgress);
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(withoutChildId))).thenReturn(projectWithOutChildren);
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(completedId))).thenReturn(projectCompleted);
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(inProgressId))).thenReturn(projectInProgress);
 
         assertDoesNotThrow(() -> subProjectValidator.validateSubProjectStatus(projectWithOutChildren.getId()));
         assertDoesNotThrow(() -> subProjectValidator.validateSubProjectStatus(projectCompleted.getId()));
@@ -77,7 +78,7 @@ class SubProjectValidatorTest {
         Project projectChildrenInProgress = Project.builder().status(ProjectStatus.IN_PROGRESS).build();
         Project projectCompleted = Project.builder().id(completedId).status(ProjectStatus.COMPLETED).children(List.of(projectChildrenInProgress)).build();
 
-        Mockito.when(projectService.getProjectById(completedId)).thenReturn(projectCompleted);
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(completedId))).thenReturn(projectCompleted);
 
         assertThrows(DataValidationException.class, () -> subProjectValidator.validateSubProjectStatus(projectCompleted.getId()));
     }

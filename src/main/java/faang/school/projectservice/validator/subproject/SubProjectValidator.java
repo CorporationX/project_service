@@ -1,15 +1,14 @@
 package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +19,7 @@ import java.util.List;
 public class SubProjectValidator {
     private final UserServiceClient userServiceClient;
     private final ProjectService projectService;
+    private final ProjectMapper projectMapper;
 
     public void validateFilter(SubprojectFilterDto subprojectFilterDto) {
         validateOwnerId(subprojectFilterDto.getRequesterId());
@@ -41,8 +41,9 @@ public class SubProjectValidator {
             throw new DataValidationException("You can't make public project in private project");
         }
     }
+
     public void validateSubProjectStatus(long projectId) {
-        Project project = projectService.getProjectById(projectId);
+        Project project = projectMapper.toProject(projectService.getProjectById(projectId));
         ProjectStatus status = project.getStatus();
 
         if (status == ProjectStatus.COMPLETED && project.getChildren() != null) {

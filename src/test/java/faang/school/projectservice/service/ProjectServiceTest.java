@@ -7,7 +7,6 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.project.ProjectFilterStatus;
 import faang.school.projectservice.filter.project.ProjectTitleFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -32,7 +31,7 @@ class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
     @Spy
-    private ProjectMapper projectMapper = new ProjectMapperImpl();
+    private ProjectMapper projectMapper;
     @InjectMocks
     private ProjectService projectService;
     ProjectDto projectDto;

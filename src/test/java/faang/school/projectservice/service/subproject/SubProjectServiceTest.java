@@ -1,19 +1,19 @@
 package faang.school.projectservice.service.subproject;
 
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
 import faang.school.projectservice.filter.subproject.SubprojectFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
-import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.moment.MomentService;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,7 +94,7 @@ class SubProjectServiceTest {
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
 
-        Mockito.when(projectService.getProjectById(rightId))
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(rightId)))
                 .thenReturn(project);
 
         assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDto));
@@ -119,7 +119,7 @@ class SubProjectServiceTest {
                 .status(ProjectStatus.COMPLETED)
                 .build();
 
-        Mockito.when(projectService.getProjectById(idCompleted))
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(idCompleted)))
                 .thenReturn(projectCompleted);
 
         assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDtoCOMPLETED));
@@ -144,7 +144,7 @@ class SubProjectServiceTest {
                 .visibility(ProjectVisibility.PRIVATE)
                 .build();
 
-        Mockito.when(projectService.getProjectById(rightId))
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(rightId)))
                 .thenReturn(project);
 
         subProjectService.updateVisibilitySubProject(visibilitySubprojectDto);
@@ -170,7 +170,7 @@ class SubProjectServiceTest {
         project.setVisibility(ProjectVisibility.PRIVATE);
         parentProject.setVisibility(ProjectVisibility.PUBLIC);
 
-        Mockito.when(projectService.getProjectById(rightId))
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(rightId)))
                 .thenReturn(project);
 
         assertDoesNotThrow(() -> subProjectService.updateVisibilitySubProject(visibilitySubprojectDto));
@@ -185,9 +185,7 @@ class SubProjectServiceTest {
         project.setParentProject(parentProject);
         project.setId(rightId);
 
-        Mockito.when(projectService.getProjectById(idParent))
-                .thenReturn(parentProject);
-        Mockito.when(projectService.getProjectById(idParent))
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(rightId)))
                 .thenReturn(parentProject);
 
         subProjectService.createSubProject(projectDto);
@@ -204,9 +202,7 @@ class SubProjectServiceTest {
         project.setParentProject(parentProject);
         project.setId(rightId);
 
-        Mockito.when(projectService.getProjectById(idParent))
-                .thenReturn(parentProject);
-        Mockito.when(projectService.getProjectById(idParent))
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(idParent)))
                 .thenReturn(parentProject);
 
         subProjectService.createSubProject(projectDto);
@@ -219,9 +215,7 @@ class SubProjectServiceTest {
         project.setParentProject(parentProject);
         project.setId(rightId);
 
-        Mockito.when(projectService.getProjectById(idParent))
-                .thenReturn(parentProject);
-        Mockito.when(projectService.getProjectById(idParent))
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(idParent)))
                 .thenReturn(parentProject);
 
         projectDto.setVisibility(ProjectVisibility.PRIVATE);
@@ -268,7 +262,7 @@ class SubProjectServiceTest {
         subProjectService = new SubProjectService(projectService, momentService, subProjectValidator, projectMapper, momentMapper, new ArrayList<>());
         SubProjectService subProjectServiceMockFilter = new SubProjectService(projectService, momentService, subProjectValidator, projectMapper, momentMapper, subprojectFilters);
 
-        Mockito.when(projectService.getProjectById(rightId))
+        Mockito.when(projectMapper.toProject(projectService.getProjectById(idParent)))
                 .thenReturn(parent);
         Mockito.when(subprojectFilters.get(0).isApplicable(filterProgress))
                 .thenReturn(true);

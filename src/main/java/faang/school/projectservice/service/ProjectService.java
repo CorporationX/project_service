@@ -30,6 +30,10 @@ public class ProjectService {
         return projectMapper.toProjectDto(project);
     }
 
+    public boolean isExistProjectById(long projectId) {
+        return projectRepository.existsById(projectId);
+    }
+
     public ProjectDto updateProject(Long id, ProjectDto projectDto) {
         projectRepository.getProjectById(id);
         Project projectUpdate = projectRepository.save(projectMapper.toProject(projectDto));

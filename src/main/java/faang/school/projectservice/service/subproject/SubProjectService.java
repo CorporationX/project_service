@@ -1,17 +1,17 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
 import faang.school.projectservice.filter.subproject.SubprojectFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
-import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.moment.MomentService;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,15 +41,16 @@ public class SubProjectService {
     public ProjectDto updateStatusSubProject(StatusSubprojectDto statusSubprojectDto) {
         subProjectValidator.validateSubProjectStatus(statusSubprojectDto.getId());
 
-        Project project = projectService.getProjectById(statusSubprojectDto.getId());
+        Project project = projectMapper.toProject(projectService.getProjectById(statusSubprojectDto.getId()));
         ProjectStatus status = statusSubprojectDto.getStatus();
+
 
         updateStatusSubproject(project, status);
         return projectMapper.toProjectDto(project);
     }
 
     public void updateVisibilitySubProject(VisibilitySubprojectDto updateStatusSubprojectDto) {
-        Project project = projectService.getProjectById(updateStatusSubprojectDto.getId());
+        Project project = projectMapper.toProject(projectService.getProjectById(updateStatusSubprojectDto.getId()));
         Project parentProject = project.getParentProject();
         ProjectVisibility visibility = updateStatusSubprojectDto.getVisibility();
 
@@ -57,7 +58,7 @@ public class SubProjectService {
     }
 
     public List<ProjectDto> getAllSubProject(SubprojectFilterDto filters) {
-        Project project = projectService.getProjectById(filters.getId());
+        Project project = projectMapper.toProject(projectService.getProjectById(filters.getId()));
         Stream<Project> subprojects = project.getChildren().stream();
 
         return subprojectFilters.stream()
@@ -68,7 +69,7 @@ public class SubProjectService {
     }
 
     private void prepareProjectForCreate(ProjectDto projectDto) {
-        Project parentProject = projectService.getProjectById(projectDto.getParentProjectId());
+        Project parentProject = projectMapper.toProject(projectService.getProjectById(projectDto.getParentProjectId()));
         ProjectVisibility parentVisibility = parentProject.getVisibility();
 
         if (projectDto.getVisibility() != null) {

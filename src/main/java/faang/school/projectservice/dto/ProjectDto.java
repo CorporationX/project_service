@@ -4,15 +4,18 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder
 @Schema(name = "Project")
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProjectDto {
     @Schema(name = "Id")
     private Long id;
@@ -28,4 +31,5 @@ public class ProjectDto {
     private ProjectStatus status;
     @Schema(name = "Visibility")
     private ProjectVisibility visibility;
+    private Long parentProjectId;
 }

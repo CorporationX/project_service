@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.subproject;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
