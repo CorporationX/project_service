@@ -10,13 +10,13 @@ import java.util.stream.Stream;
 public class StageInvitationAuthorFilter implements StageInvitationFilter{
     @Override
     public boolean isApplicable(StageInvitationFilterDto stageInvitationFilterDto) {
-        return stageInvitationFilterDto.getAuthorId() != null;
+        return stageInvitationFilterDto.getAuthorIdPattern() != null;
     }
 
     @Override
     public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitationStream,
                                          StageInvitationFilterDto stageInvitationFilterDto) {
         return stageInvitationStream.filter(stageInvitation ->
-                stageInvitation.getAuthor().getUserId().equals(stageInvitationFilterDto.getAuthorId()));
+                stageInvitation.getAuthor().getUserId().equals(stageInvitationFilterDto.getAuthorIdPattern()));
     }
 }

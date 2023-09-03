@@ -8,13 +8,13 @@ import java.util.stream.Stream;
 public class StageInvitationStatusFilter implements StageInvitationFilter{
     @Override
     public boolean isApplicable(StageInvitationFilterDto stageInvitationFilterDto) {
-        return stageInvitationFilterDto.getStatus() != null;
+        return stageInvitationFilterDto.getStatusPattern() != null;
     }
 
     @Override
     public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitationStream,
                                          StageInvitationFilterDto stageInvitationFilterDto) {
         return stageInvitationStream.filter(stageInvitation ->
-                stageInvitation.getStatus().equals(stageInvitationFilterDto.getStatus()));
+                stageInvitation.getStatus().equals(stageInvitationFilterDto.getStatusPattern()));
     }
 }

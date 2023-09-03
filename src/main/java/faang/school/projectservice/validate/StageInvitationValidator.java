@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class StageInvitationValidator {
-    private TeamMemberRepository teamMemberRepository;
-    private StageRepository stageRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private final StageRepository stageRepository;
 
     public void validateExecutors(StageInvitationDto stageInvitationDto) {
         Stage stage = stageRepository.getById(stageInvitationDto.getStageId());

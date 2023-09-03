@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class StageInvitationInvitedFilterTest {
@@ -22,12 +22,13 @@ class StageInvitationInvitedFilterTest {
     StageInvitationFilterDto filterDto;
     StageInvitation invitation1;
     StageInvitation invitation2;
+    StageInvitation invitation3;
 
     @BeforeEach
     void setUp() {
         filterDto = StageInvitationFilterDto
                 .builder()
-                .invitedId(1L)
+                .invitedIdPattern(1L)
                 .build();
 
         invitation1 = StageInvitation
@@ -36,6 +37,11 @@ class StageInvitationInvitedFilterTest {
                 .build();
 
         invitation2 = StageInvitation
+                .builder()
+                .invited(TeamMember.builder().id(1L).build())
+                .build();
+
+        invitation3 = StageInvitation
                 .builder()
                 .invited(TeamMember.builder().id(1L).build())
                 .build();
@@ -52,6 +58,14 @@ class StageInvitationInvitedFilterTest {
         Stream<StageInvitation> invitation = Stream.of(invitation1, invitation2);
         List<StageInvitation> apply = invitedFilter.apply(invitation, filterDto).toList();
         List<StageInvitation> expected = List.of(invitation2);
+        Assertions.assertEquals(expected, apply);
+    }
+
+    @Test
+    void testApplyAndNewInvitation() {
+        Stream<StageInvitation> invitation = Stream.of(invitation1, invitation2, invitation3);
+        List<StageInvitation> apply = invitedFilter.apply(invitation, filterDto).toList();
+        List<StageInvitation> expected = List.of(invitation2, invitation3);
         Assertions.assertEquals(expected, apply);
     }
 }

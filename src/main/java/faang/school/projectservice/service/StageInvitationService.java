@@ -12,6 +12,7 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validate.StageInvitationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -25,29 +26,33 @@ public class StageInvitationService {
     private final TeamMemberRepository teamMemberRepository;
     private final List<StageInvitationFilter> stageInvitationFilterList;
 
+    @Transactional
     public StageInvitationDto create(StageInvitationDto stageInvitationDto) {
         stageInvitationValidator.validateExecutors(stageInvitationDto);
         StageInvitation model = stageInvitationMapper.toModel(stageInvitationDto);
-        StageInvitation save = stageInvitationRepository.save(model);
-        return stageInvitationMapper.toDto(save);
+        StageInvitation saved = stageInvitationRepository.save(model);
+        return stageInvitationMapper.toDto(saved);
     }
 
+    @Transactional
     public StageInvitationDto accept(long invitationId) {
         StageInvitation invitation = stageInvitationRepository.findById(invitationId);
-        invitation.setStatus(StageInvitationStatus.ACCEPTED);
         TeamMember teamMember = teamMemberRepository
                 .findById(invitation.getInvited().getId());
+        invitation.setStatus(StageInvitationStatus.ACCEPTED);
         invitation.getStage().getExecutors().add(teamMember);
-        return stageInvitationMapper.toDto(stageInvitationRepository.save(invitation));
+        return stageInvitationMapper.toDto(invitation);
     }
 
+    @Transactional
     public StageInvitationDto reject(long invitationId, String message) {
         StageInvitation invitation = stageInvitationRepository.findById(invitationId);
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(message);
-        return stageInvitationMapper.toDto(stageInvitationRepository.save(invitation));
+        return stageInvitationMapper.toDto(invitation);
     }
 
+    @Transactional(readOnly = true)
     public List<StageInvitationDto> getStageInvitationFilter(
             StageInvitationFilterDto stageInvitationFilterDto, long userId) {
         Stream<StageInvitation> stageInvitationStream = stageInvitationRepository.findAll().stream()

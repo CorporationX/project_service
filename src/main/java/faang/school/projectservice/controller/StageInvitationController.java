@@ -20,17 +20,17 @@ public class StageInvitationController {
         return stageInvitationService.create(stageInvitationDto);
     }
 
-    @PutMapping({"/accept/{invitationId}"})
+    @PutMapping("/accept/{invitationId}")
     public StageInvitationDto accept(@PathVariable long invitationId) {
         return stageInvitationService.accept(invitationId);
     }
 
-    @PutMapping({"/reject/{InvitationId}"})
+    @PutMapping("/reject/{invitationId}")
     public StageInvitationDto reject(@PathVariable long invitationId, @RequestParam String message) {
         return stageInvitationService.reject(invitationId, message);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/list/{userId}")
     public List<StageInvitationDto> getStageInvitationFilter(
             @RequestBody @Valid StageInvitationFilterDto stageInvitationFilterDto,
             @PathVariable long userId) {

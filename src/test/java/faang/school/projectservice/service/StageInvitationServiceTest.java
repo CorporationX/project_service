@@ -2,8 +2,10 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
-import faang.school.projectservice.filter.stageInvitation.*;
-import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.filter.stageInvitation.StageInvitationAuthorFilter;
+import faang.school.projectservice.filter.stageInvitation.StageInvitationFilter;
+import faang.school.projectservice.filter.stageInvitation.StageInvitationStageFilter;
+import faang.school.projectservice.filter.stageInvitation.StageInvitationStatusFilter;
 import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -24,8 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class StageInvitationServiceTest {
@@ -86,9 +86,9 @@ class StageInvitationServiceTest {
 
         filterDto = StageInvitationFilterDto
                 .builder()
-                .authorId(1L)
-                .stageId(1L)
-                .status(StageInvitationStatus.ACCEPTED)
+                .authorIdPattern(1L)
+                .stageIdPattern(1L)
+                .statusPattern(StageInvitationStatus.ACCEPTED)
                 .build();
 
         invitation1 = StageInvitation
@@ -158,8 +158,6 @@ class StageInvitationServiceTest {
                 .thenReturn(invitation);
         Mockito.when(teamMemberRepository.findById(invitation.getInvited().getId()))
                 .thenReturn(teamMember);
-        Mockito.when(stageInvitationRepository.save(stageInvitation))
-                .thenReturn(invitation);
 
         StageInvitationDto accept = stageInvitationService.accept(1L);
         Assertions.assertEquals(StageInvitationStatus.ACCEPTED, accept.getStatus());
@@ -171,8 +169,6 @@ class StageInvitationServiceTest {
         stageInvitation.setDescription("descript");
 
         Mockito.when(stageInvitationRepository.findById(1L))
-                .thenReturn(invitation);
-        Mockito.when(stageInvitationRepository.save(stageInvitation))
                 .thenReturn(invitation);
 
         StageInvitationDto actual = stageInvitationService.reject(1L, "descript");
