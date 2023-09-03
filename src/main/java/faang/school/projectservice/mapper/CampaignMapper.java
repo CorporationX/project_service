@@ -12,6 +12,7 @@ public interface CampaignMapper {
     @Mapping(target = "projectId", source = "project.id")
     CampaignDto toDto(Campaign campaign);
 
+
     @Mapping(target = "project.id", source = "projectId")
     Campaign toEntity(CampaignDto campaignDto);
 }

@@ -5,13 +5,12 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.util.validator.CampaignServiceValidator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,12 +42,11 @@ public class CampaignService {
         return campaignMapper.toDto(campaign);
     }
 
+    @Transactional
     public CampaignDto update(CampaignDto campaignDto, Long userId) {
         Optional<Campaign> campaignById = campaignRepository.findById(campaignDto.getId());
 
-        if (campaignById.isEmpty()) {
-            throw new DataValidationException("No such campaign found.");
-        }
+        campaignById.orElseThrow(()-> new DataValidationException("No such campaign found."));
 
         TeamMember foundTeamMember = teamMemberRepository.findById(userId);
 
@@ -59,7 +57,6 @@ public class CampaignService {
         Campaign campaign = campaignById.get();
         campaign.setTitle(campaignDto.getTitle());
         campaign.setDescription(campaignDto.getDescription());
-        campaign.setUpdatedAt(LocalDateTime.now());
 
         Campaign save = campaignRepository.save(campaign);
         return campaignMapper.toDto(save);

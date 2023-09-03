@@ -24,7 +24,7 @@ public class CampaignController {
         return campaignService.publish(campaignDto, userContext.getUserId());
     }
 
-    @PutMapping("/update")
+    @PutMapping("/")
     public CampaignDto updateCampaign(@RequestBody @Valid CampaignDto campaignDto) {
         return campaignService.update(campaignDto, userContext.getUserId());
     }
