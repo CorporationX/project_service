@@ -10,7 +10,6 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.publisher.TaskCompletedEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -19,7 +18,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -76,12 +74,11 @@ public class ProjectService {
     }
 
     @Transactional
-    public ChangeTaskStatusDto changeTaskStatus(ChangeTaskStatusDto changeTaskStatusDto, long executorId) {
+    public TaskCompletedEvent changeTaskStatus(ChangeTaskStatusDto changeTaskStatusDto, long executorId) {
         Long projectId = changeTaskStatusDto.getProjectId();
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataValidException("Project with id " + projectId + " is not found"));
         TaskCompletedEvent taskCompletedEvent = new TaskCompletedEvent();
-
 
         project.getTasks().forEach(task -> {
             if (Objects.equals(task.getId(), changeTaskStatusDto.getTaskId())) {
@@ -100,7 +97,7 @@ public class ProjectService {
 
         taskCompletedEventPublisher.publishMessage(taskCompletedEvent);
 
-        return changeTaskStatusDto;
+        return taskCompletedEvent;
     }
 
     private ProjectDto saveEntity(Project project) {
