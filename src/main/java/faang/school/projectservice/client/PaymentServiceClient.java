@@ -1,6 +1,6 @@
 package faang.school.projectservice.client;
 
-import faang.school.projectservice.dto.project.client.PaymentRequest;
+import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.project.payment.PaymentResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;

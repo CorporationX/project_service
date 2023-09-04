@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.campaign;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,28 +17,22 @@ import java.util.Currency;
 @NoArgsConstructor
 @Data
 @Builder
-@Validated
 public class CampaignDto {
 
     @NotNull
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = " Title most not be empty! ")
     @Size(max = 128, message = "Name must be less than 128 characters")
     private String title;
 
-    @NotBlank
+    @NotBlank(message = " Description most not be empty! ")
     @Size(max = 4096, message = "Name must be less than 4096 characters")
     private String description;
 
     @NotNull
     private Long projectId;
 
-    private Currency currency;
-
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime createdAt;
-    private Long createdBy;
-
-    private LocalDateTime updatedAt;
-    private Long updatedBy;
 }

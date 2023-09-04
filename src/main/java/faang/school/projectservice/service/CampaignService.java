@@ -12,6 +12,7 @@ import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.util.validator.CampaignServiceValidator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,14 +30,9 @@ public class CampaignService {
     private final CampaignServiceValidator campaignServiceValidator;
 
     public CampaignDto publish(CampaignDto campaignDto, Long userId) {
-        Optional<Campaign> campaignById = campaignRepository.findById(campaignDto.getId());
         TeamMember foundTeamMember = teamMemberRepository.findById(userId);
 
         Project project = projectRepository.getProjectById(campaignDto.getProjectId());
-
-        if (campaignById.isPresent()) {
-            return campaignMapper.toDto(campaignById.get());
-        }
 
         campaignServiceValidator.validatePublish(project, foundTeamMember);
 
@@ -46,5 +42,25 @@ public class CampaignService {
         campaignRepository.save(campaign);
 
         return campaignMapper.toDto(campaign);
+    }
+
+    @Transactional
+    public CampaignDto update(CampaignDto campaignDto, Long userId) {
+        Optional<Campaign> campaignById = campaignRepository.findById(campaignDto.getId());
+
+        campaignById.orElseThrow(()-> new DataValidationException("No such campaign found."));
+
+        TeamMember foundTeamMember = teamMemberRepository.findById(userId);
+
+        Project project = projectRepository.getProjectById(campaignDto.getProjectId());
+
+        campaignServiceValidator.validatePublish(project, foundTeamMember);
+
+        Campaign campaign = campaignById.get();
+        campaign.setTitle(campaignDto.getTitle());
+        campaign.setDescription(campaignDto.getDescription());
+
+        Campaign save = campaignRepository.save(campaign);
+        return campaignMapper.toDto(save);
     }
 }
