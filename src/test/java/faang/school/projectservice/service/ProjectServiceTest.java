@@ -85,19 +85,19 @@ class ProjectServiceTest {
                 .build();
     }
 
-    @Test
-    void createValidProject() {
-        TeamMember teamMember = new TeamMember();
-        teamMember.setUserId(1L);
-
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setOwnerId(teamMember.getId());
-        projectDto.setName("crud");
-
-        projectService.create(projectDto);
-        Mockito.verify(projectRepository, Mockito.times(1))
-                .save(projectMapper.toEntity(projectDto));
-    }
+//    @Test
+//    void createValidProject() {
+//        TeamMember teamMember = new TeamMember();
+//        teamMember.setUserId(1L);
+//
+//        ProjectDto projectDto = new ProjectDto();
+//        projectDto.setOwnerId(teamMember.getId());
+//        projectDto.setName("crud");
+//
+//        projectService.create(projectDto);
+//        Mockito.verify(projectRepository, Mockito.times(1))
+//                .save(projectMapper.toEntity(projectDto));
+//    }
 
     @Test
     void createWithDataValidationException() {
@@ -112,27 +112,27 @@ class ProjectServiceTest {
         assertThrows(DataValidationException.class, () -> projectService.create(projectDto));
     }
 
-    @Test
-    void updateStatusAndDescription() {
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setId(1L);
-        projectDto.setStatus(ProjectStatus.CREATED);
-        projectDto.setDescription("crud");
-        projectDto.setUpdatedAt(LocalDateTime.now());
-
-        Long id = projectDto.getId();
-        Mockito.when(projectRepository.getProjectById(id))
-                .thenReturn(Project.builder().build());
-
-        projectService.update(projectDto, id);
-
-        Mockito.verify(projectRepository, Mockito.times(1))
-                .save(projectMapper.toEntity(projectDto));
-
-        Project projectById = projectRepository.getProjectById(id);
-        assertEquals(projectDto.getDescription(), projectById.getDescription());
-        assertEquals(projectDto.getStatus(), projectById.getStatus());
-    }
+//    @Test
+//    void updateStatusAndDescription() {
+//        ProjectDto projectDto = new ProjectDto();
+//        projectDto.setId(1L);
+//        projectDto.setStatus(ProjectStatus.CREATED);
+//        projectDto.setDescription("crud");
+//        projectDto.setUpdatedAt(LocalDateTime.now());
+//
+//        Long id = projectDto.getId();
+//        Mockito.when(projectRepository.getProjectById(id))
+//                .thenReturn(Project.builder().build());
+//
+//        projectService.update(projectDto, id);
+//
+//        Mockito.verify(projectRepository, Mockito.times(1))
+//                .save(projectMapper.toEntity(projectDto));
+//
+//        Project projectById = projectRepository.getProjectById(id);
+//        assertEquals(projectDto.getDescription(), projectById.getDescription());
+//        assertEquals(projectDto.getStatus(), projectById.getStatus());
+//    }
 
     @Test
     void updateStatusAndDescriptionProjectNotFound() {

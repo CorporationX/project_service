@@ -147,4 +147,23 @@ class CampaignServiceTest {
 
         Mockito.verify(campaignRepository, Mockito.times(1)).save(campaign);
     }
+
+    @Test
+    public void delete_Successful(){
+        Mockito.when(campaignRepository.findById(campaign.getId()))
+                .thenReturn(Optional.of(campaign));
+
+        campaignService.delete(campaign.getId());
+
+        Mockito.verify(campaignRepository).save(campaign);
+    }
+
+    @Test
+    public void delete_throwException(){
+        Mockito.when(campaignRepository.findById(campaign.getId()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(DataValidationException.class,
+                () -> campaignService.delete(campaign.getId()));
+    }
 }

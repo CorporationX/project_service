@@ -32,6 +32,9 @@ public class Campaign {
     @Enumerated(EnumType.STRING)
     private CampaignStatus status;
 
+    @Column(name = "flag")
+    private boolean deleted;
+
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
