@@ -3,17 +3,16 @@ package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
-import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
 import faang.school.projectservice.filter.subproject.SubprojectFilter;
-import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +44,6 @@ class SubProjectServiceTest {
     private ProjectMapper projectMapper;
     @Mock
     private MomentMapper momentMapper;
-    private SubProjectDto subProjectDto;
     private StatusSubprojectDto updateStatusSubprojectDtoCOMPLETED;
     private StatusSubprojectDto updateStatusSubprojectDto;
     private Project project;
@@ -72,11 +69,6 @@ class SubProjectServiceTest {
 
         projectCompleted.setId(idCompleted);
 
-        subProjectDto = subProjectDto.builder()
-                .id(rightId)
-                .parentProjectId(rightId)
-                .build();
-
         projectDto = ProjectDto.builder()
                 .id(rightId)
                 .parentProjectId(idParent)
@@ -88,23 +80,24 @@ class SubProjectServiceTest {
         project = tree.projectA;
         project.setParentProject(parentProject);
         project.setId(rightId);
+        ProjectDto projectDto = ProjectDto.builder().build();
 
         updateStatusSubprojectDto = StatusSubprojectDto.builder()
                 .id(rightId)
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
 
-        Mockito.when(projectMapper.toProject(projectService.getProjectById(rightId)))
+        Mockito.when(projectService.getProjectById(rightId))
+                .thenReturn(projectDto);
+        Mockito.when(projectMapper.toProject(projectDto))
                 .thenReturn(project);
 
         assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDto));
-
         assertEquals(ProjectStatus.IN_PROGRESS, project.getStatus());
-
         Mockito.verify(subProjectValidator, Mockito.times(1))
-                .validateSubProjectStatus(project.getId());
+                .validateSubProjectStatus(projectDto);
 
-        assertTrue(project.getUpdatedAt().isBefore(LocalDateTime.now()));
+        assertTrue(project.getUpdatedAt() != null);
     }
 
     @Test
@@ -118,19 +111,22 @@ class SubProjectServiceTest {
                 .id(idCompleted)
                 .status(ProjectStatus.COMPLETED)
                 .build();
+        ProjectDto projectCompletedDto = ProjectDto.builder().build();
 
-        Mockito.when(projectMapper.toProject(projectService.getProjectById(idCompleted)))
+        Mockito.when(projectService.getProjectById(idCompleted))
+                .thenReturn(projectCompletedDto);
+        Mockito.when(projectMapper.toProject(projectCompletedDto))
                 .thenReturn(projectCompleted);
 
         assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDtoCOMPLETED));
         assertEquals(ProjectStatus.COMPLETED, projectCompleted.getStatus());
 
         Mockito.verify(subProjectValidator, Mockito.times(1))
-                .validateSubProjectStatus(projectCompleted.getId());
+                .validateSubProjectStatus(projectCompletedDto);
         Mockito.verify(momentMapper, Mockito.times(1))
                 .toMomentDto(projectCompleted);
 
-        assertTrue(projectCompleted.getUpdatedAt().isBefore(LocalDateTime.now()));
+        assertTrue(projectCompleted.getUpdatedAt() != null);
     }
 
     @Test

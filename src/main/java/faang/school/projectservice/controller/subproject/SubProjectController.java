@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,22 +21,22 @@ public class SubProjectController {
 
 
     @PostMapping("/create")
-    public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
+    public ProjectDto createSubProject(@RequestBody @Valid ProjectDto projectDto) {
         return subProjectService.createSubProject(projectDto);
     }
 
     @PutMapping("/status")
-    public ProjectDto updateStatusSubProject(@RequestBody StatusSubprojectDto statusSubprojectDto) {
+    public ProjectDto updateStatusSubProject(@RequestBody @Valid StatusSubprojectDto statusSubprojectDto) {
         return subProjectService.updateStatusSubProject(statusSubprojectDto);
     }
 
     @PutMapping("/visibility")
-    public void updateVisibilitySubProject(@RequestBody VisibilitySubprojectDto updateStatusSubprojectDto) {
+    public void updateVisibilitySubProject(@RequestBody @Valid VisibilitySubprojectDto updateStatusSubprojectDto) {
         subProjectService.updateVisibilitySubProject(updateStatusSubprojectDto);
     }
 
     @GetMapping("/filter/list")
-    public List<ProjectDto> getAllSubProjects(@RequestBody SubprojectFilterDto subprojectFilterDto) {
+    public List<ProjectDto> getAllSubProjects(@RequestBody @Valid SubprojectFilterDto subprojectFilterDto) {
         subProjectValidator.validateFilter(subprojectFilterDto);
         return subProjectService.getAllSubProject(subprojectFilterDto);
     }

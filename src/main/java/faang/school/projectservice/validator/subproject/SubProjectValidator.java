@@ -21,20 +21,19 @@ public class SubProjectValidator {
     private final ProjectService projectService;
     private final ProjectMapper projectMapper;
 
+    public void validateCreateProjectDto(ProjectDto projectDto) {
+        validateOwnerId(projectDto.getOwnerId());
+        validateParentProject(projectDto.getParentProjectId());
+    }
+
     public void validateFilter(SubprojectFilterDto subprojectFilterDto) {
         validateOwnerId(subprojectFilterDto.getRequesterId());
     }
 
     private void validateOwnerId(Long ownerId) {
-        validateId(ownerId);
         userServiceClient.getUser(ownerId);
     }
 
-    private void validateId(Long id) {
-        if (id == null || id < 0) {
-            throw new DataValidationException("It's wrong id, id can't be null");
-        }
-    }
 
     public void validateVisibility(ProjectVisibility visibility, ProjectVisibility parentVisibility) {
         if (visibility == ProjectVisibility.PUBLIC && parentVisibility == ProjectVisibility.PRIVATE) {
@@ -42,8 +41,8 @@ public class SubProjectValidator {
         }
     }
 
-    public void validateSubProjectStatus(long projectId) {
-        Project project = projectMapper.toProject(projectService.getProjectById(projectId));
+    public void validateSubProjectStatus(ProjectDto projectDto) {
+        Project project = projectMapper.toProject(projectDto);
         ProjectStatus status = project.getStatus();
 
         if (status == ProjectStatus.COMPLETED && project.getChildren() != null) {
@@ -54,23 +53,14 @@ public class SubProjectValidator {
     }
 
     private boolean checkStatusChildren(List<Project> projects) {
-        for (Project project : projects) {
-            if (project.getStatus() == ProjectStatus.COMPLETED ||
-                    project.getStatus() == ProjectStatus.CANCELLED) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-    }
-
-    public void validateCreateProjectDto(ProjectDto projectDto) {
-        validateOwnerId(projectDto.getOwnerId());
-        validateParentProject(projectDto.getParentProjectId());
+        return projects.stream()
+                .allMatch(project -> project.getStatus() == ProjectStatus.COMPLETED ||
+                        project.getStatus() == ProjectStatus.CANCELLED);
     }
 
     private void validateParentProject(Long projectId) {
-        validateId(projectId);
-        projectService.getProjectById(projectId);
+        if (!projectService.isExistProjectById(projectId)) {
+            throw new DataValidationException("Project not found");
+        }
     }
 }

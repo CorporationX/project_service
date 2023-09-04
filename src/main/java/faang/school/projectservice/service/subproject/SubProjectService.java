@@ -5,13 +5,13 @@ import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
 import faang.school.projectservice.filter.subproject.SubprojectFilter;
-import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,11 +39,10 @@ public class SubProjectService {
     }
 
     public ProjectDto updateStatusSubProject(StatusSubprojectDto statusSubprojectDto) {
-        subProjectValidator.validateSubProjectStatus(statusSubprojectDto.getId());
-
-        Project project = projectMapper.toProject(projectService.getProjectById(statusSubprojectDto.getId()));
+        ProjectDto projectDto = projectService.getProjectById(statusSubprojectDto.getId());
+        subProjectValidator.validateSubProjectStatus(projectDto);
         ProjectStatus status = statusSubprojectDto.getStatus();
-
+        Project project = projectMapper.toProject(projectDto);
 
         updateStatusSubproject(project, status);
         return projectMapper.toProjectDto(project);

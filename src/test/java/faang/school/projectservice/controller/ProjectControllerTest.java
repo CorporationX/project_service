@@ -117,11 +117,9 @@ class ProjectControllerTest {
         ).andExpect(status().isBadRequest());
     }
 
-    /*
     @Test
     public void updateProjectTest() throws Exception {
         projectRepository.save(project);
-
         ResultActions resultActions = mockMvc.perform(
                 put("/project/1")
                         .contentType("application/json")
@@ -170,6 +168,4 @@ class ProjectControllerTest {
 
         assertEquals(1, actual.size());
     }
-
-     */
 }

@@ -2,9 +2,10 @@ package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
-import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,11 +29,6 @@ class SubProjectControllerTest {
     @Spy
     private ObjectMapper objectMapper;
     private MockMvc mockMvc;
-    private SubprojectFilterDto subprojectFilterDto = SubprojectFilterDto.builder().build();
-    private VisibilitySubprojectDto visibilitySubprojectDto = VisibilitySubprojectDto.builder().build();
-    private SubProjectDto subProjectDto = SubProjectDto.builder().build();
-    private ProjectDto projectDto = ProjectDto.builder().build();
-    StatusSubprojectDto statusSubprojectDto = StatusSubprojectDto.builder().build();
 
 
     @BeforeEach
@@ -43,6 +39,13 @@ class SubProjectControllerTest {
 
     @Test
     void testCreateSubProject() throws Exception {
+        ProjectDto projectDto = ProjectDto.builder()
+                .name("name")
+                .description("description")
+                .ownerId(1L)
+                .parentProjectId(1L)
+                .build();
+
         mockMvc.perform(post("/subproject/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
@@ -51,6 +54,11 @@ class SubProjectControllerTest {
 
     @Test
     public void testGetAllSubProjects() throws Exception {
+        SubprojectFilterDto subprojectFilterDto = SubprojectFilterDto.builder()
+                .id(1L)
+                .requesterId(1L)
+                .build();
+
         mockMvc.perform(get("/subproject/filter/list")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(subprojectFilterDto)))
@@ -59,6 +67,12 @@ class SubProjectControllerTest {
 
     @Test
     void testCreateSubProjectStatus() throws Exception {
+        StatusSubprojectDto statusSubprojectDto = StatusSubprojectDto.builder()
+                .id(1L)
+                .status(ProjectStatus.ON_HOLD)
+                .build();
+
+
         mockMvc.perform(put("/subproject/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(statusSubprojectDto)))
@@ -70,6 +84,11 @@ class SubProjectControllerTest {
 
     @Test
     void testCreateSubProjectVisibility() throws Exception {
+        VisibilitySubprojectDto visibilitySubprojectDto = VisibilitySubprojectDto.builder()
+                .id(1L)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+
         mockMvc.perform(put("/subproject/visibility")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(visibilitySubprojectDto)))
