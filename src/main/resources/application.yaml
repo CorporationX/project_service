@@ -37,14 +37,21 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    region: http://127.0.0.1:9000/
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+default-cover-pic: src/main/resources/default_cover_pic/dragonfly.jpeg
