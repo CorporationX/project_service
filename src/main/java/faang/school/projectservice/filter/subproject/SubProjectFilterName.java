@@ -3,9 +3,11 @@ package faang.school.projectservice.filter.subproject;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
+@Component
 public class SubProjectFilterName implements SubprojectFilter {
     @Override
     public boolean isApplicable(SubprojectFilterDto filters) {
