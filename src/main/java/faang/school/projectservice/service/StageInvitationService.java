@@ -35,6 +35,11 @@ public class StageInvitationService {
     }
 
     @Transactional
+    public void createStageInvitation(StageInvitation stageInvitation) {
+        stageInvitationRepository.save(stageInvitation);
+    }
+
+    @Transactional
     public StageInvitationDto accept(long invitationId) {
         StageInvitation invitation = stageInvitationRepository.findById(invitationId);
         TeamMember teamMember = teamMemberRepository

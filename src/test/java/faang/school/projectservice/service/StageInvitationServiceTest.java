@@ -148,6 +148,13 @@ class StageInvitationServiceTest {
     }
 
     @Test
+    void testCreateStageInvitation() {
+        StageInvitation build = StageInvitation.builder().build();
+        stageInvitationService.createStageInvitation(build);
+        Mockito.verify(stageInvitationRepository, Mockito.times(1)).save(build);
+    }
+
+    @Test
     void testAccept() {
         TeamMember teamMember = TeamMember.builder().id(1L).build();
         invitation.setStage(Stage.builder().stageId(1L).executors(new ArrayList<>()).build());
