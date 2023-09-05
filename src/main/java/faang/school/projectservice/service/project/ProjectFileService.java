@@ -4,19 +4,19 @@ import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.dto.resource.UpdateResourceDto;
-import faang.school.projectservice.exception.FileUploadException;
 import faang.school.projectservice.exception.InvalidCurrentUserException;
 import faang.school.projectservice.exception.StorageSpaceExceededException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.resource.Resource;
 import faang.school.projectservice.model.resource.ResourceStatus;
 import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.util.FileService;
+import faang.school.projectservice.validator.FileValidator;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,70 +32,79 @@ public class ProjectFileService {
     private final ResourceRepository resourceRepository;
     private final FileService fileService;
     private final ResourceMapper resourceMapper;
+    private final FileValidator fileValidator;
 
     @Transactional
     public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long userId) {
-        Project project = projectRepository.getProjectById(projectId);
-        TeamMember teamMember = findTeamMember(project, userId);
-        validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
+        Resource resource;
+        String fileKey;
+        try {
+            Project project = projectRepository.getProjectById(projectId);
+            TeamMember teamMember = findTeamMember(project, userId);
+            fileValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
 
-        String objectKey = fileService.upload(multipartFile, projectId);
+            fileKey = generateFileKey(multipartFile, projectId);
+            resource = fillUpResource(multipartFile, project, teamMember, fileKey);
 
-        Resource resource = Resource.builder()
-                .name(multipartFile.getOriginalFilename())
-                .key(objectKey)
-                .size(BigInteger.valueOf(multipartFile.getSize()))
-                .type(ResourceType.getResourceType(multipartFile.getContentType()))
-                .status(ResourceStatus.ACTIVE)
-                .createdBy(teamMember)
-                .project(project)
-                .build();
+            updateProjectStorage(resource);
+            resourceRepository.save(resource);
+        } catch (OptimisticLockException e) {
+            throw new RuntimeException("Could not update due to concurrent modifications. Please try again.");
+        }
 
-        updateProjectStorage(resource);
-        resourceRepository.save(resource);
-
+        fileService.upload(multipartFile, fileKey);
         return resourceMapper.toDto(resource);
     }
 
     @Transactional
     public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
-        Resource resource = resourceRepository.getReferenceById(resourceId);
-        TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
-        validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
-        validateIfUserCanChangeFile(resource, userId);
-        BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
-                resource, BigInteger.valueOf(multipartFile.getSize()));
+        Resource resource;
+        String fileKey;
+        try {
+            resource = resourceRepository.getReferenceById(resourceId);
+            TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
+            fileValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
+            fileValidator.validateIfUserCanChangeFile(resource, userId);
+            BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
+                    resource, BigInteger.valueOf(multipartFile.getSize()));
+
+            fileKey = generateFileKey(multipartFile, resource.getProject().getId());
+            resource.getProject().setStorageSize(storageCapacityOnUpdate);
+
+            resource.setUpdatedBy(updatedBy);
+            resource.setKey(fileKey);
+            resource.setSize(BigInteger.valueOf(multipartFile.getSize()));
+            resourceRepository.save(resource);
+
+            updateProjectStorage(resource);
+        } catch (OptimisticLockException e) {
+            throw new RuntimeException("Could not update due to concurrent modifications. Please try again.");
+        }
 
         fileService.delete(resource.getKey());
-        resource.getProject().setStorageSize(storageCapacityOnUpdate);
-
-        String key = fileService.upload(multipartFile, resource.getProject().getId());
-
-        resource.setUpdatedBy(updatedBy);
-        resource.setKey(key);
-        resource.setSize(BigInteger.valueOf(multipartFile.getSize()));
-
-        updateProjectStorage(resource);
-        resourceRepository.save(resource);
-
+        fileService.upload(multipartFile, fileKey);
         return resourceMapper.toUpdateDto(resource);
     }
 
     @Transactional
     public void deleteFile(long resourceId, long userId) {
-        Resource resource = resourceRepository.getReferenceById(resourceId);
-        TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
-        validateIfUserCanChangeFile(resource, userId);
-
-        if (!resource.getStatus().equals(ResourceStatus.DELETED)) {
-            fileService.delete(resource.getKey());
+        Resource resource;
+        try {
+            resource = resourceRepository.getReferenceById(resourceId);
+            TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
+            fileValidator.validateIfUserCanChangeFile(resource, userId);
+            fileValidator.validateResourceOnDelete(resource);
 
             resource.setStatus(ResourceStatus.DELETED);
             resource.setUpdatedBy(updatedBy);
             updateProjectStorage(resource);
 
             resourceRepository.save(resource);
+        } catch (OptimisticLockException e) {
+            throw new RuntimeException("Could not update due to concurrent modifications. Please try again.");
         }
+
+        fileService.delete(resource.getKey());
     }
 
     @Transactional(readOnly = true)
@@ -112,6 +121,13 @@ public class ProjectFileService {
                 .build();
     }
 
+    private String generateFileKey(MultipartFile multipartFile, long projectId) {
+        String fileName = multipartFile.getOriginalFilename();
+        long size = multipartFile.getSize();
+
+        return String.format("p%d_%s_%s", projectId, size, fileName);
+    }
+
     private TeamMember findTeamMember(Project project, long userId) {
         Optional<TeamMember> matchingMember = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
@@ -124,14 +140,6 @@ public class ProjectFileService {
             throw new InvalidCurrentUserException(errorMessage);
         } else {
             return matchingMember.get();
-        }
-    }
-
-    private void validateFreeStorageCapacity(Project project, BigInteger fileSize) {
-        if (fileSize.compareTo(project.getStorageSize()) > 0) {
-            String errorMessage = String.format(
-                    "Project %d storage has not enough space", project.getId());
-            throw new StorageSpaceExceededException(errorMessage);
         }
     }
 
@@ -164,31 +172,15 @@ public class ProjectFileService {
         projectRepository.save(project);
     }
 
-    private void validateIfUserCanChangeFile(Resource resource, long userId) {
-        boolean notAProjectManager = !userIsProjectManager(resource.getProject(), userId);
-        boolean notAFileCreator = !userIsFileCreator(resource, userId);
-
-        if (notAProjectManager && notAFileCreator) {
-            throw new InvalidCurrentUserException(
-                    "You should be creator of a file or a project manager to change files");
-        }
-    }
-
-    private boolean userIsProjectManager(Project project, long userId) {
-        return project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .distinct()
-                .anyMatch(teamMember ->
-                        teamMember.getRoles().contains(TeamRole.MANAGER) && teamMember.getUserId().equals(userId));
-    }
-
-    private boolean userIsFileCreator(Resource resource, long userId) {
-        return resource.getCreatedBy().getUserId().equals(userId);
-    }
-
-    private void validateFileOnUpdate(String resourceName, String fileOriginalName) {
-        if (!resourceName.equals(fileOriginalName)) {
-            throw new FileUploadException("File names don't match");
-        }
+    private Resource fillUpResource(MultipartFile multipartFile, Project project, TeamMember teamMember, String fileKey) {
+        return Resource.builder()
+                .name(multipartFile.getOriginalFilename())
+                .key(fileKey)
+                .size(BigInteger.valueOf(multipartFile.getSize()))
+                .type(ResourceType.getResourceType(multipartFile.getContentType()))
+                .status(ResourceStatus.ACTIVE)
+                .createdBy(teamMember)
+                .project(project)
+                .build();
     }
 }

@@ -23,11 +23,7 @@ public class FileService {
     private String bucketName;
     private final AmazonS3 amazonS3;
 
-    public String upload(MultipartFile multipartFile, long projectId) {
-        String fileName = multipartFile.getOriginalFilename();
-        long size = multipartFile.getSize();
-        String key = String.format("p%d_%s_%s", projectId, size, fileName);
-
+    public void upload(MultipartFile multipartFile, String key) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(multipartFile.getContentType());
         metadata.setContentLength(multipartFile.getSize());
@@ -45,8 +41,6 @@ public class FileService {
             log.error("Amazon S3 couldn't be contacted for a response", sce);
             throw sce;
         }
-
-        return key;
     }
 
     public void delete(String objectKey) {

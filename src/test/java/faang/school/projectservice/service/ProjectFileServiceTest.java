@@ -22,6 +22,7 @@ import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectFileService;
 import faang.school.projectservice.util.FileService;
+import faang.school.projectservice.validator.FileValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,6 +53,8 @@ public class ProjectFileServiceTest {
     private ResourceRepository resourceRepository;
     @Mock
     private FileService fileService;
+    @Mock
+    private FileValidator fileValidator;
     @Spy
     private ResourceMapperImpl resourceMapper;
     @InjectMocks
@@ -133,18 +136,12 @@ public class ProjectFileServiceTest {
                 .createdById(1L)
                 .build();
 
-        String fileName = multipartFile.getOriginalFilename();
-        long size = multipartFile.getSize();
-        String key = String.format("p%d_%s_%s", 1L, size, fileName);
-
         Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
-        Mockito.when(fileService.upload(multipartFile, 1L)).thenReturn(key);
 
         ResourceDto resourceDto = projectFileService.uploadFile(multipartFile, 1L, 1L);
 
         assertEquals(expectedDto, resourceDto);
         assertEquals(expectedProject, project);
-        Mockito.verify(fileService, Mockito.times(1)).upload(multipartFile, 1L);
         Mockito.verify(resourceRepository, Mockito.times(1)).save(resource);
     }
 
@@ -194,14 +191,12 @@ public class ProjectFileServiceTest {
         expectedProject.setStorageSize(BigInteger.valueOf(8L));
 
         Mockito.when(resourceRepository.getReferenceById(1L)).thenReturn(resource);
-        Mockito.when(fileService.upload(multipartFileUpdated, 1L)).thenReturn(keyUpdated);
 
         UpdateResourceDto outputDto = projectFileService.updateFile(multipartFileUpdated, 1L, userId);
 
         assertEquals(expectedOutput, outputDto);
         assertEquals(expectedProject, project);
         Mockito.verify(fileService, Mockito.times(1)).delete("p1_12_test.txt");
-        Mockito.verify(fileService, Mockito.times(1)).upload(multipartFileUpdated, 1L);
         Mockito.verify(resourceRepository, Mockito.times(1)).save(resource);
     }
 

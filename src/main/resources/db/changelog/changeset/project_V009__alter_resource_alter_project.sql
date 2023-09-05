@@ -9,3 +9,7 @@ ALTER TABLE resource
     ADD CONSTRAINT fk_updated_by
         FOREIGN KEY (updated_by)
         REFERENCES team_member (id);
+
+ALTER TABLE project
+    ADD COLUMN version BIGINT;
+

@@ -46,8 +46,8 @@ public class Project {
     @Column(name = "owner_id")
     private Long ownerId;
 
-    @ManyToOne(cascade={CascadeType.ALL})
-    @JoinColumn(name="parent_project_id")
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "parent_project_id")
     private Project parentProject;
 
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
@@ -93,4 +93,7 @@ public class Project {
 
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
+
+    @Version
+    private Long version;
 }
