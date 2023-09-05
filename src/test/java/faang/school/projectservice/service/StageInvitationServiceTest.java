@@ -197,7 +197,8 @@ class StageInvitationServiceTest {
                 stageInvitationMapper,
                 stageInvitationValidator,
                 teamMemberRepository,
-                filters);
+                filters,
+                inviteSentEvent);
 
         Mockito.when(stageInvitationRepository.findAll())
                 .thenReturn(list);
@@ -219,7 +220,8 @@ class StageInvitationServiceTest {
                 stageInvitationMapper,
                 stageInvitationValidator,
                 teamMemberRepository,
-                filters);
+                filters,
+                inviteSentEvent);
 
         Mockito.when(stageInvitationRepository.findAll())
                 .thenReturn(list);
