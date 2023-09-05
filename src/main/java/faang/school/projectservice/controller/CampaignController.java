@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.company.CreateCampanyDto;
+import faang.school.projectservice.dto.company.CampaignDto;
 import faang.school.projectservice.service.CampaignService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class CampaignController {
     private final UserContext userContext;
 
     @PostMapping("/publish")
-    public CreateCampanyDto publishCampaign(@RequestBody @Valid CreateCampanyDto dto) {
+    public CampaignDto publishCampaign(@RequestBody @Valid CampaignDto dto) {
         return campaignService.publishCampaign(dto, userContext.getUserId());
     }
 }

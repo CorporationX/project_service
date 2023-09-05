@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 @Validated
-public class CreateCampanyDto {
+public class CampaignDto {
     @NotNull
     private Long id;
 

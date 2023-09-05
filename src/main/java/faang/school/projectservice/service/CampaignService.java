@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.company.CreateCampanyDto;
+import faang.school.projectservice.dto.company.CampaignDto;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -27,20 +28,15 @@ public class CampaignService {
     private final CampaignServiceValidator campaignServiceValidator;
 
     @Transactional
-    public CreateCampanyDto publishCampaign(CreateCampanyDto dto, long userId) {
-        Optional<Campaign> foundCompany = campaignRepository.findById(dto.getId());
+    public CampaignDto publishCampaign(CampaignDto dto, long userId) {
         TeamMember foundTeamMember = teamMemberRepository.findById(userId);
         Project foundProject = projectRepository.getProjectById(dto.getProjectId());
-
-        if (foundCompany.isPresent()) {
-            log.info("Campaign already published: {}", foundCompany.get());
-            return campaignMapper.toDto(foundCompany.get());
-        }
 
         campaignServiceValidator.validatePublishedCampaign(foundProject, foundTeamMember);
 
         Campaign campaign = campaignMapper.toEntity(dto);
         campaign.setProject(foundProject);
+
         campaignRepository.save(campaign);
         log.info("Published campaign: {}", campaign);
         return campaignMapper.toDto(campaign);

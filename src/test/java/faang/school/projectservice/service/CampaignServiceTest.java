@@ -2,8 +2,7 @@ package faang.school.projectservice.service;
 
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.company.CreateCampanyDto;
-import faang.school.projectservice.dto.internship.CreateInternshipDto;
+import faang.school.projectservice.dto.company.CampaignDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.CampaignMapperImpl;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -27,7 +26,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class CampaignServiceTest {
@@ -47,7 +45,7 @@ class CampaignServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private TeamMemberRepository teamMemberRepository;
-    private CreateCampanyDto campaignDto;
+    private CampaignDto campaignDto;
     private Campaign campaign;
     private Project project;
     private Team team;
@@ -61,10 +59,14 @@ class CampaignServiceTest {
         campaign = new Campaign();
         campaign.setId(1L);
         campaign.setProject(project);
+        campaign.setTitle("Hello ");
+        campaign.setDescription("world!");
 
-        campaignDto = new CreateCampanyDto();
+        campaignDto = new CampaignDto();
         campaignDto.setId(1L);
         campaignDto.setProjectId(project.getId());
+        campaignDto.setTitle("Hello ");
+        campaignDto.setDescription("world!");
 
         teamMember = new TeamMember();
         teamMember.setId(1L);
@@ -80,9 +82,6 @@ class CampaignServiceTest {
 
     @Test
     public void publish_Successful() {
-        Mockito.when(campaignRepository.findById(campaignDto.getId()))
-                .thenReturn(Optional.of(campaign));
-
         Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
                 .thenReturn(project);
 
@@ -92,17 +91,14 @@ class CampaignServiceTest {
         Mockito.when(teamMemberRepository.findById(1L))
                 .thenReturn(teamMember);
 
-        CreateCampanyDto actual = campaignService.publishCampaign(campaignDto, 1L);
+        CampaignDto actual = campaignService.publishCampaign(campaignDto, 1L);
         Assertions.assertEquals(campaignDto, actual);
 
-        Mockito.verify(campaignRepository, Mockito.times(0)).save(campaign);
+        Mockito.verify(campaignRepository, Mockito.times(1)).save(campaign);
     }
 
     @Test
     public void publish_CampaignNotFound() {
-        Mockito.when(campaignRepository.findById(campaignDto.getId()))
-                .thenReturn(Optional.empty());
-
         Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
                 .thenReturn(project);
 
@@ -112,16 +108,14 @@ class CampaignServiceTest {
         Mockito.when(teamMemberRepository.findById(1L))
                 .thenReturn(teamMember);
 
-        CreateCampanyDto actual = campaignService.publishCampaign(campaignDto, 1L);
+        CampaignDto actual = campaignService.publishCampaign(campaignDto, 1L);
         Assertions.assertEquals(campaignDto, actual);
 
         Mockito.verify(campaignRepository).save(campaign);
     }
 
     @Test
-    public void public_emptyTeamMember_throwException(){
-        Mockito.when(campaignRepository.findById(campaignDto.getId()))
-                .thenReturn(Optional.empty());
+    public void public_emptyTeamMember_throwException() {
         Mockito.when(teamMemberRepository.findById(4L))
                 .thenReturn(TeamMember.builder().build());
         Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
