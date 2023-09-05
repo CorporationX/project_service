@@ -62,4 +62,7 @@ public class Campaign {
     private LocalDateTime updatedAt;
 
     private Long updatedBy;
+
+    @Column(name = "flag")
+    private boolean deleted;
 }

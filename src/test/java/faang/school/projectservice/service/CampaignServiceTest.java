@@ -187,4 +187,31 @@ class CampaignServiceTest {
 
         Assertions.assertEquals("Campaign with id" + 123 + " not found", dataValidationException.getMessage());
     }
+
+    @Test
+    public void delete_Successful(){
+        Campaign campaign = new Campaign();
+        campaign.setId(1L);
+        campaign.setDeleted(false);
+
+        Mockito.when(campaignRepository.findById(campaign.getId()))
+                .thenReturn(Optional.of(campaign));
+
+        campaignService.deleteCampaign(campaign.getId());
+
+        verify(campaignRepository).findById(campaign.getId());
+        Assertions.assertTrue(campaign.isDeleted());
+    }
+
+    @Test
+    public void delete_throwException(){
+        Mockito.when(campaignRepository.findById(123L))
+                .thenReturn(Optional.empty());
+
+        DataValidationException dataValidationException = Assertions.assertThrows(DataValidationException.class,
+                () -> campaignService.deleteCampaign(123L));
+
+        Assertions.assertEquals("Campaign with id" + 123 + " not found", dataValidationException.getMessage());
+
+    }
 }

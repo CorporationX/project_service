@@ -68,4 +68,13 @@ public class CampaignService {
         log.info("Retrieved campaign: {}", campaign);
         return campaignMapper.toDto(campaign);
     }
+
+    @Transactional
+    public void deleteCampaign(Long id) {
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("Campaign with id" + id + " not found"));
+
+        campaign.setDeleted(true);
+        log.info("Set company with id: {} in deleted mode", id);
+    }
 }
