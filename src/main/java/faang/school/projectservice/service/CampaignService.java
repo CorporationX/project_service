@@ -59,4 +59,13 @@ public class CampaignService {
         log.info("Updated campaign: {}", savedCompany);
         return campaignMapper.toDto(savedCompany);
     }
+
+    @Transactional(readOnly = true)
+    public CampaignDto getCampaignById(Long id) {
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("Campaign with id" + id + " not found"));
+
+        log.info("Retrieved campaign: {}", campaign);
+        return campaignMapper.toDto(campaign);
+    }
 }

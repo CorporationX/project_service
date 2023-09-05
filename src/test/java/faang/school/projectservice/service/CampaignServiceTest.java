@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CampaignServiceTest {
@@ -85,43 +87,43 @@ class CampaignServiceTest {
 
     @Test
     public void publish_Successful() {
-        Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
+        when(projectRepository.getProjectById(campaignDto.getProjectId()))
                 .thenReturn(project);
 
         Mockito.lenient().when(userContext.getUserId())
                 .thenReturn(1L);
 
-        Mockito.when(teamMemberRepository.findById(1L))
+        when(teamMemberRepository.findById(1L))
                 .thenReturn(teamMember);
 
         CampaignDto actual = campaignService.publishCampaign(campaignDto, 1L);
         Assertions.assertEquals(campaignDto, actual);
 
-        Mockito.verify(campaignRepository, Mockito.times(1)).save(campaign);
+        verify(campaignRepository, Mockito.times(1)).save(campaign);
     }
 
     @Test
     public void publish_CampaignNotFound() {
-        Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
+        when(projectRepository.getProjectById(campaignDto.getProjectId()))
                 .thenReturn(project);
 
         Mockito.lenient().when(userContext.getUserId())
                 .thenReturn(1L);
 
-        Mockito.when(teamMemberRepository.findById(1L))
+        when(teamMemberRepository.findById(1L))
                 .thenReturn(teamMember);
 
         CampaignDto actual = campaignService.publishCampaign(campaignDto, 1L);
         Assertions.assertEquals(campaignDto, actual);
 
-        Mockito.verify(campaignRepository).save(campaign);
+        verify(campaignRepository).save(campaign);
     }
 
     @Test
     public void public_emptyTeamMember_throwException() {
-        Mockito.when(teamMemberRepository.findById(4L))
+        when(teamMemberRepository.findById(4L))
                 .thenReturn(TeamMember.builder().build());
-        Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
+        when(projectRepository.getProjectById(campaignDto.getProjectId()))
                 .thenReturn(project);
         Assertions.assertThrows(DataValidationException.class,
                 () -> campaignService.publishCampaign(campaignDto, 4L));
@@ -129,35 +131,60 @@ class CampaignServiceTest {
 
     @Test
     public void update_Successful() {
-        Mockito.when(campaignRepository.findById(campaignDto.getId()))
+        when(campaignRepository.findById(campaignDto.getId()))
                 .thenReturn(Optional.of(campaign));
 
-        Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
+        when(projectRepository.getProjectById(campaignDto.getProjectId()))
                 .thenReturn(project);
 
         Mockito.lenient().when(userContext.getUserId())
                 .thenReturn(1L);
 
-        Mockito.when(teamMemberRepository.findById(1L))
+        when(teamMemberRepository.findById(1L))
                 .thenReturn(teamMember);
 
-        Mockito.when(campaignRepository.save(campaign))
+        when(campaignRepository.save(campaign))
                 .thenReturn(campaign);
 
         CampaignDto actual = campaignService.updateCampaign(campaignDto, 1L);
 
         Assertions.assertEquals(campaignDto, actual);
 
-        Mockito.verify(campaignRepository, Mockito.times(1)).save(campaign);
+        verify(campaignRepository, Mockito.times(1)).save(campaign);
     }
 
     @Test
     public void update_CampaignNotFound() {
-        Mockito.when(campaignRepository.findById(campaignDto.getId()))
+        when(campaignRepository.findById(campaignDto.getId()))
                 .thenReturn(Optional.empty());
         DataValidationException dataValidationException = Assertions.assertThrows(DataValidationException.class,
                 () -> campaignService.updateCampaign(campaignDto, anyLong()));
 
         Assertions.assertEquals("Campaign not found", dataValidationException.getMessage());
+    }
+
+    @Test
+    public void testGetCampaignByIdFound() {
+        Long campaignId = 123L;
+        Campaign campaign = new Campaign();
+        campaign.setId(campaignId);
+
+        when(campaignRepository.findById(campaignId)).thenReturn(Optional.of(campaign));
+        when(campaignMapper.toDto(campaign)).thenReturn(new CampaignDto());
+
+        CampaignDto result = campaignService.getCampaignById(campaignId);
+
+        Assertions.assertNotNull(result);
+        verify(campaignRepository).findById(campaignId);
+        verify(campaignMapper).toDto(campaign);
+    }
+    @Test
+    public void getCampaignById_CampaignNotFound() {
+        when(campaignRepository.findById(123L))
+                .thenReturn(Optional.empty());
+        DataValidationException dataValidationException = Assertions.assertThrows(DataValidationException.class,
+                () -> campaignService.getCampaignById(123L));
+
+        Assertions.assertEquals("Campaign with id" + 123 + " not found", dataValidationException.getMessage());
     }
 }
