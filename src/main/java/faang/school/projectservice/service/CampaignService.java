@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.company.CampaignDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
@@ -40,5 +41,22 @@ public class CampaignService {
         campaignRepository.save(campaign);
         log.info("Published campaign: {}", campaign);
         return campaignMapper.toDto(campaign);
+    }
+
+    @Transactional
+    public CampaignDto updateCampaign(CampaignDto dto, long userId) {
+        Campaign campaign = campaignRepository.findById(dto.getId())
+                .orElseThrow(() -> new DataValidationException("Campaign not found"));
+        TeamMember teamMember = teamMemberRepository.findById(userId);
+        Project project = projectRepository.getProjectById(dto.getProjectId());
+
+        campaignServiceValidator.validatePublishedCampaign(project, teamMember);
+
+        campaign.setTitle(dto.getTitle());
+        campaign.setDescription(dto.getDescription());
+
+        Campaign savedCompany = campaignRepository.save(campaign);
+        log.info("Updated campaign: {}", savedCompany);
+        return campaignMapper.toDto(savedCompany);
     }
 }

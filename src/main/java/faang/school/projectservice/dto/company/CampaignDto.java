@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @Builder
-@Validated
 public class CampaignDto {
     @NotNull
     private Long id;

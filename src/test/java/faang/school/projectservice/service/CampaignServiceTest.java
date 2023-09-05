@@ -26,6 +26,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
 class CampaignServiceTest {
@@ -122,5 +125,39 @@ class CampaignServiceTest {
                 .thenReturn(project);
         Assertions.assertThrows(DataValidationException.class,
                 () -> campaignService.publishCampaign(campaignDto, 4L));
+    }
+
+    @Test
+    public void update_Successful() {
+        Mockito.when(campaignRepository.findById(campaignDto.getId()))
+                .thenReturn(Optional.of(campaign));
+
+        Mockito.when(projectRepository.getProjectById(campaignDto.getProjectId()))
+                .thenReturn(project);
+
+        Mockito.lenient().when(userContext.getUserId())
+                .thenReturn(1L);
+
+        Mockito.when(teamMemberRepository.findById(1L))
+                .thenReturn(teamMember);
+
+        Mockito.when(campaignRepository.save(campaign))
+                .thenReturn(campaign);
+
+        CampaignDto actual = campaignService.updateCampaign(campaignDto, 1L);
+
+        Assertions.assertEquals(campaignDto, actual);
+
+        Mockito.verify(campaignRepository, Mockito.times(1)).save(campaign);
+    }
+
+    @Test
+    public void update_CampaignNotFound() {
+        Mockito.when(campaignRepository.findById(campaignDto.getId()))
+                .thenReturn(Optional.empty());
+        DataValidationException dataValidationException = Assertions.assertThrows(DataValidationException.class,
+                () -> campaignService.updateCampaign(campaignDto, anyLong()));
+
+        Assertions.assertEquals("Campaign not found", dataValidationException.getMessage());
     }
 }
