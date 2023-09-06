@@ -4,6 +4,9 @@ import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.dto.resource.UpdateResourceDto;
+import faang.school.projectservice.exception.FileDeleteException;
+import faang.school.projectservice.exception.FileUpdateException;
+import faang.school.projectservice.exception.FileUploadException;
 import faang.school.projectservice.exception.InvalidCurrentUserException;
 import faang.school.projectservice.exception.StorageSpaceExceededException;
 import faang.school.projectservice.jpa.ResourceRepository;
@@ -28,6 +31,8 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ProjectFileService {
+    private static final int MAX_REPS = 3;
+
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
     private final FileService fileService;
@@ -38,18 +43,30 @@ public class ProjectFileService {
     public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long userId) {
         Resource resource;
         String fileKey;
-        try {
-            Project project = projectRepository.getProjectById(projectId);
-            TeamMember teamMember = findTeamMember(project, userId);
-            fileValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
+        int attempts = 0;
 
-            fileKey = generateFileKey(multipartFile, projectId);
-            resource = fillUpResource(multipartFile, project, teamMember, fileKey);
+        while (true) {
+            try {
+                Project project = projectRepository.getProjectById(projectId);
+                TeamMember teamMember = findTeamMember(project, userId);
+                fileValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
 
-            updateProjectStorage(resource);
-            resourceRepository.save(resource);
-        } catch (OptimisticLockException e) {
-            throw new RuntimeException("Could not update due to concurrent modifications. Please try again.");
+                fileKey = generateFileKey(multipartFile, projectId);
+                resource = fillUpResource(multipartFile, project, teamMember, fileKey);
+
+                updateProjectStorage(resource);
+                resourceRepository.save(resource);
+
+                break;
+            } catch (OptimisticLockException e) {
+                attempts++;
+
+                if (attempts == MAX_REPS) {
+                    String errorMessage = String.format(
+                            "Could not upload due to concurrent modifications after %d retries. Please try again.", MAX_REPS);
+                    throw new FileUploadException(errorMessage);
+                }
+            }
         }
 
         fileService.upload(multipartFile, fileKey);
@@ -60,25 +77,36 @@ public class ProjectFileService {
     public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
         Resource resource;
         String fileKey;
-        try {
-            resource = resourceRepository.getReferenceById(resourceId);
-            TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
-            fileValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
-            fileValidator.validateIfUserCanChangeFile(resource, userId);
-            BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
-                    resource, BigInteger.valueOf(multipartFile.getSize()));
+        int attempts = 0;
 
-            fileKey = generateFileKey(multipartFile, resource.getProject().getId());
-            resource.getProject().setStorageSize(storageCapacityOnUpdate);
+        while (true) {
+            try {
+                resource = resourceRepository.getReferenceById(resourceId);
+                TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
+                fileValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
+                fileValidator.validateIfUserCanChangeFile(resource, userId);
+                BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
+                        resource, BigInteger.valueOf(multipartFile.getSize()));
 
-            resource.setUpdatedBy(updatedBy);
-            resource.setKey(fileKey);
-            resource.setSize(BigInteger.valueOf(multipartFile.getSize()));
-            resourceRepository.save(resource);
+                fileKey = generateFileKey(multipartFile, resource.getProject().getId());
+                resource.getProject().setStorageSize(storageCapacityOnUpdate);
 
-            updateProjectStorage(resource);
-        } catch (OptimisticLockException e) {
-            throw new RuntimeException("Could not update due to concurrent modifications. Please try again.");
+                resource.setUpdatedBy(updatedBy);
+                resource.setKey(fileKey);
+                resource.setSize(BigInteger.valueOf(multipartFile.getSize()));
+                resourceRepository.save(resource);
+                updateProjectStorage(resource);
+
+                break;
+            } catch (OptimisticLockException e) {
+                attempts++;
+
+                if (attempts == MAX_REPS) {
+                    String errorMessage = String.format(
+                            "Could not update due to concurrent modifications after %d retries. Please try again.", MAX_REPS);
+                    throw new FileUpdateException(errorMessage);
+                }
+            }
         }
 
         fileService.delete(resource.getKey());
@@ -89,19 +117,29 @@ public class ProjectFileService {
     @Transactional
     public void deleteFile(long resourceId, long userId) {
         Resource resource;
-        try {
-            resource = resourceRepository.getReferenceById(resourceId);
-            TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
-            fileValidator.validateIfUserCanChangeFile(resource, userId);
-            fileValidator.validateResourceOnDelete(resource);
+        int attempts = 0;
 
-            resource.setStatus(ResourceStatus.DELETED);
-            resource.setUpdatedBy(updatedBy);
-            updateProjectStorage(resource);
+        while (true) {
+            try {
+                resource = resourceRepository.getReferenceById(resourceId);
+                TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
+                fileValidator.validateIfUserCanChangeFile(resource, userId);
+                fileValidator.validateResourceOnDelete(resource);
 
-            resourceRepository.save(resource);
-        } catch (OptimisticLockException e) {
-            throw new RuntimeException("Could not update due to concurrent modifications. Please try again.");
+                resource.setStatus(ResourceStatus.DELETED);
+                resource.setUpdatedBy(updatedBy);
+                updateProjectStorage(resource);
+                resourceRepository.save(resource);
+                break;
+            } catch (OptimisticLockException e) {
+                attempts++;
+
+                if (attempts == MAX_REPS) {
+                    String errorMessage = String.format(
+                            "Could not delete due to concurrent modifications after %d retries. Please try again.", MAX_REPS);
+                    throw new FileDeleteException(errorMessage);
+                }
+            }
         }
 
         fileService.delete(resource.getKey());
