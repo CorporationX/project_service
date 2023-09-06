@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.company.CampaignDto;
 import faang.school.projectservice.service.CampaignService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +32,11 @@ public class CampaignController {
     }
 
     @GetMapping("/{id}")
-    public CampaignDto getCampaignById(@PathVariable Long id) {
-        return campaignService.getCampaignById(id);
+    public ResponseEntity<CampaignDto> getCampaignById(@PathVariable Long id) {
+        CampaignDto campaign = campaignService.getCampaignById(id);
+        if (campaign == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(campaign);
     }
 }
