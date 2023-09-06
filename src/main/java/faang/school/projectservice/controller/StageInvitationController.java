@@ -5,12 +5,11 @@ import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.service.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/invitation")
 public class StageInvitationController {

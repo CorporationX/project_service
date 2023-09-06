@@ -4,24 +4,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.redis.InviteSentEventDto;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InviteSentEvent extends AbstractEvent<InviteSentEventDto> {
+public class InviteSentPublisher extends AbstractPublisher<InviteSentEventDto> {
 
     private final StageInvitationMapper mapper;
-    private final ChannelTopic topicInvitation;
 
-    public InviteSentEvent(RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper, StageInvitationMapper mapper, ChannelTopic topicInvitation) {
-        super(redisTemplate, objectMapper);
+    public InviteSentPublisher(RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper,
+                               StageInvitationMapper mapper,
+                               @Value("${spring.data.redis.channels.invitation_channel}") String topicChannelName) {
+        super(redisTemplate, objectMapper, topicChannelName);
         this.mapper = mapper;
-        this.topicInvitation = topicInvitation;
     }
 
     public void publish(StageInvitation stageInvitation) {
         InviteSentEventDto event = mapper.toEventDto(stageInvitation);
-        publishInTopic(topicInvitation, event);
+        publishInTopic(event);
     }
 }

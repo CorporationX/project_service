@@ -11,7 +11,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.publisher.InviteSentEvent;
+import faang.school.projectservice.publisher.InviteSentPublisher;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validate.StageInvitationValidator;
@@ -41,7 +41,7 @@ class StageInvitationServiceTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Mock
-    private InviteSentEvent inviteSentEvent;
+    private InviteSentPublisher inviteSentEvent;
 
     StageInvitation invitation;
     StageInvitation stageInvitation;
