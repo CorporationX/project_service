@@ -47,6 +47,11 @@ public class CampaignService {
     public CampaignDto updateCampaign(CampaignDto dto, long userId) {
         Campaign campaign = campaignRepository.findById(dto.getId())
                 .orElseThrow(() -> new DataValidationException("Campaign not found"));
+
+        if (campaign.isDeleted()) {
+            throw new DataValidationException("Campaign with id " + dto.getId() + " mark as deleted");
+        }
+
         TeamMember teamMember = teamMemberRepository.findById(userId);
         Project project = projectRepository.getProjectById(dto.getProjectId());
 
@@ -64,6 +69,10 @@ public class CampaignService {
     public CampaignDto getCampaignById(Long id) {
         Campaign campaign = campaignRepository.findById(id)
                 .orElseThrow(() -> new DataValidationException("Campaign with id" + id + " not found"));
+
+        if (campaign.isDeleted()) {
+            throw new DataValidationException("Campaign with id" + id + " mark as deleted");
+        }
 
         log.info("Retrieved campaign: {}", campaign);
         return campaignMapper.toDto(campaign);
