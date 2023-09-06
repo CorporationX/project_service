@@ -35,13 +35,12 @@ public class ProjectFileController {
         return projectFileService.uploadFile(multipartFile, projectId, userId);
     }
 
-    @PutMapping("/{projectId}/files/resource/{resourceId}/update/")
+    @PutMapping("/files/resource/{resourceId}/update/")
     public UpdateResourceDto updateFile(@RequestParam("file") MultipartFile multipartFile,
-                                        @PathVariable long resourceId,
-                                        @PathVariable long projectId) {
+                                        @PathVariable long resourceId) {
         long userId = userContext.getUserId();
 
-        return projectFileService.updateFile(multipartFile, resourceId, projectId, userId);
+        return projectFileService.updateFile(multipartFile, resourceId, userId);
     }
 
     @GetMapping("/files/resource/{resourceId}/download/")

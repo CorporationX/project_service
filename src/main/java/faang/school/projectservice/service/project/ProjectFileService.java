@@ -42,18 +42,11 @@ public class ProjectFileService {
     @Transactional
     public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long userId) {
         Resource resource;
-        String fileKey = generateFileKey(multipartFile, projectId);
         int attempts = 0;
 
         while (true) {
             try {
-                Project project = projectRepository.getProjectById(projectId);
-                TeamMember teamMember = findTeamMember(project, userId);
-                fileValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
-                resource = fillUpResource(multipartFile, project, teamMember, fileKey);
-
-                updateProjectStorage(resource);
-                resourceRepository.save(resource);
+                resource = uploadResource(multipartFile, projectId, userId);
 
                 break;
             } catch (OptimisticLockException e) {
@@ -67,32 +60,18 @@ public class ProjectFileService {
             }
         }
 
-        fileService.upload(multipartFile, fileKey);
+        fileService.upload(multipartFile, resource.getKey());
         return resourceMapper.toDto(resource);
     }
 
     @Transactional
-    public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long projectId, long userId) {
+    public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
         Resource resource;
-        String fileKey = generateFileKey(multipartFile, projectId);
         int attempts = 0;
 
         while (true) {
             try {
-                resource = resourceRepository.getReferenceById(resourceId);
-                TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
-                fileValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
-                fileValidator.validateIfUserCanChangeFile(resource, userId);
-                BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
-                        resource, BigInteger.valueOf(multipartFile.getSize()));
-
-                resource.getProject().setStorageSize(storageCapacityOnUpdate);
-
-                resource.setUpdatedBy(updatedBy);
-                resource.setKey(fileKey);
-                resource.setSize(BigInteger.valueOf(multipartFile.getSize()));
-                resourceRepository.save(resource);
-                updateProjectStorage(resource);
+                resource = updateResource(multipartFile, resourceId, userId);
 
                 break;
             } catch (OptimisticLockException e) {
@@ -107,26 +86,18 @@ public class ProjectFileService {
         }
 
         fileService.delete(resource.getKey());
-        fileService.upload(multipartFile, fileKey);
+        fileService.upload(multipartFile, resource.getKey());
         return resourceMapper.toUpdateDto(resource);
     }
 
     @Transactional
     public void deleteFile(long resourceId, long userId) {
-        Resource resource;
+        String key;
         int attempts = 0;
 
         while (true) {
             try {
-                resource = resourceRepository.getReferenceById(resourceId);
-                TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
-                fileValidator.validateIfUserCanChangeFile(resource, userId);
-                fileValidator.validateResourceOnDelete(resource);
-
-                resource.setStatus(ResourceStatus.DELETED);
-                resource.setUpdatedBy(updatedBy);
-                updateProjectStorage(resource);
-                resourceRepository.save(resource);
+                key = deleteResource(resourceId, userId);
                 break;
             } catch (OptimisticLockException e) {
                 attempts++;
@@ -139,7 +110,7 @@ public class ProjectFileService {
             }
         }
 
-        fileService.delete(resource.getKey());
+        fileService.delete(key);
     }
 
     @Transactional(readOnly = true)
@@ -154,6 +125,53 @@ public class ProjectFileService {
                 .inputStream(file.getObjectContent())
                 .size(resource.getSize().longValue())
                 .build();
+    }
+
+    private Resource uploadResource(MultipartFile multipartFile, long projectId, long userId) {
+        Project project = projectRepository.getProjectById(projectId);
+        TeamMember teamMember = findTeamMember(project, userId);
+        fileValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
+
+        String fileKey = generateFileKey(multipartFile, projectId);
+        Resource resource = fillUpResource(multipartFile, project, teamMember, fileKey);
+
+        updateProjectStorage(resource);
+        resourceRepository.save(resource);
+
+        return resource;
+    }
+
+    private Resource updateResource(MultipartFile multipartFile, long resourceId, long userId) {
+        Resource resource = resourceRepository.getReferenceById(resourceId);
+        TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
+        fileValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
+        fileValidator.validateIfUserCanChangeFile(resource, userId);
+        BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
+                resource, BigInteger.valueOf(multipartFile.getSize()));
+
+        resource.getProject().setStorageSize(storageCapacityOnUpdate);
+
+        resource.setUpdatedBy(updatedBy);
+        resource.setKey(generateFileKey(multipartFile, resource.getProject().getId()));
+        resource.setSize(BigInteger.valueOf(multipartFile.getSize()));
+        resourceRepository.save(resource);
+        updateProjectStorage(resource);
+
+        return resource;
+    }
+
+    private String deleteResource(long resourceId, long userId) {
+        Resource resource = resourceRepository.getReferenceById(resourceId);
+        TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
+        fileValidator.validateIfUserCanChangeFile(resource, userId);
+        fileValidator.validateResourceOnDelete(resource);
+
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedBy(updatedBy);
+        updateProjectStorage(resource);
+        resourceRepository.save(resource);
+
+        return resource.getKey();
     }
 
     private String generateFileKey(MultipartFile multipartFile, long projectId) {
