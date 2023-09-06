@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InviteSentEventDto {
-    private int authorId;
-    private int invitedId;
-    private int projectId;
+    private long authorId;
+    private long invitedId;
+    private long projectId;
 }
