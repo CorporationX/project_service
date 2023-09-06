@@ -42,7 +42,7 @@ public class ProjectFileService {
     @Transactional
     public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long userId) {
         Resource resource;
-        String fileKey;
+        String fileKey = generateFileKey(multipartFile, projectId);
         int attempts = 0;
 
         while (true) {
@@ -50,8 +50,6 @@ public class ProjectFileService {
                 Project project = projectRepository.getProjectById(projectId);
                 TeamMember teamMember = findTeamMember(project, userId);
                 fileValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
-
-                fileKey = generateFileKey(multipartFile, projectId);
                 resource = fillUpResource(multipartFile, project, teamMember, fileKey);
 
                 updateProjectStorage(resource);
@@ -74,9 +72,9 @@ public class ProjectFileService {
     }
 
     @Transactional
-    public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
+    public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long projectId, long userId) {
         Resource resource;
-        String fileKey;
+        String fileKey = generateFileKey(multipartFile, projectId);
         int attempts = 0;
 
         while (true) {
@@ -88,7 +86,6 @@ public class ProjectFileService {
                 BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
                         resource, BigInteger.valueOf(multipartFile.getSize()));
 
-                fileKey = generateFileKey(multipartFile, resource.getProject().getId());
                 resource.getProject().setStorageSize(storageCapacityOnUpdate);
 
                 resource.setUpdatedBy(updatedBy);

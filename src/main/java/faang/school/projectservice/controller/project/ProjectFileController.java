@@ -22,12 +22,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/projects/")
+@RequestMapping("/api/v1/projects")
 public class ProjectFileController {
     private final ProjectFileService projectFileService;
     private final UserContext userContext;
 
-    @PostMapping("{projectId}/files/")
+    @PostMapping("/{projectId}/files/")
     public ResourceDto uploadFile(@RequestParam("file") MultipartFile multipartFile,
                                   @PathVariable long projectId) {
         long userId = userContext.getUserId();
@@ -35,12 +35,13 @@ public class ProjectFileController {
         return projectFileService.uploadFile(multipartFile, projectId, userId);
     }
 
-    @PutMapping("/files/resource/{resourceId}/update/")
+    @PutMapping("/{projectId}/files/resource/{resourceId}/update/")
     public UpdateResourceDto updateFile(@RequestParam("file") MultipartFile multipartFile,
-                                        @PathVariable long resourceId) {
+                                        @PathVariable long resourceId,
+                                        @PathVariable long projectId) {
         long userId = userContext.getUserId();
 
-        return projectFileService.updateFile(multipartFile, resourceId, userId);
+        return projectFileService.updateFile(multipartFile, resourceId, projectId, userId);
     }
 
     @GetMapping("/files/resource/{resourceId}/download/")
