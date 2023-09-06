@@ -11,6 +11,7 @@ import faang.school.projectservice.mapper.invitationMaper.TeamMemberMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.InviteSentEvent;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -24,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +39,8 @@ public class StageInvitationServiceTest {
     private TeamMemberRepository memberRepository;
     @Mock
     private StageRepository stageRepository;
+    @Mock
+    private InviteSentEvent inviteSentEvent;
     @InjectMocks
     private StageInvitationService invitationService;
     DtoStage stage1;
@@ -69,6 +73,7 @@ public class StageInvitationServiceTest {
         when(invitationRepository.save(stageInvitationMapper.toStageInvitation(invitation3))).thenReturn(stageInvitationMapper.toStageInvitation(invitation3));
         DtoStageInvitation expected = invitationService.invitationHasBeenSent(invitation3);
         assertEquals(expected, invitation3);
+        verify(inviteSentEvent).publish(stageInvitationMapper.toEventDto(stageInvitationMapper.toStageInvitation(invitation3)));
     }
 
     @Test
@@ -90,7 +95,7 @@ public class StageInvitationServiceTest {
                 , stageInvitationMapper.toStageInvitation(invitation3), stageInvitationMapper.toStageInvitation(invitation4));
         List<DtoStageInvitation> actual = List.of(invitation1, invitation3);
         invitationService = new StageInvitationService(invitationRepository, stageRepository,
-                memberRepository, List.of(new FilterStatus(), new FilterAuthor()));
+                memberRepository, List.of(new FilterStatus(), new FilterAuthor()), inviteSentEvent);
         when(invitationRepository.findAll()).thenReturn(stageInvitations);
         List<DtoStageInvitation> expected = invitationService.getAllStageInvitation(1L, new DtoStageInvitationFilter(StageInvitationStatus.PENDING, null));
         assertEquals(expected, actual);

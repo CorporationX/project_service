@@ -11,6 +11,7 @@ import faang.school.projectservice.mapper.invitationMaper.TeamMemberMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.InviteSentEvent;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -36,10 +37,17 @@ public class StageInvitationService {
     private final TeamMemberRepository memberRepository;
 
     private final List<StageInvitationFilter> invitationFilter;
+    private final InviteSentEvent inviteSentEvent;
 
+    @Transactional
     public DtoStageInvitation invitationHasBeenSent(DtoStageInvitation dto) {
         dataVerificationStageInvitation(dto);
-        return stageInvitationMapper.toDto(invitationRepository.save(stageInvitationMapper.toStageInvitation(dto)));
+
+        StageInvitation stageInvitation = stageInvitationMapper.toStageInvitation(dto);
+        StageInvitation savedInvitation = invitationRepository.save(stageInvitation);
+
+        inviteSentEvent.publish(stageInvitationMapper.toEventDto(savedInvitation));
+        return stageInvitationMapper.toDto(savedInvitation);
     }
 
     @Transactional

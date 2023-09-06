@@ -2,6 +2,7 @@ package faang.school.projectservice.handler;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorResponse;
+import faang.school.projectservice.exception.SerializeJsonException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -19,7 +20,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleDataValidationException(DataValidationException e){
+    public ErrorResponse handleDataValidationException(DataValidationException e) {
         return new ErrorResponse(e.getMessage());
     }
 
@@ -36,13 +37,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException e){
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleRuntimeException(RuntimeException e){
+    public ErrorResponse handleRuntimeException(RuntimeException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(SerializeJsonException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleJsonSerializeException(SerializeJsonException e) {
         return new ErrorResponse(e.getMessage());
     }
 }
