@@ -11,7 +11,7 @@ import java.util.List;
 
 @Component
 public class CampaignServiceValidator {
-    public void validatePublish(Project project, TeamMember requester) {
+    public void validate(Project project, TeamMember requester) {
         if (!isPublishValid(project, requester)) {
             throw new DataValidationException("In this project there is no such team member");
         }

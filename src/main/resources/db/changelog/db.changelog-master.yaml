@@ -13,3 +13,7 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V006__create_vacancy.sql
   - include:
       file: db/changelog/changeset/project_V007__create_internship.sql
+  - include:
+      file: db/changelog/changeset/project_V008__alter_campaign.sql
+  - include:
+      file: db/changelog/changeset/project_V009__rename_campaign.sql

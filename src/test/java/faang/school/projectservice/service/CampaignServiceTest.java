@@ -24,7 +24,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -147,5 +146,24 @@ class CampaignServiceTest {
         Assertions.assertEquals(campaignDto, actual);
 
         Mockito.verify(campaignRepository, Mockito.times(1)).save(campaign);
+    }
+
+    @Test
+    public void delete_Successful(){
+        Mockito.when(campaignRepository.findById(campaign.getId()))
+                .thenReturn(Optional.of(campaign));
+
+        campaignService.delete(campaign.getId());
+
+        Mockito.verify(campaignRepository).save(campaign);
+    }
+
+    @Test
+    public void delete_throwException(){
+        Mockito.when(campaignRepository.findById(campaign.getId()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(DataValidationException.class,
+                () -> campaignService.delete(campaign.getId()));
     }
 }

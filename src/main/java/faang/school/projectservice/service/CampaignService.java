@@ -5,22 +5,21 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.util.validator.CampaignServiceValidator;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CampaignService {
 
     private final CampaignMapper campaignMapper;
@@ -34,7 +33,7 @@ public class CampaignService {
 
         Project project = projectRepository.getProjectById(campaignDto.getProjectId());
 
-        campaignServiceValidator.validatePublish(project, foundTeamMember);
+        campaignServiceValidator.validate(project, foundTeamMember);
 
         Campaign campaign = campaignMapper.toEntity(campaignDto);
         campaign.setProject(project);
@@ -54,7 +53,7 @@ public class CampaignService {
 
         Project project = projectRepository.getProjectById(campaignDto.getProjectId());
 
-        campaignServiceValidator.validatePublish(project, foundTeamMember);
+        campaignServiceValidator.validate(project, foundTeamMember);
 
         Campaign campaign = campaignById.get();
         campaign.setTitle(campaignDto.getTitle());
@@ -62,5 +61,19 @@ public class CampaignService {
 
         Campaign save = campaignRepository.save(campaign);
         return campaignMapper.toDto(save);
+    }
+
+    public void delete(long campaignId) {
+        Optional<Campaign> campaignById = campaignRepository.findById(campaignId);
+
+        Campaign campaign = campaignById
+                .orElseThrow(()-> {
+                    log.error("No such campaign found.");
+                    return new DataValidationException("No such campaign found.");
+                });
+
+        campaign.setDeleted(true);
+
+        campaignRepository.save(campaign);
     }
 }

@@ -1,0 +1,1 @@
+ALTER TABLE campaign RENAME COLUMN flag TO is_deleted;

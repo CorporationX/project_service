@@ -19,7 +19,7 @@ import java.util.Currency;
 @Builder
 public class CampaignDto {
 
-    @NotNull
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
     @NotBlank(message = " Title most not be empty! ")
