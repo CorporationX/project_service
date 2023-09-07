@@ -76,4 +76,16 @@ public class CampaignService {
 
         campaignRepository.save(campaign);
     }
+
+    public CampaignDto getCampaign(long campaignId) {
+        Optional<Campaign> campaignById = campaignRepository.findById(campaignId);
+
+        Campaign campaign = campaignById
+                .orElseThrow(()-> {
+                    log.error("No such campaign found.");
+                    return new DataValidationException("No such campaign found.");
+                });
+
+        return campaignMapper.toDto(campaign);
+    }
 }
