@@ -11,6 +11,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.util.validator.CampaignServiceValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CampaignService {
 
     private final CampaignMapper campaignMapper;
@@ -64,8 +66,12 @@ public class CampaignService {
     public void delete(long campaignId) {
         Optional<Campaign> campaignById = campaignRepository.findById(campaignId);
 
-        campaignById.orElseThrow(()-> new DataValidationException("No such campaign found."));
-        Campaign campaign = campaignById.get();
+        Campaign campaign = campaignById
+                .orElseThrow(()-> {
+                    log.error("No such campaign found.");
+                    return new DataValidationException("No such campaign found.");
+                });
+
         campaign.setDeleted(true);
 
         campaignRepository.save(campaign);
