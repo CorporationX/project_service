@@ -34,12 +34,13 @@ public class ProjectService {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("This project already exist");
         }
-
         projectDto.setStatus(ProjectStatus.CREATED);
         LocalDateTime now = LocalDateTime.now();
         projectDto.setCreatedAt(now);
-        projectDto.setUpdatedAt(now);
-        return mapper.toDto(projectRepository.save(mapper.toEntity(projectDto)));
+
+        Project project = mapper.toEntity(projectDto);
+        project.setVisibility(projectDto.getVisibility());
+        return mapper.toDto(projectRepository.save(project));
     }
 
     public ProjectDto update(ProjectDto projectDto, Long id) {

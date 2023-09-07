@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -34,8 +35,11 @@ public class ProjectDto {
     private Long ownerId;
 
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 
     @NotNull
     private ProjectStatus status;
+
+    private ProjectVisibility visibility;
 }
