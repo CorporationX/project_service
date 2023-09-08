@@ -4,8 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ChangeTaskStatusDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.DataValidException;
-import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.dto.redis.TaskCompletedEvent;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -47,7 +46,7 @@ public class ProjectController {
     }
 
     @PutMapping("/task")
-    public ChangeTaskStatusDto changeTaskStatus(@RequestBody @Validated ChangeTaskStatusDto changeTaskStatusDto) {
+    public TaskCompletedEvent changeTaskStatus(@RequestBody @Validated ChangeTaskStatusDto changeTaskStatusDto) {
         return projectService.changeTaskStatus(changeTaskStatusDto, userContext.getUserId());
     }
 }
