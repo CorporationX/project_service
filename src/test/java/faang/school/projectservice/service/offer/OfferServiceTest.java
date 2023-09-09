@@ -3,8 +3,10 @@ package faang.school.projectservice.service.offer;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.offer.OfferDto;
 import faang.school.projectservice.mapper.offer.OfferMapperImpl;
+import faang.school.projectservice.model.Offer;
 import faang.school.projectservice.repository.OfferRepository;
 import faang.school.projectservice.validator.offer.OfferValidator;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,8 +52,12 @@ class OfferServiceTest {
 
     @Test
     public void updateOffer_Test() {
-        service.updateOffer(offerDto);
+        Offer tempOffer = offerMapper.toEntity(offerDto);
+        Mockito.when(offerRepository.save(tempOffer)).thenReturn(tempOffer);
 
+        OfferDto result = service.updateOffer(offerDto);
+
+        Assertions.assertEquals(result, offerDto);
         Mockito.verify(offerRepository).save(offerMapper.toEntity(offerDto));
     }
 }

@@ -1,4 +1,4 @@
-CREATE TABLE offer (
+CREATE TABLE if not exists offer (
   id BIGSERIAL PRIMARY KEY,
   vacancy_id BIGINT NOT NULL,
   candidate_id BIGINT NOT NULL,
