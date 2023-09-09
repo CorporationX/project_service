@@ -35,12 +35,11 @@ public class ProjectService {
             throw new DataValidationException("This project already exist");
         }
         projectDto.setStatus(ProjectStatus.CREATED);
-        LocalDateTime now = LocalDateTime.now();
-        projectDto.setCreatedAt(now);
-
+        projectDto.setCreatedAt(LocalDateTime.now());
+        projectDto.setVisibility(ProjectVisibility.PUBLIC);
         Project project = mapper.toEntity(projectDto);
-        project.setVisibility(projectDto.getVisibility());
-        return mapper.toDto(projectRepository.save(project));
+        Project save = projectRepository.save(project);
+        return mapper.toDto(save);
     }
 
     public ProjectDto update(ProjectDto projectDto, Long id) {
@@ -52,8 +51,8 @@ public class ProjectService {
         projectById.setDescription(projectDto.getDescription());
         projectById.setUpdatedAt(LocalDateTime.now());
 
-        Project project = mapper.toEntity(projectDto);
-        return mapper.toDto(projectRepository.save(project));
+        projectRepository.save(projectById);
+        return mapper.toDto(projectById);
     }
 
     public List<ProjectDto> getByFilters(ProjectFilterDto projectFilterDto, long userId) {
