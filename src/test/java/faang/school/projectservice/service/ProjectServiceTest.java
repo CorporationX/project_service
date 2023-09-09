@@ -87,12 +87,10 @@ class ProjectServiceTest {
 
     @Test
     void createValidProject() {
-        TeamMember teamMember = new TeamMember();
-        teamMember.setUserId(1L);
+        Mockito.when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
+                .thenReturn(false);
 
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setOwnerId(teamMember.getId());
-        projectDto.setName("crud");
+        Mockito.when(projectMapper.toEntity(projectDto)).thenReturn(project);
 
         projectService.create(projectDto);
         Mockito.verify(projectRepository, Mockito.times(1))
@@ -101,11 +99,6 @@ class ProjectServiceTest {
 
     @Test
     void createWithDataValidationException() {
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setOwnerId(1L);
-        projectDto.setName("crud");
-
-
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
                 .thenReturn(true);
 
@@ -114,24 +107,20 @@ class ProjectServiceTest {
 
     @Test
     void updateStatusAndDescription() {
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setId(1L);
-        projectDto.setStatus(ProjectStatus.CREATED);
-        projectDto.setDescription("crud");
-        projectDto.setUpdatedAt(LocalDateTime.now());
-
         Long id = projectDto.getId();
         Mockito.when(projectRepository.getProjectById(id))
-                .thenReturn(Project.builder().build());
+                .thenReturn(project);
 
-        projectService.update(projectDto, id);
+        Mockito.when(projectMapper.toDto(project))
+                .thenReturn(projectDto);
+
+        ProjectDto updatedProject = projectService.update(projectDto, id);
 
         Mockito.verify(projectRepository, Mockito.times(1))
-                .save(projectMapper.toEntity(projectDto));
+                .save(project);
 
-        Project projectById = projectRepository.getProjectById(id);
-        assertEquals(projectDto.getDescription(), projectById.getDescription());
-        assertEquals(projectDto.getStatus(), projectById.getStatus());
+        assertEquals(projectDto.getDescription(), updatedProject.getDescription());
+        assertEquals(projectDto.getStatus(), updatedProject.getStatus());
     }
 
     @Test
