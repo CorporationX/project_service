@@ -15,9 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -48,9 +45,7 @@ public class CampaignService {
         Campaign campaign = campaignRepository.findById(dto.getId())
                 .orElseThrow(() -> new DataValidationException("Campaign not found"));
 
-        if (campaign.isDeleted()) {
-            throw new DataValidationException("Campaign with id " + dto.getId() + " mark as deleted");
-        }
+        campaignIsDeleted(campaign, "Campaign with id ", dto.getId());
 
         TeamMember teamMember = teamMemberRepository.findById(userId);
         Project project = projectRepository.getProjectById(dto.getProjectId());
@@ -70,9 +65,7 @@ public class CampaignService {
         Campaign campaign = campaignRepository.findById(id)
                 .orElseThrow(() -> new DataValidationException("Campaign with id" + id + " not found"));
 
-        if (campaign.isDeleted()) {
-            throw new DataValidationException("Campaign with id" + id + " mark as deleted");
-        }
+        campaignIsDeleted(campaign, "Campaign with id", id);
 
         log.info("Retrieved campaign: {}", campaign);
         return campaignMapper.toDto(campaign);
@@ -85,5 +78,11 @@ public class CampaignService {
 
         campaign.setDeleted(true);
         log.info("Set company with id: {} in deleted mode", id);
+    }
+
+    private static void campaignIsDeleted(Campaign campaign, String x, Long dto) {
+        if (campaign.isDeleted()) {
+            throw new DataValidationException(x + dto + " mark as deleted");
+        }
     }
 }
