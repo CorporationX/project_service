@@ -31,11 +31,11 @@ public class ProjectRepository {
         return projectJpaRepository.existsByOwnerIdAndName(userId, name);
     }
 
-    public Project save(Project project){
+    public Project save(Project project) {
         return projectJpaRepository.save(project);
     }
 
-    public boolean existsById(Long id){
+    public boolean existsById(Long id) {
         return projectJpaRepository.existsById(id);
     }
 }

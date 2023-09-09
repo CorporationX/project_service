@@ -59,7 +59,7 @@ public class InternshipValidatorTest {
                                 .status(InternshipStatus.COMPLETED).build(),
                         InternshipDto.builder().interns(List.of(1L))
                                 .startDate(LocalDateTime.now())
-                                .endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS)).build()));
+                                .endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS)).build()));
         assertEquals(exception.getMessage(), "Internship already over!");
     }
 
@@ -71,7 +71,7 @@ public class InternshipValidatorTest {
                         .interns(List.of(TeamMember.builder().build())).build(),
                         InternshipDto.builder().interns(List.of(1L))
                                 .startDate(LocalDateTime.now())
-                                .endDate(LocalDateTime.now().plus(3, ChronoUnit.MONTHS))
+                                .endDate(LocalDateTime.now().plus(2, ChronoUnit.MONTHS))
                                 .interns(List.of(1L, 2L)).build()));
         assertEquals(exception.getMessage(), "Can't add new intern!");
     }
