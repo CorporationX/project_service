@@ -166,4 +166,22 @@ class CampaignServiceTest {
         Assertions.assertThrows(DataValidationException.class,
                 () -> campaignService.delete(campaign.getId()));
     }
+
+    @Test
+    public void getCampaign_Successful(){
+        Mockito.when(campaignRepository.findById(campaignDto.getId()))
+                .thenReturn(Optional.of(campaign));
+
+        var some = campaignService.getCampaign(campaignDto.getId());
+        Assertions.assertEquals(campaignDto, some);
+    }
+
+    @Test
+    public void getCampaign_throwException(){
+        Mockito.when(campaignRepository.findById(campaignDto.getId()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(DataValidationException.class,
+                () -> campaignService.getCampaign(campaignDto.getId()));
+    }
 }

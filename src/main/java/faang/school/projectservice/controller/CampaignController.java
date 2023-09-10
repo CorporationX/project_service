@@ -6,6 +6,7 @@ import faang.school.projectservice.service.CampaignService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,5 +35,10 @@ public class CampaignController {
     @DeleteMapping("/{campaignId}")
     public void deleteCampaign(@PathVariable("campaignId") long campaignId) {
         campaignService.delete(campaignId);
+    }
+
+    @GetMapping("/{campaignId}/get-campaign")
+    public CampaignDto getCampaignById(@PathVariable("campaignId") long campaignId) {
+        return campaignService.getCampaign(campaignId);
     }
 }

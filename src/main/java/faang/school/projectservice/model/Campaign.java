@@ -32,7 +32,7 @@ public class Campaign {
     @Enumerated(EnumType.STRING)
     private CampaignStatus status;
 
-    @Column(name = "flag")
+    @Column(name = "is_deleted")
     private boolean deleted;
 
     @ManyToOne
