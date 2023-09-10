@@ -23,8 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -39,6 +39,7 @@ class ProjectServiceTest {
     Project project1;
     Project project2;
     Project project3;
+    Long ownerId = 1L;
 
     @BeforeEach
     public void init() {
@@ -47,7 +48,7 @@ class ProjectServiceTest {
         List<ProjectFilter> projectFilters = List.of(projectTitleFilter, projectFilterStatus);
         projectService = new ProjectService(projectRepository, projectMapper, projectFilters);
         projectDto = ProjectDto.builder().id(1L).description("s").name("q").ownerId(1L).build();
-        project = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("q").build();
+        project = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("q").ownerId(ownerId).build();
 
         project1 = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("CorporationX").status(ProjectStatus.CREATED).build();
         project2 = Project.builder().id(2L).createdAt(LocalDateTime.now()).description("b").name("CorporationX").status(ProjectStatus.ON_HOLD).build();
@@ -56,7 +57,11 @@ class ProjectServiceTest {
 
     @Test
     public void testCreateProjectThrowsException() {
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(true);
+        Mockito.when(projectMapper.toProject(projectDto))
+                .thenReturn(project);
+        Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString()))
+                .thenReturn(true);
+
         assertThrows(DataValidationException.class, () -> projectService.createProject(projectDto));
     }
 
@@ -64,7 +69,7 @@ class ProjectServiceTest {
     public void testCreateProject() {
         ProjectDto projectDto1 = ProjectDto.builder().id(1L).description("s").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
-        Mockito.when(projectRepository.save(Mockito.any(Project.class))).thenReturn(project);
+        Mockito.when(projectRepository.save(any(Project.class))).thenReturn(project);
         Mockito.when(projectMapper.toProject(projectDto)).thenReturn(project);
         Mockito.when(projectMapper.toProjectDto(project)).thenReturn(projectDto1);
         assertEquals(ProjectStatus.CREATED, projectService.createProject(projectDto).getStatus());

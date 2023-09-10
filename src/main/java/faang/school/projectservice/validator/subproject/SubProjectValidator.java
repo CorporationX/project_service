@@ -31,7 +31,11 @@ public class SubProjectValidator {
     }
 
     private void validateOwnerId(Long ownerId) {
-        userServiceClient.getUser(ownerId);
+        try {
+            userServiceClient.getUser(ownerId);
+        } catch (Exception e) {
+            throw new DataValidationException("Owner not found");
+        }
     }
 
 
