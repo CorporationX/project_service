@@ -10,6 +10,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface  ProjectMapper {
+
+    ProjectMapper INSTANCE = Mappers.getMapper(ProjectMapper.class);
     @Mapping(source = "parentProject.id", target = "parentId")
     @Mapping(source = "children", target = "childrenId", qualifiedByName = "toChildrenId")
     ProjectDto toDto(Project project);
