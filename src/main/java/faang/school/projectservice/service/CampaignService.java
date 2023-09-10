@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -77,4 +78,11 @@ public class CampaignService {
         campaign.setDeleted(true);
         log.info("Set company with id: {} in deleted mode", id);
     }
+
+    @Transactional(readOnly = true)
+    public List<CampaignDto> getAllCampaignsWithFilters(String status, Long id) {
+        campaignServiceValidator.statusValidation(status);
+        return campaignRepository.getAllWithFilters(status, id);
+    }
+
 }
