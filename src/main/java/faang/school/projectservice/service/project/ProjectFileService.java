@@ -54,7 +54,8 @@ public class ProjectFileService {
 
                 if (attempts == MAX_REPS) {
                     String errorMessage = String.format(
-                            "Could not upload due to concurrent modifications after %d retries. Please try again.", MAX_REPS);
+                            "Could not upload due to concurrent modifications after %d retries. Please try again.",
+                            MAX_REPS);
                     throw new FileUploadException(errorMessage);
                 }
             }
@@ -79,7 +80,8 @@ public class ProjectFileService {
 
                 if (attempts == MAX_REPS) {
                     String errorMessage = String.format(
-                            "Could not update due to concurrent modifications after %d retries. Please try again.", MAX_REPS);
+                            "Could not update due to concurrent modifications after %d retries. Please try again.",
+                            MAX_REPS);
                     throw new FileUpdateException(errorMessage);
                 }
             }
@@ -104,7 +106,8 @@ public class ProjectFileService {
 
                 if (attempts == MAX_REPS) {
                     String errorMessage = String.format(
-                            "Could not delete due to concurrent modifications after %d retries. Please try again.", MAX_REPS);
+                            "Could not delete due to concurrent modifications after %d retries. Please try again.",
+                            MAX_REPS);
                     throw new FileDeleteException(errorMessage);
                 }
             }

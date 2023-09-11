@@ -53,7 +53,7 @@ public class ProjectFileServiceTest {
     private ResourceRepository resourceRepository;
     @Mock
     private FileService fileService;
-    @Mock
+    @Spy
     private FileValidator fileValidator;
     @Spy
     private ResourceMapperImpl resourceMapper;
@@ -153,7 +153,7 @@ public class ProjectFileServiceTest {
                 () -> projectFileService.uploadFile(multipartFile, 1L, 3L));
     }
 
-    @Test//NEED FIX
+    @Test
     public void testUploadFile_StorageExceeded() {
         MockMultipartFile bigFile = new MockMultipartFile(
                 "testFile", "test.txt", "text/plain", "Test content!".getBytes());
@@ -166,7 +166,7 @@ public class ProjectFileServiceTest {
 
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 2})//NEED FIX
+    @ValueSource(ints = {1, 2})
     public void testUpdateFile_Successful(int userId) {
         project.setStorageSize(BigInteger.valueOf(0L));
 
@@ -196,11 +196,11 @@ public class ProjectFileServiceTest {
 
         assertEquals(expectedOutput, outputDto);
         assertEquals(expectedProject, project);
-        Mockito.verify(fileService, Mockito.times(1)).delete("p1_12_test.txt");
+        Mockito.verify(fileService, Mockito.times(1)).delete("p1_4_test.txt");
         Mockito.verify(resourceRepository, Mockito.times(1)).save(resource);
     }
 
-    @Test//NEED FIX
+    @Test
     public void testUpdateFile_FileNameDoesNotMatch() {
         MockMultipartFile multipartFileUpdated = new MockMultipartFile(
                 "testFile", "file.txt", "text/plain", "Test".getBytes());
@@ -212,7 +212,7 @@ public class ProjectFileServiceTest {
 
     }
 
-    @ParameterizedTest//NEED FIX
+    @ParameterizedTest
     @ValueSource(ints = {2, 3})
     public void testUpdateFile_UserCantChangeFile(int userId) {
         project.setStorageSize(BigInteger.valueOf(0L));
@@ -258,7 +258,7 @@ public class ProjectFileServiceTest {
         Mockito.verify(projectRepository, Mockito.times(1)).save(project);
     }
 
-    @ParameterizedTest//NEED FIX
+    @ParameterizedTest
     @ValueSource(ints = {2, 3})
     public void testDeleteFile_UserCantDeleteFile(int userId) {
         TeamMember createdBy = TeamMember.builder()
