@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.ErrorResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.JiraRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.lang.reflect.Method;
@@ -108,7 +109,21 @@ class GlobalExceptionHandlerTest {
         assertAll(() -> {
             assertEquals("/someUri", response.getPath());
             assertEquals("Entity not found exception", response.getError());
-            assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
+            assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+        });
+    }
+
+    @Test
+    void handleJiraRequestException() {
+        JiraRequestException exception = mock(JiraRequestException.class);
+        when(exception.getMessage()).thenReturn("Bad request exception");
+
+        ErrorResponseDto response = handler.handleJiraRequestException(exception, webRequest);
+
+        assertAll(() -> {
+            assertEquals("/someUri", response.getPath());
+            assertEquals("Bad request exception", response.getError());
+            assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
         });
     }
 
