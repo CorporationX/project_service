@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -59,4 +60,29 @@ public class CampaignService {
         log.info("Updated campaign: {}", savedCompany);
         return campaignMapper.toDto(savedCompany);
     }
+
+    @Transactional(readOnly = true)
+    public CampaignDto getCampaignById(Long id) {
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("Campaign with id" + id + " not found"));
+
+        log.info("Retrieved campaign: {}", campaign);
+        return campaignMapper.toDto(campaign);
+    }
+
+    @Transactional
+    public void deleteCampaign(Long id) {
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("Campaign with id" + id + " not found"));
+
+        campaign.setDeleted(true);
+        log.info("Set company with id: {} in deleted mode", id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CampaignDto> getAllCampaignsWithFilters(String status, Long id) {
+        campaignServiceValidator.statusValidation(status);
+        return campaignRepository.getAllWithFilters(status, id);
+    }
+
 }

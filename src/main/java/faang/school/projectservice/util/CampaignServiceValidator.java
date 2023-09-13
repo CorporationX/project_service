@@ -29,4 +29,12 @@ public class CampaignServiceValidator {
         }
         return false;
     }
+
+    public void statusValidation(String status) {
+        if (status != null && !status.isEmpty()) {
+            if (!status.equals("ACTIVE") && !status.equals("CANCELED") && !status.equals("COMPLETED")) {
+                throw new DataValidationException("Invalid status");
+            }
+        }
+    }
 }

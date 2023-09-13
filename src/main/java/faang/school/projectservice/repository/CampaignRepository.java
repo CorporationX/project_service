@@ -1,5 +1,6 @@
 package faang.school.projectservice.repository;
 
+import faang.school.projectservice.dto.company.CampaignDto;
 import faang.school.projectservice.model.Campaign;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +26,11 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
                                     @Param("maxGoal") BigDecimal maxGoal,
                                     @Param("status") String status,
                                     Pageable pageable);
+
+    @Query(
+            "SELECT c FROM Campaign c" +
+                    " WHERE c.status is null or c.status = :status" +
+                    " AND c.createdBy is null or c.createdBy = :userId"
+    )
+    List<CampaignDto> getAllWithFilters(String status, Long userId);
 }
