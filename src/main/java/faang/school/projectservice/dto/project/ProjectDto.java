@@ -25,4 +25,5 @@ public class ProjectDto {
     private List<StageDto> stages;
     private ProjectStatus status;
     private ProjectVisibility visibility;
+    private Long ownerId;
 }
