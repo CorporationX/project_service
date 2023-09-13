@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.project;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,9 @@ public class VacancyFilterDto {
     @NotNull
     private Long id;
 
-    @NotNull
+    @NotBlank
     private String name;
+
+    @NotBlank
+    private String position;
 }

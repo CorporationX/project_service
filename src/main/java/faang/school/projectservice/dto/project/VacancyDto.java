@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +17,7 @@ import java.util.List;
 @Validated
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class VacancyDto {
 
     @NotNull
@@ -45,4 +47,10 @@ public class VacancyDto {
 
     @NotNull
     private Double salary;
+
+    @NotBlank
+    private String position;
+
+    @NotNull
+    private Long vacancyPlaces;
 }
