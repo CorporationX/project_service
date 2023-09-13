@@ -15,6 +15,6 @@ public class IssueProjectFilter extends IssueAbstractFilter {
 
     @Override
     public StringBuilder apply(StringBuilder filter, IssueFilterDto issueFilterDto) {
-        return concatFilter(filter, "project", issueFilterDto.getAssignee());
+        return concatFilter(filter, "project", issueFilterDto.getProject());
     }
 }

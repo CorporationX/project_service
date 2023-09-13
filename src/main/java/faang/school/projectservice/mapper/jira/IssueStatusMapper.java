@@ -13,12 +13,12 @@ public interface IssueStatusMapper {
     IssueStatusTransition toTransition(IssueStatusUpdateDto issueStatusUpdateDto);
 
     @Named("toTransition")
-    default IssueStatusTransition.Transition toTransition(String toStatus) {
-        if (toStatus.equalsIgnoreCase("to do")) {
+    default IssueStatusTransition.Transition toTransitionId(String status) {
+        if (status.equalsIgnoreCase("to do")) {
             return new IssueStatusTransition.Transition("11");
-        } else if (toStatus.equalsIgnoreCase("in progress")) {
+        } else if (status.equalsIgnoreCase("in progress")) {
             return new IssueStatusTransition.Transition("21");
-        } else if (toStatus.equalsIgnoreCase("done")) {
+        } else if (status.equalsIgnoreCase("done")) {
             return new IssueStatusTransition.Transition("31");
         }
         return null;

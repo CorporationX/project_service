@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IssuesFetchingDto {
+public class IssueFetchingDto {
 
     private Long total;
 

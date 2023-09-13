@@ -3,12 +3,14 @@ package faang.school.projectservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.cache.JiraProjectCache;
+import faang.school.projectservice.client.JiraClient;
 import faang.school.projectservice.dto.jira.IssueDto;
+import faang.school.projectservice.dto.jira.IssueFilterDto;
 import faang.school.projectservice.dto.jira.IssueReadOnlyDto;
 import faang.school.projectservice.dto.jira.IssueLinkCreationDto;
 import faang.school.projectservice.dto.jira.IssueStatusTransition;
 import faang.school.projectservice.dto.jira.IssueStatusUpdateDto;
-import faang.school.projectservice.dto.jira.IssuesFetchingDto;
+import faang.school.projectservice.dto.jira.IssueFetchingDto;
 import faang.school.projectservice.dto.jira.JiraProjectDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.jira.IssueFilter;
@@ -52,12 +54,25 @@ public class JiraService {
         return readIssue(issueJson);
     }
 
-    public IssuesFetchingDto getAllWithFilter(String projectKey, String filter) {
-        JiraProject project = getJiraProject(projectKey);
-        filter = "assignee=Ramazan";
-        String issueJson = jiraClient.getWithFilter(project, filter);
+    public IssueFetchingDto getIssues(String projectKey) {
+        IssueFilterDto filter = IssueFilterDto.builder()
+                .project(projectKey)
+                .build();
 
-        return readIssuesResult(issueJson);
+        return getIssuesWithFilter(projectKey, filter);
+    }
+
+    public IssueFetchingDto getIssuesWithFilter(String projectKey, IssueFilterDto filter) {
+        JiraProject project = getJiraProject(projectKey);
+
+        StringBuilder filterBuilder = new StringBuilder();
+        filters.stream()
+                .filter(f -> f.isApplicable(filter))
+                .forEach(f -> f.apply(filterBuilder, filter));
+
+        String issueJson = jiraClient.getIssuesWithFilter(project, filterBuilder.toString());
+
+        return readIssuesFetching(issueJson);
     }
 
     public IssueReadOnlyDto createIssue(String projectKey, IssueDto issue) {
@@ -77,9 +92,8 @@ public class JiraService {
         }  // Без указания summary другие поля не обновляются
 
         String body = writeValue(issue);
-        jiraClient.updateIssue(project, issueKey, body);
 
-        return "Issue fields updated successfully";
+        return jiraClient.updateIssue(project, issueKey, body);
     }
 
     public String changeIssueStatus(String projectKey, String issueKey, IssueStatusUpdateDto issueStatus) {
@@ -87,17 +101,15 @@ public class JiraService {
 
         IssueStatusTransition transition = issueStatusMapper.toTransition(issueStatus);
         String body = writeValue(transition);
-        jiraClient.changeIssueStatus(project, issueKey, body);
 
-        return "Issue status changed successfully";
+        return jiraClient.changeIssueStatus(project, issueKey, body);
     }
 
     public String createIssueLink(String projectKey, IssueLinkCreationDto issueLinkCreationDto) {
         JiraProject project = getJiraProject(projectKey);
         String body = writeValue(issueLinkCreationDto);
-        jiraClient.createIssueLink(project, body);
 
-        return "Issue link created successfully";
+        return jiraClient.createIssueLink(project, body);
     }
 
     private JiraProject getJiraProject(String projectKey) {
@@ -121,9 +133,9 @@ public class JiraService {
         }
     }
 
-    private IssuesFetchingDto readIssuesResult(String value) {
+    private IssueFetchingDto readIssuesFetching(String value) {
         try {
-            return objectMapper.readValue(value, IssuesFetchingDto.class);
+            return objectMapper.readValue(value, IssueFetchingDto.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

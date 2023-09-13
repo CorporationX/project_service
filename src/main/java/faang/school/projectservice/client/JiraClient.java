@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.client;
 
 import faang.school.projectservice.exception.JiraRequestException;
 import faang.school.projectservice.model.jira.JiraProject;
@@ -17,6 +17,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @Component
 public class JiraClient {
+
     private final RestTemplate restTemplate;
 
     public String getIssue(JiraProject project, String issueKey) {
@@ -26,7 +27,7 @@ public class JiraClient {
         return responseEntity.getBody();
     }
 
-    public String getWithFilter(JiraProject project, String filter) {
+    public String getIssuesWithFilter(JiraProject project, String filter) {
         String url = project.getUrl() + "search?jql=" + filter;
         ResponseEntity<String> responseEntity = exchange(url, project, HttpMethod.GET, null);
 
@@ -40,19 +41,25 @@ public class JiraClient {
         return responseEntity.getBody();
     }
 
-    public void updateIssue(JiraProject project, String issueKey, String body) {
+    public String updateIssue(JiraProject project, String issueKey, String body) {
         String url = project.getUrl() + "issue/" + issueKey;
         exchange(url, project, HttpMethod.PUT, body);
+
+        return "Issue fields updated successfully";
     }
 
-    public void changeIssueStatus(JiraProject project, String issueKey, String body) {
+    public String changeIssueStatus(JiraProject project, String issueKey, String body) {
         String url = project.getUrl() + "issue/" + issueKey + "/transitions";
         exchange(url, project, HttpMethod.POST, body);
+
+        return "Issue status changed successfully";
     }
 
-    public void createIssueLink(JiraProject project, String body) {
+    public String createIssueLink(JiraProject project, String body) {
         String url = project.getUrl() + "issueLink";
         exchange(url, project, HttpMethod.POST, body);
+
+        return "Issue link created successfully";
     }
 
     private ResponseEntity<String> exchange(String url, JiraProject project, HttpMethod method, String body) {

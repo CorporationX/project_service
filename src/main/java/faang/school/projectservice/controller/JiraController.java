@@ -1,10 +1,11 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.jira.IssueDto;
+import faang.school.projectservice.dto.jira.IssueFilterDto;
 import faang.school.projectservice.dto.jira.IssueLinkCreationDto;
 import faang.school.projectservice.dto.jira.IssueReadOnlyDto;
 import faang.school.projectservice.dto.jira.IssueStatusUpdateDto;
-import faang.school.projectservice.dto.jira.IssuesFetchingDto;
+import faang.school.projectservice.dto.jira.IssueFetchingDto;
 import faang.school.projectservice.dto.jira.JiraProjectDto;
 import faang.school.projectservice.service.JiraService;
 import jakarta.validation.Valid;
@@ -40,10 +41,16 @@ public class JiraController {
         return jiraService.getIssue(projectKey, issueKey);
     }
 
-    @GetMapping("{projectKey}/issues/{filter}")
-    public IssuesFetchingDto getAllWithFilter(@PathVariable String projectKey, @PathVariable String filter) {
+    @GetMapping("{projectKey}/issues")
+    public IssueFetchingDto getIssues(@PathVariable String projectKey) {
         log.info("Received request to get all issues from project {}", projectKey);
-        return jiraService.getAllWithFilter(projectKey, filter);
+        return jiraService.getIssues(projectKey);
+    }
+
+    @GetMapping("{projectKey}/issues/filter")
+    public IssueFetchingDto getIssuesWithFilter(@PathVariable String projectKey, @RequestBody IssueFilterDto filter) {
+        log.info("Received request to get all issues from project {} with filter {}", projectKey, filter);
+        return jiraService.getIssuesWithFilter(projectKey, filter);
     }
 
     @PostMapping("{projectKey}/issue")
