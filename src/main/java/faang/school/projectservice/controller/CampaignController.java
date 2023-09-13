@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.company.CampaignDto;
 import faang.school.projectservice.service.CampaignService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +34,6 @@ public class CampaignController {
     @GetMapping("/{id}")
     public ResponseEntity<CampaignDto> getCampaignById(@PathVariable Long id) {
         CampaignDto campaign = campaignService.getCampaignById(id);
-        if (campaign == null) {
-            throw new EntityNotFoundException("Campaign with id: " + id + " not found");
-        }
         return ResponseEntity.ok(campaign);
     }
 }
