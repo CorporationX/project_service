@@ -40,6 +40,7 @@ class SubProjectFilterNameTest {
                 .nameProject("Project B")
                 .build();
     }
+
     @Test
     void testIsApplicable() {
         assertTrue(new SubProjectFilterName().isApplicable(filterA));

@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.StatusSubprojectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.dto.subproject.VisibilitySubprojectDto;
+import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.subproject.SubprojectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.moment.MomentMapper;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Service
@@ -35,6 +38,17 @@ public class SubProjectService {
         subProjectValidator.validateCreateProjectDto(projectDto);
         prepareProjectForCreate(projectDto);
         return projectService.createProject(projectDto);
+    }
+
+    private void prepareProjectForCreate(ProjectDto projectDto) {
+        Project parentProject = projectMapper.toProject(projectService.getProjectById(projectDto.getParentProjectId()));
+        ProjectVisibility parentVisibility = parentProject.getVisibility();
+
+        if (projectDto.getVisibility() != null) {
+            subProjectValidator.validateVisibility(projectDto.getVisibility(), parentVisibility);
+        } else {
+            projectDto.setVisibility(parentVisibility);
+        }
     }
 
     public ProjectDto updateStatusSubProject(StatusSubprojectDto statusSubprojectDto) {
@@ -74,31 +88,6 @@ public class SubProjectService {
         projectDto.setVisibility(visibility);
     }
 
-    public List<ProjectDto> getAllSubProject(SubprojectFilterDto filters) {
-        ProjectDto projectDto = projectService.getProjectById(filters.getProjectId());
-        Stream<Project> subprojects = projectDto.getChildrenIds().stream()
-                .map(id -> projectMapper.toProject(projectService.getProjectById(id)))
-                .toList()
-                .stream();
-
-        return subprojectFilters.stream()
-                .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(subprojects, filters))
-                .map(projectMapper::toProjectDto)
-                .toList();
-    }
-
-    private void prepareProjectForCreate(ProjectDto projectDto) {
-        Project parentProject = projectMapper.toProject(projectService.getProjectById(projectDto.getParentProjectId()));
-        ProjectVisibility parentVisibility = parentProject.getVisibility();
-
-        if (projectDto.getVisibility() != null) {
-            subProjectValidator.validateVisibility(projectDto.getVisibility(), parentVisibility);
-        } else {
-            projectDto.setVisibility(parentVisibility);
-        }
-    }
-
     private void changeAllVisibilityInSubproject(ProjectDto projectDto) {
         Deque<ProjectDto> stack = new ArrayDeque<>();
         stack.push(projectDto);
@@ -115,5 +104,26 @@ public class SubProjectService {
                 stack.push(projectService.getProjectById(ids));
             }
         }
+    }
+
+    public List<ProjectDto> getAllSubProject(SubprojectFilterDto filters) {
+        ProjectDto projectDto = projectService.getProjectById(filters.getProjectId());
+        Stream<Project> subprojects = projectDto.getChildrenIds().stream()
+                .map(id -> projectMapper.toProject(projectService.getProjectById(id)))
+                .toList()
+                .stream();
+        return filterSubProject(filters, subprojects);
+    }
+
+    private List<ProjectDto> filterSubProject(SubprojectFilterDto filters, Stream<Project> subprojects) {
+        List<SubprojectFilter> stream = subprojectFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .toList();
+
+        for (SubprojectFilter subprojectFilter : stream) {
+            subprojects = subprojectFilter.apply(subprojects, filters);
+        }
+        return subprojects.map(projectMapper::toProjectDto)
+                .toList();
     }
 }

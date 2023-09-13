@@ -46,7 +46,7 @@ class MomentServiceTest {
 
         momentService.createMoment(momentDto);
 
-        assertTrue(moment.getDate()!=null);
+        assertTrue(moment.getDate() != null);
 
         Mockito.verify(momentMapper, Mockito.times(1))
                 .toMoment(momentDto);

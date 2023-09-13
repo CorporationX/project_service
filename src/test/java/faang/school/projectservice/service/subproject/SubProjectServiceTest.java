@@ -72,6 +72,7 @@ class SubProjectServiceTest {
                 .parentProjectId(idParent)
                 .build();
     }
+
     @Test
     void testCreateProject() {
         project = tree.projectAEntity;
@@ -88,6 +89,7 @@ class SubProjectServiceTest {
         Mockito.verify(projectService, Mockito.times(1))
                 .createProject(projectDto);
     }
+
     @Test
     public void testUpdateStatusSubProject_Not_Completed() {
         project = tree.projectAEntity;
@@ -130,7 +132,7 @@ class SubProjectServiceTest {
                 .thenReturn(projectCompleted);
 
         assertDoesNotThrow(() -> subProjectService.updateStatusSubProject(updateStatusSubprojectDtoCOMPLETED));
-       assertEquals(ProjectStatus.COMPLETED, projectCompletedDto.getStatus());
+        assertEquals(ProjectStatus.COMPLETED, projectCompletedDto.getStatus());
 
         Mockito.verify(subProjectValidator, Mockito.times(1))
                 .validateSubProjectStatus(projectCompletedDto, ProjectStatus.COMPLETED);
@@ -146,12 +148,12 @@ class SubProjectServiceTest {
                 .build();
 
         Mockito.when(projectService.getProjectById(visibilitySubprojectDto.getProjectId()))
-                        .thenReturn(projectDto);
+                .thenReturn(projectDto);
         Mockito.when(projectService.updateProject(Mockito.anyLong(), Mockito.any(ProjectDto.class)))
-                        .thenReturn(projectDto);
+                .thenReturn(projectDto);
 
         Mockito.when(projectService.getProjectById(rightId))
-                        .thenReturn(tree.projectA);
+                .thenReturn(tree.projectA);
         Mockito.when(projectService.getProjectById(2L))
                 .thenReturn(tree.projectB);
         Mockito.when(projectService.getProjectById(3L))
@@ -190,7 +192,7 @@ class SubProjectServiceTest {
         Mockito.when(projectService.getProjectById(rightId))
                 .thenReturn(projectDto);
         Mockito.when(projectService.getProjectById(idParent))
-                        .thenReturn(parentProjectDto);
+                .thenReturn(parentProjectDto);
         Mockito.when(projectService.updateProject(Mockito.anyLong(), Mockito.any(ProjectDto.class)))
                 .thenReturn(projectDto);
 
@@ -282,6 +284,6 @@ class SubProjectServiceTest {
                 .getProjectById(rightId);
 
         assertEquals(1, subProjectServiceMockFilter.getAllSubProject(filterProgress).size());
-        assertEquals(0, subProjectService.getAllSubProject(filterProgress).size());
+        assertEquals(3, subProjectService.getAllSubProject(filterProgress).size());
     }
 }

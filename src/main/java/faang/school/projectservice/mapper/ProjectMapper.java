@@ -20,6 +20,7 @@ public interface ProjectMapper {
                         .map(id -> Project.builder()
                                 .id(id).build()).toList() : null;
     }
+
     default Project map(Long parentProjectId) {
         if (parentProjectId == null) {
             return null;
@@ -35,7 +36,7 @@ public interface ProjectMapper {
 
     @Named("idList")
     default List<Long> idList(List<Project> projects) {
-        return projects!=null ? projects.stream().map(Project::getId).toList() : null;
+        return projects != null ? projects.stream().map(Project::getId).toList() : null;
     }
 
     List<ProjectDto> toListProjectDto(List<Project> projects);
