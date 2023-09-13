@@ -42,9 +42,17 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    region: http://127.0.0.1:9000/
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+
+image:
+  cover:
+    maxHeight: 566
+    maxWidth: 1080
+    maxSize: 5 MB
