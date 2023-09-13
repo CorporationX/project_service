@@ -164,6 +164,20 @@ class CampaignServiceTest {
     }
 
     @Test
+    public void update_CampaignDeleted() {
+        Long campaignId = 123L;
+        Campaign campaign = new Campaign();
+        campaign.setId(campaignId);
+        campaign.setDeleted(true);
+
+        when(campaignRepository.findById(campaignDto.getId()))
+                .thenReturn(Optional.of(campaign));
+
+        Assertions.assertThrows(DataValidationException.class,
+                () -> campaignService.updateCampaign(campaignDto, anyLong()));
+    }
+
+    @Test
     public void testGetCampaignByIdFound() {
         Long campaignId = 123L;
         Campaign campaign = new Campaign();
@@ -178,6 +192,7 @@ class CampaignServiceTest {
         verify(campaignRepository).findById(campaignId);
         verify(campaignMapper).toDto(campaign);
     }
+
     @Test
     public void getCampaignById_CampaignNotFound() {
         when(campaignRepository.findById(123L))
@@ -189,7 +204,22 @@ class CampaignServiceTest {
     }
 
     @Test
-    public void delete_Successful(){
+    public void getCampaignById_CampaignDeleted() {
+        Long campaignId = 123L;
+        Campaign campaign = new Campaign();
+        campaign.setId(campaignId);
+        campaign.setDeleted(true);
+
+        when(campaignRepository.findById(campaignId)).thenReturn(Optional.of(campaign));
+
+        DataValidationException dataValidationException = Assertions.assertThrows(DataValidationException.class,
+                () -> campaignService.getCampaignById(campaignId));
+
+        Assertions.assertEquals("Campaign with id" + campaignId + " mark as deleted", dataValidationException.getMessage());
+    }
+
+    @Test
+    public void delete_Successful() {
         Campaign campaign = new Campaign();
         campaign.setId(1L);
         campaign.setDeleted(false);
@@ -204,7 +234,7 @@ class CampaignServiceTest {
     }
 
     @Test
-    public void delete_throwException(){
+    public void delete_throwException() {
         Mockito.when(campaignRepository.findById(123L))
                 .thenReturn(Optional.empty());
 
