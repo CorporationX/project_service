@@ -31,8 +31,8 @@ public class SubProjectController {
     }
 
     @PutMapping("/visibility")
-    public void updateVisibilitySubProject(@RequestBody @Valid VisibilitySubprojectDto updateStatusSubprojectDto) {
-        subProjectService.updateVisibilitySubProject(updateStatusSubprojectDto);
+    public ProjectDto updateVisibilitySubProject(@RequestBody @Valid VisibilitySubprojectDto updateStatusSubprojectDto) {
+        return subProjectService.updateVisibilitySubProject(updateStatusSubprojectDto);
     }
 
     @GetMapping("/filter/list")

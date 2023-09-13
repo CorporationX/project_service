@@ -55,7 +55,7 @@ class SubProjectControllerTest {
     @Test
     public void testGetAllSubProjects() throws Exception {
         SubprojectFilterDto subprojectFilterDto = SubprojectFilterDto.builder()
-                .id(1L)
+                .projectId(1L)
                 .requesterId(1L)
                 .build();
 
@@ -68,7 +68,7 @@ class SubProjectControllerTest {
     @Test
     void testCreateSubProjectStatus() throws Exception {
         StatusSubprojectDto statusSubprojectDto = StatusSubprojectDto.builder()
-                .id(1L)
+                .projectId(1L)
                 .status(ProjectStatus.ON_HOLD)
                 .build();
 
@@ -85,7 +85,7 @@ class SubProjectControllerTest {
     @Test
     void testCreateSubProjectVisibility() throws Exception {
         VisibilitySubprojectDto visibilitySubprojectDto = VisibilitySubprojectDto.builder()
-                .id(1L)
+                .projectId(1L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
 

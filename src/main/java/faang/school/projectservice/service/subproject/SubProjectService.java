@@ -16,7 +16,6 @@ import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -39,26 +38,48 @@ public class SubProjectService {
     }
 
     public ProjectDto updateStatusSubProject(StatusSubprojectDto statusSubprojectDto) {
-        ProjectDto projectDto = projectService.getProjectById(statusSubprojectDto.getId());
-        subProjectValidator.validateSubProjectStatus(projectDto);
+        ProjectDto projectDto = projectService.getProjectById(statusSubprojectDto.getProjectId());
+        subProjectValidator.validateSubProjectStatus(projectDto, statusSubprojectDto.getStatus());
         ProjectStatus status = statusSubprojectDto.getStatus();
-        Project project = projectMapper.toProject(projectDto);
 
-        updateStatusSubproject(project, status);
-        return projectMapper.toProjectDto(project);
+        updateStatusSubproject(projectDto, status);
+        return projectService.updateProject(projectDto.getId(), projectDto);
     }
 
-    public void updateVisibilitySubProject(VisibilitySubprojectDto updateStatusSubprojectDto) {
-        Project project = projectMapper.toProject(projectService.getProjectById(updateStatusSubprojectDto.getId()));
-        Project parentProject = project.getParentProject();
-        ProjectVisibility visibility = updateStatusSubprojectDto.getVisibility();
+    private void updateStatusSubproject(ProjectDto projectDto, ProjectStatus status) {
+        Project project = projectMapper.toProject(projectDto);
+        if (status == ProjectStatus.COMPLETED &&
+                project.getVisibility() != ProjectVisibility.PRIVATE) {
+            momentService.createMoment(momentMapper.toMomentDto(project));
+        }
+        projectDto.setStatus(status);
+    }
 
-        updateVisibilitySubProject(project, parentProject, visibility);
+    public ProjectDto updateVisibilitySubProject(VisibilitySubprojectDto visibilitySubprojectDto) {
+        ProjectDto projectDto = projectService.getProjectById(visibilitySubprojectDto.getProjectId());
+        updateVisibilitySubProject(projectDto, visibilitySubprojectDto.getVisibility());
+        return projectService.updateProject(projectDto.getId(), projectDto);
+    }
+
+    private void updateVisibilitySubProject(ProjectDto projectDto, ProjectVisibility visibility) {
+        if (projectDto.getParentProjectId() != null) {
+            ProjectDto parentProject = projectService.getProjectById(projectDto.getParentProjectId());
+            subProjectValidator.validateVisibility(visibility, parentProject.getVisibility());
+        }
+
+        if (visibility == ProjectVisibility.PRIVATE) {
+            changeAllVisibilityInSubproject(projectDto);
+        }
+
+        projectDto.setVisibility(visibility);
     }
 
     public List<ProjectDto> getAllSubProject(SubprojectFilterDto filters) {
-        Project project = projectMapper.toProject(projectService.getProjectById(filters.getId()));
-        Stream<Project> subprojects = project.getChildren().stream();
+        ProjectDto projectDto = projectService.getProjectById(filters.getProjectId());
+        Stream<Project> subprojects = projectDto.getChildrenIds().stream()
+                .map(id -> projectMapper.toProject(projectService.getProjectById(id)))
+                .toList()
+                .stream();
 
         return subprojectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
@@ -78,41 +99,20 @@ public class SubProjectService {
         }
     }
 
-    private void updateStatusSubproject(Project project, ProjectStatus status) {
-        if (status == ProjectStatus.COMPLETED &&
-                project.getVisibility() != ProjectVisibility.PRIVATE) {
-            momentService.createMoment(momentMapper.toMomentDto(project));
-        }
-
-        project.setStatus(status);
-        project.setUpdatedAt(LocalDateTime.now());
-    }
-
-    private void updateVisibilitySubProject(Project project, Project parentProject, ProjectVisibility visibility) {
-        subProjectValidator.validateVisibility(visibility, parentProject.getVisibility());
-
-        if (visibility == ProjectVisibility.PRIVATE) {
-            changeAllVisibilityInSubproject(project);
-        }
-
-        project.setUpdatedAt(LocalDateTime.now());
-        project.setVisibility(visibility);
-    }
-
-    private void changeAllVisibilityInSubproject(Project project) {
-        Deque<Project> stack = new ArrayDeque<>();
-        stack.push(project);
+    private void changeAllVisibilityInSubproject(ProjectDto projectDto) {
+        Deque<ProjectDto> stack = new ArrayDeque<>();
+        stack.push(projectDto);
 
         while (!stack.isEmpty()) {
-            Project currentProject = stack.pop();
+            ProjectDto currentProject = stack.pop();
             currentProject.setVisibility(ProjectVisibility.PRIVATE);
-
-            if (currentProject.getChildren() == null) {
+            projectService.updateProject(currentProject.getId(), currentProject);
+            if (currentProject.getChildrenIds() == null) {
                 continue;
             }
 
-            for (Project subproject : currentProject.getChildren()) {
-                stack.push(subproject);
+            for (Long ids : currentProject.getChildrenIds()) {
+                stack.push(projectService.getProjectById(ids));
             }
         }
     }

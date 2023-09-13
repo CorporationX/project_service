@@ -33,7 +33,7 @@ public class ProjectService {
         if (projectRepository.existsByOwnerUserIdAndName(project.getOwnerId(), project.getName())) {
             throw new DataValidationException("You can't create project with name existed");
         }
-        if (project.getVisibility()==null){
+        if (project.getVisibility() == null) {
             project.setVisibility(ProjectVisibility.PUBLIC);
         }
         if (project.getParentProject() != null) {
@@ -48,7 +48,11 @@ public class ProjectService {
 
     public ProjectDto updateProject(Long id, ProjectDto projectDto) {
         projectRepository.getProjectById(id);
-        Project projectUpdate = projectRepository.save(projectMapper.toProject(projectDto));
+        Project projectUpdate = projectMapper.toProject(projectDto);
+        if (projectUpdate.getParentProject() != null) {
+            projectUpdate.setParentProject(projectRepository.getProjectById(projectUpdate.getParentProject().getId()));
+        }
+        projectUpdate = projectRepository.save(projectUpdate);
         return projectMapper.toProjectDto(projectUpdate);
     }
 

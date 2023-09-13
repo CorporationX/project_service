@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StatusSubprojectDto {
     @NotNull
-    private Long id;
+    private Long projectId;
     @NotNull
     private ProjectStatus status;
 }

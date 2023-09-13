@@ -79,6 +79,7 @@ class ProjectServiceTest {
     public void testUpdateProject() {
         ProjectDto projectDtoForUpdate = ProjectDto.builder().id(1L).description("new description").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
+        Mockito.when(projectMapper.toProject(projectDtoForUpdate)).thenReturn(project);
         projectService.updateProject(1L, projectDtoForUpdate);
         Mockito.verify(projectRepository, Mockito.times(1)).save(projectMapper.toProject(projectDtoForUpdate));
     }

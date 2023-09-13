@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @Schema(name = "Project")
@@ -34,4 +36,5 @@ public class ProjectDto {
     private ProjectVisibility visibility;
     @JsonProperty("parentProjectId")
     private Long parentProjectId;
+    private List<Long> childrenIds;
 }

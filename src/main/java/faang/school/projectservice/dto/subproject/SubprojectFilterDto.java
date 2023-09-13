@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SubprojectFilterDto {
     @NotNull
-    private Long id;
+    private Long projectId;
     @NotNull
     private Long requesterId;
-    private String nameFilter;
+    private String nameProject;
     private ProjectStatus statusFilter;
 }

@@ -46,7 +46,7 @@ class MomentServiceTest {
 
         momentService.createMoment(momentDto);
 
-        assertTrue(moment.getCreatedAt().isBefore(LocalDateTime.now()));
+        assertTrue(moment.getDate()!=null);
 
         Mockito.verify(momentMapper, Mockito.times(1))
                 .toMoment(momentDto);

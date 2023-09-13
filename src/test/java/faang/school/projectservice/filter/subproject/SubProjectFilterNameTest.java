@@ -2,7 +2,6 @@ package faang.school.projectservice.filter.subproject;
 
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,10 +34,10 @@ class SubProjectFilterNameTest {
         projects.add(projectC);
 
         filterA = SubprojectFilterDto.builder()
-                .nameFilter("Project A")
+                .nameProject("Project A")
                 .build();
         filterB = SubprojectFilterDto.builder()
-                .nameFilter("Project B")
+                .nameProject("Project B")
                 .build();
     }
     @Test

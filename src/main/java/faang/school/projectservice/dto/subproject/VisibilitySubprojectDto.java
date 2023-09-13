@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class VisibilitySubprojectDto {
     @NotNull
-    private Long id;
+    private Long projectId;
     @NotNull
     private ProjectVisibility visibility;
 }

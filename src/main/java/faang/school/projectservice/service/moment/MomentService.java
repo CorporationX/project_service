@@ -17,8 +17,7 @@ public class MomentService {
 
     public MomentDto createMoment(MomentDto momentDto) {
         Moment moment = momentMapper.toMoment(momentDto);
-        moment.setCreatedAt(LocalDateTime.now());
-
+        moment.setDate(LocalDateTime.now());
         Moment newMoment = momentRepository.save(moment);
         return momentMapper.toMomentDto(newMoment);
     }

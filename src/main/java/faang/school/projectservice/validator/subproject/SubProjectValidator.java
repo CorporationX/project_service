@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.SubprojectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.ProjectService;
@@ -19,7 +18,6 @@ import java.util.List;
 public class SubProjectValidator {
     private final UserServiceClient userServiceClient;
     private final ProjectService projectService;
-    private final ProjectMapper projectMapper;
 
     public void validateCreateProjectDto(ProjectDto projectDto) {
         validateOwnerId(projectDto.getOwnerId());
@@ -45,21 +43,21 @@ public class SubProjectValidator {
         }
     }
 
-    public void validateSubProjectStatus(ProjectDto projectDto) {
-        Project project = projectMapper.toProject(projectDto);
-        ProjectStatus status = project.getStatus();
-
-        if (status == ProjectStatus.COMPLETED && project.getChildren() != null) {
-            if (!checkStatusChildren(project.getChildren())) {
-                throw new DataValidationException("You can make the project completed only after finishing all subprojects");
-            }
+    public void validateSubProjectStatus(ProjectDto projectDto, ProjectStatus newStatus) {
+        if (newStatus == ProjectStatus.COMPLETED &&
+                projectDto.getChildrenIds() != null &&
+                !checkStatusChildren(projectDto.getChildrenIds())) {
+            throw new DataValidationException("You can make the project completed only after finishing all subprojects");
         }
     }
 
-    private boolean checkStatusChildren(List<Project> projects) {
+    private boolean checkStatusChildren(List<Long> projects) {
         return projects.stream()
-                .allMatch(project -> project.getStatus() == ProjectStatus.COMPLETED ||
-                        project.getStatus() == ProjectStatus.CANCELLED);
+                .allMatch(projectId -> {
+                    ProjectStatus status = projectService.getProjectById(projectId).getStatus();
+                    return status == ProjectStatus.COMPLETED || status == ProjectStatus.CANCELLED ?
+                            true : false;
+                });
     }
 
     private void validateParentProject(Long projectId) {
