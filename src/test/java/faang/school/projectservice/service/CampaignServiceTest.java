@@ -66,12 +66,14 @@ class CampaignServiceTest {
         campaign = new Campaign();
         campaign.setId(1L);
         campaign.setProject(project);
+        campaign.setStatus(CampaignStatus.ACTIVE);
         campaign.setTitle("Hello ");
         campaign.setDescription("world!");
 
         campaignDto = new CampaignDto();
         campaignDto.setId(1L);
         campaignDto.setProjectId(project.getId());
+        campaignDto.setCampaignStatus(CampaignStatus.ACTIVE);
         campaignDto.setTitle("Hello ");
         campaignDto.setDescription("world!");
 
