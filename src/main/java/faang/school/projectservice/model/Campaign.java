@@ -2,7 +2,10 @@ package faang.school.projectservice.model;
 
 import faang.school.projectservice.dto.client.Currency;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,6 +14,9 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "campaign")
 public class Campaign {
     @Id

@@ -2,10 +2,15 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.campaign.CampaignDto;
+import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filters.campaign.CampaignFilter;
+import faang.school.projectservice.filters.campaign.CampaignFilterByCreatedAt;
+import faang.school.projectservice.filters.campaign.CampaignFilterByStatus;
 import faang.school.projectservice.mapper.CampaignMapperImpl;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Campaign;
+import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -24,6 +29,8 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -177,11 +184,57 @@ class CampaignServiceTest {
     }
 
     @Test
-    public void getCampaign_throwException(){
+    public void getCampaign_throwException() {
         Mockito.when(campaignRepository.findById(campaignDto.getId()))
                 .thenReturn(Optional.empty());
 
         Assertions.assertThrows(DataValidationException.class,
                 () -> campaignService.getCampaign(campaignDto.getId()));
+    }
+
+    @Test
+    public void getByFilters() {
+        CampaignFilterByCreatedAt campaignFilterByCreatedAt = new CampaignFilterByCreatedAt();
+        CampaignFilterByStatus campaignFilterByStatus = new CampaignFilterByStatus();
+        List<CampaignFilter> campaignFilters = List.of(campaignFilterByCreatedAt, campaignFilterByStatus);
+        CampaignService campaignServiceNew = new CampaignService(campaignMapper, campaignRepository , projectRepository, teamMemberRepository, campaignServiceValidator, campaignFilters);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        CampaignFilterDto campaignFilterDto = CampaignFilterDto
+                .builder()
+                .createdAt(now)
+                .campaignStatus(CampaignStatus.ACTIVE)
+                .createdBy(100L)
+                .build();
+
+        Campaign campaign1 = Campaign
+                .builder()
+                .createdAt(now)
+                .status(CampaignStatus.ACTIVE)
+                .createdBy(100L)
+                .build();
+
+        Campaign campaign2 = Campaign
+                .builder()
+                .createdAt(now)
+                .status(CampaignStatus.CANCELED)
+                .createdBy(100L)
+                .build();
+
+        Campaign campaign3 = Campaign
+                .builder()
+                .createdAt(LocalDateTime.now().minusDays(3))
+                .status(CampaignStatus.ACTIVE)
+                .createdBy(100L)
+                .build();
+
+        Mockito.when(campaignRepository.findAll())
+                .thenReturn(List.of(campaign1, campaign2, campaign3));
+
+        List<CampaignDto> actual = campaignServiceNew.getByFilters(campaignFilterDto);
+
+        Assertions.assertEquals(1, actual.size());
+        Assertions.assertEquals(campaignMapper.toDto(campaign1), actual.get(0));
     }
 }
