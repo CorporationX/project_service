@@ -15,7 +15,11 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -53,8 +57,13 @@ public class Moment {
     )
     private List<Project> projects;
 
-    @ElementCollection
-    private List<Long> userIds;
+    @ManyToMany
+    @JoinTable(
+            name = "moment_team_member",
+            joinColumns = @JoinColumn(name = "moment_id"),
+            inverseJoinColumns = @JoinColumn(name = "team_member_id")
+    )
+    private List<TeamMember> members;
 
     @Column(name = "image_id")
     private String imageId;

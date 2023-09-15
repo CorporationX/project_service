@@ -28,7 +28,7 @@ public class MomentValidatorTest {
     @Test
     public void checkIsProjectClosedTestNullIds() {
         Exception exception = assertThrows(DataValidationException.class,
-                () -> momentValidator.checkIsProjectClosed(null));
+                () -> momentValidator.isProjectClosed(null));
         assertEquals("null parameter",
                 "Moment must be created from at least one project",
                 exception.getMessage()
@@ -39,7 +39,7 @@ public class MomentValidatorTest {
         List<Long> ids = new ArrayList<>();
 
         Exception exception = assertThrows(DataValidationException.class,
-                () -> momentValidator.checkIsProjectClosed(ids));
+                () -> momentValidator.isProjectClosed(ids));
         assertEquals("null parameter",
                 "Moment must be created from at least one project",
                 exception.getMessage()
@@ -57,7 +57,7 @@ public class MomentValidatorTest {
         Mockito.when(projectService.getProjectById(createdProjectId)).thenReturn(createdProject);
 
         Exception exception = assertThrows(DataValidationException.class,
-                () -> momentValidator.checkIsProjectClosed(List.of(createdProjectId, cancelledProjectId)));
+                () -> momentValidator.isProjectClosed(List.of(createdProjectId, cancelledProjectId)));
         assertEquals("Cancelled project",
                 "You can't create moment for project: 1 with status CANCELLED",
                 exception.getMessage()
@@ -74,7 +74,7 @@ public class MomentValidatorTest {
         Mockito.when(projectService.getProjectById(inProgressProjectId)).thenReturn(inProgressProject);
         Mockito.when(projectService.getProjectById(createdProjectId)).thenReturn(createdProject);
 
-        momentValidator.checkIsProjectClosed(List.of(createdProjectId, inProgressProjectId));
+        momentValidator.isProjectClosed(List.of(createdProjectId, inProgressProjectId));
         Mockito.verify(projectService, Mockito.times(2))
                 .getProjectById(Mockito.anyLong());
     }

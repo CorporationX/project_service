@@ -91,7 +91,7 @@ public class ProjectService {
                 .toList();
     }
 
-    public List<Project> getProjectsById(List<Long> ids) {
+    public List<Project> getProjectsByIds(List<Long> ids) {
         return projectRepository.findAllByIds(ids);
     }
 }

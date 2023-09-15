@@ -42,4 +42,7 @@ public class TeamMember {
 
     @OneToMany(mappedBy = "updatedBy")
     private List<Resource> updatedResources;
+
+    @ManyToMany(mappedBy = "members")
+    private List<Moment> moments;
 }

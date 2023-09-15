@@ -1,33 +1,51 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.service.MomentService;
+import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.validator.MomentValidator;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/moment")
+@RequestMapping("/moments")
 @RequiredArgsConstructor
+@Tag(name = "Moments", description = "important moments of project")
 public class MomentController {
 
     private final MomentService momentService;
+    private final MomentValidator momentValidator;
 
     @PostMapping
-    public MomentDto createMoment(@RequestBody MomentDto momentDto) {
-        validateMoment(momentDto);
+    public MomentDto createMoment(@RequestBody @Valid MomentDto momentDto) {
+        momentValidator.validateMoment(momentDto);
         return momentService.createMoment(momentDto);
     }
 
-    private void validateMoment(MomentDto momentDto) {
-        if (momentDto == null) {
-            throw new DataValidationException("Moment can't be null");
-        }
-        if (momentDto.getName() == null || momentDto.getName().isBlank()) {
-            throw new DataValidationException("Moment name can't be null or blank");
-        }
+    @PutMapping("{momentId}")
+    public MomentDto updateMoment(@PathVariable Long momentId, @RequestBody MomentDto momentDto) {
+        momentValidator.validateMoment(momentDto);
+        return momentService.updateMoment(momentId, momentDto);
+    }
+
+    @GetMapping
+    public Page<MomentDto> getAllMoments(@RequestParam(value = "page") int page,
+                                         @RequestParam(value = "pageSize") int pageSize) {
+        return momentService.getAllMoments(page, pageSize);
+    }
+
+    @GetMapping("/filter")
+    public Page<MomentDto> getAllMomentsByFilter(@RequestBody MomentFilterDto filter,
+                                         @RequestParam(value = "page") int page,
+                                         @RequestParam(value = "pageSize") int pageSize) {
+        return momentService.getAllMoments(page, pageSize, filter);
+    }
+
+    @GetMapping("{momentId}")
+    public MomentDto getMomentById(@PathVariable Long momentId) {
+        return momentService.getMomentById(momentId);
     }
 }
