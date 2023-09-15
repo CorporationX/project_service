@@ -10,11 +10,12 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,10 +30,10 @@ public class ProjectService {
 
     @Transactional
     public List<ProjectDto> getAllProjects(Long userId) {
-        List<Project> projects = projectRepository.findAll().collect(Collectors.toList());
+        List<Project> projects = projectRepository.findAll().toList();
         List<Project> filteredProjects = projects.stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC ||
-                        project.getTeams().stream().anyMatch(team -> team.getTeamMembers().stream().anyMatch(teamMember -> teamMember.getUserId() == userId)))
+                        project.getTeams().stream().anyMatch(team -> team.getTeamMembers().stream().anyMatch(teamMember -> Objects.equals(teamMember.getUserId(), userId))))
                 .collect(Collectors.toList());
         return projectMapper.toDtoList(filteredProjects);
     }
@@ -98,5 +99,9 @@ public class ProjectService {
             throw new DataValidException(String
                     .format(PROJECT_FROM_USER_EXISTS, projectDto.getId()));
         }
+    }
+    @Transactional(readOnly = true)
+    public Boolean isProjectExist(long id) {
+        return projectRepository.existsById(id);
     }
 }
