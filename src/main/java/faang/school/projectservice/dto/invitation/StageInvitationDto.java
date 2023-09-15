@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class DtoStageInvitation {
+public class StageInvitationDto {
     @NotBlank(message = "stage name can't be empty")
     @Size(min = 1, max = 1000, message = "stage name the value cannot be empty or more than 1000 characters")
     private String description;
@@ -23,7 +23,7 @@ public class DtoStageInvitation {
     @Valid
     private DtoStage stage;
 
-    public DtoStageInvitation(String description, long userIdAuthor, long userIdInvited, DtoStage stage) {
+    public StageInvitationDto(String description, long userIdAuthor, long userIdInvited, DtoStage stage) {
         this.description = description;
         this.status = StageInvitationStatus.PENDING;
         this.idAuthor = userIdAuthor;

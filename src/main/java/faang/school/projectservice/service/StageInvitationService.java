@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.invitation.DtoStage;
-import faang.school.projectservice.dto.invitation.DtoStageInvitation;
+import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.invitation.DtoStageInvitationFilter;
 import faang.school.projectservice.exception.ValidException;
 import faang.school.projectservice.filter.stageInvitation.StageInvitationFilter;
@@ -11,6 +11,7 @@ import faang.school.projectservice.mapper.invitationMaper.TeamMemberMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.InviteSentEvent;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -36,28 +37,33 @@ public class StageInvitationService {
     private final TeamMemberRepository memberRepository;
 
     private final List<StageInvitationFilter> invitationFilter;
+    private final InviteSentEvent inviteSentEvent;
 
-    public DtoStageInvitation invitationHasBeenSent(DtoStageInvitation dto) {
+    @Transactional
+    public StageInvitationDto invitationHasBeenSent(StageInvitationDto dto) {
         dataVerificationStageInvitation(dto);
-        return stageInvitationMapper.toDto(invitationRepository.save(stageInvitationMapper.toStageInvitation(dto)));
+
+        StageInvitation stageInvitation = stageInvitationMapper.toStageInvitation(dto);
+        StageInvitation savedInvitation = invitationRepository.save(stageInvitation);
+
+        inviteSentEvent.publish(stageInvitationMapper.toEventDto(savedInvitation));
+        return stageInvitationMapper.toDto(savedInvitation);
     }
 
     @Transactional
     public StageInvitationStatus acceptDeclineInvitation(String status, long idInvitation) {
         StageInvitation invitation = invitationRepository.findById(idInvitation);
 
-        if (status.equals("ACCEPTED")) {
-            invitation.setStatus(StageInvitationStatus.ACCEPTED);
-        } else if (status.equals("REJECTED")) {
-            invitation.setStatus(StageInvitationStatus.REJECTED);
-        } else if (status.equals("PENDING")) {
-            invitation.setStatus(StageInvitationStatus.PENDING);
+        switch (status) {
+            case "ACCEPTED" -> invitation.setStatus(StageInvitationStatus.ACCEPTED);
+            case "REJECTED" -> invitation.setStatus(StageInvitationStatus.REJECTED);
+            case "PENDING" -> invitation.setStatus(StageInvitationStatus.PENDING);
         }
 
         return invitation.getStatus();
     }
 
-    public List<DtoStageInvitation> getAllStageInvitation(long userId, DtoStageInvitationFilter filters) {
+    public List<StageInvitationDto> getAllStageInvitation(long userId, DtoStageInvitationFilter filters) {
         List<StageInvitation> stageInvitations = invitationRepository.findAll().stream()
                 .filter(invitation -> invitation.getInvited().getId() == userId).toList();
 
@@ -66,7 +72,7 @@ public class StageInvitationService {
                 .map(stageInvitationMapper::toDto).toList();
     }
 
-    private void dataVerificationStageInvitation(DtoStageInvitation dto) {
+    private void dataVerificationStageInvitation(StageInvitationDto dto) {
         long authorTeamMemberId = dto.getIdAuthor();
         long invitedTeamMemberId = dto.getIdInvited();
         DtoStage dtoStage = dto.getStage();

@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.invitation.DtoStageInvitation;
+import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.invitation.DtoStageInvitationFilter;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.StageInvitationService;
@@ -21,7 +21,7 @@ public class StageInvitationController {
     private final StageInvitationService invitationService;
 
     @PostMapping("/send-invitation")
-    public DtoStageInvitation sendAnInvitation(@Valid @RequestBody DtoStageInvitation invitationDto) {
+    public StageInvitationDto sendAnInvitation(@Valid @RequestBody StageInvitationDto invitationDto) {
         return invitationService.invitationHasBeenSent(invitationDto);
     }
 
@@ -35,7 +35,7 @@ public class StageInvitationController {
     }
 
     @GetMapping("/stage/{userId}")
-    public List<DtoStageInvitation> getStageInvitation(@PathVariable("userId") @Positive(message = "user id must be greater than 0")
+    public List<StageInvitationDto> getStageInvitation(@PathVariable("userId") @Positive(message = "user id must be greater than 0")
                                                        @Max(value = Long.MAX_VALUE, message = "user id the value cannot be empty or greater than 9223372036854775807") Long userId
             , @RequestBody @Valid DtoStageInvitationFilter filter) {
 
