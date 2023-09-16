@@ -10,8 +10,10 @@ import org.mapstruct.ReportingPolicy;
 public interface CampaignMapper {
 
     @Mapping(target = "projectId", source = "project.id")
+    @Mapping(target = "campaignStatus", source = "status")
     CampaignDto toDto(Campaign campaign);
 
     @Mapping(target = "project.id", source = "projectId")
+    @Mapping(target = "status", source = "campaignStatus")
     Campaign toEntity(CampaignDto campaignDto);
 }
