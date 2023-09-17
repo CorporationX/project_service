@@ -25,6 +25,10 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+jira:
+  api:
+    issue-url: /rest/api/2/issue/
+
 server:
   port: 8082
 

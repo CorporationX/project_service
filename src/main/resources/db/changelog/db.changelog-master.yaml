@@ -15,3 +15,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V007__create_internship.sql
   - include:
       file: db/changelog/changeset/project_V008__alter_candidate_add_vacancy.sql
+  - include:
+      file: db/changelog/changeset/project_V009_create_jira.sql

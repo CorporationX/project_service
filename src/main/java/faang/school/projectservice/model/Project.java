@@ -87,4 +87,7 @@ public class Project {
 
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
+
+    @OneToOne(mappedBy = "project")
+    private Jira jira;
 }

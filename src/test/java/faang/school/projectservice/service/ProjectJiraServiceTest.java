@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectServiceTest {
+public class ProjectJiraServiceTest {
     private final long userId = 1L;
     private final long projectId = 1L;
     @Mock
