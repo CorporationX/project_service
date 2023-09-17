@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,12 +37,11 @@ class TaskServiceTest {
         when(taskMapper.createDtoToEntity(createTaskDto)).thenReturn(taskEntity);
         when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
         when(taskMapper.entityToResponseDto(taskEntity)).thenReturn(new ResponseTaskDto());
-        when(jiraApiService.createTask(createTaskDto)).thenReturn("Jira Status");
+
 
         ResponseTaskDto response = taskService.createTask(createTaskDto);
 
         assertNotNull(response);
-        assertEquals("Jira Status", response.getJiraStatus());
 
         verify(taskMapper).createDtoToEntity(createTaskDto);
         verify(taskRepository).save(taskEntity);

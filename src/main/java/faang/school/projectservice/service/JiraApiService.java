@@ -34,7 +34,7 @@ public class JiraApiService {
     private final JiraMapper jiraMapper;
     private final RedisService redisService;
     @Value("${jira.api.issue-url}")
-    private String issueCreationUrl;
+    private final String issueCreationUrl;
 
     @Transactional
     public ResponseJiraDto connectJira(CreateJiraDto createJiraDto) {

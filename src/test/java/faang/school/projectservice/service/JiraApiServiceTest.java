@@ -7,9 +7,9 @@ import faang.school.projectservice.mapper.jira.JiraMapper;
 import faang.school.projectservice.model.Jira;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.JiraRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,8 +42,12 @@ class JiraApiServiceTest {
     @Mock
     private RedisService redisService;
 
-    @InjectMocks
     private JiraApiService jiraApiService;
+
+    @BeforeEach
+    void setUp() {
+        jiraApiService = new JiraApiService(restTemplate, jiraRepository, jiraMapper, redisService, "test");
+    }
 
     @Test
     public void testConnectJira() {
