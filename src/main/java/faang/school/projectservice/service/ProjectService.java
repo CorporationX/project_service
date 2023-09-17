@@ -42,10 +42,7 @@ public class ProjectService {
         return mapper.toDto(save);
     }
 
-    public ProjectDto update(ProjectDto projectDto, Long id) {
-        if (id == null) {
-            throw new DataValidationException("Project doesn't exist");
-        }
+    public ProjectDto update(ProjectDto projectDto, long id) {
         Project projectById = projectRepository.getProjectById(id);
         projectById.setStatus(projectDto.getStatus());
         projectById.setDescription(projectDto.getDescription());
