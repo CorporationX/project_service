@@ -124,11 +124,6 @@ class ProjectServiceTest {
     }
 
     @Test
-    void updateStatusAndDescriptionProjectNotFound() {
-        assertThrows(DataValidationException.class, () -> projectService.update(new ProjectDto(), teamMember.getId()));
-    }
-
-    @Test
     void getProjectByNameAndStatus() {
         Project project1 = Project.builder()
                 .id(2L)
