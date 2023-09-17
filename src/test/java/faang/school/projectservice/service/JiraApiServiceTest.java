@@ -21,7 +21,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -65,7 +64,6 @@ class JiraApiServiceTest {
         CreateTaskDto createTaskDto = CreateTaskDto.builder().projectId(projectId).build();
         Jira jiraEntity = new Jira(1L, "test", "T1", "test-url",
                 Project.builder().id(projectId).build());
-        jiraApiService.setIssueCreationUrl("test");
 
         when(jiraRepository.findByProjectId(projectId)).thenReturn(Optional.of(jiraEntity));
         when(redisService.getFromRedis("jira_token:" + jiraEntity.getId())).thenReturn("test_token");
@@ -74,9 +72,8 @@ class JiraApiServiceTest {
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(responseEntity);
 
-        String response = jiraApiService.createTask(createTaskDto);
+        jiraApiService.createTask(createTaskDto);
 
-        assertEquals("response body", response);
         verify(jiraRepository).findByProjectId(projectId);
         verify(redisService).getFromRedis("jira_token:" + jiraEntity.getId());
         verify(restTemplate).exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class));

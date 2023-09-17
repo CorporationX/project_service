@@ -1,5 +1,7 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.jira.CreateJiraDto;
+import faang.school.projectservice.dto.jira.ResponseJiraDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidException;
@@ -26,6 +28,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
+    private final JiraApiService jiraApiService;
 
     @Transactional
     public List<ProjectDto> getAllProjects(Long userId) {
@@ -53,6 +56,7 @@ public class ProjectService {
         validateOfExistingProjectFromUser(projectDto);
         Project project = projectMapper.toEntity(projectDto);
         project.setStatus(ProjectStatus.CREATED);
+
         return saveEntity(project);
     }
 
@@ -79,6 +83,10 @@ public class ProjectService {
         Project savedSubProject = projectRepository.save(subProject);
         parentProject.getChildren().add(savedSubProject);
         return projectMapper.toDto(savedSubProject);
+    }
+
+    public ResponseJiraDto connectProjectToJira(CreateJiraDto createJiraDto) {
+       return jiraApiService.connectJira(createJiraDto);
     }
 
     private ProjectDto saveEntity(Project project) {

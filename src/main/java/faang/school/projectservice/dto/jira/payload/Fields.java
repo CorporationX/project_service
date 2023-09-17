@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Fields {
-    private Project project;
+    private ProjectJira project;
+    private Parent parent;
     private String summary;
     private String description;
     private Issuetype issuetype;

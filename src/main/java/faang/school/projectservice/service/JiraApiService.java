@@ -5,13 +5,13 @@ import faang.school.projectservice.dto.jira.payload.Fields;
 import faang.school.projectservice.dto.jira.payload.Issuetype;
 import faang.school.projectservice.dto.jira.payload.JiraPayload;
 import faang.school.projectservice.dto.jira.ResponseJiraDto;
-import faang.school.projectservice.dto.jira.payload.Project;
+import faang.school.projectservice.dto.jira.payload.ProjectJira;
 import faang.school.projectservice.dto.task.CreateTaskDto;
 import faang.school.projectservice.mapper.jira.JiraMapper;
 import faang.school.projectservice.model.Jira;
 import faang.school.projectservice.repository.JiraRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -19,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -26,13 +27,12 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class JiraApiService {
     private final RestTemplate restTemplate;
     private final JiraRepository jiraRepository;
     private final JiraMapper jiraMapper;
     private final RedisService redisService;
-
-    @Setter // Для юнит теста, иначе он в мок тесте будет Null
     @Value("${jira.api.issue-url}")
     private String issueCreationUrl;
 
@@ -48,15 +48,17 @@ public class JiraApiService {
         return jiraRepository.findByProjectId(projectId).orElse(null);
     }
 
-    public String createTask(CreateTaskDto createTaskDto) {
+    @Async
+    public void createTask(CreateTaskDto createTaskDto) {
         Jira jira = getJiraByProjectId(createTaskDto.getProjectId());
         if (jira == null) {
-            return null;
+            return;
         }
-        Fields fields = new Fields(Project.builder().key(jira.getProjectKey()).build(),
-                createTaskDto.getName(),
-                createTaskDto.getDescription(),
-                new Issuetype("Task"));
+        Fields fields = Fields.builder().project(ProjectJira.builder().key(jira.getProjectKey()).build())
+                .summary(createTaskDto.getName())
+                .description( createTaskDto.getDescription())
+                .issuetype(new Issuetype("Task"))
+                .build();
         JiraPayload jiraPayload = new JiraPayload(fields);
 
         String username = jira.getUsername();
@@ -64,7 +66,7 @@ public class JiraApiService {
 
         ResponseEntity<String> response = restTemplate.exchange(jira.getProjectUrl().concat(issueCreationUrl), HttpMethod.POST,
                 new HttpEntity<>(jiraPayload, getHeaders(username, token)), String.class);
-        return response.getBody();
+        log.info(response.getBody());
     }
 
     public HttpHeaders getHeaders(String username, String token) {

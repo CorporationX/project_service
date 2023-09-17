@@ -20,7 +20,7 @@ public class TaskService {
     public ResponseTaskDto createTask(CreateTaskDto createTaskDto) {
         Task task = taskRepository.save(taskMapper.createDtoToEntity(createTaskDto));
         ResponseTaskDto response = taskMapper.entityToResponseDto(task);
-        response.setJiraStatus(jiraApiService.createTask(createTaskDto));
+        jiraApiService.createTask(createTaskDto);
         return response;
     }
 }

@@ -21,5 +21,4 @@ public class ResponseTaskDto {
     private Long reporterUserId;
     private LocalDateTime createdAt;
     private Long projectId;
-    private String jiraStatus;
 }
