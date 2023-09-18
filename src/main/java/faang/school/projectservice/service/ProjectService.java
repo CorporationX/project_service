@@ -34,25 +34,22 @@ public class ProjectService {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("This project already exist");
         }
-
         projectDto.setStatus(ProjectStatus.CREATED);
-        LocalDateTime now = LocalDateTime.now();
-        projectDto.setCreatedAt(now);
-        projectDto.setUpdatedAt(now);
-        return mapper.toDto(projectRepository.save(mapper.toEntity(projectDto)));
+        projectDto.setCreatedAt(LocalDateTime.now());
+        projectDto.setVisibility(ProjectVisibility.PUBLIC);
+        Project project = mapper.toEntity(projectDto);
+        Project save = projectRepository.save(project);
+        return mapper.toDto(save);
     }
 
-    public ProjectDto update(ProjectDto projectDto, Long id) {
-        if (id == null) {
-            throw new DataValidationException("Project doesn't exist");
-        }
+    public ProjectDto update(ProjectDto projectDto, long id) {
         Project projectById = projectRepository.getProjectById(id);
         projectById.setStatus(projectDto.getStatus());
         projectById.setDescription(projectDto.getDescription());
         projectById.setUpdatedAt(LocalDateTime.now());
 
-        Project project = mapper.toEntity(projectDto);
-        return mapper.toDto(projectRepository.save(project));
+        projectRepository.save(projectById);
+        return mapper.toDto(projectById);
     }
 
     public List<ProjectDto> getByFilters(ProjectFilterDto projectFilterDto, long userId) {

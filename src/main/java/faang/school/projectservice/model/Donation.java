@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import faang.school.projectservice.dto.client.Currency;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Currency;
 
 @Data
 @Builder

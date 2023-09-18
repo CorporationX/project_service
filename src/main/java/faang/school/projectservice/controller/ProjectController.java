@@ -19,9 +19,9 @@ public class ProjectController {
         return projectService.create(projectDto);
     }
 
-    @PutMapping("/")
-    public ProjectDto changeStatus(@RequestBody ProjectDto projectDto, Long id) {
-        return projectService.update(projectDto, id);
+    @PutMapping("/{projectId}")
+    public ProjectDto changeStatus(@RequestBody ProjectDto projectDto, @PathVariable long projectId) {
+        return projectService.update(projectDto, projectId);
     }
 
     @PostMapping("/{userId}/get-by-filters")
