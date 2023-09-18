@@ -33,7 +33,8 @@ public class VacancyService {
     @Transactional
     public VacancyDto create(VacancyDto vacancyDto) {
         validateVacancy(vacancyDto);
-        Vacancy saveVacancy = vacancyRepository.save(vacancyMapper.toEntity(vacancyDto));
+        Vacancy entity = vacancyMapper.toEntity(vacancyDto);
+        Vacancy saveVacancy = vacancyRepository.save(entity);
         return vacancyMapper.toDto(saveVacancy);
     }
 

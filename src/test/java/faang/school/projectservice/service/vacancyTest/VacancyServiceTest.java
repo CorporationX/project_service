@@ -12,7 +12,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.VacancyService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,15 +56,15 @@ class VacancyServiceTest {
     void setUp() {
         vacancy = new Vacancy();
         vacancy.setProject(Project.builder().id(1L).build());
-        vacancy.setId(1L);
+        vacancy.setId(2L);
         vacancy.setDescription("privet");
         vacancy.setName("crud1");
         vacancy.setStatus(VacancyStatus.OPEN);
         vacancy.setSalary(120000.0);
         vacancy.setCreatedBy(1L);
         vacancy.setPosition("DEVELOPER");
+        vacancy.setVacancyPlaces(3L);
 
-        vacancyMapper = new VacancyMapperImpl();
         vacancyDto = VacancyDto.builder()
                 .id(vacancy.getId())
                 .name(vacancy.getName())
@@ -75,6 +74,7 @@ class VacancyServiceTest {
                 .projectId(vacancy.getProject().getId())
                 .createdBy(vacancy.getCreatedBy())
                 .position("DEVELOPER")
+                .vacancyPlaces(vacancy.getVacancyPlaces())
                 .build();
 
 
@@ -92,10 +92,12 @@ class VacancyServiceTest {
                 .thenReturn(false);
         Mockito.when(teamMemberRepository.findById(vacancyDto.getCreatedBy()))
                 .thenReturn(teamMember);
+        Mockito.when(vacancyMapper.toEntity(vacancyDto))
+                .thenReturn(vacancy);
 
         vacancyService.create(vacancyDto);
         Mockito.verify(vacancyRepository, Mockito.times(1))
-                .save(vacancy);
+                .save(vacancyMapper.toEntity(vacancyDto));
     }
     @Test
     void delete_HappyPath() {
@@ -160,7 +162,7 @@ class VacancyServiceTest {
         vacancyService = VacancyService.builder().vacancyMapper(vacancyMapper).vacancyRepository(vacancyRepository).filters(filters).build();
 
         List<VacancyDto> projectsWithFilterActual = vacancyService.getByFilters(vacancyFilterDto);
-        Assertions.assertEquals(filteredProjectsExpected, projectsWithFilterActual);
+        assertEquals(filteredProjectsExpected, projectsWithFilterActual);
     }
 
     @Test

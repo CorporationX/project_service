@@ -14,8 +14,10 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V007__create_internship.sql
   - include:
-      file: db/changelog/changeset/project_V009__rename_campaign.sql
- - include:
-      file: db/changelog/changeset/project_V009__alter_vacancy.sql
+      file: db/changelog/changeset/project_V008__alter_campaign.sql
   - include:
-      file: db/changelog/changeset/project_V0010__alter_candidate.sql
+      file: db/changelog/changeset/project_V009__rename_campaign.sql
+  - include:
+      file: db/changelog/changeset/project_V008__alter_vacancy.sql
+  - include:
+      file: db/changelog/changeset/project_V009__alter_candidate.sql

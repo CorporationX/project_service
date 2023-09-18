@@ -73,5 +73,5 @@ public class Vacancy {
     private String position;
 
     @Column(name = "vacancy_places", nullable = false)
-    private Long vacancy_places;
+    private Long vacancyPlaces;
 }
