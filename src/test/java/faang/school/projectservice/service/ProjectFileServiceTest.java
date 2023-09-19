@@ -20,7 +20,7 @@ import faang.school.projectservice.model.resource.Resource;
 import faang.school.projectservice.model.resource.ResourceStatus;
 import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.ProjectFileService;
+import faang.school.projectservice.service.project.ProjectResourceService;
 import faang.school.projectservice.util.FileService;
 import faang.school.projectservice.validator.FileValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +58,7 @@ public class ProjectFileServiceTest {
     @Spy
     private ResourceMapperImpl resourceMapper;
     @InjectMocks
-    private ProjectFileService projectFileService;
+    private ProjectResourceService projectFileService;
 
     private Project project;
     private Project expectedProject;

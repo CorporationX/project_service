@@ -4,11 +4,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.dto.resource.UpdateResourceDto;
-import faang.school.projectservice.exception.FileDeleteException;
-import faang.school.projectservice.exception.FileUpdateException;
-import faang.school.projectservice.exception.FileUploadException;
-import faang.school.projectservice.exception.InvalidCurrentUserException;
-import faang.school.projectservice.exception.StorageSpaceExceededException;
+import faang.school.projectservice.exception.*;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -21,6 +17,9 @@ import faang.school.projectservice.util.FileService;
 import faang.school.projectservice.validator.FileValidator;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,90 +29,66 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ProjectFileService {
-    private static final int MAX_REPS = 3;
+public class ProjectResourceService {
+    private static final int MAX_ATTEMPTS = 5;
 
     private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
     private final ResourceRepository resourceRepository;
     private final FileService fileService;
     private final ResourceMapper resourceMapper;
     private final FileValidator fileValidator;
 
     @Transactional
+    @Retryable(retryFor = OptimisticLockException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 1000))
     public ResourceDto uploadFile(MultipartFile multipartFile, long projectId, long userId) {
-        Resource resource;
-        int attempts = 0;
-
-        while (true) {
-            try {
-                resource = uploadResource(multipartFile, projectId, userId);
-
-                break;
-            } catch (OptimisticLockException e) {
-                attempts++;
-
-                if (attempts == MAX_REPS) {
-                    String errorMessage = String.format(
-                            "Could not upload due to concurrent modifications after %d retries. Please try again.",
-                            MAX_REPS);
-                    throw new FileUploadException(errorMessage);
-                }
-            }
-        }
+        Resource resource = uploadResource(multipartFile, projectId, userId);
 
         fileService.upload(multipartFile, resource.getKey());
+
         return resourceMapper.toDto(resource);
     }
 
-    @Transactional
-    public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
-        Resource resource;
-        int attempts = 0;
-
-        while (true) {
-            try {
-                resource = updateResource(multipartFile, resourceId, userId);
-
-                break;
-            } catch (OptimisticLockException e) {
-                attempts++;
-
-                if (attempts == MAX_REPS) {
-                    String errorMessage = String.format(
-                            "Could not update due to concurrent modifications after %d retries. Please try again.",
-                            MAX_REPS);
-                    throw new FileUpdateException(errorMessage);
-                }
-            }
-        }
-
-        fileService.delete(resource.getKey());
-        fileService.upload(multipartFile, resource.getKey());
-        return resourceMapper.toUpdateDto(resource);
+    @Recover
+    public ResourceDto recoverUpload(OptimisticLockException e,
+                                     MultipartFile multipartFile,
+                                     long projectId,
+                                     long userId) {
+       throw new FileUploadException("blablabal");
     }
 
     @Transactional
+    @Retryable(retryFor = OptimisticLockException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 1000))
+    public UpdateResourceDto updateFile(MultipartFile multipartFile, long resourceId, long userId) {
+        Resource resource = updateResource(multipartFile, resourceId, userId);
+
+        fileService.delete(resource.getKey());
+        fileService.upload(multipartFile, resource.getKey());
+
+        return resourceMapper.toUpdateDto(resource);
+    }
+
+    @Recover
+    public UpdateResourceDto recoverUpdate(OptimisticLockException e,
+                                           MultipartFile multipartFile,
+                                           long resourceId,
+                                           long userId) {
+        throw new FileUpdateException("blablabvla");
+    }
+
+    @Transactional
+    @Retryable(retryFor = OptimisticLockException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 1000))
     public void deleteFile(long resourceId, long userId) {
-        String key;
-        int attempts = 0;
-
-        while (true) {
-            try {
-                key = deleteResource(resourceId, userId);
-                break;
-            } catch (OptimisticLockException e) {
-                attempts++;
-
-                if (attempts == MAX_REPS) {
-                    String errorMessage = String.format(
-                            "Could not delete due to concurrent modifications after %d retries. Please try again.",
-                            MAX_REPS);
-                    throw new FileDeleteException(errorMessage);
-                }
-            }
-        }
+        String key = deleteResource(resourceId, userId);
 
         fileService.delete(key);
+    }
+
+    @Recover
+    public void recoverDelete(OptimisticLockException e,
+                              long resourceId,
+                              long userId) {
+        throw new FileDeleteException("blkalbalbal");
     }
 
     @Transactional(readOnly = true)

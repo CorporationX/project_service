@@ -4,7 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.GetResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.dto.resource.UpdateResourceDto;
-import faang.school.projectservice.service.project.ProjectFileService;
+import faang.school.projectservice.service.project.ProjectResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/projects")
 public class ProjectFileController {
-    private final ProjectFileService projectFileService;
+    private final ProjectResourceService projectFileService;
     private final UserContext userContext;
 
     @PostMapping("/{projectId}/files/")
