@@ -51,7 +51,7 @@ public class JiraService {
         JiraProject project = getJiraProject(projectKey);
         String issueJson = jiraClient.getIssue(project, issueKey);
 
-        return readIssue(issueJson);
+        return readValue(issueJson, IssueReadOnlyDto.class);
     }
 
     public IssueFetchingDto getIssues(String projectKey) {
@@ -72,7 +72,7 @@ public class JiraService {
 
         String issueJson = jiraClient.getIssuesWithFilter(project, filterBuilder.toString());
 
-        return readIssuesFetching(issueJson);
+        return readValue(issueJson, IssueFetchingDto.class);
     }
 
     public IssueReadOnlyDto createIssue(String projectKey, IssueDto issue) {
@@ -80,7 +80,7 @@ public class JiraService {
         String body = writeValue(issue);
         String issueJson = jiraClient.createIssue(project, body);
 
-        return readIssue(issueJson);
+        return readValue(issueJson, IssueReadOnlyDto.class);
     }
 
     public String updateIssue(String projectKey, String issueKey, IssueDto issue) {
@@ -89,7 +89,7 @@ public class JiraService {
         if (Objects.isNull(issue.getFields().getSummary())) {
             IssueReadOnlyDto oldIssue = getIssue(projectKey, issueKey);
             issue.getFields().setSummary(oldIssue.getFields().getSummary());
-        }  // Без указания summary другие поля не обновляются
+        }
 
         String body = writeValue(issue);
 
@@ -125,17 +125,9 @@ public class JiraService {
         }
     }
 
-    private IssueReadOnlyDto readIssue(String value) {
+    private <T> T readValue(String value, Class<T> clazz) {
         try {
-            return objectMapper.readValue(value, IssueReadOnlyDto.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private IssueFetchingDto readIssuesFetching(String value) {
-        try {
-            return objectMapper.readValue(value, IssueFetchingDto.class);
+            return objectMapper.readValue(value, clazz);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
