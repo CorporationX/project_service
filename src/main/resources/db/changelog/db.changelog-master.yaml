@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V008__alter_candidate_add_vacancy.sql
   - include:
       file: db/changelog/changeset/project_V009_alter_constrate_resource_for_teammember.sql
+  - include:
+      file: db/changelog/changeset/project_V010_alter_removed_to_campaign.sql

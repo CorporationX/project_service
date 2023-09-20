@@ -13,7 +13,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -22,6 +25,9 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "campaign")
 public class Campaign {
     @Id
@@ -41,6 +47,7 @@ public class Campaign {
     private BigDecimal amountRaised;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 100)
     private CampaignStatus status;
 
     @ManyToOne
@@ -48,12 +55,15 @@ public class Campaign {
     private Project project;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "currency", length = 10)
     private Currency currency;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "created_by")
     private Long createdBy;
 
     @UpdateTimestamp
@@ -61,5 +71,9 @@ public class Campaign {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "updated_by")
     private Long updatedBy;
+
+    @Column(name = "removed")
+    private boolean removed;
 }

@@ -1,0 +1,2 @@
+ALTER TABLE campaign
+    ADD removed BOOLEAN DEFAULT FALSE;
