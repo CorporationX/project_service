@@ -16,8 +16,8 @@ public class AmazonS3Config {
     private String accessKey;
     @Value("${services.s3.secretKey}")
     private String secretKey;
-    @Value("${services.s3.region}")
-    private String region;
+    @Value("${services.s3.endpoint}")
+    private String endpoint;
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
@@ -25,8 +25,9 @@ public class AmazonS3Config {
     public AmazonS3 amazonS3() {
         AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(region, null))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, null))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                .withPathStyleAccessEnabled(true)
                 .build();
 
         if (!amazonS3.doesBucketExistV2(bucketName)) {

@@ -57,7 +57,6 @@ class ProjectServiceTest {
 
         ProjectFilter projectFilter = Mockito.mock(ProjectFilter.class);
         List<ProjectFilter> projectFilters = List.of(projectFilter);
-        projectService = new ProjectService(projectRepository, projectMapper, projectFilters, projectValidator);
     }
 
     @Test

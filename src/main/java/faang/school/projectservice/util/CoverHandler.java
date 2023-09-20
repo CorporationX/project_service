@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @Service
-public class CoverService {
+public class CoverHandler {
     @Value("${image.cover.maxHeight}")
     private int maxHeight;
     @Value("${image.cover.maxWidth}")
@@ -20,9 +20,10 @@ public class CoverService {
     public byte[] resizeCover(MultipartFile multipartFile) {
         try {
             BufferedImage image = ImageIO.read(multipartFile.getInputStream());
-            int width = image.getWidth();
-            int height = image.getHeight();
-            getNewSize(image, width, height);
+
+            int width = getNewWidth(image.getWidth(), image.getHeight());
+            int height = getNewHeight(image.getWidth(), image.getHeight());
+
             BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             Graphics2D graphics = resizedImage.createGraphics();
             graphics.drawImage(image, 0, 0, width, height, null);
@@ -35,16 +36,21 @@ public class CoverService {
         }
     }
 
-    public void getNewSize(BufferedImage image, int width, int height) {
-        if (width == height) {
-            if (width > maxWidth) {
-                width = height = maxWidth;
-
-            }
+    public int getNewWidth(int width, int height) {
+        if (width == height && width > maxWidth) {
+            width = maxWidth;
         } else if (width > maxWidth) {
             width = maxWidth;
+        }
+        return width;
+    }
+
+    public int getNewHeight(int width, int height) {
+        if (width == height && height > maxWidth) {
+            height = maxWidth;
         } else if (height > maxHeight) {
             height = maxHeight;
         }
+        return height;
     }
 }
