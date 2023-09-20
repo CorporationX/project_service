@@ -22,8 +22,8 @@ spring:
       port: 6379
       host: localhost
       channels:
-        calculations_channel:
-          name: calculations_channel
+        calculations_channel: calculations-channel
+        invitation_channel: invitation-channel
 
 server:
   port: 8082

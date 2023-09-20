@@ -49,4 +49,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleProjectStorageCapacityExceededException(FileParseException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
+
+    @ExceptionHandler(SerializeJsonException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<String> handleJsonSerializeException(SerializeJsonException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
 }

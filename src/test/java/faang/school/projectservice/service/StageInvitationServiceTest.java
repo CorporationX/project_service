@@ -11,6 +11,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.InviteSentPublisher;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validate.StageInvitationValidator;
@@ -39,6 +40,8 @@ class StageInvitationServiceTest {
     private StageInvitationValidator stageInvitationValidator;
     @Mock
     private TeamMemberRepository teamMemberRepository;
+    @Mock
+    private InviteSentPublisher inviteSentEvent;
 
     StageInvitation invitation;
     StageInvitation stageInvitation;
@@ -194,7 +197,8 @@ class StageInvitationServiceTest {
                 stageInvitationMapper,
                 stageInvitationValidator,
                 teamMemberRepository,
-                filters);
+                filters,
+                inviteSentEvent);
 
         Mockito.when(stageInvitationRepository.findAll())
                 .thenReturn(list);
@@ -216,7 +220,8 @@ class StageInvitationServiceTest {
                 stageInvitationMapper,
                 stageInvitationValidator,
                 teamMemberRepository,
-                filters);
+                filters,
+                inviteSentEvent);
 
         Mockito.when(stageInvitationRepository.findAll())
                 .thenReturn(list);

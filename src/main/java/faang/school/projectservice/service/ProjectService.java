@@ -7,6 +7,7 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,17 +24,36 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
 
     public ProjectDto createProject(ProjectDto projectDto) {
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+        Project project = projectMapper.toProject(projectDto);
+        prepareCreateProjectDtoData(project);
+        project = projectRepository.save(project);
+        return projectMapper.toProjectDto(project);
+    }
+
+    private void prepareCreateProjectDtoData(Project project) {
+        if (projectRepository.existsByOwnerUserIdAndName(project.getOwnerId(), project.getName())) {
             throw new DataValidationException("You can't create project with name existed");
         }
-        projectDto.setStatus(ProjectStatus.CREATED);
-        Project project = projectRepository.save(projectMapper.toProject(projectDto));
-        return projectMapper.toProjectDto(project);
+        if (project.getVisibility() == null) {
+            project.setVisibility(ProjectVisibility.PUBLIC);
+        }
+        if (project.getParentProject() != null) {
+            project.setParentProject(projectRepository.getProjectById(project.getParentProject().getId()));
+        }
+        project.setStatus(ProjectStatus.CREATED);
+    }
+
+    public boolean isExistProjectById(long projectId) {
+        return projectRepository.existsById(projectId);
     }
 
     public ProjectDto updateProject(Long id, ProjectDto projectDto) {
         projectRepository.getProjectById(id);
-        Project projectUpdate = projectRepository.save(projectMapper.toProject(projectDto));
+        Project projectUpdate = projectMapper.toProject(projectDto);
+        if (projectUpdate.getParentProject() != null) {
+            projectUpdate.setParentProject(projectRepository.getProjectById(projectUpdate.getParentProject().getId()));
+        }
+        projectUpdate = projectRepository.save(projectUpdate);
         return projectMapper.toProjectDto(projectUpdate);
     }
 

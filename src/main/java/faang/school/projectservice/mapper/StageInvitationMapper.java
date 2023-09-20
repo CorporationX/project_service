@@ -1,5 +1,6 @@
 package faang.school.projectservice.mapper;
 
+import faang.school.projectservice.dto.redis.InviteSentEventDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.mapstruct.Mapper;
@@ -35,4 +36,9 @@ public interface StageInvitationMapper {
     @Mapping(source = "authorId", target = "author.id")
     @Mapping(source = "invitedId", target = "invited.id")
     List<StageInvitation> toModelList(List<StageInvitationDto> stageInvitationDtoList);
+
+    @Mapping(target = "authorId", source = "author.id")
+    @Mapping(target = "invitedId", source = "invited.id")
+    @Mapping(target = "projectId", source = "stage.project.id")
+    InviteSentEventDto toEventDto(StageInvitation stageInvitation);
 }

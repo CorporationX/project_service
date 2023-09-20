@@ -7,12 +7,8 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.project.ProjectFilterStatus;
 import faang.school.projectservice.filter.project.ProjectTitleFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,17 +23,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
     @Spy
-    private ProjectMapper projectMapper = new ProjectMapperImpl();
+    private ProjectMapper projectMapper;
     @InjectMocks
     private ProjectService projectService;
     ProjectDto projectDto;
@@ -45,6 +39,7 @@ class ProjectServiceTest {
     Project project1;
     Project project2;
     Project project3;
+    Long ownerId = 1L;
 
     @BeforeEach
     public void init() {
@@ -53,7 +48,7 @@ class ProjectServiceTest {
         List<ProjectFilter> projectFilters = List.of(projectTitleFilter, projectFilterStatus);
         projectService = new ProjectService(projectRepository, projectMapper, projectFilters);
         projectDto = ProjectDto.builder().id(1L).description("s").name("q").ownerId(1L).build();
-        project = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("q").build();
+        project = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("q").ownerId(ownerId).build();
 
         project1 = Project.builder().id(1L).createdAt(LocalDateTime.now()).description("s").name("CorporationX").status(ProjectStatus.CREATED).build();
         project2 = Project.builder().id(2L).createdAt(LocalDateTime.now()).description("b").name("CorporationX").status(ProjectStatus.ON_HOLD).build();
@@ -61,25 +56,33 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testCreateProjectThrowsException() {
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(true);
+    public void testCreateProjectThrowsException() {
+        Mockito.when(projectMapper.toProject(projectDto))
+                .thenReturn(project);
+        Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString()))
+                .thenReturn(true);
+
         assertThrows(DataValidationException.class, () -> projectService.createProject(projectDto));
     }
 
     @Test
-    void testCreateProject() {
+    public void testCreateProject() {
         ProjectDto projectDto1 = ProjectDto.builder().id(1L).description("s").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
-        Mockito.when(projectRepository.save(Mockito.any(Project.class))).thenReturn(project);
+        Mockito.when(projectRepository.save(any(Project.class))).thenReturn(project);
         Mockito.when(projectMapper.toProject(projectDto)).thenReturn(project);
         Mockito.when(projectMapper.toProjectDto(project)).thenReturn(projectDto1);
         assertEquals(ProjectStatus.CREATED, projectService.createProject(projectDto).getStatus());
     }
 
     @Test
-    void testUpdateProject() {
+    public void testUpdateProject() {
         ProjectDto projectDtoForUpdate = ProjectDto.builder().id(1L).description("new description").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
+        Mockito.when(projectMapper.toProject(projectDtoForUpdate)).thenReturn(project);
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
         projectService.updateProject(1L, projectDtoForUpdate);
         Mockito.verify(projectRepository, Mockito.times(1)).save(projectMapper.toProject(projectDtoForUpdate));
     }
