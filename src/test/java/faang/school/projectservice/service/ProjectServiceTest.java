@@ -9,6 +9,9 @@ import faang.school.projectservice.filter.project.ProjectTitleFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +59,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testCreateProjectThrowsException() {
+    void testCreateProjectThrowsException() {
         Mockito.when(projectMapper.toProject(projectDto))
                 .thenReturn(project);
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString()))
@@ -66,7 +69,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testCreateProject() {
+    void testCreateProject() {
         ProjectDto projectDto1 = ProjectDto.builder().id(1L).description("s").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
         Mockito.when(projectRepository.save(any(Project.class))).thenReturn(project);
@@ -76,13 +79,10 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testUpdateProject() {
+    void testUpdateProject() {
         ProjectDto projectDtoForUpdate = ProjectDto.builder().id(1L).description("new description").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
         Mockito.when(projectMapper.toProject(projectDtoForUpdate)).thenReturn(project);
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
         projectService.updateProject(1L, projectDtoForUpdate);
         Mockito.verify(projectRepository, Mockito.times(1)).save(projectMapper.toProject(projectDtoForUpdate));
     }

@@ -20,4 +20,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V010__create_offer.sql
   - include:
-      file: db/changelog/changeset/project_V010_alter_removed_to_campaign.sql
+      file: db/changelog/changeset/project_V011_alter_removed_to_campaign.sql
