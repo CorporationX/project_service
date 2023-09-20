@@ -25,6 +25,12 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 10MB  # Максимальный размер для отдельного файла
+      max-request-size: 10MB  # Максимальный размер для всего запроса (включая все файлы)
+
+
 server:
   port: 8082
 

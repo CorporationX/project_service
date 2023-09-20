@@ -1,7 +1,7 @@
 package faang.school.projectservice.util;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-@Service
+@Component
 public class CoverHandler {
     @Value("${image.cover.maxHeight}")
     private int maxHeight;
@@ -38,7 +38,7 @@ public class CoverHandler {
 
     public int getNewWidth(int width, int height) {
         if (width == height && width > maxWidth) {
-            width = maxWidth;
+            return maxWidth;
         } else if (width > maxWidth) {
             width = maxWidth;
         }
@@ -47,7 +47,7 @@ public class CoverHandler {
 
     public int getNewHeight(int width, int height) {
         if (width == height && height > maxWidth) {
-            height = maxWidth;
+            return maxWidth;
         } else if (height > maxHeight) {
             height = maxHeight;
         }

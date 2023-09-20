@@ -84,11 +84,14 @@ public class ProjectService {
         projectValidator.validateSizeFile(multipartFile);
         coverHandler.resizeCover(multipartFile);
 
+
         String folder = "projectId_" + project.getId() + "_projectName_" + project.getName();
         String key = s3Service.uploadFile(multipartFile, folder);
 
         project.setCoverImageId(key);
         projectRepository.save(project);
+
+        log.debug("Cover with key: " + multipartFile.getOriginalFilename() + " uploaded");
 
         return key;
     }
@@ -99,11 +102,12 @@ public class ProjectService {
     }
 
     @Transactional
-    public void deleteFile(Long projectId) {
+    public void deleteCover(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
         String key = project.getCoverImageId();
         project.setCoverImageId(null);
         projectRepository.save(project);
         s3Service.deleteFile(key);
+        log.debug("Cover with key: " + key + " deleted");
     }
 }

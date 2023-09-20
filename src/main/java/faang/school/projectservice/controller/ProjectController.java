@@ -67,7 +67,7 @@ public class ProjectController {
     @DeleteMapping("/{projectId}/deleteCover")
     public ResponseEntity<String> deleteProjectCover(@PathVariable Long projectId) {
         log.debug("Received request to delete cover for project with id: {}", projectId);
-        projectService.deleteFile(projectId);
+        projectService.deleteCover(projectId);
         return ResponseEntity.ok().body("Project cover has been successfully deleted");
     }
 

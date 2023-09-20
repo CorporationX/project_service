@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ProjectValidator {
     @Value("${image.cover.maxSize}")
-    private String maxSize;
+    private long maxSize;
     private final ProjectRepository projectRepository;
 
     public void existProjectValidator(Long projectId) {
@@ -25,7 +25,7 @@ public class ProjectValidator {
         if (multipartFile == null) {
             throw new DataValidationException("File is null");
         }
-        if (multipartFile.getSize() > Long.parseLong(maxSize)) {
+        if (multipartFile.getSize() > maxSize) {
             throw new DataValidationException("File size must be less than 5 MB");
         }
     }
