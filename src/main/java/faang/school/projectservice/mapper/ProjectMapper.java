@@ -2,6 +2,7 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectEventDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.resource.Resource;
@@ -48,6 +49,9 @@ public interface ProjectMapper {
     @Mapping(target = "vacancies", source = "vacanciesId", qualifiedByName = "toVacancies")
     @Mapping(target = "children", source = "childrenId", qualifiedByName = "toChildren")
     Project toEntity(ProjectDto projectDto);
+
+    @Mapping(target = "projectId", source = "id")
+    ProjectEventDto toEventProjectDto(Project project);
 
     @Mapping(target = "stages", source = "stagesId", qualifiedByName = "toStages")
     @Mapping(target = "schedule", source = "scheduleId", qualifiedByName = "toSchedule")

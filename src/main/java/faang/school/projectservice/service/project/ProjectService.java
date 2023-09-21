@@ -11,6 +11,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.project.ProjectStatus;
 import faang.school.projectservice.model.project.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilter;
+    private final ProjectPublisher projectPublisher;
 
     @Transactional
     public ProjectDto createProject(ProjectCreateDto projectCreateDto) {
@@ -35,8 +37,10 @@ public class ProjectService {
         }
         log.info("Project creation started {}", projectCreateDto.getName());
         projectCreateDto.setStatus(ProjectStatus.CREATED);
+        Project dtoToProject = projectMapper.createDtoToProject(projectCreateDto);
 
-        return projectMapper.toDto(projectRepository.save(projectMapper.createDtoToProject(projectCreateDto)));
+        projectPublisher.publish(dtoToProject);
+        return projectMapper.toDto(projectRepository.save(dtoToProject));
     }
 
     @Transactional

@@ -23,7 +23,9 @@ spring:
       host: localhost
       channels:
         calculations_channel:
-          name: calculations_channel
+          name: calculations-channel
+        projects_channel:
+          name: projects-channel
 
 server:
   port: 8082

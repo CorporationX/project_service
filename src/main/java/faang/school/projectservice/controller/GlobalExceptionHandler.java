@@ -3,9 +3,11 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.exception.ErrorResponse;
 import faang.school.projectservice.exception.InvalidUserException;
 import faang.school.projectservice.exception.MomentExistingException;
+import faang.school.projectservice.exception.SerializeJsonException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -62,5 +64,11 @@ public class GlobalExceptionHandler {
                         error -> ((FieldError) error).getField(),
                         error -> Objects.requireNonNullElse(error.getDefaultMessage(), ""))
                 );
+    }
+
+    @ExceptionHandler(SerializeJsonException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<String> handleJsonSerializeException(SerializeJsonException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 }
