@@ -1,11 +1,10 @@
 package faang.school.projectservice.dto.project;
 
 
+import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +27,7 @@ public class ProjectDto {
     private String description;
     private Long parentId;
     private List<Long> childrenId;
+    private List<StageDto> stages;
     private ProjectStatus status;
     private ProjectVisibility visibility;
 }

@@ -10,11 +10,12 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,10 +30,10 @@ public class ProjectService {
 
     @Transactional
     public List<ProjectDto> getAllProjects(Long userId) {
-        List<Project> projects = projectRepository.findAll().collect(Collectors.toList());
+        List<Project> projects = projectRepository.findAll().toList();
         List<Project> filteredProjects = projects.stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC ||
-                        project.getTeams().stream().anyMatch(team -> team.getTeamMembers().stream().anyMatch(teamMember -> teamMember.getUserId() == userId)))
+                        project.getTeams().stream().anyMatch(team -> team.getTeamMembers().stream().anyMatch(teamMember -> Objects.equals(teamMember.getUserId(), userId))))
                 .collect(Collectors.toList());
         return projectMapper.toDtoList(filteredProjects);
     }
@@ -67,19 +68,6 @@ public class ProjectService {
                         String.format("Project with id %d does not exist.", projectDto.getId())));
     }
 
-    @Transactional
-    public ProjectDto createSubProject(ProjectDto projectDto) {
-        validateParentProjectExist(projectDto);
-        validateVisibilityConsistency(projectDto);
-        validateSubProjectUnique(projectDto);
-        Project subProject = projectMapper.toEntity(projectDto);
-        Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
-        subProject.setParentProject(parentProject);
-        subProject.setStatus(ProjectStatus.CREATED);
-        Project savedSubProject = projectRepository.save(subProject);
-        parentProject.getChildren().add(savedSubProject);
-        return projectMapper.toDto(savedSubProject);
-    }
 
     private ProjectDto saveEntity(Project project) {
         project = projectRepository.save(project);
@@ -112,28 +100,8 @@ public class ProjectService {
                     .format(PROJECT_FROM_USER_EXISTS, projectDto.getId()));
         }
     }
-
-    private void validateParentProjectExist(ProjectDto projectDto) {
-        if (!projectRepository.existsById(projectDto.getParentId())) {
-            throw new DataValidException("No such parent project");
-        }
-    }
-
-    private void validateVisibilityConsistency(ProjectDto projectDto) {
-        Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
-        if (!projectDto.getVisibility().equals(parentProject.getVisibility())) {
-            throw new DataValidException("The visibility of the subproject must be - " +
-                    parentProject.getVisibility() + " like the parent project");
-        }
-    }
-
-    private void validateSubProjectUnique(ProjectDto projectDto) {
-        Project parentProject = projectRepository.getProjectById(projectDto.getParentId());
-        String subProjectName = projectDto.getName();
-        boolean subProjectExists = parentProject.getChildren().stream().anyMatch(
-                subProject -> subProject.getName().equals(subProjectName));
-        if (subProjectExists) {
-            throw new DataValidException("Subproject with name " + subProjectName + " already exists");
-        }
+    @Transactional(readOnly = true)
+    public Boolean isProjectExist(long id) {
+        return projectRepository.existsById(id);
     }
 }

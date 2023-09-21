@@ -51,8 +51,7 @@ public class Vacancy {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @OneToMany
-    @JoinColumn(name = "vacancy")
+    @OneToMany(mappedBy = "vacancy")
     private List<Candidate> candidates;
 
     @CreationTimestamp
