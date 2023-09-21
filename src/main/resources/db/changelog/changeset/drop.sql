@@ -1,12 +1,12 @@
-DROP TABLE team;
-DROP TABLE team_member;
-DROP TABLE task;
-DROP TABLE resource;
-DROP TABLE schedule;
-DROP TABLE project;
-DROP TABLE project_stage;
-DROP TABLE project_stage_roles;
-DROP TABLE campaign;
-DROP TABLE donation;
+DROP TABLE team CASCADE;
+DROP TABLE team_member CASCADE;
+DROP TABLE task CASCADE;
+DROP TABLE resource CASCADE;
+DROP TABLE schedule CASCADE;
+DROP TABLE  project CASCADE;
+DROP TABLE project_stage CASCADE;
+DROP TABLE project_stage_roles CASCADE;
+DROP TABLE campaign CASCADE;
+DROP TABLE donation CASCADE;
 
 DELETE FROM databasechangelog;
