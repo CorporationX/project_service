@@ -14,6 +14,7 @@ public class ProjectValidator {
     @Value("${image.cover.maxSize}")
     private long maxSize;
     private final ProjectRepository projectRepository;
+    private final long maxFileSize = maxSize / (1024 * 1024);
 
     public void existProjectValidator(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
@@ -26,7 +27,7 @@ public class ProjectValidator {
             throw new DataValidationException("File is null");
         }
         if (multipartFile.getSize() > maxSize) {
-            throw new DataValidationException("File size must be less than 5 MB");
+            throw new DataValidationException(String.format("File size must be less than %s MB", maxFileSize));
         }
     }
 }
