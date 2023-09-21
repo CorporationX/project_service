@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
         log.error("Entity not found exception occurred", e);
         return ErrorResponseDto.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .error(e.getMessage())
                 .path(request.getRequestURI())
                 .build();
