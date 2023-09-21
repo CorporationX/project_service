@@ -4,6 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +32,7 @@ public class ProjectController {
     public ProjectDto getProject(@PathVariable("id") long projectId) {
         return projectService.getProject(projectId);
     }
-
+  
     @PostMapping("/project")
     public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
         return projectService.createProject(projectDto);
@@ -44,7 +45,7 @@ public class ProjectController {
     }
 
     @PostMapping
-    public List<ProjectDto> getProjects(@RequestBody ProjectFilterDto projectFilter) {
+    public List<ProjectDto> getProjects(@Valid @RequestBody ProjectFilterDto projectFilter) {
         return projectService.getProjects(projectFilter);
     }
 
