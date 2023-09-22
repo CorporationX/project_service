@@ -8,6 +8,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableScheduling
@@ -17,6 +18,11 @@ public class ProjectServiceApplication {
         new SpringApplicationBuilder(ProjectServiceApplication.class)
                 .bannerMode(Banner.Mode.OFF)
                 .run(args);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
     @Bean
