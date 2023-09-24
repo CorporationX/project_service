@@ -12,7 +12,6 @@ import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
-import faang.school.projectservice.util.validator.DonationServiceValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,8 +33,6 @@ class DonationServiceTest {
 
     @Spy
     private DonationMapperImpl donationMapper;
-    @Spy
-    private DonationServiceValidator donationServiceValidator;
     @Mock
     private UserServiceClient userServiceClient;
     @Mock
