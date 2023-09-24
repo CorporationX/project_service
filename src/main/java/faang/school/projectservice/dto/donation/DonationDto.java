@@ -22,18 +22,17 @@ public class DonationDto implements Serializable {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
-    @NotNull(message = "The payment number must not be null")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long paymentNumber;
 
     @NotNull(message = "The amount must not be null")
-    @Min(value = 1, message = "The amount must be greater than 0")
+    @Min(value = 1, message = "The amount must be greater or equal to 1")
     private BigDecimal amount;
 
     @NotNull(message = "The currency must not be null")
     @Pattern(message = "Currency code must be either 'USD' or 'EUR'", regexp = "^(USD|EUR)$")
     private String currency;
 
-    @NotNull(message = "The user id must not be null")
-    private Long userId;
+    @NotNull(message = "The campaign id must not be null")
+    private Long campaignId;
 }

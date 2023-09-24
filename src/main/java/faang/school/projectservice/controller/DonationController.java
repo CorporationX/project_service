@@ -1,7 +1,8 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationDto;
-import faang.school.projectservice.filter.donation.DonationFilter;
+import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.service.DonationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,25 +31,25 @@ public class DonationController {
 
     @PostMapping
     @Operation(summary = "Создание доната")
-    public DonationDto createDonation(@Valid @RequestBody DonationDto donationDto) {
+    public PaymentResponse createDonation(@Valid @RequestBody DonationDto donationDto) {
         return donationService.createDonation(donationDto);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{donationId}")
     @Operation(summary = "Получение доната пользователя по id доната")
-    public DonationDto getDonationById(@PathVariable Long userId, @RequestParam Long donationId) {
-        return donationService.getDonationById(userId, donationId);
+    public DonationDto getDonationById(@PathVariable Long donationId) {
+        return donationService.getDonationById(donationId);
     }
 
-    @GetMapping("/{userId}/all")
+    @GetMapping("/all")
     @Operation(summary = "Получение списка донатов пользователя")
-    public List<DonationDto> getAllDonations(@PathVariable Long userId) {
-        return donationService.getAllDonations(userId);
+    public List<DonationDto> getAllDonations() {
+        return donationService.getAllDonations();
     }
 
-    @GetMapping("/{userId}/filter")
+    @GetMapping("/all/filter")
     @Operation(summary = "Получение списка донатов пользователя с фильтром")
-    public List<DonationDto> getAllDonationsWithFilter(@Valid @RequestBody DonationFilter donationFilter) {
-        return donationService.getAllDonationsWithFilter(donationFilter);
+    public List<DonationDto> getAllDonationsWithFilter(@Valid @RequestBody DonationFilterDto donationFilter) {
+        return donationService.getAllDonationsByFilters(donationFilter);
     }
 }
