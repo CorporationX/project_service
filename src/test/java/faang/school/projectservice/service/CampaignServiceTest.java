@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.Currency;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilter;
-import faang.school.projectservice.dto.campaign.CampaignGetDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdatedDto;
 import faang.school.projectservice.mapper.CampaignMapperImpl;
 import faang.school.projectservice.model.Campaign;
@@ -48,7 +47,7 @@ class CampaignServiceTest {
     @Mock
     private SessionFactory sessionFactory;
     private Campaign campaign;
-    private CampaignGetDto campaignGetDto;
+    private CampaignDto campaignDto1;
 
     @BeforeEach
     void setUp() {
@@ -61,9 +60,10 @@ class CampaignServiceTest {
                 .project(Project.builder().id(1L).build())
                 .currency(Currency.USD)
                 .createdBy(1L)
+                .updatedBy(1L)
                 .build();
 
-        campaignGetDto = CampaignGetDto.builder()
+        campaignDto1 = CampaignDto.builder()
                 .title("Z")
                 .description("Z description")
                 .goal(new BigDecimal(1000_000_000))
@@ -100,15 +100,15 @@ class CampaignServiceTest {
         Mockito.when(campaignRepository.findById(1L)).thenReturn(Optional.of(campaign));
         Mockito.when(projectService.checkManagerRole(1L, 1L)).thenReturn(true);
         Mockito.when(projectService.checkOwnerProject(1L, 1L)).thenReturn(true);
-        campaignGetDto.setTitle("X");
-        campaignGetDto.setDescription("X description");
+        campaignDto1.setTitle("X");
+        campaignDto1.setDescription("X description");
 
         CampaignUpdatedDto updatedDto = CampaignUpdatedDto.builder().title("X").description("X description").build();
 
-        CampaignGetDto actual = campaignService.updateCampaign(updatedDto, 1L, 1L);
-        System.out.println(campaignGetDto);
+        CampaignDto actual = campaignService.updateCampaign(updatedDto, 1L, 1L);
+        System.out.println(campaignDto1);
 
-        assertEquals(campaignGetDto, actual);
+        assertEquals(campaignDto1, actual);
     }
 
     @Test
@@ -144,8 +144,8 @@ class CampaignServiceTest {
         Mockito.when(session.createQuery(criteriaQuery)).thenReturn(query);
         Mockito.when(query.getResultList()).thenReturn(List.of(campaign));
 
-        List<CampaignGetDto> actual = campaignService.getCampaignsByFilter(campaignFilter);
+        List<CampaignDto> actual = campaignService.getCampaignsByFilter(campaignFilter);
 
-        assertEquals(List.of(campaignGetDto), actual);
+        assertEquals(List.of(campaignDto1), actual);
     }
 }

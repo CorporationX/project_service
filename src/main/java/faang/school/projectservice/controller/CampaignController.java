@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilter;
-import faang.school.projectservice.dto.campaign.CampaignGetDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdatedDto;
 import faang.school.projectservice.service.CampaignService;
 import jakarta.validation.Valid;
@@ -28,13 +27,13 @@ public class CampaignController {
     private final UserContext userContext;
 
     @PostMapping
-    public CampaignGetDto createCampaign(@RequestBody @Valid CampaignDto campaign) {
+    public CampaignDto createCampaign(@RequestBody @Valid CampaignDto campaign) {
         long userId = userContext.getUserId();
         return campaignService.createCampaign(campaign, userId);
     }
 
     @PutMapping("/{campaignId}")
-    public CampaignGetDto updateCampaign(@RequestBody CampaignUpdatedDto campaignDto, @PathVariable long campaignId) {
+    public CampaignDto updateCampaign(@RequestBody CampaignUpdatedDto campaignDto, @PathVariable long campaignId) {
         long userId = userContext.getUserId();
         return campaignService.updateCampaign(campaignDto, userId, campaignId);
     }
@@ -45,12 +44,13 @@ public class CampaignController {
     }
 
     @GetMapping("/{id}")
-    public CampaignGetDto getCampaignById(@PathVariable long id) {
-        return campaignService.getCampaignById(id);
+    public CampaignDto getCampaignById(@PathVariable long id) {
+        long userId = userContext.getUserId();
+        return campaignService.getCampaignById(id, userId);
     }
 
     @GetMapping("/list")
-    public List<CampaignGetDto> getCampaignByFilter(@RequestBody CampaignFilter campaignFilter) {
+    public List<CampaignDto> getCampaignByFilter(@RequestBody CampaignFilter campaignFilter) {
         return campaignService.getCampaignsByFilter(campaignFilter);
     }
 }

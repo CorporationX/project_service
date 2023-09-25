@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilter;
-import faang.school.projectservice.dto.campaign.CampaignGetDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdatedDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
@@ -34,18 +33,19 @@ public class CampaignService {
     private final SessionFactory sessionFactory;
 
     @Transactional
-    public CampaignGetDto createCampaign(CampaignDto campaignDto, long userId) {
+    public CampaignDto createCampaign(CampaignDto campaignDto, long userId) {
         validateCampaign(campaignDto.getProjectId(), userId);
 
         Campaign campaign = campaignMapper.toEntity(campaignDto);
         campaign.setAmountRaised(new BigDecimal(0));
         campaign.setCreatedBy(userId);
+        campaign.setUpdatedBy(userId);
         Campaign campaignSaved = campaignRepository.save(campaign);
         return campaignMapper.toDto(campaignSaved);
     }
 
     @Transactional
-    public CampaignGetDto updateCampaign(CampaignUpdatedDto campaignDto, long userId, long campaignId) {
+    public CampaignDto updateCampaign(CampaignUpdatedDto campaignDto, long userId, long campaignId) {
         Campaign campaign = getById(campaignId);
         validateCampaign(campaign.getProject().getId(), userId);
 
@@ -62,13 +62,14 @@ public class CampaignService {
     }
 
     @Transactional(readOnly = true)
-    public CampaignGetDto getCampaignById(long campaignId) {
+    public CampaignDto getCampaignById(long campaignId, long userId) {
         Campaign campaign = getById(campaignId);
+        checkAccessRights(campaign.getProject().getId(), userId);
         return campaignMapper.toDto(campaign);
     }
 
     @Transactional(readOnly = true)
-    public List<CampaignGetDto> getCampaignsByFilter(CampaignFilter campaignFilter) {
+    public List<CampaignDto> getCampaignsByFilter(CampaignFilter campaignFilter) {
         try (Session session = sessionFactory.openSession()) {
             HibernateCriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
             CriteriaQuery<Campaign> criteriaQuery = criteriaBuilder.createQuery(Campaign.class);
@@ -108,8 +109,17 @@ public class CampaignService {
         boolean isMemberManager = projectService.checkManagerRole(projectId, userId);
         boolean isOwnerProject = projectService.checkOwnerProject(projectId, userId);
 
-        if (!isMemberManager || !isOwnerProject) {
+        if (!isMemberManager && !isOwnerProject) {
             throw new DataValidationException("You can't create campaign");
+        }
+    }
+
+    private void checkAccessRights(long projectId, long userId) {
+        boolean isOwnerProject = projectService.checkManagerRole(projectId, userId);
+        boolean isCreator = projectId == userId;
+
+        if (!isOwnerProject && !isCreator) {
+            throw new DataValidationException("You do not have access rights");
         }
     }
 }

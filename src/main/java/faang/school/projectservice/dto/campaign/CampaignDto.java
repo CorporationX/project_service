@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.campaign;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import faang.school.projectservice.dto.Currency;
 import faang.school.projectservice.model.CampaignStatus;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -31,6 +33,9 @@ public class CampaignDto {
     @NotNull(message = "Goal cannot be null")
     private BigDecimal goal;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private BigDecimal amountRaised;
+
     @NotNull(message = "Campaign status cannot be null")
     private CampaignStatus status;
 
@@ -40,5 +45,15 @@ public class CampaignDto {
     @NotNull(message = "Currency cannot be null")
     private Currency currency;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private LocalDateTime createdAt;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long createdBy;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private LocalDateTime updatedAt;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long updatedBy;
 }
