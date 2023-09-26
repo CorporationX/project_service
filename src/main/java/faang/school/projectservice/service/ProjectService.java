@@ -9,12 +9,16 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.s3.S3ServiceImpl;
+import faang.school.projectservice.util.CoverHandler;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,6 +31,8 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
     private final ProjectValidator projectValidator;
+    private final S3ServiceImpl s3Service;
+    private final CoverHandler coverHandler;
 
     public void validateProjectId(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
@@ -69,5 +75,39 @@ public class ProjectService {
                 .flatMap(filter -> filter.apply(projectRepository.findAll().stream(), filters))
                 .map(projectMapper::toDto)
                 .toList();
+    }
+
+    @Transactional
+    public String addCoverProject(Long projectId, MultipartFile multipartFile) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        projectValidator.validateSizeFile(multipartFile);
+        coverHandler.resizeCover(multipartFile);
+
+
+        String folder = "projectId_" + project.getId() + "_projectName_" + project.getName();
+        String key = s3Service.uploadFile(multipartFile, folder);
+
+        project.setCoverImageId(key);
+        projectRepository.save(project);
+
+        log.debug("Cover with key: " + multipartFile.getOriginalFilename() + " uploaded");
+
+        return key;
+    }
+
+    @Transactional(readOnly = true)
+    public InputStream getProjectCover(Long projectId) {
+        return s3Service.downloadFile(projectRepository.getProjectById(projectId).getCoverImageId());
+    }
+
+    @Transactional
+    public void deleteCover(Long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+        project.setCoverImageId(null);
+        projectRepository.save(project);
+        s3Service.deleteFile(key);
+        log.debug("Cover with key: " + key + " deleted");
     }
 }
