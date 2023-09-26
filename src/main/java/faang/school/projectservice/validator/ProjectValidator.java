@@ -11,10 +11,11 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 @RequiredArgsConstructor
 public class ProjectValidator {
+    private final int BYTE_IN_ONE_MEGABYTE = 1024 * 1024;
     @Value("${image.cover.maxSize}")
     private long maxSize;
     private final ProjectRepository projectRepository;
-    private final long maxFileSize = maxSize / (1024 * 1024);
+    private final long maxFileSize = maxSize / BYTE_IN_ONE_MEGABYTE;
 
     public void existProjectValidator(Long projectId) {
         if (!projectRepository.existsById(projectId)) {

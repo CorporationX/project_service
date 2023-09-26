@@ -37,20 +37,10 @@ public class CoverHandler {
     }
 
     public int getNewWidth(int width, int height) {
-        if (width == height && width > maxWidth) {
-            return maxWidth;
-        } else if (width > maxWidth) {
-            width = maxWidth;
-        }
-        return width;
+        return (width == height && width > maxWidth) ? maxWidth : Math.min(width, maxWidth);
     }
 
     public int getNewHeight(int width, int height) {
-        if (width == height && height > maxWidth) {
-            return maxWidth;
-        } else if (height > maxHeight) {
-            height = maxHeight;
-        }
-        return height;
+        return (width == height && width > maxWidth) ? maxWidth : Math.min(height, maxHeight);
     }
 }
