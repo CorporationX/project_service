@@ -36,4 +36,10 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
+
+    @OneToMany(mappedBy = "createdBy")
+    private List<Resource> createdResources;
+
+    @OneToMany(mappedBy = "updatedBy")
+    private List<Resource> updatedResources;
 }
