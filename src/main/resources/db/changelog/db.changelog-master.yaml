@@ -20,4 +20,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V010__create_offer.sql
   - include:
-      file: db/changelog/changeset/project_V011__create_moment_member.sql
+      file: db/changelog/changeset/project_V012__create_moment_member.sql
