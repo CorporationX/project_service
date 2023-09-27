@@ -16,23 +16,23 @@ public class ResourcesValidator {
     public void checkStorageCapacity(long newStorageCapacity) {
         if (newStorageCapacity > MAX_PROJECT_FILE_SIZE) {
             log.error("throw FileParseException");
-            throw new FileParseException("Project storage capacity exceeded");
+            throw new FileParseException("New storage capacity is too large");
         }
     }
 
     public void checkRightsToDelete(Resource resource, Project project, long userId) {
         if (resource.getCreatedBy().getUserId() != userId) {
-            throw new DataValidationException("The user does not have the right to delete");
+            throw new DataValidationException("You can't delete this resource");
         }
 
         if (project.getOwnerId() != userId) {
-            throw new DataValidationException("The user does not have the right to delete");
+            throw new DataValidationException("You can't delete this resource");
         }
     }
 
     public void checkTeamMemberInProject(TeamMember teamMember) {
         if (teamMember == null) {
-            throw new DataValidationException("Team member is not in the project");
+            throw new DataValidationException("There's no team member on the project");
         }
     }
 }

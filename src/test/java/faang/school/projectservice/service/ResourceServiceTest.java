@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ResourceDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.*;
@@ -11,14 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,7 +53,6 @@ public class ResourceServiceTest {
     private ResourceService resourceService;
 
     private Project project;
-    private Project newStorageCapacity;
 
     private Resource resource;
     private ResourceDto resourceDto;
@@ -63,7 +64,7 @@ public class ResourceServiceTest {
                 .name("Faang")
                 .storageSize(BigInteger.valueOf(2_097_151_000))
                 .build();
-        newStorageCapacity = Project.builder()
+        Project newStorageCapacity = Project.builder()
                 .id(5L)
                 .name("New Faang")
                 .storageSize(BigInteger.valueOf(2_097_152_000))
@@ -100,8 +101,6 @@ public class ResourceServiceTest {
         when(multipartFile.getContentType()).thenReturn("image/png");
         when(multipartFile.getSize()).thenReturn(2_097_151_000L);
 
-        resource.setProject(Project.builder().id(1L).build());
-
         when(resourceMapper.toEntity(resourceDto)).thenReturn(resource);
 
         resourceService.uploadFile(resourceDto, multipartFile, 1L);
@@ -109,5 +108,32 @@ public class ResourceServiceTest {
         verify(fileStore).uploadFile(multipartFile, resource.getKey());
         verify(resourceRepository).save(resource);
         verify(projectService).saveProject(project);
+    }
+
+    @Test
+    void updateFileTest() {
+        when(teamMemberService.findByUserIdAndProjectId(1L, 1L)).thenReturn(teamMember);
+        when(projectService.getProjectByIdFromRepo(resourceDto.getProjectId())).thenReturn(project);
+        when(resourceRepository.findById(1L)).thenReturn(Optional.ofNullable(resource));
+
+        resourceService.updateFile(1L, resourceDto, multipartFile, 1L);
+
+        verify(resourceRepository).save(resource);
+    }
+
+    @Test
+    void deleteFileTest() {
+        when(projectService.getProjectByIdFromRepo(1L)).thenReturn(project);
+        when(resourceRepository.findById(1L)).thenReturn(Optional.ofNullable(resource));
+
+        resourceService.deleteResource(1L, 1L);
+
+        verify(resourceRepository).save(resource);
+        verify(projectService).saveProject(project);
+    }
+
+    @Test
+    void testUpdateFileThrowException() {
+        assertThrows(EntityNotFoundException.class, () -> resourceService.updateFile(1L, resourceDto, multipartFile, 1L));
     }
 }
