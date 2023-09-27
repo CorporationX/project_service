@@ -9,6 +9,9 @@ import faang.school.projectservice.filter.project.ProjectTitleFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +59,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testCreateProjectThrowsException() {
+    void testCreateProjectThrowsException() {
         Mockito.when(projectMapper.toProject(projectDto))
                 .thenReturn(project);
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString()))
@@ -66,7 +69,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testCreateProject() {
+    void testCreateProject() {
         ProjectDto projectDto1 = ProjectDto.builder().id(1L).description("s").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(Mockito.anyLong(), Mockito.anyString())).thenReturn(false);
         Mockito.when(projectRepository.save(any(Project.class))).thenReturn(project);
@@ -76,7 +79,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testUpdateProject() {
+    void testUpdateProject() {
         ProjectDto projectDtoForUpdate = ProjectDto.builder().id(1L).description("new description").name("q").ownerId(1L).status(ProjectStatus.CREATED).build();
         Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
         Mockito.when(projectMapper.toProject(projectDtoForUpdate)).thenReturn(project);
@@ -85,7 +88,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testGetFilteredProjectsByTitle() {
+    void testGetFilteredProjectsByTitle() {
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
 
         ProjectFilterDto projectFilterDto = ProjectFilterDto.builder().name("CorporationX").status(ProjectStatus.CREATED).build();
@@ -94,7 +97,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testGetFilteredProjectsByStatus() {
+    void testGetFilteredProjectsByStatus() {
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
 
         ProjectFilterDto projectFilterDto = ProjectFilterDto.builder().status(ProjectStatus.CREATED).build();
@@ -104,21 +107,87 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testGetAllProjects() {
+    void testGetAllProjects() {
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
         List<ProjectDto> projectDtoList = projectService.getAllProjects();
         assertEquals(3, projectDtoList.size());
     }
 
     @Test
-    public void testGetProjectById() {
+    void testGetProjectById() {
         Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
         assertEquals(projectMapper.toProjectDto(project), projectService.getProjectById(1L));
     }
 
     @Test
-    public void testGetProjectByIdThrowsException() {
+    void testGetProjectByIdThrowsException() {
         Mockito.when(projectRepository.getProjectById(-1L)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(-1L));
+    }
+
+    @Test
+    void testCheckManageRoleAssertTrue() {
+        TeamMember teamMember1 = TeamMember.builder()
+                .userId(1L)
+                .roles(List.of(TeamRole.MANAGER))
+                .build();
+        TeamMember teamMember2 = TeamMember.builder()
+                .userId(2L)
+                .roles(List.of(TeamRole.MANAGER))
+                .build();
+        Project project = Project.builder()
+                .teams(List.of(Team
+                        .builder()
+                        .teamMembers(List.of(teamMember1, teamMember2))
+                        .build()))
+                .build();
+
+        Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
+
+        assertTrue(projectService.checkManagerRole(1L, 1L));
+    }
+
+    @Test
+    void testCheckManageRoleAssertFalse() {
+        TeamMember teamMember1 = TeamMember.builder()
+                .userId(1L)
+                .roles(List.of(TeamRole.DESIGNER))
+                .build();
+        TeamMember teamMember2 = TeamMember.builder()
+                .userId(2L)
+                .roles(List.of(TeamRole.DEVELOPER))
+                .build();
+        Project project = Project.builder()
+                .teams(List.of(Team
+                        .builder()
+                        .teamMembers(List.of(teamMember1, teamMember2))
+                        .build()))
+                .build();
+
+        Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
+
+        assertFalse(projectService.checkManagerRole(1L, 1L));
+    }
+
+    @Test
+    void testCheckOwnerProjectAssertTrue() {
+        Project project = Project.builder()
+                .ownerId(1L)
+                .build();
+
+        Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
+
+        assertTrue(projectService.checkOwnerProject(1L, 1L));
+    }
+
+    @Test
+    void testCheckOwnerProjectAssertFalse() {
+        Project project = Project.builder()
+                .ownerId(1L)
+                .build();
+
+        Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
+
+        assertFalse(projectService.checkOwnerProject(1L, 2L));
     }
 }

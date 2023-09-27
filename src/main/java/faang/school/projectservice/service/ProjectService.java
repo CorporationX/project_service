@@ -8,6 +8,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -78,6 +79,19 @@ public class ProjectService {
 
     public void saveProject(Project project) {
         projectRepository.save(project);
+    }
+
+    public boolean checkManagerRole(long projectId, long userId) {
+        Project project = projectRepository.getProjectById(projectId);
+        return project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(teamMember -> teamMember.getUserId() == userId)
+                .anyMatch(teamMember -> teamMember.getRoles().contains(TeamRole.MANAGER));
+    }
+
+    public boolean checkOwnerProject(long projectId, long userId) {
+        Project project = projectRepository.getProjectById(projectId);
+        return project.getOwnerId().equals(userId);
     }
 
     private List<ProjectDto> filterProjects(ProjectFilterDto projectFilterDto, Stream<Project> projects) {

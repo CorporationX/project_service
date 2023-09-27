@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableFeignClients
+@EnableFeignClients(basePackages = "faang.school.projectservice.client")
 @OpenAPIDefinition(
         info = @Info(
                 title = "Project Service",
