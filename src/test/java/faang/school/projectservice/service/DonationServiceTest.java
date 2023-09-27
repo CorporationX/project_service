@@ -9,6 +9,7 @@ import faang.school.projectservice.exception.EntityStatusException;
 import faang.school.projectservice.mapper.DonationMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
+import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
@@ -43,6 +44,7 @@ class DonationServiceTest {
     private CampaignRepository campaignRepository;
     private Campaign campaign;
     private DonationDto donationDto;
+    private Donation donation;
     private Project project;
 
     @BeforeEach
@@ -63,6 +65,8 @@ class DonationServiceTest {
         donationDto.setAmount(BigDecimal.valueOf(100));
         donationDto.setCampaignId(campaign.getId());
         donationDto.setUserId(1L);
+
+        donation = donationMapper.toEntity(donationDto);
     }
 
     @Test
@@ -103,5 +107,23 @@ class DonationServiceTest {
 
         Assertions.assertThrows(EntityStatusException.class,
                 () -> donationService.send(donationDto1));
+    }
+
+    @Test
+    public void getDonation_Successful() {
+        Mockito.when(donationRepository.findById(donationDto.getId()))
+                .thenReturn(Optional.of(donation));
+
+        var some = donationService.getDonation(donationDto.getId());
+        Assertions.assertEquals(donationDto, some);
+    }
+
+    @Test
+    public void getDonation_throwException() {
+        Mockito.when(donationRepository.findById(donationDto.getId()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(DataValidationException.class,
+                () -> donationService.getDonation(donationDto.getId()));
     }
 }

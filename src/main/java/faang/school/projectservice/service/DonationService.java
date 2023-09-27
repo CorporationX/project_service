@@ -49,6 +49,12 @@ public class DonationService {
         return donationMapper.toDto(donation);
     }
 
+    public DonationDto getDonation(long donationId) {
+        Optional<Donation> donationById = donationRepository.findById(donationId);
+        donationById.orElseThrow(() -> new DataValidationException("Donation does not exist"));
+        return donationMapper.toDto(donationById.get());
+    }
+
     private void validateStatus(Campaign campaign) {
         if (campaign.getStatus() != CampaignStatus.ACTIVE) {
             throw new EntityStatusException("Campaign is not active");
