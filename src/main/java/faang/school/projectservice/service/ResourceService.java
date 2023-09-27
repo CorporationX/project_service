@@ -8,6 +8,7 @@ import faang.school.projectservice.model.*;
 import faang.school.projectservice.util.FileStore;
 import faang.school.projectservice.validator.ResourcesValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "services.s3", havingValue = "true")
 public class ResourceService {
     private final ResourceRepository resourceRepository;
     private final ResourcesValidator resourcesValidator;

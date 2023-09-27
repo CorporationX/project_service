@@ -16,7 +16,7 @@ import java.io.IOException;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "services.s3.isMocked", havingValue = "true")
+@ConditionalOnProperty(value = "services.s3", havingValue = "true")
 public class FileStore {
     private final AmazonS3 amazonS3;
 
