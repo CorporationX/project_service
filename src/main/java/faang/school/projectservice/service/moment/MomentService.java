@@ -3,21 +3,19 @@ package faang.school.projectservice.service.moment;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.moment.MomentRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.TeamMemberService;
 import faang.school.projectservice.validator.MomentValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +35,6 @@ public class MomentService {
     private final TeamMemberService teamMemberService;
     @Lazy
     private final ProjectService projectService;
-    private List<MomentFilter> momentFilters;
 
     @Transactional
     public MomentDto createMoment(MomentDto momentDto) {
@@ -61,25 +58,26 @@ public class MomentService {
                 .orElseThrow(() -> new DataValidationException("Moment by id: " + momentId + " not found"));
     }
 
-    public Page<MomentDto> getAllMoments(int page, int pageSize) {
-        return momentRepository.findAll(PageRequest.of(page, pageSize))
+    public Page<MomentDto> getAllMoments(Pageable pageable) {
+        return momentRepository.findAll(pageable)
                 .map(momentMapper::toMomentDto);
     }
 
-    public Page<MomentDto> getAllMoments(int page, int pageSize, MomentFilterDto filter) {
-        Stream<Moment> momentsStream = momentRepository.findAll(PageRequest.of(page, pageSize)).stream();
-
-        List<MomentDto> filteredMomentsDto = momentFilters.stream()
-                .filter(momentFilter -> momentFilter.isApplicable(filter))
-                .flatMap(momentFilter -> momentFilter.apply(momentsStream, filter))
-                .map(momentMapper::toMomentDto)
-                .toList();
-        return new PageImpl<>(filteredMomentsDto);
+    public Page<MomentDto> getAllMoments(MomentFilterDto filter, Pageable pageable) {
+        return momentRepository.findByProjectsAndDate(filter.getProjectIds(), filter.getDateFrom(), filter.getDateTo(), pageable).map(momentMapper::toMomentDto);
     }
 
     @Transactional
     public MomentDto updateMoment(Long momentId, MomentDto updatedMomentDto) {
         Moment oldMoment = findMomentById(momentId);
+
+        if (updatedMomentDto.getName() != null && !updatedMomentDto.getName().isBlank()) {
+            oldMoment.setName(updatedMomentDto.getName());
+        }
+
+        if (updatedMomentDto.getDescription() != null && !updatedMomentDto.getDescription().isBlank()) {
+            oldMoment.setDescription(updatedMomentDto.getDescription());
+        }
 
         Set<TeamMember> newMembers = getNewMembers(oldMoment, updatedMomentDto);
         List<Project> newMembersProjects = getProjectsByMembers(newMembers);
@@ -92,13 +90,6 @@ public class MomentService {
                     .distinct()
                     .toList();
             oldMoment.getMembers().addAll(newMembersAndNewProjectsMembers);
-            /*newMembers.addAll(getMembersByProjects(List.copyOf(newProjects)));
-            List<TeamMember> newMembersAndNewProjectsMembers = Stream.concat(
-                            newMembers.stream(),
-                            oldMoment.getMembers().stream())
-                    .distinct()
-                    .toList();
-            oldMoment.setMembers(newMembersAndNewProjectsMembers);*/
         }
 
         if (!newMembersProjects.isEmpty() || !newProjects.isEmpty()) {
@@ -109,20 +100,25 @@ public class MomentService {
                     .toList();
             oldMoment.getProjects().addAll(newMembersProjectsAndNewProjects);
         }
-        momentRepository.save(oldMoment);
+
         return momentMapper.toMomentDto(oldMoment);
     }
 
     private Set<TeamMember> getNewMembers(Moment oldMoment, MomentDto updatedMomentDto) {
-        Set<TeamMember> newMembers = new HashSet<>(
-                teamMemberService.getTeamMembersByIds(updatedMomentDto.getMemberIds()));
-        oldMoment.getMembers().forEach(newMembers::remove);
+        Set<TeamMember> newMembers = new HashSet<>();
+        if (updatedMomentDto.getMemberIds() != null && !updatedMomentDto.getMemberIds().isEmpty()) {
+            newMembers.addAll(teamMemberService.getTeamMembersByIds(updatedMomentDto.getMemberIds()));
+            oldMoment.getMembers().forEach(newMembers::remove);
+        }
         return newMembers;
     }
 
     private Set<Project> getNewProjects(Moment oldMoment, MomentDto updatedMomentDto) {
-        Set<Project> newProjects = new HashSet<>(projectService.getProjectsByIds(updatedMomentDto.getProjectIds()));
-        oldMoment.getProjects().forEach(newProjects::remove);
+        Set<Project> newProjects = new HashSet<>();
+        if (updatedMomentDto.getProjectIds() != null && !updatedMomentDto.getProjectIds().isEmpty()) {
+            newProjects.addAll(projectService.getProjectsByIds(updatedMomentDto.getProjectIds()));
+            oldMoment.getProjects().forEach(newProjects::remove);
+        }
         return newProjects;
     }
 

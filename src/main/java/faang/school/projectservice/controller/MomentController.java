@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,16 +34,14 @@ public class MomentController {
     }
 
     @GetMapping
-    public Page<MomentDto> getAllMoments(@RequestParam(value = "page") int page,
-                                         @RequestParam(value = "pageSize") int pageSize) {
-        return momentService.getAllMoments(page, pageSize);
+    public Page<MomentDto> getAllMoments(@PageableDefault(sort = {"id"}, size = 25) Pageable pageable) {
+        return momentService.getAllMoments(pageable);
     }
 
     @GetMapping("/filter")
     public Page<MomentDto> getAllMomentsByFilter(@RequestBody MomentFilterDto filter,
-                                         @RequestParam(value = "page") int page,
-                                         @RequestParam(value = "pageSize") int pageSize) {
-        return momentService.getAllMoments(page, pageSize, filter);
+                                                 @PageableDefault(sort = {"id"}, size = 25) Pageable pageable) {
+        return momentService.getAllMoments(filter, pageable);
     }
 
     @GetMapping("{momentId}")
