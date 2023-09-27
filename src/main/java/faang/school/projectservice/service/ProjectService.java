@@ -104,4 +104,8 @@ public class ProjectService {
                 .map(projectMapper::toProjectDto)
                 .toList();
     }
+
+    public List<Project> getProjectsByIds(List<Long> ids) {
+        return projectRepository.findAllByIds(ids);
+    }
 }

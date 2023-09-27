@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.jpa.MomentJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -22,7 +21,7 @@ class MomentServiceTest {
     @InjectMocks
     private MomentService momentService;
     @Mock
-    private MomentRepository momentRepository;
+    private MomentJpaRepository momentJpaRepository;
     @Mock
     private MomentMapper momentMapper;
     private Moment moment = new Moment();
@@ -50,7 +49,7 @@ class MomentServiceTest {
 
         Mockito.verify(momentMapper, Mockito.times(1))
                 .toMoment(momentDto);
-        Mockito.verify(momentRepository, Mockito.times(1))
+        Mockito.verify(momentJpaRepository, Mockito.times(1))
                 .save(moment);
     }
 
