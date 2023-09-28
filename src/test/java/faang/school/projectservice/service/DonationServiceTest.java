@@ -135,4 +135,44 @@ class DonationServiceTest {
         Assertions.assertThrows(DataValidationException.class,
                 () -> donationService.getDonation(donationDto.getId()));
     }
+
+    @ParameterizedTest
+    @MethodSource("getUserId")
+    @DisplayName("get donations by userId")
+    public void getDonationsByUserId_Successful(long userId) {
+        Donation donation1 = Donation
+                .builder()
+                .id(2L)
+                .userId(2L)
+                .currency(Currency.EUR)
+                .campaign(campaign)
+                .amount(BigDecimal.valueOf(100))
+                .build();
+
+        Donation donation2 = Donation
+                .builder()
+                .id(3L)
+                .userId(2L)
+                .currency(Currency.EUR)
+                .campaign(campaign)
+                .amount(BigDecimal.valueOf(100))
+                .build();
+
+        List<Donation> donations = List.of(donation, donation1, donation2);
+        Mockito.when(donationRepository.findAll())
+                .thenReturn(donations);
+        List<DonationDto> donationDtos = donations
+                .stream()
+                .map(donat -> donationMapper.toDto(donat))
+                .toList();
+
+        List<DonationDto> donationsByUserId = donationService.getDonationsByUserId(userId);
+        Assertions.assertEquals(donationsByUserId, donationDtos);
+    }
+
+    static Stream<Arguments> getUserId() {
+        return Stream.of(
+                Arguments.of(2L)
+        );
+    }
 }

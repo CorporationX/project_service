@@ -61,7 +61,7 @@ public class DonationService {
         List<Donation> donations = donationRepository.findAll();
         List<Donation> donationsByUserId = new ArrayList<>();
         for (Donation donation : donations) {
-            if (donation.getUserId().equals(userServiceClient.getUser(userId).getId())) { //я не уверен, можно ли так делать, но через постман выдает список донатов по переданному userId
+            if (donation.getUserId().equals(userId)) {
                 donationsByUserId.add(donation);
             }
         }
