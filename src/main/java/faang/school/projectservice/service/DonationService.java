@@ -36,7 +36,7 @@ public class DonationService {
 
     @Transactional
     public DonationDto send(DonationDto donationDto) {
-        isUserExist(donationDto);
+        isUserExistByDto(donationDto);
 
         Optional<Campaign> campaignById = campaignRepository.findById(donationDto.getCampaignId());
         campaignById.orElseThrow(() -> new DataValidationException("No such campaign found."));
@@ -58,6 +58,7 @@ public class DonationService {
     }
 
     public List<DonationDto> getDonationsByUserId(long userId) {
+        isUserExistByUserId(userId);
         List<Donation> donations = donationRepository.findAll();
         List<Donation> donationsByUserId = new ArrayList<>();
         for (Donation donation : donations) {
@@ -77,9 +78,17 @@ public class DonationService {
         }
     }
 
-    private void isUserExist(DonationDto donationDto) {
+    private void isUserExistByDto(DonationDto donationDto) {
         try {
             userServiceClient.getUser(donationDto.getUserId());
+        } catch (FeignException.FeignClientException exception) {
+            throw new UserNotFoundException("This user doesn't exist");
+        }
+    }
+
+    private void isUserExistByUserId(long userId) {
+        try {
+            userServiceClient.getUser(userId);
         } catch (FeignException.FeignClientException exception) {
             throw new UserNotFoundException("This user doesn't exist");
         }
