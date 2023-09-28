@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
+import faang.school.projectservice.dto.campaign.UpdateCampaignDto;
 import faang.school.projectservice.model.Campaign;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -11,9 +12,15 @@ public interface CampaignMapper {
 
     @Mapping(target = "projectId", source = "project.id")
     @Mapping(target = "campaignStatus", source = "status")
-    CampaignDto toDto(Campaign campaign);
+    CampaignDto toCampaignDto(Campaign campaign);
+
+    @Mapping(target = "projectId", source = "project.id")
+    UpdateCampaignDto toUpdateCampaignDto(Campaign campaign);
 
     @Mapping(target = "project.id", source = "projectId")
     @Mapping(target = "status", source = "campaignStatus")
-    Campaign toEntity(CampaignDto campaignDto);
+    Campaign toEntityCampaign(CampaignDto campaignDto);
+
+    @Mapping(target = "project.id", source = "projectId")
+    Campaign toEntityUpdateCampaign(UpdateCampaignDto campaignDto);
 }
