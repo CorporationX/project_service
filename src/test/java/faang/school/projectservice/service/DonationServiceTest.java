@@ -15,16 +15,25 @@ import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class DonationServiceTest {
@@ -60,11 +69,11 @@ class DonationServiceTest {
         campaign.setDescription("world!");
 
         donationDto = new DonationDto();
-        donationDto.setId(2L);
+        donationDto.setId(1L);
         donationDto.setCurrency(Currency.USD);
         donationDto.setAmount(BigDecimal.valueOf(100));
         donationDto.setCampaignId(campaign.getId());
-        donationDto.setUserId(1L);
+        donationDto.setUserId(2L);
 
         donation = donationMapper.toEntity(donationDto);
     }

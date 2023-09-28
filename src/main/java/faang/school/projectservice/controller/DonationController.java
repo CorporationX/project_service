@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/donation")
@@ -25,5 +27,10 @@ public class DonationController {
     @GetMapping("/{donationId}")
     public DonationDto getDonation(@PathVariable long donationId) {
         return donationService.getDonation(donationId);
+    }
+
+    @GetMapping("/{userId}/get-all-donation")
+    public List<DonationDto> getDonationsByUserId(@PathVariable long userId) {
+        return donationService.getDonationsByUserId(userId);
     }
 }

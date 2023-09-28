@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -53,6 +55,20 @@ public class DonationService {
         Optional<Donation> donationById = donationRepository.findById(donationId);
         donationById.orElseThrow(() -> new DataValidationException("Donation does not exist"));
         return donationMapper.toDto(donationById.get());
+    }
+
+    public List<DonationDto> getDonationsByUserId(long userId) {
+        List<Donation> donations = donationRepository.findAll();
+        List<Donation> donationsByUserId = new ArrayList<>();
+        for (Donation donation : donations) {
+            if (donation.getUserId().equals(userServiceClient.getUser(userId).getId())) { //я не уверен, можно ли так делать, но через постман выдает список донатов по переданному userId
+                donationsByUserId.add(donation);
+            }
+        }
+        return donationsByUserId
+                .stream()
+                .map(donation -> donationMapper.toDto(donation))
+                .toList();
     }
 
     private void validateStatus(Campaign campaign) {
