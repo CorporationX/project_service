@@ -31,6 +31,7 @@ import java.text.MessageFormat;
 @Service
 @RequiredArgsConstructor
 public class ProjectResourceService {
+
     private static final int MAX_ATTEMPTS = 5;
 
     private final ProjectRepository projectRepository;
@@ -57,7 +58,7 @@ public class ProjectResourceService {
                                      long userId) {
         throw new FileUploadException(
                 MessageFormat.format(
-                        "Failed to upload the file {} after {} attempts due to concurrent modifications." +
+                        "Failed to upload the file {0} after {1} attempts due to concurrent modifications." +
                         "Please try again.", multipartFile.getOriginalFilename(), MAX_ATTEMPTS));
     }
 
@@ -78,7 +79,7 @@ public class ProjectResourceService {
                                            long resourceId,
                                            long userId) {
         throw new FileUpdateException(MessageFormat.format(
-                "Failed to update the file {} after {} attempts due to concurrent modifications." +
+                "Failed to update the file {0} after {1} attempts due to concurrent modifications." +
                 "Please try again.", multipartFile.getOriginalFilename(), MAX_ATTEMPTS));
     }
 

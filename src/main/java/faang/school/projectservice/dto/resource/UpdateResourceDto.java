@@ -1,13 +1,9 @@
 package faang.school.projectservice.dto.resource;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Data
 @SuperBuilder
@@ -16,6 +12,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class UpdateResourceDto extends ResourceDto {
-    private LocalDateTime updatedAt;
+    private ZonedDateTime updatedAt;
     private Long updatedById;
 }

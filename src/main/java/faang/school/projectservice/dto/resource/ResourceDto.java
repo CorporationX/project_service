@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Data
 @SuperBuilder
@@ -22,5 +22,5 @@ public class ResourceDto {
     private ResourceStatus status;
     private Long projectId;
     private Long createdById;
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 }

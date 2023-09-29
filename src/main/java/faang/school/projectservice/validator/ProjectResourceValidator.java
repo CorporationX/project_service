@@ -18,7 +18,7 @@ public class ProjectResourceValidator {
 
     public void validateResourceOnDelete(Resource resource) {
         if (resource.getStatus().equals(ResourceStatus.DELETED)) {
-            throw new FileDeleteException(MessageFormat.format("File {} already deleted", resource.getName()));
+            throw new FileDeleteException(MessageFormat.format("File {0} already deleted", resource.getName()));
         }
     }
 
