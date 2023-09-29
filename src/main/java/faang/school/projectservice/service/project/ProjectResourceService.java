@@ -15,7 +15,7 @@ import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.TeamMemberService;
 import faang.school.projectservice.util.FileService;
-import faang.school.projectservice.validator.ResourceValidator;
+import faang.school.projectservice.validator.ProjectResourceValidator;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.retry.annotation.Backoff;
@@ -38,7 +38,7 @@ public class ProjectResourceService {
     private final ResourceRepository resourceRepository;
     private final FileService fileService;
     private final ResourceMapper resourceMapper;
-    private final ResourceValidator resourceValidator;
+    private final ProjectResourceValidator projectResourceValidator;
 
     @Transactional
     @Retryable(retryFor = OptimisticLockException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 1000))
@@ -116,7 +116,7 @@ public class ProjectResourceService {
     private Resource uploadResource(MultipartFile multipartFile, long projectId, long userId) {
         Project project = projectRepository.getProjectById(projectId);
         TeamMember teamMember = teamMemberService.findByUserIdAndProjectId(userId, projectId);
-        resourceValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
+        projectResourceValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
 
         String fileKey = generateFileKey(multipartFile, projectId);
         Resource resource = fillUpResource(multipartFile, project, teamMember, fileKey);
@@ -131,8 +131,8 @@ public class ProjectResourceService {
         Resource resource = resourceRepository.getReferenceById(resourceId);
         TeamMember updatedBy = teamMemberService.findByUserIdAndProjectId(userId, resource.getProject().getId());
 
-        resourceValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
-        resourceValidator.validateIfUserCanChangeFile(resource, userId);
+        projectResourceValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
+        projectResourceValidator.validateIfUserCanChangeFile(resource, userId);
 
         BigInteger setStorageCapacityOnUpdate = storageCapacityOnUpdate(
                 resource, BigInteger.valueOf(multipartFile.getSize()));
@@ -152,8 +152,8 @@ public class ProjectResourceService {
         Resource resource = resourceRepository.getReferenceById(resourceId);
         TeamMember updatedBy = teamMemberService.findByUserIdAndProjectId(userId, resource.getProject().getId());
 
-        resourceValidator.validateIfUserCanChangeFile(resource, userId);
-        resourceValidator.validateResourceOnDelete(resource);
+        projectResourceValidator.validateIfUserCanChangeFile(resource, userId);
+        projectResourceValidator.validateResourceOnDelete(resource);
 
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedBy(updatedBy);

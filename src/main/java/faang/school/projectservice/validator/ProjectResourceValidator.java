@@ -14,7 +14,7 @@ import java.math.BigInteger;
 import java.text.MessageFormat;
 
 @Component
-public class ResourceValidator {
+public class ProjectResourceValidator {
 
     public void validateResourceOnDelete(Resource resource) {
         if (resource.getStatus().equals(ResourceStatus.DELETED)) {

@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
@@ -20,9 +20,9 @@ import faang.school.projectservice.model.resource.Resource;
 import faang.school.projectservice.model.resource.ResourceStatus;
 import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.ProjectResourceService;
+import faang.school.projectservice.service.TeamMemberService;
 import faang.school.projectservice.util.FileService;
-import faang.school.projectservice.validator.ResourceValidator;
+import faang.school.projectservice.validator.ProjectResourceValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,7 +56,7 @@ public class ProjectResourceServiceTest {
     @Mock
     private TeamMemberService teamMemberService;
     @Spy
-    private ResourceValidator resourceValidator;
+    private ProjectResourceValidator projectResourceValidator;
     @Spy
     private ResourceMapperImpl resourceMapper;
     @InjectMocks
@@ -67,7 +67,6 @@ public class ProjectResourceServiceTest {
     private MockMultipartFile multipartFile;
     private Resource resource;
     private TeamMember teamMember;
-    private TeamMember projectManager;
 
     @BeforeEach
     void setUp() {
@@ -79,7 +78,7 @@ public class ProjectResourceServiceTest {
                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
 
-        projectManager = TeamMember.builder()
+        TeamMember projectManager = TeamMember.builder()
                 .id(2L)
                 .userId(2L)
                 .roles(new ArrayList<>(List.of(TeamRole.MANAGER)))
