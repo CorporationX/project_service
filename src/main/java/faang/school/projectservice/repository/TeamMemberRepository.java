@@ -16,7 +16,9 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
-    public TeamMember findByUserIdAndProjectId(long userId, long projectId){
-        return jpaRepository.findByUserIdAndProjectId(userId,projectId);
+    public TeamMember findByUserIdAndProjectId(long userId, long projectId) {
+        return jpaRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Team member: %s doesn't belong to the project: %s", userId, projectId)));
     }
 }

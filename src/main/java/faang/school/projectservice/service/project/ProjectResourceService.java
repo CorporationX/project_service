@@ -13,8 +13,9 @@ import faang.school.projectservice.model.resource.Resource;
 import faang.school.projectservice.model.resource.ResourceStatus;
 import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.TeamMemberService;
 import faang.school.projectservice.util.FileService;
-import faang.school.projectservice.validator.FileValidator;
+import faang.school.projectservice.validator.ResourceValidator;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.retry.annotation.Backoff;
@@ -25,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
-import java.util.Optional;
+import java.text.MessageFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +34,11 @@ public class ProjectResourceService {
     private static final int MAX_ATTEMPTS = 5;
 
     private final ProjectRepository projectRepository;
-    private final ProjectService projectService;
+    private final TeamMemberService teamMemberService;
     private final ResourceRepository resourceRepository;
     private final FileService fileService;
     private final ResourceMapper resourceMapper;
-    private final FileValidator fileValidator;
+    private final ResourceValidator resourceValidator;
 
     @Transactional
     @Retryable(retryFor = OptimisticLockException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 1000))
@@ -54,7 +55,10 @@ public class ProjectResourceService {
                                      MultipartFile multipartFile,
                                      long projectId,
                                      long userId) {
-       throw new FileUploadException("blablabal");
+        throw new FileUploadException(
+                MessageFormat.format(
+                        "Failed to upload the file {} after {} attempts due to concurrent modifications." +
+                        "Please try again.", multipartFile.getOriginalFilename(), MAX_ATTEMPTS));
     }
 
     @Transactional
@@ -73,7 +77,9 @@ public class ProjectResourceService {
                                            MultipartFile multipartFile,
                                            long resourceId,
                                            long userId) {
-        throw new FileUpdateException("blablabvla");
+        throw new FileUpdateException(MessageFormat.format(
+                "Failed to update the file {} after {} attempts due to concurrent modifications." +
+                "Please try again.", multipartFile.getOriginalFilename(), MAX_ATTEMPTS));
     }
 
     @Transactional
@@ -88,13 +94,15 @@ public class ProjectResourceService {
     public void recoverDelete(OptimisticLockException e,
                               long resourceId,
                               long userId) {
-        throw new FileDeleteException("blkalbalbal");
+        throw new FileDeleteException(MessageFormat.format(
+                "Failed to delete the file {0} after {1} attempts due to concurrent modifications." +
+                "Please try again.", resourceId, MAX_ATTEMPTS));
     }
 
     @Transactional(readOnly = true)
     public GetResourceDto getFile(long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        findTeamMember(resource.getProject(), userId);
+        teamMemberService.findByUserIdAndProjectId(userId, resource.getProject().getId());
         S3Object file = fileService.getFile(resource.getKey());
 
         return GetResourceDto.builder()
@@ -107,8 +115,8 @@ public class ProjectResourceService {
 
     private Resource uploadResource(MultipartFile multipartFile, long projectId, long userId) {
         Project project = projectRepository.getProjectById(projectId);
-        TeamMember teamMember = findTeamMember(project, userId);
-        fileValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
+        TeamMember teamMember = teamMemberService.findByUserIdAndProjectId(userId, projectId);
+        resourceValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
 
         String fileKey = generateFileKey(multipartFile, projectId);
         Resource resource = fillUpResource(multipartFile, project, teamMember, fileKey);
@@ -121,17 +129,19 @@ public class ProjectResourceService {
 
     private Resource updateResource(MultipartFile multipartFile, long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
-        fileValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
-        fileValidator.validateIfUserCanChangeFile(resource, userId);
-        BigInteger storageCapacityOnUpdate = storageCapacityOnUpdate(
+        TeamMember updatedBy = teamMemberService.findByUserIdAndProjectId(userId, resource.getProject().getId());
+
+        resourceValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
+        resourceValidator.validateIfUserCanChangeFile(resource, userId);
+
+        BigInteger setStorageCapacityOnUpdate = storageCapacityOnUpdate(
                 resource, BigInteger.valueOf(multipartFile.getSize()));
 
-        resource.getProject().setStorageSize(storageCapacityOnUpdate);
-
+        resource.getProject().setStorageSize(setStorageCapacityOnUpdate);
         resource.setUpdatedBy(updatedBy);
         resource.setKey(generateFileKey(multipartFile, resource.getProject().getId()));
         resource.setSize(BigInteger.valueOf(multipartFile.getSize()));
+
         resourceRepository.save(resource);
         updateProjectStorage(resource);
 
@@ -140,9 +150,10 @@ public class ProjectResourceService {
 
     private String deleteResource(long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        TeamMember updatedBy = findTeamMember(resource.getProject(), userId);
-        fileValidator.validateIfUserCanChangeFile(resource, userId);
-        fileValidator.validateResourceOnDelete(resource);
+        TeamMember updatedBy = teamMemberService.findByUserIdAndProjectId(userId, resource.getProject().getId());
+
+        resourceValidator.validateIfUserCanChangeFile(resource, userId);
+        resourceValidator.validateResourceOnDelete(resource);
 
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedBy(updatedBy);
@@ -157,21 +168,6 @@ public class ProjectResourceService {
         long size = multipartFile.getSize();
 
         return String.format("p%d_%s_%s", projectId, size, fileName);
-    }
-
-    private TeamMember findTeamMember(Project project, long userId) {
-        Optional<TeamMember> matchingMember = project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .filter(teamMember -> teamMember.getUserId() == userId)
-                .findAny();
-
-        if (matchingMember.isEmpty()) {
-            String errorMessage = String.format(
-                    "The user with id: %d is not on the project", userId);
-            throw new InvalidCurrentUserException(errorMessage);
-        } else {
-            return matchingMember.get();
-        }
     }
 
     private BigInteger storageCapacityOnUpdate(Resource resource, BigInteger fileSize) {
@@ -203,7 +199,10 @@ public class ProjectResourceService {
         projectRepository.save(project);
     }
 
-    private Resource fillUpResource(MultipartFile multipartFile, Project project, TeamMember teamMember, String fileKey) {
+    private Resource fillUpResource(MultipartFile multipartFile,
+                                    Project project,
+                                    TeamMember teamMember,
+                                    String fileKey) {
         return Resource.builder()
                 .name(multipartFile.getOriginalFilename())
                 .key(fileKey)

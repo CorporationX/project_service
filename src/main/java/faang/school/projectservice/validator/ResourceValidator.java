@@ -11,21 +11,21 @@ import faang.school.projectservice.model.resource.ResourceStatus;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
+import java.text.MessageFormat;
 
 @Component
-public class FileValidator {
+public class ResourceValidator {
 
     public void validateResourceOnDelete(Resource resource) {
         if (resource.getStatus().equals(ResourceStatus.DELETED)) {
-            throw new FileDeleteException("File already deleted");
+            throw new FileDeleteException(MessageFormat.format("File {} already deleted", resource.getName()));
         }
     }
 
     public void validateFreeStorageCapacity(Project project, BigInteger fileSize) {
         if (fileSize.compareTo(project.getStorageSize()) > 0) {
-            String errorMessage = String.format(
-                    "Project %d storage has not enough space", project.getId());
-            throw new StorageSpaceExceededException(errorMessage);
+            throw new StorageSpaceExceededException(
+                    MessageFormat.format("Project {0} storage has not enough space", project.getId()));
         }
     }
 

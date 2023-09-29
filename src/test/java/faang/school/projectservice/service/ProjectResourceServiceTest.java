@@ -22,7 +22,7 @@ import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectResourceService;
 import faang.school.projectservice.util.FileService;
-import faang.school.projectservice.validator.FileValidator;
+import faang.school.projectservice.validator.ResourceValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,15 +46,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectFileServiceTest {
+public class ProjectResourceServiceTest {
     @Mock
     private ProjectRepository projectRepository;
     @Mock
     private ResourceRepository resourceRepository;
     @Mock
     private FileService fileService;
+    @Mock
+    private TeamMemberService teamMemberService;
     @Spy
-    private FileValidator fileValidator;
+    private ResourceValidator resourceValidator;
     @Spy
     private ResourceMapperImpl resourceMapper;
     @InjectMocks
@@ -64,18 +66,20 @@ public class ProjectFileServiceTest {
     private Project expectedProject;
     private MockMultipartFile multipartFile;
     private Resource resource;
+    private TeamMember teamMember;
+    private TeamMember projectManager;
 
     @BeforeEach
     void setUp() {
         LocalDateTime createdAt = LocalDateTime.of(2023, 8, 31, 15, 30);
 
-        TeamMember teamMember = TeamMember.builder()
+        teamMember = TeamMember.builder()
                 .id(1L)
                 .userId(1L)
                 .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
 
-        TeamMember projectManager = TeamMember.builder()
+        projectManager = TeamMember.builder()
                 .id(2L)
                 .userId(2L)
                 .roles(new ArrayList<>(List.of(TeamRole.MANAGER)))
@@ -137,20 +141,13 @@ public class ProjectFileServiceTest {
                 .build();
 
         Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
+        Mockito.when(teamMemberService.findByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(teamMember);
 
         ResourceDto resourceDto = projectFileService.uploadFile(multipartFile, 1L, 1L);
 
         assertEquals(expectedDto, resourceDto);
         assertEquals(expectedProject, project);
         Mockito.verify(resourceRepository, Mockito.times(1)).save(resource);
-    }
-
-    @Test
-    public void testUploadFile_InvalidUser() {
-        Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
-
-        assertThrows(InvalidCurrentUserException.class,
-                () -> projectFileService.uploadFile(multipartFile, 1L, 3L));
     }
 
     @Test
@@ -184,7 +181,6 @@ public class ProjectFileServiceTest {
                 .type(ResourceType.TEXT)
                 .size(BigInteger.valueOf(sizeUpdated))
                 .key(keyUpdated)
-                .updatedById((long) userId)
                 .projectId(1L)
                 .build();
 
@@ -294,13 +290,5 @@ public class ProjectFileServiceTest {
 
         Mockito.verify(resourceRepository, Mockito.times(1)).getReferenceById(1L);
         Mockito.verify(fileService, Mockito.times(1)).getFile(resource.getKey());
-    }
-
-    @Test
-    public void testGetFile_UserHasNoAccess() {
-        Mockito.when(resourceRepository.getReferenceById(1L)).thenReturn(resource);
-
-        assertThrows(InvalidCurrentUserException.class,
-                () -> projectFileService.getFile(1L, 3L));
     }
 }

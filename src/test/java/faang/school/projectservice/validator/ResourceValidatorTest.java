@@ -2,9 +2,7 @@ package faang.school.projectservice.validator;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class FileValidatorTest {
+class ResourceValidatorTest {
 
     @Test
     void validateResourceOnDelete() {
