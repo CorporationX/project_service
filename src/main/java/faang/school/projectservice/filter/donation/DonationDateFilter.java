@@ -18,6 +18,6 @@ public class DonationDateFilter implements DonationFilter {
     public void apply(List<Donation> donations, DonationFilterDto donationFilterDto) {
         LocalDate filterDate = donationFilterDto.getDonationDate();
 
-        donations.removeIf(donation -> donation.getDonationTime() != null && donation.getDonationTime().toLocalDate().isEqual(filterDate));
+        donations.removeIf(donation -> donation.getDonationTime().toLocalDate().isEqual(filterDate));
     }
 }
