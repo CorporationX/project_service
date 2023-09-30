@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityStatusException;
@@ -33,6 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -73,7 +73,7 @@ class DonationServiceTest {
 
         donationDto = new DonationDto();
         donationDto.setId(1L);
-        donationDto.setCurrency(java.util.Currency.getInstance("USD"));
+        donationDto.setCurrency(Currency.getInstance("USD"));
         donationDto.setAmount(BigDecimal.valueOf(100));
         donationDto.setCampaignId(campaign.getId());
         donationDto.setUserId(2L);
@@ -110,7 +110,7 @@ class DonationServiceTest {
 
         DonationDto donationDto1 = new DonationDto();
         donationDto1.setId(2L);
-        donationDto1.setCurrency(java.util.Currency.getInstance("EUR"));
+        donationDto1.setCurrency(Currency.getInstance("EUR"));
         donationDto1.setAmount(BigDecimal.valueOf(100));
         donationDto1.setCampaignId(campaign1.getId());
         donationDto1.setUserId(1L);
@@ -148,7 +148,7 @@ class DonationServiceTest {
                 .builder()
                 .id(2L)
                 .userId(2L)
-                .currency(java.util.Currency.getInstance("EUR"))
+                .currency(Currency.getInstance("EUR"))
                 .campaign(campaign)
                 .amount(BigDecimal.valueOf(100))
                 .build();
@@ -157,7 +157,7 @@ class DonationServiceTest {
                 .builder()
                 .id(3L)
                 .userId(2L)
-                .currency(java.util.Currency.getInstance("EUR"))
+                .currency(Currency.getInstance("EUR"))
                 .campaign(campaign)
                 .amount(BigDecimal.valueOf(100))
                 .build();
@@ -177,33 +177,39 @@ class DonationServiceTest {
     @ParameterizedTest
     @MethodSource("getFilters")
     @DisplayName("useFilter")
-    public void getAllByFilter(java.util.Currency currency, BigDecimal minAmount, BigDecimal maxAmount, LocalDateTime time) {
+    public void getAllByFilter(Currency currency, BigDecimal minAmount, BigDecimal maxAmount, LocalDateTime time) {
         Donation donation1 = Donation
                 .builder()
-                .currency(java.util.Currency.getInstance("USD"))
+                .currency(Currency.getInstance("USD"))
                 .amount(BigDecimal.valueOf(100))
                 .donationTime(LocalDateTime.now().minusMonths(1).truncatedTo(ChronoUnit.MINUTES))
                 .build();
         Donation donation2 = Donation
                 .builder()
-                .currency(java.util.Currency.getInstance("EUR"))
+                .currency(Currency.getInstance("EUR"))
                 .amount(BigDecimal.valueOf(150))
                 .donationTime(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES))
                 .build();
         Donation donation3 = Donation
                 .builder()
-                .currency(java.util.Currency.getInstance("STD"))
-                .amount(BigDecimal.valueOf(100))
+                .currency(Currency.getInstance("STD"))
+                .amount(BigDecimal.valueOf(200))
                 .donationTime(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES))
                 .build();
         Donation donation4 = Donation
                 .builder()
-                .currency(java.util.Currency.getInstance("EUR"))
+                .currency(Currency.getInstance("EUR"))
                 .amount(BigDecimal.valueOf(70))
                 .donationTime(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES))
                 .build();
+        Donation donation5 = Donation
+                .builder()
+                .currency(Currency.getInstance("RUB"))
+                .amount(BigDecimal.valueOf(700))
+                .donationTime(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES))
+                .build();
 
-        List<Donation> donations = List.of(donation1, donation2, donation3, donation4);
+        List<Donation> donations = List.of(donation1, donation2, donation3, donation4, donation5);
         Mockito.lenient().when(donationRepository.findAllByFilters(currency, minAmount, maxAmount, time, Pageable.unpaged()))
                 .thenReturn(donations);
         List<DonationDto> actual = donationService.getAllByFilter(currency, minAmount, maxAmount, time);
@@ -213,12 +219,18 @@ class DonationServiceTest {
 
     static Stream<Arguments> getFilters() {
         return Stream.of(
-                Arguments.of(java.util.Currency.getInstance("USD"), BigDecimal.valueOf(100), BigDecimal.valueOf(1000), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
-                Arguments.of(java.util.Currency.getInstance("EUR"), BigDecimal.valueOf(70), BigDecimal.valueOf(1500), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
-                Arguments.of(java.util.Currency.getInstance("STD"), BigDecimal.valueOf(0), BigDecimal.valueOf(100), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
-                Arguments.of(java.util.Currency.getInstance("AOA"), BigDecimal.valueOf(120), BigDecimal.valueOf(700), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
-                Arguments.of(java.util.Currency.getInstance("VND"), BigDecimal.valueOf(100), BigDecimal.valueOf(150), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
-                Arguments.of(java.util.Currency.getInstance("USD"), BigDecimal.valueOf(50), BigDecimal.valueOf(150), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES))
+                Arguments.of(Currency.getInstance("USD"), BigDecimal.valueOf(100), BigDecimal.valueOf(1000), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("EUR"), BigDecimal.valueOf(70), BigDecimal.valueOf(700), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("EUR"), BigDecimal.valueOf(0), BigDecimal.valueOf(100), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("USD"), BigDecimal.valueOf(120), BigDecimal.valueOf(700), LocalDateTime.now().minusMonths(1).truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("STD"), BigDecimal.valueOf(10), BigDecimal.valueOf(150), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("RUB"), BigDecimal.valueOf(50), BigDecimal.valueOf(150), LocalDateTime.now().minusMonths(2).truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("RUB"), BigDecimal.valueOf(700), BigDecimal.valueOf(1000), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("USD"), BigDecimal.valueOf(480), BigDecimal.valueOf(1500), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("RUB"), BigDecimal.valueOf(0), BigDecimal.valueOf(1000), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("STD"), BigDecimal.valueOf(70), BigDecimal.valueOf(100), LocalDateTime.now().minusMonths(1).truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("USD"), BigDecimal.valueOf(100), BigDecimal.valueOf(200), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)),
+                Arguments.of(Currency.getInstance("EUR"), BigDecimal.valueOf(200), BigDecimal.valueOf(700), LocalDateTime.now().minusMonths(2).truncatedTo(ChronoUnit.MINUTES))
         );
     }
 
