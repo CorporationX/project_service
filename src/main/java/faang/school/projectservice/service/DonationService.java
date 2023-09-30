@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -16,10 +17,14 @@ import faang.school.projectservice.repository.DonationRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,6 +72,14 @@ public class DonationService {
             }
         }
         return donationsByUserId
+                .stream()
+                .map(donation -> donationMapper.toDto(donation))
+                .toList();
+    }
+
+    public List<DonationDto> getAllByFilter(Currency currency, BigDecimal minAmount, BigDecimal maxAmount, LocalDateTime createdAt) {
+        List<Donation> allByFilters = donationRepository.findAllByFilters(currency, minAmount, maxAmount, createdAt, Pageable.unpaged());
+        return allByFilters
                 .stream()
                 .map(donation -> donationMapper.toDto(donation))
                 .toList();
