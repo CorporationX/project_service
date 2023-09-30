@@ -110,6 +110,7 @@ class DonationServiceTest {
         donationDto1.setCurrency(Currency.USD);
         donationDto1.setAmount(BigDecimal.valueOf(100));
         donationDto1.setCampaignId(campaign1.getId());
+        donationDto1.setUserId(1L);
 
         Mockito.when(campaignRepository.findById(donationDto1.getCampaignId()))
                 .thenReturn(Optional.of(campaign1));
