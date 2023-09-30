@@ -28,6 +28,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -162,5 +163,17 @@ class DonationServiceTest {
         when(donationMapper.toDtoList(List.of(donation))).thenReturn(List.of(donationDto));
         List<DonationDto> result = donationService.getAllDonationsByFilters(donationFilter);
         assertNotNull(result);
+    }
+
+    @Test
+    void testGetAllDonationsByFiltersWhenDonationsIsEmpty() {
+        when(userContext.getUserId()).thenReturn(123L);
+        when(donationRepository.findAllByUserId(eq(123L), any())).thenReturn(Collections.emptyList());
+
+        List<DonationDto> result = donationService.getAllDonationsByFilters(new DonationFilterDto());
+
+        assertEquals(Collections.emptyList(), result);
+
+        verify(donationRepository, times(1)).findAllByUserId(eq(123L), any());
     }
 }
