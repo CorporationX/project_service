@@ -29,7 +29,6 @@ public class Donation {
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
-    @Enumerated(EnumType.STRING)
     private Currency currency;
     private Long userId;
 }
