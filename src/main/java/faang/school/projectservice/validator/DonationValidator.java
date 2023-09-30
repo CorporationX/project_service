@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class DonationValidator {
     public void validateCampaign(Campaign campaign) {
+        if (campaign == null) {
+            throw new EntityNotFoundException("Campaign not found");
+        }
         if (!campaign.getStatus().equals(CampaignStatus.ACTIVE)) {
             throw new EntityNotFoundException("Campaign is finished");
         }

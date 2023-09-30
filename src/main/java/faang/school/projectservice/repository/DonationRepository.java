@@ -1,6 +1,7 @@
 package faang.school.projectservice.repository;
 
 import faang.school.projectservice.model.Donation;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +12,5 @@ import java.util.Optional;
 public interface DonationRepository extends JpaRepository<Donation, Long> {
     Optional<Donation> findByIdAndUserId(Long id, Long userId);
 
-    List<Donation> findAllByUserId(Long userId);
+    List<Donation> findAllByUserId(Long userId, PageRequest of);
 }

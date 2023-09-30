@@ -17,6 +17,7 @@ import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.validator.DonationValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,7 +77,7 @@ public class DonationService {
     public List<DonationDto> getAllDonations() {
         Long userId = userContext.getUserId();
 
-        List<Donation> donations = donationRepository.findAllByUserId(userId);
+        List<Donation> donations = donationRepository.findAllByUserId(userId, PageRequest.of(0, 100));
 
         return donationMapper.toDtoList(donations);
     }
@@ -84,13 +85,13 @@ public class DonationService {
     @Transactional(readOnly = true)
     public List<DonationDto> getAllDonationsByFilters(DonationFilterDto filters) {
         Long userId = userContext.getUserId();
-        List<Donation> donations = donationRepository.findAllByUserId(userId);
+        List<Donation> donations = donationRepository.findAllByUserId(userId, PageRequest.of(0, 100));
 
         if (donations.isEmpty()) {
             return List.of();
         }
 
-        donationFilters.stream()
+        donationFilters.parallelStream()
                 .filter(donationFilter -> donationFilter.isApplicable(filters))
                 .forEach(donationFilter -> donationFilter.apply(donations, filters));
 
