@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.dto.campaign.UpdateCampaignDto;
@@ -32,7 +31,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,6 +55,7 @@ class CampaignServiceTest {
     private CampaignDto campaignDto;
     private UpdateCampaignDto updateCampaignDto;
     private Campaign campaign;
+    private Optional<Campaign> campaignOptional;
     private Campaign entityUpdateCampaign;
     private Project project;
     private Team team;
@@ -85,12 +84,17 @@ class CampaignServiceTest {
 
         updateCampaignDto = new UpdateCampaignDto();
         updateCampaignDto.setId(1L);
-        updateCampaignDto.setProjectId(campaignDto.getProjectId());
         updateCampaignDto.setTitle("Hi ");
         updateCampaignDto.setDescription("space ");
         updateCampaignDto.setUpdatedBy(1L);
 
-        entityUpdateCampaign = campaignMapper.toEntityUpdateCampaign(updateCampaignDto);
+        entityUpdateCampaign = new Campaign();
+        entityUpdateCampaign.setId(1L);
+        entityUpdateCampaign.setProject(project);
+        entityUpdateCampaign.setStatus(CampaignStatus.ACTIVE);
+        entityUpdateCampaign.setTitle("Hello ");
+        entityUpdateCampaign.setDescription("world!");
+        entityUpdateCampaign.setCreatedBy(1L);
 
         teamMember = new TeamMember();
         teamMember.setId(1L);
@@ -147,7 +151,7 @@ class CampaignServiceTest {
         Mockito.when(campaignRepository.findById(updateCampaignDto.getId()))
                 .thenReturn(Optional.of(entityUpdateCampaign));
 
-        Mockito.when(projectRepository.getProjectById(updateCampaignDto.getProjectId()))
+        Mockito.when(projectRepository.getProjectById(entityUpdateCampaign.getProject().getId()))
                 .thenReturn(project);
 
         Mockito.when(teamMemberRepository.findById(1L))

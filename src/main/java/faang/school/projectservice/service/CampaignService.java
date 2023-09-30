@@ -67,7 +67,8 @@ public class CampaignService {
 
         TeamMember foundTeamMember = teamMemberRepository.findById(updateCampaignDto.getUpdatedBy());
 
-        Project project = projectRepository.getProjectById(updateCampaignDto.getProjectId());
+        Long projectId = campaignById.get().getProject().getId();
+        Project project = projectRepository.getProjectById(projectId);
 
         campaignServiceValidator.validate(project, foundTeamMember);
 

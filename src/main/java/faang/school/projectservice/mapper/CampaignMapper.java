@@ -14,13 +14,11 @@ public interface CampaignMapper {
     @Mapping(target = "campaignStatus", source = "status")
     CampaignDto toCampaignDto(Campaign campaign);
 
-    @Mapping(target = "projectId", source = "project.id")
     UpdateCampaignDto toUpdateCampaignDto(Campaign campaign);
 
     @Mapping(target = "project.id", source = "projectId")
     @Mapping(target = "status", source = "campaignStatus")
     Campaign toEntityCampaign(CampaignDto campaignDto);
 
-    @Mapping(target = "project.id", source = "projectId")
     Campaign toEntityUpdateCampaign(UpdateCampaignDto campaignDto);
 }

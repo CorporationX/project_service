@@ -29,9 +29,6 @@ public class UpdateCampaignDto {
     @Size(max = 4096, message = "Name must be less than 4096 characters")
     private String description;
 
-    @NotNull
-    private Long projectId;
-
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime updatedAt;
 
