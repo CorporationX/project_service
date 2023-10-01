@@ -5,7 +5,7 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.EntityStatusException;
+import faang.school.projectservice.exception.enumException.EntityStatusException;
 import faang.school.projectservice.mapper.DonationMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;

@@ -1,4 +1,4 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.exception.notFoundException;
 
 public class UserNotFoundException extends RuntimeException {
     public UserNotFoundException(String message) {
