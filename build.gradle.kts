@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    jacoco
 }
 
 group = "faang.school"
@@ -70,10 +71,49 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+
 }
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+}
+
+jacoco {
+    toolVersion = "0.8.9"
+    reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+    classDirectories.setFrom(files(classDirectories.files.map {
+        fileTree(it).apply {
+            exclude("school/faang/projectservice/client/**",
+                "school/faang/projectservice/config/**",
+                "school/faang/projectservice/dto/**",
+                "school/faang/projectservice/mapper/**",
+                "school/faang/projectservice/model/**",
+                "school/faang/projectservice/repository/**",
+                "school/faang/projectservice/exception/**",
+                "school/faang/projectservice/util/**",
+            )
+        }
+    }))
+}
+
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
+
+
