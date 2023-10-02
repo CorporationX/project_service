@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectByFilterDto;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
@@ -10,17 +10,17 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.project.ProjectNameFilter;
 import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.project.ProjectStatus;
 import faang.school.projectservice.model.project.ProjectVisibility;
 import faang.school.projectservice.model.resource.Resource;
-import faang.school.projectservice.model.task.Task;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.vacancy.Vacancy;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.task.Task;
+import faang.school.projectservice.model.vacancy.Vacancy;
+import faang.school.projectservice.publisher.ProjectPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,9 +34,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +46,8 @@ class ProjectServiceTest {
     private ProjectService projectService;
     @Spy
     private ProjectMapperImpl projectMapper;
+    @Mock
+    private ProjectPublisher projectPublisher;
 
     private TeamMember teamMember;
     private TeamMember teamMember2;
@@ -122,7 +122,7 @@ class ProjectServiceTest {
         when(projectRepository.existsById(1L)).thenReturn(true);
         when(projectRepository.findAll()).thenReturn(List.of(
                 projectPublic, projectPrivate, projectPublic2, projectPrivate2, projectPrivate3, projectPrivate4));
-        projectService = new ProjectService(projectRepository, projectMapper, projectFilterList);
+        projectService = new ProjectService(projectRepository, projectMapper, projectFilterList,projectPublisher);
 
         List<ProjectDto> projectsByStatus = projectService.getAllProjectsByFilter(
                 1L, ProjectByFilterDto.builder().status(ProjectStatus.IN_PROGRESS).name("test1").build());
