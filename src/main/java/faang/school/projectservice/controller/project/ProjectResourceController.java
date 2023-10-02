@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/projects")
-public class ProjectFileController {
+public class ProjectResourceController {
     private final ProjectResourceService projectFileService;
     private final UserContext userContext;
 
