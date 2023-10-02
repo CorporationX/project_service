@@ -32,10 +32,11 @@ class StageServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private StageMapper stageMapper;
+    @Mock
+    private Stage stage;
     @InjectMocks
     private StageService stageService;
 
-    private Stage stage;
 
     @Test
     public void createStage_projectUnavailable() {
@@ -57,16 +58,18 @@ class StageServiceTest {
     @Test
     public void createStage_validEmptyName() {
         stage = Stage.builder()
-                .stageId(2L)
+                .stageId(1L)
                 .stageName("")
                 .project(Project.builder()
                         .id(1L)
-                        .status(ProjectStatus.CREATED)
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .visibility(ProjectVisibility.PRIVATE)
                         .build())
                 .build();
+        when(projectRepository.getProjectById(anyLong())).thenReturn(stage.getProject());
         StageException stageException = assertThrows(StageException.class, () -> stageService.create(StageMapper.INSTANCE.toDto(stage)));
         verify(stageRepository, times(0)).save(stage);
-        assertEquals("Name cannot be empty", stageException.getMessage());
+        assertEquals("Stage name cannot be empty", stageException.getMessage());
     }
 
     @Test
