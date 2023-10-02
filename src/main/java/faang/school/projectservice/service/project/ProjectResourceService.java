@@ -2,16 +2,18 @@ package faang.school.projectservice.service.project;
 
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.GetResourceDto;
+import faang.school.projectservice.dto.resource.ResourceCreationDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.dto.resource.UpdateResourceDto;
-import faang.school.projectservice.exception.*;
+import faang.school.projectservice.exception.FileDeleteException;
+import faang.school.projectservice.exception.FileUpdateException;
+import faang.school.projectservice.exception.FileUploadException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.resource.Resource;
 import faang.school.projectservice.model.resource.ResourceStatus;
-import faang.school.projectservice.model.resource.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.TeamMemberService;
 import faang.school.projectservice.util.FileService;
@@ -59,7 +61,7 @@ public class ProjectResourceService {
         throw new FileUploadException(
                 MessageFormat.format(
                         "Failed to upload the file {0} after {1} attempts due to concurrent modifications." +
-                        "Please try again.", multipartFile.getOriginalFilename(), MAX_ATTEMPTS));
+                                "Please try again.", multipartFile.getOriginalFilename(), MAX_ATTEMPTS));
     }
 
     @Transactional
@@ -80,7 +82,7 @@ public class ProjectResourceService {
                                            long userId) {
         throw new FileUpdateException(MessageFormat.format(
                 "Failed to update the file {0} after {1} attempts due to concurrent modifications." +
-                "Please try again.", multipartFile.getOriginalFilename(), MAX_ATTEMPTS));
+                        "Please try again.", multipartFile.getOriginalFilename(), MAX_ATTEMPTS));
     }
 
     @Transactional
@@ -97,7 +99,7 @@ public class ProjectResourceService {
                               long userId) {
         throw new FileDeleteException(MessageFormat.format(
                 "Failed to delete the file {0} after {1} attempts due to concurrent modifications." +
-                "Please try again.", resourceId, MAX_ATTEMPTS));
+                        "Please try again.", resourceId, MAX_ATTEMPTS));
     }
 
     @Transactional(readOnly = true)
@@ -120,9 +122,11 @@ public class ProjectResourceService {
         projectResourceValidator.validateFreeStorageCapacity(project, BigInteger.valueOf(multipartFile.getSize()));
 
         String fileKey = generateFileKey(multipartFile, projectId);
-        Resource resource = fillUpResource(multipartFile, project, teamMember, fileKey);
+        ResourceCreationDto resourceCreationDto = new ResourceCreationDto(multipartFile, project, teamMember, fileKey);
+        Resource resource = resourceMapper.toCreateEntity(resourceCreationDto);
 
-        updateProjectStorage(resource);
+        Project updatedProject = updateProjectStorage(resource);
+        projectRepository.save(updatedProject);
         resourceRepository.save(resource);
 
         return resource;
@@ -134,17 +138,18 @@ public class ProjectResourceService {
 
         projectResourceValidator.validateFileOnUpdate(resource.getName(), multipartFile.getOriginalFilename());
         projectResourceValidator.validateIfUserCanChangeFile(resource, userId);
+        BigInteger storageCapacityOnUpdate = getStorageCapacityOnUpdate(resource);
+        projectResourceValidator.validateStorageCapacityOnUpdate(
+                storageCapacityOnUpdate, BigInteger.valueOf(multipartFile.getSize()), resource);
 
-        BigInteger setStorageCapacityOnUpdate = storageCapacityOnUpdate(
-                resource, BigInteger.valueOf(multipartFile.getSize()));
-
-        resource.getProject().setStorageSize(setStorageCapacityOnUpdate);
+        resource.getProject().setStorageSize(storageCapacityOnUpdate);
         resource.setUpdatedBy(updatedBy);
         resource.setKey(generateFileKey(multipartFile, resource.getProject().getId()));
         resource.setSize(BigInteger.valueOf(multipartFile.getSize()));
 
+        Project updatedProject = updateProjectStorage(resource);
+        projectRepository.save(updatedProject);
         resourceRepository.save(resource);
-        updateProjectStorage(resource);
 
         return resource;
     }
@@ -158,7 +163,9 @@ public class ProjectResourceService {
 
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedBy(updatedBy);
-        updateProjectStorage(resource);
+
+        Project updatedProject = updateProjectStorage(resource);
+        projectRepository.save(updatedProject);
         resourceRepository.save(resource);
 
         return resource.getKey();
@@ -171,22 +178,13 @@ public class ProjectResourceService {
         return String.format("p%d_%s_%s", projectId, size, fileName);
     }
 
-    private BigInteger storageCapacityOnUpdate(Resource resource, BigInteger fileSize) {
+    private BigInteger getStorageCapacityOnUpdate(Resource resource) {
         BigInteger storageSize = resource.getProject().getStorageSize();
-        BigInteger resourceSize = resource.getSize();
-        BigInteger storageCapacity = storageSize.add(resourceSize);
 
-        if (fileSize.compareTo(storageCapacity) > 0) {
-            String errorMessage = String.format(
-                    "Impossible to update %s, project %d storage has not enough space",
-                    resource.getName(), resource.getProject().getId());
-            throw new StorageSpaceExceededException(errorMessage);
-        }
-
-        return storageCapacity;
+        return storageSize.add(resource.getSize());
     }
 
-    private void updateProjectStorage(Resource resource) {
+    private Project updateProjectStorage(Resource resource) {
         Project project = resource.getProject();
         BigInteger storageSize = project.getStorageSize();
         BigInteger resourceSize = resource.getSize();
@@ -197,21 +195,6 @@ public class ProjectResourceService {
             project.setStorageSize(storageSize.subtract(resourceSize));
         }
 
-        projectRepository.save(project);
-    }
-
-    private Resource fillUpResource(MultipartFile multipartFile,
-                                    Project project,
-                                    TeamMember teamMember,
-                                    String fileKey) {
-        return Resource.builder()
-                .name(multipartFile.getOriginalFilename())
-                .key(fileKey)
-                .size(BigInteger.valueOf(multipartFile.getSize()))
-                .type(ResourceType.getResourceType(multipartFile.getContentType()))
-                .status(ResourceStatus.ACTIVE)
-                .createdBy(teamMember)
-                .project(project)
-                .build();
+        return project;
     }
 }

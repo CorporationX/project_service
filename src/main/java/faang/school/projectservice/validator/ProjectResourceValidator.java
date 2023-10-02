@@ -29,6 +29,15 @@ public class ProjectResourceValidator {
         }
     }
 
+    public void validateStorageCapacityOnUpdate(BigInteger storageCapacity, BigInteger fileSize, Resource resource) {
+        if (fileSize.compareTo(storageCapacity) > 0) {
+            String errorMessage = String.format(
+                    "Impossible to update %s, project %d storage has not enough space",
+                    resource.getName(), resource.getProject().getId());
+            throw new StorageSpaceExceededException(errorMessage);
+        }
+    }
+
     public void validateFileOnUpdate(String resourceName, String fileOriginalName) {
         if (!resourceName.equals(fileOriginalName)) {
             throw new FileUploadException("File names don't match");
