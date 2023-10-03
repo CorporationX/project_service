@@ -4,6 +4,16 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
+  servlet:
+    multipart:
+      max-file-size = 5MB
+      max-request-size = 5MB
+
+  image:
+    cover:
+      maxHeight: 566
+      maxWidth: 1080
+      maxSize: 5242880
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -42,7 +52,7 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     isMocked: false
   payment-service:
     host: http://localhost

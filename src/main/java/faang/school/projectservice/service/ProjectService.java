@@ -1,5 +1,8 @@
 package faang.school.projectservice.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -11,10 +14,15 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import lombok.Builder;
+import faang.school.projectservice.util.validator.ConvertFile;
+import faang.school.projectservice.util.validator.CoverHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +31,18 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-@Builder
 public class ProjectService {
     private final ProjectJpaRepository projectJpaRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
     private final List<ProjectFilter> filters;
+    @Value("${services.s3.bucketName}")
+    private String bucketName;
+    private final AmazonS3 s3Client;
+    private final ConvertFile convertFile;
+    private final CoverHandler coverHandler;
 
+    @Transactional
     public ProjectDto create(ProjectDto projectDto) {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("This project already exist");
@@ -42,6 +55,7 @@ public class ProjectService {
         return mapper.toDto(save);
     }
 
+    @Transactional
     public ProjectDto update(ProjectDto projectDto, long id) {
         Project projectById = projectRepository.getProjectById(id);
         projectById.setStatus(projectDto.getStatus());
@@ -101,5 +115,29 @@ public class ProjectService {
 
     public void deleteProjectById(Long id) {
         projectJpaRepository.deleteById(id);
+    }
+
+    @Transactional
+    public String uploadFile(long projectId, MultipartFile file) {
+        Project projectById = projectRepository.getProjectById(projectId);
+        coverHandler.resizeCover(file);
+        File convertedFile = convertFile.convertMultiPartFileToFile(file);
+        String fileName = getFileName(file);
+        putFile(file, convertedFile, fileName);
+        projectById.setCoverImageId(fileName);
+        projectRepository.save(projectById);
+        return fileName;
+    }
+
+    private void putFile(MultipartFile file, File convertedFile, String fileName) {
+        long fileSize = file.getSize();
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(fileSize);
+        metadata.setContentType(file.getContentType());
+        s3Client.putObject(new PutObjectRequest(bucketName, fileName, convertedFile));
+    }
+
+    private String getFileName(MultipartFile file) {
+        return System.currentTimeMillis() + "_" + file.getOriginalFilename();
     }
 }
