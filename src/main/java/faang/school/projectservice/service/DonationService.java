@@ -59,14 +59,8 @@ public class DonationService {
 
     public List<DonationDto> getDonationsByUserId(long userId) {
         isUserExist(userId);
-        List<Donation> donations = donationRepository.findAll();
-        List<Donation> donationsByUserId = new ArrayList<>();
-        for (Donation donation : donations) {
-            if (donation.getUserId() == userId) {
-                donationsByUserId.add(donation);
-            }
-        }
-        return donationsByUserId
+        List<Donation> donations = donationRepository.findAllByUserId(userId);
+        return donations
                 .stream()
                 .map(donation -> donationMapper.toDto(donation))
                 .toList();
