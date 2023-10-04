@@ -3,6 +3,7 @@ package faang.school.projectservice.dto.projectview;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -10,5 +11,5 @@ import java.util.Date;
 public class ProjectViewEvent {
     private Long projectId;
     private Long userId;
-    private Date timestamp;
+    private LocalDateTime timestamp;
 }
