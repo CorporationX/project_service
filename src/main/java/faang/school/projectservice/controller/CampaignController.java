@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
+import faang.school.projectservice.dto.campaign.UpdateCampaignDto;
 import faang.school.projectservice.service.CampaignService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,17 +23,16 @@ import java.util.List;
 @RequestMapping("/campaigns")
 public class CampaignController {
 
-    private final UserContext userContext;
     private final CampaignService campaignService;
 
     @PostMapping("/publish")
     public CampaignDto publishCampaign(@RequestBody @Valid CampaignDto campaignDto) {
-        return campaignService.publish(campaignDto, userContext.getUserId());
+        return campaignService.publish(campaignDto);
     }
 
     @PutMapping("/")
-    public CampaignDto updateCampaign(@RequestBody @Valid CampaignDto campaignDto) {
-        return campaignService.update(campaignDto, userContext.getUserId());
+    public UpdateCampaignDto updateCampaign(@RequestBody @Valid UpdateCampaignDto updateCampaignDto) {
+        return campaignService.update(updateCampaignDto);
     }
 
     @DeleteMapping("/{campaignId}")
