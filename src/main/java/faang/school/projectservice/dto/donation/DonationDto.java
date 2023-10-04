@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.donation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import faang.school.projectservice.dto.client.Currency;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +11,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Currency;
 
 @Data
 @Builder

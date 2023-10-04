@@ -16,13 +16,10 @@ import faang.school.projectservice.repository.DonationRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Currency;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,22 +53,14 @@ public class DonationService {
 
     public DonationDto getDonation(long donationId) {
         Optional<Donation> donationById = donationRepository.findById(donationId);
-        return donationMapper.toDto(donationById
-                .orElseThrow(() -> new DataValidationException("Donation does not exist")));
+        donationById.orElseThrow(() -> new DataValidationException("Donation does not exist"));
+        return donationMapper.toDto(donationById.get());
     }
 
     public List<DonationDto> getDonationsByUserId(long userId) {
         isUserExist(userId);
         List<Donation> donations = donationRepository.findAllByUserId(userId);
         return donations
-                .stream()
-                .map(donation -> donationMapper.toDto(donation))
-                .toList();
-    }
-
-    public List<DonationDto> getAllByFilter(Currency currency, BigDecimal minAmount, BigDecimal maxAmount, LocalDateTime createdAt) {
-        List<Donation> allByFilters = donationRepository.findAllByFilters(currency, minAmount, maxAmount, createdAt, Pageable.unpaged());
-        return allByFilters
                 .stream()
                 .map(donation -> donationMapper.toDto(donation))
                 .toList();

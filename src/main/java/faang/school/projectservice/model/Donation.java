@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import faang.school.projectservice.dto.client.Currency;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +10,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Currency;
 
 @Data
 @Builder
@@ -29,6 +29,7 @@ public class Donation {
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
+    @Enumerated(EnumType.STRING)
     private Currency currency;
     private Long userId;
 }
