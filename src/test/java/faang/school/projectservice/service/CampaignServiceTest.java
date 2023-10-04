@@ -231,7 +231,7 @@ class CampaignServiceTest {
                 .thenReturn(campaigns);
         List<CampaignDto> campaignDtos = campaigns
                 .stream()
-                .map(campaign -> campaignMapper.toDto(campaign.get()))
+                .map(campaign -> campaignMapper.toCampaignDto(campaign.get()))
                 .toList();
         List<CampaignDto> campaignsByProjectId = campaignService.getAllCampaigns(projectId);
 
