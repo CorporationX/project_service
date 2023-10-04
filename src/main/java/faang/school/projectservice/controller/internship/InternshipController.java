@@ -25,7 +25,7 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     @PostMapping
-    public ResponseInternshipDto create(@Valid @RequestBody CreateInternshipDto dto) {
+    public ResponseInternshipDto create (@Valid @RequestBody CreateInternshipDto dto) {
         return internshipService.create(dto);
     }
 
