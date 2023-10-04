@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
+import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filters.campaign.CampaignFilter;
 import faang.school.projectservice.filters.campaign.CampaignFilterByCreatedAt;
@@ -11,6 +12,7 @@ import faang.school.projectservice.mapper.CampaignMapperImpl;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
+import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -21,18 +23,25 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.util.validator.CampaignServiceValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class CampaignServiceTest {
@@ -194,6 +203,35 @@ class CampaignServiceTest {
                 () -> campaignService.getCampaign(campaignDto.getId()));
     }
 
+    @ParameterizedTest
+    @MethodSource("getProjectId")
+    @DisplayName("get donations by userId")
+    public void getDonationsByUserId_Successful(long projectId) {
+        Campaign campaign1 = Campaign
+                .builder()
+                .id(2L)
+                .project(project)
+                .status(CampaignStatus.ACTIVE)
+                .build();
+        Campaign campaign2 = Campaign
+                .builder()
+                .id(3L)
+                .project(project)
+                .status(CampaignStatus.ACTIVE)
+                .build();
+
+        List<Optional<Campaign>> campaigns = List.of(Optional.of(campaign1), Optional.of(campaign2));
+        Mockito.when(campaignRepository.findAllByProjectId(projectId))
+                .thenReturn(campaigns);
+        List<CampaignDto> campaignDtos = campaigns
+                .stream()
+                .map(campaign -> campaignMapper.toDto(campaign.get()))
+                .toList();
+        List<CampaignDto> campaignsByProjectId = campaignService.getAllCampaigns(projectId);
+
+        Assertions.assertEquals(campaignsByProjectId, campaignDtos); 
+    }
+
     @Test
     public void getByFilters() {
         CampaignFilterByCreatedAt campaignFilterByCreatedAt = new CampaignFilterByCreatedAt();
@@ -238,5 +276,11 @@ class CampaignServiceTest {
 
         Assertions.assertEquals(1, actual.size());
         Assertions.assertEquals(campaignMapper.toDto(campaign1), actual.get(0));
+    }
+
+    static Stream<Arguments> getProjectId() {
+        return Stream.of(
+                Arguments.of(2L)
+        );
     }
 }

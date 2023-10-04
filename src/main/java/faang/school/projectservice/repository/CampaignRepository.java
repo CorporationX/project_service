@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     Optional<Campaign> findByTitleAndProjectId(String title, Long projectId);
 
+    List<Optional<Campaign>> findAllByProjectId(Long projectId);
+
     @Query(
             "SELECT c FROM Campaign c " +
             "WHERE (:namePattern IS NULL OR c.title LIKE %:namePattern%) " +
