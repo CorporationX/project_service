@@ -56,8 +56,8 @@ public class DonationService {
 
     public DonationDto getDonation(long donationId) {
         Optional<Donation> donationById = donationRepository.findById(donationId);
-        donationById.orElseThrow(() -> new DataValidationException("Donation does not exist"));
-        return donationMapper.toDto(donationById.get());
+        return donationMapper.toDto(donationById
+                .orElseThrow(() -> new DataValidationException("Donation does not exist")));
     }
 
     public List<DonationDto> getDonationsByUserId(long userId) {
