@@ -1,7 +1,7 @@
 package faang.school.projectservice.exceptionhandler;
 
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.service.exception.DataValidationException;
+import faang.school.projectservice.service.exception.notFoundException.EntityNotFoundException;
 import faang.school.projectservice.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

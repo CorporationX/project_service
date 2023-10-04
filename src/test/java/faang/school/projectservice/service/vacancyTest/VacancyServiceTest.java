@@ -2,7 +2,7 @@ package faang.school.projectservice.service.vacancyTest;
 
 import faang.school.projectservice.dto.project.VacancyDto;
 import faang.school.projectservice.dto.project.VacancyFilterDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.service.exception.notFoundException.EntityNotFoundException;
 import faang.school.projectservice.filters.VacancyFilter;
 import faang.school.projectservice.filters.VacancyFilterByName;
 import faang.school.projectservice.filters.VacancyFilterByPosition;

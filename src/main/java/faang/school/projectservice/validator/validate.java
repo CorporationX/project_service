@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.service.exception.DataValidationException;
 
 public class validate {
     private void validateProject(ProjectDto projectDto) {
