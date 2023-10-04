@@ -2,8 +2,8 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.VacancyDto;
 import faang.school.projectservice.dto.project.VacancyFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.notFoundException.EntityNotFoundException;
+import faang.school.projectservice.service.exception.DataValidationException;
+import faang.school.projectservice.service.exception.notFoundException.EntityNotFoundException;
 import faang.school.projectservice.filters.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.*;

@@ -3,7 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.service.exception.DataValidationException;
 import faang.school.projectservice.filters.campaign.CampaignFilter;
 import faang.school.projectservice.filters.campaign.CampaignFilterByCreatedAt;
 import faang.school.projectservice.filters.campaign.CampaignFilterByStatus;
@@ -30,7 +30,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
