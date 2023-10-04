@@ -16,7 +16,6 @@ import java.util.Optional;
 @Repository
 public interface DonationRepository extends JpaRepository<Donation, Long> {
     Optional<Donation> findByIdAndUserId(Long id, Long userId);
-
     List<Donation> findAllByUserId(Long userId);
 
     @Query(
