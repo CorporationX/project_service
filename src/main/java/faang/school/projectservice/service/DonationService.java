@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
@@ -64,14 +62,8 @@ public class DonationService {
 
     public List<DonationDto> getDonationsByUserId(long userId) {
         isUserExist(userId);
-        List<Donation> donations = donationRepository.findAll();
-        List<Donation> donationsByUserId = new ArrayList<>();
-        for (Donation donation : donations) {
-            if (donation.getUserId() == userId) {
-                donationsByUserId.add(donation);
-            }
-        }
-        return donationsByUserId
+        List<Donation> donations = donationRepository.findAllByUserId(userId);
+        return donations
                 .stream()
                 .map(donation -> donationMapper.toDto(donation))
                 .toList();

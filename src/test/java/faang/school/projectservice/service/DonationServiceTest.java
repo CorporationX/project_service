@@ -163,7 +163,7 @@ class DonationServiceTest {
                 .build();
 
         List<Donation> donations = List.of(donation, donation1, donation2);
-        Mockito.when(donationRepository.findAll())
+        Mockito.when(donationRepository.findAllByUserId(userId))
                 .thenReturn(donations);
         List<DonationDto> donationDtos = donations
                 .stream()

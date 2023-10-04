@@ -26,6 +26,7 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
             AND (:minAmount IS NULL OR d.amount >= :minAmount)
             AND (:maxAmount IS NULL OR d.amount <= :maxAmount)
             AND (CAST(:createdAt AS date) IS NULL OR d.donation_time = CAST(:createdAt AS date))
+            ORDER by d.donation_time
             """
     )
     List<Donation> findAllByFilters(@Param("currency") Currency currency,
