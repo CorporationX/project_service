@@ -22,8 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -108,17 +106,9 @@ public class CampaignService {
     }
 
     public List<CampaignDto> getAllCampaigns(long projectId) {
-        List<Campaign> campaigns = campaignRepository.findAll();
-        List<Campaign> campaignsByProjectId = new ArrayList<>();
-
-        for (Campaign campaign : campaigns) {
-            if (campaign.getProject().getId() == projectId) {
-                campaignsByProjectId.add(campaign);
-            }
-        }
-
-        return campaignsByProjectId.stream()
-                .map(campaign -> campaignMapper.toCampaignDto(campaign))
+        List<Optional<Campaign>> campaigns = campaignRepository.findAllByProjectId(projectId);
+        return campaigns.stream()
+                .map(campaign -> campaignMapper.toCampaignDto(campaign.orElseThrow(() -> new DataValidationException("No such campaign found."))))
                 .toList();
     }
 
