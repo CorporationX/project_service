@@ -258,6 +258,10 @@ public class ProjectService {
         return projectRepository.getProjectById(projectId);
     }
 
+    public void saveProject(Project project) {
+        projectRepository.save(project);
+    }
+
     public boolean isProjectExist(Long projectId) {
         return projectRepository.existsById(projectId);
     }
