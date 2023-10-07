@@ -1,5 +1,6 @@
 package faang.school.projectservice.exceptionhandler;
 
+import faang.school.projectservice.exception.*;
 import faang.school.projectservice.exception.CoverImageException;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.exception.DataNotFoundException;
@@ -78,6 +79,13 @@ public class GlobalExceptionHandler {
         log.error(e.getMessage());
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(FileParseException.class)
+    public ResponseEntity<ErrorResponse> handleProjectStorageCapacityExceededException(FileParseException e) {
+        log.error(e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(CoverImageException.class)
