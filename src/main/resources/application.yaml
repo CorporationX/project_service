@@ -40,11 +40,21 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     isMocked: false
+    region: http://127.0.0.1:9000/
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+project:
+  cover-image:
+    resolution:
+      square: 1080
+      vertical:
+        height: 1080
+        width: 566
+    max-file-size: 5 # Максимальный размер файла (в мегабайтах)

@@ -1,28 +1,30 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.exception.CoverImageException;
+import faang.school.projectservice.exception.DataAlreadyExistingException;
+import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.PrivateAccessException;
-import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.mapper.SubProjectMapperImpl;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.exception.DataAlreadyExistingException;
-import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.ProjectFilter;
 import faang.school.projectservice.service.filters.ProjectFilterByName;
 import faang.school.projectservice.service.filters.ProjectFilterByStatus;
+import faang.school.projectservice.util.MultipartFileHandler;
 import jakarta.persistence.EntityNotFoundException;
-import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,14 +34,18 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +54,12 @@ import static org.mockito.Mockito.when;
 class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private MultipartFileHandler multipartFileHandler;
+    @Mock
+    private AmazonS3Service amazonS3Service;
+    @Mock
+    private MultipartFile multipartFile;
     @Spy
     private SubProjectMapper subProjectMapper = new SubProjectMapperImpl();
     @Spy
@@ -70,12 +82,18 @@ class ProjectServiceTest {
     Project project2;
     Project project3;
 
+    private long currentTime;
+    private String originalFileName;
+    private String key;
+    private String generatedMinioUrl;
+    private String bucketName;
+
     @BeforeEach
     void setUp() {
         List<ProjectFilter> projectFilters = new ArrayList<>(List.of(new ProjectFilterByName(), new ProjectFilterByStatus()));
         projectJpaRepository = Mockito.mock(ProjectJpaRepository.class);
         ProjectRepository testProjectRepository = new ProjectRepository(projectJpaRepository);
-        testProjectService = new ProjectService(testProjectRepository, mockProjectMapper, subProjectMapper, projectFilters);
+        testProjectService = new ProjectService(testProjectRepository, mockProjectMapper, subProjectMapper, projectFilters, multipartFileHandler, amazonS3Service);
         teamMember = TeamMember.builder()
                 .userId(2L)
                 .build();
@@ -163,6 +181,11 @@ class ProjectServiceTest {
         this.onlyWithIdProject = Project.builder()
                 .id(1L)
                 .build();
+        originalFileName = "GoogleImage";
+        bucketName = "corpbucket";
+        currentTime = System.currentTimeMillis();
+        key = project.getId() + project.getName() + currentTime + originalFileName;
+        generatedMinioUrl = "http://localhost:9000/" + bucketName + "/" + originalFileName;
     }
 
     @Test
@@ -253,7 +276,7 @@ class ProjectServiceTest {
                 .projectNamePattern("Proj")
                 .status(ProjectStatus.CREATED)
                 .build();
-        projectService = new ProjectService(projectRepository, mockProjectMapper, subProjectMapper, filters);
+        projectService = new ProjectService(projectRepository, mockProjectMapper, subProjectMapper, filters, multipartFileHandler, amazonS3Service);
         List<ProjectDto> filteredProjectsResult =
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
@@ -568,5 +591,76 @@ class ProjectServiceTest {
 
         assertEquals(expected, result);
         assertEquals(1, result.size());
+    }
+
+    @Test
+    void addCoverImageTest() {
+        byte[] processedImage = new byte[]{0, 1};
+        String folder = project.getId() + project.getName();
+
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(multipartFileHandler.processCoverImage(multipartFile)).thenReturn(processedImage);
+        when(amazonS3Service.uploadFile(processedImage, multipartFile, folder)).thenReturn(key);
+        when(multipartFileHandler.generateCoverImageUrl(key)).thenReturn(generatedMinioUrl);
+
+        String result = projectService.addCoverImage(1, multipartFile);
+
+        assertEquals(generatedMinioUrl, result);
+        assertEquals(project.getCoverImageId(), key);
+
+        verify(projectRepository).getProjectById(1L);
+        verify(multipartFileHandler).processCoverImage(multipartFile);
+        verify(amazonS3Service).uploadFile(processedImage, multipartFile, folder);
+        verify(multipartFileHandler).generateCoverImageUrl(key);
+    }
+
+    @Test
+    void getCoverImageByTest() {
+        project.setCoverImageId(key);
+
+        when(projectRepository.getProjectById(2L)).thenReturn(project);
+        when(multipartFileHandler.generateCoverImageUrl(key)).thenReturn(generatedMinioUrl);
+
+        String result = projectService.getCoverImageBy(2);
+
+        assertEquals(generatedMinioUrl, result);
+
+        verify(projectRepository).getProjectById(2L);
+        verify(multipartFileHandler).generateCoverImageUrl(key);
+    }
+
+    @Test
+    void getCoverImageThrowExceptionTest() {
+        when(projectRepository.getProjectById(2L)).thenReturn(project);
+
+        String message = "There is no cover image in project with ID: 2";
+
+        CoverImageException exception = assertThrows(CoverImageException.class, () -> projectService.getCoverImageBy(2));
+
+        assertEquals(message, exception.getMessage());
+    }
+
+    @Test
+    void deleteCoverImageByTest() {
+        project.setCoverImageId(key);
+
+        when(projectRepository.getProjectById(3L)).thenReturn(project);
+
+        projectService.deleteCoverImageBy(3);
+
+        verify(projectRepository).getProjectById(3L);
+        verify(amazonS3Service).deleteFile(key);
+        verify(projectRepository).deleteCoverImage(3);
+    }
+
+    @Test
+    void deleteCoverImageByThrowExceptionTest() {
+        when(projectRepository.getProjectById(3L)).thenReturn(project);
+
+        String message = "Cover image in project with ID: 3, already deleted";
+
+        CoverImageException exception = assertThrows(CoverImageException.class, () -> projectService.deleteCoverImageBy(3));
+
+        assertEquals(message, exception.getMessage());
     }
 }
