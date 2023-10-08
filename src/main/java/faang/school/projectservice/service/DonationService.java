@@ -35,10 +35,11 @@ public class DonationService {
     private final DonationMapper donationMapper;
     private final PaymentServiceClient paymentServiceClient;
     private final DonationValidator donationValidator;
+    private final CampaignService campaignService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PaymentResponse createDonation(DonationDto donationDto) {
-        Campaign campaign = getCampaign(donationDto);
+        Campaign campaign = campaignService.getCampaign(donationDto);
 
         donationValidator.validateCampaign(campaign);
 
@@ -93,7 +94,7 @@ public class DonationService {
 
         donationFilters.parallelStream()
                 .filter(donationFilter -> donationFilter.isApplicable(filters))
-                .forEach(donationFilter -> donationFilter.apply(donations, filters));
+                .forEach(donationFilter -> donationFilter.apply(filters));
 
         return donationMapper.toDtoList(donations);
     }
@@ -105,10 +106,5 @@ public class DonationService {
                 .paymentCurrency(Currency.valueOf(donationDto.getCurrency()))
                 .targetCurrency(Currency.valueOf(donationDto.getCurrency()))
                 .build();
-    }
-
-    private Campaign getCampaign(DonationDto donationDto) {
-        return campaignRepository.findById(donationDto.getCampaignId())
-                .orElseThrow(() -> new EntityNotFoundException("Campaign not found"));
     }
 }

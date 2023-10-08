@@ -2,83 +2,79 @@ package faang.school.projectservice.filter.donation;
 
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.model.Donation;
-import org.junit.jupiter.api.BeforeEach;
+import faang.school.projectservice.repository.DonationRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DonationDateFilterTest {
-    private DonationDateFilter dateFilter;
-    private DonationFilterDto filterDto;
+    @Mock
+    private DonationRepository donationRepository;
 
-    @BeforeEach
-    public void setUp() {
-        dateFilter = new DonationDateFilter();
-        filterDto = new DonationFilterDto();
-    }
-
+    @InjectMocks
+    private DonationDateFilter filter;
 
     @Test
-    void testIsApplicable_shouldReturnTrueWhenDonationDateIsNotNull() {
-        filterDto.setDonationDate(LocalDate.now());
+    public void testIsApplicableShouldReturnTrueWhenDonationDateIsNotNull() {
+        DonationFilterDto donationFilterDto = DonationFilterDto.builder()
+                .donationDate(LocalDate.now())
+                .build();
 
-        boolean result = dateFilter.isApplicable(filterDto);
+        boolean result = filter.isApplicable(donationFilterDto);
 
         assertTrue(result);
     }
 
     @Test
-    void testIsApplicable_shouldReturnFalseWhenDonationDateIsNull() {
-        boolean result = dateFilter.isApplicable(filterDto);
+    public void testIsApplicableShouldReturnFalseWhenDonationDateIsNull() {
+        DonationFilterDto donationFilterDto = DonationFilterDto.builder().build();
+
+        boolean result = filter.isApplicable(donationFilterDto);
 
         assertFalse(result);
     }
 
     @Test
-    void testApply_shouldRemoveDonationsWithMatchingDonationDate() {
+    public void testApplyShouldReturnFilteredDonationsWhenDonationDateIsNotNull() {
         LocalDate filterDate = LocalDate.now();
-        filterDto.setDonationDate(filterDate);
+        DonationFilterDto donationFilterDto = DonationFilterDto.builder()
+                .donationDate(filterDate)
+                .build();
+        List<Donation> expectedDonations = Collections.singletonList(new Donation());
 
-        Donation donation1 = new Donation();
-        donation1.setDonationTime(LocalDateTime.of(filterDate, LocalDateTime.now().toLocalTime()));
+        when(donationRepository.findByDonationDate(filterDate)).thenReturn(expectedDonations);
 
-        Donation donation2 = new Donation();
-        donation2.setDonationTime(LocalDateTime.of(filterDate.plusDays(1), LocalDateTime.now().toLocalTime()));
+        List<Donation> result = filter.apply(donationFilterDto);
 
-        List<Donation> donations = new ArrayList<>();
-        donations.add(donation1);
-        donations.add(donation2);
-
-        dateFilter.apply(donations, filterDto);
-
-        assertEquals(1, donations.size());
-        assertEquals(donation2, donations.get(0));
+        assertEquals(expectedDonations, result);
+        verify(donationRepository, times(1)).findByDonationDate(filterDate);
     }
 
     @Test
-    void testApply_shouldNotRemoveDonationsWithDifferentDonationDate() {
-        LocalDate filterDate = LocalDate.now();
-        filterDto.setDonationDate(filterDate);
+    public void testApplyShouldReturnEmptyListWhenDonationDateIsNull() {
+        DonationFilterDto donationFilterDto = DonationFilterDto.builder().build();
 
-        Donation donation1 = new Donation();
-        donation1.setDonationTime(LocalDateTime.of(filterDate.plusDays(1), LocalDateTime.now().toLocalTime()));
+        List<Donation> result = filter.apply(donationFilterDto);
 
-        Donation donation2 = new Donation();
-        donation2.setDonationTime(LocalDateTime.of(filterDate.plusDays(2), LocalDateTime.now().toLocalTime()));
-
-        List<Donation> donations = new ArrayList<>();
-        donations.add(donation1);
-        donations.add(donation2);
-
-        dateFilter.apply(donations, filterDto);
-
-        assertEquals(2, donations.size());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }

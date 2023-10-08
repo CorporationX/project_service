@@ -3,26 +3,31 @@ package faang.school.projectservice.filter.donation;
 
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.model.Donation;
-import org.junit.jupiter.api.BeforeEach;
+import faang.school.projectservice.repository.DonationRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DonationAmountFilterTest {
+    @Mock
+    private DonationRepository donationRepository;
+    @InjectMocks
     private DonationAmountFilter filter;
-    private List<Donation> donations;
-
-    @BeforeEach
-    public void setUp() {
-        filter = new DonationAmountFilter();
-        donations = new ArrayList<>();
-    }
 
     @Test
     public void testIsApplicableWithNonNullAmount() {
@@ -40,38 +45,47 @@ class DonationAmountFilterTest {
     }
 
     @Test
-    public void testApplyRemovesDonationsWithMatchingAmount() {
-        Donation donation1 = new Donation();
-        donation1.setAmount(BigDecimal.valueOf(100.0));
-        donations.add(donation1);
+    void testIsApplicableShouldReturnTrueWhenAmountIsNotNull() {
+        DonationFilterDto filterDto = DonationFilterDto.builder()
+                .amount(BigDecimal.TEN)
+                .build();
 
-        Donation donation2 = new Donation();
-        donation2.setAmount(BigDecimal.valueOf(200.0));
-        donations.add(donation2);
+        boolean result = filter.isApplicable(filterDto);
 
-        DonationFilterDto filterDto = new DonationFilterDto();
-        filterDto.setAmount(BigDecimal.valueOf(100.0));
-
-        filter.apply(donations, filterDto);
-
-        assertEquals(1, donations.size());
+        assertTrue(result);
     }
 
     @Test
-    public void testApplyLeavesDonationsWithNonMatchingAmount() {
-        Donation donation1 = new Donation();
-        donation1.setAmount(BigDecimal.valueOf(100.0));
-        donations.add(donation1);
+    void testIsApplicableShouldReturnFalseWhenAmountIsNull() {
+        DonationFilterDto filterDto = DonationFilterDto.builder().build();
 
-        Donation donation2 = new Donation();
-        donation2.setAmount(BigDecimal.valueOf(200.0));
-        donations.add(donation2);
+        boolean result = filter.isApplicable(filterDto);
 
-        DonationFilterDto filterDto = new DonationFilterDto();
-        filterDto.setAmount(BigDecimal.valueOf(300.0));
+        assertFalse(result);
+    }
 
-        filter.apply(donations, filterDto);
+    @Test
+    void testApplyShouldReturnListOfDonationsWithGivenAmount() {
+        BigDecimal amount = BigDecimal.valueOf(50);
+        DonationFilterDto filterDto = DonationFilterDto.builder().amount(amount).build();
 
-        assertEquals(0, donations.size());
+        List<Donation> expectedDonations = Collections.singletonList(new Donation());
+        when(donationRepository.findByAmount(amount)).thenReturn(expectedDonations);
+
+        List<Donation> result = filter.apply(filterDto);
+
+        assertEquals(expectedDonations, result);
+    }
+
+    @Test
+    void testApplyShouldReturnEmptyListWhenNoDonationWithGivenAmount() {
+        BigDecimal amount = BigDecimal.valueOf(100);
+        DonationFilterDto filterDto = DonationFilterDto.builder().amount(amount).build();
+
+        when(donationRepository.findByAmount(amount)).thenReturn(Collections.emptyList());
+
+        List<Donation> result = filter.apply(filterDto);
+
+        assertEquals(Collections.emptyList(), result);
     }
 }

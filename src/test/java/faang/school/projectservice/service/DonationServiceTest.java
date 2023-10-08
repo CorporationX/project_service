@@ -68,6 +68,9 @@ class DonationServiceTest {
     @Mock
     private List<DonationFilter> donationFilters;
 
+    @Mock
+    private CampaignService campaignService;
+
     @InjectMocks
     private DonationService donationService;
 
@@ -98,7 +101,7 @@ class DonationServiceTest {
         Long userId = 123L;
         long paymentNumber = 1234567890L;
 
-        when(campaignRepository.findById(donationDto.getCampaignId())).thenReturn(Optional.of(campaign));
+        when(campaignService.getCampaign(donationDto)).thenReturn(campaign);
         when(paymentServiceClient.sendPayment(any(PaymentRequest.class))).thenReturn(paymentResponse);
         when(userContext.getUserId()).thenReturn(userId);
         when(donationMapper.toEntity(donationDto)).thenReturn(new Donation());
@@ -109,7 +112,6 @@ class DonationServiceTest {
 
         assertNotNull(result);
         assertEquals(paymentResponse, result);
-        verify(campaignRepository, times(1)).findById(donationDto.getCampaignId());
         verify(donationValidator, times(1)).validateCampaign(campaign);
         verify(paymentServiceClient, times(1)).sendPayment(any(PaymentRequest.class));
         verify(userContext, times(1)).getUserId();
@@ -119,14 +121,14 @@ class DonationServiceTest {
 
     @Test
     public void testCreateDonation_WithInvalidCampaign_ShouldThrowEntityNotFoundException() {
-        when(campaignRepository.findById(donationDto.getCampaignId())).thenReturn(Optional.empty());
+        when(campaignService.getCampaign(donationDto)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class, () -> donationService.createDonation(donationDto));
     }
 
     @Test
     public void testCreateDonation_WithCancelledCampaign_ShouldThrowPaymentException() {
         campaign.setStatus(CampaignStatus.CANCELED);
-        when(campaignRepository.findById(donationDto.getCampaignId())).thenReturn(Optional.of(campaign));
+        when(campaignService.getCampaign(donationDto)).thenReturn(campaign);
         doThrow(PaymentException.class).when(donationValidator).validateCampaign(campaign);
         assertThrows(PaymentException.class, () -> donationService.createDonation(donationDto));
     }

@@ -1,71 +1,63 @@
 package faang.school.projectservice.filter.donation;
 
-import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.model.Donation;
-import org.junit.jupiter.api.BeforeEach;
+import faang.school.projectservice.repository.DonationRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DonationCurrencyFilterTest {
 
+    @Mock
+    private DonationRepository donationRepository;
+
+    @InjectMocks
     private DonationCurrencyFilter filter;
-    private DonationFilterDto filterDto;
 
-    @BeforeEach
-    public void setUp() {
-        filter = new DonationCurrencyFilter();
-        filterDto = new DonationFilterDto();
+    @Test
+    void testIsApplicableShouldReturnTrueWhenCurrencyIsNotNull() {
+        DonationFilterDto filterDto = DonationFilterDto.builder().currency("USD").build();
+        assertTrue(filter.isApplicable(filterDto));
     }
 
     @Test
-    public void testIsApplicableSuccess() {
-        filterDto.setCurrency("USD");
-
-        boolean result = filter.isApplicable(filterDto);
-
-        assertTrue(result);
+    void testIsApplicableShouldReturnFalseWhenCurrencyIsNull() {
+        DonationFilterDto filterDto = DonationFilterDto.builder().build();
+        assertFalse(filter.isApplicable(filterDto));
     }
 
     @Test
-    public void testIsApplicableFailure() {
-        boolean result = filter.isApplicable(filterDto);
-
-        assertFalse(result);
+    void testApplyShouldReturnEmptyListWhenCurrencyIsNull() {
+        DonationFilterDto filterDto = DonationFilterDto.builder().build();
+        List<Donation> result = filter.apply(filterDto);
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    public void testApplySuccess() {
-        filterDto.setCurrency("USD");
+    void testApplyShouldReturnFilteredDonationsByCurrency() {
+        String currencyCode = "USD";
+        DonationFilterDto filterDto = DonationFilterDto.builder().currency(currencyCode).build();
+        when(donationRepository.findByCurrency(currencyCode)).thenReturn(Collections.emptyList());
 
-        Donation donation1 = new Donation();
-        donation1.setCurrency(Currency.valueOf("USD"));
+        List<Donation> result = filter.apply(filterDto);
 
-        Donation donation2 = new Donation();
-        donation2.setCurrency(Currency.valueOf("EUR"));
-
-        List<Donation> donations = new ArrayList<>();
-        donations.add(donation1);
-        donations.add(donation2);
-
-        filter.apply(donations, filterDto);
-
-        assertEquals(1, donations.size());
-        assertEquals("USD", donations.get(0).getCurrency().name());
-    }
-
-    @Test
-    public void testApplyFailure() {
-        filterDto.setCurrency("USD");
-
-        filter.apply(new ArrayList<>(), filterDto);
-
-        assertEquals(0, 0);
+        assertTrue(result.isEmpty());
+        verify(donationRepository, times(1)).findByCurrency(currencyCode);
     }
 }
