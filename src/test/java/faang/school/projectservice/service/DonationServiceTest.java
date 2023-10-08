@@ -9,7 +9,6 @@ import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.PaymentException;
-import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.DonationMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
@@ -28,7 +27,9 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,9 +67,6 @@ class DonationServiceTest {
     private DonationRepository donationRepository;
 
     @Mock
-    private List<DonationFilter> donationFilters;
-
-    @Mock
     private CampaignService campaignService;
 
     @InjectMocks
@@ -77,7 +75,6 @@ class DonationServiceTest {
     private Campaign campaign;
     private DonationDto donationDto;
     private Donation donation;
-    private DonationFilterDto donationFilter;
 
     @BeforeEach
     void setUp() {
@@ -92,7 +89,6 @@ class DonationServiceTest {
                 .amount(BigDecimal.TEN)
                 .campaign(campaign)
                 .build();
-        donationFilter = DonationFilterDto.builder().build();
     }
 
     @Test
@@ -159,23 +155,35 @@ class DonationServiceTest {
     }
 
     @Test
-    public void testGetAllDonationsByFilters_WithValidUserId_ShouldReturnAllDonations() {
+    void getAllDonationsByFilters() {
         when(userContext.getUserId()).thenReturn(1L);
-        when(donationRepository.findAllByUserId(anyLong(), eq(PageRequest.of(0, 100)))).thenReturn(List.of(donation));
-        when(donationMapper.toDtoList(List.of(donation))).thenReturn(List.of(donationDto));
-        List<DonationDto> result = donationService.getAllDonationsByFilters(donationFilter);
-        assertNotNull(result);
-    }
 
-    @Test
-    void testGetAllDonationsByFiltersWhenDonationsIsEmpty() {
-        when(userContext.getUserId()).thenReturn(123L);
-        when(donationRepository.findAllByUserId(eq(123L), any())).thenReturn(Collections.emptyList());
+        BigDecimal amount = new BigDecimal("100.00");
+        String currency = "USD";
+        LocalDate donationDate = LocalDate.now();
 
-        List<DonationDto> result = donationService.getAllDonationsByFilters(new DonationFilterDto());
+        List<Donation> mockDonations = Arrays.asList(
+            Donation.builder().userId(1L).amount(amount).currency(Currency.valueOf(currency)).donationTime(LocalDateTime.now()).build(),
+            Donation.builder().userId(1L).amount(amount).currency(Currency.valueOf(currency)).donationTime(LocalDateTime.now()).build()
+        );
 
-        assertEquals(Collections.emptyList(), result);
+        when(donationRepository.findAllByUserIdAndFilter(1L, amount, currency, donationDate))
+                .thenReturn(mockDonations);
 
-        verify(donationRepository, times(1)).findAllByUserId(eq(123L), any());
+        List<DonationDto> expectedDonationDtos = Arrays.asList(
+                DonationDto.builder().campaignId(25L).amount(amount).currency(currency).build(),
+                DonationDto.builder().campaignId(25L).amount(amount).currency(currency).build()
+        );
+
+        when(donationMapper.toDtoList(mockDonations)).thenReturn(expectedDonationDtos);
+
+        DonationFilterDto filterDto = new DonationFilterDto();
+        filterDto.setAmount(amount);
+        filterDto.setCurrency(currency);
+        filterDto.setDonationDate(donationDate);
+
+        List<DonationDto> result = donationService.getAllDonationsByFilters(filterDto);
+
+        assertEquals(expectedDonationDtos, result);
     }
 }

@@ -8,11 +8,9 @@ import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Donation;
-import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.validator.DonationValidator;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +26,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class DonationService {
-    private final CampaignRepository campaignRepository;
     private final UserContext userContext;
     private final DonationRepository donationRepository;
-    private final List<DonationFilter> donationFilters;
     private final DonationMapper donationMapper;
     private final PaymentServiceClient paymentServiceClient;
     private final DonationValidator donationValidator;
@@ -84,17 +80,14 @@ public class DonationService {
     }
 
     @Transactional(readOnly = true)
-    public List<DonationDto> getAllDonationsByFilters(DonationFilterDto filters) {
+    public List<DonationDto> getAllDonationsByFilters(DonationFilterDto filterDto) {
         Long userId = userContext.getUserId();
-        List<Donation> donations = donationRepository.findAllByUserId(userId, PageRequest.of(0, 100));
-
-        if (donations.isEmpty()) {
-            return List.of();
-        }
-
-        donationFilters.parallelStream()
-                .filter(donationFilter -> donationFilter.isApplicable(filters))
-                .forEach(donationFilter -> donationFilter.apply(filters));
+        List<Donation> donations = donationRepository.findAllByUserIdAndFilter(
+                userId,
+                filterDto.getAmount(),
+                filterDto.getCurrency(),
+                filterDto.getDonationDate()
+        );
 
         return donationMapper.toDtoList(donations);
     }
