@@ -18,14 +18,6 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
 
     List<Donation> findAllByUserId(Long userId, PageRequest of);
 
-    @Query(nativeQuery = true, value = "SELECT d FROM Donation d WHERE DATE(d.donation_time) = :donationDate")
-    List<Donation> findByDonationDate(LocalDate donationDate);
-
-    @Query(nativeQuery = true, value = "SELECT d FROM Donation d WHERE d.currency = :currency")
-    List<Donation> findByCurrency(String currency);
-
-    List<Donation> findByAmount(BigDecimal amount);
-
     @Query("""
                 SELECT d FROM Donation d
                     WHERE d.userId = :userId
