@@ -3,8 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.donation.DonationDto;
-import faang.school.projectservice.service.exception.DataValidationException;
-import faang.school.projectservice.service.exception.enumException.EntityStatusException;
 import faang.school.projectservice.mapper.DonationMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
@@ -12,6 +10,9 @@ import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
+import faang.school.projectservice.service.exception.enumException.EntityStatusException;
+import faang.school.projectservice.service.exception.notFoundException.campaign.CampaignNotFoundException;
+import faang.school.projectservice.service.exception.notFoundException.donation.DonationNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -94,7 +95,7 @@ class DonationServiceTest {
         Mockito.when(campaignRepository.findById(donationDto.getCampaignId()))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(DataValidationException.class,
+        Assertions.assertThrows(CampaignNotFoundException.class,
                 () -> donationService.send(donationDto));
     }
 
@@ -133,7 +134,7 @@ class DonationServiceTest {
         Mockito.when(donationRepository.findById(donationDto.getId()))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(DataValidationException.class,
+        Assertions.assertThrows(DonationNotFoundException.class,
                 () -> donationService.getDonation(donationDto.getId()));
     }
 
