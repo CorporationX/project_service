@@ -93,11 +93,12 @@ public class DonationService {
     }
 
     private PaymentRequest createPaymentRequest(DonationDto donationDto, long paymentNumber) {
+        Currency currency = Currency.valueOf(donationDto.getCurrency());
         return PaymentRequest.builder()
                 .paymentNumber(paymentNumber)
                 .amount(donationDto.getAmount())
-                .paymentCurrency(Currency.valueOf(donationDto.getCurrency()))
-                .targetCurrency(Currency.valueOf(donationDto.getCurrency()))
+                .paymentCurrency(currency)
+                .targetCurrency(currency)
                 .build();
     }
 }
