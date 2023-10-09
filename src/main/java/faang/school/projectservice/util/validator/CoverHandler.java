@@ -1,5 +1,7 @@
 package faang.school.projectservice.util.validator;
 
+import faang.school.projectservice.exception.ImageResizeException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @Component
+@Slf4j
 public class CoverHandler {
     @Value("${spring.image.cover.maxHeight}")
     private int maxHeight;
@@ -32,7 +35,8 @@ public class CoverHandler {
             ImageIO.write(resizedImage, "jpg", outputStream);
             return outputStream.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("Error while resizing image: " + e.getMessage());
+            log.error(e.getMessage());
+            throw new ImageResizeException("Error while resizing image: " + e.getMessage());
         }
     }
 

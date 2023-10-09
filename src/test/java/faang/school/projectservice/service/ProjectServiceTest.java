@@ -119,59 +119,6 @@ class ProjectServiceTest {
         assertEquals(projectDto.getStatus(), updatedProject.getStatus());
     }
 
-//    @Test
-//    void getProjectByNameAndStatus() {
-//        Project project1 = Project.builder()
-//                .id(2L)
-//                .name("Project1")
-//                .description("new Project")
-//                .ownerId(1L)
-//                .status(ProjectStatus.IN_PROGRESS)
-//                .visibility(ProjectVisibility.PRIVATE)
-//                .teams(List.of(team))
-//                .createdAt(LocalDateTime.now())
-//                .updatedAt(LocalDateTime.now())
-//                .build();
-//        Project project2 = Project.builder()
-//                .id(3L)
-//                .name("Project2")
-//                .description("new Project")
-//                .ownerId(1L)
-//                .status(ProjectStatus.CREATED)
-//                .visibility(ProjectVisibility.PUBLIC)
-//                .teams(List.of(team))
-//                .createdAt(LocalDateTime.now())
-//                .updatedAt(LocalDateTime.now())
-//                .build();
-//        Project project3 = Project.builder()
-//                .id(4L)
-//                .name("Project3")
-//                .description("new Project")
-//                .ownerId(1L)
-//                .status(ProjectStatus.CREATED)
-//                .visibility(ProjectVisibility.PRIVATE)
-//                .teams(List.of(team))
-//                .createdAt(LocalDateTime.now())
-//                .updatedAt(LocalDateTime.now())
-//                .build();
-//
-//        List<Project> projects = List.of(project, project1, project2, project3);
-//
-//        Mockito.when(projectRepository.findAll()).thenReturn(projects);
-//        List<ProjectFilter> filters = List.of(new ProjectFilterByName(), new ProjectFilterByStatus());
-//        ProjectFilterDto projectFilterDto = ProjectFilterDto.builder()
-//                .name("Proj")
-//                .status(ProjectStatus.CREATED)
-//                .build();
-//
-//        projectService = ProjectService.builder().mapper(projectMapper).projectRepository(projectRepository).filters(filters).build();
-//        List<ProjectDto> filteredProjectsResult =
-//                List.of(projectMapper.toDto(project2), projectMapper.toDto(project));
-//
-//        List<ProjectDto> projectsWithFilter = projectService.getByFilters(projectFilterDto, 1L);
-//        Assertions.assertEquals(filteredProjectsResult, projectsWithFilter);
-//    }
-
     @Test
     void getAllProjects_EmptyList() {
         List<Project> allProjects = new ArrayList<>();
