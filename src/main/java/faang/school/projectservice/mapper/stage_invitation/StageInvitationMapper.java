@@ -2,6 +2,7 @@ package faang.school.projectservice.mapper.stage_invitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.publisher.event.InviteSentEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -30,6 +31,8 @@ public interface StageInvitationMapper {
     @Mapping(source = "authorId", target = "author.id")
     @Mapping(source = "invitedId", target = "invited.id")
     List<StageInvitation> toEntityList(List<StageInvitationDto> stageInvitationDtoList);
+
+    InviteSentEvent toEvent(StageInvitationDto stageInvitationDto);
 
     @Mapping(source = "stageId", target = "stage.stageId")
     @Mapping(source = "authorId", target = "author.id")
