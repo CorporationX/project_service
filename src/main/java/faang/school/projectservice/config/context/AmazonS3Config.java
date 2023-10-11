@@ -6,41 +6,34 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(value = "services.s3.isMocked", havingValue = "true")
 public class AmazonS3Config {
 
-    @Value("${services.S3.accessKey}")
+    @Value("${services.s3.accessKey}")
     private String accessKey;
-
-    @Value("${service.S3.secretKey}")
+    @Value("${services.s3.secretKey}")
     private String secretKey;
-
-    @Value("${service.S3.bucketName}")
+    @Value("${services.s3.region}")
+    private String region;
+    @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    @Value("${service.S3.endpoint}")
-    private String endpoint;
-
-    @Bean(name = "client")
-    public AmazonS3 amazonS3 (@Value("${services.s3.endpoint}") String endpoint,
-                            @Value("${services.s3.accessKey}") String accessKey,
-                            @Value("${services.s3.secretKey}") String secretKey) {
-        AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-        AmazonS3 client = AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, null))
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+    @Bean
+    public AmazonS3 amazonS3() {
+        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+        AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(region, null))
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .build();
 
-        if (!client.doesBucketExistV2(bucketName)) {
-            client.createBucket(bucketName);
+        if (!amazonS3.doesBucketExistV2(bucketName)) {
+            amazonS3.createBucket(bucketName);
         }
-        return client;
+
+        return amazonS3;
     }
 }

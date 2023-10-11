@@ -1,9 +1,11 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.file.FileUploadResult;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.exception.CoverImageException;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
 import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.DataValidationException;
@@ -15,9 +17,12 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.ProjectFilter;
+import faang.school.projectservice.util.MultipartFileHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,12 +31,15 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final SubProjectMapper subProjectMapper;
     private final List<ProjectFilter> filters;
+    private final MultipartFileHandler multipartFileHandler;
+    private final AmazonS3Service amazonS3Service;
 
     public ProjectDto create(ProjectDto projectDto) {
         validateNameAndDescription(projectDto);
@@ -73,6 +81,44 @@ public class ProjectService {
         }
         projectRepository.save(projectToUpdate);
         return projectMapper.toDto(projectToUpdate);
+    }
+
+    @Transactional
+    public String addCoverImage(long projectId, MultipartFile file) {
+        Project project = projectRepository.getProjectById(projectId);
+        byte[] processedImage = multipartFileHandler.processCoverImage(file);
+
+        String folder = String.valueOf(project.getId());
+        FileUploadResult uploadResult = amazonS3Service.uploadFile(processedImage, file, folder);
+
+        String key = uploadResult.getFileKey();
+
+        project.setCoverImageId(key);
+        return multipartFileHandler.generateCoverImageUrl(key);
+    }
+
+    public String getCoverImageBy(long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+
+        if (key == null || key.isBlank()) {
+            throw new CoverImageException("There is no cover image in project with ID: " + projectId);
+        }
+
+        return multipartFileHandler.generateCoverImageUrl(key);
+    }
+
+    @Transactional
+    public void deleteCoverImageBy(long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+
+        if (key == null || key.isBlank()) {
+            throw new CoverImageException("Cover image in project with ID: " + projectId + ", already deleted");
+        }
+
+        amazonS3Service.deleteFile(key);
+        projectRepository.deleteCoverImage(projectId);
     }
 
     public List<ProjectDto> getProjectsWithFilter(ProjectFilterDto projectFilterDto, long userId) {

@@ -1,12 +1,18 @@
 package faang.school.projectservice.exceptionhandler;
 
 import faang.school.projectservice.exception.*;
+import faang.school.projectservice.exception.CoverImageException;
+import faang.school.projectservice.exception.DataAlreadyExistingException;
+import faang.school.projectservice.exception.DataNotFoundException;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.FileException;
+import faang.school.projectservice.exception.PrivateAccessException;
+import faang.school.projectservice.exceptionhandler.response.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
-import faang.school.projectservice.exceptionhandler.response.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -80,5 +86,21 @@ public class GlobalExceptionHandler {
         log.error(e.getMessage());
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(CoverImageException.class)
+    public ResponseEntity<ErrorResponse> handleCoverImageException(CoverImageException e) {
+        log.error("Cover image exception occurred", e);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(FileException.class)
+    public ResponseEntity<ErrorResponse> handleFileException(FileException e) {
+        log.error("File exception occurred", e);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(e.getMessage()));
     }
 }
