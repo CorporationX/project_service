@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.file.FileUploadResult;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.SubProjectDto;
@@ -596,11 +597,11 @@ class ProjectServiceTest {
     @Test
     void addCoverImageTest() {
         byte[] processedImage = new byte[]{0, 1};
-        String folder = project.getId() + project.getName();
+        String folder = String.valueOf(project.getId());
 
         when(projectRepository.getProjectById(1L)).thenReturn(project);
         when(multipartFileHandler.processCoverImage(multipartFile)).thenReturn(processedImage);
-        when(amazonS3Service.uploadFile(processedImage, multipartFile, folder)).thenReturn(key);
+        when(amazonS3Service.uploadFile(processedImage, multipartFile, folder)).thenReturn(new FileUploadResult(key));
         when(multipartFileHandler.generateCoverImageUrl(key)).thenReturn(generatedMinioUrl);
 
         String result = projectService.addCoverImage(1, multipartFile);

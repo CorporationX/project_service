@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import faang.school.projectservice.dto.file.FileUploadResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,10 +59,10 @@ class AmazonS3ServiceTest {
         when(file.getContentType()).thenReturn("image/jpeg");
         when(file.getOriginalFilename()).thenReturn(originalFileName);
 
-        String result = amazonS3Service.uploadFile(bytes, file, folder);
+        FileUploadResult result = amazonS3Service.uploadFile(bytes, file, folder);
 
-        assertTrue(result.startsWith(folder));
-        assertTrue(result.endsWith(originalFileName));
+        assertTrue(result.getFileKey().startsWith(folder));
+        assertTrue(result.getFileKey().endsWith(originalFileName));
 
         verify(amazonS3).putObject(any(PutObjectRequest.class));
     }

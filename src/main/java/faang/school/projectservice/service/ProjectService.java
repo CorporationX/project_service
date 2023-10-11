@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.file.FileUploadResult;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.SubProjectDto;
@@ -87,8 +88,10 @@ public class ProjectService {
         Project project = projectRepository.getProjectById(projectId);
         byte[] processedImage = multipartFileHandler.processCoverImage(file);
 
-        String folder = project.getId() + project.getName();
-        String key = amazonS3Service.uploadFile(processedImage, file, folder);
+        String folder = String.valueOf(project.getId());
+        FileUploadResult uploadResult = amazonS3Service.uploadFile(processedImage, file, folder);
+
+        String key = uploadResult.getFileKey();
 
         project.setCoverImageId(key);
         return multipartFileHandler.generateCoverImageUrl(key);

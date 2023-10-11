@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.dto.file.FileUploadResult;
 import faang.school.projectservice.exception.FileException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ public class AmazonS3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public String uploadFile(byte[] resizedFile, MultipartFile file, String folder) {
+    public FileUploadResult uploadFile(byte[] resizedFile, MultipartFile file, String folder) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(resizedFile.length);
         objectMetadata.setContentType(file.getContentType());
@@ -36,7 +37,7 @@ public class AmazonS3Service {
             amazonS3Client.putObject(putObjectRequest);
 
             log.info("File with key '{}' was successfully uploaded", key);
-            return key;
+            return new FileUploadResult(key);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new FileException("File exception occurred");

@@ -60,13 +60,13 @@ public class ProjectController {
         return projectService.addCoverImage(projectId, file);
     }
 
-    @GetMapping("/coverImage/{projectId}")
+    @GetMapping("/{projectId}/coverImage")
     public String getCoverImageBy(@PathVariable long projectId) {
         log.info("Received request to get a cover image from project with ID: {}", projectId);
         return projectService.getCoverImageBy(projectId);
     }
 
-    @DeleteMapping("/coverImage/{projectId}")
+    @DeleteMapping("/{projectId}/coverImage")
     public void deleteCoverImage(@PathVariable @NotBlank long projectId) {
         log.info("Received request to delete a cover image from project with ID: {}", projectId);
         projectService.deleteCoverImageBy(projectId);
