@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -42,5 +43,15 @@ public class ProjectController {
     @GetMapping("/{userId}")
     public ProjectDto getProjectById(@PathVariable long userId) {
         return projectService.getProjectById(userId);
+    }
+
+    @PutMapping("/{projectId}/add")
+    public String uploadImage(@PathVariable long projectId, @RequestBody MultipartFile file) {
+        return projectService.uploadFile(projectId, file);
+    }
+
+    @DeleteMapping("/{projectId}/delete")
+    public void deleteImage(@PathVariable long projectId) {
+        projectService.deleteFile(projectId);
     }
 }
