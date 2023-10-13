@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -14,9 +15,10 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.util.validator.ConvertFile;
+import faang.school.projectservice.util.validator.FileConverter;
 import faang.school.projectservice.util.validator.CoverHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
     private final ProjectJpaRepository projectJpaRepository;
     private final ProjectRepository projectRepository;
@@ -39,7 +42,7 @@ public class ProjectService {
     @Value("${services.s3.bucketName}")
     private String bucketName;
     private final AmazonS3 s3Client;
-    private final ConvertFile convertFile;
+    private final FileConverter convertFile;
     private final CoverHandler coverHandler;
 
     @Transactional
@@ -120,13 +123,30 @@ public class ProjectService {
     @Transactional
     public String uploadFile(long projectId, MultipartFile file) {
         Project projectById = projectRepository.getProjectById(projectId);
-        coverHandler.resizeCover(file);
-        File convertedFile = convertFile.convertMultiPartFileToFile(file);
+        byte[] bytes = coverHandler.resizeCover(file);
         String fileName = getFileName(file);
-        putFile(file, convertedFile, fileName);
+        File resizedFile = convertFile.convert(bytes, fileName);
+        putFile(file, resizedFile, fileName);
         projectById.setCoverImageId(fileName);
         projectRepository.save(projectById);
         return fileName;
+    }
+
+    @Transactional
+    public void deleteFile(long projectId) {
+        Project projectById = projectRepository.getProjectById(projectId);
+        String coverImageId = projectById.getCoverImageId();
+        deleteCover(coverImageId);
+        projectById.setCoverImageId(null);
+        projectRepository.save(projectById);
+    }
+
+    private void deleteCover(String coverImageId) {
+        try {
+            s3Client.deleteObject(bucketName, coverImageId);
+        } catch (AmazonClientException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     private void putFile(MultipartFile file, File convertedFile, String fileName) {

@@ -45,8 +45,13 @@ public class ProjectController {
         return projectService.getProjectById(userId);
     }
 
-    @PutMapping("{projectId}/add")
+    @PutMapping("/{projectId}/add")
     public String uploadImage(@PathVariable long projectId, @RequestBody MultipartFile file) {
         return projectService.uploadFile(projectId, file);
+    }
+
+    @DeleteMapping("/{projectId}/delete")
+    public void deleteImage(@PathVariable long projectId) {
+        projectService.deleteFile(projectId);
     }
 }
