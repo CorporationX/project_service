@@ -45,7 +45,7 @@ public class DonationService {
         isUserExists(donationDto.getUserId());
 
         paymentServiceClient.sendPayment(
-                new PaymentRequest(donationDto.getPaymentNumber(), donationDto.getAmount(), donationDto.getCurrency(), donationDto.getCurrency())
+                new PaymentRequest(donationDto.getPaymentNumber(), donationDto.getAmount(), donationDto.getCurrency())
         );
 
         Donation donation = donationMapper.toEntity(donationDto);

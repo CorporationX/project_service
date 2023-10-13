@@ -64,7 +64,7 @@ public class DonationServiceTest {
         campaign.setDescription("test");
         campaign.setTitle("test");
 
-        paymentServiceClient.sendPayment(new PaymentRequest(1L, new BigDecimal(1), Currency.EUR, Currency.EUR));
+        paymentServiceClient.sendPayment(new PaymentRequest(1L, new BigDecimal(1), Currency.EUR));
 
         filterDonationDto = new FilterDonationDto();
         filterDonationDto.setMinAmountPattern(new BigDecimal(5));
