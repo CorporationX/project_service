@@ -1,6 +1,6 @@
 package faang.school.projectservice.util.validator;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.service.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;

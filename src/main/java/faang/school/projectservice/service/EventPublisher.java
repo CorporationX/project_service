@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.service.exception.DataValidationException;
 import faang.school.projectservice.messaging.MessagePublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

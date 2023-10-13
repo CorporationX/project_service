@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.client;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
