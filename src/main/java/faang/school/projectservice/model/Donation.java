@@ -10,10 +10,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,6 +33,8 @@ public class Donation {
     private Long id;
     private Long paymentNumber;
     private BigDecimal amount;
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime donationTime;
     @ManyToOne
     @JoinColumn(name = "campaign_id")
