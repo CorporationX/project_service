@@ -17,13 +17,12 @@ public class ProjectViewEventPublisher {
 
     private final ObjectMapper objectMapper;
     private final RedisTemplate<String, Object> redisTemplate;
-    @Value("${spring.data.redis.channels.project_view_channel.name}")
-    private final String projectViewChannel;
+    private final ChannelTopic projectViewTopic;
 
     public void publish(ProjectViewDto projectViewEvent) {
         try {
             String viewEvent = objectMapper.writeValueAsString(projectViewEvent);
-            redisTemplate.convertAndSend(projectViewChannel, viewEvent);
+            redisTemplate.convertAndSend(projectViewTopic.getTopic(), viewEvent);
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException", e);
         }
