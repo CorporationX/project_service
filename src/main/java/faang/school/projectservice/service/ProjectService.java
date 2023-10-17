@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectViewDto;
 import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exception.DataAlreadyExistingException;
@@ -13,6 +14,7 @@ import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.ProjectFilter;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final SubProjectMapper subProjectMapper;
     private final List<ProjectFilter> filters;
+    private final ProjectViewEventPublisher publisher;
 
     public ProjectDto create(ProjectDto projectDto) {
         validateNameAndDescription(projectDto);
@@ -103,6 +106,7 @@ public class ProjectService {
         if (!isUserInPrivateProjectTeam) {
             throw new PrivateAccessException("This project is private");
         }
+        publisher.publish(new ProjectViewDto(projectId, userId, LocalDateTime.now()));
         return projectMapper.toDto(projectById);
     }
 

@@ -20,11 +20,8 @@ public class RedisConfig {
     private int port;
     @Value("${spring.data.redis.channels.invitation_channel.name}")
     private String invitationTopicName;
-
-    @Bean
-    public ObjectMapper objectMapper(){
-        return new ObjectMapper();
-    }
+    @Value("${spring.data.redis.channels.project_view_channel.name}")
+    private String projectViewTopicName;
 
     @Bean
     public JedisConnectionFactory invitationConnectionFactory() {
@@ -44,5 +41,10 @@ public class RedisConfig {
     @Bean
     public ChannelTopic invitationTopic() {
         return new ChannelTopic(invitationTopicName);
+    }
+
+    @Bean
+    public ChannelTopic projectViewTopic() {
+        return new ChannelTopic(projectViewTopicName);
     }
 }
