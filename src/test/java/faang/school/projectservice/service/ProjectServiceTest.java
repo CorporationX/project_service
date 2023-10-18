@@ -18,6 +18,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.service.filters.ProjectFilter;
 import faang.school.projectservice.service.filters.ProjectFilterByName;
 import faang.school.projectservice.service.filters.ProjectFilterByStatus;
@@ -54,6 +55,8 @@ class ProjectServiceTest {
     private ProjectMapper mockProjectMapper = new ProjectMapperImpl();
     @InjectMocks
     private ProjectService projectService;
+    @Mock
+    private ProjectViewEventPublisher eventPublisher;
     ProjectJpaRepository projectJpaRepository;
     private ProjectService testProjectService;
     private SubProjectDto subProjectDto;
@@ -75,7 +78,7 @@ class ProjectServiceTest {
         List<ProjectFilter> projectFilters = new ArrayList<>(List.of(new ProjectFilterByName(), new ProjectFilterByStatus()));
         projectJpaRepository = Mockito.mock(ProjectJpaRepository.class);
         ProjectRepository testProjectRepository = new ProjectRepository(projectJpaRepository);
-        testProjectService = new ProjectService(testProjectRepository, mockProjectMapper, subProjectMapper, projectFilters);
+        testProjectService = new ProjectService(testProjectRepository, mockProjectMapper, subProjectMapper, projectFilters, eventPublisher);
         teamMember = TeamMember.builder()
                 .userId(2L)
                 .build();
@@ -253,7 +256,7 @@ class ProjectServiceTest {
                 .projectNamePattern("Proj")
                 .status(ProjectStatus.CREATED)
                 .build();
-        projectService = new ProjectService(projectRepository, mockProjectMapper, subProjectMapper, filters);
+        projectService = new ProjectService(projectRepository, mockProjectMapper, subProjectMapper, filters, eventPublisher);
         List<ProjectDto> filteredProjectsResult =
                 List.of(mockProjectMapper.toDto(project2), mockProjectMapper.toDto(project));
 
