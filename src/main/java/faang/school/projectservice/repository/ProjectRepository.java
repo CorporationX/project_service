@@ -2,6 +2,7 @@ package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.service.exception.notFoundException.project.ProjectNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,7 +16,7 @@ public class ProjectRepository {
 
     public Project getProjectById(Long projectId) {
         return projectJpaRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
+                () -> new ProjectNotFoundException(String.format("Project not found by id: %s", projectId))
         );
     }
 
