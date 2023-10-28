@@ -1,7 +1,8 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.team.TeamDto;
 import faang.school.projectservice.dto.team.TeamMemberDto;
-import faang.school.projectservice.service.TeamMemberService;
+import faang.school.projectservice.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,10 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/teams")
 public class TeamController {
 
-    private final TeamMemberService service;
+    private final TeamService service;
+
+    @PostMapping("/team/create")
+    public TeamDto createTeam(@RequestBody @Valid TeamDto dto) {
+        return service.createTeamByOwner(dto);
+    }
 
     @PostMapping("/add")
-    public TeamMemberDto publishCampaign(@RequestBody @Valid TeamMemberDto dto) {
+    public TeamMemberDto addMembers(@RequestBody @Valid TeamMemberDto dto) {
         return service.addMembersInTeam(dto);
     }
 }

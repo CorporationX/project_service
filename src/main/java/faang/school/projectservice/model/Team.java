@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import faang.school.projectservice.mapper.TeamMapper;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -47,4 +48,8 @@ public class Team {
     @JsonBackReference
     @JoinColumn(name = "project_id")
     private Project project;
+
+    public void addTeamMember(TeamMember member) {
+        teamMembers.add(member);
+    }
 }

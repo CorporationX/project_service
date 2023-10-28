@@ -1,7 +1,6 @@
 package faang.school.projectservice.dto.team;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import faang.school.projectservice.model.TeamRole;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,17 +13,13 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class TeamMemberDto {
+public class TeamDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
-    @NotNull
-    private Long userId;
+    private List<TeamMemberDto> teamMembers;
 
     @NotNull
-    private List<TeamRole> roles;
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long teamId;
+    private Long projectId;
 }

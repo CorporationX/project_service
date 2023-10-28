@@ -18,4 +18,7 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
+
+    @Query(nativeQuery = true, value = "INSERT INTO team_member (user_id, team_id) VALUES (:userId, :teamId) returning id")
+    Long create(long userId, long teamId);
 }
