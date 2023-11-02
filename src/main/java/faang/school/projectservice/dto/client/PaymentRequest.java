@@ -13,8 +13,5 @@ public record PaymentRequest (
         BigDecimal amount,
 
         @NotNull
-        Currency paymentCurrency,
-
-        @NotNull
-        Currency targetCurrency
+        Currency currency
 ) {}
