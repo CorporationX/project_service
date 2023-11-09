@@ -7,7 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.s3.S3ServiceImpl;
-import faang.school.projectservice.util.CoverHandler;
+import faang.school.projectservice.s3.CoverHandler;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

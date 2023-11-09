@@ -1,4 +1,4 @@
-package faang.school.projectservice.util;
+package faang.school.projectservice.s3;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

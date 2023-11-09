@@ -10,7 +10,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.s3.S3ServiceImpl;
-import faang.school.projectservice.util.CoverHandler;
+import faang.school.projectservice.s3.CoverHandler;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

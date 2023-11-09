@@ -1,7 +1,6 @@
 package faang.school.projectservice.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
-import faang.school.projectservice.util.CoverHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
