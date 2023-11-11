@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class InviteSentEventPublisher implements MessagePublisher {
 
-    private final RedisTemplate<String, Object> invitationTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final ChannelTopic invitationTopic;
     private final ObjectMapper objectMapper;
 
     @Override
     public void publish(String message) {
-        invitationTemplate.convertAndSend(invitationTopic.getTopic(), message);
+        redisTemplate.convertAndSend(invitationTopic.getTopic(), message);
     }
 
     @Override
@@ -28,6 +28,6 @@ public class InviteSentEventPublisher implements MessagePublisher {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        invitationTemplate.convertAndSend(invitationTopic.getTopic(), eventString);
+        redisTemplate.convertAndSend(invitationTopic.getTopic(), eventString);
     }
 }

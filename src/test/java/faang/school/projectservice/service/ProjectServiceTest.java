@@ -47,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -350,7 +351,7 @@ class ProjectServiceTest {
 
         DataAlreadyExistingException exception = assertThrows(DataAlreadyExistingException.class, () -> projectService.createSubProject(subProjectDto));
 
-        assertEquals("Project Faang is already exist", exception.getMessage());
+        assertEquals("SubProject Faang is already exist", exception.getMessage());
     }
 
     @Test
@@ -368,21 +369,28 @@ class ProjectServiceTest {
                 .thenReturn(false);
         when(projectRepository.getProjectById(2L))
                 .thenReturn(Project.builder()
-                        .id(10L)
                         .visibility(ProjectVisibility.PRIVATE)
                         .build());
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> projectService.createSubProject(subProjectDto));
 
-        assertEquals("Public SubProject: Faang, cant be with a private parent Project with id: 10", exception.getMessage());
+        assertEquals("Public SubProject: Faang, cant be with a private parent Project with id: 2", exception.getMessage());
     }
 
     @Test
     void createSubProjectTest() {
+        Project expected = Project.builder()
+                .name("Faang")
+                .description("This is Faang")
+                .ownerId(1L)
+                .parentProject(Project.builder().id(2L).build())
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+
         when(projectRepository.existsByOwnerUserIdAndName(subProjectDto.getOwnerId(), subProjectDto.getName()))
                 .thenReturn(false);
-        when(projectRepository.getProjectById(subProjectDto.getParentProjectId()))
-                .thenReturn(subProject);
+        doReturn(subProject).doReturn(subProject).when(projectRepository).getProjectById(subProjectDto.getParentProjectId());
+        when(projectRepository.save(any(Project.class))).thenReturn(expected);
 
         SubProjectDto result = projectService.createSubProject(subProjectDto);
 
@@ -504,31 +512,38 @@ class ProjectServiceTest {
         updateSubProjectDto.setVisibility(ProjectVisibility.PRIVATE);
 
         Project firstProjectChildren = Project.builder()
+                .id(1L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
         Project firstChildren = Project.builder()
+                .id(2L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(new ArrayList<>(List.of(firstProjectChildren)))
                 .build();
 
         Project secondFirstProjectChildren = Project.builder()
+                .id(3L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
 
         Project secondSecondProjectFirstChildren = Project.builder()
+                .id(4L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
         Project secondSecondProjectChildren = Project.builder()
+                .id(5L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(new ArrayList<>(List.of(secondSecondProjectFirstChildren)))
                 .build();
 
         Project secondChildren = Project.builder()
+                .id(6L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(new ArrayList<>(List.of(secondFirstProjectChildren, secondSecondProjectChildren)))
                 .build();
 
         Project returnProject = Project.builder()
+                .id(7L)
                 .name("Faang")
                 .updatedAt(LocalDateTime.now())
                 .children(new ArrayList<>(List.of(firstChildren, secondChildren)))
