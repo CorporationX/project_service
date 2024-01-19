@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
 }
@@ -70,4 +71,34 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            isEnabled = true
+            element = "CLASS"
+            includes = listOf(
+                    "org.gradle.*",
+                    "school.faang.project_service.*")
+
+            limit {
+                counter = "LINE"
+                value = "TOTALCOUNT"
+                minimum = "0.0".toBigDecimal()   /* это для успешной проверки, после поменять -> minimum = "0.7".toBigDecimal()*/
+            }
+        }
+    }
 }
