@@ -97,7 +97,7 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "LINE"
                 value = "TOTALCOUNT"
-                minimum = "0.0".toBigDecimal()   /* это для успешной проверки, после поменять -> minimum = "0.7".toBigDecimal()*/
+                minimum = "0.0".toBigDecimal()
             }
         }
     }
