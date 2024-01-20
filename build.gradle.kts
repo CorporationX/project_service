@@ -73,6 +73,9 @@ tasks.bootJar {
     archiveFileName.set("service.jar")
 }
 
+/**
+ * Jacoco
+ */
 jacoco {
     toolVersion = "0.8.11"
 }
@@ -97,7 +100,7 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "LINE"
                 value = "TOTALCOUNT"
-                minimum = "0.0".toBigDecimal()
+                minimum = "0.7".toBigDecimal()
             }
         }
     }
