@@ -72,7 +72,9 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
-
+    /**
+     * JaCoCo
+     */
 jacoco {
     toolVersion = "0.8.11"
 }
@@ -97,7 +99,7 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "LINE"
                 value = "TOTALCOUNT"
-                minimum = "0.0".toBigDecimal()   /* это для успешной проверки, после поменять -> minimum = "0.7".toBigDecimal()*/
+                minimum = "0.7".toBigDecimal()
             }
         }
     }
