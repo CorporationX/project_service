@@ -60,8 +60,8 @@ public class ProjectValidator {
                         projectValidate = project;
                         break;
                     }
-                }
-            }
+                } // Пишу для очередного желающего сказать, что этот метод никогда не возвращает null.
+            } // Возвращает и еще как ! Да так возвращает, что ломал мне метод фильтрации.
         } else {
             projectValidate = project;
         }

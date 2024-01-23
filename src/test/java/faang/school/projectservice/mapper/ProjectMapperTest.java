@@ -10,6 +10,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static faang.school.projectservice.model.ProjectStatus.CREATED;
+import static faang.school.projectservice.model.ProjectStatus.IN_PROGRESS;
 import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,13 +31,16 @@ class ProjectMapperTest {
                 .build();
         projectDto = ProjectDto
                 .builder()
+                .status(CREATED)
+                .visibility(PUBLIC)
                 .build();
         projectUpDate = Project.builder()
-                .status(CREATED)
+                .status(IN_PROGRESS)
+                .visibility(PUBLIC)
                 .build();
         projectUpDateDto = ProjectUpDateDto
                 .builder()
-                .status(CREATED)
+                .status(IN_PROGRESS)
                 .build();
     }
 
@@ -51,7 +55,7 @@ class ProjectMapperTest {
     }
 
     @Test
-    void testToUpDateEntity() {
-        assertEquals(projectUpDate, projectMapper.toEntity(projectUpDateDto));
+    void testUpdate() {
+        assertEquals(projectUpDate, projectMapper.update(project, projectUpDateDto));
     }
 }

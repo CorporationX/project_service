@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.times;
@@ -20,7 +19,7 @@ import static org.mockito.Mockito.verify;
 public class ProjectControllerTests {
     @Mock
     private ProjectService projectService;
-    @Spy
+    @Mock
     private ProjectValidator projectValidator;
     @InjectMocks
     private ProjectController projectController;
@@ -57,5 +56,11 @@ public class ProjectControllerTests {
     void testGetProjectById_ShouldCallServiceMethod() {
         projectController.getProjectById(1L);
         verify(projectService, times(1)).getProjectById(1L);
+    }
+
+    @Test
+    void testDeleteProjectById_ShouldCallServiceMethod() {
+        projectController.deleteProjectById(1L);
+        verify(projectService, times(1)).deleteProjectById(1L);
     }
 }

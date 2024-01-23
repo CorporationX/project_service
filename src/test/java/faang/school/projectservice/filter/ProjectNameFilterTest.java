@@ -24,7 +24,7 @@ class ProjectNameFilterTest {
         project = Project.builder().name("NotJava").build();
         project2 = Project.builder().name("Java").build();
         projectStream = Stream.of(project, project2);
-        projectStream2 = Stream.of(project2);
+        projectStream2 = Stream.of(project, project2);
     }
 
     @Test

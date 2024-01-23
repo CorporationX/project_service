@@ -27,6 +27,8 @@ import static faang.school.projectservice.model.ProjectStatus.CREATED;
 import static faang.school.projectservice.model.ProjectStatus.IN_PROGRESS;
 import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +45,7 @@ class ProjectServiceTest {
     private ProjectValidator projectValidator;
     @InjectMocks
     private ProjectService projectService;
-    private Project project;
+    private Project project1;
 
     private List<Project> projects;
     private List<ProjectDto> projectDtos;
@@ -54,9 +56,9 @@ class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
-        project = Project.builder().id(1L).status(CREATED).visibility(PUBLIC).build();
-        projectDto = projectMapper.toDto(project);
-        projects = List.of(project);
+        project1 = Project.builder().id(1L).status(CREATED).visibility(PUBLIC).build();
+        projectDto = projectMapper.toDto(project1);
+        projects = List.of(project1);
         projectDtos = List.of(projectDto);
     }
 
@@ -68,11 +70,11 @@ class ProjectServiceTest {
     @Test
     void testUpdateProject_ShouldReturnUpdateProjectDto() {
         // Arrange
-        project = Project.builder().id(1L).status(IN_PROGRESS).visibility(PUBLIC).build();
+        project1 = Project.builder().id(1L).status(IN_PROGRESS).build();
         projectUpDateDto = ProjectUpDateDto.builder().status(ProjectStatus.COMPLETED).build();
-        projectDto = ProjectDto.builder().id(1L).status(ProjectStatus.COMPLETED).build();
+        projectDto = projectMapper.toDto(project1);
         // Act
-        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(projectRepository.getProjectById(1L)).thenReturn(project1);
         // Assert
         assertEquals(projectDto, projectService.updateProject(1L, projectUpDateDto));
     }
@@ -84,7 +86,7 @@ class ProjectServiceTest {
         projectFiltersStream = Stream.of(new ProjectNameFilter(), new ProjectStatusFilter());
         // Act
         when(projectRepository.findAll()).thenReturn(projects);
-        when(projectValidator.validateServiceGetProject(userContext.getUserId(), project)).thenReturn(project);
+        when(projectValidator.validateServiceGetProject(userContext.getUserId(), project1)).thenReturn(project1);
         when(projectFilters.stream()).thenReturn(projectFiltersStream);
         // Assert
         assertEquals(projectDtos, projectService.getAllProjectsWithFilter(projectFilterDto));
@@ -94,7 +96,7 @@ class ProjectServiceTest {
     void testGetAllProjects_ShouldReturnAllProjects() {
         // Act
         when(projectRepository.findAll()).thenReturn(projects);
-        when(projectValidator.validateServiceGetProject(userContext.getUserId(), project)).thenReturn(project);
+        when(projectValidator.validateServiceGetProject(userContext.getUserId(), project1)).thenReturn(project1);
         // Assert
         assertEquals(projectDtos, projectService.getAllProjects());
     }
@@ -102,9 +104,18 @@ class ProjectServiceTest {
     @Test
     void testGetProjectById() {
         // Act
-        when(projectRepository.getProjectById(1L)).thenReturn(project);
-        when(projectValidator.validateServiceGetProject(userContext.getUserId(), project)).thenReturn(project);
+        when(projectRepository.getProjectById(1L)).thenReturn(project1);
+        when(projectValidator.validateServiceGetProject(userContext.getUserId(), project1)).thenReturn(project1);
         // Assert
         assertEquals(projectDto, projectService.getProjectById(1L));
+    }
+
+    @Test
+    void testDeleteProjectById() {
+        // Act
+        projectService.deleteProjectById(1L);
+        // Assert
+        verify(projectRepository,times(1)).deleteById(1L);
+        verify(projectRepository,times(1)).getProjectById(1L);
     }
 }
