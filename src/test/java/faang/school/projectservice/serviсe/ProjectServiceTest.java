@@ -112,7 +112,9 @@ class ProjectServiceTest {
 
     @Test
     void testDeleteProjectById() {
+        // Act
         projectService.deleteProjectById(1L);
+        // Assert
         verify(projectRepository,times(1)).deleteById(1L);
         verify(projectRepository,times(1)).getProjectById(1L);
     }
