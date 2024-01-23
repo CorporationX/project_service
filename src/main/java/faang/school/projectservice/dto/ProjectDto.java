@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -17,10 +18,8 @@ public class ProjectDto {
     private Long id;
     private String name;
     private String description;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     private Long ownerId;
-    @Builder.Default
-    private ProjectStatus status = ProjectStatus.CREATED;
-    @Builder.Default
-    private ProjectVisibility visibility = ProjectVisibility.PUBLIC;
+    private ProjectStatus status;
+    private ProjectVisibility visibility;
 }
