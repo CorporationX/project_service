@@ -98,11 +98,10 @@ public class ProjectService {
 
         validateAccessToProject(ownerId);
 
-        /*UserDto user = userServiceClient.getUser(ownerId);
+        UserDto user = userServiceClient.getUser(ownerId);
         if (user == null) {
             throw new EntityNotFoundException("User with id = " + ownerId + " not found");
         }
-*/
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
             throw new IllegalArgumentException(
                     "You already have project with name: " + name +
