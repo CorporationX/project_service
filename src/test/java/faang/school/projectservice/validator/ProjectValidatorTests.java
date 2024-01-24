@@ -21,6 +21,8 @@ import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 public class ProjectValidatorTests {
     @Mock
@@ -29,13 +31,30 @@ public class ProjectValidatorTests {
     private ProjectValidator projectValidator;
 
     @Test
-    void testValidateCreateProject_ShouldThrowDataValidationException() {
+    void testValidateCreateProjectIfNull() {
         assertThrows(DataValidationException.class, () -> {
             projectValidator.validateCreateProject(ProjectDto.builder().build());
         });
     }
 
-    // ЕЩЕ ОДИМН ТЕСТ НАДО!!!
+    @Test
+    void testValidateUpdateProjectIfProjectExists() {
+        List<Project> projects = List.of(Project.builder()
+                .name("project")
+                .description("description")
+                .ownerId(1L)
+                .build());
+        ProjectDto project = ProjectDto.builder()
+                .name("project")
+                .description("description")
+                .ownerId(1L)
+                .build();
+
+        when(projectRepository.findAll()).thenReturn(projects);
+        assertThrows(DataValidationException.class, () -> {
+            projectValidator.validateCreateProject(project);
+        });
+    }
 
     @Test
     void testValidateUpdateProject_ShouldThrowDataValidationException() {
@@ -64,7 +83,7 @@ public class ProjectValidatorTests {
         var team = Team.builder().teamMembers(List.of(TeamMember.builder().id(1L).build())).build();
         var project = Project.builder().teams(List.of(team)).visibility(PRIVATE).build();
         assertNull(projectValidator.validateServiceGetProject(2L, project));
-    }// понятно,что тут можно ни один тест написать,но лучше комментов дождусь)
+    }
 
     @Test
     void testValidateServiceGetProject_ShouldReturnProject() {
