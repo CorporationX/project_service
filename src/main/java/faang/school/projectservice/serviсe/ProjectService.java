@@ -36,8 +36,7 @@ public class ProjectService {
         projectDto.setOwnerId(userContext.getUserId());
         log.info("Project creation started {}", projectDto.getName());
         var project = projectMapper.toEntity(projectDto);
-        projectRepository.save(project);
-        return projectMapper.toDto(project);
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Transactional
@@ -78,7 +77,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public void   deleteProjectById(Long id) {
+    public void deleteProjectById(Long id) {
         var project = projectRepository.getProjectById(id);
         projectValidator.validateServiceOwnerOfProject(userContext.getUserId(), project);
         projectRepository.deleteById(id);
