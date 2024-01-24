@@ -18,6 +18,8 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,8 +112,8 @@ class InternshipServiceTest {
                 .project(project)
                 .mentorId(mentor)
                 .interns(interns)
-                .startDate()
-                .endDate()
+                .startDate(LocalDateTime.of(2024, Month.FEBRUARY, 5, 10, 0))
+                .endDate(LocalDateTime.of(2024,Month.JULY, 15, 10, 0))
                 .build();
         when(projectRepository.getProjectById(5L)).thenReturn(project);
         when(teamMemberRepository.findById(5L)).thenReturn(mentor);

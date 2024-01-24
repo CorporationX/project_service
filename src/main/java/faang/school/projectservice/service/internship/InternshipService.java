@@ -40,8 +40,9 @@ public class InternshipService {
         List<TeamMember> interns = internshipDto.getInterns();
         if (interns == null || interns.isEmpty())
             throw new IllegalArgumentException("Interns list cannot be empty");
-        Duration duration = Duration.between(internshipDto.getStartDate(), internshipDto.getEndDate());
-        if(duration.toDays() > 91)
+        //Duration duration = Duration.between(internshipDto.getStartDate(), internshipDto.getEndDate());
+        Period period = Period.between(internshipDto.getStartDate().toLocalDate(), internshipDto.getEndDate().toLocalDate());
+        if(period.getMonths() > 3)
             throw new IllegalArgumentException("Internship duration cannot exceed 90 days");
         return true;
     }
