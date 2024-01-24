@@ -1,22 +1,23 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.filter.ProjectFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -24,15 +25,11 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final UserServiceClient userServiceClient;
-    private final List<ProjectFilter<Project, ProjectFilterDto>> projectFilters;
+    private final UserContext userContext;
+    private final List<Filter<Project, ProjectFilterDto>> filters;
 
     public ProjectDto create(ProjectDto projectDto) {
-        long ownerId = projectDto.getOwnerId();
-        String name = projectDto.getName();
-
-        ProjectValidator.validateProjectName(projectDto);
-        throwIfUserHasSameProjectName(ownerId, name);
-        throwIfUserNotExist(ownerId);
+        validateProjectToCreate(projectDto);
 
         projectDto.setStatus(ProjectStatus.CREATED);
         if (projectDto.getVisibility() == null) {
@@ -45,13 +42,18 @@ public class ProjectService {
     }
 
     public ProjectDto update(ProjectDto projectDto) {
-        Project project = projectRepository.getProjectById(projectDto.getId());
+        Project project = projectRepository.getProjectById(projectDto.getId());//also validation - throws if no project
+        validateAccessToProject(projectDto.getOwnerId());
 
-        if (projectDto.getStatus() != null) {
-            project.setStatus(projectDto.getStatus());
+        ProjectStatus status = projectDto.getStatus();
+        String description = projectDto.getDescription();
+
+        if (status != null) {
+            project.setStatus(status);
         }
-        if (projectDto.getDescription() != null) {
-            project.setDescription(projectDto.getDescription());
+        if (description != null) {
+            validateDescription(description);
+            project.setDescription(description);
         }
         project.setUpdatedAt(LocalDateTime.now());
 
@@ -60,46 +62,74 @@ public class ProjectService {
         return projectMapper.toDto(updatedProject);
     }
 
+    public ProjectDto getById(long id) {
+        validateAccessToProject(id);
+        return projectMapper.toDto(projectRepository.getProjectById(id));
+    }
+
     public List<ProjectDto> getAll() {
-        return null;
+        return projectMapper.entitiesToDtos(getPublicOrOwnProjects());
     }
 
-    public ProjectDto getById(long projectId) {
-        return null;
+    public List<ProjectDto> getAll(ProjectFilterDto filterDto) {
+        Stream<Project> projectsStream = getPublicOrOwnProjects().stream();
+
+        List<Project> filteredProjects = filters.stream()
+                .filter(prjFilter -> prjFilter.isApplicable(filterDto))
+                .reduce(projectsStream,
+                        (stream, prjFilter) -> prjFilter.apply(stream, filterDto),
+                        Stream::concat)
+                .toList();
+
+        return projectMapper.entitiesToDtos(filteredProjects);
     }
 
-    public ProjectDto delete(ProjectDto projectDto) {
-        return null;
+    private List<Project> getPublicOrOwnProjects() {
+        return projectRepository.findAll().stream()
+                .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
+                        haveAccessToProject(project.getOwnerId()))
+                .toList();
     }
 
-    private void throwIfUserHasSameProjectName(long ownerId, String name) {
+    private void validateProjectToCreate(ProjectDto projectDto) {
+        long ownerId = projectDto.getOwnerId();
+        String name = projectDto.getName();
+        String description = projectDto.getDescription();
+
+        validateAccessToProject(ownerId);
+
+        /*UserDto user = userServiceClient.getUser(ownerId);
+        if (user == null) {
+            throw new EntityNotFoundException("User with id = " + ownerId + " not found");
+        }
+*/
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
             throw new IllegalArgumentException(
                     "You already have project with name: " + name +
                             ". Choose another name"
             );
         }
+
+        if (name.isEmpty() || name.isBlank()) {
+            throw new IllegalArgumentException("Name of project cannot be empty or blank");
+        }
+
+        validateDescription(description);
     }
 
-    private void throwIfUserNotExist(long ownerId) {
-        UserDto user = userServiceClient.getUser(ownerId);
-        if (user == null) {
-            throw new EntityNotFoundException("User with id = " + ownerId + " not found");
+    private void validateDescription(String description) {
+        if (description != null && (description.isEmpty() || description.isBlank())) {
+            throw new IllegalArgumentException("Description of project cannot be empty or blank");
         }
     }
 
-    private void throwIfProjectNotExist(long id) {
-        if (!projectRepository.existsById(id)) {
-            throw new EntityNotFoundException("Project with id = " + id + " not found");
+    private void validateAccessToProject(long ownerId) {
+        if (!haveAccessToProject(ownerId)) {
+            throw new SecurityException("User is not the owner of the project");
         }
     }
 
-    public List<ProjectDto> getByFilters(ProjectFilterDto projectFilterDto) {
-        List<Project> projects = projectRepository.findAll();
-
-        projectFilters.stream().filter(prjFilter -> prjFilter.isApplicable(projectFilterDto))
-                .forEach((prjFilter) -> prjFilter.apply(projects, projectFilterDto));
-
-        return projectMapper.entitiesToDtos(projects);
+    private boolean haveAccessToProject(long ownerId) {
+        return userContext.getUserId() == ownerId;
     }
 }
