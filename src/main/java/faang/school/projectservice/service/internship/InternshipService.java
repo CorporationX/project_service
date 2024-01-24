@@ -33,6 +33,8 @@ public class InternshipService {
     }
 
     private boolean checkInternshipDto(InternshipDto internshipDto){
+        // в этих методах уже пробрасываются исключения, поэтому при создании объекта тоже может вылететь исключение,
+        // если данные не валидные, так? Их же не надо проверять?
         Project project = projectRepository.getProjectById(internshipDto.getProject().getId());
         TeamMember mentor = teamMemberRepository.findById(internshipDto.getMentorId().getId());
         List<TeamMember> interns = internshipDto.getInterns();
