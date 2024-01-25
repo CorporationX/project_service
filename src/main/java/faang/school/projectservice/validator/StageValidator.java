@@ -16,13 +16,19 @@ public class StageValidator {
 
     public void validateStage(StageDto stageDto) {
         if (stageDto.getStageName() == null || stageDto.getStageName().isEmpty()) {
-            throw new RuntimeException("Введите наименование этапа");
+            throw new DataValidationException("Введите наименование этапа");
         }
         if (stageDto.getProjectId() == null) {
-            throw new RuntimeException("Введите id проекта");
+            throw new DataValidationException("Введите id проекта");
         }
         if (stageDto.getStageRolesDto().isEmpty()) {
             throw new DataValidationException("Определите список ролей и количество человек для каждой роли");
+        }
+    }
+
+    public void validateNullStageId(Long stageId) {
+        if (stageId == null) {
+            throw new DataValidationException("Введите id этапа");
         }
     }
 

@@ -11,14 +11,8 @@ public class ProjectValidator {
     private final ProjectRepository projectRepository;
 
     public void validateExistProjectById(Long id) {
-        if (projectRepository.existsById(id)) {
+        if (!projectRepository.existsById(id)) {
             throw new DataValidationException("Проект с id - " + id + " не существует");
         }
     }
-
-//    public void validateStatusProjectNotCancelled(Long id) {
-//        if (projectRepository.getProjectById(id).getStatus().equals(CANCELLED)) {
-//            throw new DataValidationException("");
-//        }
-//    }
 }
