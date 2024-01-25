@@ -63,16 +63,17 @@ public class ProjectService {
     }
 
     public ProjectDto getById(long id) {
-        validateAccessToProject(id);
-        return projectMapper.toDto(projectRepository.getProjectById(id));
+        Project projectById = projectRepository.getProjectById(id);
+        validateAccessToProject(projectById.getOwnerId());
+        return projectMapper.toDto(projectById);
     }
 
     public List<ProjectDto> getAll() {
-        return projectMapper.entitiesToDtos(getPublicOrOwnProjects());
+        return projectMapper.entitiesToDtos(getVisibleProjects());
     }
 
     public List<ProjectDto> getAll(ProjectFilterDto filterDto) {
-        Stream<Project> projectsStream = getPublicOrOwnProjects().stream();
+        Stream<Project> projectsStream = getVisibleProjects().stream();
 
         List<Project> filteredProjects = filters.stream()
                 .filter(prjFilter -> prjFilter.isApplicable(filterDto))
@@ -84,7 +85,7 @@ public class ProjectService {
         return projectMapper.entitiesToDtos(filteredProjects);
     }
 
-    private List<Project> getPublicOrOwnProjects() {
+    private List<Project> getVisibleProjects() {
         return projectRepository.findAll().stream()
                 .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
                         haveAccessToProject(project.getOwnerId()))
