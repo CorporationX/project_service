@@ -25,6 +25,8 @@ public class InternshipService {
     public InternshipDto createInternship(InternshipDto internshipDto) {
         if (!checkInternshipDto(internshipDto))
             throw new IllegalArgumentException("Internship cannot be created");
+        if(internshipRepository.existsById(internshipDto.getId()))
+            throw new IllegalArgumentException("Internship with this id " + internshipDto.getId() + " already exists");
         Internship createdInternship = internshipRepository.save(internshipMapper.toEntity(internshipDto));
         return internshipMapper.toInternshipDto(createdInternship);
     }
@@ -35,9 +37,13 @@ public class InternshipService {
         List<TeamMember> interns = internshipDto.getInterns();
         if (interns == null || interns.isEmpty())
             throw new IllegalArgumentException("Interns list cannot be empty");
+        if (internshipDto.getStartDate().isAfter(internshipDto.getEndDate()))
+            throw new IllegalArgumentException("Incorrect dates have been entered");
         Duration duration = Duration.between(internshipDto.getStartDate(), internshipDto.getEndDate());
         if (duration.toDays() > 91)
             throw new IllegalArgumentException("Internship duration cannot exceed 91 days");
         return true;
     }
+
+
 }

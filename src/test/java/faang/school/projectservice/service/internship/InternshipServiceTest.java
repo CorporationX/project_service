@@ -12,10 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -45,6 +42,7 @@ class InternshipServiceTest {
     private InternshipDto internshipDto;
     private Project project;
     private TeamMember mentor;
+    private List<TeamMember> interns;
 
     @BeforeEach
     void setUp() {
@@ -52,7 +50,7 @@ class InternshipServiceTest {
         project.setId(5L);
         mentor = new TeamMember();
         mentor.setId(5L);
-        List<TeamMember> interns = new ArrayList<>(List.of(new TeamMember(), new TeamMember()));
+        interns = new ArrayList<>(List.of(new TeamMember(), new TeamMember()));
         internshipDto = InternshipDto.builder()
                 .id(123L)
                 .project(project)
@@ -70,8 +68,7 @@ class InternshipServiceTest {
         internshipService.createInternship(internshipDto);
         ArgumentCaptor<Internship> internshipCaptor = ArgumentCaptor.forClass(Internship.class);
         verify(internshipRepository).save(internshipCaptor.capture());
-        Internship internshipResult = internshipCaptor.getValue();
-        assertEquals(internshipDto.getId(), internshipResult.getId());
+        assertEquals(internshipDto.getId(), internshipCaptor.getValue().getId());
     }
 
     @Test
@@ -80,6 +77,11 @@ class InternshipServiceTest {
         assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
     }
 
+    @Test
+    void testCreateInternshipWithExistenceIdIntership() {
+        Mockito.when(internshipRepository.existsById(123L)).thenReturn(true);
+        assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
+    }
 
     @Test
     void testCreateInternshipWithNullInterns() {
@@ -90,6 +92,12 @@ class InternshipServiceTest {
     @Test
     void testCreateInternshipWithEmptyInterns() {
         internshipDto.setInterns(new ArrayList<>());
+        assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
+    }
+
+    @Test
+    void testCreateInternshipWithIncorrectDate() {
+        internshipDto.setEndDate(LocalDateTime.of(2024, Month.JANUARY, 15, 10, 0));
         assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
     }
 

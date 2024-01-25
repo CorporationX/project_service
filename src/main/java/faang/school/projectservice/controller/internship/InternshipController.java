@@ -12,7 +12,8 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
-        //проверка на валидность входящих данных
+        if (internshipDto == null || internshipDto.getId() == null || internshipDto.getId() < 0)
+            throw new IllegalArgumentException("Internship cannot be created");
         return internshipService.createInternship(internshipDto);
     }
 }
