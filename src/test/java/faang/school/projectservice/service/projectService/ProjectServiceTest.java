@@ -6,6 +6,8 @@ import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.project.NameFilter;
+import faang.school.projectservice.filter.project.StatusFilter;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -16,55 +18,73 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
-    @Mock
     private ProjectRepository projectRepository;
+    private UserServiceClient userServiceClient;
+    private UserContext userContext;
+    private List<Filter<Project, ProjectFilterDto>> filters;
     @Spy
     private ProjectMapperImpl projectMapper;
-    @Mock
-    private UserServiceClient userServiceClient;
-    @Mock
-    private UserContext userContext;
-    @Mock
-    private List<Filter<Project, ProjectFilterDto>> filters;
-    @InjectMocks
     private ProjectService projectService;
-    private ProjectDto correctProjectDto;
-    private Project correctProjectEntity;
-    private final long CORRECT_PROJECT_ID = 5L;
+    @Captor
+    private ArgumentCaptor<Project> captor;
+
+    Filter<Project, ProjectFilterDto> nameFilter;
+    Filter<Project, ProjectFilterDto> statusFilter;
+    private ProjectDto filledProjectDto;
+    private Project filledProjectEntity;
+    private final long FILLED_PROJECT_ID = 5L;
     private final long OWNER_ACCESSED_ID = 1L;
     private final long OWNER_NOT_ACCESSED_ID = 2L;
 
     @BeforeEach
     public void setUp() {
-        correctProjectDto = new ProjectDto();
-        correctProjectDto.setId(CORRECT_PROJECT_ID);
-        correctProjectDto.setOwnerId(OWNER_ACCESSED_ID);
-        correctProjectDto.setName("project name");
-        correctProjectDto.setDescription("project description");
-        correctProjectDto.setStatus(ProjectStatus.CREATED);
-        correctProjectDto.setVisibility(ProjectVisibility.PUBLIC);
+        filledProjectDto = new ProjectDto();
+        filledProjectDto.setId(FILLED_PROJECT_ID);
+        filledProjectDto.setOwnerId(OWNER_ACCESSED_ID);
+        filledProjectDto.setName("project name");
+        filledProjectDto.setDescription("project description");
+        filledProjectDto.setStatus(ProjectStatus.CREATED);
+        filledProjectDto.setVisibility(ProjectVisibility.PUBLIC);
 
-        correctProjectEntity = new Project();
-        correctProjectEntity.setId(CORRECT_PROJECT_ID);
-        correctProjectEntity.setOwnerId(OWNER_ACCESSED_ID);
-        correctProjectEntity.setName("project name");
-        correctProjectEntity.setDescription("project description");
-        correctProjectEntity.setStatus(ProjectStatus.CREATED);
-        correctProjectEntity.setVisibility(ProjectVisibility.PUBLIC);
+        filledProjectEntity = new Project();
+        filledProjectEntity.setId(FILLED_PROJECT_ID);
+        filledProjectEntity.setOwnerId(OWNER_ACCESSED_ID);
+        filledProjectEntity.setName("project name");
+        filledProjectEntity.setDescription("project description");
+        filledProjectEntity.setStatus(ProjectStatus.CREATED);
+        filledProjectEntity.setVisibility(ProjectVisibility.PUBLIC);
+
+        projectRepository = Mockito.mock(ProjectRepository.class);
+        userServiceClient = Mockito.mock(UserServiceClient.class);
+        userContext = Mockito.mock(UserContext.class);
+        userContext = Mockito.mock(UserContext.class);
+        nameFilter = Mockito.mock(NameFilter.class);
+        statusFilter = Mockito.mock(StatusFilter.class);
+        filters = new ArrayList<>(List.of(nameFilter, statusFilter));
+
+        projectService = new ProjectService(projectRepository, projectMapper, userServiceClient, userContext, filters);
     }
 
     @Test
@@ -73,7 +93,7 @@ public class ProjectServiceTest {
 
         assertThrows(
                 SecurityException.class,
-                () -> projectService.create(correctProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
@@ -84,7 +104,7 @@ public class ProjectServiceTest {
 
         assertThrows(
                 EntityNotFoundException.class,
-                () -> projectService.create(correctProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
@@ -96,42 +116,44 @@ public class ProjectServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> projectService.create(correctProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
     @Test
     public void testCreate_nameNotValid_throwsIllegalArgumentException() {
-        correctProjectDto.setName("   ");
+        filledProjectDto.setName("   ");
         validated();
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> projectService.create(correctProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
     @Test
     public void testCreate_descriptionNotValid_throwsIllegalArgumentException() {
-        correctProjectDto.setDescription("   ");
+        filledProjectDto.setDescription("   ");
         validated();
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> projectService.create(correctProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
     @Test
     public void testCreate_validProjectDto_projectSaved() {
         validated();
-        Project savedProjectEntity = projectMapper.toEntity(correctProjectDto);
-        when(projectRepository.save(savedProjectEntity)).thenReturn(savedProjectEntity);
 
-        ProjectDto expectedProjectDto = projectService.create(correctProjectDto);
+        projectService.create(filledProjectDto);
 
-        assertNotNull(expectedProjectDto);
-        assertEquals(correctProjectDto, expectedProjectDto);
+        verify(projectRepository, times(1)).save(captor.capture());
+
+        Project savedProject = captor.getValue();
+        assertNotNull(savedProject);
+        assertEquals(savedProject.getStatus(), filledProjectDto.getStatus());
+        assertEquals(savedProject.getVisibility(), filledProjectDto.getVisibility());
     }
 
     @Test
@@ -140,28 +162,88 @@ public class ProjectServiceTest {
 
         assertThrows(
                 SecurityException.class,
-                () -> projectService.create(correctProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
     @Test
     public void testGetById_ValidAccess_returnsProject() {
         accessAllowed(true);
-        when(projectRepository.getProjectById(OWNER_ACCESSED_ID)).thenReturn(correctProjectEntity);
+        when(projectRepository.getProjectById(OWNER_ACCESSED_ID)).thenReturn(filledProjectEntity);
 
         ProjectDto expectedProjectDto = projectService.getById(OWNER_ACCESSED_ID);
 
-        assertEquals(expectedProjectDto, correctProjectDto);
+        assertEquals(expectedProjectDto, filledProjectDto);
     }
 
     @Test
-    public void testGetAll () {
-        ///
+    public void testGetAll_noProjectsFromDB_returnsEmptyList() {
+        when(projectRepository.findAll()).thenReturn(Collections.emptyList());
+        List<ProjectDto> all = projectService.getAll();
+        assertEquals(Collections.emptyList(), all);
     }
 
     @Test
-    public void testGetAllWithFilters () {
-        ///
+    public void testGetAll_containsPublicAndOwnProjects_returnsOnlyVisibleProjects() {
+        List<ProjectDto> expected = projectMapper.entitiesToDtos(getVisibleProjectsSim());
+
+        List<ProjectDto> returnedProjects = projectService.getAll();
+
+        assertEquals(expected, returnedProjects);
+    }
+
+    @Test
+    public void testGetAllWithFilters_notFilledFilterDto_returnsAllVisibleProjects() {
+        ProjectFilterDto notFilledFilterDto = new ProjectFilterDto();
+        when(nameFilter.isApplicable(any())).thenReturn(false);
+        List<ProjectDto> expected = projectMapper.entitiesToDtos(getVisibleProjectsSim());
+
+        List<ProjectDto> returnedProjectDtos = projectService.getAll(notFilledFilterDto);
+
+        assertEquals(expected, returnedProjectDtos);
+    }
+
+    @Test
+    public void testGetAllWithFilters_filledNameFilterDto_returnsFilteredDtos() {
+        ProjectFilterDto filterDto = new ProjectFilterDto();
+        String subString = "Industry";
+        filterDto.setName(subString);
+        Stream<Project> allVisibleProjects = getVisibleProjectsSim().stream();
+
+        when(filters.get(0).isApplicable(filterDto)).thenReturn(true);
+        when(filters.get(1).isApplicable(filterDto)).thenReturn(false);
+        when(filters.get(0).apply(any(), any())).thenReturn(
+                allVisibleProjects.filter(prj -> prj.getName().contains(filterDto.getName())));
+
+        List<ProjectDto> filteredProjectDtos = projectService.getAll(filterDto);
+
+        assertEquals(1, filteredProjectDtos.size());
+        assertTrue(filteredProjectDtos.get(0).getName().contains(subString));
+    }
+
+    private List<Project> getVisibleProjectsSim() {
+        Project publicAndNotOwnPrj = new Project();
+        publicAndNotOwnPrj.setName("Space X Project");
+        publicAndNotOwnPrj.setStatus(ProjectStatus.CREATED);
+        publicAndNotOwnPrj.setOwnerId(OWNER_NOT_ACCESSED_ID);
+        publicAndNotOwnPrj.setVisibility(ProjectVisibility.PUBLIC);
+        Project privateAndOwnPrj = new Project();
+        privateAndOwnPrj.setName("Apple Industry");
+        privateAndOwnPrj.setStatus(ProjectStatus.COMPLETED);
+        privateAndOwnPrj.setOwnerId(OWNER_ACCESSED_ID);
+        privateAndOwnPrj.setVisibility(ProjectVisibility.PRIVATE);
+        Project privateAndNotOwnPrj = new Project();
+        privateAndNotOwnPrj.setName("Faang School Industry");
+        privateAndNotOwnPrj.setStatus(ProjectStatus.COMPLETED);
+        privateAndNotOwnPrj.setOwnerId(OWNER_NOT_ACCESSED_ID);
+        privateAndNotOwnPrj.setVisibility(ProjectVisibility.PRIVATE);
+
+        List<Project> projects = List.of(publicAndNotOwnPrj, privateAndOwnPrj, privateAndNotOwnPrj);
+
+        when(projectRepository.findAll()).thenReturn(projects);
+        accessAllowed(true);
+
+        return List.of(publicAndNotOwnPrj, privateAndOwnPrj);
     }
 
     private void validated() {
@@ -171,7 +253,7 @@ public class ProjectServiceTest {
     }
 
     private void projectNameExists(boolean isExist) {
-        when(projectRepository.existsByOwnerUserIdAndName(OWNER_ACCESSED_ID, correctProjectDto.getName())).thenReturn(isExist);
+        when(projectRepository.existsByOwnerUserIdAndName(OWNER_ACCESSED_ID, filledProjectDto.getName())).thenReturn(isExist);
     }
 
     private void userFromDatabase(UserDto userFromDatabase) {
