@@ -58,12 +58,12 @@ class InternshipServiceTest {
                 .startDate(LocalDateTime.of(2024, Month.FEBRUARY, 5, 10, 0))
                 .endDate((LocalDateTime.of(2024, Month.MAY, 5, 10, 0)))
                 .build();
-        when(projectRepository.getProjectById(5L)).thenReturn(project);
-        when(teamMemberRepository.findById(5L)).thenReturn(mentor);
     }
 
     @Test
     void testCreateInternshipSuccessful() {
+        when(projectRepository.getProjectById(5L)).thenReturn(project);
+        when(teamMemberRepository.findById(5L)).thenReturn(mentor);
         internshipService.createInternship(internshipDto);
         ArgumentCaptor<Internship> internshipCaptor = ArgumentCaptor.forClass(Internship.class);
         verify(internshipRepository).save(internshipCaptor.capture());
@@ -72,14 +72,18 @@ class InternshipServiceTest {
 
     @Test
     void testCreateInternshipFailure() {
+        when(projectRepository.getProjectById(5L)).thenReturn(project);
+        when(teamMemberRepository.findById(5L)).thenReturn(mentor);
         when(internshipService.createInternship(internshipDto)).thenThrow(IllegalArgumentException.class);
         assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
     }
 
     @Test
-    void testCreateInternshipWithExistenceIdIntership() {
-        Mockito.when(internshipRepository.existsById(123L)).thenReturn(true);
+    void testCreateInternshipWithExistenceInternshipId() {
+        when(internshipRepository.existsById(123L)).thenReturn(true);
         assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
+        verify(internshipRepository).existsById(123L);
+
     }
 
     @Test

@@ -23,26 +23,51 @@ public class InternshipService {
     private final ProjectRepository projectRepository;
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
-        if (!checkInternshipDto(internshipDto))
-            throw new IllegalArgumentException("Internship cannot be created");
-        if(internshipRepository.existsById(internshipDto.getId()))
-            throw new IllegalArgumentException("Internship with this id " + internshipDto.getId() + " already exists");
+        checkInternshipDtoValid(internshipDto);
         Internship createdInternship = internshipRepository.save(internshipMapper.toEntity(internshipDto));
         return internshipMapper.toInternshipDto(createdInternship);
     }
 
-    private boolean checkInternshipDto(InternshipDto internshipDto) {
+    private void checkInternshipDtoValid(InternshipDto internshipDto) {
+        checkInternshipDtoId(internshipDto);
+        checkProject(internshipDto);
+        checkMentor(internshipDto);
+        checkExistenceInterns(internshipDto);
+        checkInternshipDtoDate(internshipDto);
+    }
+
+    private void checkInternshipDtoId(InternshipDto internshipDto) {
+        if (internshipRepository.existsById(internshipDto.getId()))
+            throw new IllegalArgumentException("Internship with this id " + internshipDto.getId() + " already exists");
+    }
+
+
+    private void checkProject(InternshipDto internshipDto) {
         Project project = projectRepository.getProjectById(internshipDto.getProject().getId());
+        if (project == null)
+            throw new IllegalArgumentException("Project with id " + internshipDto.getProject().getId() + " not found");
+    }
+
+    private void checkMentor(InternshipDto internshipDto) {
         TeamMember mentor = teamMemberRepository.findById(internshipDto.getMentorId().getId());
+        if (mentor == null)
+            throw new IllegalArgumentException("Mentor with id " + internshipDto.getMentorId().getId() + " not found");
+    }
+
+    private void checkExistenceInterns(InternshipDto internshipDto) {
         List<TeamMember> interns = internshipDto.getInterns();
         if (interns == null || interns.isEmpty())
             throw new IllegalArgumentException("Interns list cannot be empty");
+    }
+
+    private void checkInternshipDtoDate(InternshipDto internshipDto) {
+        if (internshipDto.getStartDate() == null || internshipDto.getEndDate() == null)
+            throw new NullPointerException("Invalid dates");
         if (internshipDto.getStartDate().isAfter(internshipDto.getEndDate()))
             throw new IllegalArgumentException("Incorrect dates have been entered");
         Duration duration = Duration.between(internshipDto.getStartDate(), internshipDto.getEndDate());
         if (duration.toDays() > 91)
             throw new IllegalArgumentException("Internship duration cannot exceed 91 days");
-        return true;
     }
 
 
