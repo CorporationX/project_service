@@ -36,7 +36,6 @@ class InternshipServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private TeamMemberRepository teamMemberRepository;
-
     @Spy
     private InternshipMapper internshipMapper = Mappers.getMapper(InternshipMapper.class);
     private InternshipDto internshipDto;
