@@ -14,6 +14,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,7 @@ public class ProjectServiceTest {
     @Spy
     private ProjectMapperImpl projectMapper;
     private ProjectService projectService;
+    private ProjectValidator projectValidator;
     @Captor
     private ArgumentCaptor<Project> captor;
 
@@ -83,8 +85,9 @@ public class ProjectServiceTest {
         nameFilter = Mockito.mock(NameFilter.class);
         statusFilter = Mockito.mock(StatusFilter.class);
         filters = new ArrayList<>(List.of(nameFilter, statusFilter));
+        projectValidator = new ProjectValidator(projectRepository, userContext);
 
-        projectService = new ProjectService(projectRepository, projectMapper, userServiceClient, userContext, filters);
+        projectService = new ProjectService(projectRepository, projectMapper, userServiceClient, filters, projectValidator);
     }
 
     @Test

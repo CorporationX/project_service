@@ -1,31 +1,41 @@
 package faang.school.projectservice.validator.project;
 
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
 public class ProjectValidator {
+    private final ProjectRepository projectRepository;
+    private final UserContext userContext;
 
-    public static void validateName (String name, long ownerId) {
+    public void validateName(String name) {
         if (name.isEmpty() || name.isBlank()) {
             throw new IllegalArgumentException("Name of project cannot be empty or blank");
         }
     }
 
-    public static void validateDescription(String description) {
+    public void validateDescription(String description) {
         if (description != null && (description.isEmpty() || description.isBlank())) {
             throw new IllegalArgumentException("Description of project cannot be empty or blank");
         }
     }
 
-    public static void validateAccessToProject(long ownerId, long authUserId) {
-        if (!haveAccessToProject(ownerId, authUserId)) {
+    public void validateAccessToProject(long ownerId) {
+        if (!haveAccessToProject(ownerId)) {
             throw new SecurityException("User is not the owner of the project");
         }
     }
 
-    public static boolean haveAccessToProject(long ownerId, long authUserId) {
-        return authUserId == ownerId;
+    public boolean haveAccessToProject(long ownerId) {
+        return userContext.getUserId() == ownerId;
+    }
+
+    public void validateNameExistence(long ownerId, String name) {
+        if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
+            throw new IllegalArgumentException("Project with this name already exists. Name: " + name);
+        }
     }
 }

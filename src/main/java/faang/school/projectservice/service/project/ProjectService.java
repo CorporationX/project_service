@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -26,8 +25,8 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final UserServiceClient userServiceClient;
-    private final UserContext userContext;
     private final List<Filter<Project, ProjectFilterDto>> filters;
+    private final ProjectValidator projectValidator;
 
     public ProjectDto create(ProjectDto projectDto) {
         validateProjectToCreate(projectDto);
@@ -44,7 +43,7 @@ public class ProjectService {
 
     public ProjectDto update(ProjectDto projectDto) {
         Project project = projectRepository.getProjectById(projectDto.getId());//also validation - throws if no project
-        ProjectValidator.validateAccessToProject(projectDto.getOwnerId(), userContext.getUserId());
+        projectValidator.validateAccessToProject(projectDto.getOwnerId());
 
         ProjectStatus status = projectDto.getStatus();
         String description = projectDto.getDescription();
@@ -53,7 +52,7 @@ public class ProjectService {
             project.setStatus(status);
         }
         if (description != null) {
-            ProjectValidator.validateDescription(description);
+            projectValidator.validateDescription(description);
             project.setDescription(description);
         }
         project.setUpdatedAt(LocalDateTime.now());
@@ -65,7 +64,7 @@ public class ProjectService {
 
     public ProjectDto getById(long id) {
         Project projectById = projectRepository.getProjectById(id);
-        ProjectValidator.validateAccessToProject(projectById.getOwnerId(), userContext.getUserId());
+        projectValidator.validateAccessToProject(projectById.getOwnerId());
         return projectMapper.toDto(projectById);
     }
 
@@ -89,7 +88,7 @@ public class ProjectService {
     private List<Project> getVisibleProjects() {
         return projectRepository.findAll().stream()
                 .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
-                        ProjectValidator.haveAccessToProject(project.getOwnerId(), userContext.getUserId()))
+                        projectValidator.haveAccessToProject(project.getOwnerId()))
                 .toList();
     }
 
@@ -99,23 +98,17 @@ public class ProjectService {
         String description = projectDto.getDescription();
 
 
-        ProjectValidator.validateAccessToProject(ownerId, userContext.getUserId());
+        projectValidator.validateAccessToProject(ownerId);
         validateUserExistence(ownerId);
-        validateNameExistence(ownerId, name);
-        ProjectValidator.validateName(name, ownerId);
-        ProjectValidator.validateDescription(description);
+        projectValidator.validateNameExistence(ownerId, name);
+        projectValidator.validateName(name);
+        projectValidator.validateDescription(description);
     }
 
     private void validateUserExistence(long ownerId) {
         UserDto user = userServiceClient.getUser(ownerId);
         if (user == null) {
             throw new EntityNotFoundException("User with id = " + ownerId + " not found");
-        }
-    }
-
-    private void validateNameExistence (long ownerId, String name) {
-        if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
-            throw new IllegalArgumentException("Project with this name already exists. Name: " + name);
         }
     }
 }
