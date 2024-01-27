@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.stage;
 
-import faang.school.projectservice.model.Project;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

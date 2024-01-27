@@ -24,10 +24,10 @@ class StageControllerTest {
     private StageService stageService;
     @Mock
     private StageValidator stageValidator;
-
     @InjectMocks
     private StageController stageController;
 
+    Long stageId = 1l;
 
     @Test
     void testCreateStage_whenInputStageIsCorrect_thenSaveToBd() {
@@ -63,8 +63,6 @@ class StageControllerTest {
 
     @Test
     void testGetStagesById_returnStage() {
-        // Arrange
-        Long stageId = 1l;
         // Act
         stageController.getStageById(stageId);
         // Assert
@@ -73,11 +71,17 @@ class StageControllerTest {
 
     @Test
     void testDeleteStagesById_returnStage() {
-        // Arrange
-        Long stageId = 1l;
         // Act
         stageController.deleteStageById(stageId);
         // Assert
         verify(stageService, times(1)).deleteStageById(stageId);
+    }
+
+    @Test
+    void testUpdateStage_returnStage() {
+        // Act
+        stageController.updateStage(stageId);
+        // Assert
+        verify(stageService, times(1)).updateStage(stageId);
     }
 }

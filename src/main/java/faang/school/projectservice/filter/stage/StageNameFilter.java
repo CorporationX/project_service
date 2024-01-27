@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class StageNameFilter implements StageFilter{
+public class StageNameFilter implements StageFilter {
     @Override
     public boolean isApplicable(StageFilterDto filter) {
         return filter.getStageNamePattern() != null;
@@ -15,6 +15,6 @@ public class StageNameFilter implements StageFilter{
 
     @Override
     public Stream<Stage> apply(Stream<Stage> stages, StageFilterDto filter) {
-        return stages.filter(stage-> stage.getStageName().contains(filter.getStageNamePattern()));
+        return stages.filter(stage -> stage.getStageName().contains(filter.getStageNamePattern()));
     }
 }

@@ -1,10 +1,14 @@
 package faang.school.projectservice.filter.stage;
 
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.model.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StageNameFilterTest {
 
@@ -26,9 +30,13 @@ class StageNameFilterTest {
     @Test
     void testApply() {
         //Arrange
+        Stage stage = Stage.builder().stageName("Stage").build();
+        Stream<Stage> stageStream = List.of(stage).stream();
 
         //Act
+        List<Stage> result = stageNameFilter.apply(stageStream, filter).toList();
 
         //Assert
+        assertTrue(result.contains(stage));
     }
 }

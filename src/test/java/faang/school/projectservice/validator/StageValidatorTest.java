@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.StageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,13 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 
 import static faang.school.projectservice.model.ProjectStatus.CANCELLED;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StageValidatorTest {
-    @Mock
-    private StageRepository stageRepository;
     @Mock
     private ProjectRepository projectRepository;
     @InjectMocks
@@ -31,7 +28,7 @@ class StageValidatorTest {
 
     @BeforeEach
     void setUp() {
-       stageDto = StageDto.builder().stageName("Stage").projectId(1L).stageRolesDto(new ArrayList<>()).build();
+        stageDto = StageDto.builder().stageName("Stage").projectId(1L).stageRolesDto(new ArrayList<>()).build();
     }
 
     @Test
@@ -41,6 +38,7 @@ class StageValidatorTest {
         // Act & Assert
         assertThrows(DataValidationException.class, () -> stageValidator.validateStage(stageDto));
     }
+
     @Test
     void testValidateStage_thenProjectIdNull_thenThrowDataValidationException() {
         // Arrange
@@ -48,6 +46,7 @@ class StageValidatorTest {
         // Act & Assert
         assertThrows(DataValidationException.class, () -> stageValidator.validateStage(stageDto));
     }
+
     @Test
     void testValidateStage_thenStageRolesIsEmpty_thenThrowDataValidationException() {
         // Act & Assert
