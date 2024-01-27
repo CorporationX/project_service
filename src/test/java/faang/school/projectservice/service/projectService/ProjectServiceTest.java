@@ -48,7 +48,6 @@ public class ProjectServiceTest {
     @Spy
     private ProjectMapperImpl projectMapper;
     private ProjectService projectService;
-    private ProjectValidator projectValidator;
     @Captor
     private ArgumentCaptor<Project> captor;
 
@@ -56,12 +55,12 @@ public class ProjectServiceTest {
     Filter<Project, ProjectFilterDto> statusFilter;
     private ProjectDto filledProjectDto;
     private Project filledProjectEntity;
-    private final long FILLED_PROJECT_ID = 5L;
     private final long OWNER_ACCESSED_ID = 1L;
     private final long OWNER_NOT_ACCESSED_ID = 2L;
 
     @BeforeEach
     public void setUp() {
+        long FILLED_PROJECT_ID = 5L;
         filledProjectDto = new ProjectDto();
         filledProjectDto.setId(FILLED_PROJECT_ID);
         filledProjectDto.setOwnerId(OWNER_ACCESSED_ID);
@@ -85,7 +84,7 @@ public class ProjectServiceTest {
         nameFilter = Mockito.mock(NameFilter.class);
         statusFilter = Mockito.mock(StatusFilter.class);
         filters = new ArrayList<>(List.of(nameFilter, statusFilter));
-        projectValidator = new ProjectValidator(projectRepository, userContext);
+        ProjectValidator projectValidator = new ProjectValidator(projectRepository, userContext);
 
         projectService = new ProjectService(projectRepository, projectMapper, userServiceClient, filters, projectValidator);
     }
