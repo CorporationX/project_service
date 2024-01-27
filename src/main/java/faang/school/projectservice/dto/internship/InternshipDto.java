@@ -15,9 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 public class InternshipDto {
     private Long id;
-    private Project project;
-    private TeamMember mentorId;
-    private List<TeamMember> interns;
+    private Long projectId;
+    private Long mentorId;
+    private List<Long> interns;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 

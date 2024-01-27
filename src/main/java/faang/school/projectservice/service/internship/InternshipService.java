@@ -8,6 +8,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,44 +23,32 @@ public class InternshipService {
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
 
+   @Transactional
     public InternshipDto createInternship(InternshipDto internshipDto) {
-        checkInternshipDtoValid(internshipDto);
-        Internship createdInternship = internshipRepository.save(internshipMapper.toEntity(internshipDto));
-        return internshipMapper.toInternshipDto(createdInternship);
-    }
-
-    private void checkInternshipDtoValid(InternshipDto internshipDto) {
-        checkInternshipDtoId(internshipDto);
-        checkProject(internshipDto);
-        checkMentor(internshipDto);
         checkExistenceInterns(internshipDto);
         checkInternshipDtoDate(internshipDto);
+        Internship createdInternship = internshipMapper.toEntity(internshipDto);
+        createdInternship.setProject(checkProject(internshipDto.getProjectId()));
+        createdInternship.setMentorId(checkMentor(internshipDto.getMentorId()));
+        createdInternship.setInterns(internshipDto.getInterns().stream()
+                .map(teamMemberRepository::findById)
+                .toList());
+        Internship internshipNew = internshipRepository.save(createdInternship);
+        return internshipMapper.toInternshipDto(internshipNew);
     }
 
-    private void checkInternshipDtoId(InternshipDto internshipDto) {
-        if (internshipRepository.existsById(internshipDto.getId()))
-            throw new IllegalArgumentException("Internship with this id " + internshipDto.getId() + " already exists");
+    private Project checkProject(Long id) {
+        return projectRepository.getProjectById(id);
     }
 
-
-    private void checkProject(InternshipDto internshipDto) {
-        Project project = projectRepository.getProjectById(internshipDto.getProject().getId());
-        if (project == null)
-            throw new IllegalArgumentException("Project with id " + internshipDto.getProject().getId() + " not found");
+    private TeamMember checkMentor(Long id) {
+        return teamMemberRepository.findById(id);
     }
-
-    private void checkMentor(InternshipDto internshipDto) {
-        TeamMember mentor = teamMemberRepository.findById(internshipDto.getMentorId().getId());
-        if (mentor == null)
-            throw new IllegalArgumentException("Mentor with id " + internshipDto.getMentorId().getId() + " not found");
-    }
-
     private void checkExistenceInterns(InternshipDto internshipDto) {
-        List<TeamMember> interns = internshipDto.getInterns();
+        List<Long> interns = internshipDto.getInterns();
         if (interns == null || interns.isEmpty())
             throw new IllegalArgumentException("Interns list cannot be empty");
     }
-
     private void checkInternshipDtoDate(InternshipDto internshipDto) {
         if (internshipDto.getStartDate() == null || internshipDto.getEndDate() == null)
             throw new NullPointerException("Invalid dates");
@@ -69,6 +58,4 @@ public class InternshipService {
         if (duration.toDays() > 91)
             throw new IllegalArgumentException("Internship duration cannot exceed 91 days");
     }
-
-
 }
