@@ -95,7 +95,7 @@ tasks.jacocoTestCoverageVerification {
     })
     violationRules {
         rule {
-            enabled = false          //Включить данное правило
+            enabled = true          //Включить данное правило
             limit {    //Установить минимальное покрытие и
                 //выводить проценты в читаемом виде (до 2 знаков после запятой)
                 minimum = BigDecimal(0.7).setScale(2, RoundingMode.HALF_UP)
