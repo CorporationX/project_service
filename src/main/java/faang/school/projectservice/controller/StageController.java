@@ -47,8 +47,8 @@ public class StageController {
         return stageService.getStagesById(stageId);
     }
 
-    @PutMapping
-    public StageDto updateStage(Long stageId) {
+    @PutMapping("/{id}")
+    public StageDto updateStage(@PathVariable("id")Long stageId) {
         stageValidator.validateNullStageId(stageId);
         return stageService.updateStage(stageId);
     }
