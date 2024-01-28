@@ -1,7 +1,14 @@
+import java.math.RoundingMode
+
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+}
+
+jacoco {
+    toolVersion = "0.8.9"
 }
 
 group = "faang.school"
@@ -64,6 +71,42 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        csv.required.set(false)
+        xml.required.set(false)
+        html.required.set(true)
+    }
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+    executionData.setFrom(files("$buildDir/jacoco/test.exec")) // Путь к данным исполнения тестов
+    sourceDirectories.setFrom(files("src/main/java"))          // Путь к исходному коду проекта на Java
+    classDirectories.setFrom(fileTree("build/classes/java/main") {
+        //Пакеты для анализа процентного покрытия кода
+        exclude("**/faang/school/projectservice/client/**")
+        exclude("**/faang/school/projectservice/config/**")
+        exclude("**/faang/school/projectservice/dto/**")
+        exclude("**/faang/school/projectservice/jpa/**")
+        exclude("**/faang/school/projectservice/model/**")
+        exclude("**/faang/school/projectservice/repository/**")
+        exclude("**/faang/school/projectservice/ProjectServiceApplication.java")
+    })
+    violationRules {
+        rule {
+            enabled = false          //Включить данное правило
+            limit {    //Установить минимальное покрытие и
+                //выводить проценты в читаемом виде (до 2 знаков после запятой)
+                minimum = BigDecimal(0.75).setScale(2, RoundingMode.HALF_UP)
+            }
+        }
+    }
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
