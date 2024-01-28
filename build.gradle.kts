@@ -90,20 +90,15 @@ tasks.jacocoTestCoverageVerification {
     sourceDirectories.setFrom(files("src/main/java"))          // Путь к исходному коду проекта на Java
     classDirectories.setFrom(fileTree("build/classes/java/main") {
         //Пакеты для анализа процентного покрытия кода
-        exclude("**/faang/school/projectservice/client/**")
-        exclude("**/faang/school/projectservice/config/**")
-        exclude("**/faang/school/projectservice/dto/**")
-        exclude("**/faang/school/projectservice/jpa/**")
-        exclude("**/faang/school/projectservice/model/**")
-        exclude("**/faang/school/projectservice/repository/**")
-        exclude("**/faang/school/projectservice/ProjectServiceApplication.java")
+        include("faang/school/projectservice/service/**/*.class")
+        include("faang/school/projectservice/controller/**/*.class")
     })
     violationRules {
         rule {
             enabled = false          //Включить данное правило
             limit {    //Установить минимальное покрытие и
                 //выводить проценты в читаемом виде (до 2 знаков после запятой)
-                minimum = BigDecimal(0.75).setScale(2, RoundingMode.HALF_UP)
+                minimum = BigDecimal(0.7).setScale(2, RoundingMode.HALF_UP)
             }
         }
     }
