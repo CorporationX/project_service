@@ -1,7 +1,5 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
@@ -11,7 +9,6 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.project.ProjectValidator;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +21,19 @@ import java.util.stream.Stream;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    private final UserServiceClient userServiceClient;
     private final List<Filter<Project, ProjectFilterDto>> filters;
     private final ProjectValidator projectValidator;
 
     public ProjectDto create(ProjectDto projectDto) {
-        validateProjectToCreate(projectDto);
+        long ownerId = projectDto.getOwnerId();
+        String name = projectDto.getName();
+        String description = projectDto.getDescription();
+
+        projectValidator.validateAccessToProject(ownerId);
+        projectValidator.validateUserExistence(ownerId);
+        projectValidator.validateNameExistence(ownerId, name);
+        projectValidator.validateName(name);
+        projectValidator.validateDescription(description);
 
         projectDto.setStatus(ProjectStatus.CREATED);
         if (projectDto.getVisibility() == null) {
@@ -90,25 +94,5 @@ public class ProjectService {
                 .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
                         projectValidator.haveAccessToProject(project.getOwnerId()))
                 .toList();
-    }
-
-    private void validateProjectToCreate(ProjectDto projectDto) {
-        long ownerId = projectDto.getOwnerId();
-        String name = projectDto.getName();
-        String description = projectDto.getDescription();
-
-
-        projectValidator.validateAccessToProject(ownerId);
-        validateUserExistence(ownerId);
-        projectValidator.validateNameExistence(ownerId, name);
-        projectValidator.validateName(name);
-        projectValidator.validateDescription(description);
-    }
-
-    private void validateUserExistence(long ownerId) {
-        UserDto user = userServiceClient.getUser(ownerId);
-        if (user == null) {
-            throw new EntityNotFoundException("User with id = " + ownerId + " not found");
-        }
     }
 }

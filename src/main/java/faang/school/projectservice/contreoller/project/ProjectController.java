@@ -1,6 +1,5 @@
 package faang.school.projectservice.contreoller.project;
 
-import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -23,7 +22,6 @@ import java.util.List;
 @RequestMapping("/project-service/api/v1/projects")
 public class ProjectController {
     private final ProjectService projectService;
-    private final UserServiceClient userServiceClient;
     private final UserContext userContext;
 
     @PostMapping
@@ -32,7 +30,7 @@ public class ProjectController {
     }
 
     @GetMapping("/test")
-    public String test () {
+    public String test() {
         return String.valueOf(userContext.getUserId());
     }
 

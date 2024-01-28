@@ -84,9 +84,9 @@ public class ProjectServiceTest {
         nameFilter = Mockito.mock(NameFilter.class);
         statusFilter = Mockito.mock(StatusFilter.class);
         filters = new ArrayList<>(List.of(nameFilter, statusFilter));
-        ProjectValidator projectValidator = new ProjectValidator(projectRepository, userContext);
+        ProjectValidator projectValidator = new ProjectValidator(projectRepository, userServiceClient, userContext);
 
-        projectService = new ProjectService(projectRepository, projectMapper, userServiceClient, filters, projectValidator);
+        projectService = new ProjectService(projectRepository, projectMapper, filters, projectValidator);
     }
 
     @Test

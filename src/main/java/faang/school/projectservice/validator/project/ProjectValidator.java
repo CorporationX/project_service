@@ -1,7 +1,10 @@
 package faang.school.projectservice.validator.project;
 
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProjectValidator {
     private final ProjectRepository projectRepository;
+    private final UserServiceClient userServiceClient;
     private final UserContext userContext;
 
     public void validateName(String name) {
@@ -36,6 +40,13 @@ public class ProjectValidator {
     public void validateNameExistence(long ownerId, String name) {
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
             throw new IllegalArgumentException("Project with this name already exists. Name: " + name);
+        }
+    }
+
+    public void validateUserExistence(long ownerId) {
+        UserDto user = userServiceClient.getUser(ownerId);
+        if (user == null) {
+            throw new EntityNotFoundException("User with id = " + ownerId + " not found");
         }
     }
 }
