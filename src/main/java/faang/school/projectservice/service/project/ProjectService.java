@@ -82,7 +82,8 @@ public class ProjectService {
         List<Project> filteredProjects = filters.stream()
                 .filter(prjFilter -> prjFilter.isApplicable(filterDto))
                 .reduce(projects,
-                        (stream, prjFilter) -> prjFilter.apply(stream, filterDto),
+                        (stream, prjFilter)
+                                -> prjFilter.apply(stream, filterDto),
                         Stream::concat)
                 .toList();
 
