@@ -1,9 +1,9 @@
-package faang.school.projectservice.serviсe;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.dto.ProjectUpDateDto;
+import faang.school.projectservice.dto.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.filter.ProjectNameFilter;
@@ -55,7 +55,7 @@ class ProjectServiceTest {
     private List<Project> projects;
     private List<ProjectDto> projectDtos;
     private ProjectDto projectDto;
-    private ProjectUpDateDto projectUpDateDto;
+    private ProjectUpdateDto projectUpDateDto;
     private Long id;
 
     @BeforeEach
@@ -69,17 +69,21 @@ class ProjectServiceTest {
         projectDto = projectMapper.toDto(project1);
         projects = List.of(project1);
         projectDtos = List.of(projectDto);
-        projectUpDateDto = ProjectUpDateDto.builder()
+        projectUpDateDto = ProjectUpdateDto.builder()
                 .status(ProjectStatus.COMPLETED)
                 .build();
     }
 
     @Test
     void testCreateProjectWithExistsByOwnerUserIdAndName() {
-        whenExistByOwnerIdAndName(true);
+        //whenExistByOwnerIdAndName(true);
+        when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
+                .thenReturn(true);
         assertThrows(DataValidationException.class, () -> {
             projectService.createProject(projectDto);
         });
+        //verify(projectRepository, times(1)).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
+        //verify(projectService, times(1)).createProject(projectDto);
     }
 
     @Test
@@ -114,7 +118,6 @@ class ProjectServiceTest {
         assertEquals(projectDtos, projectService.getAllProjectsWithFilter(projectFilterDto));
     }
 
-
     @Test
     void testGetAllProjects_ShouldReturnAllProjects() {
         when(projectRepository.findAll()).thenReturn(projects);
@@ -142,7 +145,7 @@ class ProjectServiceTest {
     }
 
     private void whenValidateServiceGetProject() {
-        when(projectValidator.validateServiceGetProject(userContext.getUserId(), project1))
+        when(projectValidator.checkIfUserIsMember(userContext.getUserId(), project1))
                 .thenReturn(project1);
     }
 

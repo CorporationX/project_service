@@ -2,9 +2,9 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.dto.ProjectUpDateDto;
+import faang.school.projectservice.dto.ProjectUpdateDto;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.serviсe.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +33,7 @@ public class ProjectControllerTests {
 
     @Test
     void testUpdateProject_ShouldCallServiceMethod() {
-        var projectUpDateDto = ProjectUpDateDto.builder().status(ProjectStatus.COMPLETED).build();
+        var projectUpDateDto = ProjectUpdateDto.builder().status(ProjectStatus.COMPLETED).build();
         projectController.updateProject(1L, projectUpDateDto);
         verify(projectService, times(1))
                 .updateProject(1L, projectUpDateDto);

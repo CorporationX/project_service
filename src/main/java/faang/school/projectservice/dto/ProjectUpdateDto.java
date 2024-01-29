@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class ProjectUpDateDto {
+public class ProjectUpdateDto {
     private String description;
     private ProjectStatus status;
 }
