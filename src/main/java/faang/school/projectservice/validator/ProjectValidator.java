@@ -5,12 +5,9 @@ import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 import static faang.school.projectservice.model.ProjectVisibility.PRIVATE;
 
@@ -44,7 +41,7 @@ public class ProjectValidator {
     }
 
     public Project checkIfUserIsMember(Long userId, Project project) {
-        if (project.getVisibility()==PRIVATE) {
+        if (project.getVisibility() == PRIVATE) {
             boolean isMember = project.getTeams().stream()
                     .flatMap(team -> team.getTeamMembers().stream())
                     .anyMatch(teamMember -> teamMember.getId().equals(userId));

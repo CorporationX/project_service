@@ -98,7 +98,7 @@ tasks.jacocoTestCoverageVerification {
                     "faang.school.projectservice.validator.*",
                     "faang.school.projectservice.filter.*")
             limit {
-                minimum = "0.5".toBigDecimal()
+                minimum = "0.75".toBigDecimal()
             }
         }
     }

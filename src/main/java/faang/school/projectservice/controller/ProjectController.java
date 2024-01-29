@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,9 +39,8 @@ public class ProjectController {
     @PutMapping("/{id}")
     // идемпотентный andPoint - сколько бы раз не вызывали с одинаковыми параметрами-результат один и тот же
     public ProjectDto updateProject(@PathVariable Long id, @RequestBody ProjectUpdateDto projectDto) {
-        projectValidator.validateUpdateProject( projectDto);
+        projectValidator.validateUpdateProject(projectDto);
         return projectService.updateProject(id, projectDto);
-
     }
 
     @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}, summary = "Get all projects with filters")
@@ -64,12 +62,4 @@ public class ProjectController {
         projectValidator.validateProjectId(id);
         return projectService.getProjectById(id);
     }
-
-    @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}, summary = "Delete project by id")
-    @DeleteMapping("/{id}")
-    public void deleteProjectById(@PathVariable Long id) {
-        projectValidator.validateProjectId(id);
-        projectService.deleteProjectById(id);
-    }
-    // ^^ по заданию этого не было, но, кажется, должна быть такая возможность для владельца проекта
 }

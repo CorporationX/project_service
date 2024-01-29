@@ -57,10 +57,4 @@ public class ProjectControllerTests {
         projectController.getProjectById(1L);
         verify(projectService, times(1)).getProjectById(1L);
     }
-
-    @Test
-    void testDeleteProjectById_ShouldCallServiceMethod() {
-        projectController.deleteProjectById(1L);
-        verify(projectService, times(1)).deleteProjectById(1L);
-    }
 }

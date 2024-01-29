@@ -35,7 +35,6 @@ public class ProjectService {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("Project " + projectDto.getName() + " already exist");
         }
-
         log.info("Project creation started {}", projectDto.getName());
         var project = projectMapper.toEntity(projectDto);
         return projectMapper.toDto(projectRepository.save(project));
@@ -48,10 +47,11 @@ public class ProjectService {
         if (!projectUpdateDto.getDescription().isBlank()) {
             projectToUpdate.setDescription(projectUpdateDto.getDescription());
         }
-        if (projectUpdateDto.getStatus()!=null) {
+        if (projectUpdateDto.getStatus() != null) {
             projectToUpdate.setStatus(projectUpdateDto.getStatus());
         }
         log.info("Project updated {}", projectToUpdate.getName());
+        projectRepository.save(projectToUpdate);
         return projectMapper.toDto(projectToUpdate);
     }
 
@@ -63,6 +63,7 @@ public class ProjectService {
                 .flatMap(projectFilter -> {
                     return projectFilter.applyFilter(projectFilterDto, getFilteredProject(projects));
                 })
+                .distinct()
                 .map(projectMapper::toDto)
                 .toList();
     }
@@ -73,13 +74,6 @@ public class ProjectService {
         return getFilteredProject(projects)
                 .map(projectMapper::toDto)
                 .toList();
-    }
-
-    @Transactional
-    public void deleteProjectById(Long id) {
-        var project = projectRepository.getProjectById(id);
-        projectValidator.checkForValidOwner(userContext.getUserId(), project);
-        projectRepository.deleteById(id);
     }
 
     @Transactional(readOnly = true)

@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static faang.school.projectservice.model.ProjectStatus.COMPLETED;
 import static faang.school.projectservice.model.ProjectStatus.CREATED;
 import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,6 +64,8 @@ class ProjectServiceTest {
         id = 1L;
         project1 = Project.builder()
                 .id(id)
+                .ownerId(1L)
+                .name("project")
                 .status(CREATED)
                 .visibility(PUBLIC)
                 .build();
@@ -71,24 +74,23 @@ class ProjectServiceTest {
         projectDtos = List.of(projectDto);
         projectUpDateDto = ProjectUpdateDto.builder()
                 .status(ProjectStatus.COMPLETED)
+                .description("проект")
                 .build();
     }
 
     @Test
     void testCreateProjectWithExistsByOwnerUserIdAndName() {
-        //whenExistByOwnerIdAndName(true);
-        when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
-                .thenReturn(true);
+        whenExistByOwnerIdAndName(true);
+        when(userContext.getUserId()).thenReturn(1L);
         assertThrows(DataValidationException.class, () -> {
             projectService.createProject(projectDto);
         });
-        //verify(projectRepository, times(1)).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
-        //verify(projectService, times(1)).createProject(projectDto);
     }
 
     @Test
     void testCreateProjectSavesProject() {
         whenExistByOwnerIdAndName(false);
+        when(userContext.getUserId()).thenReturn(1L);
         projectService.createProject(projectDto);
         verify(projectRepository, times(1)).save(captor.capture());
         Project project = captor.getValue();
@@ -105,7 +107,13 @@ class ProjectServiceTest {
     @Test
     void testUpdateProject_ShouldReturnUpdateProjectDto() {
         whenGetProjectById();
-        assertEquals(projectDto, projectService.updateProject(id, projectUpDateDto));
+        ProjectDto projectDto1 = ProjectDto.builder().id(1L)
+                .name("project")
+                .description("проект")
+                .ownerId(1L)
+                .status(COMPLETED)
+                .visibility(PUBLIC).build();
+        assertEquals(projectDto1, projectService.updateProject(id, projectUpDateDto));
     }
 
     @Test
@@ -130,13 +138,6 @@ class ProjectServiceTest {
         whenGetProjectById();
         whenValidateServiceGetProject();
         assertEquals(projectDto, projectService.getProjectById(id));
-    }
-
-    @Test
-    void testDeleteProjectById() {
-        projectService.deleteProjectById(1L);
-        verify(projectRepository, times(1)).deleteById(id);
-        verify(projectRepository, times(1)).getProjectById(id);
     }
 
     private void whenExistByOwnerIdAndName(boolean t) {
