@@ -9,11 +9,11 @@ import lombok.ToString;
 @Setter
 @ToString
 @AllArgsConstructor
-public class ControllerError {
+public class ResponseError {
     private int status;
     private String message;
 
-    public ControllerError(int status) {
+    public ResponseError(int status) {
         this.status = status;
     }
 }

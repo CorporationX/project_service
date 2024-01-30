@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
@@ -12,7 +13,6 @@ import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -20,20 +20,14 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final UserServiceClient userServiceClient;
     private final ProjectMapper projectMapper;
     private final List<Filter<Project, ProjectFilterDto>> filters;
     private final ProjectValidator projectValidator;
 
     public ProjectDto create(ProjectDto projectDto) {
-        long ownerId = projectDto.getOwnerId();
-        String name = projectDto.getName();
-        String description = projectDto.getDescription();
-
-        projectValidator.validateAccessToProject(ownerId);
-        projectValidator.validateUserExistence(ownerId);
-        projectValidator.validateNameExistence(ownerId, name);
-        projectValidator.validateName(name);
-        projectValidator.validateDescription(description);
+        projectValidator.validateToCreate(projectDto);
+        //userServiceClient.getUser(projectDto.getOwnerId()); //throws if user doesn't exist
 
         projectDto.setStatus(ProjectStatus.CREATED);
         if (projectDto.getVisibility() == null) {
@@ -46,20 +40,19 @@ public class ProjectService {
     }
 
     public ProjectDto update(ProjectDto projectDto) {
-        Project project = projectRepository.getProjectById(projectDto.getId());//also validation - throws if no project
-        projectValidator.validateAccessToProject(projectDto.getOwnerId());
+        Project project = getProjectById(projectDto.getId()); //throws if project doesn't exist
+        projectValidator.validateAccessToProject(project.getOwnerId());
 
-        ProjectStatus status = projectDto.getStatus();
-        String description = projectDto.getDescription();
+        ProjectStatus updatedStatus = projectDto.getStatus();
+        String updatedDescription = projectDto.getDescription();
 
-        if (status != null) {
-            project.setStatus(status);
+        if (updatedStatus != null) {
+            project.setStatus(updatedStatus);
         }
-        if (description != null) {
-            projectValidator.validateDescription(description);
-            project.setDescription(description);
+        if (updatedDescription != null) {
+            projectValidator.validateDescription(updatedDescription);
+            project.setDescription(updatedDescription);
         }
-        project.setUpdatedAt(LocalDateTime.now());
 
         Project updatedProject = projectRepository.save(project);
 
@@ -67,7 +60,7 @@ public class ProjectService {
     }
 
     public ProjectDto getById(long id) {
-        Project projectById = projectRepository.getProjectById(id);
+        Project projectById = getProjectById(id);
         projectValidator.validateAccessToProject(projectById.getOwnerId());
         return projectMapper.toDto(projectById);
     }
@@ -95,5 +88,9 @@ public class ProjectService {
                 .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
                         projectValidator.haveAccessToProject(project.getOwnerId()))
                 .toList();
+    }
+
+    private Project getProjectById(Long id) {
+        return projectRepository.getProjectById(id);
     }
 }

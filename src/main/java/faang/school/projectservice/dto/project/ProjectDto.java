@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ public class ProjectDto {
     private Long id;
     private String name;
     private String description;
+    @Min(1)
     private long ownerId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
