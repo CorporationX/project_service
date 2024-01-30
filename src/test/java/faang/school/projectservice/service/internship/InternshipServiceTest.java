@@ -5,10 +5,7 @@ import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.mapper.TeamMemberMapper;
-import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -28,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static faang.school.projectservice.model.InternshipStatus.COMPLETED;
 import static faang.school.projectservice.model.TeamRole.DEVELOPER;
 import static faang.school.projectservice.model.TeamRole.INTERN;
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,11 +49,13 @@ class InternshipServiceTest {
     @Captor
     private ArgumentCaptor<Internship> internshipCaptor;
     private TeamMember teamMember;
+    private Internship internship;
     private InternshipDto internshipDto;
     private TeamMemberDto teamMemberDto;
     private Project project;
     private TeamMember mentor;
     private List<TeamMember> interns;
+  //  private List<F> interns;
 
     @BeforeEach
     void setUp() {
@@ -91,16 +91,6 @@ class InternshipServiceTest {
         when(internshipService.createInternship(internshipDto)).thenThrow(IllegalArgumentException.class);
         assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
     }
-
-//    @Test
-//    void testCreateInternshipWithExistenceInternshipId() {
-//        lenient().when(projectRepository.getProjectById(5L)).thenReturn(project);
-//        lenient().when(teamMemberRepository.findById(5L)).thenReturn(mentor);
-//        when(internshipRepository.existsById(123L)).thenReturn(true);
-//        assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
-//        verify(internshipRepository).existsById(123L);
-//
-//    }
 
     @Test
     void testCreateInternshipWithNullInterns() {
@@ -151,7 +141,6 @@ class InternshipServiceTest {
         Internship internship = internshipMapper.toEntity(internshipDto);
         when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
-       // when(internshipRepository.save(internship)).thenReturn(internship);
         internshipService.finishInterPrematurely(internshipDto, teamMemberDto);
         assertTrue(teamMember.getRoles().contains(DEVELOPER));
         assertFalse(teamMember.getRoles().contains(INTERN));
@@ -160,9 +149,36 @@ class InternshipServiceTest {
     @Test
     void testRemoveInterPrematurelySuccessful(){
         Internship internship = internshipMapper.toEntity(internshipDto);
-        when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
         internshipService.removeInterPrematurely(internshipDto, teamMemberDto);
         assertEquals(1, internship.getInterns().size());
+        // здесь бы проверить на удаление роли INTERN у teamMemberDto, но не пойму как
     }
+
+    @Test
+    void testUpdateInternshipSuccessful(){
+        Internship internship = internshipMapper.toEntity(internshipDto);
+        when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
+        when(internshipRepository.save(internship)).thenReturn(internship);
+        internshipDto.setStartDate(LocalDateTime.of(2024, Month.FEBRUARY, 15, 10, 0));
+        InternshipDto updatedInternshipDto = internshipService.updateInternship(internshipDto);
+        assertEquals(updatedInternshipDto.getStartDate(), internshipDto.getStartDate());
+    }
+
+    @Test
+    void testUpdateInternshipAfterEndDateSuccessful(){
+        Internship internship = internshipMapper.toEntity(internshipDto);
+        when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
+        when(internshipRepository.save(internship)).thenReturn(internship);
+        internship.setStartDate(LocalDateTime.of(2023, Month.NOVEMBER, 1, 10, 0));
+        internship.setEndDate(LocalDateTime.of(2024, Month.JANUARY, 20, 12, 0));
+        InternshipDto updatedInternshipDto = internshipService.updateInternshipAfterEndDate(123);
+        assertTrue(internship.getStatus().equals(COMPLETED));
+    }
+
+    @Test
+    void testGetInternshipByFilter(){
+
+    }
+
 }

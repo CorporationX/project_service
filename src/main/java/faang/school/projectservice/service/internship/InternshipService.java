@@ -71,7 +71,7 @@ public class InternshipService {
     public InternshipDto removeInterPrematurely(InternshipDto internshipDto, TeamMemberDto teamMemberDto) {
         Internship internship = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipDto.getId()));
-        TeamMember intern = searchInternInInternship(internshipDto, teamMemberDto);
+        TeamMember intern = searchInternInInternship(internship, teamMemberDto);
         removeRole(intern);
         internship.getInterns().remove(intern);
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
@@ -89,7 +89,8 @@ public class InternshipService {
 
 
     public InternshipDto updateInternshipAfterEndDate(long idInternshipDto) {
-        Internship internship = internshipRepository.getReferenceById(idInternshipDto);
+        Internship internship = internshipRepository.findById(idInternshipDto)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + idInternshipDto));
         if (LocalDateTime.now().isBefore(internship.getEndDate()))
             throw new IllegalArgumentException("The internship is not over");
         internship.getInterns()
@@ -107,13 +108,19 @@ public class InternshipService {
 
     public List<InternshipDto> getInternshipByFilter(InternshipFilterDto filter) {
         Stream<Internship> internshipStream = internshipRepository.findAll().stream();
-
-        return filters.stream()
-                .filter(fil -> fil.isApplicable(filter))
-                .flatMap(fil -> fil.apply(internshipStream, filter))
-                .map(internshipMapper::toInternshipDto)
-                .distinct()
-                .toList();
+//
+//        return filters.stream()
+//                .filter(fil -> fil.isApplicable(filter))
+//                .flatMap(fil -> fil.apply(internshipStream, filter))
+//                .map(internshipMapper::toInternshipDto)
+//                .distinct()
+//                .toList();
+        for (InternshipFilter fil : filters) {
+            if (fil.isApplicable(filter)) {
+                internshipStream = fil.apply(internshipStream, filter);
+            }
+        }
+        return internshipStream.map(internshipMapper::toInternshipDto).toList();
     }
 
     private Internship updateInternshipFields(Internship existingInternship, InternshipDto updatedInternshipDto) {
@@ -121,16 +128,18 @@ public class InternshipService {
             existingInternship.setMentorId(teamMemberRepository.findById(updatedInternshipDto.getMentorId()));
         if (updatedInternshipDto.getInterns() != null)
             existingInternship.setInterns(updatedInternshipDto.getInterns());
-        if (updatedInternshipDto.getStartDate() != null && updatedInternshipDto.getEndDate() != null) {
+        if (updatedInternshipDto.getStartDate() != null) {
             checkInternshipDtoDate(updatedInternshipDto);
             existingInternship.setStartDate(updatedInternshipDto.getStartDate());
-            existingInternship.setStartDate(updatedInternshipDto.getStartDate());
+        }
+        if (updatedInternshipDto.getEndDate() != null) {
+            checkInternshipDtoDate(updatedInternshipDto);
+            existingInternship.setEndDate(updatedInternshipDto.getEndDate());
         }
         return existingInternship;
     }
 
-    private TeamMember searchInternInInternship(InternshipDto internshipDto, TeamMemberDto teamMemberDto) {
-        Internship internship = internshipRepository.getReferenceById(internshipDto.getId());
+    private TeamMember searchInternInInternship(Internship internship, TeamMemberDto teamMemberDto) {
         List<TeamMember> interns = internship.getInterns();
 
         return interns.stream()
