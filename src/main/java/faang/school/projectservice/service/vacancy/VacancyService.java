@@ -30,9 +30,13 @@ public class VacancyService {
     private final VacancyValidator vacancyValidator;
     private final List<Filter<VacancyFilterDto, Vacancy>> filters;
 
-    public Vacancy getVacancy(long id) {
+    public Vacancy getVacancyById(long id) {
         return vacancyRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("This vacancy by id: %s not found!"));
+    }
+
+    public VacancyDto getVacancy(long id) {
+        return vacancyMapper.toDto(getVacancyById(id));
     }
 
     public List<VacancyDto> getVacancies(VacancyFilterDto filter) {
@@ -69,7 +73,7 @@ public class VacancyService {
     }
 
     public VacancyDto deleteVacancy(long id) {
-        var deletedVacancy = getVacancy(id);
+        var deletedVacancy = getVacancyById(id);
 
         deletedVacancy.getCandidates().removeIf(candidate ->
                 !candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED));
