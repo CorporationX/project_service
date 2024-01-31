@@ -25,9 +25,4 @@ public interface VacancyMapper {
     @Mapping(target = "candidates", ignore = true)
     @Mapping(target = "project.id", ignore = true)
     Vacancy toEntity(VacancyDto dto);
-
-    @Named("mapCandidates")
-    default List<Long> mapCandidates(List<Candidate> candidates) {
-        return candidates.stream().map(Candidate::getId).toList();
-    }
 }
