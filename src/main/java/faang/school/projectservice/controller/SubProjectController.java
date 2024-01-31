@@ -7,44 +7,45 @@ import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller("/api/v1/subProject")
+@RestController
+@RequestMapping("/api/v1/subProject")
 @RequiredArgsConstructor
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/create")
-    @ResponseBody
+    @PostMapping
     public ProjectDto create(@RequestBody CreateSubProjectDto createSubProjectDto) {
-        if (createSubProjectDto.getName().isBlank()) {
-            throw new DataValidationException("Incorrect data");
-        }
+        validateName(createSubProjectDto);
         return projectService.createSubProject(createSubProjectDto);
     }
 
     @PutMapping("/update/{projectId}")
-    @ResponseBody
     public ProjectDto updateProject(@PathVariable Long projectId,
                                     @RequestBody UpdateSubProjectDto updateSubProjectDto) {
-        isValidId(projectId);
+        validateId(projectId);
         return projectService.updateProject(projectId, updateSubProjectDto);
     }
 
     @PostMapping("/findSubProject/{projectId}")
-    @ResponseBody
-    public List<ProjectDto> getFilteredPublicSubProjects(@PathVariable Long projectId,
-                                                         @RequestBody ProjectFilterDto projectFilterDto) {
-        isValidId(projectId);
-        return projectService.getFilteredPublicSubProjects(projectId, projectFilterDto);
+    public List<ProjectDto> getFilteredSubProjects(@PathVariable Long projectId,
+                                                   @RequestBody ProjectFilterDto projectFilterDto) {
+        validateId(projectId);
+        return projectService.getFilteredSubProjects(projectId, projectFilterDto);
     }
 
-    private static void isValidId(Long projectId) {
+    private void validateId(Long projectId) {
         if (projectId <= 0) {
             throw new DataValidationException("Incorrect id: " + projectId);
+        }
+    }
+
+    private void validateName(CreateSubProjectDto createSubProjectDto) {
+        if (createSubProjectDto.getName().isBlank()) {
+            throw new DataValidationException("Incorrect data");
         }
     }
 }

@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -29,9 +28,9 @@ public class ProjectService {
     public ProjectDto createSubProject(CreateSubProjectDto createSubProjectDto) {
         Project parent = projectRepository.getProjectById(createSubProjectDto.getParentId());
         Project entitySubProject = projectMapper.toEntity(createSubProjectDto);
-//        entitySubProject.setVisibility(parent.getVisibility());
+        entitySubProject.setVisibility(parent.getVisibility());
         entitySubProject.setStatus(ProjectStatus.CREATED);
-//        entitySubProject.setParentProject(parent);
+        entitySubProject.setParentProject(parent);
         Project subProject = projectRepository.save(entitySubProject);
         return projectMapper.toDto(subProject);
     }
@@ -43,13 +42,15 @@ public class ProjectService {
         if (updateSubProjectDto.getStatus() == ProjectStatus.COMPLETED
                 && !checkingAllSubProjectIsComplete(projectToUpdate)) {
             throw new DataValidationException
-                    ("Проект невозможно завершить,пока имеются открытые подпроекты");
+                    ("The project cannot be completed while there are open subprojects");
         }
+
         if (updateSubProjectDto.getVisibility() == ProjectVisibility.PRIVATE
                 && !checkingListForNullAndEmpty(projectToUpdate)) {
             projectToUpdate.getChildren()
                     .forEach(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE));
         }
+
 //        projectMapper.updateToEntity(projectToUpdate, updateSubProjectDto);
         projectToUpdate.setStatus(updateSubProjectDto.getStatus());
         projectToUpdate.setVisibility(updateSubProjectDto.getVisibility());
@@ -62,29 +63,20 @@ public class ProjectService {
         return projectMapper.toDto(projectToUpdate);
     }
 
-
     @Transactional
-    public List<ProjectDto> getFilteredPublicSubProjects(long projectId, ProjectFilterDto projectFilterDto) {
+    public List<ProjectDto> getFilteredSubProjects(long projectId, ProjectFilterDto projectFilterDto) {
         Project project = getProject(projectId);
         if (project.getVisibility().equals(ProjectVisibility.PRIVATE)) {
-            throw new DataValidationException("Объект недоступен");
+            throw new DataValidationException("Object unavailable");
         }
-        Stream<Project> visibileProjects = filterPublicSubProjects(project);
-        for (ProjectFilter filter : filters) {
-            if (filter.isApplicable(projectFilterDto)) {
-                visibileProjects = filter.apply(visibileProjects, projectFilterDto);
-            }
-        }
-        return visibileProjects .map(projectMapper::toDto).toList();
+        Stream<Project> visibleProjects = project.getChildren().stream();
+        return filters.stream()
+                .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
+                .flatMap(projectFilter -> projectFilter.apply(visibleProjects, projectFilterDto))
+                .distinct()
+                .map(projectMapper::toDto)
+                .toList();
     }
-
-    private Stream<Project> filterPublicSubProjects(Project project) {
-        return project.getChildren().stream()
-                .filter(subProject -> subProject.getVisibility().equals(ProjectVisibility.PUBLIC));
-//                .filter(subProject -> subProject.getName().equalsIgnoreCase(project.getName()))
-
-    }
-
 
     private Project getProject(long projectId) {
         return projectRepository.getProjectById(projectId);
@@ -119,10 +111,3 @@ public class ProjectService {
         }
     }
 }
-//        return  filters.stream()
-//                .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
-//                .flatMap(projectFilter -> projectFilter.apply(visibileProjects.stream(), projectFilterDto))
-//                .distinct()
-//                .map(projectMapper::toDto)
-//                .toList();
-//    }

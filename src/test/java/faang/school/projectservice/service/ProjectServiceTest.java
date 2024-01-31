@@ -6,7 +6,6 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
-import faang.school.projectservice.filter.project.ProjectNameFilter;
 import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -18,9 +17,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -39,14 +38,8 @@ class ProjectServiceTest {
     private ProjectRepository projectRepository;
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
-    @Spy
-    private List<ProjectFilter> filtersFilt;
     @Mock
-    private ProjectStatusFilter projectStatusFilter;
-    @Mock
-    private ProjectNameFilter projectNameFilter;
-    @Captor
-    private ArgumentCaptor<Project> projectCaptor;
+    private List<ProjectFilter> filters;
 
     @InjectMocks
     private ProjectService projectService;
@@ -56,11 +49,9 @@ class ProjectServiceTest {
     Project project3;
     Project project4;
     Project project5;
-    Project project6;
-    ProjectDto project3Dto;
     Project pubProject;
+    Project pubProject1;
     Project parent;
-    Project updatePublic;
     ProjectDto projectDto;
     ProjectDto project1Dto;
     ProjectDto project2Dto;
@@ -68,7 +59,6 @@ class ProjectServiceTest {
     ProjectDto project5Dto;
     ProjectDto project6Dto;
     CreateSubProjectDto createProjectDto;
-    Project updatePubProjectDto;
     UpdateSubProjectDto updateSubProjectDto;
     UpdateSubProjectDto updateSubProjectDto1;
     Project child1;
@@ -83,26 +73,23 @@ class ProjectServiceTest {
     Project child55;
     ProjectFilterDto projectFilterDto;
     Stream<ProjectFilter> filterStream;
-    Stream<Project> projects;
-    Stream<Project> projectsDto;
+    CreateSubProjectDto createSubProjectDto;
 
 
     @BeforeEach
     void init() {
-//        List<ProjectFilter> listFilters = new ArrayList<>(List.of( new ProjectNameFilter(), new ProjectStatusFilter()));
-//        ReflectionTestUtils.setField(projectService, "filters", listFilters);
 
         parent = Project.builder()
                 .id(1L)
                 .build();
-
         pubProject = Project.builder()
+                .name("project")
                 .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PUBLIC)
                 .parentProject(parent)
                 .build();
-
         projectDto = ProjectDto.builder()
+                .name("project")
                 .id(1L)
                 .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PUBLIC)
@@ -136,7 +123,7 @@ class ProjectServiceTest {
         child44 = Project.builder()
                 .id(44L)
                 .name("Tetris")
-                .status(ProjectStatus.CANCELLED)
+                .status(ProjectStatus.COMPLETED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
         child55 = Project.builder()
@@ -157,7 +144,7 @@ class ProjectServiceTest {
         child44Dto = ProjectDto.builder()
                 .id(44L)
                 .name("Tetris")
-                .status(ProjectStatus.IN_PROGRESS)
+                .status(ProjectStatus.CANCELLED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
         child55Dto = ProjectDto.builder()
@@ -167,15 +154,10 @@ class ProjectServiceTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(new ArrayList<>())
                 .build();
-
-        projects = Stream.of(child55,child44);
-        projectsDto = Stream.of(child55,child44);
-
-        filtersFilt = Arrays.asList(projectNameFilter,projectStatusFilter);
-//        ProjectStatusFilter projectStatusFilter = new ProjectStatusFilter();
-//        ProjectNameFilter projectNameFilter = new ProjectNameFilter();
-
-//        filterStream = Stream.of(new ProjectNameFilter());
+        projectFilterDto = ProjectFilterDto.builder()
+                .name("Sony")
+                .status(ProjectStatus.CANCELLED)
+                .build();
     }
 
     @Test
@@ -227,12 +209,9 @@ class ProjectServiceTest {
                         child55.getId()
                 ))
                 .build();
-
         when(projectRepository.getProjectById(anyLong())).thenReturn(project);
-        assertEquals(project1Dto, projectService.updateProject(anyLong(), updateSubProjectDto));
 
-//        projectService.updateProject(anyLong(), updateSubProjectDto);
-//        verify(projectRepository, times(1)).save(projectCaptor.capture());
+        assertEquals(project1Dto, projectService.updateProject(anyLong(), updateSubProjectDto));
     }
 
     @Test
@@ -301,57 +280,55 @@ class ProjectServiceTest {
 
     @Test
     public void testFilteredPublicSubProject() {
-        projectFilterDto = ProjectFilterDto.builder()
-                .name("Sony")
-                .status(ProjectStatus.CANCELLED)
-                .build();
         project5 = Project.builder()
                 .id(5L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(Arrays.asList(
-                        child33,
                         child44,
                         child55
                 ))
                 .build();
+        filterStream = Stream.of(new ProjectStatusFilter());
+        when(projectRepository.getProjectById(anyLong())).thenReturn(project5);
+        when(filters.stream()).thenReturn(filterStream);
 
-       when(projectRepository.getProjectById(anyLong())).thenReturn(project5);
-       when(projectNameFilter.apply(projects,projectFilterDto)).thenReturn(projectsDto);
-
-        List<ProjectDto> actualSubProjects = projectService.getFilteredPublicSubProjects(project5.getId(), projectFilterDto);
+        List<ProjectDto> actualSubProjects =
+                projectService.getFilteredSubProjects(project5.getId(), projectFilterDto);
         List<ProjectDto> expectedSubProjects = new ArrayList<>(List.of(child55Dto));
 
         assertTrue(expectedSubProjects.size() == actualSubProjects.size()
-                 && expectedSubProjects.containsAll(actualSubProjects));
+                && expectedSubProjects.containsAll(actualSubProjects));
     }
 
+
+    @Test
+    public void testCreateSubProjectWithValidDataSuccessfully() {
+        createSubProjectDto = CreateSubProjectDto.builder()
+                .name("project")
+                .build();
+        pubProject1 = Project.builder()
+                .name("project")
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PUBLIC)
+                .parentProject(parent)
+                .build();
+        when(projectRepository.getProjectById(anyLong())).thenReturn(pubProject1);
+        when(projectRepository.save(any(Project.class))).thenReturn(parent);
+        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
+
+        ProjectDto result = projectService.createSubProject(createProjectDto);
+
+        assertEquals(projectDto.getName(), result.getName());
+        assertEquals(projectDto.getStatus(), result.getStatus());
+        assertEquals(projectDto.getVisibility(), result.getVisibility());
+        assertEquals(projectDto.getDescription(), result.getDescription());
+    }
+
+
+    @Test
+    public void testFilteredSubProjectsThrowDataValidationException() {
+        when(projectRepository.getProjectById(anyLong())).thenReturn(child33);
+        assertThrows(DataValidationException.class,
+                () -> projectService.getFilteredSubProjects(child33.getId(), projectFilterDto));
+    }
 }
-
-
-//        project6 = Project.builder()
-//                .id(6L)
-//                .visibility(ProjectVisibility.PRIVATE)
-//                .children(Arrays.asList(
-//                        child33,
-//                        child44,
-//                        child55
-//                ))
-//                .build();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

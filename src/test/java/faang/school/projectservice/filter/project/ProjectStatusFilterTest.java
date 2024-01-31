@@ -2,6 +2,7 @@ package faang.school.projectservice.filter.project;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,35 +17,38 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class ProjectNameFilterTest {
+class ProjectStatusFilterTest {
     @InjectMocks
-    private ProjectNameFilter projectNameFilter;
-    List<Project> projects;
+    private ProjectStatusFilter projectStatusFilter;
+    private List<Project> projects;
 
     @BeforeEach
-    public void init(){
+    public void init() {
         projects = List.of(
                 Project.builder()
-                        .name("Alpha")
+                        .status(ProjectStatus.IN_PROGRESS)
                         .build(),
                 Project.builder()
-                        .name("Beta")
+                        .status(ProjectStatus.COMPLETED)
                         .build(),
                 Project.builder()
-                        .name("Gamma")
+                        .status(ProjectStatus.CANCELLED)
                         .build(),
                 Project.builder()
-                        .name("Delta")
+                        .status(ProjectStatus.CREATED)
+                        .build(),
+                Project.builder()
+                        .status(ProjectStatus.ON_HOLD)
                         .build()
         );
     }
 
     @Test
-    void testReturnIsTrueIfFilterIsSpecified() {
+    public void testReturnTrueIfFilterIsSpecified() {
         ProjectFilterDto filterDto = ProjectFilterDto.builder()
-                .name("Gamma")
+                .status(ProjectStatus.IN_PROGRESS)
                 .build();
-        boolean isApplicable = projectNameFilter.isApplicable(filterDto);
+        boolean isApplicable = projectStatusFilter.isApplicable(filterDto);
 
         assertTrue(isApplicable);
     }
@@ -52,7 +56,7 @@ class ProjectNameFilterTest {
     @Test
     public void testReturnFalseIfFilterIsSpecified() {
         ProjectFilterDto filterDto = new ProjectFilterDto();
-        boolean isApplicable = projectNameFilter.isApplicable(filterDto);
+        boolean isApplicable = projectStatusFilter.isApplicable(filterDto);
 
         assertFalse(isApplicable);
     }
@@ -60,14 +64,14 @@ class ProjectNameFilterTest {
     @Test
     public void testReturnFilteredProjectList() {
         ProjectFilterDto filterDto = ProjectFilterDto.builder()
-                .name("Delta")
+                .status(ProjectStatus.COMPLETED)
                 .build();
         List<Project> expectedProjects = Collections.singletonList(
                 Project.builder()
-                        .name("Delta")
+                        .status(ProjectStatus.COMPLETED)
                         .build()
         );
-        Stream<Project> tempProjects = projectNameFilter.apply(projects.stream(), filterDto);
+        Stream<Project> tempProjects = projectStatusFilter.apply(projects.stream(), filterDto);
         List<Project> actualProjects = tempProjects.toList();
 
         assertTrue(expectedProjects.size() == actualProjects.size()
