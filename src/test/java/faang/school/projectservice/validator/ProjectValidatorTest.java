@@ -25,6 +25,6 @@ class ProjectValidatorTest {
         when(projectRepository.existsById(projectId)).thenReturn(false);
 
         // Act & Assert
-        assertThrows(DataValidationException.class, () -> projectValidator.validateExistProjectById(projectId));
+        assertThrows(DataValidationException.class, () -> projectValidator.existsById(projectId));
     }
 }

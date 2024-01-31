@@ -43,19 +43,20 @@ public class StageService {
     @Transactional
     public StageDto createStage(StageDto stageDto) {
         Long projectId = stageDto.getProjectId();
-        projectValidator.validateExistProjectById(projectId);
+        projectValidator.existsById(projectId);
         stageValidator.validateStatusProject(projectId);
         Stage stage = stageMapper.toEntity(stageDto);
         stage.getStageRoles().forEach((role) -> role.setStage(stage));
         return stageMapper.toDto(stageRepository.save(stage));
     }
 
+    @Transactional
     public List<StageDto> getAllStageByFilter(StageFilterDto filters) {
         List<Stage> stages = stageRepository.findAll();
         return stageFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .flatMap(filter -> filter.apply(stages.stream(), filters))
-                .distinct() //чтобы не дублировало результат при выполнении нескольких фильтров
+                .distinct()
                 .map((stageMapper::toDto))
                 .toList();
     }
@@ -75,6 +76,7 @@ public class StageService {
         stageRepository.delete(stage);
     }
 
+    @Transactional
     public StageDto getStagesById(Long stageId) {
         return stageMapper.toDto(stageRepository.getById(stageId));
     }
@@ -84,8 +86,14 @@ public class StageService {
         Stage stage = stageRepository.getById(stageId);
         List<StageRoles> stageRoles = stage.getStageRoles(); // требования к участникам по всем ролям проекта
         List<TeamMember> teamMembers = stage.getExecutors(); // участники этапа
+        Map<TeamRole, Long> missedMembers = getMissedMembers(stageRoles, teamMembers); //определение нехватки участников для каждой роли этапа
+        if (!missedMembers.isEmpty()) {
+            inviteMember(stage, missedMembers);
+        }
+        return stageMapper.toDto(stageRepository.getById(stage.getStageId()));
+    }
 
-        //определение нехватки участников для каждой роли этапа
+    private Map<TeamRole, Long> getMissedMembers(List<StageRoles> stageRoles, List<TeamMember> teamMembers) {
         Map<TeamRole, Long> missedMembers = new HashMap<>();
         stageRoles.forEach((stageRole) -> {
                     TeamRole teamRole = stageRole.getTeamRole();
@@ -98,10 +106,7 @@ public class StageService {
                     }
                 }
         );
-        if (!missedMembers.isEmpty()) {
-            inviteMember(stage, missedMembers);
-        }
-        return stageMapper.toDto(stageRepository.getById(stage.getStageId()));
+        return missedMembers;
     }
 
     private void inviteMember(Stage stage, Map<TeamRole, Long> missedMembers) {
@@ -111,7 +116,7 @@ public class StageService {
         //формируем список участников проекта, которые не участвуют в нашем этапе:
         List<TeamMember> members = teamsProject.stream()
                 .flatMap((team -> team.getTeamMembers().stream()
-                        .filter((member) -> !member.getStages().equals(stage))))
+                        .filter((member) -> !member.getStages().contains(stage))))
                 .toList();
 
         missedMembers.entrySet().forEach((missedMember) -> {

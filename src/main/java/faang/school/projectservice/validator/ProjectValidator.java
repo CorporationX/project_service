@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class ProjectValidator {
     private final ProjectRepository projectRepository;
 
-    public void validateExistProjectById(Long id) {
+    public void existsById(Long id) {
         if (!projectRepository.existsById(id)) {
             throw new DataValidationException("Проект с id - " + id + " не существует");
         }

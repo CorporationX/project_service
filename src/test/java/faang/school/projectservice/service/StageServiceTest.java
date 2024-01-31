@@ -85,7 +85,7 @@ class StageServiceTest {
 
         //Assert
         assertAll(
-                () -> verify(projectValidator, times(1)).validateExistProjectById(projectId),
+                () -> verify(projectValidator, times(1)).existsById(projectId),
                 () -> verify(stageValidator, times(1)).validateStatusProject(projectId),
                 () -> verify(stageMapper, times(1)).toEntity(stageDto),
                 () -> verify(stageRepository, times(1)).save(stage)

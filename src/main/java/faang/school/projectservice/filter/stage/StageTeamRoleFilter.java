@@ -16,6 +16,6 @@ public class StageTeamRoleFilter implements StageFilter {
     @Override
     public Stream<Stage> apply(Stream<Stage> stages, StageFilterDto filter) {
         return stages.filter((stage -> stage.getStageRoles().stream()
-                .anyMatch(role->role.getTeamRole().equals(filter.getTeamRole()))));
+                .anyMatch(role -> role.getTeamRole().equals(filter.getTeamRole()))));
     }
 }
