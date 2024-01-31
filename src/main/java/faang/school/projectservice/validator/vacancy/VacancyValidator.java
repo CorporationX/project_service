@@ -7,7 +7,7 @@ import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.service.vacancy.TeamMemberService;
+import faang.school.projectservice.service.team.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

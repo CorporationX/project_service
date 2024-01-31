@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.vacancy;
+package faang.school.projectservice.service.team;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;

@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.vacancy;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
@@ -18,11 +18,5 @@ public class ProjectService {
     public Project getProjectById(long id) {
         return projectJpaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Project by id: %s noy found!", id)));
-    }
-
-    public void existsProjectById(long id) {
-        if (!projectJpaRepository.existsById(id)) {
-            throw new EntityNotFoundException(String.format("Project does not exists by id: %s", id));
-        }
     }
 }
