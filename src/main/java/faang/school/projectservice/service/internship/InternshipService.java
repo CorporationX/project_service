@@ -44,9 +44,6 @@ public class InternshipService {
         checkExistenceInterns(internshipDto);
         checkInternshipDtoDate(internshipDto);
         Internship createdInternship = internshipMapper.toEntity(internshipDto);
-        //   createdInternship.setProject(projectRepository.getProjectById(internshipDto.getProjectId()));
-        //  createdInternship.setMentorId(teamMemberRepository.findById(internshipDto.getMentorId()));
-        //  createdInternship.setInterns(getInterns(internshipDto));
         createdInternship.getInterns().forEach(intern -> changeRole(intern, INTERN));
         createdInternship.setStatus(IN_PROGRESS);
         return internshipMapper.toInternshipDto(internshipRepository.save(createdInternship));
@@ -75,7 +72,6 @@ public class InternshipService {
         removeRole(intern);
         internship.getInterns().remove(intern);
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
-
     }
 
     public InternshipDto updateInternship(InternshipDto updatedInternshipDto) {
@@ -108,13 +104,7 @@ public class InternshipService {
 
     public List<InternshipDto> getInternshipByFilter(InternshipFilterDto filter) {
         Stream<Internship> internshipStream = internshipRepository.findAll().stream();
-//
-//        return filters.stream()
-//                .filter(fil -> fil.isApplicable(filter))
-//                .flatMap(fil -> fil.apply(internshipStream, filter))
-//                .map(internshipMapper::toInternshipDto)
-//                .distinct()
-//                .toList();
+
         for (InternshipFilter fil : filters) {
             if (fil.isApplicable(filter)) {
                 internshipStream = fil.apply(internshipStream, filter);
@@ -172,12 +162,6 @@ public class InternshipService {
                 .flatMap(stage -> stage.getTasks().stream())
                 .allMatch(task -> task.getStatus().equals(DONE));
     }
-
-//    private boolean checkAllTasksTodo(TeamMember intern) {
-//        return intern.getStages().stream()
-//                .flatMap(stage -> stage.getTasks().stream())
-//                .allMatch(task -> task.getStatus().equals(TODO));
-//    }
 
     private void changeRole(TeamMember teamMember, TeamRole role) {
         List<TeamRole> roles = teamMember.getRoles();

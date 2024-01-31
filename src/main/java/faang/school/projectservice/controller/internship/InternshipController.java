@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.internship;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
+import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.service.internship.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -44,6 +45,8 @@ public class InternshipController {
 
     public InternshipDto updateInternshipAfterEndDate(long idInternshipDto) {
         checkValidData(idInternshipDto);
+        if(idInternshipDto < 1)
+            throw new DataValidationException("Invalid id");
         return internshipService.updateInternshipAfterEndDate(idInternshipDto);
     }
     public List<InternshipDto> getInternshipByFilter(InternshipFilterDto filter) {
@@ -52,6 +55,6 @@ public class InternshipController {
     }
     private <T> void checkValidData(T data) {
         if (data == null)
-            throw new IllegalArgumentException("The object has not been created");
+            throw new DataValidationException("The object has not been created");
     }
 }

@@ -1,20 +1,21 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exeption.DataValidationException;
+import faang.school.projectservice.filter.internship.InternshipStatusFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.mapper.TeamMemberMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,14 +23,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static faang.school.projectservice.model.InternshipStatus.COMPLETED;
+import static faang.school.projectservice.model.InternshipStatus.IN_PROGRESS;
 import static faang.school.projectservice.model.TeamRole.DEVELOPER;
 import static faang.school.projectservice.model.TeamRole.INTERN;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class InternshipServiceTest {
@@ -49,13 +53,12 @@ class InternshipServiceTest {
     @Captor
     private ArgumentCaptor<Internship> internshipCaptor;
     private TeamMember teamMember;
-    private Internship internship;
     private InternshipDto internshipDto;
     private TeamMemberDto teamMemberDto;
-    private Project project;
-    private TeamMember mentor;
     private List<TeamMember> interns;
-  //  private List<F> interns;
+
+
+
 
     @BeforeEach
     void setUp() {
@@ -166,18 +169,24 @@ class InternshipServiceTest {
     }
 
     @Test
-    void testUpdateInternshipAfterEndDateSuccessful(){
+    void testGetInternshipByFilterSuccessful(){
         Internship internship = internshipMapper.toEntity(internshipDto);
-        when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
-        when(internshipRepository.save(internship)).thenReturn(internship);
-        internship.setStartDate(LocalDateTime.of(2023, Month.NOVEMBER, 1, 10, 0));
-        internship.setEndDate(LocalDateTime.of(2024, Month.JANUARY, 20, 12, 0));
-        InternshipDto updatedInternshipDto = internshipService.updateInternshipAfterEndDate(123);
-        assertTrue(internship.getStatus().equals(COMPLETED));
-    }
+        internship.setStatus(IN_PROGRESS);
+        Internship internship1 = new Internship();
+        internship1.setStatus(COMPLETED);
+        Internship internship2 = new Internship();
+        internship2.setStatus(COMPLETED);
 
-    @Test
-    void testGetInternshipByFilter(){
+        InternshipFilterDto internshipFilterDto = new InternshipFilterDto();
+        internshipFilterDto.setStatus(IN_PROGRESS);
+
+        internshipService = new InternshipService(internshipRepository, internshipMapper, teamMemberRepository,
+                teamMemberMapper, projectRepository, Arrays.asList(new InternshipStatusFilter()));
+
+        when(internshipRepository.findAll()).thenReturn(Arrays.asList(internship, internship1, internship2));
+        List<InternshipDto> actualList = internshipService.getInternshipByFilter(internshipFilterDto);
+
+        assertEquals(Arrays.asList(internshipDto), actualList);
 
     }
 
