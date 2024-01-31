@@ -6,7 +6,6 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/vacancy")
 public class VacancyController implements VacancyApi {
     private final VacancyService vacancyService;
     private final VacancyValidator vacancyValidator;
