@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("${endpoint_base.path}/projects")
+@RequestMapping("/projects")
 public class ProjectController {
     private final ProjectService projectService;
 

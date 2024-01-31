@@ -27,7 +27,7 @@ public class ProjectService {
 
     public ProjectDto create(ProjectDto projectDto) {
         projectValidator.validateToCreate(projectDto);
-        //userServiceClient.getUser(projectDto.getOwnerId()); //throws if user doesn't exist
+        userServiceClient.getUser(projectDto.getOwnerId()); //throws if user doesn't exist
 
         projectDto.setStatus(ProjectStatus.CREATED);
         if (projectDto.getVisibility() == null) {
