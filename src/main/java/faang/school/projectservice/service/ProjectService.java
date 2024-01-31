@@ -35,7 +35,6 @@ public class ProjectService {
         return projectMapper.toDto(subProject);
     }
 
-
     @Transactional
     public ProjectDto updateProject(long projectId, UpdateSubProjectDto updateSubProjectDto) {
         Project projectToUpdate = getProject(projectId);
