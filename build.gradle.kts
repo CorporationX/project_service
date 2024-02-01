@@ -69,6 +69,13 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
+val jacocoInclude = listOf(
+        "**/controller/**",
+        "**/service/**",
+        "**/validator/**",
+        "**/mapper/**"
+)
+
 tasks.withType<Test> {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
@@ -86,15 +93,15 @@ tasks.jacocoTestReport {
 
 tasks.jacocoTestCoverageVerification {
     dependsOn(tasks.test)
-    executionData.setFrom(files("$buildDir/jacoco/test.exec")) // Путь к данным исполнения тестов
-    sourceDirectories.setFrom(files("src/main/java"))          // Путь к исходному коду проекта на Java
-    classDirectories.setFrom(fileTree("build/classes/java/main") {
-        //Пакеты для анализа процентного покрытия кода
-        include("faang/school/projectservice/service/**/*.class")
-        include("faang/school/projectservice/controller/**/*.class")
-    })
+
     violationRules {
         rule {
+            element = "CLASS"
+            classDirectories.setFrom(
+                    sourceSets.main.get().output.asFileTree.matching {
+                        include(jacocoInclude)
+                    }
+            )
             enabled = true          //Включить данное правило
             limit {    //Установить минимальное покрытие и
                 //выводить проценты в читаемом виде (до 2 знаков после запятой)
