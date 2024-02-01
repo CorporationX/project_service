@@ -27,13 +27,12 @@ public class ProjectService {
     @Transactional
     public ProjectDto createSubProject(CreateSubProjectDto createSubProjectDto) {
         Project parent = projectRepository.getProjectById(createSubProjectDto.getParentId());
-        Project entitySubProject = projectMapper.toEntity(createSubProjectDto);
-        entitySubProject.setVisibility(parent.getVisibility());
-        entitySubProject.setStatus(ProjectStatus.CREATED);
-        entitySubProject.setParentProject(parent);
+        Project entitySubProject = getSetSubProject(createSubProjectDto, parent);
         Project subProject = projectRepository.save(entitySubProject);
         return projectMapper.toDto(subProject);
     }
+
+
 
     @Transactional
     public ProjectDto updateProject(long projectId, UpdateSubProjectDto updateSubProjectDto) {
@@ -79,6 +78,14 @@ public class ProjectService {
 
     private Project getProject(long projectId) {
         return projectRepository.getProjectById(projectId);
+    }
+
+    private Project getSetSubProject(CreateSubProjectDto createSubProjectDto, Project parent) {
+        Project entitySubProject = projectMapper.toEntity(createSubProjectDto);
+        entitySubProject.setVisibility(parent.getVisibility());
+        entitySubProject.setStatus(ProjectStatus.CREATED);
+        entitySubProject.setParentProject(parent);
+        return entitySubProject;
     }
 
     private boolean checkingListForNullAndEmpty(Project projectToUpdate) {
