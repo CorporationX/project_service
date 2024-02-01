@@ -92,6 +92,7 @@ tasks.jacocoTestCoverageVerification {
             isEnabled = true
             element = "CLASS"
             includes = listOf("faang.school.projectservice.service.*",
+                    "faang.school.projectservice.controller.*",
                     "faang.school.projectservice.exception.*",
                     "faang.school.projectservice.mapper.*",
                     "faang.school.projectservice.validator.*",
