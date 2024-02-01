@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -67,10 +66,9 @@ public class ProjectService {
         if (project.getVisibility().equals(ProjectVisibility.PRIVATE)) {
             throw new DataValidationException("Object unavailable");
         }
-        Stream<Project> visibleProjects = project.getChildren().stream();
         return filters.stream()
                 .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
-                .flatMap(projectFilter -> projectFilter.apply(visibleProjects, projectFilterDto))
+                .flatMap(projectFilter -> projectFilter.apply(project.getChildren().stream(), projectFilterDto))
                 .distinct()
                 .map(projectMapper::toDto)
                 .toList();
