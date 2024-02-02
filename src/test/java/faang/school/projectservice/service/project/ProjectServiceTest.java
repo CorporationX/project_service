@@ -49,14 +49,12 @@ class ProjectServiceTest {
     Project project3;
     Project project4;
     Project project5;
-    Project pubProject;
     Project pubProject1;
     Project parent;
     ProjectDto projectDto;
     ProjectDto project1Dto;
     ProjectDto project2Dto;
     ProjectDto project4Dto;
-    ProjectDto project5Dto;
     ProjectDto project6Dto;
     CreateSubProjectDto createProjectDto;
     UpdateSubProjectDto updateSubProjectDto;
@@ -65,12 +63,11 @@ class ProjectServiceTest {
     Project child2;
     Project child3;
     Project child4;
-    Project child33;
+    Project project33;
     ProjectDto child33Dto;
-    ProjectDto child44Dto;
     ProjectDto child55Dto;
     Project child44;
-    Project child55;
+    Project project55;
     ProjectFilterDto projectFilterDto;
     Stream<ProjectFilter> filterStream;
     CreateSubProjectDto createSubProjectDto;
@@ -81,12 +78,6 @@ class ProjectServiceTest {
 
         parent = Project.builder()
                 .id(1L)
-                .build();
-        pubProject = Project.builder()
-                .name("project")
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PUBLIC)
-                .parentProject(parent)
                 .build();
         projectDto = ProjectDto.builder()
                 .name("project")
@@ -114,7 +105,7 @@ class ProjectServiceTest {
                 .status(ProjectStatus.COMPLETED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
-        child33 = Project.builder()
+        project33 = Project.builder()
                 .id(33L)
                 .name("Poker")
                 .status(ProjectStatus.CANCELLED)
@@ -126,7 +117,7 @@ class ProjectServiceTest {
                 .status(ProjectStatus.COMPLETED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
-        child55 = Project.builder()
+        project55 = Project.builder()
                 .id(55L)
                 .name("Sony")
                 .status(ProjectStatus.CANCELLED)
@@ -140,12 +131,6 @@ class ProjectServiceTest {
                 .name("Poker")
                 .status(ProjectStatus.ON_HOLD)
                 .visibility(ProjectVisibility.PRIVATE)
-                .build();
-        child44Dto = ProjectDto.builder()
-                .id(44L)
-                .name("Tetris")
-                .status(ProjectStatus.CANCELLED)
-                .visibility(ProjectVisibility.PUBLIC)
                 .build();
         child55Dto = ProjectDto.builder()
                 .id(55L)
@@ -193,20 +178,13 @@ class ProjectServiceTest {
                 ))
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
-        project5Dto = ProjectDto.builder()
-                .id(5L)
-                .children(Arrays.asList(
-                        child33.getId(),
-                        child44.getId(),
-                        child55.getId()
-                ))
-                .build();
+
         project6Dto = ProjectDto.builder()
                 .id(6L)
                 .children(Arrays.asList(
-                        child33.getId(),
+                        project33.getId(),
                         child44.getId(),
-                        child55.getId()
+                        project55.getId()
                 ))
                 .build();
         when(projectRepository.getProjectById(anyLong())).thenReturn(project);
@@ -230,7 +208,6 @@ class ProjectServiceTest {
                 .children(new ArrayList<>())
                 .build();
         when(projectRepository.getProjectById(anyLong())).thenReturn(project2);
-
         assertEquals(project2Dto, projectService.updateProject(anyLong(), updateSubProjectDto));
     }
 
@@ -285,7 +262,7 @@ class ProjectServiceTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(Arrays.asList(
                         child44,
-                        child55
+                        project55
                 ))
                 .build();
         filterStream = Stream.of(new ProjectStatusFilter());
@@ -299,7 +276,6 @@ class ProjectServiceTest {
         assertTrue(expectedSubProjects.size() == actualSubProjects.size()
                 && expectedSubProjects.containsAll(actualSubProjects));
     }
-
 
     @Test
     public void testCreateSubProjectWithValidDataSuccessfully() {
@@ -326,8 +302,8 @@ class ProjectServiceTest {
 
     @Test
     public void testFilteredSubProjectsThrowDataValidationException() {
-        when(projectRepository.getProjectById(anyLong())).thenReturn(child33);
+        when(projectRepository.getProjectById(anyLong())).thenReturn(project33);
         assertThrows(DataValidationException.class,
-                () -> projectService.getFilteredSubProjects(child33.getId(), projectFilterDto));
+                () -> projectService.getFilteredSubProjects(project33.getId(), projectFilterDto));
     }
 }
