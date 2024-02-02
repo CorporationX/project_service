@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class SubProjectController {
     private final ProjectService projectService;
 
     @PostMapping
-    public ProjectDto create(@RequestBody CreateSubProjectDto createSubProjectDto) {
+    public ProjectDto create(@Valid @RequestBody CreateSubProjectDto createSubProjectDto) {
         validateName(createSubProjectDto);
         return projectService.createSubProject(createSubProjectDto);
     }
