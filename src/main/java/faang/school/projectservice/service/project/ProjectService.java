@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
@@ -45,8 +45,6 @@ public class ProjectService {
             projectToUpdate.getChildren()
                     .forEach(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE));
         }
-
-//        projectMapper.updateToEntity(projectToUpdate, updateSubProjectDto);
         projectToUpdate.setStatus(updateSubProjectDto.getStatus());
         projectToUpdate.setVisibility(updateSubProjectDto.getVisibility());
 

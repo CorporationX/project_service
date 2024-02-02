@@ -1,4 +1,5 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.project;
+
 
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
@@ -30,5 +31,4 @@ public interface ProjectMapper {
         }
         return Collections.emptyList();
     }
-//    void updateToEntity(@MappingTarget Project project, UpdateSubProjectDto updateSubProjectDto);
 }

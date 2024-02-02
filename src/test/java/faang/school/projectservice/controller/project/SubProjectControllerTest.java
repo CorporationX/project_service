@@ -1,5 +1,6 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.project;
 
+import faang.school.projectservice.controller.SubProjectController;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -8,7 +9,7 @@ import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

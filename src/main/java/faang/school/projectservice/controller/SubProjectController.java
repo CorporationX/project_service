@@ -5,8 +5,9 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,17 +25,17 @@ public class SubProjectController {
         return projectService.createSubProject(createSubProjectDto);
     }
 
-    @PutMapping("/update/{projectId}")
+    @PutMapping("/{projectId}")
     public ProjectDto updateProject(@PathVariable Long projectId,
                                     @RequestBody UpdateSubProjectDto updateSubProjectDto) {
         validateId(projectId);
         return projectService.updateProject(projectId, updateSubProjectDto);
     }
 
-    @PostMapping("/findSubProject/{projectId}")
-    public List<ProjectDto> getFilteredSubProjects(@PathVariable Long projectId,
+    @PostMapping("/search/{projectId}")
+    public List<ProjectDto> getFilteredSubProjects(@PathVariable @Min(1) Long projectId,
                                                    @RequestBody ProjectFilterDto projectFilterDto) {
-        validateId(projectId);
+//        validateId(projectId);
         return projectService.getFilteredSubProjects(projectId, projectFilterDto);
     }
 

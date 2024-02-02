@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.project.ProjectStatusFilter;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -323,7 +323,6 @@ class ProjectServiceTest {
         assertEquals(projectDto.getVisibility(), result.getVisibility());
         assertEquals(projectDto.getDescription(), result.getDescription());
     }
-
 
     @Test
     public void testFilteredSubProjectsThrowDataValidationException() {

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateSubProjectDto {
-    @NotNull(message = "the parentId field must not be null")
+    @NotNull(message = "The parentId field must not be null")
     private Long parentId;
     private String name;
     private String description;
