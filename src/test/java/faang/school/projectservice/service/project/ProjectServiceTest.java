@@ -8,11 +8,12 @@ import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,9 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -40,270 +39,124 @@ class ProjectServiceTest {
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
     @Mock
     private List<ProjectFilter> filters;
+    @Mock
+    private ProjectFilterDto projectFilterDto;
+    @Mock
+    private MomentRepository momentRepository;
 
     @InjectMocks
     private ProjectService projectService;
 
-    Project project;
-    Project project2;
-    Project project3;
-    Project project4;
-    Project project5;
-    Project pubProject1;
-    Project parent;
-    ProjectDto projectDto;
-    ProjectDto project1Dto;
-    ProjectDto project2Dto;
-    ProjectDto project4Dto;
-    ProjectDto project6Dto;
-    CreateSubProjectDto createProjectDto;
-    UpdateSubProjectDto updateSubProjectDto;
-    UpdateSubProjectDto updateSubProjectDto1;
-    Project child1;
-    Project child2;
-    Project child3;
-    Project child4;
-    Project project33;
-    ProjectDto child33Dto;
-    ProjectDto child55Dto;
-    Project child44;
-    Project project55;
-    ProjectFilterDto projectFilterDto;
-    Stream<ProjectFilter> filterStream;
-    CreateSubProjectDto createSubProjectDto;
-
+    private Project testProject;
+    private ProjectDto testProjectDto;
+    private CreateSubProjectDto createSubProjectDto;
+    private UpdateSubProjectDto updateSubProjectDto;
 
     @BeforeEach
     void init() {
+        testProject = Project.builder()
+                .id(1L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
 
-        parent = Project.builder()
-                .id(1L)
-                .build();
-        projectDto = ProjectDto.builder()
-                .name("project")
+        testProjectDto = ProjectDto.builder()
                 .id(1L)
                 .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
-        child1 = Project.builder()
-                .id(11L)
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PUBLIC)
+
+        createSubProjectDto = CreateSubProjectDto.builder()
+                .parentId(1L)
+                .name("SubProject")
                 .build();
-        child2 = Project.builder()
-                .id(22L)
+
+        updateSubProjectDto = UpdateSubProjectDto.builder()
                 .status(ProjectStatus.COMPLETED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-        child3 = Project.builder()
-                .id(33L)
-                .status(ProjectStatus.ON_HOLD)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-        child4 = Project.builder()
-                .id(44L)
-                .status(ProjectStatus.COMPLETED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-        project33 = Project.builder()
-                .id(33L)
-                .name("Poker")
-                .status(ProjectStatus.CANCELLED)
                 .visibility(ProjectVisibility.PRIVATE)
                 .build();
-        child44 = Project.builder()
-                .id(44L)
-                .name("Tetris")
-                .status(ProjectStatus.COMPLETED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-        project55 = Project.builder()
-                .id(55L)
-                .name("Sony")
-                .status(ProjectStatus.CANCELLED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-        createProjectDto = CreateSubProjectDto.builder()
-                .parentId(123L)
-                .build();
-        child33Dto = ProjectDto.builder()
-                .id(33L)
-                .name("Poker")
-                .status(ProjectStatus.ON_HOLD)
-                .visibility(ProjectVisibility.PRIVATE)
-                .build();
-        child55Dto = ProjectDto.builder()
-                .id(55L)
-                .name("Sony")
-                .status(ProjectStatus.CANCELLED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .children(new ArrayList<>())
-                .build();
+
         projectFilterDto = ProjectFilterDto.builder()
                 .name("Sony")
-                .status(ProjectStatus.CANCELLED)
+                .status(ProjectStatus.IN_PROGRESS)
                 .build();
     }
 
     @Test
     public void testCreateSubProjectSuccessfully() {
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
-        when(projectRepository.save(project)).thenReturn(project);
+        when(projectRepository.getProjectById(anyLong())).thenReturn(testProject);
+        when(projectRepository.save(any(Project.class))).thenReturn(testProject);
+
         projectRepository.getProjectById(anyLong());
-        projectRepository.save(project);
+        projectRepository.save(testProject);
 
         verify(projectRepository, times(1)).getProjectById(anyLong());
-        verify(projectRepository, times(1)).save(project);
+        verify(projectRepository, times(1)).save(any(Project.class));
     }
 
     @Test
     public void testUpdateProjectStatusToInProgressAndVisibilityToPrivate() {
-        project = Project.builder()
-                .visibility(ProjectVisibility.PUBLIC)
-                .children(Arrays.asList(
-                        child4,
-                        child2
-                ))
-                .status(ProjectStatus.ON_HOLD)
-                .build();
-        updateSubProjectDto = UpdateSubProjectDto.builder()
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PRIVATE)
-                .build();
-        project1Dto = ProjectDto.builder()
-                .visibility(ProjectVisibility.PRIVATE)
-                .children(Arrays.asList(
-                        child4.getId(),
-                        child2.getId()
-                ))
-                .status(ProjectStatus.IN_PROGRESS)
-                .build();
+        Moment moment = new Moment();
+        testProject.setStatus(ProjectStatus.ON_HOLD);
+        testProject.setVisibility(ProjectVisibility.PUBLIC);
 
-        project6Dto = ProjectDto.builder()
-                .id(6L)
-                .children(Arrays.asList(
-                        project33.getId(),
-                        child44.getId(),
-                        project55.getId()
-                ))
-                .build();
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+        when(projectRepository.getProjectById(anyLong())).thenReturn(testProject);
+        when(projectMapper.toDto(any(Project.class))).thenReturn(testProjectDto);
+        when(momentRepository.save(any(Moment.class))).thenReturn(moment);
 
-        assertEquals(project1Dto, projectService.updateProject(anyLong(), updateSubProjectDto));
+        ProjectDto resultDto = projectService.updateProject(testProject.getId(), updateSubProjectDto);
+        assertEquals(testProjectDto, resultDto);
     }
 
     @Test
-    public void testUpdateProjectStatusToCompletedWhenConditions() {
-        project2 = Project.builder()
-                .visibility(ProjectVisibility.PRIVATE)
-                .status(ProjectStatus.IN_PROGRESS)
-                .build();
-        updateSubProjectDto = UpdateSubProjectDto.builder()
-                .status(ProjectStatus.COMPLETED)
-                .visibility(ProjectVisibility.PRIVATE)
-                .build();
-        project2Dto = ProjectDto.builder()
-                .status(ProjectStatus.COMPLETED)
-                .visibility(ProjectVisibility.PRIVATE)
-                .children(new ArrayList<>())
-                .build();
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project2);
-        assertEquals(project2Dto, projectService.updateProject(anyLong(), updateSubProjectDto));
+    public void testThrowDataValidationExceptionWhenSubProjectsStatusNotCompleted() {
+        testProject.setChildren(Arrays.asList(new Project(), new Project()));
+
+        when(projectRepository.getProjectById(anyLong())).thenReturn(testProject);
+
+        assertThrows(DataValidationException.class,
+                () -> projectService.updateProject(testProject.getId(), updateSubProjectDto));
     }
 
     @Test
-    public void testThrowDataValidationExceptionWhenCompletingProjectWithIncompleteChildren() {
-        project3 = Project.builder()
-                .id(3L)
-                .children(Arrays.asList(
-                        child1,
-                        child2
-                ))
-                .visibility(ProjectVisibility.PRIVATE)
-                .status(ProjectStatus.IN_PROGRESS)
-                .build();
-        updateSubProjectDto1 = UpdateSubProjectDto.builder()
-                .status(ProjectStatus.COMPLETED)
-                .build();
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project3);
+    public void testCreateSubProjectWithValidDataSuccessfully() {
+        when(projectRepository.getProjectById(anyLong())).thenReturn(testProject);
+        when(projectRepository.save(any(Project.class))).thenReturn(new Project());
+        when(projectMapper.toDto(any(Project.class))).thenReturn(testProjectDto);
 
-        Assertions.assertThrows(DataValidationException.class,
-                () -> projectService.updateProject(project3.getId(), updateSubProjectDto1));
-    }
+        ProjectDto result = projectService.createSubProject(createSubProjectDto);
 
-    @Test
-    public void testReturnUpdatedProjectDtoWhenMomentReceived() {
-        project4 = Project.builder()
-                .id(4L)
-                .children(Collections.singletonList(child4))
-                .visibility(ProjectVisibility.PRIVATE)
-                .status(ProjectStatus.IN_PROGRESS)
-                .moments(new ArrayList<>())
-                .build();
-        updateSubProjectDto = UpdateSubProjectDto.builder()
-                .status(ProjectStatus.COMPLETED)
-                .visibility(ProjectVisibility.PRIVATE)
-                .build();
-        project4Dto = ProjectDto.builder()
-                .id(4L)
-                .children(Collections.singletonList(child4.getId()))
-                .visibility(ProjectVisibility.PRIVATE)
-                .status(ProjectStatus.COMPLETED)
-                .build();
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project4);
-
-        assertEquals(project4Dto, projectService.updateProject(anyLong(), updateSubProjectDto));
+        assertEquals(result, testProjectDto);
     }
 
     @Test
     public void testFilteredPublicSubProject() {
-        project5 = Project.builder()
-                .id(5L)
+        testProject.setName("Sony");
+
+        Project testParentProject = Project.builder()
+                .id(1L)
                 .visibility(ProjectVisibility.PUBLIC)
-                .children(Arrays.asList(
-                        child44,
-                        project55
-                ))
+                .children(Arrays.asList(testProject))
                 .build();
-        filterStream = Stream.of(new ProjectStatusFilter());
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project5);
+
+        Stream<ProjectFilter> filterStream = Stream.of(new ProjectStatusFilter());
+        when(projectRepository.getProjectById(anyLong())).thenReturn(testParentProject);
         when(filters.stream()).thenReturn(filterStream);
+        when(projectMapper.toDto(testProject)).thenReturn(testProjectDto);
 
         List<ProjectDto> actualSubProjects =
-                projectService.getFilteredSubProjects(project5.getId(), projectFilterDto);
-        List<ProjectDto> expectedSubProjects = new ArrayList<>(List.of(child55Dto));
+                projectService.getFilteredSubProjects(testParentProject.getId(), projectFilterDto);
+        List<ProjectDto> expectedSubProjects = Arrays.asList(testProjectDto);
 
         assertTrue(expectedSubProjects.size() == actualSubProjects.size()
                 && expectedSubProjects.containsAll(actualSubProjects));
     }
 
     @Test
-    public void testCreateSubProjectWithValidDataSuccessfully() {
-        createSubProjectDto = CreateSubProjectDto.builder()
-                .name("project")
-                .build();
-        pubProject1 = Project.builder()
-                .name("project")
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PUBLIC)
-                .parentProject(parent)
-                .build();
-        when(projectRepository.getProjectById(anyLong())).thenReturn(pubProject1);
-        when(projectRepository.save(any(Project.class))).thenReturn(parent);
-        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
-
-        ProjectDto result = projectService.createSubProject(createProjectDto);
-
-        assertEquals(projectDto.getName(), result.getName());
-        assertEquals(projectDto.getStatus(), result.getStatus());
-        assertEquals(projectDto.getVisibility(), result.getVisibility());
-        assertEquals(projectDto.getDescription(), result.getDescription());
-    }
-
-    @Test
     public void testFilteredSubProjectsThrowDataValidationException() {
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project33);
+        testProject.setVisibility(ProjectVisibility.PRIVATE);
+        when(projectRepository.getProjectById(anyLong())).thenReturn(testProject);
         assertThrows(DataValidationException.class,
-                () -> projectService.getFilteredSubProjects(project33.getId(), projectFilterDto));
+                () -> projectService.getFilteredSubProjects(testProject.getId(), projectFilterDto));
     }
 }

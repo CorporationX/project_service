@@ -9,6 +9,7 @@ import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.*;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final MomentRepository momentRepository;
     private final List<ProjectFilter> filters;
 
     @Transactional
@@ -103,10 +105,11 @@ public class ProjectService {
         Moment moment = new Moment();
         moment.setName(projectToUpdate.getName());
         moment.setUserIds(userIds);
+        Moment momentAfterSave = momentRepository.save(moment);
         if (checkingListForNullAndEmpty(projectToUpdate)) {
-            projectToUpdate.setMoments(new ArrayList<>(Arrays.asList(moment)));
+            projectToUpdate.setMoments(new ArrayList<>(Arrays.asList(momentAfterSave)));
         } else {
-            projectToUpdate.getMoments().add(moment);
+            projectToUpdate.getMoments().add(momentAfterSave);
         }
     }
 }
