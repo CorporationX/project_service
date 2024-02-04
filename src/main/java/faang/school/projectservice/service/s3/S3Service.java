@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.model.Resource;
@@ -13,13 +14,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "services.s3.isMocked", havingValue = "false")
 public class S3Service {
     private final AmazonS3 s3Client;
 
@@ -36,7 +37,7 @@ public class S3Service {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucketName, key, file.getInputStream(), objectMetadata);
             s3Client.putObject(putObjectRequest);
-        } catch (Exception e) {
+        } catch (AmazonS3Exception | IOException e) {
             throw new RuntimeException("Failed to upload file: " + e.getMessage());
         }
 
