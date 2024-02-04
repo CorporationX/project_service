@@ -47,22 +47,25 @@ public class InternshipService {
         return internshipMapper.toInternshipDto(internshipRepository.save(createdInternship));
     }
 
-    public InternshipDto addNewInterns(InternshipDto internshipDto, TeamMemberDto teamMemberDto) {
-        Internship internship = internshipRepository.findById(internshipDto.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipDto.getId()));
+    @Transactional
+    public InternshipDto addNewIntern(long internshipId, long teamMemberId) {
+        Internship internship = internshipRepository.findById(internshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipId));
         if (LocalDateTime.now().isAfter(internship.getStartDate()))
             throw new IllegalArgumentException("The internship has already started");
-        TeamMember teamMember = teamMemberMapper.toEntity(teamMemberDto);
+        TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         internship.getInterns().add(teamMember);
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
 
-    public InternshipDto finishInterPrematurely(InternshipDto internshipDto, TeamMemberDto teamMemberDto) {
-        TeamMember teamMember = teamMemberRepository.findById(teamMemberDto.getId());
+    @Transactional
+    public InternshipDto finishInterPrematurely(long internshipId, long teamMemberId) {
+        TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         changeRole(teamMember, DEVELOPER);
-        return updateInterns(internshipDto, teamMember);
+        return updateInterns(internshipId, teamMember);
     }
 
+    @Transactional
     public InternshipDto removeInterPrematurely(InternshipDto internshipDto, TeamMemberDto teamMemberDto) {
         Internship internship = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipDto.getId()));
@@ -72,6 +75,7 @@ public class InternshipService {
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
 
+    @Transactional
     public InternshipDto updateInternship(InternshipDto updatedInternshipDto) {
         Internship existingInternship = internshipRepository.findById(updatedInternshipDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + updatedInternshipDto.getId()));
@@ -81,7 +85,7 @@ public class InternshipService {
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
 
-
+    @Transactional
     public InternshipDto updateInternshipAfterEndDate(long idInternshipDto) {
         Internship internship = internshipRepository.findById(idInternshipDto)
                 .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + idInternshipDto));
@@ -99,7 +103,7 @@ public class InternshipService {
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
 
-
+    @Transactional
     public List<InternshipDto> getInternshipByFilter(InternshipFilterDto filter) {
         Stream<Internship> internshipStream = internshipRepository.findAll().stream();
 
@@ -140,9 +144,9 @@ public class InternshipService {
         intern.setRoles(roles);
     }
 
-    private InternshipDto updateInterns(InternshipDto internshipDto, TeamMember teamMember) {
-        Internship internship = internshipRepository.findById(internshipDto.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipDto.getId()));
+    private InternshipDto updateInterns(long internshipId, TeamMember teamMember) {
+        Internship internship = internshipRepository.findById(internshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipId));
         internship.getInterns().stream()
                 .filter(intern -> intern.getId().equals(teamMember.getId()))
                 .findFirst()

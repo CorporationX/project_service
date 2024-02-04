@@ -11,7 +11,6 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,11 +38,8 @@ import static org.mockito.Mockito.when;
 class InternshipServiceTest {
     @InjectMocks
     private InternshipService internshipService;
-
     @Mock
     private InternshipRepository internshipRepository;
-    @Mock
-    private ProjectRepository projectRepository;
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Spy
@@ -133,7 +129,7 @@ class InternshipServiceTest {
         Internship internship = internshipMapper.toEntity(internshipDto);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
         when(internshipRepository.save(internship)).thenReturn(internship);
-        InternshipDto updatedInternshipDto = internshipService.addNewInterns(internshipDto, new TeamMemberDto());
+        InternshipDto updatedInternshipDto = internshipService.addNewIntern(internshipDto.getId(), 1L);
         assertEquals(3, updatedInternshipDto.getInterns().size());
     }
 
@@ -142,13 +138,13 @@ class InternshipServiceTest {
         Internship internship = internshipMapper.toEntity(internshipDto);
         when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
-        internshipService.finishInterPrematurely(internshipDto, teamMemberDto);
+        internshipService.finishInterPrematurely(internshipDto.getId(), teamMemberDto.getId());
         assertTrue(teamMember.getRoles().contains(DEVELOPER));
         assertFalse(teamMember.getRoles().contains(INTERN));
     }
 
     @Test
-    void testRemoveInterPrematurelySuccessful(){
+    void testRemoveInterPrematurelySuccessful() {
         Internship internship = internshipMapper.toEntity(internshipDto);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
         internshipService.removeInterPrematurely(internshipDto, teamMemberDto);
@@ -157,7 +153,7 @@ class InternshipServiceTest {
     }
 
     @Test
-    void testUpdateInternshipSuccessful(){
+    void testUpdateInternshipSuccessful() {
         Internship internship = internshipMapper.toEntity(internshipDto);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
         when(internshipRepository.save(internship)).thenReturn(internship);
@@ -167,7 +163,7 @@ class InternshipServiceTest {
     }
 
     @Test
-    void testGetInternshipByFilterSuccessful(){
+    void testGetInternshipByFilterSuccessful() {
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setStatus(IN_PROGRESS);
         Internship internship1 = new Internship();

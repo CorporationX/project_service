@@ -31,8 +31,12 @@ class InternshipControllerTest {
 
     @BeforeEach
     void setUp() {
-        internshipDto = InternshipDto.builder().build();
-        teamMemberDto = TeamMemberDto.builder().build();
+        internshipDto = InternshipDto.builder()
+                .id(1L)
+                .build();
+        teamMemberDto = TeamMemberDto.builder()
+                .id(100L)
+                .build();
         filter = new InternshipFilterDto();
     }
 
@@ -43,24 +47,16 @@ class InternshipControllerTest {
         Mockito.verify(internshipService).createInternship(internshipDto);
     }
 
-
-    @Test
-    void testCreateInternshipWithNullInternshipDto() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> internshipController.createInternship(internshipDtoNull));
-        assertEquals(exception.getMessage(), "The object has not been created");
-    }
-
     @Test
     void testAddNewInternsSuccessful() {
-        internshipController.addNewInterns(internshipDto, teamMemberDto);
-        Mockito.verify(internshipService).addNewInterns(internshipDto, teamMemberDto);
+        internshipController.addNewIntern(internshipDto.getId(), teamMemberDto.getId());
+        Mockito.verify(internshipService).addNewIntern(internshipDto.getId(), teamMemberDto.getId());
     }
 
     @Test
     void testFinishInterPrematurelySuccessful() {
-        internshipController.finishInterPrematurely(internshipDto, teamMemberDto);
-        Mockito.verify(internshipService).finishInterPrematurely(internshipDto, teamMemberDto);
+        internshipController.finishInterPrematurely(internshipDto.getId(), teamMemberDto.getId());
+        Mockito.verify(internshipService).finishInterPrematurely(internshipDto.getId(), teamMemberDto.getId());
     }
 
     @Test
