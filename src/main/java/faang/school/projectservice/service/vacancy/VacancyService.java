@@ -4,8 +4,11 @@ import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
@@ -26,6 +29,7 @@ import java.util.List;
 public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final VacancyMapper vacancyMapper;
+    private final TeamMemberService teamMemberService;
     private final ProjectService projectService;
     private final VacancyValidator vacancyValidator;
     private final List<Filter<VacancyFilterDto, Vacancy>> filters;
@@ -52,7 +56,7 @@ public class VacancyService {
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         Project project = projectService.getProjectById(vacancyDto.getProjectId());
 
-        vacancyValidator.validateCreateVacancy(vacancyDto.getCreatedBy());
+        vacancyValidator.validateSupervisorRole(vacancyDto.getCreatedBy());
 
         Vacancy newVacancy = vacancyMapper.toEntity(vacancyDto);
         newVacancy.setProject(project);
@@ -60,9 +64,20 @@ public class VacancyService {
         return vacancyMapper.toDto(vacancyRepository.save(newVacancy));
     }
 
-    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+    public VacancyDto updateOrCloseVacancy(VacancyDto vacancyDto) {
         Vacancy updatedVacancy = vacancyMapper.toEntity(vacancyDto);
-        vacancyValidator.validateForUpdateVacancy(updatedVacancy);
+
+        TeamRole teamRole = TeamRole.valueOf(vacancyDto.getPosition());
+        List<Candidate> candidates = updatedVacancy.getCandidates();
+
+        for (Candidate candidate : candidates) {
+            if (candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED)) {
+                TeamMember teamMember = teamMemberService.getTeamMember(candidate.getId());
+                teamMember.getRoles().add(teamRole);
+            }
+        }
+
+        vacancyValidator.validateCandidateRole(updatedVacancy);
 
         if (vacancyDto.getStatus().equals(VacancyStatus.CLOSED)) {
             vacancyValidator.validateForCloseVacancy(updatedVacancy);
