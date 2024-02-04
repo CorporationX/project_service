@@ -2,7 +2,6 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
@@ -59,17 +58,17 @@ public class InternshipService {
     }
 
     @Transactional
-    public InternshipDto finishInterPrematurely(long internshipId, long teamMemberId) {
+    public InternshipDto finishInternPrematurely(long internshipId, long teamMemberId) {
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         changeRole(teamMember, DEVELOPER);
         return updateInterns(internshipId, teamMember);
     }
 
     @Transactional
-    public InternshipDto removeInterPrematurely(InternshipDto internshipDto, TeamMemberDto teamMemberDto) {
-        Internship internship = internshipRepository.findById(internshipDto.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipDto.getId()));
-        TeamMember intern = searchInternInInternship(internship, teamMemberDto);
+    public InternshipDto removeInternPrematurely(long internshipId, long internId) {
+        Internship internship = internshipRepository.findById(internId)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipId));
+        TeamMember intern = searchInternInInternship(internship, internId);
         removeRole(intern);
         internship.getInterns().remove(intern);
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
@@ -86,9 +85,9 @@ public class InternshipService {
     }
 
     @Transactional
-    public InternshipDto updateInternshipAfterEndDate(long idInternshipDto) {
-        Internship internship = internshipRepository.findById(idInternshipDto)
-                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + idInternshipDto));
+    public InternshipDto updateInternshipAfterEndDate(long internshipId) {
+        Internship internship = internshipRepository.findById(internshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipId));
         if (LocalDateTime.now().isBefore(internship.getEndDate()))
             throw new IllegalArgumentException("The internship is not over");
         internship.getInterns()
@@ -131,9 +130,9 @@ public class InternshipService {
         return existingInternship;
     }
 
-    private TeamMember searchInternInInternship(Internship internship, TeamMemberDto teamMemberDto) {
+    private TeamMember searchInternInInternship(Internship internship, long teamMemberId) {
         return internship.getInterns().stream()
-                .filter(teamMember -> teamMember.getId().equals(teamMemberDto.getId()))
+                .filter(teamMember -> teamMember.getId().equals(teamMemberId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Intern not found in the internship"));
     }

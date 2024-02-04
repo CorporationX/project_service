@@ -55,14 +55,14 @@ class InternshipControllerTest {
 
     @Test
     void testFinishInterPrematurelySuccessful() {
-        internshipController.finishInterPrematurely(internshipDto.getId(), teamMemberDto.getId());
-        Mockito.verify(internshipService).finishInterPrematurely(internshipDto.getId(), teamMemberDto.getId());
+        internshipController.finishInternPrematurely(internshipDto.getId(), teamMemberDto.getId());
+        Mockito.verify(internshipService).finishInternPrematurely(internshipDto.getId(), teamMemberDto.getId());
     }
 
     @Test
     void removeInterPrematurelySuccessful() {
-        internshipController.removeInterPrematurely(internshipDto, teamMemberDto);
-        Mockito.verify(internshipService).removeInterPrematurely(internshipDto, teamMemberDto);
+        internshipController.removeInternPrematurely(internshipDto.getId(), teamMemberDto.getId());
+        Mockito.verify(internshipService).removeInternPrematurely(internshipDto.getId(), teamMemberDto.getId());
     }
 
     @Test

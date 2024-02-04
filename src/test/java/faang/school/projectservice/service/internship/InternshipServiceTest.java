@@ -138,7 +138,7 @@ class InternshipServiceTest {
         Internship internship = internshipMapper.toEntity(internshipDto);
         when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
-        internshipService.finishInterPrematurely(internshipDto.getId(), teamMemberDto.getId());
+        internshipService.finishInternPrematurely(internshipDto.getId(), teamMemberDto.getId());
         assertTrue(teamMember.getRoles().contains(DEVELOPER));
         assertFalse(teamMember.getRoles().contains(INTERN));
     }
@@ -147,7 +147,7 @@ class InternshipServiceTest {
     void testRemoveInterPrematurelySuccessful() {
         Internship internship = internshipMapper.toEntity(internshipDto);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
-        internshipService.removeInterPrematurely(internshipDto, teamMemberDto);
+        internshipService.removeInternPrematurely(internshipDto.getId(), teamMemberDto.getId());
         assertEquals(1, internship.getInterns().size());
         // здесь бы проверить на удаление роли INTERN у teamMemberDto, но не пойму как
     }

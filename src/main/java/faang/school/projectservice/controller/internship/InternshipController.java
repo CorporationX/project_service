@@ -2,7 +2,6 @@ package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.service.internship.InternshipService;
 import jakarta.validation.constraints.NotNull;
@@ -28,27 +27,28 @@ public class InternshipController {
     }
 
     @PutMapping("/intern/{id}/finish/{internshipId}")
-    public InternshipDto finishInterPrematurely(@PathVariable long internshipId, @PathVariable long id) {
-        return internshipService.finishInterPrematurely(internshipId, id);
+    public InternshipDto finishInternPrematurely(@PathVariable long internshipId, @PathVariable long id) {
+        return internshipService.finishInternPrematurely(internshipId, id);
     }
 
-    @DeleteMapping("intern/delete")
-    public InternshipDto removeInterPrematurely(InternshipDto internshipDto, TeamMemberDto teamMemberDto) {
-        return internshipService.removeInterPrematurely(internshipDto, teamMemberDto);
+    @DeleteMapping("intern/{id}/delete/{internshipId}")
+    public InternshipDto removeInternPrematurely(@PathVariable long internshipId, @PathVariable long id) {
+        return internshipService.removeInternPrematurely(internshipId, id);
     }
 
     @PutMapping("/update")
-    public InternshipDto updateInternship(InternshipDto internshipDto) {
+    public InternshipDto updateInternship(@NotNull @RequestBody InternshipDto internshipDto) {
         return internshipService.updateInternship(internshipDto);
     }
 
-    @PutMapping("/update/end")
-    public InternshipDto updateInternshipAfterEndDate(long idInternshipDto) {
-        if (idInternshipDto < 1)
+    @PutMapping("/update/end/{internshipId}")
+    public InternshipDto updateInternshipAfterEndDate(@PathVariable long internshipId) {
+        if (internshipId < 1)
             throw new DataValidationException("Invalid id");
-        return internshipService.updateInternshipAfterEndDate(idInternshipDto);
+        return internshipService.updateInternshipAfterEndDate(internshipId);
     }
-@GetMapping
+
+    @GetMapping
     public List<InternshipDto> getInternshipByFilter(@RequestBody InternshipFilterDto filter) {
         return internshipService.getInternshipByFilter(filter);
     }
