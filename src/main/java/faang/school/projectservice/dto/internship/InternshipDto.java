@@ -1,7 +1,5 @@
 package faang.school.projectservice.dto.internship;
 
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 @Builder
 @Data
 @NoArgsConstructor

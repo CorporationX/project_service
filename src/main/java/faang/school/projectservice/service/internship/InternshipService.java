@@ -5,13 +5,12 @@ import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
-import faang.school.projectservice.mapper.InternshipMapper;
-import faang.school.projectservice.mapper.TeamMemberMapper;
+import faang.school.projectservice.mapper.internship.InternshipMapper;
+import faang.school.projectservice.mapper.internship.TeamMemberMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +35,6 @@ public class InternshipService {
     private final InternshipMapper internshipMapper;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamMemberMapper teamMemberMapper;
-    private final ProjectRepository projectRepository;
     private final List<InternshipFilter> filters;
 
     @Transactional
@@ -130,9 +128,7 @@ public class InternshipService {
     }
 
     private TeamMember searchInternInInternship(Internship internship, TeamMemberDto teamMemberDto) {
-        List<TeamMember> interns = internship.getInterns();
-
-        return interns.stream()
+        return internship.getInterns().stream()
                 .filter(teamMember -> teamMember.getId().equals(teamMemberDto.getId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Intern not found in the internship"));
@@ -147,8 +143,7 @@ public class InternshipService {
     private InternshipDto updateInterns(InternshipDto internshipDto, TeamMember teamMember) {
         Internship internship = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipDto.getId()));
-        List<TeamMember> interns = internship.getInterns();
-        interns.stream()
+        internship.getInterns().stream()
                 .filter(intern -> intern.getId().equals(teamMember.getId()))
                 .findFirst()
                 .ifPresent(intern -> {
@@ -181,7 +176,7 @@ public class InternshipService {
 
     private void checkInternshipDtoDate(InternshipDto internshipDto) {
         if (internshipDto.getStartDate() == null || internshipDto.getEndDate() == null)
-            throw new NullPointerException("Invalid dates");
+            throw new DataValidationException("Invalid dates");
         if (internshipDto.getStartDate().isAfter(internshipDto.getEndDate()))
             throw new IllegalArgumentException("Incorrect dates have been entered");
         Duration duration = Duration.between(internshipDto.getStartDate(), internshipDto.getEndDate());

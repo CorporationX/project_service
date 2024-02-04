@@ -1,11 +1,11 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.TeamMember;
-import org.mapstruct.*;
-
-import java.util.List;
+import org.mapstruct.InjectionStrategy;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface InternshipMapper {

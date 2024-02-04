@@ -5,8 +5,8 @@ import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.filter.internship.InternshipStatusFilter;
-import faang.school.projectservice.mapper.InternshipMapper;
-import faang.school.projectservice.mapper.TeamMemberMapper;
+import faang.school.projectservice.mapper.internship.InternshipMapper;
+import faang.school.projectservice.mapper.internship.TeamMemberMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -56,8 +56,6 @@ class InternshipServiceTest {
     private InternshipDto internshipDto;
     private TeamMemberDto teamMemberDto;
     private List<TeamMember> interns;
-
-
 
 
     @BeforeEach
@@ -112,7 +110,7 @@ class InternshipServiceTest {
     @Test
     void testCreateInternshipWithNullDate() {
         internshipDto.setEndDate(null);
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> internshipService.createInternship(internshipDto));
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> internshipService.createInternship(internshipDto));
         assertEquals(exception.getMessage(), "Invalid dates");
     }
 
@@ -181,7 +179,7 @@ class InternshipServiceTest {
         internshipFilterDto.setStatus(IN_PROGRESS);
 
         internshipService = new InternshipService(internshipRepository, internshipMapper, teamMemberRepository,
-                teamMemberMapper, projectRepository, Arrays.asList(new InternshipStatusFilter()));
+                teamMemberMapper, Arrays.asList(new InternshipStatusFilter()));
 
         when(internshipRepository.findAll()).thenReturn(Arrays.asList(internship, internship1, internship2));
         List<InternshipDto> actualList = internshipService.getInternshipByFilter(internshipFilterDto);
