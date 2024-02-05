@@ -22,7 +22,6 @@ public class VacancyController implements VacancyApi {
 
     @Override
     public VacancyDto getVacancy(Long id) {
-        vacancyValidator.validateId(id);
         return vacancyService.getVacancy(id);
     }
 
@@ -33,19 +32,18 @@ public class VacancyController implements VacancyApi {
 
     @Override
     public VacancyDto create(VacancyDto vacancyDto) {
-        vacancyValidator.validateVacancyController(vacancyDto);
+        vacancyValidator.validateVacancy(vacancyDto);
         return vacancyService.createVacancy(vacancyDto);
     }
 
     @Override
     public VacancyDto update(VacancyDto vacancyDto) {
-        vacancyValidator.validateVacancyController(vacancyDto);
-        return vacancyService.updateVacancy(vacancyDto);
+        vacancyValidator.validateVacancy(vacancyDto);
+        return vacancyService.updateOrCloseVacancy(vacancyDto);
     }
 
     @Override
     public VacancyDto deleteVacancy(Long id) {
-        vacancyValidator.validateId(id);
         return vacancyService.deleteVacancy(id);
     }
 }
