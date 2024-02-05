@@ -8,9 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -27,7 +25,6 @@ import java.util.List;
  */
 
 @RequestMapping(path = "/projects")
-@Validated
 @Tag(name = "Project", description = "The project API")
 public interface ProjectApi {
 
@@ -46,7 +43,7 @@ public interface ProjectApi {
             content = @Content(schema = @Schema(implementation = EntityNotFoundException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
             content = @Content(schema = @Schema(implementation = Void.class)))
-    ProjectDto create(@RequestBody @Valid ProjectDto projectDto);
+    ProjectDto create(@RequestBody ProjectDto projectDto);
 
     @PutMapping
     @Operation(
@@ -63,7 +60,7 @@ public interface ProjectApi {
             content = @Content(schema = @Schema(implementation = EntityNotFoundException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
             content = @Content(schema = @Schema(implementation = Void.class)))
-    ProjectDto update(@RequestBody @Valid ProjectDto projectDto);
+    ProjectDto update(@RequestBody ProjectDto projectDto);
 
     @GetMapping
     @Operation(
