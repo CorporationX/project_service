@@ -25,27 +25,31 @@ public class VacancyValidator {
             throw new DataValidationException("This id is null!");
         }
     }
-    public void validateVacancyController(VacancyDto dto) {
+
+    public void validateVacancy(VacancyDto dto) {
         if (null == dto.getProjectId()) {
             throw new DataValidationException("The vacancy does not belong to any project!");
-        } else if (null == dto.getCreatedBy()) {
+        }
+
+        if (null == dto.getCreatedBy()) {
             throw new DataValidationException("The vacancy does not have a supervisor!");
         }
     }
 
-    public void validateCreateVacancy(long id) {
+    public void validateSupervisorRole(long id) {
         TeamMember teamMember = teamMemberService.getTeamMember(id);
-        if (!teamMember.getRoles().contains(TeamRole.OWNER)) {
+        if (!teamMember.getRoles().contains(TeamRole.OWNER) ||
+                !teamMember.getRoles().contains(TeamRole.MANAGER)) {
             throw new DataValidationException("The supervisor does not have the appropriate role!");
         }
     }
 
-    public void validateForUpdateVacancy(Vacancy vacancy) {
+    public void validateCandidateRole(Vacancy vacancy) {
         if (teamMemberService.getAllTeamMembersByIds(vacancy.getCandidates()
-                .stream()
-                .filter(candidate -> candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
-                .map(Candidate::getId)
-                .toList())
+                        .stream()
+                        .filter(candidate -> candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
+                        .map(Candidate::getId)
+                        .toList())
                 .stream()
                 .anyMatch(teamMember -> null == teamMember.getRoles())) {
             throw new DataValidationException("Not all candidates have a role on the project");
