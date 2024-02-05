@@ -1,20 +1,19 @@
 package faang.school.projectservice.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
+import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
@@ -51,6 +50,16 @@ public class S3Service {
         resource.setName(file.getOriginalFilename());
 
         return resource;
+    }
+
+    public InputStream downloadFile(String key) {
+        GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, key);
+        try {
+            S3Object s3Object = s3Client.getObject(getObjectRequest);
+            return s3Object.getObjectContent();
+        } catch (Exception e) {
+            throw new FileException("Ошибка при загрузке файла: " + e.getMessage());
+        }
     }
 }
 

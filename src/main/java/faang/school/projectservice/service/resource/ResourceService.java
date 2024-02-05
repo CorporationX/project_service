@@ -1,16 +1,22 @@
 package faang.school.projectservice.service.resource;
 
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.math.BigInteger;
 
 @Service
@@ -20,27 +26,38 @@ public class ResourceService {
     private final S3Service s3Service;
     private final ResourceRepository resourceRepository;
     private final ResourceMapper resourceMapper;
+    private final TeamMemberRepository teamMemberRepository;
 
 
-    public ResourceDto addResource(Long projectId, MultipartFile file) {
+    public ResourceDto addResource(long projectId, long userId, MultipartFile file) {
         Project project = projectService.getProjectById(projectId);
+        TeamMember teamMember = teamMemberRepository.findById(userId);
+
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(project.getMaxStorageSize(), newStorageSize);
 
         String folder = project.getId() + project.getName();
         Resource resource = s3Service.uploadFile(file, folder);
         resource.setProject(project);
+        resource.setCreatedBy(teamMember);
         resource = resourceRepository.save(resource);
 
         project.setStorageSize(newStorageSize);
+        project.setCoverImageId(resource.getKey());
         projectService.save(project);
 
         return resourceMapper.toDto(resource);
     }
 
+    public InputStream downloadResource(long resourceId) {
+        Resource resource = resourceRepository.findById(resourceId)
+                .orElseThrow(() -> new EntityNotFoundException("Ресурс не найден"));
+        return s3Service.downloadFile(resource.getKey());
+    }
+
     private void checkStorageSizeExceeded(BigInteger maxStorageSize, BigInteger newStorageSize) {
         if (newStorageSize.compareTo(maxStorageSize) > 0) {
-            throw new IllegalArgumentException("Storage size exceeded");
+            throw new IllegalArgumentException("Превышен размер хранилища");
         }
     }
 }
