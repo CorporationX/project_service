@@ -1,7 +1,14 @@
+import java.math.RoundingMode
+
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+}
+
+jacoco {
+    toolVersion = "0.8.9"
 }
 
 group = "faang.school"
@@ -66,8 +73,46 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
+val jacocoInclude = listOf(
+        "**/controller/**",
+        "**/service/**",
+        "**/validator/**",
+        "**/mapper/**"
+)
+
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        csv.required.set(false)
+        xml.required.set(false)
+        html.required.set(true)
+    }
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+
+    violationRules {
+        rule {
+            element = "CLASS"
+            classDirectories.setFrom(
+                    sourceSets.main.get().output.asFileTree.matching {
+                        include(jacocoInclude)
+                    }
+            )
+            enabled = true          //Включить данное правило
+            limit {    //Установить минимальное покрытие и
+                //выводить проценты в читаемом виде (до 2 знаков после запятой)
+                minimum = BigDecimal(0.7).setScale(2, RoundingMode.HALF_UP)
+            }
+        }
+    }
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
