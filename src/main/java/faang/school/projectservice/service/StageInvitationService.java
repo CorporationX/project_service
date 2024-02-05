@@ -7,6 +7,8 @@ import faang.school.projectservice.repository.StageInvitationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class StageInvitationService {
@@ -27,8 +29,12 @@ public class StageInvitationService {
 
     }
 
-    public void filter() {
-
+    public List<StageInvitationDto> getAll(Long id) {
+        return stageInvitationMapper.toDto(stageInvitationRepository
+                .findAll()
+                .stream()
+                .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(id))
+                .toList());
     }
 
 }

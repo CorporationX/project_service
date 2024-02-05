@@ -6,6 +6,8 @@ import faang.school.projectservice.service.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class StageInvitationController {
@@ -34,8 +36,11 @@ public class StageInvitationController {
         stageInvitationService.reject();
     }
 
-    public void filterInvitation() {
-        stageInvitationService.filter();
+    public List<StageInvitationDto> getAllInvitation(Long id) {
+        if ((id == null) || (id < 0))
+            throw new ValidateStageInvitationException("Incorrect user id");
+        return stageInvitationService.getAll(id);
     }
+
 
 }
