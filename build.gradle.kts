@@ -72,3 +72,34 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            isEnabled = true
+            element = "CLASS"
+            includes = listOf("faang.school.projectservice.service.*",
+                    "faang.school.projectservice.controller.*",
+                    "faang.school.projectservice.exception.*",
+                    "faang.school.projectservice.mapper.*",
+                    "faang.school.projectservice.validator.*",
+                    "faang.school.projectservice.filter.*")
+            limit {
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+    }
+}
