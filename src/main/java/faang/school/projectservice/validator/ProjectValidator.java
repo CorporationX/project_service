@@ -57,4 +57,9 @@ public class ProjectValidator {
             throw new DataValidationException("You are not owner of project");
         }
     }
+    public void existsById(Long id) {
+        if (!projectRepository.existsById(id)) {
+            throw new DataValidationException("Проект с id - " + id + " не существует");
+        }
+    }
 }
