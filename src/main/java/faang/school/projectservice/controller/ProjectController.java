@@ -8,27 +8,29 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
-public class ResourceController {
+@RequestMapping("/projects")
+public class ProjectController {
     private final ResourceService resourceService;
     private final UserContext userContext;
 
-    @PutMapping("/resources/{projectId}/add")
-    public ResourceDto addResource(@PathVariable long projectId, @RequestBody MultipartFile file) {
-        return resourceService.addResource(projectId, userContext.getUserId(), file);
+    @PutMapping("/{projectId}/cover/add")
+    public ResourceDto addCover(@PathVariable long projectId, @RequestBody MultipartFile file) {
+        return resourceService.addCoverToProject(projectId, userContext.getUserId(), file);
     }
 
-    @GetMapping("/resources/{resourceId}")
-    public ResponseEntity<byte[]> downloadResource(@PathVariable long resourceId) {
+    @GetMapping("/cover/{resourceId}")
+    public ResponseEntity<byte[]> getCover(@PathVariable long resourceId) {
         byte[] imageBytes = null;
         try {
-            imageBytes = resourceService.downloadResource(resourceId).readAllBytes();
+            imageBytes = resourceService.downloadCover(resourceId).readAllBytes();
         } catch (IOException e) {
             e.printStackTrace();
         }

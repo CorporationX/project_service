@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 public class ProjectService {
     private final ProjectRepository projectRepository;
 
+
     public Project getProjectById(Long id) {
         return projectRepository.getProjectById(id);
     }
