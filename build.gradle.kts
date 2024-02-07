@@ -89,7 +89,7 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
-            isEnabled = false
+            isEnabled = true
             element = "CLASS"
             includes = listOf("faang.school.projectservice.service.*",
                     "faang.school.projectservice.exception.*",
