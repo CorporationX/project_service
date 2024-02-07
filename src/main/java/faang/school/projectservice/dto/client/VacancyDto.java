@@ -13,6 +13,5 @@ import lombok.NoArgsConstructor;
 public class VacancyDto {
     private Long id;
     private String name;
-    private Project project;
-
+    private Long projectId;
 }

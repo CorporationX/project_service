@@ -87,4 +87,8 @@ public class Project {
 
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
+
+    public void addVacancy(Vacancy vacancy) {
+        this.vacancies.add(vacancy);
+    }
 }

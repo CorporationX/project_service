@@ -1,36 +1,50 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.VacancyDto;
-import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/api/v1/vacancy")
 @RequiredArgsConstructor
 public class VacancyController {
     private final VacancyService vacancyService;
+    private final VacancyMapper vacancyMapper;
 
-    public VacancyDto createVacancy(VacancyDto vacancyDto) {
-        return vacancyService.createVacancy(vacancyDto);
+    @PutMapping("/create")
+    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto,
+                                    @RequestParam("createdBy") Long createdBy) {
+        return vacancyService.createVacancy(vacancyDto, createdBy);
     }
 
-    public VacancyDto updateVacancy(Vacancy vacancy) {
-        return vacancyService.updateVacancy(vacancy);
+    @PutMapping("/update")
+    public void updateVacancy(@RequestBody VacancyDto vacancyDto) {
+        vacancyService.updateVacancy(vacancyDto);
     }
 
-    public void deleteVacancy(Long id) {
+    @DeleteMapping("/delete/{id}")
+    public void deleteVacancy(@PathVariable("id") Long id) {
         vacancyService.deleteVacancy(id);
     }
 
-    public List<Vacancy> getAllVacancies(String name) {
-        return vacancyService.getAllVacancies(name);
+    //разобраться с фильтрами   @GetMapping("/getAll")
+    public Map<Long, VacancyDto> getAllVacancies() {
+        return vacancyService.getAllVacancies();
     }
 
-    public VacancyDto getVacancy(Long id) {
+    @GetMapping("/get/{id}")
+    public VacancyDto getVacancy(@PathVariable("id") Long id) {
         return vacancyService.getVacancy(id);
     }
-
 }
