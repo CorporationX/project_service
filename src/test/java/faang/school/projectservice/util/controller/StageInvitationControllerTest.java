@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,27 +47,27 @@ public class StageInvitationControllerTest {
 
     @Test
     void testAcceptInvitationMissingUserId() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.acceptInvitation(null, Mockito.anyLong()));
+        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.acceptInvitation(null, 4L));
     }
 
     @Test
     void testAcceptInvitationMissingInvitationId() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.acceptInvitation(Mockito.anyLong(), null));
+        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.acceptInvitation(5L, null));
     }
 
     @Test
     void testRejectInvitationMissingUserId() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.rejectInvitation(null, Mockito.anyLong(), Mockito.anyString()));
+        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.rejectInvitation(null, 4L, "anyString()"));
     }
 
     @Test
     void testRejectInvitationMissingInvitationId() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.rejectInvitation(Mockito.anyLong(), null, Mockito.anyString()));
+        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.rejectInvitation(5L, null, "anyString()"));
     }
 
     @Test
     void testRejectInvitationMissingDescription() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.rejectInvitation(Mockito.anyLong(), Mockito.anyLong(), null));
+        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.rejectInvitation(4L, 5L, null));
     }
 
     @Test
