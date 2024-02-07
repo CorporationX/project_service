@@ -56,7 +56,7 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitationRepository
                 .findAll()
                 .stream()
-                .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(id))
+                .filter(stageInvitation -> stageInvitation.getInvited().getUserId() == id)
                 .toList());
     }
 

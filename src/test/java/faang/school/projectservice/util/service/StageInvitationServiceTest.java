@@ -5,17 +5,21 @@ import faang.school.projectservice.exception.ValidateStageInvitationException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.StageInvitationService;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +31,8 @@ public class StageInvitationServiceTest {
     private StageInvitationRepository stageInvitationRepository;
     @InjectMocks
     private StageInvitationService stageInvitationService;
+    @Captor
+    private ArgumentCaptor<List<StageInvitation>> captor;
 
     private StageInvitation invitation;
     private StageInvitationDto stageInvitationDto;
@@ -35,7 +41,7 @@ public class StageInvitationServiceTest {
     void testCreate() {
         stageInvitationDto = new StageInvitationDto();
         stageInvitationService.create(stageInvitationDto);
-        Mockito.verify(stageInvitationRepository, Mockito.times(1)).save(stageInvitationMapper.toEntity(stageInvitationDto));
+        Mockito.verify(stageInvitationRepository, times(1)).save(stageInvitationMapper.toEntity(stageInvitationDto));
     }
 
     @Test
@@ -46,7 +52,7 @@ public class StageInvitationServiceTest {
     }
 
     @Test
-    void testAccept(){
+    void testAccept() {
         invitation = new StageInvitation();
         invitation.setId(1L);
         TeamMember teamMember = new TeamMember();
@@ -54,7 +60,7 @@ public class StageInvitationServiceTest {
         invitation.setInvited(teamMember);
         when(stageInvitationRepository.findById(2L)).thenReturn(invitation);
         stageInvitationService.accept(1L, 2L);
-        Mockito.verify(stageInvitationRepository, Mockito.times(1)).save(invitation);
+        Mockito.verify(stageInvitationRepository, times(1)).save(invitation);
     }
 
     @Test
@@ -65,13 +71,30 @@ public class StageInvitationServiceTest {
     }
 
     @Test
-    void testGetAllFail() {
-
-    }
-
-    @Test
     void testGetAll() {
+        StageInvitation firstStageInvitation = new StageInvitation();
+        firstStageInvitation.setId(1L);
 
+        StageInvitation secondStageInvitation = new StageInvitation();
+        secondStageInvitation.setId(2L);
+
+        TeamMember firstMember = new TeamMember();
+        firstMember.setUserId(1L);
+
+        TeamMember secondMember = new TeamMember();
+        secondMember.setUserId(1L);
+
+        firstStageInvitation.setInvited(firstMember);
+        secondStageInvitation.setInvited(secondMember);
+
+        List testList = List.of(firstStageInvitation, secondStageInvitation);
+
+        when(stageInvitationRepository.findAll()).thenReturn(testList);
+
+        List<StageInvitationDto> invitations = stageInvitationService.getAll(1L);
+        Mockito.verify(stageInvitationMapper, times(1)).toDto(captor.capture());
+
+        Assert.assertEquals(2, captor.getValue().size());
     }
 
 }
