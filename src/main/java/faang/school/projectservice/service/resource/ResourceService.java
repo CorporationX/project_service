@@ -34,8 +34,8 @@ public class ResourceService {
         Project project = projectService.getProjectEntityById(projectId);
         TeamMember teamMember = teamMemberRepository.findById(userId);
 
-        coverHandler.checkCoverMemorySize(file);
         coverHandler.checkCoverSize(file);
+        coverHandler.checkCoverResolution(file);
 
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));

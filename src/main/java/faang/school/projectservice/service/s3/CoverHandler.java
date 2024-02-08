@@ -16,13 +16,13 @@ public class CoverHandler {
     private final int MAX_HEIGHT = 566;
     private final int MAX_WIDTH = 1080;
 
-    public void checkCoverMemorySize(MultipartFile file) {
+    public void checkCoverSize(MultipartFile file) {
         if (file.getSize() > MAX_COVER_SIZE) {
             throw new IllegalArgumentException("Превышен размер обложки");
         }
     }
 
-    public void checkCoverSize(MultipartFile file) {
+    public void checkCoverResolution(MultipartFile file) {
         BufferedImage originalImage = null;
         try {
             originalImage = ImageIO.read(file.getInputStream());
