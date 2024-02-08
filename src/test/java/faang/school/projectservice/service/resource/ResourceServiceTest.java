@@ -7,7 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.s3.CoverHandler;
 import faang.school.projectservice.service.s3.S3Service;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ class ResourceServiceTest {
         resource.setKey("key");
         MultipartFile file = new MockMultipartFile("file", "file.png", "image/png", "file".getBytes());
 
-        Mockito.when(projectService.getProjectById(projectId))
+        Mockito.when(projectService.getProjectEntityById(projectId))
                 .thenReturn(project);
         Mockito.when(teamMemberRepository.findById(userId))
                 .thenReturn(teamMember);

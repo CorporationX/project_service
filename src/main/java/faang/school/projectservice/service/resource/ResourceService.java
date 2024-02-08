@@ -8,7 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.s3.CoverHandler;
 import faang.school.projectservice.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class ResourceService {
 
 
     public ResourceDto addCoverToProject(long projectId, long userId, MultipartFile file) {
-        Project project = projectService.getProjectById(projectId);
+        Project project = projectService.getProjectEntityById(projectId);
         TeamMember teamMember = teamMemberRepository.findById(userId);
 
         coverHandler.checkCoverMemorySize(file);
