@@ -63,7 +63,7 @@ public class S3Service {
             return s3Object.getObjectContent();
         } catch (Exception e) {
             log.error("Ошибка загрузки файла", e);
+            throw new RuntimeException("Ошибка загрузки файла");
         }
-        return InputStream.nullInputStream();
     }
 }
