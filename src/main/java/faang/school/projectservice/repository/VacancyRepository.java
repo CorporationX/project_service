@@ -9,9 +9,4 @@ import java.util.List;
 
 @Repository
 public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
-
-    @Query(nativeQuery = true, value = """
-            SELECT v.* FROM vacancy v
-            """)
-    List<Vacancy> findByPositionAndName();
 }

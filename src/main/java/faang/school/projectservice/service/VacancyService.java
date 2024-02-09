@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -15,10 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static faang.school.projectservice.model.CandidateStatus.ACCEPTED;
-import static faang.school.projectservice.model.CandidateStatus.REJECTED;
 import static faang.school.projectservice.model.TeamRole.OWNER;
 import static faang.school.projectservice.model.VacancyStatus.CLOSED;
 
@@ -46,7 +43,7 @@ public class VacancyService {
     }
 
     public void updateVacancy(VacancyDto vacancyDto) {
-        Vacancy vacancy = vacancyMapper.toEntity(getVacancy(vacancyDto.getId()));
+        Vacancy vacancy = getVacancy(vacancyDto.getId());
         if (vacancy.getCandidates().size() < vacancy.getCount()) {
             System.out.println("Нужно больше кандидатов");
         }
@@ -56,26 +53,23 @@ public class VacancyService {
     }
 
     public void deleteVacancy(Long id) {
-        Vacancy vacancy = vacancyMapper.toEntity(getVacancy(id));
-        vacancy.getCandidates()
+        getVacancy(id)
+                .getCandidates()
                 .forEach(candidate -> {
-                    if (!candidate.getCandidateStatus().equals(REJECTED)) {
-                        TeamMember teamMember = teamMemberRepository
-                                .findById(candidate.getId());
-                        vacancyRepository.deleteById(teamMember.getId());
+                    if (!candidate.getCandidateStatus().equals(ACCEPTED)) {
+                        vacancyRepository.deleteById(candidate.getUserId());
                     }
                 });
     }
 
-    public Map<Long, VacancyDto> getAllVacancies() {
-        return vacancyRepository.findByPositionAndName().stream()
-                .collect(Collectors.toMap(Vacancy::getId, vacancyMapper::toDto));
+    public Map<Long, VacancyDto> getVacanciesWithFilters(Long projectId, Long position, String name) {
+        vacancyRepository.findAll();
+        return null;
     }
 
-    public VacancyDto getVacancy(Long id) {
-        Vacancy vacancy = vacancyRepository.findById(id)
+    public Vacancy getVacancy(Long id) {
+        return vacancyRepository.findById(id)
                 .orElseThrow(() -> new DataValidationException("Такой вакансии нет"));
-        return vacancyMapper.toDto(vacancy);
     }
 }
 

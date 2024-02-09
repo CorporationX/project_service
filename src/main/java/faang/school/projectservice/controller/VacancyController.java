@@ -38,13 +38,15 @@ public class VacancyController {
         vacancyService.deleteVacancy(id);
     }
 
-    //разобраться с фильтрами   @GetMapping("/getAll")
-    public Map<Long, VacancyDto> getAllVacancies() {
-        return vacancyService.getAllVacancies();
+    @GetMapping("/getWithFilters/{id}")
+    public Map<Long, VacancyDto> getAllVacancies(@PathVariable("id") Long projectId,
+                                                 @RequestParam("position") Long position,
+                                                 @RequestParam("name") String name) {
+        return vacancyService.getVacanciesWithFilters(projectId, position, name);
     }
 
     @GetMapping("/get/{id}")
     public VacancyDto getVacancy(@PathVariable("id") Long id) {
-        return vacancyService.getVacancy(id);
+        return vacancyMapper.toDto(vacancyService.getVacancy(id));
     }
 }
