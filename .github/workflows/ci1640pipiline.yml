@@ -2,8 +2,7 @@ name: Java CI with Gradle (Werewolf)
 
 on:
   pull_request:
-    branches:
-      - feature/pipline-BC2-1640
+    branches: [ "feature/pipline-BC2-1640" ]
 
 
 jobs:
