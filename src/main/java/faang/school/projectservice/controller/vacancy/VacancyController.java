@@ -43,7 +43,7 @@ public class VacancyController implements VacancyApi {
     }
 
     @Override
-    public VacancyDto deleteVacancy(Long id) {
-        return vacancyService.deleteVacancy(id);
+    public VacancyDto close(Long id) {
+        return vacancyService.closeVacancy(id);
     }
 }

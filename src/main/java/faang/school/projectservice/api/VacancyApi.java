@@ -24,17 +24,17 @@ import java.util.List;
  * @author Alexander Bulgakov
  */
 
-@RequestMapping(path = "/vacancy")
+@RequestMapping(path = "/api/v1/vacancy")
 @Tag(name = "Vacancy", description = "The vacancy API")
 public interface VacancyApi {
 
     @GetMapping("/get/{id}")
-    @Operation(summary = "Возвращает вакансию", description = "", tags = { "Vacancy" })
+    @Operation(summary = "Возвращает вакансию", description = "", tags = {"Vacancy"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
-        content = @Content(mediaType = "application/json",
-        schema = @Schema(implementation = VacancyDto.class)))
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = VacancyDto.class)))
     @ApiResponse(responseCode = "400", description = "bad request (Неправильный запрос)",
-        content = @Content(schema = @Schema(implementation = DataValidationException.class)))
+            content = @Content(schema = @Schema(implementation = DataValidationException.class)))
     @ApiResponse(responseCode = "404", description = "not found (Не найден)",
             content = @Content(schema = @Schema(implementation = EntityNotFoundException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
@@ -43,7 +43,7 @@ public interface VacancyApi {
 
     @PostMapping("/get")
     @Operation(summary = "Возвращает все вакансии по фильтру", description = "",
-            tags = { "Vacancy" })
+            tags = {"Vacancy"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
             content = @Content(mediaType = "application/json",
                     array = @ArraySchema(
@@ -62,7 +62,7 @@ public interface VacancyApi {
     @PostMapping("/create")
     @Operation(summary = "Создает и возвращает вакансию",
             description = "Возвращает созданную вакансию после сохранения в базу",
-            tags = { "Vacancy" })
+            tags = {"Vacancy"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = VacancyDto.class)))
@@ -78,7 +78,7 @@ public interface VacancyApi {
     @Operation(summary = "Обновляет и возвращает вакансию",
             description = "Возвращает обновлённую вакансию после сохранения в базу, " +
                     "так же можно закрыть вакансию передав статус",
-            tags = { "Vacancy" })
+            tags = {"Vacancy"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = VacancyDto.class)))
@@ -91,9 +91,9 @@ public interface VacancyApi {
     VacancyDto update(@RequestBody VacancyDto updateDto);
 
     @DeleteMapping("/delete/{id}")
-    @Operation(summary = "Удаляет и возвращает версию вакансии до удаления",
-            description = "Возвращает удаляемую вакансию для проверки",
-            tags = { "Vacancy" })
+    @Operation(summary = "Закрывает вакансию и возвращает дто со статусом CLOSE",
+            description = "Возвращает закрываемую вакансию для проверки",
+            tags = {"Vacancy"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = VacancyDto.class)))
@@ -103,5 +103,5 @@ public interface VacancyApi {
             content = @Content(schema = @Schema(implementation = EntityNotFoundException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
             content = @Content(schema = @Schema(implementation = Void.class)))
-    VacancyDto deleteVacancy(@PathVariable Long id);
+    VacancyDto close(@PathVariable Long id);
 }

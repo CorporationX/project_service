@@ -17,7 +17,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,7 +49,9 @@ public class VacancyService {
                 .filter(f -> f.isApplicable(filter))
                 .forEach(f -> f.apply(vacancies, filter));
 
-        return new ArrayList<>(vacancies.stream().map(vacancyMapper::toDto).toList());
+        return vacancies.stream()
+                .map(vacancyMapper::toDto)
+                .toList();
     }
 
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
@@ -79,22 +80,19 @@ public class VacancyService {
 
         vacancyValidator.validateCandidateRole(updatedVacancy);
 
-        if (vacancyDto.getStatus().equals(VacancyStatus.CLOSED)) {
-            vacancyValidator.validateForCloseVacancy(updatedVacancy);
-            updatedVacancy.setStatus(VacancyStatus.CLOSED);
-        }
-
         return vacancyMapper.toDto(vacancyRepository.save(updatedVacancy));
     }
 
-    public VacancyDto deleteVacancy(long id) {
-        var deletedVacancy = getVacancyById(id);
+    public VacancyDto closeVacancy(long id) {
+        var vacancy = getVacancyById(id);
 
-        deletedVacancy.getCandidates().removeIf(candidate ->
-                !candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED));
-
-        vacancyRepository.deleteById(id);
-
-        return vacancyMapper.toDto(deletedVacancy);
+        if (vacancy.getStatus().equals(VacancyStatus.CLOSED)) {
+            vacancyValidator.validateForCloseVacancy(vacancy);
+            vacancy.setStatus(VacancyStatus.CLOSED);
+            vacancy.getCandidates().removeIf(candidate ->
+                    !candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED));
+        }
+        
+        return vacancyMapper.toDto(vacancy);
     }
 }

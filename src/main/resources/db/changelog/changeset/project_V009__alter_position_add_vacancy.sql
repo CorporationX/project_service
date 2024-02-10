@@ -1,0 +1,2 @@
+ALTER TABLE vacancy
+    ADD COLUMN position VARCHAR(255) NOT NULL
