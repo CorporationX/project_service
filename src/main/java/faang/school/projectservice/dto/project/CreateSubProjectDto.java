@@ -6,10 +6,9 @@ import jakarta.validation.constraints.Min;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
-public class ProjectDto {
+public class CreateSubProjectDto {
     private Long id;
     private String name;
     private String description;

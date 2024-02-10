@@ -26,6 +26,24 @@ public class ProjectService {
     private final ProjectValidator projectValidator;
 
     public ProjectDto create(ProjectDto projectDto) {
+        Project project = preCreate(projectDto);
+        Project savedProject = projectRepository.save(project);
+        return projectMapper.toDto(savedProject);
+    }
+
+    public ProjectDto createSubProject(ProjectDto projectDto) {
+        Long parentId = projectDto.getParentId();
+        Project parentProject = getProjectById(parentId);
+        Project subProject = preCreate(projectDto);
+        subProject.setParentProject(parentProject);
+        projectValidator.validateVisibility(subProject);
+
+        Project savedProject = projectRepository.save(subProject);
+
+        return projectMapper.toDto(savedProject);
+    }
+
+    private Project preCreate(ProjectDto projectDto) {
         projectValidator.validateToCreate(projectDto);
         userServiceClient.getUser(projectDto.getOwnerId()); //throws if user doesn't exist
 
@@ -33,20 +51,19 @@ public class ProjectService {
         if (projectDto.getVisibility() == null) {
             projectDto.setVisibility(ProjectVisibility.PRIVATE);
         }
-
-        Project savedProject = projectRepository.save(projectMapper.toEntity(projectDto));
-
-        return projectMapper.toDto(savedProject);
+        return projectMapper.toEntity(projectDto);
     }
 
-    public ProjectDto update(ProjectDto projectDto) {
+    public ProjectDto updateProject(ProjectDto projectDto) {
         Project project = getProjectById(projectDto.getId()); //throws if project doesn't exist
         projectValidator.validateAccessToProject(project.getOwnerId());
 
         ProjectStatus updatedStatus = projectDto.getStatus();
         String updatedDescription = projectDto.getDescription();
+        List<Project> children = project.getChildren();
 
         if (updatedStatus != null) {
+            projectValidator.validateStatus(children, updatedStatus);
             project.setStatus(updatedStatus);
         }
         if (updatedDescription != null) {
@@ -55,7 +72,6 @@ public class ProjectService {
         }
 
         Project updatedProject = projectRepository.save(project);
-
         return projectMapper.toDto(updatedProject);
     }
 
@@ -92,5 +108,9 @@ public class ProjectService {
 
     private Project getProjectById(Long id) {
         return projectRepository.getProjectById(id);
+    }
+
+    public boolean existsProjectById(long projectId) {
+        return projectRepository.existsById(projectId);
     }
 }

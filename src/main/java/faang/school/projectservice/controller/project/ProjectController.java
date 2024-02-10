@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -24,15 +25,19 @@ import java.util.List;
 @RequestMapping("/projects")
 public class ProjectController {
     private final ProjectService projectService;
+    private final ProjectValidator projectValidator;
 
     @PostMapping
-    public ProjectDto create(@RequestBody @Valid ProjectDto projectDto) {
-        return projectService.create(projectDto);
+    public ProjectDto createProject(@RequestBody @Valid ProjectDto projectDto) {
+        if (projectDto.getParentId() == null) {
+            return projectService.create(projectDto);
+        }
+        return projectService.createSubProject(projectDto);
     }
 
     @PutMapping
-    public ProjectDto update(@RequestBody ProjectDto projectDto) {
-        return projectService.update(projectDto);
+    public ProjectDto updateProject(@RequestBody ProjectDto projectDto) {
+        return projectService.updateProject(projectDto);
     }
 
     @GetMapping
@@ -49,4 +54,10 @@ public class ProjectController {
     public List<ProjectDto> getByFilters(@ModelAttribute ProjectFilterDto filterDto) {
         return projectService.getAll(filterDto);
     }
+
+    @PostMapping("/exists/{projectId}")
+    public void existsProjectById(@PathVariable long projectId) {
+        projectService.existsProjectById(projectId);
+    }
+
 }
