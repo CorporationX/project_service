@@ -16,6 +16,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,9 +85,9 @@ public class ProjectServiceTest {
         nameFilter = Mockito.mock(NameFilter.class);
         statusFilter = Mockito.mock(StatusFilter.class);
         filters = new ArrayList<>(List.of(nameFilter, statusFilter));
-        ProjectValidator projectValidator = new ProjectValidator(projectRepository, userServiceClient, userContext);
+        ProjectValidator projectValidator = new ProjectValidator(projectRepository, userContext);
 
-        projectService = new ProjectService(projectRepository, projectMapper, filters, projectValidator);
+        projectService = new ProjectService(projectRepository, userServiceClient, projectMapper, filters, projectValidator);
     }
 
     @Test
@@ -102,6 +103,7 @@ public class ProjectServiceTest {
     @Test
     public void testCreate_ownerUserNotExist_throwsEntityNotFoundException() {
         accessAllowed(true);
+        projectNameExists(false);
         userFromDatabase(null);
 
         assertThrows(
@@ -113,7 +115,6 @@ public class ProjectServiceTest {
     @Test
     public void testCreate_projectNameAlreadyExists_throwsIllegalArgumentException() {
         accessAllowed(true);
-        userFromDatabase(new UserDto());
         projectNameExists(true);
 
         assertThrows(
@@ -125,10 +126,10 @@ public class ProjectServiceTest {
     @Test
     public void testCreate_nameNotValid_throwsIllegalArgumentException() {
         filledProjectDto.setName("   ");
-        validated();
+        accessAllowed(true);
 
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> projectService.create(filledProjectDto)
         );
     }
@@ -136,17 +137,20 @@ public class ProjectServiceTest {
     @Test
     public void testCreate_descriptionNotValid_throwsIllegalArgumentException() {
         filledProjectDto.setDescription("   ");
-        validated();
+        accessAllowed(true);
+        projectNameExists(false);
 
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> projectService.create(filledProjectDto)
         );
     }
 
     @Test
     public void testCreate_validProjectDto_projectSaved() {
-        validated();
+        accessAllowed(true);
+        userFromDatabase(new UserDto());
+        projectNameExists(false);
 
         projectService.create(filledProjectDto);
 
@@ -248,17 +252,15 @@ public class ProjectServiceTest {
         return List.of(publicAndNotOwnPrj, privateAndOwnPrj);
     }
 
-    private void validated() {
-        accessAllowed(true);
-        userFromDatabase(new UserDto());
-        projectNameExists(false);
-    }
-
     private void projectNameExists(boolean isExist) {
         when(projectRepository.existsByOwnerUserIdAndName(OWNER_ACCESSED_ID, filledProjectDto.getName())).thenReturn(isExist);
     }
 
     private void userFromDatabase(UserDto userFromDatabase) {
+        if (userFromDatabase == null) {
+            when(userServiceClient.getUser(OWNER_ACCESSED_ID)).thenThrow(EntityNotFoundException.class);
+            return;
+        }
         when(userServiceClient.getUser(OWNER_ACCESSED_ID)).thenReturn(userFromDatabase);
     }
 
