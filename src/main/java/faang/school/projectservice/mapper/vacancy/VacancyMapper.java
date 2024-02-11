@@ -20,7 +20,7 @@ import java.util.List;
 public interface VacancyMapper {
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "count", target = "candidatesCount")
-    @Mapping(source = "candidates", target = "candidatesIds", conditionQualifiedByName = "mapCandidates")
+    @Mapping(source = "candidates", target = "candidatesIds", qualifiedByName = "mapCandidates")
     VacancyDto toDto(Vacancy vacancy);
 
     @Mapping(target = "candidates", ignore = true)

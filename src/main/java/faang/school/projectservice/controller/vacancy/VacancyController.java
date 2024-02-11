@@ -1,6 +1,9 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.api.VacancyApi;
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
@@ -19,6 +22,8 @@ import java.util.List;
 public class VacancyController implements VacancyApi {
     private final VacancyService vacancyService;
     private final VacancyValidator vacancyValidator;
+    private final UserServiceClient userServiceClient;
+    private final UserContext userContext;
 
     @Override
     public VacancyDto getVacancy(Long id) {
@@ -37,8 +42,14 @@ public class VacancyController implements VacancyApi {
     }
 
     @Override
-    public VacancyDto update(VacancyDto vacancyDto) {
+    public VacancyDto update(Long vacancyId, VacancyDto vacancyDto) {
+        long userId = userContext.getUserId();
+        UserDto user = userServiceClient.getUser(userId);
+        
+        vacancyValidator.validateUser(user, vacancyDto);
+        vacancyValidator.validateSupervisorRole(user.getId());
         vacancyValidator.validateVacancy(vacancyDto);
+
         return vacancyService.updateOrCloseVacancy(vacancyDto);
     }
 

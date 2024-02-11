@@ -44,12 +44,9 @@ public class Vacancy {
     @NotBlank
     private String name;
 
-    @ElementCollection(targetClass = TeamRole.class)
-    @CollectionTable(name = "team_member_roles",
-            joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "position")
     @Enumerated(EnumType.STRING)
-    private List<TeamRole> position;
+    private TeamRole position;
 
     @NotBlank
     private String description;

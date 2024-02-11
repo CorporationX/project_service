@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,13 +22,12 @@ import java.util.List;
 /**
  * @author Alexander Bulgakov
  */
-
-@RequestMapping(path = "/api/v1/vacancy")
-@Tag(name = "Vacancy", description = "The vacancy API")
+@RequestMapping(path = "/vacancies")
+@Tag(name = "Vacancies", description = "The vacancy API")
 public interface VacancyApi {
 
-    @GetMapping("/get/{id}")
-    @Operation(summary = "Возвращает вакансию", description = "", tags = {"Vacancy"})
+    @GetMapping("/{id}")
+    @Operation(summary = "Возвращает вакансию", description = "", tags = {"Vacancies"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = VacancyDto.class)))
@@ -37,13 +35,15 @@ public interface VacancyApi {
             content = @Content(schema = @Schema(implementation = DataValidationException.class)))
     @ApiResponse(responseCode = "404", description = "not found (Не найден)",
             content = @Content(schema = @Schema(implementation = EntityNotFoundException.class)))
+    @ApiResponse(responseCode = "405", description = "method not allowed (Не разрешён)",
+            content = @Content(schema = @Schema(implementation = RuntimeException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
             content = @Content(schema = @Schema(implementation = Void.class)))
     VacancyDto getVacancy(@PathVariable("id") Long id);
 
-    @PostMapping("/get")
+    @PostMapping("/get-all")
     @Operation(summary = "Возвращает все вакансии по фильтру", description = "",
-            tags = {"Vacancy"})
+            tags = {"Vacancies"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
             content = @Content(mediaType = "application/json",
                     array = @ArraySchema(
@@ -55,6 +55,8 @@ public interface VacancyApi {
             content = @Content(schema = @Schema(implementation = DataValidationException.class)))
     @ApiResponse(responseCode = "404", description = "not found (Не найден)",
             content = @Content(schema = @Schema(implementation = EntityNotFoundException.class)))
+    @ApiResponse(responseCode = "405", description = "method not allowed (Не разрешён)",
+            content = @Content(schema = @Schema(implementation = RuntimeException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
             content = @Content(schema = @Schema(implementation = Void.class)))
     List<VacancyDto> getVacancies(@RequestBody VacancyFilterDto filter);
@@ -62,7 +64,7 @@ public interface VacancyApi {
     @PostMapping("/create")
     @Operation(summary = "Создает и возвращает вакансию",
             description = "Возвращает созданную вакансию после сохранения в базу",
-            tags = {"Vacancy"})
+            tags = {"Vacancies"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = VacancyDto.class)))
@@ -70,15 +72,17 @@ public interface VacancyApi {
             content = @Content(schema = @Schema(implementation = DataValidationException.class)))
     @ApiResponse(responseCode = "404", description = "not found (Не найден)",
             content = @Content(schema = @Schema(implementation = EntityNotFoundException.class)))
+    @ApiResponse(responseCode = "405", description = "method not allowed (Не разрешён)",
+            content = @Content(schema = @Schema(implementation = RuntimeException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
             content = @Content(schema = @Schema(implementation = Void.class)))
     VacancyDto create(@RequestBody VacancyDto vacancyDto);
 
-    @PutMapping("/update")
+    @PutMapping("/{vacancyId}")
     @Operation(summary = "Обновляет и возвращает вакансию",
             description = "Возвращает обновлённую вакансию после сохранения в базу, " +
                     "так же можно закрыть вакансию передав статус",
-            tags = {"Vacancy"})
+            tags = {"Vacancies"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = VacancyDto.class)))
@@ -86,14 +90,16 @@ public interface VacancyApi {
             content = @Content(schema = @Schema(implementation = DataValidationException.class)))
     @ApiResponse(responseCode = "404", description = "not found (Не найден)",
             content = @Content(schema = @Schema(implementation = EntityNotFoundException.class)))
+    @ApiResponse(responseCode = "405", description = "method not allowed (Не разрешён)",
+            content = @Content(schema = @Schema(implementation = RuntimeException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
             content = @Content(schema = @Schema(implementation = Void.class)))
-    VacancyDto update(@RequestBody VacancyDto updateDto);
+    VacancyDto update(@PathVariable Long vacancyId, @RequestBody VacancyDto updateDto);
 
-    @DeleteMapping("/delete/{id}")
+    @PutMapping("/close/{id}")
     @Operation(summary = "Закрывает вакансию и возвращает дто со статусом CLOSE",
             description = "Возвращает закрываемую вакансию для проверки",
-            tags = {"Vacancy"})
+            tags = {"Vacancies"})
     @ApiResponse(responseCode = "200", description = "success (Успешно)",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = VacancyDto.class)))
@@ -101,6 +107,8 @@ public interface VacancyApi {
             content = @Content(schema = @Schema(implementation = DataValidationException.class)))
     @ApiResponse(responseCode = "404", description = "not found (Не найден)",
             content = @Content(schema = @Schema(implementation = EntityNotFoundException.class)))
+    @ApiResponse(responseCode = "405", description = "method not allowed (Не разрешён)",
+            content = @Content(schema = @Schema(implementation = RuntimeException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
             content = @Content(schema = @Schema(implementation = Void.class)))
     VacancyDto close(@PathVariable Long id);

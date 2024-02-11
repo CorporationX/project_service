@@ -20,6 +20,6 @@ public class VacancyPositionFilter implements Filter<VacancyFilterDto, Vacancy> 
 
     @Override
     public void apply(List<Vacancy> vacancies, VacancyFilterDto filter) {
-        vacancies.removeIf(vacancy -> !vacancy.getPosition().contains(filter.getPosition()));
+        vacancies.removeIf(vacancy -> !vacancy.getPosition().toString().contains(filter.getPosition()));
     }
 }

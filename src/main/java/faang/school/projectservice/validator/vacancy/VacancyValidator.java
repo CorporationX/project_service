@@ -1,5 +1,6 @@
 package faang.school.projectservice.validator.vacancy;
 
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
@@ -23,6 +24,12 @@ public class VacancyValidator {
     public void validateId(Long id) {
         if (id == null) {
             throw new DataValidationException("This id is null!");
+        }
+    }
+
+    public void validateUser(UserDto user, VacancyDto dto) {
+        if (!dto.getCreatedBy().equals(user.getId())) {
+            throw new DataValidationException("User isn't owner!");
         }
     }
 
