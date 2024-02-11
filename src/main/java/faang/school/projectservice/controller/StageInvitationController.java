@@ -30,6 +30,8 @@ public class StageInvitationController {
         return stageInvitationService.reject(stageInvitationId, message);
     }
 
+    // "Просмотреть все приглашения для одного участника с фильтрами"
+    // Не совсем понял, что за один участник. Будет прилетать чей-то ID-шник?
     public List<StageInvitationDto> findAllInviteByFilter(StageInvitationFilterDto filterDto) {
         validator.validateFilter(filterDto);
         return stageInvitationService.findAllInviteByFilter(filterDto);
