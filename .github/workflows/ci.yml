@@ -3,12 +3,12 @@ name: CI/CD basilisk-bc2 (ProjectService)
 on:
   push:
     branches:
-      - basilisk-master-bc2
-      - 'basilisk-master-bc2/**'
+      - 'basilisk-master-bc2'
+      - 'basilisk-master-bc2-**'
   pull_request:
     branches:
-      - basilisk-master-bc2
-      - 'basilisk-master-bc2/**'
+      - 'basilisk-master-bc2'
+      - 'basilisk-master-bc2-**'
 
 jobs:
   build:
