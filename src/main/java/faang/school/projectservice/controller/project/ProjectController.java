@@ -45,6 +45,11 @@ public class ProjectController {
         return projectService.getAll();
     }
 
+    @GetMapping
+    public List<ProjectDto> getAllSubprojectsByFilter(@PathVariable @Min(1) long parentId, @ModelAttribute ProjectFilterDto filterDto) {
+        return projectService.getAllSubprojectsByFilter(parentId, filterDto);
+    }
+
     @GetMapping("{projectId}")
     public ProjectDto getById(@PathVariable @Min(1) long projectId) {
         return projectService.getById(projectId);

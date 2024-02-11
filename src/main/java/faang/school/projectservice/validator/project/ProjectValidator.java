@@ -28,12 +28,6 @@ public class ProjectValidator {
         validateDescription(projectDto.getDescription());
     }
 
-    public void validateParentId(Long parentId) {
-        if (parentId == null) {
-            throw new ValidationException("Parent ID not valid");
-        }
-    }
-
     public void validateStatus(List<Project> children, ProjectStatus updatedStatus) {
         validateStatuses(children, updatedStatus);
         validateSubProjectCompleted(children, updatedStatus);
@@ -73,7 +67,7 @@ public class ProjectValidator {
         }
     }
 
-    public void validateSubProjectCompleted(List<Project> children,ProjectStatus updatedStatus) {
+    public void validateSubProjectCompleted(List<Project> children, ProjectStatus updatedStatus) {
         if (updatedStatus.equals(ProjectStatus.COMPLETED) &&
                 !children.stream()
                         .allMatch(childProject -> childProject.getStatus().equals(ProjectStatus.COMPLETED))) {

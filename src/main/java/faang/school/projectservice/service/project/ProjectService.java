@@ -87,16 +87,19 @@ public class ProjectService {
 
     public List<ProjectDto> getAll(ProjectFilterDto filterDto) {
         Stream<Project> projects = getVisibleProjects().stream();
+        List<Project> filteredProjects = getFilteredProjects(filterDto, projects);
 
-        List<Project> filteredProjects = filters.stream()
+        return projectMapper.entitiesToDtos(filteredProjects);
+    }
+
+    private List<Project> getFilteredProjects(ProjectFilterDto filterDto, Stream<Project> projects) {
+        return filters.stream()
                 .filter(prjFilter -> prjFilter.isApplicable(filterDto))
                 .reduce(projects,
                         (stream, prjFilter)
                                 -> prjFilter.apply(stream, filterDto),
                         Stream::concat)
                 .toList();
-
-        return projectMapper.entitiesToDtos(filteredProjects);
     }
 
     private List<Project> getVisibleProjects() {
@@ -113,4 +116,12 @@ public class ProjectService {
     public boolean existsProjectById(long projectId) {
         return projectRepository.existsById(projectId);
     }
+
+    public List<ProjectDto> getAllSubprojectsByFilter(long parentId, ProjectFilterDto projectFilterDto) {
+        Stream<Project> allChildren = getProjectById(parentId).getChildren().stream();
+        List<Project> filteredSubProjects = getFilteredProjects(projectFilterDto, allChildren);
+
+        return projectMapper.entitiesToDtos(filteredSubProjects);
+    }
+
 }
