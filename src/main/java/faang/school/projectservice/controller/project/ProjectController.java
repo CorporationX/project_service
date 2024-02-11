@@ -27,12 +27,9 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ProjectValidator projectValidator;
 
-    @PostMapping
+    @PostMapping()
     public ProjectDto createProject(@RequestBody @Valid ProjectDto projectDto) {
-        if (projectDto.getParentId() == null) {
-            return projectService.create(projectDto);
-        }
-        return projectService.createSubProject(projectDto);
+        return projectService.createProject(projectDto);
     }
 
     @PutMapping

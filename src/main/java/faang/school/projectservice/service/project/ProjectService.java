@@ -25,20 +25,18 @@ public class ProjectService {
     private final List<Filter<Project, ProjectFilterDto>> filters;
     private final ProjectValidator projectValidator;
 
-    public ProjectDto create(ProjectDto projectDto) {
-        Project project = preCreate(projectDto);
-        Project savedProject = projectRepository.save(project);
-        return projectMapper.toDto(savedProject);
-    }
 
-    public ProjectDto createSubProject(ProjectDto projectDto) {
+    public ProjectDto createProject(ProjectDto projectDto) {
         Long parentId = projectDto.getParentId();
-        Project parentProject = getProjectById(parentId);
-        Project subProject = preCreate(projectDto);
-        subProject.setParentProject(parentProject);
-        projectValidator.validateVisibility(subProject);
+        Project project = preCreate(projectDto);
 
-        Project savedProject = projectRepository.save(subProject);
+        if (parentId != null) {
+            Project parentProject = getProjectById(parentId);
+            project.setParentProject(parentProject);
+            projectValidator.validateVisibility(project);
+        }
+
+        Project savedProject = projectRepository.save(project);
 
         return projectMapper.toDto(savedProject);
     }
