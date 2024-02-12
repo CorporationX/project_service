@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
-import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -16,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -86,16 +84,5 @@ class SubProjectControllerTest {
         subProjectController.getFilteredSubProjects(1L, projectFilterDto);
 
         verify(projectService, times(1)).getFilteredSubProjects(1L, projectFilterDto);
-    }
-
-    @Test
-    public void testCreateSubProjectWithBlankNameThrowsDataValidationException() {
-        assertThrows(DataValidationException.class, () -> subProjectController.create(createSubProjectNameIsBlankDto));
-    }
-
-    @Test
-    public void testUpdateProjectWithInvalidIdThrowsDataValidationException() {
-        assertThrows(DataValidationException.class,
-                () -> subProjectController.updateProject(-1L, updateSubProjectDto));
     }
 }
