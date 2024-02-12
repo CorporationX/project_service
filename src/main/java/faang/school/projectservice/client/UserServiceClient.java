@@ -1,5 +1,6 @@
 package faang.school.projectservice.client;
 
+import faang.school.projectservice.dto.client.EventDto;
 import faang.school.projectservice.dto.client.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
