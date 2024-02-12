@@ -40,6 +40,11 @@ calculations_messages_processing:
 
 services:
   s3:
+    resources:
+      cover:
+        height: 566
+        width: 1080
+        maxSize: 5242880
     endpoint: http://127.0.0.1:9000
     accessKey: user
     secretKey: password
@@ -51,3 +56,4 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+

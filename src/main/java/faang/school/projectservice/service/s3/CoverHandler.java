@@ -1,96 +1,72 @@
 package faang.school.projectservice.service.s3;
 
-import faang.school.projectservice.exception.FileException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Component
 public class CoverHandler {
-    private final long MAX_COVER_SIZE = 5242880L;
-    private final int MAX_HEIGHT = 566;
-    private final int MAX_WIDTH = 1080;
+    @Value("${services.s3.resources.cover.maxSize}")
+    private long maxCoverSize;
+    @Value("${services.s3.resources.cover.height}")
+    private int maxHeight;
+    @Value("${services.s3.resources.cover.width}")
+    private int maxWidth;
 
     public void checkCoverSize(MultipartFile file) {
-        if (file.getSize() > MAX_COVER_SIZE) {
+        if (file.getSize() > maxCoverSize) {
             throw new IllegalArgumentException("Превышен размер обложки");
         }
     }
 
-    public void checkCoverResolution(MultipartFile file) {
-        BufferedImage originalImage = null;
-        try {
-            originalImage = ImageIO.read(file.getInputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        int originalWidth = originalImage.getWidth();
-        int originalHeight = originalImage.getHeight();
-
-        if (originalHeight == originalWidth) {
-            if (originalHeight > MAX_WIDTH) {
-                throw new FileException("Размер обложки не должен быть больше 1080x1080");
-            }
-        } else {
-            if (originalHeight > MAX_HEIGHT || originalWidth > MAX_WIDTH) {
-                throw new FileException("Размер обложки не должен быть больше 1080x566");
-            }
-        }
-    }
-
     //Страшный душный метод проверки и сжатия обложки
-    public byte[] checkCoverAndResize(MultipartFile file) {
-        BufferedImage originalImage = null;
+    public InputStream checkCoverAndResize(MultipartFile file) throws IOException {
+        BufferedImage originalImage = ImageIO.read(file.getInputStream());
         BufferedImage resizedImage = null;
-        try {
-            originalImage = ImageIO.read(file.getInputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
         int originalWidth = originalImage.getWidth();
         int originalHeight = originalImage.getHeight();
         double ration = (double) originalWidth / originalHeight;
 
-        if (ration == 1){
-            if (originalHeight > 1080){
-                resizedImage = resizeImage(originalImage, 1080, 1080);
+        if (ration == 1) {  // Если квадратное
+            if (originalHeight > maxWidth) {
+                resizedImage = resizeImage(originalImage, maxWidth, maxWidth);
             }
-        } else if (ration < 1){
-            if (originalHeight > 1080){
-                resizedImage = resizeImage(originalImage, (int) (1080*ration), 1080);
+        } else if (ration < 1) {    //Если вертикальный прямоугольник
+            if (originalHeight > maxWidth) {
+                resizedImage = resizeImage(originalImage, (int) (maxWidth * ration), maxWidth);
             }
-        } else if (ration > 1 && ration < (double) 1080 /566){
-            if (originalHeight > 566){
-                resizedImage = resizeImage(originalImage, (int) (566*ration), 566);
+        } else if (ration > 1 && ration < (double) maxWidth / maxHeight) {
+            if (originalHeight > maxHeight) {
+                resizedImage = resizeImage(originalImage, (int) (maxHeight * ration), maxHeight);
             }
-        } else if (ration > (double) 1080 /566){
-            if (originalWidth > 1080){
-                resizedImage = resizeImage(originalImage, 1080, (int) (1080/ration));
+        } else if (ration > (double) maxWidth / maxHeight) {
+            if (originalWidth > maxWidth) {
+                resizedImage = resizeImage(originalImage, maxWidth, (int) (maxWidth / ration));
             }
         }
-        if (resizedImage == null){
+        if (resizedImage == null) {
             resizedImage = originalImage;
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(resizedImage, "jpg", outputStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return outputStream.toByteArray(); //как потом перевести byte[] в InputStream?
-    }       //все способы требуют создание нового специального класса ради одного этого действия
+        ImageIO.write(resizedImage, "png", outputStream);
+        return new ByteArrayInputStream(outputStream.toByteArray());
+    }
 
     private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
-        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
-        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-        outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-        return outputImage;
+        BufferedImage scaledBI = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = scaledBI.createGraphics();
+        g.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
+        g.dispose();
+        return scaledBI;
     }
 }

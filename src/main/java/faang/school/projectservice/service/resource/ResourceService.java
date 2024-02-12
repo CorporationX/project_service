@@ -29,14 +29,11 @@ public class ResourceService {
     private final CoverHandler coverHandler;
 
 
-
     public ResourceDto addCoverToProject(long projectId, long userId, MultipartFile file) {
         Project project = projectService.getProjectEntityById(projectId);
         TeamMember teamMember = teamMemberRepository.findById(userId);
 
         coverHandler.checkCoverSize(file);
-        coverHandler.checkCoverResolution(file);
-
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(project.getMaxStorageSize(), newStorageSize);

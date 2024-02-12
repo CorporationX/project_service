@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class S3Service {
     private final AmazonS3 s3Client;
+    private final CoverHandler coverHandler;
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
@@ -33,23 +34,26 @@ public class S3Service {
         objectMetadata.setContentType(file.getContentType());
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
         try {
+            InputStream resizedFile = coverHandler.checkCoverAndResize(file);
             PutObjectRequest putObjectRequest = new PutObjectRequest(
-                    bucketName, key, file.getInputStream(), objectMetadata);
+                    bucketName, key, resizedFile, objectMetadata);
+            putObjectRequest.getMetadata().setContentLength(resizedFile.available());
+            putObjectRequest.getMetadata().setContentType("image/png");
+            resizedFile.close();
             s3Client.putObject(putObjectRequest);
         } catch (AmazonS3Exception | IOException e) {
             throw new RuntimeException("Failed to upload file: " + e.getMessage());
         }
 
-        Resource resource = new Resource();
-        resource.setKey(key);
-        resource.setSize(BigInteger.valueOf(fileSize));
-        resource.setCreatedAt(LocalDateTime.now());
-        resource.setUpdatedAt(LocalDateTime.now());
-        resource.setStatus(ResourceStatus.ACTIVE);
-        resource.setType(ResourceType.getResourceType(file.getContentType()));
-        resource.setName(file.getOriginalFilename());
-
-        return resource;
+        return Resource.builder()
+                .key(key)
+                .size(BigInteger.valueOf(fileSize))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .status(ResourceStatus.ACTIVE)
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .name(file.getOriginalFilename())
+                .build();
     }
 
     public InputStream downloadFile(String key) {
