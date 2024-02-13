@@ -49,12 +49,16 @@ public class StageInvitationService {
         return mapper.toDto(repository.save(invitation));
     }
 
-    public List<StageInvitationDto> findAllInviteByFilter(StageInvitationFilterDto filterDto) {
-        List<StageInvitation> stageInvitations = repository.findAll();
+    public List<StageInvitationDto> findAllInviteByFilter(StageInvitationFilterDto filterDto, String userId) {
+        List<StageInvitation> stageInvitations = findAllInvitationForUser(userId);
         filters.stream()
                 .filter(f -> f.IsApplicable(filterDto))
                 .forEach(f -> f.apply(stageInvitations, filterDto));
 
         return stageInvitations.stream().map(mapper::toDto).toList();
+    }
+
+    private List<StageInvitation> findAllInvitationForUser(String userId) {
+        return  repository.findAll().stream().filter(stage -> stage.getInvited().getId().equals(Long.parseLong(userId))).toList();
     }
 }
