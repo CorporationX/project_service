@@ -62,9 +62,7 @@ class VacancyServiceTest {
         Project project = Project.builder()
                 .id(vacancyDto.getProjectId())
                 .build();
-
         TeamMember member = new TeamMember();
-
         Vacancy vacancy = Vacancy.builder()
                 .name(vacancyDto.getName())
                 .createdBy(createdBy)
@@ -147,9 +145,40 @@ class VacancyServiceTest {
     }
 
     @Test
+    void testGetVacancyWithAllFiltersSuccessful() {
+        String nameTrue = "Java";
+        String positionTrue = "Junior";
+        String nameFalse = "Kotlin";
+        String positionFalse = "Midl";
+        Vacancy vacancy1 = getVacancy(1L, nameTrue, positionTrue, 11l);
+        Vacancy vacancy2 = getVacancy(2L, nameFalse, positionTrue, 12l);
+        Vacancy vacancy3 = getVacancy(3L, nameTrue, positionFalse, 13l);
+        Vacancy vacancy4 = getVacancy(4L, nameFalse, positionFalse, 14l);
+        List<Vacancy> list = List.of(vacancy1, vacancy2, vacancy3, vacancy4);
+        when(vacancyRepository.findAll()).thenReturn(list);
+        List<VacancyDto> vacancyDto = vacancyService.getVacanciesWithFilters(nameTrue, positionTrue);
+
+        assertEquals(1, vacancyDto.size());
+        assertEquals(vacancy1.getId(), list.get(0).getId());
+    }
+
+    @Test
     void testGetVacancyDataValidateException() {
         when(vacancyRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(DataValidationException.class, () -> vacancyService.getVacancy(1L));
     }
 
+    private static Vacancy getVacancy(Long id,
+                                      String name,
+                                      String description,
+                                      Long projectId) {
+        return Vacancy.builder()
+                .id(id)
+                .name(name)
+                .description(description)
+                .project(Project.builder()
+                        .id(projectId)
+                        .build())
+                .build();
+    }
 }

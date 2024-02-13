@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 import static faang.school.projectservice.model.CandidateStatus.ACCEPTED;
 import static faang.school.projectservice.model.TeamRole.OWNER;
@@ -62,14 +62,30 @@ public class VacancyService {
                 });
     }
 
-    public Map<Long, VacancyDto> getVacanciesWithFilters(Long projectId, Long position, String name) {
-        vacancyRepository.findAll();
-        return null;
+    public List<VacancyDto> getVacanciesWithFilters(String name, String position) {
+        List<Vacancy> vacancyWithFilter = vacancyRepository.findAll();
+        if (name != null) vacancyWithFilter = filterName(vacancyWithFilter, name);
+        if (position != null) vacancyWithFilter = filterDescription(vacancyWithFilter, position);
+        return vacancyWithFilter.stream()
+                .map(vacancyMapper::toDto)
+                .toList();
     }
 
     public Vacancy getVacancy(Long id) {
         return vacancyRepository.findById(id)
                 .orElseThrow(() -> new DataValidationException("Такой вакансии нет"));
+    }
+
+    private List<Vacancy> filterName(List<Vacancy> vacancyWithFilter, String name) {
+        return vacancyWithFilter.stream()
+                .filter(vacancy -> vacancy.getName().contains(name))
+                .toList();
+    }
+
+    private List<Vacancy> filterDescription(List<Vacancy> vacancyWithFilter, String position) {
+        return vacancyWithFilter.stream()
+                .filter(vacancy -> vacancy.getDescription().contains(position))
+                .toList();
     }
 }
 
