@@ -49,4 +49,9 @@ public class ProjectController {
     public List<ProjectDto> getByFilters(@ModelAttribute ProjectFilterDto filterDto) {
         return projectService.getAll(filterDto);
     }
+
+    @GetMapping("{projectId}/exist")
+    public boolean existProjectById(@PathVariable("projectId") long projectsId) {
+        return projectService.existProjectById(projectsId);
+    }
 }
