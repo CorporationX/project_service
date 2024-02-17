@@ -12,6 +12,7 @@ import faang.school.projectservice.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class VacancyService {
         teamMemberRepository.findById(createdBy).setRoles(Collections.singletonList(OWNER));
         Vacancy vacancy = Vacancy.builder()
                 .name(vacancyDto.getName())
+                .createdAt(LocalDateTime.now())
                 .createdBy(createdBy)
                 .description("junior-dev")
                 .status(VacancyStatus.OPEN)
@@ -49,6 +51,7 @@ public class VacancyService {
         }
         vacancy.getCandidates()
                 .forEach(candidate -> candidate.setCandidateStatus(ACCEPTED));
+        vacancy.setUpdatedAt(LocalDateTime.now());
         vacancy.setStatus(CLOSED);
     }
 
