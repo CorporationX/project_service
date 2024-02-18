@@ -1,9 +1,15 @@
 package faang.school.projectservice.dto.project;
 
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ProjectViewEvent {
-    private long id;
-    private long userId;
-    private LocalDateTime viewTime;
+    private long projectId;
+    private long ownerId;
 }

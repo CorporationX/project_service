@@ -3,16 +3,19 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectViewEvent;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -20,6 +23,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectViewEventPublisher publisher;
     private final UserServiceClient userServiceClient;
     private final ProjectMapper projectMapper;
     private final List<Filter<Project, ProjectFilterDto>> filters;
@@ -61,7 +65,14 @@ public class ProjectService {
 
     public ProjectDto getById(long id) {
         Project projectById = getProjectById(id);
-        projectValidator.validateAccessToProject(projectById.getOwnerId());
+        Long ownerId = projectById.getOwnerId();
+        projectValidator.validateAccessToProject(ownerId);
+        ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
+                .projectId(id)
+                .ownerId(ownerId)
+                .build();
+        String str = "id " + id+ "owner " + ownerId;
+        publisher.publish(str);
         return projectMapper.toDto(projectById);
     }
 

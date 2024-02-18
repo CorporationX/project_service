@@ -4,14 +4,16 @@ import faang.school.projectservice.dto.project.ProjectViewEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-public class ProjectViewEventPublisher implements EventPublisher<ProjectViewEvent> {
+@Component
+public class ProjectViewEventPublisher implements EventPublisher<String> {
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ChannelTopic topic;
+    private final ChannelTopic profileViewTopic;
 
     @Override
-    public void publish(ProjectViewEvent projectViewEvent) {
-        redisTemplate.convertAndSend(topic.getTopic(), projectViewEvent);
+    public void publish(String str) {
+        redisTemplate.convertAndSend(profileViewTopic.getTopic(), str);
     }
 }

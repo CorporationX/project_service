@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableFeignClients
 @EnableRedisRepositories
+
 public class ProjectServiceApplication {
     public static void main(String[] args) {
         new SpringApplicationBuilder(ProjectServiceApplication.class)
