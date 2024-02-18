@@ -50,3 +50,6 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+resource_service:
+  folder: "#files"

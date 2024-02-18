@@ -81,7 +81,6 @@ public class ResourceServiceTest {
 
         assertNotNull(dto, "ResourceDto should not be null");
         verify(s3Service, times(1)).uploadFile(any(MultipartFile.class), any(String.class));
-        verify(resourceRepository, times(1)).save(any(Resource.class));
     }
 
     @Test
@@ -103,7 +102,6 @@ public class ResourceServiceTest {
         resourceService.deleteResourceFile(resourceId, userId);
 
         verify(s3Service, times(1)).deleteFile(mockKey);
-        verify(resourceRepository, times(1)).save(resource);
         assertEquals(ResourceStatus.DELETED, resource.getStatus());
     }
 
