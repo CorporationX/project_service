@@ -1,11 +1,13 @@
 package faang.school.projectservice.dto.resource;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class ResourceDto {
 
     private Long id;

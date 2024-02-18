@@ -44,12 +44,12 @@ public class CoverHandler {
             if (originalHeight > maxWidth) {
                 resizedImage = resizeImage(originalImage, (int) (maxWidth * ration), maxWidth);
             }
-        } else if (ration > 1 && ration < (double) maxWidth / maxHeight) {
-            if (originalHeight > maxHeight) {
+        } else if (ration > 1 && ration < (double) maxWidth / maxHeight) { //Если горизонтальный прямоугольник
+            if (originalHeight > maxHeight) {     //и коэфф. отношения ширины к высоте меньше чем у прямоугольника со сторонами 1080 на 566
                 resizedImage = resizeImage(originalImage, (int) (maxHeight * ration), maxHeight);
             }
-        } else if (ration > (double) maxWidth / maxHeight) {
-            if (originalWidth > maxWidth) {
+        } else if (ration > (double) maxWidth / maxHeight) {//если горизонтальный прямоугольник
+            if (originalWidth > maxWidth) {  //и коээф. отношения ширины к высоте больше чем у прямоугольника со сторонами 1080 на 566
                 resizedImage = resizeImage(originalImage, maxWidth, (int) (maxWidth / ration));
             }
         }
