@@ -55,13 +55,13 @@ public class Task {
     @JoinColumn(name = "parent_task_id")
     private Task parentTask;
 
-    @ManyToMany
-    @JoinTable(
-            name = "task_linked_tasks",
-            joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "linked_task_id")
-    )
-    private List<Task> linkedTasks;
+//    @ManyToMany
+//    @JoinTable(
+//            name = "task_linked_tasks",
+//            joinColumns = @JoinColumn(name = "task_id"),
+//            inverseJoinColumns = @JoinColumn(name = "linked_task_id")
+//    )
+//    private List<Task> linkedTasks;
 
     @ManyToOne
     @JoinColumn(name = "project_id")
