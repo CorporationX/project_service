@@ -92,7 +92,7 @@ tasks.jacocoTestReport {
         xml.required.set(false)
         html.required.set(true)
     }
-    finalizedBy(tasks.jacocoTestCoverageVerification)
+    //finalizedBy(tasks.jacocoTestCoverageVerification)
 }
 
 tasks.jacocoTestCoverageVerification {

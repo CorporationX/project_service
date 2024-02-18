@@ -47,7 +47,7 @@ public class ProjectValidator {
 
     public void validateNameExistence(long ownerId, String name) {
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
-            throw new EntityNotFoundException("Project with this name already exists. Name: " + name);
+            throw new IllegalArgumentException("Project with this name already exists. Name: " + name);
         }
     }
 }

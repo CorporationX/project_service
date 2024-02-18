@@ -1,4 +1,4 @@
-package faang.school.projectservice.contreoller.project;
+package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.api.ProjectApi;
 import faang.school.projectservice.dto.project.ProjectDto;
@@ -40,5 +40,10 @@ public class ProjectController implements ProjectApi {
     @Override
     public List<ProjectDto> getByFilters(ProjectFilterDto filterDto) {
         return projectService.getAll(filterDto);
+    }
+
+    @GetMapping("{projectId}/exist")
+    public boolean existProjectById(@PathVariable("projectId") long projectsId) {
+        return projectService.existProjectById(projectsId);
     }
 }
