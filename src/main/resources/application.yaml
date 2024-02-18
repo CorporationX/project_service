@@ -24,6 +24,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        profile_view_channel:
+          name: profile_view_channel
   mvc:
     servlet:
       path: /api/v1
