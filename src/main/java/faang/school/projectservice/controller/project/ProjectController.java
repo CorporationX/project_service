@@ -27,7 +27,7 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ProjectValidator projectValidator;
 
-    @PostMapping()
+    @PostMapping
     public ProjectDto createProject(@RequestBody @Valid ProjectDto projectDto) {
         return projectService.createProject(projectDto);
     }
@@ -42,7 +42,7 @@ public class ProjectController {
         return projectService.getAll();
     }
 
-    @GetMapping
+    @GetMapping("/{parentId}")
     public List<ProjectDto> getAllSubprojectsByFilter(@PathVariable @Min(1) long parentId, @ModelAttribute ProjectFilterDto filterDto) {
         return projectService.getAllSubprojectsByFilter(parentId, filterDto);
     }
