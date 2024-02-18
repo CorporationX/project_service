@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -63,7 +62,7 @@ public class ProjectValidator {
 
     public void validateNameExistence(long ownerId, String name) {
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
-            throw new EntityNotFoundException("Project with this name already exists. Name: " + name);
+            throw new ValidationException("Project with this name already exists. Name: " + name);
         }
     }
 

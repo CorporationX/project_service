@@ -1,4 +1,3 @@
-/*
 package faang.school.projectservice.service.projectService;
 
 import faang.school.projectservice.client.UserServiceClient;
@@ -9,7 +8,7 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.project.NameFilter;
 import faang.school.projectservice.filter.project.StatusFilter;
-import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -17,12 +16,12 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,8 +46,8 @@ public class ProjectServiceTest {
     private UserServiceClient userServiceClient;
     private UserContext userContext;
     private List<Filter<Project, ProjectFilterDto>> filters;
-    @Mock
-    private ProjectMapper projectMapper;
+    @Spy
+    private ProjectMapperImpl projectMapper;
     private ProjectService projectService;
     @Captor
     private ArgumentCaptor<Project> captor;
@@ -82,7 +81,6 @@ public class ProjectServiceTest {
         projectRepository = Mockito.mock(ProjectRepository.class);
         userServiceClient = Mockito.mock(UserServiceClient.class);
         userContext = Mockito.mock(UserContext.class);
-        userContext = Mockito.mock(UserContext.class);
         nameFilter = Mockito.mock(NameFilter.class);
         statusFilter = Mockito.mock(StatusFilter.class);
         filters = new ArrayList<>(List.of(nameFilter, statusFilter));
@@ -104,6 +102,7 @@ public class ProjectServiceTest {
     @Test
     public void testCreate_ownerUserNotExist_throwsEntityNotFoundException() {
         accessAllowed(true);
+        projectNameExists(false);
         userFromDatabase(null);
 
         assertThrows(
@@ -115,11 +114,10 @@ public class ProjectServiceTest {
     @Test
     public void testCreate_projectNameAlreadyExists_throwsIllegalArgumentException() {
         accessAllowed(true);
-        userFromDatabase(new UserDto());
         projectNameExists(true);
 
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> projectService.createProject(filledProjectDto)
         );
     }
@@ -127,10 +125,10 @@ public class ProjectServiceTest {
     @Test
     public void testCreate_nameNotValid_throwsIllegalArgumentException() {
         filledProjectDto.setName("   ");
-        validated();
-
+        accessAllowed(true);
+        projectNameExists(false);
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> projectService.createProject(filledProjectDto)
         );
     }
@@ -138,17 +136,19 @@ public class ProjectServiceTest {
     @Test
     public void testCreate_descriptionNotValid_throwsIllegalArgumentException() {
         filledProjectDto.setDescription("   ");
-        validated();
-
+        accessAllowed(true);
+        projectNameExists(false);
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> projectService.createProject(filledProjectDto)
         );
     }
 
     @Test
     public void testCreate_validProjectDto_projectSaved() {
-        validated();
+        accessAllowed(true);
+        projectNameExists(false);
+        userFromDatabase(new UserDto());
 
         projectService.createProject(filledProjectDto);
 
@@ -250,17 +250,15 @@ public class ProjectServiceTest {
         return List.of(publicAndNotOwnPrj, privateAndOwnPrj);
     }
 
-    private void validated() {
-        accessAllowed(true);
-        userFromDatabase(new UserDto());
-        projectNameExists(false);
-    }
-
     private void projectNameExists(boolean isExist) {
         when(projectRepository.existsByOwnerUserIdAndName(OWNER_ACCESSED_ID, filledProjectDto.getName())).thenReturn(isExist);
     }
 
     private void userFromDatabase(UserDto userFromDatabase) {
+        if (userFromDatabase == null) {
+            when(userServiceClient.getUser(OWNER_ACCESSED_ID)).thenThrow(EntityNotFoundException.class);
+            return;
+        }
         when(userServiceClient.getUser(OWNER_ACCESSED_ID)).thenReturn(userFromDatabase);
     }
 
@@ -273,5 +271,3 @@ public class ProjectServiceTest {
         }
     }
 }
-
- */
