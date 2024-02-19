@@ -80,5 +80,4 @@ public class ProjectValidator {
             throw new ValidationException("Statuses not equals");
         }
     }
-
 }
