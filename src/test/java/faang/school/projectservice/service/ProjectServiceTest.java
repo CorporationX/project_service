@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.projectService;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
@@ -8,12 +8,12 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.project.NameFilter;
 import faang.school.projectservice.filter.project.StatusFilter;
-import faang.school.projectservice.mapper.project.ProjectMapperImpl;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
