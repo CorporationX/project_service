@@ -33,13 +33,13 @@ public class ProjectValidator {
     }
 
     public void validateName(String name) {
-        if (name.isEmpty() || name.isBlank()) {
+        if (name == null || name.isBlank()) {
             throw new ValidationException("Name of project cannot be empty or blank");
         }
     }
 
     public void validateDescription(String description) {
-        if (description != null && (description.isEmpty() || description.isBlank())) {
+        if (description != null && description.isBlank()) {
             throw new ValidationException("Description of project cannot be empty or blank");
         }
     }
