@@ -47,6 +47,7 @@ public class ResourceService {
         resource.setCreatedBy(teamMemberRepository.findById(userId));
         resource.setUpdatedBy(teamMemberRepository.findById(userId));
         project.setStorageSize(newStorageSize);
+        resourceRepository.save(resource);
 
         return resourceMapper.toDto(resource);
     }
