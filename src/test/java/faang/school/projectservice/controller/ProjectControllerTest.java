@@ -91,7 +91,7 @@ public class ProjectControllerTest {
     }
 
     @Test
-    void testExistsProjectById_exists_returnsTrue () {
+    void testExistsProjectById_exists_returnsTrue() {
         Long projectId = projectDto.getId();
         when(projectService.existsProjectById(projectId)).thenReturn(true);
 
@@ -110,5 +110,22 @@ public class ProjectControllerTest {
 
         verify(projectService, times(1)).existsProjectById(projectId);
         assertFalse(isExistsProject);
+    }
+
+    @Test
+    void successGetAllSubprojectsByFilter() {
+        List<ProjectDto> projectDtos = List.of(ProjectDto.builder()
+                .id(1L)
+                .ownerId(1L)
+                .build());
+        long parentId = 1L;
+        ProjectFilterDto filterDto = new ProjectFilterDto();
+        filterDto.setName("Filter");
+
+        when(projectService.getAllSubprojectsByFilter(parentId, filterDto)).thenReturn(projectDtos);
+        List<ProjectDto> projectDtosActual = projectController.getAllSubprojectsByFilter(parentId, filterDto);
+
+        verify(projectService).getAllSubprojectsByFilter(parentId, filterDto);
+        assertEquals(projectDtos, projectDtosActual);
     }
 }

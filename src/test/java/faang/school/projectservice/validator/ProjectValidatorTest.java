@@ -63,7 +63,7 @@ class ProjectValidatorTest {
     }
 
     @Test
-    void testValidateDescription_validDesc_nothingHappens () {
+    void testValidateDescription_validDesc_nothingHappens() {
         String validDesc1 = "some valid desc";
         String validDesc2 = null;
         projectValidator.validateDescription(validDesc1);
@@ -71,7 +71,7 @@ class ProjectValidatorTest {
     }
 
     @Test
-    void testValidateDescription_notValidDesc_ThrowsValidationException () {
+    void testValidateDescription_notValidDesc_ThrowsValidationException() {
         String notValidDesc1 = "   ";
         String notValidDesc2 = "";
         validateDescAssertThrowsValidationException(notValidDesc1);
@@ -109,14 +109,14 @@ class ProjectValidatorTest {
     }
 
     @Test
-    void testHaveAccessToProject_userIdNotEqualsContext_returnsFalse () {
+    void testHaveAccessToProject_userIdNotEqualsContext_returnsFalse() {
         mockUserContext();
         boolean haveAccessToProject = projectValidator.haveAccessToProject(USER_ID_WITH_ACCESS + 1);
         assertFalse(haveAccessToProject);
     }
 
     @Test
-    void testHaveAccessToProject_userIdEqualsContext_returnsTrue () {
+    void testHaveAccessToProject_userIdEqualsContext_returnsTrue() {
         mockUserContext();
         boolean haveAccessToProject = projectValidator.haveAccessToProject(USER_ID_WITH_ACCESS);
         assertTrue(haveAccessToProject);
@@ -147,7 +147,7 @@ class ProjectValidatorTest {
         projectValidator.validateNameExistence(projectId, projectName);
     }
 
-    private void mockProjectNameExistenceCheck (boolean isExist, long userId, String projectName) {
+    private void mockProjectNameExistenceCheck(boolean isExist, long userId, String projectName) {
         when(projectRepository.existsByOwnerUserIdAndName(userId, projectName)).thenReturn(isExist);
     }
 }

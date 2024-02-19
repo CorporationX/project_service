@@ -115,9 +115,9 @@ public class ProjectService {
         return projectRepository.existsById(projectId);
     }
 
-    public List<ProjectDto> getAllSubprojectsByFilter(long parentId, ProjectFilterDto projectFilterDto) {
+    public List<ProjectDto> getAllSubprojectsByFilter(long parentId, ProjectFilterDto filterDto) {
         Stream<Project> allChildren = getProjectById(parentId).getChildren().stream();
-        List<Project> filteredSubProjects = getFilteredProjects(projectFilterDto, allChildren);
+        List<Project> filteredSubProjects = getFilteredProjects(filterDto, allChildren);
 
         return projectMapper.entitiesToDtos(filteredSubProjects);
     }

@@ -13,7 +13,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
@@ -269,5 +268,65 @@ public class ProjectServiceTest {
         if (!isAllowed) {
             when(userContext.getUserId()).thenReturn(OWNER_NOT_ACCESSED_ID);
         }
+    }
+
+    @Test
+    public void successExistProjectById() {
+        long projectId = 1L;
+        Mockito.when(projectRepository.existsById(projectId)).thenReturn(true);
+        boolean actual = projectService.existsProjectById(projectId);
+        assertTrue(actual);
+    }
+
+    @Test
+    public void successGetAllSubprojectsByFilter() {
+        ProjectFilterDto filterDto = new ProjectFilterDto();
+        String filterName = "First";
+        filterDto.setName(filterName);
+        Project project = new Project();
+        project.setId(1L);
+        project.setName("Parent");
+        project.setChildren(List.of(Project.builder()
+                .id(2L)
+                .name(filterName)
+                .build()));
+        Stream<Project> allChildren = project.getChildren().stream();
+
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+        when(filters.get(0).isApplicable(filterDto)).thenReturn(true);
+        when(filters.get(1).isApplicable(filterDto)).thenReturn(false);
+        when(filters.get(0).apply(any(), any())).thenReturn(
+                allChildren.filter(prj -> prj.getName().contains(filterDto.getName())));
+
+        List<ProjectDto> allSubprojectsByFilter = projectService.getAllSubprojectsByFilter(project.getId(), filterDto);
+
+        assertEquals(1, allSubprojectsByFilter.size());
+        assertTrue(allSubprojectsByFilter.get(0).getName().contains(filterName));
+    }
+
+    @Test
+    public void successUpdateProject() {
+        ProjectDto projectDto = new ProjectDto();
+        projectDto.setId(1L);
+        projectDto.setOwnerId(1L);
+        projectDto.setStatus(ProjectStatus.IN_PROGRESS);
+        projectDto.setDescription("UpdateProjectDescription");
+        Project project = new Project();
+        project.setId(1L);
+        project.setOwnerId(1L);
+        project.setStatus(ProjectStatus.CREATED);
+        project.setDescription("OldProjectDescription");
+        project.setChildren(List.of(Project.builder()
+                .id(2L)
+                .name("ChildFirst")
+                .status(ProjectStatus.IN_PROGRESS)
+                .build()));
+
+        when(userContext.getUserId()).thenReturn(1L);
+        when(projectRepository.getProjectById(projectDto.getId())).thenReturn(project);
+        when(projectRepository.save(project)).thenReturn(project);
+        ProjectDto projectDtoActual = projectService.updateProject(projectDto);
+        verify(projectRepository).save(project);
+        assertEquals(projectDto, projectDtoActual);
     }
 }
