@@ -22,6 +22,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.PrintStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,6 +66,7 @@ class VacancyServiceTest {
         TeamMember member = new TeamMember();
         Vacancy vacancy = Vacancy.builder()
                 .name(vacancyDto.getName())
+                .createdAt(null)
                 .createdBy(createdBy)
                 .description("junior-dev")
                 .status(VacancyStatus.OPEN)
@@ -79,7 +81,9 @@ class VacancyServiceTest {
 
         verify(projectRepository).save(project);
         verify(vacancyRepository).save(captorVacancy.capture());
-        assertEquals(vacancy, captorVacancy.getValue());
+        Vacancy vacancy1 = captorVacancy.getValue();
+        vacancy1.setCreatedAt(null);
+        assertEquals(vacancy, vacancy1);
         assertEquals(1, member.getRoles().size());
         assertEquals(OWNER, member.getRoles().get(0));
     }
