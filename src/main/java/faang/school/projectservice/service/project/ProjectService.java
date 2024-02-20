@@ -67,12 +67,15 @@ public class ProjectService {
         Project projectById = getProjectById(id);
         Long ownerId = projectById.getOwnerId();
         projectValidator.validateAccessToProject(ownerId);
-        ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
-                .projectId(id)
-                .ownerId(ownerId)
-                .receivedAt(LocalDateTime.now())
-                .build();
-        publisher.publish(projectViewEvent);
+
+        publisher.publish(
+                ProjectViewEvent.builder()
+                        .projectId(id)
+                        .ownerId(ownerId)
+                        .receivedAt(LocalDateTime.now())
+                        .build()
+        );
+
         return projectMapper.toDto(projectById);
     }
 
