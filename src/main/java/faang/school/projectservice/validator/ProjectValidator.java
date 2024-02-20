@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.project;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;

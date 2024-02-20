@@ -13,7 +13,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validator.project.ProjectValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
