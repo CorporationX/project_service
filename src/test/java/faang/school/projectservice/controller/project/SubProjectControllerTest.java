@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.project.ProjectServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,19 +22,15 @@ import static org.mockito.Mockito.verify;
 class SubProjectControllerTest {
 
     @Mock
-    private ProjectService projectService;
-
+    private ProjectServiceImpl projectService;
     @InjectMocks
     private SubProjectController subProjectController;
-
     Project project;
     ProjectDto projectDto;
     CreateSubProjectDto createSubProjectDto;
     CreateSubProjectDto createSubProjectNameIsBlankDto;
-
     ProjectFilterDto projectFilterDto;
     UpdateSubProjectDto updateSubProjectDto;
-
 
     @BeforeEach
     void setUp() {
@@ -44,6 +40,7 @@ class SubProjectControllerTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .status(ProjectStatus.CREATED)
                 .build();
+
         projectDto = ProjectDto.builder()
                 .name("Onboarding")
                 .build();

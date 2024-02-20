@@ -1,7 +1,5 @@
 package faang.school.projectservice.mapper.project;
 
-
-
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
@@ -18,7 +16,6 @@ public interface ProjectMapper {
     @Mapping(source = "parentProject.id", target = "parentProjectId")
     @Mapping(source = "children", target = "children", qualifiedByName = "mapToLongChildrenId")
     ProjectDto toDto(Project project);
-
 
     Project toEntity(CreateSubProjectDto createSubProjectDto);
 

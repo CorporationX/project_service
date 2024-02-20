@@ -26,7 +26,6 @@ class ProjectMapperTest {
     private CreateSubProjectDto createSubProjectDto;
     private Project parent;
 
-
     @BeforeEach
     void setUp() {
         project = Project.builder()

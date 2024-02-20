@@ -22,7 +22,7 @@ class ProjectNameFilterTest {
     List<Project> projects;
 
     @BeforeEach
-    public void init(){
+    public void init() {
         projects = List.of(
                 Project.builder()
                         .name("Alpha")

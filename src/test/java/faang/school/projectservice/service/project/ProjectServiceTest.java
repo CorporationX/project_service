@@ -45,7 +45,7 @@ class ProjectServiceTest {
     private MomentRepository momentRepository;
 
     @InjectMocks
-    private ProjectService projectService;
+    private ProjectServiceImpl projectService;
 
     private Project testProject;
     private ProjectDto testProjectDto;
