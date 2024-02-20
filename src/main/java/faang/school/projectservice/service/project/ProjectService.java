@@ -70,9 +70,9 @@ public class ProjectService {
         ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
                 .projectId(id)
                 .ownerId(ownerId)
+                .receivedAt(LocalDateTime.now())
                 .build();
-        String str = "id " + id+ "owner " + ownerId;
-        publisher.publish(str);
+        publisher.publish(projectViewEvent);
         return projectMapper.toDto(projectById);
     }
 
