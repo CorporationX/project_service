@@ -121,5 +121,4 @@ public class ProjectService {
 
         return projectMapper.entitiesToDtos(filteredSubProjects);
     }
-
 }
