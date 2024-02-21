@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
     private final ObjectMapper objectMapper;
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseError handleIllegalArgumentException(IllegalArgumentException ex) {
@@ -54,7 +55,7 @@ public class GlobalExceptionHandler {
         String defaultMessage = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
         log.error("MethodArgumentNotValidException", ex);
         return new ResponseError(HttpStatus.BAD_REQUEST.value(), defaultMessage);
-        }
+    }
 
     @ExceptionHandler
     public ResponseEntity<ResponseError> handleFeignException(FeignException ex) {
@@ -73,5 +74,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(httpStatus)
                 .body(responseError);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseError handleRuntimeException(RuntimeException ex) {
+        log.error("RuntimeException", ex);
+        return new ResponseError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
     }
 }
