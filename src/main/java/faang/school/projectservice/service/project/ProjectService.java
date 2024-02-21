@@ -39,7 +39,7 @@ public class ProjectService {
         }
 
         Project savedProject = projectRepository.save(projectMapper.toEntity(projectDto));
-
+        log.info("Project with ID {} was saved by user with ID {}", savedProject.getId(), savedProject.getOwnerId());
         return projectMapper.toDto(savedProject);
     }
 
@@ -59,7 +59,7 @@ public class ProjectService {
         }
 
         Project updatedProject = projectRepository.save(project);
-
+        log.info("Project with ID {} was updated by user with ID {}", updatedProject.getId(), updatedProject.getOwnerId());
         return projectMapper.toDto(updatedProject);
     }
 
@@ -69,7 +69,7 @@ public class ProjectService {
         projectValidator.validateAccessToProject(ownerId);
 
         publisher.publish(id, ownerId);
-
+        log.info("Project with ID {} was  viewed by user with ID {}", id, ownerId);
         return projectMapper.toDto(projectById);
     }
 
