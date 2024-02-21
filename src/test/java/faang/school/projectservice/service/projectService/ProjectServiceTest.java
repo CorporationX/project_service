@@ -12,6 +12,7 @@ import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.project.ProjectValidator;
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.when;
 public class ProjectServiceTest {
     private ProjectRepository projectRepository;
     private UserServiceClient userServiceClient;
+    private ProjectViewEventPublisher publisher;
     private UserContext userContext;
     private List<Filter<Project, ProjectFilterDto>> filters;
     @Spy
@@ -80,6 +82,7 @@ public class ProjectServiceTest {
 
         projectRepository = Mockito.mock(ProjectRepository.class);
         userServiceClient = Mockito.mock(UserServiceClient.class);
+        publisher = Mockito.mock(ProjectViewEventPublisher.class);
         userContext = Mockito.mock(UserContext.class);
         userContext = Mockito.mock(UserContext.class);
         nameFilter = Mockito.mock(NameFilter.class);
@@ -87,7 +90,7 @@ public class ProjectServiceTest {
         filters = new ArrayList<>(List.of(nameFilter, statusFilter));
         ProjectValidator projectValidator = new ProjectValidator(projectRepository, userContext);
 
-        projectService = new ProjectService(projectRepository, userServiceClient, projectMapper, filters, projectValidator);
+        projectService = new ProjectService(projectRepository, publisher, userServiceClient, projectMapper, filters, projectValidator);
     }
 
     @Test
