@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.vacancy;
 
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import lombok.Data;
@@ -14,10 +15,10 @@ public class VacancyDto {
     private Long id;
     private String name;
     private String description;
-    private String position;
+    private TeamRole position;
     private Long projectId;
     private Long createdBy;
-    private Long candidatesCount;
+    private Integer candidatesCount;
     private List<Long> candidatesIds;
     private Double salary;
     private WorkSchedule workSchedule;

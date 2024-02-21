@@ -94,7 +94,7 @@ public interface VacancyApi {
             content = @Content(schema = @Schema(implementation = RuntimeException.class)))
     @ApiResponse(responseCode = "500", description = "server error (Ошибка сервера)",
             content = @Content(schema = @Schema(implementation = Void.class)))
-    VacancyDto update(@PathVariable Long vacancyId, @RequestBody VacancyDto updateDto);
+    VacancyDto update(@RequestBody VacancyDto updateDto);
 
     @PutMapping("/close/{id}")
     @Operation(summary = "Закрывает вакансию и возвращает дто со статусом CLOSE",

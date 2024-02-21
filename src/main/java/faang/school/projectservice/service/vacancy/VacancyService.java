@@ -38,7 +38,7 @@ public class VacancyService {
                 new EntityNotFoundException("This vacancy by id: %s not found!"));
     }
 
-    public VacancyDto getVacancy(long id) {
+    public VacancyDto getVacancyDto(long id) {
         return vacancyMapper.toDto(getVacancyById(id));
     }
 
@@ -62,14 +62,16 @@ public class VacancyService {
         Vacancy newVacancy = vacancyMapper.toEntity(vacancyDto);
         newVacancy.setProject(project);
 
-        return vacancyMapper.toDto(vacancyRepository.save(newVacancy));
+        Vacancy saved = vacancyRepository.save(newVacancy);
+
+        return vacancyMapper.toDto(saved);
     }
 
     public VacancyDto updateOrCloseVacancy(VacancyDto vacancyDto) {
-        Vacancy updatedVacancy = vacancyMapper.toEntity(vacancyDto);
+        Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
 
-        TeamRole teamRole = TeamRole.valueOf(vacancyDto.getPosition());
-        List<Candidate> candidates = updatedVacancy.getCandidates();
+        TeamRole teamRole = vacancyDto.getPosition();
+        List<Candidate> candidates = vacancy.getCandidates();
 
         for (Candidate candidate : candidates) {
             if (candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED)) {
@@ -78,21 +80,21 @@ public class VacancyService {
             }
         }
 
-        vacancyValidator.validateCandidateRole(updatedVacancy);
+        vacancyValidator.validateCandidateRole(vacancy);
 
-        return vacancyMapper.toDto(vacancyRepository.save(updatedVacancy));
+        return vacancyMapper.toDto(vacancyRepository.save(vacancy));
     }
 
     public VacancyDto closeVacancy(long id) {
         var vacancy = getVacancyById(id);
 
-        if (vacancy.getStatus().equals(VacancyStatus.CLOSED)) {
+        if (vacancy.getStatus().equals(VacancyStatus.OPEN)) {
             vacancyValidator.validateForCloseVacancy(vacancy);
             vacancy.setStatus(VacancyStatus.CLOSED);
             vacancy.getCandidates().removeIf(candidate ->
                     !candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED));
         }
-        
+
         return vacancyMapper.toDto(vacancy);
     }
 }

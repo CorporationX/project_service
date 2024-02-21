@@ -19,13 +19,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class VacancyValidator {
+    
     private final TeamMemberService teamMemberService;
-
-    public void validateId(Long id) {
-        if (id == null) {
-            throw new DataValidationException("This id is null!");
-        }
-    }
 
     public void validateUser(UserDto user, VacancyDto dto) {
         if (!dto.getCreatedBy().equals(user.getId())) {

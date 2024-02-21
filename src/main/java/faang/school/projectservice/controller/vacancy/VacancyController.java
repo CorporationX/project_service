@@ -27,7 +27,7 @@ public class VacancyController implements VacancyApi {
 
     @Override
     public VacancyDto getVacancy(Long id) {
-        return vacancyService.getVacancy(id);
+        return vacancyService.getVacancyDto(id);
     }
 
     @Override
@@ -42,10 +42,10 @@ public class VacancyController implements VacancyApi {
     }
 
     @Override
-    public VacancyDto update(Long vacancyId, VacancyDto vacancyDto) {
+    public VacancyDto update(VacancyDto vacancyDto) {
         long userId = userContext.getUserId();
         UserDto user = userServiceClient.getUser(userId);
-        
+
         vacancyValidator.validateUser(user, vacancyDto);
         vacancyValidator.validateSupervisorRole(user.getId());
         vacancyValidator.validateVacancy(vacancyDto);
@@ -55,6 +55,10 @@ public class VacancyController implements VacancyApi {
 
     @Override
     public VacancyDto close(Long id) {
+        long userId = userContext.getUserId();
+        UserDto user = userServiceClient.getUser(userId);
+
+        vacancyValidator.validateSupervisorRole(user.getId());
         return vacancyService.closeVacancy(id);
     }
 }
