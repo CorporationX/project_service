@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 @Component
 @Slf4j
 public class ProjectViewEventPublisher extends AbstractEventPublisher<ProjectViewEvent> {
-    private final ChannelTopic profileViewTopic;
+    private final ChannelTopic projectViewTopic;
 
     public void publish(ProjectViewEvent projectViewEvent) {
         log.info("Event was published {}", projectViewEvent);
-        convertAndSend(projectViewEvent, profileViewTopic.getTopic());
+        convertAndSend(projectViewEvent, projectViewTopic.getTopic());
     }
 
     public void publish(long id, Long ownerId) {

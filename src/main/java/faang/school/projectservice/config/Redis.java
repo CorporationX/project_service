@@ -16,7 +16,7 @@ public class Redis {
     @Value("${spring.data.redis.port}")
     int port;
     @Value("${spring.data.redis.channels.profile_view_channel.name}")
-    String profileViewChannelName;
+    String projectViewChannelName;
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
@@ -35,6 +35,6 @@ public class Redis {
 
     @Bean
     ChannelTopic profileViewTopic() {
-        return new ChannelTopic(profileViewChannelName);
+        return new ChannelTopic(projectViewChannelName);
     }
 }
