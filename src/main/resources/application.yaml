@@ -27,6 +27,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        task_channel:
+          name: task_channel
 
 server:
   port: 8082
