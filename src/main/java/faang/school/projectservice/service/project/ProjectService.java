@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
@@ -28,6 +29,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final List<Filter<Project, ProjectFilterDto>> filters;
     private final ProjectValidator projectValidator;
+    private final UserContext userContext;
 
     public ProjectDto create(ProjectDto projectDto) {
         projectValidator.validateToCreate(projectDto);
@@ -68,7 +70,7 @@ public class ProjectService {
         Long ownerId = projectById.getOwnerId();
         projectValidator.validateAccessToProject(ownerId);
 
-        publisher.publish(id, ownerId);
+        publisher.publish(id, userContext.getUserId());
         log.info("Project with ID {} was  viewed by user with ID {}", id, ownerId);
         return projectMapper.toDto(projectById);
     }
