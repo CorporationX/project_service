@@ -87,4 +87,14 @@ public class ProjectService {
                 .map(project -> projectValidator.checkIfUserIsMember(userContext.getUserId(), project))
                 .filter(Objects::nonNull);
     }
+
+    @Transactional(readOnly = true)
+    public Project getProjectModelById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
+
+    @Transactional
+    public void save(Project project){
+        projectRepository.save(project);
+    }
 }
