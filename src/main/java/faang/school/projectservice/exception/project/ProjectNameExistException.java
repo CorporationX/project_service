@@ -1,4 +1,4 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.exception.project;
 
 public class ProjectNameExistException extends RuntimeException {
 
