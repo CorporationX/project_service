@@ -2,18 +2,18 @@ package faang.school.projectservice.publisher;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
 @Slf4j
-public abstract class AbstractEventPublisher<T> {
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-    @Autowired
-    private ObjectMapper objectMapper;
+@RequiredArgsConstructor
+public abstract class AbstractEventPublisher<EventType> {
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
-    protected void convertAndSend(T event, String channelTopicName) {
+    abstract void publish (EventType event);
+    protected void convertAndSend(EventType event, String channelTopicName) {
         String json;
         try {
             json = objectMapper.writeValueAsString(event);

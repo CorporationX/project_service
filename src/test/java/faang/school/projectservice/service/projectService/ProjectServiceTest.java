@@ -8,6 +8,7 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.project.NameFilter;
 import faang.school.projectservice.filter.project.StatusFilter;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -90,7 +91,14 @@ public class ProjectServiceTest {
         filters = new ArrayList<>(List.of(nameFilter, statusFilter));
         ProjectValidator projectValidator = new ProjectValidator(projectRepository, userContext);
 
-        projectService = new ProjectService(projectRepository, publisher, userServiceClient, projectMapper, filters, projectValidator);
+        projectService = new ProjectService(projectRepository,
+                publisher,
+                userServiceClient,
+                projectMapper,
+                filters,
+                projectValidator,
+                userContext
+        );
     }
 
     @Test

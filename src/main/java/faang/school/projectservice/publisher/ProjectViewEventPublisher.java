@@ -1,26 +1,34 @@
 package faang.school.projectservice.publisher;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.project.ProjectViewEvent;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
 @Component
 @Slf4j
 public class ProjectViewEventPublisher extends AbstractEventPublisher<ProjectViewEvent> {
-    private final ChannelTopic projectViewTopic;
+    private final ChannelTopic channelTopic;
 
-    public void publish(ProjectViewEvent projectViewEvent) {
-        log.info("Event was published {}", projectViewEvent);
-        convertAndSend(projectViewEvent, projectViewTopic.getTopic());
+    public ProjectViewEventPublisher(RedisTemplate<String, Object> redisTemplate,
+                                     ObjectMapper objectMapper,
+                                     ChannelTopic channelTopic) {
+        super(redisTemplate, objectMapper);
+        this.channelTopic = channelTopic;
+    }
+
+    @Override
+    public void publish(ProjectViewEvent event) {
+        log.info("Event was published {}", event);
+        convertAndSend(event, channelTopic.getTopic());
     }
 
     public void publish(long id, Long ownerId) {
-        publish(ProjectViewEvent.builder()
+        this.publish(ProjectViewEvent.builder()
                 .projectId(id)
                 .ownerId(ownerId)
                 .receivedAt(LocalDateTime.now())
