@@ -44,6 +44,7 @@ public class InternshipServiceImpl implements InternshipService {
         checkId(internshipDto.getMentorId());
         if (!teamMemberRepository.existsById(internshipDto.getMentorId()))
             throw new DataValidationException("There is no mentor with this id in the team member");
+
         checkInternsIsNotEmpty(internshipDto);
         checkInternshipDtoDate(internshipDto.getStartDate(), internshipDto.getEndDate());
         Internship internship = internshipMapper.toEntity(internshipDto);
