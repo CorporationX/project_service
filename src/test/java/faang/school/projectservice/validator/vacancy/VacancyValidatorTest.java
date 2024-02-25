@@ -8,7 +8,7 @@ import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.service.vacancy.TeamMemberService;
+import faang.school.projectservice.service.TeamMemberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

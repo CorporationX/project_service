@@ -1,12 +1,12 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.api.VacancyApi;
-import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.service.vacancy.VacancyService;
+import faang.school.projectservice.service.UserService;
+import faang.school.projectservice.service.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,8 +22,8 @@ import java.util.List;
 public class VacancyController implements VacancyApi {
     private final VacancyService vacancyService;
     private final VacancyValidator vacancyValidator;
-    private final UserServiceClient userServiceClient;
     private final UserContext userContext;
+    private final UserService userService;
 
     @Override
     public VacancyDto getVacancy(Long id) {
@@ -44,8 +44,8 @@ public class VacancyController implements VacancyApi {
     @Override
     public VacancyDto update(VacancyDto vacancyDto) {
         long userId = userContext.getUserId();
-        UserDto user = userServiceClient.getUser(userId);
-
+        UserDto user = userService.getUserDtoById(userId);
+        
         vacancyValidator.validateUser(user, vacancyDto);
         vacancyValidator.validateSupervisorRole(user.getId());
         vacancyValidator.validateVacancy(vacancyDto);
@@ -56,7 +56,7 @@ public class VacancyController implements VacancyApi {
     @Override
     public VacancyDto close(Long id) {
         long userId = userContext.getUserId();
-        UserDto user = userServiceClient.getUser(userId);
+        UserDto user = userService.getUserDtoById(userId);
 
         vacancyValidator.validateSupervisorRole(user.getId());
         return vacancyService.closeVacancy(id);

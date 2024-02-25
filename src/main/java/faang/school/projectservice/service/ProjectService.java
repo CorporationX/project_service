@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.vacancy;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;

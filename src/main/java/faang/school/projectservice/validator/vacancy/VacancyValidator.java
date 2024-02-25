@@ -8,7 +8,7 @@ import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.service.vacancy.TeamMemberService;
+import faang.school.projectservice.service.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class VacancyValidator {
-    
+
     private final TeamMemberService teamMemberService;
 
     public void validateUser(UserDto user, VacancyDto dto) {

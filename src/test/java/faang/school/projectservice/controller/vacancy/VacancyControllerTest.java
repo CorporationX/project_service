@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.service.vacancy.VacancyService;
+import faang.school.projectservice.service.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
