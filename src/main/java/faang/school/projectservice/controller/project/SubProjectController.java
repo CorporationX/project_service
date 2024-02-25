@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
-import faang.school.projectservice.service.project.ProjectServiceImpl;
+import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @Validated
 public class SubProjectController {
-    private final ProjectServiceImpl projectService;
+    private final ProjectService projectService;
 
     @PostMapping
     public ProjectDto create(@RequestBody @Valid CreateSubProjectDto createSubProjectDto) {

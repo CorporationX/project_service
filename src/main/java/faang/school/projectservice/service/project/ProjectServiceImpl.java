@@ -100,15 +100,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void createSubprojectsCompletedMoment(Project project, List<Long> userIds) {
-        Moment moment = momentRepository.save(buildNewMomentForProject(project, userIds));
-        if (project.getMoments() == null || project.getMoments().isEmpty()) {
+        Moment moment = momentRepository.save(buildMoment(project, userIds));
+        if (project.getMoments() == null) {
             project.setMoments(new ArrayList<>(Arrays.asList(moment)));
         } else {
             project.getMoments().add(moment);
         }
     }
 
-    private Moment buildNewMomentForProject(Project project, List<Long> userIds) {
+    private Moment buildMoment(Project project, List<Long> userIds) {
         Moment moment = new Moment();
         moment.setName(project.getName());
         moment.setUserIds(userIds);
