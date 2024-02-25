@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.team;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.event.TeamEventDto;
 import faang.school.projectservice.publisher.TeamEventPublisher;
