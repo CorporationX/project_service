@@ -51,17 +51,15 @@ public class ResourceService {
         return resourceMapper.toDto(resource);
     }
 
-    public InputStream downloadCover(long resourceId) {
-        Resource resource = resourceRepository.findById(resourceId)
-                .orElseThrow(() -> new EntityNotFoundException("Ресурс не найден"));
-        return s3Service.downloadFile(resource.getKey());
-    }
-
     public void checkStorageSizeExceeded(BigInteger maxStorageSize, BigInteger newStorageSize) {
         if (newStorageSize.compareTo(maxStorageSize) > 0) {
-            throw new IllegalArgumentException("Превышен размер хранилища");
+            throw new RuntimeException("Превышен размер хранилища");
         }
     }
 
-
+    public InputStream downloadCoverByProjectId(long projectId) {
+        Resource resource = resourceRepository.findResourceByProjectId(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Ресурс не найден"));
+        return s3Service.downloadFile(resource.getKey());
+    }
 }

@@ -16,7 +16,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -69,15 +76,15 @@ public class ProjectController {
         }
 
     @PutMapping("/{projectId}/cover/add")
-    public ResourceDto addCover(@PathVariable long projectId, @RequestBody MultipartFile file) {
+    public ResourceDto addCover(@PathVariable long projectId, @RequestPart MultipartFile file) {
         return resourceService.addCoverToProject(projectId, userContext.getUserId(), file);
     }
 
-    @GetMapping("/cover/{resourceId}")
-    public ResponseEntity<byte[]> getCover(@PathVariable long resourceId) {
+    @GetMapping("/cover/{projectId}")
+    public ResponseEntity<byte[]> getCover(@PathVariable long projectId) {
         byte[] imageBytes = null;
         try {
-            imageBytes = resourceService.downloadCover(resourceId).readAllBytes();
+            imageBytes = resourceService.downloadCoverByProjectId(projectId).readAllBytes();
         } catch (IOException e) {
             e.printStackTrace();
         }

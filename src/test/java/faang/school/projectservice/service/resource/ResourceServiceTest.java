@@ -76,7 +76,7 @@ class ResourceServiceTest {
     void checkStorageSizeExceededFailTest() {
         BigInteger maxStorageSize = new BigInteger("1000");
         BigInteger newStorageSize = new BigInteger("2000");
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RuntimeException.class,
                 () -> resourceService.checkStorageSizeExceeded(maxStorageSize, newStorageSize));
     }
 
@@ -89,19 +89,19 @@ class ResourceServiceTest {
 
     @Test
     void downloadCoverFailTest() {
-        long resourceId = 1L;
+        long projectId = 1L;
         assertThrows(EntityNotFoundException.class,
-                () -> resourceService.downloadCover(resourceId));
+                () -> resourceService.downloadCoverByProjectId(projectId));
     }
 
     @Test
     void downloadCoverSuccessTest() {
-        long resourceId = 1L;
+        long projectId = 1L;
         Resource resource = new Resource();
         resource.setKey("key");
-        Mockito.when(resourceRepository.findById(resourceId))
+        Mockito.when(resourceRepository.findResourceByProjectId(projectId))
                 .thenReturn(Optional.of(resource));
-        resourceService.downloadCover(resourceId);
+        resourceService.downloadCoverByProjectId(projectId);
         Mockito.verify(s3Service).downloadFile(resource.getKey());
     }
 }

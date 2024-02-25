@@ -82,9 +82,9 @@ public class ProjectControllerTests {
         byte[] result = new byte[]{1, 2, 3};
         long resourceId = 1L;
         InputStream inputStream = Mockito.mock(InputStream.class);
-        Mockito.when(resourceService.downloadCover(resourceId)).thenReturn(inputStream);
+        Mockito.when(resourceService.downloadCoverByProjectId(resourceId)).thenReturn(inputStream);
         Mockito.when(inputStream.readAllBytes()).thenReturn(result);
         projectController.getCover(resourceId);
-        Mockito.verify(resourceService).downloadCover(resourceId);
+        Mockito.verify(resourceService).downloadCoverByProjectId(resourceId);
     }
 }
