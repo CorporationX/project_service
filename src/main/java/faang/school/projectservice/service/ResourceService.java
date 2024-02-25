@@ -8,6 +8,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,9 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
     private final TeamMemberRepository teamMemberRepository;
 
+    @Value("${resource_service.folder}")
+    private String folderEnd;
+
     @Transactional(readOnly = true)
     public InputStream downloadResourceFile(long resourceId) {
         Resource resource = getResourceById(resourceId);
@@ -37,15 +41,13 @@ public class ResourceService {
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(project.getMaxStorageSize(), newStorageSize);
 
-        String folder = project.getId() + project.getName() + "#files";
+        String folder = project.getId() + project.getName() + folderEnd;
         Resource resource = s3Service.uploadFile(file, folder);
         resource.setProject(project);
         resource.setCreatedBy(teamMemberRepository.findById(userId));
         resource.setUpdatedBy(teamMemberRepository.findById(userId));
-        resourceRepository.save(resource);
-
         project.setStorageSize(newStorageSize);
-        projectService.save(project);
+        resourceRepository.save(resource);
 
         return resourceMapper.toDto(resource);
     }
@@ -58,7 +60,6 @@ public class ResourceService {
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedAt(LocalDateTime.now());
         resource.setUpdatedBy(teamMemberRepository.findById(userId));
-        resourceRepository.save(resource);
 
         Project project = resource.getProject();
         project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));

@@ -56,3 +56,6 @@ jira:
   base-url: https://faang-school.atlassian.net
   auth-token: ATATT3xFfGF0JLGIATZsSQkw7dJCfm5lHv09EuLt8OnZ-UNOzeZFWb0eWAkeXAqRMzQcRsgF0BDjvKqvlIrioYz6uVxVxVAfkM629GyiqihcYMIs5RUz28vF8fFxZM7P3fgDwMwUjOIY_WgHsRnUIcrvJiJQ2mtbod0rSDnR9ggV_XlEuTgjYvU=41267657
   email: gasanovkamil516@gmail.com
+
+resource_service:
+  folder: "#files"
