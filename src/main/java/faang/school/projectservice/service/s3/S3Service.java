@@ -34,12 +34,10 @@ public class S3Service {
         objectMetadata.setContentType(file.getContentType());
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
         try {
-            InputStream resizedFile = coverHandler.checkCoverAndResize(file);
+            InputStream fileStream = coverHandler.checkCoverAndResize(file);
             PutObjectRequest putObjectRequest = new PutObjectRequest(
-                    bucketName, key, resizedFile, objectMetadata);
-            putObjectRequest.getMetadata().setContentLength(resizedFile.available());
-            putObjectRequest.getMetadata().setContentType("image/png");
-            resizedFile.close();
+                    bucketName, key, fileStream, objectMetadata);
+            fileStream.close();
             s3Client.putObject(putObjectRequest);
         } catch (AmazonS3Exception | IOException e) {
             throw new RuntimeException("Failed to upload file: " + e.getMessage());

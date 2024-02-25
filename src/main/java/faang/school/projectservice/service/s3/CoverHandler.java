@@ -35,21 +35,25 @@ public class CoverHandler {
         int originalWidth = originalImage.getWidth();
         int originalHeight = originalImage.getHeight();
         double ration = (double) originalWidth / originalHeight;
+        boolean SQUARE = originalHeight == originalWidth;
+        boolean VERTICAL = ration < 1;
+        boolean HORIZONTAL_FLAT = ration > (double) maxWidth / maxHeight;
+        boolean HORIZONTAL_TALL = ration > 1 && ration < (double) maxWidth / maxHeight;
 
-        if (ration == 1) {  // Если квадратное
+        if (SQUARE) {
             if (originalHeight > maxWidth) {
                 resizedImage = resizeImage(originalImage, maxWidth, maxWidth);
             }
-        } else if (ration < 1) {    //Если вертикальный прямоугольник
+        } else if (VERTICAL) {
             if (originalHeight > maxWidth) {
                 resizedImage = resizeImage(originalImage, (int) (maxWidth * ration), maxWidth);
             }
-        } else if (ration > 1 && ration < (double) maxWidth / maxHeight) { //Если горизонтальный прямоугольник
-            if (originalHeight > maxHeight) {     //и коэфф. отношения ширины к высоте меньше чем у прямоугольника со сторонами 1080 на 566
+        } else if (HORIZONTAL_TALL) {
+            if (originalHeight > maxHeight) {
                 resizedImage = resizeImage(originalImage, (int) (maxHeight * ration), maxHeight);
             }
-        } else if (ration > (double) maxWidth / maxHeight) {//если горизонтальный прямоугольник
-            if (originalWidth > maxWidth) {  //и коээф. отношения ширины к высоте больше чем у прямоугольника со сторонами 1080 на 566
+        } else if (HORIZONTAL_FLAT) {
+            if (originalWidth > maxWidth) {
                 resizedImage = resizeImage(originalImage, maxWidth, (int) (maxWidth / ration));
             }
         }
