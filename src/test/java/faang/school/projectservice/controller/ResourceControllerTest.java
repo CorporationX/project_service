@@ -1,5 +1,8 @@
 package faang.school.projectservice.controller;
 //
+//import static org.junit.jupiter.api.Assertions.*;
+//import static org.mockito.Mockito.*;
+//
 //import faang.school.projectservice.config.context.UserContext;
 //import faang.school.projectservice.service.ResourceService;
 //import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +14,8 @@ package faang.school.projectservice.controller;
 //import org.springframework.mock.web.MockMultipartFile;
 //import org.springframework.web.multipart.MultipartFile;
 //
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//
 //@ExtendWith(MockitoExtension.class)
-//class ResourceControllerTest {
+//public class ResourceControllerTest {
 //    @InjectMocks
 //    private ResourceController resourceController;
 //    @Mock
