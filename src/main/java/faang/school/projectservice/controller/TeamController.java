@@ -15,7 +15,7 @@ public class TeamController {
     private final TeamEventPublisher teamEventPublisher;
 
     @PutMapping
-    public void createTeam() {
+    public void createTeam() { //   <------------  Mock для проверки паблишера
         TeamEventDto teamEventDto = TeamEventDto.builder()
                 .userId(1L)
                 .projectId(2L)
