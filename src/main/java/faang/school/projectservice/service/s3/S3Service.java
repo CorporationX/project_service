@@ -30,13 +30,15 @@ public class S3Service {
     public Resource uploadFile(MultipartFile file, String folder) {
         long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(fileSize);
-        objectMetadata.setContentType(file.getContentType());
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
         try {
             InputStream fileStream = coverHandler.checkCoverAndResize(file);
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucketName, key, fileStream, objectMetadata);
+            ObjectMetadata metadata = putObjectRequest.getMetadata();
+            metadata.setContentLength(fileStream.available());
+            metadata.setContentType("image/png");
+            putObjectRequest.setMetadata(metadata);
             fileStream.close();
             s3Client.putObject(putObjectRequest);
         } catch (AmazonS3Exception | IOException e) {
