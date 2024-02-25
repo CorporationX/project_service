@@ -1,10 +1,13 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.TaskCompletedEvent;
 import faang.school.projectservice.dto.TaskDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.publisher.TaskCompletedEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +30,12 @@ class TaskServiceTest {
     @Mock
     private TaskMapper taskMapper;
 
+    @Mock
+    private TaskCompletedEvent taskCompletedEvent;
+
+    @Mock
+    private TaskCompletedEventPublisher taskCompletedEventPublisher;
+
     @InjectMocks
     private TaskService taskService;
 
@@ -39,11 +48,14 @@ class TaskServiceTest {
         taskDto.setId(1L);
         taskDto.setName("Test Task");
         taskDto.setDescription("Test Description");
+        taskDto.setPerformerUserId(1L);
+        taskDto.setProjectId(1L);
 
         task = new Task();
         task.setId(taskDto.getId());
         task.setName(taskDto.getName());
         task.setDescription(taskDto.getDescription());
+        task.setStatus(TaskStatus.DONE);
     }
 
     @Test
@@ -59,6 +71,7 @@ class TaskServiceTest {
         doNothing().when(taskMapper).updateTaskFromDto(any(TaskDto.class), any(Task.class));
         taskService.updateTask(taskDto);
         verify(taskRepository, times(1)).save(task);
+        verify(taskCompletedEventPublisher,times(1)).publish(taskCompletedEvent);
     }
 
     @Test
