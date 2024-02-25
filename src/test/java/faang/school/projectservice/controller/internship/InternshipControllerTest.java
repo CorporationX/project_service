@@ -3,7 +3,7 @@ package faang.school.projectservice.controller.internship;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
-import faang.school.projectservice.exeption.DataValidationException;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.internship.InternshipService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,9 +13,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @ExtendWith(MockitoExtension.class)
 class InternshipControllerTest {
     @InjectMocks
@@ -23,11 +20,11 @@ class InternshipControllerTest {
     @Mock
     private InternshipService internshipService;
     private InternshipDto internshipDto;
-    private InternshipDto internshipDtoNull;
     private TeamMemberDto teamMemberDto;
     private InternshipFilterDto filter;
+    private TeamRole teamRole;
     private long INTERNSHIP_ID = 5;
-    private long NO_VALID_ID = -5;
+
 
     @BeforeEach
     void setUp() {
@@ -78,15 +75,26 @@ class InternshipControllerTest {
     }
 
     @Test
-    void testUpdateInternshipAfterEndDateFailed() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> internshipController.updateInternshipAfterEndDate(NO_VALID_ID));
-        assertEquals(exception.getMessage(), "Invalid id");
+    void testGetInternshipByStatusSuccessful() {
+        internshipController.getInternshipByStatus(filter);
+        Mockito.verify(internshipService).getInternshipByStatus(filter);
     }
 
     @Test
-    void testGetInternshipByFilterSuccessful() {
-        internshipController.getInternshipByFilter(filter);
-        Mockito.verify(internshipService).getInternshipByFilter(filter);
+    void testGetInternshipByRoleSuccessful(){
+        internshipController.getInternshipByRole(filter, teamRole);
+        Mockito.verify(internshipService).getInternshipByRole(filter, teamRole);
+    }
+
+    @Test
+    void testGetAllInternshipSuccessful(){
+        internshipController.getAllInternship();
+        Mockito.verify(internshipService).getAllInternship();
+    }
+
+    @Test
+    void testGetById(){
+        internshipController.getById(INTERNSHIP_ID);
+        Mockito.verify(internshipService).getById(INTERNSHIP_ID);
     }
 }

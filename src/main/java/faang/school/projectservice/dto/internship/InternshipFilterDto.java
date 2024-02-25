@@ -8,6 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class InternshipFilterDto {
     private InternshipStatus status;
-
-    //еще было сказано, получить с фильтром по роли, но роли в стажировке нет
+    private long id;
 }
