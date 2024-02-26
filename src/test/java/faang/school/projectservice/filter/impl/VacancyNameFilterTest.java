@@ -1,7 +1,7 @@
-package faang.school.projectservice.filter.impl.vacancy;
+package faang.school.projectservice.filter.impl;
 
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.filter.vacancy.impl.VacancyNameFilter;
 import faang.school.projectservice.model.Vacancy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,34 +12,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Bulgakov
  */
-
 @ExtendWith(MockitoExtension.class)
-public class VacancyPositionFilterTest {
-    private VacancyPositionFilter vacancyPositionFilter;
+public class VacancyNameFilterTest {
+
+    private VacancyNameFilter vacancyNameFilter;
     private List<Vacancy> vacancies;
 
     @BeforeEach
     public void setUp() {
-        vacancyPositionFilter = new VacancyPositionFilter();
+        vacancyNameFilter = new VacancyNameFilter();
         Vacancy vacancy1 = new Vacancy();
         vacancy1.setName("Software Engineer");
-        vacancy1.setPosition(TeamRole.DEVELOPER);
 
         Vacancy vacancy2 = new Vacancy();
         vacancy2.setName("Data Analyst");
-        vacancy2.setPosition(TeamRole.ANALYST);
 
         Vacancy vacancy3 = new Vacancy();
         vacancy3.setName("Product Manager");
-        vacancy3.setPosition(TeamRole.MANAGER);
-
         vacancies = new ArrayList<>();
 
+        // Add some sample vacancies for testing
         vacancies.add(vacancy1);
         vacancies.add(vacancy2);
         vacancies.add(vacancy3);
@@ -48,22 +44,21 @@ public class VacancyPositionFilterTest {
     @Test
     public void testIsApplicable() {
         VacancyFilterDto filter = new VacancyFilterDto();
-        filter.setPosition(TeamRole.DEVELOPER);
+        filter.setName("Engineer");
 
-        boolean isApplicable = vacancyPositionFilter.isApplicable(filter);
+        boolean isApplicable = vacancyNameFilter.isApplicable(filter);
 
-        assertTrue(isApplicable);
+        assertEquals(true, isApplicable);
     }
 
     @Test
     public void testApply() {
         VacancyFilterDto filter = new VacancyFilterDto();
-        filter.setPosition(TeamRole.DEVELOPER);
+        filter.setName("Engineer");
 
-        vacancyPositionFilter.apply(vacancies, filter);
-        var expected = vacancies.get(0);
+        vacancyNameFilter.apply(vacancies, filter);
 
         assertEquals(1, vacancies.size());
-        assertEquals("Software Engineer", expected.getName());
+        assertEquals("Software Engineer", vacancies.get(0).getName());
     }
 }

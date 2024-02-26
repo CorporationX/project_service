@@ -1,7 +1,7 @@
-package faang.school.projectservice.filter.impl.vacancy;
+package faang.school.projectservice.filter.vacancy.impl;
 
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.vacancy.Filter;
 import faang.school.projectservice.model.Vacancy;
 import org.springframework.stereotype.Component;
 
@@ -12,14 +12,14 @@ import java.util.List;
  */
 
 @Component
-public class VacancyNameFilter implements Filter<VacancyFilterDto, Vacancy> {
+public class VacancyPositionFilter implements Filter<VacancyFilterDto, Vacancy> {
     @Override
     public boolean isApplicable(VacancyFilterDto filter) {
-        return filter.getName() != null;
+        return filter.getPosition() != null;
     }
 
     @Override
     public void apply(List<Vacancy> vacancies, VacancyFilterDto filter) {
-        vacancies.removeIf(vacancy -> !vacancy.getName().contains(filter.getName()));
+        vacancies.removeIf(vacancy -> !vacancy.getPosition().equals(filter.getPosition()));
     }
 }
