@@ -14,7 +14,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @OpenAPIDefinition(
         info = @Info(
                 title = "Project Service",
-                version = "1.0.0")
+                version = "1.0.0"
+        )
 )
 public class ProjectServiceApplication {
     public static void main(String[] args) {
