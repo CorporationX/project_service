@@ -67,7 +67,7 @@ public class VacancyService {
         return vacancyMapper.toDto(saved);
     }
 
-    public VacancyDto updateOrCloseVacancy(VacancyDto vacancyDto) {
+    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
 
         TeamRole teamRole = vacancyDto.getPosition();

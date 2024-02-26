@@ -1,12 +1,12 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.api.VacancyApi;
-import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.service.UserService;
 import faang.school.projectservice.service.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ public class VacancyControllerTest {
     @Mock
     private VacancyValidator vacancyValidator;
     @Mock
-    private UserServiceClient userServiceClient;
+    private UserService userService;
     @Mock
     private UserContext userContext;
 
@@ -43,7 +43,7 @@ public class VacancyControllerTest {
     @BeforeEach
     void setUp() {
         vacancyController = new VacancyController(vacancyService,
-                vacancyValidator, userServiceClient, userContext);
+                vacancyValidator, userContext, userService);
     }
 
     @Test
@@ -93,8 +93,8 @@ public class VacancyControllerTest {
         user.setId(1L);
 
         when(userContext.getUserId()).thenReturn(1L);
-        when(userServiceClient.getUser(1L)).thenReturn(user);
-        when(vacancyService.updateOrCloseVacancy(vacancyDto)).thenReturn(vacancyDto);
+        when(userService.getUserDtoById(1L)).thenReturn(user);
+        when(vacancyService.updateVacancy(vacancyDto)).thenReturn(vacancyDto);
 
         VacancyDto updated = vacancyController.update(vacancyDto);
 
@@ -102,7 +102,7 @@ public class VacancyControllerTest {
         verify(vacancyValidator, times(1)).validateUser(user, vacancyDto);
         verify(vacancyValidator, times(1)).validateSupervisorRole(user.getId());
         verify(vacancyValidator, times(1)).validateVacancy(vacancyDto);
-        verify(vacancyService, times(1)).updateOrCloseVacancy(vacancyDto);
+        verify(vacancyService, times(1)).updateVacancy(vacancyDto);
     }
 
     @Test
@@ -116,7 +116,7 @@ public class VacancyControllerTest {
         vacancyDto.setStatus(VacancyStatus.CLOSED);
 
         when(userContext.getUserId()).thenReturn(1L);
-        when(userServiceClient.getUser(1L)).thenReturn(user);
+        when(userService.getUserDtoById(1L)).thenReturn(user);
         when(vacancyService.closeVacancy(vacancyId)).thenReturn(vacancyDto);
 
         VacancyDto closed = vacancyController.close(vacancyId);

@@ -50,7 +50,7 @@ public class VacancyController implements VacancyApi {
         vacancyValidator.validateSupervisorRole(user.getId());
         vacancyValidator.validateVacancy(vacancyDto);
 
-        return vacancyService.updateOrCloseVacancy(vacancyDto);
+        return vacancyService.updateVacancy(vacancyDto);
     }
 
     @Override

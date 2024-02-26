@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
@@ -11,6 +12,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,16 +38,16 @@ import static org.mockito.Mockito.when;
 public class VacancyServiceTest {
     @Mock
     private VacancyRepository vacancyRepository;
-
     @Mock
     private VacancyMapper vacancyMapper;
-
     @Mock
     private TeamMemberService teamMemberService;
-
+    @Mock
+    private VacancyValidator vacancyValidator;
     @Mock
     private ProjectService projectService;
-
+    @Mock
+    private List<Filter<VacancyFilterDto, Vacancy>> filters;
     @InjectMocks
     private VacancyService vacancyService;
 
@@ -139,7 +141,7 @@ public class VacancyServiceTest {
 
     @Test
     @DisplayName("Test update vacancy")
-    void testUpdateOrCloseVacancy() {
+    void testUpdateVacancy() {
         long id = 1L;
 
         Candidate candidate = new Candidate();
@@ -166,7 +168,7 @@ public class VacancyServiceTest {
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
 
-        VacancyDto result = vacancyService.updateOrCloseVacancy(vacancyDto);
+        VacancyDto result = vacancyService.updateVacancy(vacancyDto);
 
         assertNotNull(result);
     }
