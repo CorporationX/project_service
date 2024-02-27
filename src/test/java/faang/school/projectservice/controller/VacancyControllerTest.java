@@ -1,14 +1,15 @@
-package faang.school.projectservice.controller.vacancy;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.api.VacancyApi;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.controller.VacancyController;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.service.UserService;
 import faang.school.projectservice.service.VacancyService;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
+import faang.school.projectservice.validator.VacancyValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

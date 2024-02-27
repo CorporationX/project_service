@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.vacancy;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;

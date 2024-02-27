@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter.vacancy.impl;
+package faang.school.projectservice.filter.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.filter.vacancy.Filter;
@@ -12,14 +12,14 @@ import java.util.List;
  */
 
 @Component
-public class VacancyNameFilter implements Filter<VacancyFilterDto, Vacancy> {
+public class VacancyPositionFilter implements Filter<VacancyFilterDto, Vacancy> {
     @Override
     public boolean isApplicable(VacancyFilterDto filter) {
-        return filter.getName() != null;
+        return filter.getPosition() != null;
     }
 
     @Override
     public void apply(List<Vacancy> vacancies, VacancyFilterDto filter) {
-        vacancies.removeIf(vacancy -> !vacancy.getName().contains(filter.getName()));
+        vacancies.removeIf(vacancy -> !vacancy.getPosition().equals(filter.getPosition()));
     }
 }

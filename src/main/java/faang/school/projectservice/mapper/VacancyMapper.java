@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper.vacancy;
+package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.Candidate;

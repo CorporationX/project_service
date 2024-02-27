@@ -1,9 +1,9 @@
-package faang.school.projectservice.controller.project;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.api.ProjectApi;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -36,7 +36,7 @@ public class ProjectController implements ProjectApi {
 
     @Override
     public ProjectDto getById(long projectId) {
-        return projectService.getById(projectId);
+        return projectService.getProjectDtoById(projectId);
     }
 
     @Override
@@ -46,6 +46,6 @@ public class ProjectController implements ProjectApi {
 
     @GetMapping("{projectId}/exist")
     public boolean existProjectById(@PathVariable("projectId") long projectsId) {
-        return projectService.existProjectById(projectsId);
+        return projectService.projectExists(projectsId);
     }
 }

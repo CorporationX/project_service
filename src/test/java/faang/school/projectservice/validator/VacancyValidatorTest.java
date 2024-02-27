@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.vacancy;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
@@ -9,6 +9,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.TeamMemberService;
+import faang.school.projectservice.validator.VacancyValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

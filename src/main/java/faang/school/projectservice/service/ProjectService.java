@@ -1,28 +1,100 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * @author Alexander Bulgakov
- */
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
-    private final ProjectJpaRepository projectJpaRepository;
+    private final ProjectRepository projectRepository;
+    private final UserServiceClient userServiceClient;
+    private final ProjectMapper projectMapper;
+    private final List<Filter<Project, ProjectFilterDto>> filters;
+    private final ProjectValidator projectValidator;
 
-    public Project getProjectById(long id) {
-        return projectJpaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Project by id: %s noy found!", id)));
+    public ProjectDto create(ProjectDto projectDto) {
+        projectValidator.validateToCreate(projectDto);
+        userServiceClient.getUser(projectDto.getOwnerId()); //throws if user doesn't exist
+
+        projectDto.setStatus(ProjectStatus.CREATED);
+        if (projectDto.getVisibility() == null) {
+            projectDto.setVisibility(ProjectVisibility.PRIVATE);
+        }
+
+        Project savedProject = projectRepository.save(projectMapper.toEntity(projectDto));
+
+        return projectMapper.toDto(savedProject);
     }
 
-    public void existsProjectById(long id) {
-        if (!projectJpaRepository.existsById(id)) {
-            throw new EntityNotFoundException(String.format("Project does not exists by id: %s", id));
+    public ProjectDto update(ProjectDto projectDto) {
+        Project project = getProjectById(projectDto.getId()); //throws if project doesn't exist
+        projectValidator.validateAccessToProject(project.getOwnerId());
+
+        ProjectStatus updatedStatus = projectDto.getStatus();
+        String updatedDescription = projectDto.getDescription();
+
+        if (updatedStatus != null) {
+            project.setStatus(updatedStatus);
         }
+        if (updatedDescription != null) {
+            projectValidator.validateDescription(updatedDescription);
+            project.setDescription(updatedDescription);
+        }
+
+        Project updatedProject = projectRepository.save(project);
+
+        return projectMapper.toDto(updatedProject);
+    }
+
+    public ProjectDto getProjectDtoById(long id) {
+        return projectMapper.toDto(getProjectById(id));
+    }
+
+    public List<ProjectDto> getAll() {
+        return projectMapper.entitiesToDtos(getVisibleProjects());
+    }
+
+    public List<ProjectDto> getAll(ProjectFilterDto filterDto) {
+        Stream<Project> projects = getVisibleProjects().stream();
+
+        List<Project> filteredProjects = filters.stream()
+                .filter(prjFilter -> prjFilter.isApplicable(filterDto))
+                .reduce(projects,
+                        (stream, prjFilter)
+                                -> prjFilter.apply(stream, filterDto),
+                        Stream::concat)
+                .toList();
+
+        return projectMapper.entitiesToDtos(filteredProjects);
+    }
+
+    private List<Project> getVisibleProjects() {
+        return projectRepository.findAll().stream()
+                .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
+                        projectValidator.haveAccessToProject(project.getOwnerId()))
+                .toList();
+    }
+
+    public Project getProjectById(Long id) {
+        Project project = projectRepository.getProjectById(id);
+        projectValidator.validateAccessToProject(project.getOwnerId());
+        return project;
+    }
+
+    public boolean projectExists(long projectsId) {
+        return projectRepository.existsById(projectsId);
     }
 }
