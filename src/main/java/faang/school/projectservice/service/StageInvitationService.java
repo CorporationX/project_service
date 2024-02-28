@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +34,7 @@ public class StageInvitationService {
 
     public StageInvitationDto accept(long stageInvitationId) {
         StageInvitation invitation = repository.findById(stageInvitationId);
-        List<TeamMember> teamMembers = invitation.getStage().getExecutors();
-        teamMembers.add(invitation.getInvited());
-        invitation.getStage().setExecutors(teamMembers);
+        invitation.getStage().getExecutors().add(invitation.getInvited());
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
 
         return mapper.toDto(repository.save(invitation));
@@ -49,16 +48,17 @@ public class StageInvitationService {
         return mapper.toDto(repository.save(invitation));
     }
 
-    public List<StageInvitationDto> findAllInviteByFilter(StageInvitationFilterDto filterDto, String userId) {
+    public List<StageInvitationDto> findAllInviteByFilter(StageInvitationFilterDto filterDto, long userId) {
         List<StageInvitation> stageInvitations = findAllInvitationForUser(userId);
         filters.stream()
                 .filter(f -> f.IsApplicable(filterDto))
                 .forEach(f -> f.apply(stageInvitations, filterDto));
-
-        return stageInvitations.stream().map(mapper::toDto).toList();
+        return stageInvitations.stream().map(mapper::toDto).collect(Collectors.toList());
     }
 
-    private List<StageInvitation> findAllInvitationForUser(String userId) {
-        return  repository.findAll().stream().filter(stage -> stage.getInvited().getId().equals(Long.parseLong(userId))).toList();
+    private List<StageInvitation> findAllInvitationForUser(long userId) {
+        return  repository.findAll().stream()
+                .filter(stage -> stage.getInvited().getId() == userId)
+                .collect(Collectors.toList());
     }
 }
