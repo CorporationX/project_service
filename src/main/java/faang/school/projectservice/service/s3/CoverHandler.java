@@ -21,13 +21,12 @@ public class CoverHandler {
     @Value("${services.s3.resources.cover.width}")
     private int maxWidth;
 
-    public void checkCoverSize(MultipartFile file) {
-        if (file.getSize() > maxCoverSize) {
+    public void checkCoverSize(long fileSize) {
+        if (fileSize > maxCoverSize) {
             throw new IllegalArgumentException("Превышен размер обложки");
         }
     }
 
-    //Страшный душный метод проверки и сжатия обложки
     public InputStream checkCoverAndResize(MultipartFile file) throws IOException {
         BufferedImage originalImage = ImageIO.read(file.getInputStream());
         BufferedImage resizedImage = null;

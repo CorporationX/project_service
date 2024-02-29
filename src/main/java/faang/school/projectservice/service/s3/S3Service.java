@@ -2,7 +2,7 @@ package faang.school.projectservice.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
-import faang.school.projectservice.exception.FileException;
+import faang.school.projectservice.exception.FileUploadingException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
@@ -62,7 +62,7 @@ public class S3Service {
             S3Object s3Object = s3Client.getObject(getObjectRequest);
             return s3Object.getObjectContent();
         } catch (Exception e) {
-            throw new FileException("Ошибка при загрузке файла: " + e.getMessage());
+            throw new FileUploadingException("Ошибка при загрузке файла: " + e.getMessage());
         }
     }
 }

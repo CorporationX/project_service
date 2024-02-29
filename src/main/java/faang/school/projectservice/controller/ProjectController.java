@@ -73,9 +73,9 @@ public class ProjectController {
     public ProjectDto getProjectById(@PathVariable Long id) {
         projectValidator.validateProjectId(id);
         return projectService.getProjectById(id);
-        }
+    }
 
-    @PutMapping("/{projectId}/cover/add")
+    @PutMapping("/{projectId}/cover")
     public ResourceDto addCover(@PathVariable long projectId, @RequestPart MultipartFile file) {
         return resourceService.addCoverToProject(projectId, userContext.getUserId(), file);
     }

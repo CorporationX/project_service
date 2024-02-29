@@ -10,6 +10,7 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.s3.CoverHandler;
 import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -36,6 +37,8 @@ class ResourceServiceTest {
     private final ResourceMapperImpl resourceMapper = new ResourceMapperImpl();
     @Mock
     private CoverHandler coverHandler;
+    @Mock
+    private ProjectValidator projectValidator;
     @InjectMocks
     private ResourceService resourceService;
 
@@ -56,7 +59,7 @@ class ResourceServiceTest {
         resource.setKey("key");
         MultipartFile file = new MockMultipartFile("file", "file.png", "image/png", "file".getBytes());
 
-        Mockito.when(projectService.getProjectEntityById(projectId))
+        Mockito.when(projectService.getById(projectId))
                 .thenReturn(project);
         Mockito.when(teamMemberRepository.findById(userId))
                 .thenReturn(teamMember);
@@ -72,20 +75,7 @@ class ResourceServiceTest {
         assertEquals(project.getCoverImageId(), resource.getKey());
     }
 
-    @Test
-    void checkStorageSizeExceededFailTest() {
-        BigInteger maxStorageSize = new BigInteger("1000");
-        BigInteger newStorageSize = new BigInteger("2000");
-        assertThrows(RuntimeException.class,
-                () -> resourceService.checkStorageSizeExceeded(maxStorageSize, newStorageSize));
-    }
 
-    @Test
-    void checkStorageSizeExceededSuccessTest() {
-        BigInteger maxStorageSize = new BigInteger("1000");
-        BigInteger newStorageSize = new BigInteger("500");
-        resourceService.checkStorageSizeExceeded(maxStorageSize, newStorageSize);
-    }
 
     @Test
     void downloadCoverFailTest() {

@@ -88,7 +88,7 @@ public class ProjectService {
                 .filter(Objects::nonNull);
     }
 
-    public Project getProjectEntityById(Long id) {
+    public Project getById(Long id) {
         return projectRepository.getProjectById(id);
     }
 
