@@ -1,15 +1,15 @@
-package faang.school.projectservice.service.project;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
-import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validator.project.ProjectValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -59,10 +59,8 @@ public class ProjectService {
         return projectMapper.toDto(updatedProject);
     }
 
-    public ProjectDto getById(long id) {
-        Project projectById = getProjectById(id);
-        projectValidator.validateAccessToProject(projectById.getOwnerId());
-        return projectMapper.toDto(projectById);
+    public ProjectDto getProjectDtoById(long id) {
+        return projectMapper.toDto(getProjectById(id));
     }
 
     public List<ProjectDto> getAll() {
@@ -90,7 +88,13 @@ public class ProjectService {
                 .toList();
     }
 
-    private Project getProjectById(Long id) {
-        return projectRepository.getProjectById(id);
+    public Project getProjectById(Long id) {
+        Project project = projectRepository.getProjectById(id);
+        projectValidator.validateAccessToProject(project.getOwnerId());
+        return project;
+    }
+
+    public boolean projectExists(long projectsId) {
+        return projectRepository.existsById(projectsId);
     }
 }
