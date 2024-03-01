@@ -21,7 +21,7 @@ public interface ProjectService {
 
     List<ProjectDto> getAllByFilter(ProjectFilterDto filterDto);
 
-    ProjectDto updateProject(long projectId, UpdateSubProjectDto updateSubProjectDto);
+    ProjectDto updateSubProject(long projectId, UpdateSubProjectDto updateSubProjectDto);
 
     List<ProjectDto> getFilteredSubProjects(long projectId, ProjectFilterDto projectFilterDto);
 

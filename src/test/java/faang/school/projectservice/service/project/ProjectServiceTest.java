@@ -104,7 +104,7 @@ class ProjectServiceTest {
         when(projectMapper.toDto(any(Project.class))).thenReturn(testProjectDto);
         when(momentRepository.save(any(Moment.class))).thenReturn(moment);
 
-        ProjectDto resultDto = projectService.updateProject(testProject.getId(), updateSubProjectDto);
+        ProjectDto resultDto = projectService.updateSubProject(testProject.getId(), updateSubProjectDto);
         assertEquals(testProjectDto, resultDto);
     }
 
@@ -115,7 +115,7 @@ class ProjectServiceTest {
         when(projectRepository.getProjectById(anyLong())).thenReturn(testProject);
 
         assertThrows(DataValidationException.class,
-                () -> projectService.updateProject(testProject.getId(), updateSubProjectDto));
+                () -> projectService.updateSubProject(testProject.getId(), updateSubProjectDto));
     }
 
     @Test

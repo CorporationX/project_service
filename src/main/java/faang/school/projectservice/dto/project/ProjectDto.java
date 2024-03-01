@@ -20,8 +20,7 @@ public class ProjectDto {
     @NotNull(message = "Project's 'id' can not be null", groups = {ValidationGroups.Update.class})
     @Positive(message = "Project's 'id' should be greater than zero", groups = {ValidationGroups.Update.class})
     private Long id;
-    @NotBlank(message = "Project's 'name' can not be empty")
-    @NotNull(message = "Project's 'name' can not be null", groups = {ValidationGroups.Create.class})
+    @NotBlank(message = "Project's 'name' can not be empty", groups = {ValidationGroups.Create.class})
     private String name;
     @Size(max = 255, message = "Project's 'description' can not be greater than 255 symbols.",
             groups = {ValidationGroups.Create.class, ValidationGroups.Update.class})

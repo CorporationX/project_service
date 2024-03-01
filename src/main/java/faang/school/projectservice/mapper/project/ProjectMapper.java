@@ -13,7 +13,7 @@ import java.util.List;
         injectionStrategy = InjectionStrategy.FIELD)
 public interface ProjectMapper {
     @Mapping(source = "parentProject.id", target = "parentProjectId")
-    @Mapping(source = "children", target = "children", qualifiedByName = "mapToLongChildrenId")
+//    @Mapping(source = "children", target = "children", qualifiedByName = "mapToLongChildrenId")
     ProjectDto toDto(Project project);
 
     Project toEntity(CreateSubProjectDto createSubProjectDto);
@@ -28,7 +28,6 @@ public interface ProjectMapper {
     @Mapping(source = "description", target = "description")
     void updateProject(ProjectDto projectDto, @MappingTarget Project project);
 
-    @Named("mapToLongChildrenId")
     default List<Long> mapToLongChildrenId(List<Project> children) {
         if (children != null) {
             return children.stream()
@@ -37,4 +36,16 @@ public interface ProjectMapper {
         }
         return Collections.emptyList();
     }
+
+    default List<Project> mapIdsToProjects(List<Long> childrenIds) {
+        if (childrenIds == null) {
+            return Collections.emptyList();
+        }
+        return childrenIds.stream()
+                .map(id -> Project.builder()
+                        .id(id)
+                        .build())
+                .toList();
+    }
+
 }

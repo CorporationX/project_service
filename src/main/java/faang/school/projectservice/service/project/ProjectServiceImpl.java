@@ -9,6 +9,7 @@ import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.resource.ResourceMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +34,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final MomentRepository momentRepository;
     private final List<ProjectFilter> filters;
 
+    @Override
     @Transactional
     public ProjectDto createSubProject(CreateSubProjectDto createSubProjectDto) {
         Project parent = projectRepository.getProjectById(createSubProjectDto.getParentId());
@@ -42,7 +43,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Transactional
-    public ProjectDto updateProject(long projectId, UpdateSubProjectDto updateSubProjectDto) {
+    public ProjectDto updateSubProject(long projectId, UpdateSubProjectDto updateSubProjectDto) {
         Project project = getProject(projectId);
         if (updateSubProjectDto.getStatus() == ProjectStatus.COMPLETED
                 && !isEverySubProjectComplete(project)) {
@@ -113,8 +114,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectDto> getAllByFilter(ProjectFilterDto filterDto) {
         List<Project> projects = projectJpaRepository.findAll();
-        Stream<ProjectDto> projectStream = projectMapper.toDtos(projects).stream();
-        return projectFilterService.applyFilters(projectStream, filterDto).toList();
+        List<Project> projectFilteredList = projectFilterService.applyFilters(projects.stream(), filterDto).toList();
+        return projectMapper.toDtos(projectFilteredList);
     }
 
     private Project getProjectFromDB(Long id) {
@@ -130,7 +131,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void validateOwnerIdAndNameExist(ProjectDto projectDto) {
         if (projectJpaRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new ProjectNameExistException(
+            throw new DataValidationException(
                     String.format("This user already have a project with name : %s", projectDto.getName()));
         }
     }
@@ -180,4 +181,5 @@ public class ProjectServiceImpl implements ProjectService {
         moment.setUserIds(userIds);
         return moment;
     }
+
 }
