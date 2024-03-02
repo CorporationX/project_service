@@ -71,11 +71,11 @@ public class ProjectControllerTest {
     @Test
     void testGetById() {
         long projectId = projectDto.getId();
-        when(projectService.getById(projectId)).thenReturn(projectDto);
+        when(projectService.getProjectDtoById(projectId)).thenReturn(projectDto);
 
         ProjectDto projectDtoById = projectController.getById(projectId);
 
-        verify(projectService, times(1)).getById(projectId);
+        verify(projectService, times(1)).getProjectDtoById(projectId);
         assertEquals(projectDto, projectDtoById);
     }
 

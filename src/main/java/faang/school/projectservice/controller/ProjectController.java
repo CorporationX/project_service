@@ -48,7 +48,7 @@ public class ProjectController {
 
     @GetMapping("/{projectId}")
     public ProjectDto getById(@PathVariable @Min(1) long projectId) {
-        return projectService.getById(projectId);
+        return projectService.getProjectDtoById(projectId);
     }
 
     @GetMapping("/filters")

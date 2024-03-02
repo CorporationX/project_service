@@ -73,7 +73,7 @@ public class ProjectService {
         return projectMapper.toDto(updatedProject);
     }
 
-    public ProjectDto getById(long id) {
+    public ProjectDto getProjectDtoById(long id) {
         Project projectById = getProjectById(id);
         projectValidator.validateAccessToProject(projectById.getOwnerId());
         return projectMapper.toDto(projectById);
@@ -107,7 +107,7 @@ public class ProjectService {
                 .toList();
     }
 
-    private Project getProjectById(Long id) {
+    public Project getProjectById(Long id) {
         return projectRepository.getProjectById(id);
     }
 
