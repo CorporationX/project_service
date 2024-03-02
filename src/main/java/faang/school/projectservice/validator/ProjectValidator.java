@@ -32,7 +32,7 @@ public class ProjectValidator {
         validateSubProjectCompleted(children, updatedStatus);
     }
 
-    public void validateName(String name) {
+    private void validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new ValidationException("Name of project cannot be empty or blank");
         }
@@ -60,13 +60,13 @@ public class ProjectValidator {
         }
     }
 
-    public void validateNameExistence(long ownerId, String name) {
+    private void validateNameExistence(long ownerId, String name) {
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
             throw new ValidationException("Project with this name already exists. Name: " + name);
         }
     }
 
-    public void validateSubProjectCompleted(List<Project> children, ProjectStatus updatedStatus) {
+    private void validateSubProjectCompleted(List<Project> children, ProjectStatus updatedStatus) {
         if (updatedStatus.equals(ProjectStatus.COMPLETED) &&
                 !children.stream()
                         .allMatch(childProject -> childProject.getStatus().equals(ProjectStatus.COMPLETED))) {
@@ -74,7 +74,7 @@ public class ProjectValidator {
         }
     }
 
-    public void validateStatuses(List<Project> children, ProjectStatus updatedStatus) {
+    private void validateStatuses(List<Project> children, ProjectStatus updatedStatus) {
         if (!children.stream()
                 .allMatch(childProject -> childProject.getStatus().equals(updatedStatus))) {
             throw new ValidationException("Statuses not equals");

@@ -25,23 +25,24 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @PostMapping
+    @PostMapping("/create")
     public ProjectDto createProject(@RequestBody @Valid ProjectDto projectDto) {
         return projectService.createProject(projectDto);
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public ProjectDto updateProject(@RequestBody ProjectDto projectDto) {
         return projectService.updateProject(projectDto);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<ProjectDto> getAll() {
         return projectService.getAll();
     }
 
-    @GetMapping("/{parentId}")
-    public List<ProjectDto> getAllSubprojectsByFilter(@PathVariable @Min(1) long parentId, @ModelAttribute ProjectFilterDto filterDto) {
+    @GetMapping("/sub/{parentId}")
+    public List<ProjectDto> getAllSubprojectsByFilter(@PathVariable @Min(1) long parentId,
+                                                      @ModelAttribute ProjectFilterDto filterDto) {
         return projectService.getAllSubprojectsByFilter(parentId, filterDto);
     }
 

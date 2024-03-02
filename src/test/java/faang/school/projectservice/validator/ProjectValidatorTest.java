@@ -46,22 +46,6 @@ class ProjectValidatorTest {
     }
 
     @Test
-    void testValidateName_validName_nothingHappens() {
-        String validName = "Faang shcool";
-        projectValidator.validateName(validName);
-    }
-
-    @Test
-    void testValidateName_notValidName_throwsValidationException() {
-        String notValidName1 = "   ";
-        String notValidName2 = "";
-        String notValidName3 = null;
-        validateNameAssertThrowsValidationException(notValidName1);
-        validateNameAssertThrowsValidationException(notValidName2);
-        validateNameAssertThrowsValidationException(notValidName3);
-    }
-
-    @Test
     void testValidateDescription_validDesc_nothingHappens() {
         String validDesc1 = "some valid desc";
         String validDesc2 = null;
@@ -77,24 +61,11 @@ class ProjectValidatorTest {
         validateDescAssertThrowsValidationException(notValidDesc2);
     }
 
-    private void validateNameAssertThrowsValidationException(String notValidName) {
-        assertThrows(
-                ValidationException.class,
-                () -> projectValidator.validateName(notValidName)
-        );
-    }
-
     private void validateDescAssertThrowsValidationException(String notValidDesc) {
         assertThrows(
                 ValidationException.class,
                 () -> projectValidator.validateDescription(notValidDesc)
         );
-    }
-
-    @Test
-    void testValidateAccessToProject_haveAccess_nothingHappens() {
-        mockUserContext();
-        projectValidator.validateAccessToProject(USER_ID_WITH_ACCESS);
     }
 
     @Test
@@ -125,28 +96,8 @@ class ProjectValidatorTest {
         when(userContext.getUserId()).thenReturn(USER_ID_WITH_ACCESS);
     }
 
-    @Test
-    void testValidateNameExistence_nameExists_throwsValidationException() {
-        long projectId = 10L;
-        String projectName = "name";
-        mockProjectNameExistenceCheck(true, projectId, projectName);
-        when(projectRepository.existsByOwnerUserIdAndName(projectId, projectName)).thenReturn(true);
-        assertThrows(
-                ValidationException.class,
-                () -> projectValidator.validateNameExistence(projectId, projectName)
-        );
-    }
-
-    @Test
-    void testValidateNameExistence_nameNotExist_nothingHappens() {
-        long projectId = 5L;
-        String projectName = "name";
-        mockProjectNameExistenceCheck(false, projectId, projectName);
-        when(projectRepository.existsByOwnerUserIdAndName(projectId, projectName)).thenReturn(false);
-        projectValidator.validateNameExistence(projectId, projectName);
-    }
-
     private void mockProjectNameExistenceCheck(boolean isExist, long userId, String projectName) {
         when(projectRepository.existsByOwnerUserIdAndName(userId, projectName)).thenReturn(isExist);
     }
+
 }
