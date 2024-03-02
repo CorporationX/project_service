@@ -10,12 +10,12 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-public class Redis {
+public class RedisConfig {
     @Value("${spring.data.redis.host}")
     String host;
     @Value("${spring.data.redis.port}")
     int port;
-    @Value("${spring.data.redis.channels.profile_view_channel.name}")
+    @Value("${spring.data.redis.channel.project_view.project_view_channel}")
     String projectViewChannelName;
 
     @Bean

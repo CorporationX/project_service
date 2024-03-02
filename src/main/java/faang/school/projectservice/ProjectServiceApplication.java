@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableFeignClients
-@EnableRedisRepositories
 
 public class ProjectServiceApplication {
     public static void main(String[] args) {

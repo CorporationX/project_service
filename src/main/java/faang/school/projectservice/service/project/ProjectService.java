@@ -4,6 +4,7 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectViewEvent;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -70,7 +72,13 @@ public class ProjectService {
         Long ownerId = projectById.getOwnerId();
         projectValidator.validateAccessToProject(ownerId);
 
-        publisher.publish(id, userContext.getUserId());
+        publisher.publish(
+                ProjectViewEvent.builder()
+                        .projectId(id)
+                        .ownerId(ownerId)
+                        .receivedAt(LocalDateTime.now())
+                        .build()
+        );
         log.info("Project with ID {} was  viewed by user with ID {}", id, ownerId);
         return projectMapper.toDto(projectById);
     }
