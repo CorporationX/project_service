@@ -92,7 +92,13 @@ public class ProjectService {
         return projectRepository.getProjectById(id);
     }
 
+    @Transactional(readOnly = true)
+    public Project getProjectModelById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
+
+    @Transactional
     public Project save(Project project){
-        return projectRepository.save(project);
+        projectRepository.save(project);
     }
 }
