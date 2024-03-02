@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigInteger;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -26,5 +28,20 @@ class ProjectValidatorTest {
 
         // Act & Assert
         assertThrows(DataValidationException.class, () -> projectValidator.existsById(projectId));
+    }
+
+    @Test
+    void checkStorageSizeExceededFailTest() {
+        BigInteger maxStorageSize = new BigInteger("1000");
+        BigInteger newStorageSize = new BigInteger("2000");
+        assertThrows(RuntimeException.class,
+                () -> projectValidator.checkStorageSizeExceeded(maxStorageSize, newStorageSize));
+    }
+
+    @Test
+    void checkStorageSizeExceededSuccessTest() {
+        BigInteger maxStorageSize = new BigInteger("1000");
+        BigInteger newStorageSize = new BigInteger("500");
+        projectValidator.checkStorageSizeExceeded(maxStorageSize, newStorageSize);
     }
 }

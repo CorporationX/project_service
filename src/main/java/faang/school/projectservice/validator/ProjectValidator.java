@@ -4,10 +4,13 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.FileUploadingException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.math.BigInteger;
 
 import static faang.school.projectservice.model.ProjectVisibility.PRIVATE;
 
@@ -57,9 +60,16 @@ public class ProjectValidator {
             throw new DataValidationException("You are not owner of project");
         }
     }
+
     public void existsById(Long id) {
         if (!projectRepository.existsById(id)) {
             throw new DataValidationException("Проект с id - " + id + " не существует");
+        }
+    }
+
+    public void checkStorageSizeExceeded(BigInteger maxStorageSize, BigInteger newStorageSize) {
+        if (newStorageSize.compareTo(maxStorageSize) > 0) {
+            throw new FileUploadingException("Превышен размер хранилища");
         }
     }
 }

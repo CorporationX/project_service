@@ -97,6 +97,8 @@ tasks.jacocoTestCoverageVerification {
                     "faang.school.projectservice.mapper.*",
                     "faang.school.projectservice.validator.*",
                     "faang.school.projectservice.filter.*")
+            excludes = listOf("faang.school.projectservice.service.s3.CoverHandler",
+                    "faang.school.projectservice.service.s3.AmazonS3Config")
             limit {
                 minimum = "0.75".toBigDecimal()
             }

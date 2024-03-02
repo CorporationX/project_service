@@ -88,13 +88,17 @@ public class ProjectService {
                 .filter(Objects::nonNull);
     }
 
+    public Project getById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
+
     @Transactional(readOnly = true)
     public Project getProjectModelById(Long id) {
         return projectRepository.getProjectById(id);
     }
 
     @Transactional
-    public void save(Project project){
-        projectRepository.save(project);
+    public Project save(Project project) {
+        return projectRepository.save(project);
     }
 }
