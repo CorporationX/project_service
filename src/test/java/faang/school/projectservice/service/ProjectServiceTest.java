@@ -174,7 +174,7 @@ public class ProjectServiceTest {
         accessAllowed(true);
         when(projectRepository.getProjectById(OWNER_ACCESSED_ID)).thenReturn(filledProjectEntity);
 
-        ProjectDto expectedProjectDto = projectService.getById(OWNER_ACCESSED_ID);
+        ProjectDto expectedProjectDto = projectService.getProjectDtoById(OWNER_ACCESSED_ID);
 
         assertEquals(expectedProjectDto, filledProjectDto);
     }
