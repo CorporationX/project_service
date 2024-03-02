@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.FileUploadingException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.service.s3.CoverHandler;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -64,6 +65,10 @@ public class S3Service {
         } catch (Exception e) {
             throw new FileUploadingException("Ошибка при загрузке файла: " + e.getMessage());
         }
+    }
+
+    public void deleteFile(String key) {
+        s3Client.deleteObject(bucketName, key);
     }
 }
 

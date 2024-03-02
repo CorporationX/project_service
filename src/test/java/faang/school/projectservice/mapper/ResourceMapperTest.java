@@ -3,11 +3,6 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
-import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
-import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(MockitoExtension.class)
 public class ResourceMapperTest {
     @Spy
-    private ResourceMapper mapper = new ResourceMapperImpl();
+    private ResourceMapper resourceMapper = new ResourceMapperImpl();
     private Resource resource;
     private ResourceDto resourceDto;
     private Project project;
@@ -51,7 +46,7 @@ public class ResourceMapperTest {
         Resource resource = new Resource();
         resource.setProject(project);
 
-        ResourceDto resourceDto = mapper.toDto(resource);
+        ResourceDto resourceDto = resourceMapper.toDto(resource);
 
         assertEquals(resource.getProject().getId(), resourceDto.getProjectId());
     }

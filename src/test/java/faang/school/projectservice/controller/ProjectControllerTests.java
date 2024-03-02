@@ -6,7 +6,7 @@ import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectUpdateDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.service.resource.ResourceService;
+import faang.school.projectservice.service.ResourceService;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
