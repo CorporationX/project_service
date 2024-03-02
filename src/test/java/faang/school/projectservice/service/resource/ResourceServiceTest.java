@@ -19,7 +19,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
-import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -89,8 +89,8 @@ class ResourceServiceTest {
         long projectId = 1L;
         Resource resource = new Resource();
         resource.setKey("key");
-        Mockito.when(resourceRepository.findResourceByProjectId(projectId))
-                .thenReturn(Optional.of(resource));
+        Mockito.when(resourceRepository.findByProjectId(projectId))
+                .thenReturn(List.of(resource));
         resourceService.downloadCoverByProjectId(projectId);
         Mockito.verify(s3Service).downloadFile(resource.getKey());
     }

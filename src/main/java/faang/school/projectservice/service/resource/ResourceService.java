@@ -54,8 +54,8 @@ public class ResourceService {
     }
 
     public InputStream downloadCoverByProjectId(long projectId) {
-        Resource resource = resourceRepository.findResourceByProjectId(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Ресурс не найден"));
+        Resource resource = resourceRepository.findByProjectId(projectId)
+                .stream().findFirst().orElseThrow(() -> new EntityNotFoundException("Ресурс не найден"));
         return s3Service.downloadFile(resource.getKey());
     }
 }
