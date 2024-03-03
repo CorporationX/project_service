@@ -43,7 +43,7 @@ public class ResourceServiceTest {
     @Test
     void testUserIdExistsIsInvalid() {
         MockMultipartFile file = prepareMultipartFile();
-        Project project = prepareProject();
+        prepareProject();
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
                 () -> resourceService.addResource(projectId, file, userId));
@@ -68,7 +68,7 @@ public class ResourceServiceTest {
     void testAddResourceFile() {
         MockMultipartFile file = prepareMultipartFile();
 
-        Project project = prepareProject();
+        prepareProject();
 
         when(s3Service.uploadFile(any(MultipartFile.class), any(String.class))).thenReturn(new Resource());
         when(teamMemberRepository.findById(userId)).thenReturn(new TeamMember());
@@ -101,7 +101,7 @@ public class ResourceServiceTest {
 
     @Test
     void testDeleteFromMinio() {
-        TeamMember teamMember = prepareResourceForDeleting();
+        prepareResourceForDeleting();
 
         resourceService.deleteResource(resourceId, userId);
         verify(s3Service, times(1)).deleteFile(any());
@@ -109,10 +109,10 @@ public class ResourceServiceTest {
 
     @Test
     void testDeleteFromDB() {
-        TeamMember teamMember = prepareResourceForDeleting();
+        prepareResourceForDeleting();
 
         resourceService.deleteResource(resourceId, userId);
-        verify(resourceRepository, times(1)).delete(resource);
+        assertEquals(resourceRepository.findById(resourceId).get().getStatus(), ResourceStatus.DELETED);
     }
 
     private MockMultipartFile prepareMultipartFile() {

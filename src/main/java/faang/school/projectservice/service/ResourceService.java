@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +29,7 @@ public class ResourceService {
         Project project = projectService.getProjectById(projectId);
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(project.getMaxStorageSize(), newStorageSize);
-        userIdExists(userId);
+        teamMemberIdExists(userId);
 
         String folder = project.getId() + project.getName();
         Resource resource = s3Service.uploadFile(file, folder);
@@ -39,26 +40,26 @@ public class ResourceService {
 
         saveProject(project, newStorageSize);
 
-        return resourceMapper.resourceToDto(resource);
+        return resourceMapper.toDto(resource);
     }
 
     public ResourceDto updateResource(Long resourceId, MultipartFile file, Long userId) {
-        Resource resourceFromDB = getResourceWithCheckedPermissions(resourceId, userId);
-        Project project = resourceFromDB.getProject();
+        Resource currentResource = getResourceWithCheckedPermissions(resourceId, userId);
+        Project project = currentResource.getProject();
 
         BigInteger newStorageSize = project.getStorageSize()
-                .subtract(resourceFromDB.getSize())
+                .subtract(currentResource.getSize())
                 .add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(project.getMaxStorageSize(), newStorageSize);
 
         String folder = project.getId() + project.getName();
-        s3Service.deleteFile(resourceFromDB.getKey());
+        s3Service.deleteFile(currentResource.getKey());
         Resource resource = s3Service.uploadFile(file, folder);
 
-        updateResourceFiles(resourceFromDB, resource);
+        updateResourceFiles(currentResource, resource);
         saveProject(project, newStorageSize);
 
-        return resourceMapper.resourceToDto(resourceFromDB);
+        return resourceMapper.toDto(currentResource);
     }
 
     public void deleteResource(Long resourceId, Long userId) {
@@ -68,11 +69,10 @@ public class ResourceService {
         project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
 
         resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedAt(LocalDateTime.now());
         resource.getUpdatedBy().setId(userId);
         resource.setKey(null);
         resource.setSize(null);
-
-        resourceRepository.delete(resource);
     }
 
     public InputStream downloadResource(Long resourceId) {
@@ -86,7 +86,7 @@ public class ResourceService {
         }
     }
 
-    private void userIdExists(Long userId) {
+    private void teamMemberIdExists(Long userId) {
         if (teamMemberRepository.findById(userId) == null) {
             throw new IllegalArgumentException("There are no this user in team");
         }

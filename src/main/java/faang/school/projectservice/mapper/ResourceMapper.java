@@ -9,5 +9,5 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "Spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ResourceMapper {
     @Mapping(source = "project.id", target = "projectId")
-    ResourceDto resourceToDto(Resource resource);
+    ResourceDto toDto(Resource resource);
 }

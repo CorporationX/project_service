@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -23,6 +22,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class S3Service {
     private final AmazonS3 s3client;
+
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
@@ -49,7 +49,6 @@ public class S3Service {
             throw new RuntimeException("File download error");
         }
     }
-
 
     private ObjectMetadata prepareObjectMetadata(MultipartFile file) {
         ObjectMetadata objectMetadata = new ObjectMetadata();

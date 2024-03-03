@@ -12,11 +12,6 @@ public class ProjectService {
 
     public Project getProjectById(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
-
-        if (project == null) {
-            throw new IllegalArgumentException("Project's id not found");
-        }
-
         return project;
     }
 
