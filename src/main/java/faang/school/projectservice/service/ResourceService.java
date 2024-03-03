@@ -70,7 +70,7 @@ public class ResourceService {
 
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedAt(LocalDateTime.now());
-        resource.getUpdatedBy().setId(userId);
+        resource.setUpdatedBy(teamMemberRepository.findById(userId));
         resource.setKey(null);
         resource.setSize(null);
     }
