@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.api.ProjectApi;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
@@ -21,20 +22,23 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/projects")
-public class ProjectController {
+@RequestMapping("/project")
+public class ProjectController implements ProjectApi {
     private final ProjectService projectService;
 
-    @PostMapping("/create")
-    public ProjectDto createProject(@RequestBody @Valid ProjectDto projectDto) {
-        return projectService.createProject(projectDto);
+    @Override
+    @PostMapping
+    public ProjectDto create(@RequestBody @Valid ProjectDto projectDto) {
+        return projectService.create(projectDto);
     }
 
-    @PutMapping("/update")
-    public ProjectDto updateProject(@RequestBody ProjectDto projectDto) {
-        return projectService.updateProject(projectDto);
+    @Override
+    @PutMapping
+    public ProjectDto update(@RequestBody ProjectDto projectDto) {
+        return projectService.update(projectDto);
     }
 
+    @Override
     @GetMapping("/all")
     public List<ProjectDto> getAll() {
         return projectService.getAll();
@@ -46,11 +50,13 @@ public class ProjectController {
         return projectService.getAllSubprojectsByFilter(parentId, filterDto);
     }
 
+    @Override
     @GetMapping("/{projectId}")
     public ProjectDto getById(@PathVariable @Min(1) long projectId) {
         return projectService.getProjectDtoById(projectId);
     }
 
+    @Override
     @GetMapping("/filters")
     public List<ProjectDto> getByFilters(@ModelAttribute ProjectFilterDto filterDto) {
         return projectService.getAll(filterDto);

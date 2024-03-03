@@ -94,7 +94,7 @@ public class ProjectServiceTest {
 
         assertThrows(
                 SecurityException.class,
-                () -> projectService.createProject(filledProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
@@ -106,7 +106,7 @@ public class ProjectServiceTest {
 
         assertThrows(
                 EntityNotFoundException.class,
-                () -> projectService.createProject(filledProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
@@ -117,7 +117,7 @@ public class ProjectServiceTest {
 
         assertThrows(
                 ValidationException.class,
-                () -> projectService.createProject(filledProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
@@ -128,7 +128,7 @@ public class ProjectServiceTest {
         projectNameExists(false);
         assertThrows(
                 ValidationException.class,
-                () -> projectService.createProject(filledProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
@@ -139,7 +139,7 @@ public class ProjectServiceTest {
         projectNameExists(false);
         assertThrows(
                 ValidationException.class,
-                () -> projectService.createProject(filledProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
@@ -149,7 +149,7 @@ public class ProjectServiceTest {
         projectNameExists(false);
         userFromDatabase(new UserDto());
 
-        projectService.createProject(filledProjectDto);
+        projectService.create(filledProjectDto);
 
         verify(projectRepository, times(1)).save(captor.capture());
 
@@ -165,7 +165,7 @@ public class ProjectServiceTest {
 
         assertThrows(
                 SecurityException.class,
-                () -> projectService.createProject(filledProjectDto)
+                () -> projectService.create(filledProjectDto)
         );
     }
 
@@ -325,7 +325,7 @@ public class ProjectServiceTest {
         when(userContext.getUserId()).thenReturn(1L);
         when(projectRepository.getProjectById(projectDto.getId())).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
-        ProjectDto projectDtoActual = projectService.updateProject(projectDto);
+        ProjectDto projectDtoActual = projectService.update(projectDto);
         verify(projectRepository).save(project);
         assertEquals(projectDto, projectDtoActual);
     }

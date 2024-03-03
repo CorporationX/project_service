@@ -40,21 +40,21 @@ public class ProjectControllerTest {
 
     @Test
     void testCreateProject() {
-        when(projectService.createProject(projectDto)).thenReturn(projectDto);
+        when(projectService.create(projectDto)).thenReturn(projectDto);
 
-        ProjectDto projectDtoCreateProject = projectController.createProject(projectDto);
+        ProjectDto projectDtoCreateProject = projectController.create(projectDto);
 
-        verify(projectService, times(1)).createProject(projectDto);
+        verify(projectService, times(1)).create(projectDto);
         assertEquals(projectDto, projectDtoCreateProject);
     }
 
     @Test
     void testUpdateProject() {
-        when(projectService.updateProject(projectDto)).thenReturn(projectDto);
+        when(projectService.update(projectDto)).thenReturn(projectDto);
 
-        ProjectDto projectDtoUpdateProject = projectController.updateProject(projectDto);
+        ProjectDto projectDtoUpdateProject = projectController.update(projectDto);
 
-        verify(projectService, times(1)).updateProject(projectDto);
+        verify(projectService, times(1)).update(projectDto);
         assertEquals(projectDto, projectDtoUpdateProject);
     }
 

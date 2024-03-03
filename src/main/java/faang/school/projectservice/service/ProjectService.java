@@ -26,7 +26,7 @@ public class ProjectService {
     private final ProjectValidator projectValidator;
 
 
-    public ProjectDto createProject(ProjectDto projectDto) {
+    public ProjectDto create(ProjectDto projectDto) {
         Long parentId = projectDto.getParentId();
         Project project = preCreate(projectDto);
 
@@ -52,7 +52,7 @@ public class ProjectService {
         return projectMapper.toEntity(projectDto);
     }
 
-    public ProjectDto updateProject(ProjectDto projectDto) {
+    public ProjectDto update(ProjectDto projectDto) {
         Project project = getProjectById(projectDto.getId()); //throws if project doesn't exist
         projectValidator.validateAccessToProject(project.getOwnerId());
 
