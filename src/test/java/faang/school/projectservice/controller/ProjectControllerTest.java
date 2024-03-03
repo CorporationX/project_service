@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,8 @@ import static org.mockito.Mockito.when;
 public class ProjectControllerTest {
     @Mock
     private ProjectService projectService;
+    @Mock
+    private ProjectValidator projectValidator;
     @InjectMocks
     private ProjectController projectController;
     private ProjectDto projectDto;

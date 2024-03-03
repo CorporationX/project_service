@@ -23,7 +23,6 @@ public class ProjectValidator {
 
         validateAccessToProject(ownerId);
         validateNameExistence(ownerId, name);
-        validateName(name);
         validateDescription(projectDto.getDescription());
     }
 
@@ -32,7 +31,7 @@ public class ProjectValidator {
         validateSubProjectCompleted(children, updatedStatus);
     }
 
-    private void validateName(String name) {
+    public void validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new ValidationException("Name of project cannot be empty or blank");
         }

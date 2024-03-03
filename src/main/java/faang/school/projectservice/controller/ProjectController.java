@@ -4,6 +4,7 @@ import faang.school.projectservice.api.ProjectApi;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,12 @@ import java.util.List;
 @RequestMapping("/project")
 public class ProjectController implements ProjectApi {
     private final ProjectService projectService;
+    private final ProjectValidator projectValidator;
 
     @Override
     @PostMapping
     public ProjectDto create(@RequestBody @Valid ProjectDto projectDto) {
+        projectValidator.validateName(projectDto.getName());
         return projectService.create(projectDto);
     }
 

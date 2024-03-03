@@ -122,17 +122,6 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void testCreate_nameNotValid_throwsIllegalArgumentException() {
-        filledProjectDto.setName("   ");
-        accessAllowed(true);
-        projectNameExists(false);
-        assertThrows(
-                ValidationException.class,
-                () -> projectService.create(filledProjectDto)
-        );
-    }
-
-    @Test
     public void testCreate_descriptionNotValid_throwsIllegalArgumentException() {
         filledProjectDto.setDescription("   ");
         accessAllowed(true);
