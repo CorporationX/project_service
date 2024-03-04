@@ -4,7 +4,8 @@ import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
-import faang.school.projectservice.exceptions.DataValidationException;
+
+import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;

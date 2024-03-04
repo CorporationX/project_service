@@ -12,7 +12,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
