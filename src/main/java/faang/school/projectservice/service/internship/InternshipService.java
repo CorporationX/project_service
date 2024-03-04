@@ -25,6 +25,6 @@ public interface InternshipService {
 
     List<InternshipDto> getAllInternship();
 
-    InternshipDto getById(long id);
+    InternshipDto getDtoById(long id);
 
 }

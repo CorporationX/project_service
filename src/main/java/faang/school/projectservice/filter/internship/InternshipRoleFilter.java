@@ -4,9 +4,10 @@ import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
-
+@Component
 public class InternshipRoleFilter implements InternshipFilter {
     private TeamMemberRepository teamMemberRepository;
 

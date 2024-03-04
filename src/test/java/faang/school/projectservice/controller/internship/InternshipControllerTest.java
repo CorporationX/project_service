@@ -95,6 +95,6 @@ class InternshipControllerTest {
     @Test
     void testGetById(){
         internshipController.getById(INTERNSHIP_ID);
-        Mockito.verify(internshipService).getById(INTERNSHIP_ID);
+        Mockito.verify(internshipService).getDtoById(INTERNSHIP_ID);
     }
 }

@@ -18,7 +18,7 @@ import java.util.List;
 public class InternshipController {
     private final InternshipService internshipService;
 
-    @PostMapping("/create")
+    @PostMapping
     public InternshipDto createInternship(@Validated @RequestBody InternshipDto internshipDto) {
         return internshipService.createInternship(internshipDto);
     }
@@ -41,7 +41,7 @@ public class InternshipController {
         return internshipService.removeInternPrematurely(internshipId, id);
     }
 
-    @PutMapping("/update")
+    @PutMapping
     public InternshipDto updateInternship(@NotNull @RequestBody InternshipDto internshipDto) {
         return internshipService.updateInternship(internshipDto);
     }
@@ -68,6 +68,6 @@ public class InternshipController {
 
     @GetMapping("/{id}")
     public InternshipDto getById(@PathVariable @Positive(message = "Id must be greater than zero") long id) {
-        return internshipService.getById(id);
+        return internshipService.getDtoById(id);
     }
 }

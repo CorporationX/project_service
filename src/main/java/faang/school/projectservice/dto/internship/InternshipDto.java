@@ -17,7 +17,7 @@ public class InternshipDto {
     private Long id;
     private Long projectId;
     private Long mentorId;
-    private List<TeamMember> interns;
+    private List<Long> internsId;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 }
