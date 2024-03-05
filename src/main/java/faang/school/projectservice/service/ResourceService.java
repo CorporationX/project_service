@@ -10,6 +10,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -62,6 +63,7 @@ public class ResourceService {
         return resourceMapper.toDto(currentResource);
     }
 
+    @Transactional
     public void deleteResource(Long resourceId, Long userId) {
         Resource resource = getResourceWithCheckedPermissions(resourceId, userId);
         s3Service.deleteFile(resource.getKey());
