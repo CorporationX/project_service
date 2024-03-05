@@ -20,5 +20,4 @@ public class ResourceDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long projectId;
-
 }
