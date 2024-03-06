@@ -25,7 +25,23 @@ public class ProjectService {
     private final List<Filter<Project, ProjectFilterDto>> filters;
     private final ProjectValidator projectValidator;
 
+
     public ProjectDto create(ProjectDto projectDto) {
+        Long parentId = projectDto.getParentId();
+        Project project = preCreate(projectDto);
+
+        if (parentId != null) {
+            Project parentProject = getProjectById(parentId);
+            project.setParentProject(parentProject);
+            projectValidator.validateVisibility(project);
+        }
+
+        Project savedProject = projectRepository.save(project);
+
+        return projectMapper.toDto(savedProject);
+    }
+
+    private Project preCreate(ProjectDto projectDto) {
         projectValidator.validateToCreate(projectDto);
         userServiceClient.getUser(projectDto.getOwnerId()); //throws if user doesn't exist
 
@@ -33,10 +49,7 @@ public class ProjectService {
         if (projectDto.getVisibility() == null) {
             projectDto.setVisibility(ProjectVisibility.PRIVATE);
         }
-
-        Project savedProject = projectRepository.save(projectMapper.toEntity(projectDto));
-
-        return projectMapper.toDto(savedProject);
+        return projectMapper.toEntity(projectDto);
     }
 
     public ProjectDto update(ProjectDto projectDto) {
@@ -45,8 +58,10 @@ public class ProjectService {
 
         ProjectStatus updatedStatus = projectDto.getStatus();
         String updatedDescription = projectDto.getDescription();
+        List<Project> children = project.getChildren();
 
         if (updatedStatus != null) {
+            projectValidator.validateStatus(children, updatedStatus);
             project.setStatus(updatedStatus);
         }
         if (updatedDescription != null) {
@@ -55,12 +70,13 @@ public class ProjectService {
         }
 
         Project updatedProject = projectRepository.save(project);
-
         return projectMapper.toDto(updatedProject);
     }
 
     public ProjectDto getProjectDtoById(long id) {
-        return projectMapper.toDto(getProjectById(id));
+        Project projectById = getProjectById(id);
+        projectValidator.validateAccessToProject(projectById.getOwnerId());
+        return projectMapper.toDto(projectById);
     }
 
     public List<ProjectDto> getAll() {
@@ -69,16 +85,19 @@ public class ProjectService {
 
     public List<ProjectDto> getAll(ProjectFilterDto filterDto) {
         Stream<Project> projects = getVisibleProjects().stream();
+        List<Project> filteredProjects = getFilteredProjects(filterDto, projects);
 
-        List<Project> filteredProjects = filters.stream()
+        return projectMapper.entitiesToDtos(filteredProjects);
+    }
+
+    private List<Project> getFilteredProjects(ProjectFilterDto filterDto, Stream<Project> projects) {
+        return filters.stream()
                 .filter(prjFilter -> prjFilter.isApplicable(filterDto))
                 .reduce(projects,
                         (stream, prjFilter)
                                 -> prjFilter.apply(stream, filterDto),
                         Stream::concat)
                 .toList();
-
-        return projectMapper.entitiesToDtos(filteredProjects);
     }
 
     private List<Project> getVisibleProjects() {
@@ -89,12 +108,17 @@ public class ProjectService {
     }
 
     public Project getProjectById(Long id) {
-        Project project = projectRepository.getProjectById(id);
-        projectValidator.validateAccessToProject(project.getOwnerId());
-        return project;
+        return projectRepository.getProjectById(id);
     }
 
-    public boolean projectExists(long projectsId) {
-        return projectRepository.existsById(projectsId);
+    public boolean existsProjectById(long projectId) {
+        return projectRepository.existsById(projectId);
+    }
+
+    public List<ProjectDto> getAllSubprojectsByFilter(long parentId, ProjectFilterDto filterDto) {
+        Stream<Project> allChildren = getProjectById(parentId).getChildren().stream();
+        List<Project> filteredSubProjects = getFilteredProjects(filterDto, allChildren);
+
+        return projectMapper.entitiesToDtos(filteredSubProjects);
     }
 }
