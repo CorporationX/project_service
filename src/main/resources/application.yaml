@@ -44,6 +44,7 @@ services:
     accessKey: user
     secretKey: password
     bucketName: projectbucket
+    region: us-west-2
     isMocked: false
   payment-service:
     host: http://localhost

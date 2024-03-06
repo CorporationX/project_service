@@ -14,13 +14,15 @@ public class AmazonS3Config {
 
     @Value("${services.s3.accessKey}") private String accessKeyId;
     @Value("${services.s3.secretKey}") private String secretKey;
+    @Value("${services.s3.endpoint}") private String s3Endpoint;
+    @Value("${services.s3.region}") private String region;
 
     @Bean
     public AmazonS3 s3Client() {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKeyId, secretKey);
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:9000", "us-west-2"))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(s3Endpoint, region))
                 .withPathStyleAccessEnabled(true)
                 .build();
     }

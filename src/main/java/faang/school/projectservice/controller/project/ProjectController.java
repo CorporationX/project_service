@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validation.ValidationGroups;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,14 +20,15 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping("/create")
-    ResponseEntity<ProjectDto> createProject(@Validated(ValidationGroups.Create.class) @RequestBody ProjectDto projectDto) {
+    @PostMapping()
+    @Validated(ValidationGroups.Create.class)
+    ResponseEntity<ProjectDto> create(@Valid @RequestBody ProjectDto projectDto) {
         ProjectDto responceProjectDto = projectService.create(projectDto);
         return new ResponseEntity<>(responceProjectDto, HttpStatus.OK);
     }
 
-    @PutMapping("/update")
-    ResponseEntity<ProjectDto> updateProject(@Validated(ValidationGroups.Update.class) @RequestBody ProjectDto projectDto) {
+    @PutMapping()
+    ResponseEntity<ProjectDto> update(@Validated(ValidationGroups.Update.class) @RequestBody ProjectDto projectDto) {
         ProjectDto responceProjectDto = projectService.update(projectDto);
         return new ResponseEntity<>(responceProjectDto, HttpStatus.OK);
     }
