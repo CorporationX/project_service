@@ -44,8 +44,10 @@ public class InternshipServiceImpl implements InternshipService {
     public InternshipDto createInternship(InternshipDto internshipDto) {
         checkId(internshipDto.getProjectId());
         checkId(internshipDto.getMentorId());
-        if (!teamMemberRepository.existsById(internshipDto.getMentorId()))
+        if (!teamMemberRepository.existsById(internshipDto.getMentorId())) {
+            log.error("There is no mentor with this id in the team member");
             throw new DataValidationException("There is no mentor with this id in the team member");
+        }
         checkInternsIsNotEmpty(internshipDto);
         checkInternshipDtoDate(internshipDto.getStartDate(), internshipDto.getEndDate());
         Internship internship = internshipMapper.toEntity(internshipDto);
@@ -57,8 +59,9 @@ public class InternshipServiceImpl implements InternshipService {
     @Transactional
     public InternshipDto addNewIntern(long internshipId, long teamMemberId) {
         Internship internship = getById(internshipId);
-        if (LocalDateTime.now().isAfter(internship.getStartDate()))
-            throw new DataValidationException("The internship has already started");
+        if (LocalDateTime.now().isAfter(internship.getStartDate())){
+            log.error("The internship has already started");
+            throw new DataValidationException("The internship has already started");}
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         internship.getInterns().add(teamMember);
         return internshipMapper.toDto(internshipRepository.save(internship));
