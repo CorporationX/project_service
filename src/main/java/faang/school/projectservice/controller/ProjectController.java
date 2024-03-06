@@ -19,34 +19,29 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping("/create")
-    ResponseEntity<ProjectDto> createProject(@Validated(ValidationGroups.Create.class) @RequestBody ProjectDto projectDto) {
-        ProjectDto responceProjectDto = projectService.create(projectDto);
-        return new ResponseEntity<>(responceProjectDto, HttpStatus.OK);
+    @PostMapping()
+    ResponseEntity<ProjectDto> create(@Validated(ValidationGroups.Create.class) @RequestBody ProjectDto projectDto) {
+        return new ResponseEntity<>(projectService.create(projectDto), HttpStatus.OK);
     }
 
-    @PutMapping("/update")
-    ResponseEntity<ProjectDto> updateProject(@Validated(ValidationGroups.Update.class) @RequestBody ProjectDto projectDto) {
-        ProjectDto responceProjectDto = projectService.update(projectDto);
-        return new ResponseEntity<>(responceProjectDto, HttpStatus.OK);
+    @PutMapping()
+    ResponseEntity<ProjectDto> update(@Validated(ValidationGroups.Update.class) @RequestBody ProjectDto projectDto) {
+        return new ResponseEntity<>(projectService.update(projectDto), HttpStatus.OK);
     }
 
     @GetMapping("/all")
     ResponseEntity<List<ProjectDto>> getAll() {
-        List<ProjectDto> projectsDtos = projectService.getAll();
-        return new ResponseEntity<>(projectsDtos, HttpStatus.OK);
+        return new ResponseEntity<>(projectService.getAll(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     ResponseEntity<ProjectDto> findById(@PathVariable Long id) {
-        ProjectDto projectDto = projectService.findById(id);
-        return new ResponseEntity<>(projectDto, HttpStatus.OK);
+        return new ResponseEntity<>(projectService.findById(id), HttpStatus.OK);
     }
 
     @GetMapping("/all/filter")
-    ResponseEntity<List<ProjectDto>> getAllByFilter(@RequestBody(required = false) ProjectFilterDto filterDto) {
-        List<ProjectDto> allByFilter = projectService.getAllByFilter(filterDto);
-        return new ResponseEntity<>(allByFilter, HttpStatus.OK);
+    ResponseEntity<List<ProjectDto>> filteredProjects(@RequestBody(required = false) ProjectFilterDto filterDto) {
+        return new ResponseEntity<>(projectService.getAllByFilter(filterDto), HttpStatus.OK);
     }
 
 }

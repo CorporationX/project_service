@@ -2,7 +2,6 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -14,7 +13,7 @@ public interface ProjectService {
 
     List<ProjectDto> getAll();
 
-    ProjectDto findById(@PathVariable Long id);
+    ProjectDto findById(Long id);
 
     List<ProjectDto> getAllByFilter(ProjectFilterDto filterDto);
 

@@ -13,9 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -31,7 +29,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectDto create(ProjectDto projectDto) {
-        ensureOwnerIsSet(projectDto);
+        setOwner(projectDto);
         validateOwnerIdAndNameExist(projectDto);
         projectDto.setStatus(ProjectStatus.CREATED);
         Project createdProject = projectRepository.save(projectMapper.toProject(projectDto));
@@ -41,8 +39,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectDto update(ProjectDto projectDto) {
-        Project project = getProjectFromDB(projectDto.getId());
-        project.setUpdatedAt(LocalDateTime.now());
+        Project project = getProject(projectDto.getId());
         projectMapper.updateProject(projectDto, project);
         return projectMapper.toDto(project);
     }
@@ -54,8 +51,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDto findById(@PathVariable Long id) {
-        Project project = getProjectFromDB(id);
+    public ProjectDto findById(Long id) {
+        Project project = getProject(id);
         return projectMapper.toDto(project);
     }
 
@@ -66,12 +63,12 @@ public class ProjectServiceImpl implements ProjectService {
         return projectFilterService.applyFilters(projectStream, filterDto).toList();
     }
 
-    private Project getProjectFromDB(Long id) {
+    private Project getProject(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Project with id = %d not exist", id)));
     }
 
-    private void ensureOwnerIsSet(ProjectDto projectDto) {
+    private void setOwner(ProjectDto projectDto) {
         if (projectDto.getOwnerId() == null) {
             projectDto.setOwnerId(userContext.getUserId());
         }
