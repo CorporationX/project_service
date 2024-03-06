@@ -16,6 +16,7 @@ import java.util.List;
  */
 @Mapper(componentModel = "spring",
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
         injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface VacancyMapper {
     @Mapping(source = "project.id", target = "projectId")
