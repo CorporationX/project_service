@@ -19,12 +19,12 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping()
+    @PostMapping
     ResponseEntity<ProjectDto> create(@Validated(ValidationGroups.Create.class) @RequestBody ProjectDto projectDto) {
         return new ResponseEntity<>(projectService.create(projectDto), HttpStatus.OK);
     }
 
-    @PutMapping()
+    @PutMapping
     ResponseEntity<ProjectDto> update(@Validated(ValidationGroups.Update.class) @RequestBody ProjectDto projectDto) {
         return new ResponseEntity<>(projectService.update(projectDto), HttpStatus.OK);
     }

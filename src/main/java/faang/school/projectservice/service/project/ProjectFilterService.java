@@ -23,11 +23,9 @@ public class ProjectFilterService {
 
     public Stream<ProjectDto> applyFilters(Stream<ProjectDto> projectDtoStream, ProjectFilterDto filterDto) {
         projectDtoStream = filterVisibilityScope(projectDtoStream);
-        if (filterDto != null) {
-            for (ProjectFilter projectFilter : projectFilters) {
-                if (projectFilter.isApplicable(filterDto)) {
-                    projectDtoStream = projectFilter.apply(projectDtoStream, filterDto);
-                }
+        for (ProjectFilter projectFilter : projectFilters) {
+            if (projectFilter.isApplicable(filterDto)) {
+                projectDtoStream = projectFilter.apply(projectDtoStream, filterDto);
             }
         }
         return projectDtoStream;
@@ -38,9 +36,7 @@ public class ProjectFilterService {
             if (projectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
                 long clientUserId = userContext.getUserId();
                 TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(clientUserId, projectDto.getId());
-                if (teamMember == null) {
-                    return false;
-                }
+                return teamMember != null;
             }
             return true;
         });
