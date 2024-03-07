@@ -9,6 +9,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
 
+    @Qualifier("s3Client")
     private final AmazonS3 s3Client;
     @Value("${services.s3.bucketName}")
     private String bucketName;

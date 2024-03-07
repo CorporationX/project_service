@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("api/v1/resources")
 @RequiredArgsConstructor
-public class ResourceController {
+public class ImgResourceController {
 
     private final ResourceService resourceService;
 

@@ -17,7 +17,7 @@ public class AmazonS3Config {
     @Value("${services.s3.endpoint}") private String s3Endpoint;
     @Value("${services.s3.region}") private String region;
 
-    @Bean
+    @Bean(name = "s3Client")
     public AmazonS3 s3Client() {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKeyId, secretKey);
         return AmazonS3ClientBuilder.standard()

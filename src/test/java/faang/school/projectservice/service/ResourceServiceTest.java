@@ -1,10 +1,7 @@
 package faang.school.projectservice.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.mapper.ResourceMapper;
+import faang.school.projectservice.mapper.resource.ResourceMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.Test;
@@ -18,6 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceServiceTest {

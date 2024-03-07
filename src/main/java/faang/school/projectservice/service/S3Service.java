@@ -9,6 +9,7 @@ import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +22,8 @@ import java.time.LocalDateTime;
 @Slf4j
 @RequiredArgsConstructor
 public class S3Service {
+
+    @Qualifier("clientAmazonS3")
     private final AmazonS3 s3client;
 
     @Value("${services.s3.bucketName}")

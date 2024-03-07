@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.mapper.ResourceMapper;
+import faang.school.projectservice.mapper.resource.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -124,4 +124,5 @@ public class ResourceService {
         return resourceRepository.findById(resourceId)
                 .orElseThrow(() -> new IllegalArgumentException("There are no resource with this ID"));
     }
+
 }
