@@ -3,28 +3,81 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.project.ProjectNameExistException;
+import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.mapper.resource.ResourceMapper;
+import faang.school.projectservice.model.*;
+import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
-import java.util.stream.Stream;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
-
-    private final ProjectJpaRepository projectRepository;
-    private final ProjectFilterService projectFilterService;
+    private final ProjectRepository projectRepository;
+    private final ProjectJpaRepository projectJpaRepository;
     private final UserContext userContext;
+    private final ProjectFilterService projectFilterService;
     private final ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
+    private final MomentRepository momentRepository;
+    private final List<ProjectFilter> filters;
+
+    @Override
+    @Transactional
+    public ProjectDto createSubProject(CreateSubProjectDto createSubProjectDto) {
+        Project parent = projectRepository.getProjectById(createSubProjectDto.getParentId());
+        Project subProject = createSubProject(createSubProjectDto, parent);
+        return projectMapper.toDto(projectRepository.save(subProject));
+    }
+
+    @Transactional
+    public ProjectDto updateSubProject(long projectId, UpdateSubProjectDto updateSubProjectDto) {
+        Project project = getProject(projectId);
+        if (updateSubProjectDto.getStatus() == ProjectStatus.COMPLETED
+                && !isEverySubProjectComplete(project)) {
+            throw new DataValidationException
+                    ("The project cannot be completed while there are open subprojects");
+        }
+
+        if (updateSubProjectDto.getVisibility() == ProjectVisibility.PRIVATE
+                && !isContainsSubprojects(project)) {
+            project.getChildren()
+                    .forEach(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE));
+        }
+        project.setStatus(updateSubProjectDto.getStatus());
+        project.setVisibility(updateSubProjectDto.getVisibility());
+
+        if (updateSubProjectDto.getStatus() == ProjectStatus.COMPLETED) {
+            List<Long> userIds = getProjectTeamMemberIds(project);
+            createSubprojectsCompletedMoment(project, userIds);
+        }
+        projectRepository.save(project);
+        return projectMapper.toDto(project);
+    }
+
+    public List<ProjectDto> getFilteredSubProjects(long projectId, ProjectFilterDto projectFilterDto) {
+        Project project = getProject(projectId);
+        if (project.getVisibility().equals(ProjectVisibility.PRIVATE)) {
+            throw new DataValidationException("Object unavailable");
+        }
+        return filters.stream()
+                .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
+                .flatMap(projectFilter -> projectFilter.apply(project.getChildren().stream(), projectFilterDto))
+                .distinct()
+                .map(projectMapper::toDto)
+                .toList();
+    }
 
     @Override
     @Transactional
@@ -32,7 +85,7 @@ public class ProjectServiceImpl implements ProjectService {
         setOwner(projectDto);
         validateOwnerIdAndNameExist(projectDto);
         projectDto.setStatus(ProjectStatus.CREATED);
-        Project createdProject = projectRepository.save(projectMapper.toProject(projectDto));
+        Project createdProject = projectJpaRepository.save(projectMapper.toProject(projectDto));
         return projectMapper.toDto(createdProject);
     }
 
@@ -46,7 +99,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAll() {
-        List<Project> projects = projectRepository.findAll();
+        List<Project> projects = projectJpaRepository.findAll();
         return projectMapper.toDtos(projects);
     }
 
@@ -58,13 +111,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAllByFilter(ProjectFilterDto filterDto) {
-        List<Project> projects = projectRepository.findAll();
-        Stream<ProjectDto> projectStream = projectMapper.toDtos(projects).stream();
-        return projectFilterService.applyFilters(projectStream, filterDto).toList();
+        List<Project> projects = projectJpaRepository.findAll();
+        List<Project> projectFilteredList = projectFilterService.applyFilters(projects.stream(), filterDto).toList();
+        return projectMapper.toDtos(projectFilteredList);
     }
 
     private Project getProject(Long id) {
-        return projectRepository.findById(id)
+        return projectJpaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Project with id = %d not exist", id)));
     }
 
@@ -75,10 +128,56 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void validateOwnerIdAndNameExist(ProjectDto projectDto) {
-        if (projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new ProjectNameExistException(
+        if (projectJpaRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+            throw new DataValidationException(
                     String.format("This user already have a project with name : %s", projectDto.getName()));
         }
+    }
+
+    private Project getProject(long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+
+    private Project createSubProject(CreateSubProjectDto createSubProjectDto, Project parent) {
+        Project entitySubProject = projectMapper.toEntity(createSubProjectDto);
+        entitySubProject.setVisibility(parent.getVisibility());
+        entitySubProject.setStatus(ProjectStatus.CREATED);
+        entitySubProject.setParentProject(parent);
+        return entitySubProject;
+    }
+
+    private boolean isContainsSubprojects(Project projectToUpdate) {
+        return projectToUpdate.getChildren() == null || projectToUpdate.getChildren().isEmpty();
+    }
+
+    private boolean isEverySubProjectComplete(Project projectToUpdate) {
+        return isContainsSubprojects(projectToUpdate) || projectToUpdate.getChildren().stream()
+                .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
+    }
+
+    private List<Long> getProjectTeamMemberIds(Project project) {
+        return Optional.ofNullable(project.getTeams())
+                .orElse(Collections.emptyList())
+                .stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .map(TeamMember::getId)
+                .toList();
+    }
+
+    private void createSubprojectsCompletedMoment(Project project, List<Long> userIds) {
+        Moment moment = momentRepository.save(buildMoment(project, userIds));
+        if (project.getMoments() == null) {
+            project.setMoments(new ArrayList<>(Arrays.asList(moment)));
+        } else {
+            project.getMoments().add(moment);
+        }
+    }
+
+    private Moment buildMoment(Project project, List<Long> userIds) {
+        Moment moment = new Moment();
+        moment.setName(project.getName());
+        moment.setUserIds(userIds);
+        return moment;
     }
 
 }
