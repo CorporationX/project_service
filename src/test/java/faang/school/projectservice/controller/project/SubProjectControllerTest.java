@@ -73,7 +73,7 @@ class SubProjectControllerTest {
     public void testCallUpdateProjectServiceOnce() {
         subProjectController.updateProject(1L, updateSubProjectDto);
 
-        verify(projectService, times(1)).updateProject(1L, updateSubProjectDto);
+        verify(projectService, times(1)).updateSubProject(1L, updateSubProjectDto);
     }
 
     @Test
