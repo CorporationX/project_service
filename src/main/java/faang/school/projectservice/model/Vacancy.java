@@ -1,8 +1,5 @@
 package faang.school.projectservice.model;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -29,6 +26,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Table(name = "vacancy")
 @Data
@@ -43,6 +43,10 @@ public class Vacancy {
 
     @NotBlank
     private String name;
+
+    @Column(name = "position")
+    @Enumerated(EnumType.STRING)
+    private TeamRole position;
 
     @NotBlank
     private String description;
