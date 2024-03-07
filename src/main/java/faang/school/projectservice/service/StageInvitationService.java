@@ -1,0 +1,63 @@
+package faang.school.projectservice.service;
+
+import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
+import faang.school.projectservice.filter.stage_invitation.StageInvitationFilter;
+import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.validator.StageInvitationValidator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class StageInvitationService {
+    private final StageInvitationValidator validator;
+    private final StageInvitationMapper mapper;
+    private final StageInvitationRepository repository;
+    private final List<StageInvitationFilter> filters;
+
+    public StageInvitationDto create(StageInvitationDto stageInvitationDto) {
+        validator.validateStageInvitation(stageInvitationDto);
+
+        StageInvitation stageInvitation = mapper.toEntity(stageInvitationDto);
+        stageInvitation.setStatus(StageInvitationStatus.PENDING);
+
+        return mapper.toDto(repository.save(stageInvitation));
+    }
+
+    public StageInvitationDto accept(long stageInvitationId) {
+        StageInvitation invitation = repository.findById(stageInvitationId);
+        invitation.getStage().getExecutors().add(invitation.getInvited());
+        invitation.setStatus(StageInvitationStatus.ACCEPTED);
+
+        return mapper.toDto(repository.save(invitation));
+    }
+
+    public StageInvitationDto reject(long stageInvitationId, String message) {
+        StageInvitation invitation = repository.findById(stageInvitationId);
+        invitation.setStatus(StageInvitationStatus.REJECTED);
+        invitation.setDescription(message);
+
+        return mapper.toDto(repository.save(invitation));
+    }
+
+    public List<StageInvitationDto> findAllInviteByFilter(StageInvitationFilterDto filterDto, long userId) {
+        List<StageInvitation> stageInvitations = findAllInvitationForUser(userId);
+        filters.stream()
+                .filter(f -> f.IsApplicable(filterDto))
+                .forEach(f -> f.apply(stageInvitations, filterDto));
+        return stageInvitations.stream().map(mapper::toDto).collect(Collectors.toList());
+    }
+
+    private List<StageInvitation> findAllInvitationForUser(long userId) {
+        return  repository.findAll().stream()
+                .filter(stage -> stage.getInvited().getId() == userId)
+                .collect(Collectors.toList());
+    }
+}
