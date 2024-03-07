@@ -29,5 +29,4 @@ public class ResourceDto {
     private LocalDateTime updatedAt;
     @NotNull(message = "Project's 'id' can not be null", groups = {ValidationGroups.Create.class, ValidationGroups.Update.class})
     private Long projectId;
-
 }
