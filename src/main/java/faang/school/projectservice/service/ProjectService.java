@@ -60,7 +60,7 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(projectMapper.toEntity(projectDto));
         log.info("Project with ID {} was saved by user with ID {}", savedProject.getId(), savedProject.getOwnerId());
-        return projectMapper.toDto(savedProject);
+        return savedProject;
     }
 
     public ProjectDto update(ProjectDto projectDto) {
