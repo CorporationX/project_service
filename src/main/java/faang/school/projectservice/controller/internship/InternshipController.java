@@ -56,8 +56,8 @@ public class InternshipController {
         return internshipService.getInternshipByStatus(filter);
     }
 
-    @GetMapping("/filter/role")
-    public List<InternshipDto> getInternshipByRole(InternshipFilterDto id, TeamRole role) {
+    @GetMapping("/filter/{role}")
+    public List<InternshipDto> getInternshipByRole(InternshipFilterDto id, @PathVariable TeamRole role) {
         return internshipService.getInternshipByRole(id, role);
     }
 

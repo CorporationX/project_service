@@ -12,6 +12,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validation.InternshipValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,8 @@ public class InternshipServiceImpl implements InternshipService {
     private final TeamMemberRepository teamMemberRepository;
     private final TeamMemberMapper teamMemberMapper;
     private final List<InternshipFilter> filters;
-    private final int MAX_DURATION_INTERNSHIP_DAYS = 91;
+    private final InternshipValidator internshipValidator;
+
 
     @Transactional
     public InternshipDto createInternship(InternshipDto internshipDto) {
@@ -49,7 +51,7 @@ public class InternshipServiceImpl implements InternshipService {
             throw new DataValidationException("There is no mentor with this id in the team member");
         }
         checkInternsIsNotEmpty(internshipDto);
-        checkInternshipDtoDate(internshipDto.getStartDate(), internshipDto.getEndDate());
+        internshipValidator.checkInternshipDtoDate(internshipDto.getStartDate(), internshipDto.getEndDate());
         Internship internship = internshipMapper.toEntity(internshipDto);
         List<TeamMember> interns = internshipDto.getInternsId().stream()
                 .map(teamMemberRepository::findById)
@@ -160,11 +162,11 @@ public class InternshipServiceImpl implements InternshipService {
                     .map(teamMemberRepository::findById)
                     .toList());
         if (internshipDto.getStartDate() != null) {
-            checkInternshipDtoDate(internshipDto.getStartDate(), internship.getEndDate());
+            internshipValidator.checkInternshipDtoDate(internshipDto.getStartDate(), internship.getEndDate());
             internship.setStartDate(internshipDto.getStartDate());
         }
         if (internshipDto.getEndDate() != null) {
-            checkInternshipDtoDate(internship.getStartDate(), internshipDto.getEndDate());
+            internshipValidator.checkInternshipDtoDate(internship.getStartDate(), internshipDto.getEndDate());
             internship.setEndDate(internshipDto.getEndDate());
         }
         return internship;
@@ -219,15 +221,5 @@ public class InternshipServiceImpl implements InternshipService {
                 .toList();
         if (interns.isEmpty())
             throw new IllegalArgumentException("Interns list cannot be empty");
-    }
-
-    private void checkInternshipDtoDate(LocalDateTime startDate, LocalDateTime endDate) {
-        if (startDate == null || endDate == null)
-            throw new DataValidationException("Invalid dates");
-        if (startDate.isAfter(endDate))
-            throw new IllegalArgumentException("Incorrect dates have been entered");
-        Duration duration = Duration.between(startDate, endDate);
-        if (duration.toDays() > MAX_DURATION_INTERNSHIP_DAYS)
-            throw new DataValidationException("Internship duration cannot exceed " + MAX_DURATION_INTERNSHIP_DAYS + " days");
     }
 }
