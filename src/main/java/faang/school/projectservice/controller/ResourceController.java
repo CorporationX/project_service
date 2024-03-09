@@ -11,7 +11,7 @@ import java.io.InputStream;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/resources")
+@RequestMapping("/resources")
 public class ResourceController {
     private final ResourceService resourceService;
     private final UserContext userContext;
