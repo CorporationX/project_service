@@ -12,6 +12,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validation.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +32,7 @@ import static faang.school.projectservice.model.TeamRole.DEVELOPER;
 import static faang.school.projectservice.model.TeamRole.INTERN;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class InternshipServiceTest {
@@ -42,6 +42,8 @@ class InternshipServiceTest {
     private InternshipRepository internshipRepository;
     @Mock
     private TeamMemberRepository teamMemberRepository;
+    @Mock
+    private InternshipValidator internshipValidator;
     @Spy
     private InternshipMapper internshipMapper = Mappers.getMapper(InternshipMapper.class);
     @Spy
@@ -52,7 +54,7 @@ class InternshipServiceTest {
     private InternshipDto internshipDto;
     private TeamMemberDto teamMemberDto;
     private List<TeamMember> interns;
-
+    private int MAX_DURATION_INTERNSHIP_DAYS = 91;
 
     @BeforeEach
     void setUp() {
@@ -114,6 +116,8 @@ class InternshipServiceTest {
     @Test
     void testCreateInternshipWithNullDate() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(true);
+        doThrow(new DataValidationException("Invalid dates")).when(internshipValidator)
+                .checkInternshipDtoDate(any(LocalDateTime.class), isNull());
         internshipDto.setEndDate(null);
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> internshipService.createInternship(internshipDto));
@@ -123,8 +127,10 @@ class InternshipServiceTest {
     @Test
     void testCreateInternshipWithIncorrectDate() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(true);
-        internshipDto.setEndDate(LocalDateTime.now().minusDays(1));
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        doThrow(new DataValidationException("Incorrect dates have been entered")).when(internshipValidator)
+                .checkInternshipDtoDate(any(LocalDateTime.class), any(LocalDateTime.class));
+        //internshipDto.setEndDate(LocalDateTime.now().minusDays(1));
+        DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> internshipService.createInternship(internshipDto));
         assertEquals(exception.getMessage(), "Incorrect dates have been entered");
     }
@@ -132,7 +138,9 @@ class InternshipServiceTest {
     @Test
     void testCreateInternshipWithLongerThreeMonths() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(true);
-        internshipDto.setEndDate(LocalDateTime.now().plusDays(95));
+        doThrow(new DataValidationException("Internship duration cannot exceed 91 days")).when(internshipValidator)
+                .checkInternshipDtoDate(any(LocalDateTime.class), any(LocalDateTime.class));
+       // internshipDto.setEndDate(LocalDateTime.now().plusDays(95));
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> internshipService.createInternship(internshipDto));
         assertEquals(exception.getMessage(), "Internship duration cannot exceed 91 days");
@@ -200,7 +208,7 @@ class InternshipServiceTest {
         internshipFilterDto.setStatus(IN_PROGRESS);
 
         internshipService = new InternshipServiceImpl(internshipRepository, internshipMapper, teamMemberRepository,
-                teamMemberMapper, Arrays.asList(new InternshipStatusFilter()));
+                teamMemberMapper, Arrays.asList(new InternshipStatusFilter()), internshipValidator);
 
         when(internshipRepository.findAll()).thenReturn(Arrays.asList(internship, internship1, internship2));
         List<InternshipDto> actualList = internshipService.getInternshipByStatus(internshipFilterDto);

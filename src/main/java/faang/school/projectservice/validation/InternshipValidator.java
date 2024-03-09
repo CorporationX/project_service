@@ -12,7 +12,7 @@ public class InternshipValidator {
         if (startDate == null || endDate == null)
             throw new DataValidationException("Invalid dates");
         if (startDate.isAfter(endDate))
-            throw new IllegalArgumentException("Incorrect dates have been entered");
+            throw new DataValidationException("Incorrect dates have been entered");
         Duration duration = Duration.between(startDate, endDate);
         if (duration.toDays() > MAX_DURATION_INTERNSHIP_DAYS)
             throw new DataValidationException("Internship duration cannot exceed " + MAX_DURATION_INTERNSHIP_DAYS + " days");
