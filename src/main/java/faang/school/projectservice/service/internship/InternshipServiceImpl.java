@@ -2,8 +2,8 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.exeption.DataValidationException;
-import faang.school.projectservice.exeption.EntityNotFoundException;
+import faang.school.projectservice.exeptions.DataValidationException;
+import faang.school.projectservice.exeptions.EntityNotFoundException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.mapper.internship.TeamMemberMapper;
@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static faang.school.projectservice.model.InternshipStatus.COMPLETED;
