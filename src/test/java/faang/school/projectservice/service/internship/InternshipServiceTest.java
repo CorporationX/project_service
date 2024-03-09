@@ -8,6 +8,7 @@ import faang.school.projectservice.filter.internship.InternshipStatusFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.mapper.internship.TeamMemberMapper;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
@@ -20,7 +21,6 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-/*
+
 @ExtendWith(MockitoExtension.class)
 class InternshipServiceTest {
     @InjectMocks
@@ -65,20 +65,21 @@ class InternshipServiceTest {
                 .id(1L)
                 .roles(new ArrayList<>(List.of(TeamRole.INTERN)))
                 .build();
-        interns = new ArrayList<>(List.of(teamMember, new TeamMember()));
+        // interns = new ArrayList<>(List.of(teamMember, new TeamMember()));
         internshipDto = InternshipDto.builder()
                 .id(123L)
                 .projectId(1L)
                 .mentorId(5L)
-                .interns()
-                .startDate(LocalDateTime.of(2024, Month.FEBRUARY, 28, 10, 0))
-                .endDate((LocalDateTime.of(2024, Month.MAY, 20, 10, 0)))
+                .internsId(List.of(8L, 9L, 10L))
+                .startDate(LocalDateTime.now().plusDays(1))
+                .endDate(LocalDateTime.now().plusDays(90))
                 .build();
     }
 
     @Test
     void testCreateInternshipSuccessful() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(true);
+        when(teamMemberRepository.findById(anyLong())).thenReturn(teamMember);
         internshipService.createInternship(internshipDto);
         internshipCaptor = ArgumentCaptor.forClass(Internship.class);
         verify(internshipRepository).save(internshipCaptor.capture());
@@ -88,23 +89,26 @@ class InternshipServiceTest {
     @Test
     void testCreateInternshipFailure() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(false);
-        DataValidationException exception = assertThrows(DataValidationException.class, () -> internshipService.createInternship(internshipDto));
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> internshipService.createInternship(internshipDto));
         assertEquals("There is no mentor with this id in the team member", exception.getMessage());
     }
 
     @Test
     void testCreateInternshipWithNullInterns() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(true);
-        internshipDto.setInterns(null);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
+        internshipDto.setInternsId(List.of());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> internshipService.createInternship(internshipDto));
         assertEquals("Interns list cannot be empty", exception.getMessage());
     }
 
     @Test
     void testCreateInternshipWithEmptyInterns() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(true);
-        internshipDto.setInterns(new ArrayList<>());
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
+        internshipDto.setInternsId(new ArrayList<>());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> internshipService.createInternship(internshipDto));
         assertEquals(exception.getMessage(), "Interns list cannot be empty");
     }
 
@@ -112,38 +116,43 @@ class InternshipServiceTest {
     void testCreateInternshipWithNullDate() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(true);
         internshipDto.setEndDate(null);
-        DataValidationException exception = assertThrows(DataValidationException.class, () -> internshipService.createInternship(internshipDto));
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> internshipService.createInternship(internshipDto));
         assertEquals(exception.getMessage(), "Invalid dates");
     }
 
     @Test
     void testCreateInternshipWithIncorrectDate() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(true);
-        internshipDto.setEndDate(LocalDateTime.of(2024, Month.JANUARY, 15, 10, 0));
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> internshipService.createInternship(internshipDto));
+        internshipDto.setEndDate(LocalDateTime.now().minusDays(1));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> internshipService.createInternship(internshipDto));
         assertEquals(exception.getMessage(), "Incorrect dates have been entered");
     }
 
     @Test
     void testCreateInternshipWithLongerThreeMonths() {
         when(teamMemberRepository.existsById(anyLong())).thenReturn(true);
-        internshipDto.setEndDate(LocalDateTime.of(2024, Month.JUNE, 15, 10, 0));
-        DataValidationException exception = assertThrows(DataValidationException.class, () -> internshipService.createInternship(internshipDto));
+        internshipDto.setEndDate(LocalDateTime.now().plusDays(95));
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> internshipService.createInternship(internshipDto));
         assertEquals(exception.getMessage(), "Internship duration cannot exceed 91 days");
     }
 
     @Test
     void testAddNewInternsSuccessful() {
         Internship internship = internshipMapper.toEntity(internshipDto);
+        internship.setInterns(new ArrayList<>(List.of(TeamMember.builder().id(8L).build())));
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
-        when(internshipRepository.save(internship)).thenReturn(internship);
+        when(teamMemberRepository.findById(anyLong())).thenReturn(teamMember);
         InternshipDto updatedInternshipDto = internshipService.addNewIntern(internshipDto.getId(), 1L);
-        assertEquals(3, updatedInternshipDto.getInterns().size());
+        assertEquals(2, updatedInternshipDto.getInternsId().size());
     }
 
     @Test
     void testFinishInterPrematurelySuccessful() {
         Internship internship = internshipMapper.toEntity(internshipDto);
+        internship.setInterns(new ArrayList<>(List.of(TeamMember.builder().id(8L).build())));
         when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
         internshipService.finishInternPrematurely(internshipDto.getId(), teamMemberDto.getId());
@@ -154,20 +163,21 @@ class InternshipServiceTest {
     @Test
     void testRemoveInterPrematurelySuccessful() {
         Internship internship = internshipMapper.toEntity(internshipDto);
+        internship.setInterns(new ArrayList<>(List.of(teamMember, new TeamMember())));
         when(internshipRepository.findById(anyLong())).thenReturn(Optional.of(internship));
         internshipService.removeInternPrematurely(internshipDto.getId(), teamMemberDto.getId());
         assertEquals(1, internship.getInterns().size());
     }
 
-    @Test
+  /*  @Test
     void testUpdateInternshipSuccessful() {
         Internship internship = internshipMapper.toEntity(internshipDto);
         when(internshipRepository.findById(123L)).thenReturn(Optional.of(internship));
-        when(internshipRepository.save(internship)).thenReturn(internship);
-        internshipDto.setStartDate(LocalDateTime.of(2024, Month.MARCH, 15, 10, 0));
+       // when(internshipRepository.save(internship)).thenReturn(internship);
+        internshipDto.setStartDate(LocalDateTime.now().plusDays(5));
         InternshipDto updatedInternshipDto = internshipService.updateInternship(internshipDto);
         assertEquals(updatedInternshipDto.getStartDate(), internshipDto.getStartDate());
-    }
+    }*/
 
     @Test
     void testUpdateInternshipAfterEndDate_InternshipNotFound() {
@@ -176,8 +186,10 @@ class InternshipServiceTest {
                 internshipService.updateInternshipAfterEndDate(123L));
     }
 
+
     @Test
     void testGetInternshipByStatusSuccessful() {
+        internshipDto.setInternsId(new ArrayList<>());
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setStatus(IN_PROGRESS);
         Internship internship1 = new Internship();
@@ -196,5 +208,4 @@ class InternshipServiceTest {
 
         assertEquals(Arrays.asList(internshipDto), actualList);
     }
-
-}*/
+}

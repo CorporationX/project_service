@@ -13,12 +13,12 @@ public class InternshipRoleFilter implements InternshipFilter {
 
     @Override
     public boolean isApplicable(InternshipFilterDto internshipFilterDto) {
-        return internshipFilterDto.getId() > 0;
+        return internshipFilterDto.getRole() != null;
     }
 
     @Override
     public Stream<Internship> apply(Stream<Internship> internshipStream, InternshipFilterDto internshipFilterDto) {
-        TeamMember teamMember = teamMemberRepository.findById(internshipFilterDto.getId());
-        return internshipStream.filter(internship -> internship.getInterns().contains(teamMember));
+        return internshipStream.filter(internship -> internship.getInterns().contains(internshipFilterDto.getRole()));
+     //  return internshipStream.filter(internship -> internship.getInterns().stream().anyMatch(intern -> intern.getRoles().contains(internshipFilterDto.getRole())));
     }
 }

@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static faang.school.projectservice.model.InternshipStatus.COMPLETED;
@@ -51,7 +52,12 @@ public class InternshipServiceImpl implements InternshipService {
         checkInternsIsNotEmpty(internshipDto);
         checkInternshipDtoDate(internshipDto.getStartDate(), internshipDto.getEndDate());
         Internship internship = internshipMapper.toEntity(internshipDto);
-        internship.getInterns().forEach(intern -> changeRole(intern, INTERN));
+        List<TeamMember> interns = internshipDto.getInternsId().stream()
+                .map(teamMemberRepository::findById)
+                .peek(teamMember -> changeRole(teamMember, INTERN))
+                .toList();
+        internship.setInterns(interns);
+        internshipDto.getInternsId().forEach(id -> changeRole(teamMemberRepository.findById(id), INTERN));
         internship.setStatus(IN_PROGRESS);
         return internshipMapper.toDto(internshipRepository.save(internship));
     }
@@ -59,12 +65,13 @@ public class InternshipServiceImpl implements InternshipService {
     @Transactional
     public InternshipDto addNewIntern(long internshipId, long teamMemberId) {
         Internship internship = getById(internshipId);
-        if (LocalDateTime.now().isAfter(internship.getStartDate())){
+        if (LocalDateTime.now().isAfter(internship.getStartDate())) {
             log.error("The internship has already started");
-            throw new DataValidationException("The internship has already started");}
+            throw new DataValidationException("The internship has already started");
+        }
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         internship.getInterns().add(teamMember);
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        return internshipMapper.toDto(internship);
     }
 
     @Transactional
@@ -72,7 +79,7 @@ public class InternshipServiceImpl implements InternshipService {
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         changeRole(teamMember, DEVELOPER);
         Internship internship = updateInterns(internshipId, teamMember);
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        return internshipMapper.toDto(internship);
     }
 
     @Transactional
@@ -81,7 +88,7 @@ public class InternshipServiceImpl implements InternshipService {
         TeamMember intern = searchInternInInternship(internship, internId);
         removeRole(intern, INTERN);
         internship.getInterns().remove(intern);
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        return internshipMapper.toDto(internship);
     }
 
     @Transactional
@@ -90,7 +97,7 @@ public class InternshipServiceImpl implements InternshipService {
         if (internship.equals(internshipMapper.toEntity(updatedInternshipDto)))
             throw new DataValidationException("There are no fields to update");
         internship = updateInternshipFields(internship, updatedInternshipDto);
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        return internshipMapper.toDto(internship);
     }
 
     @Transactional
@@ -107,7 +114,7 @@ public class InternshipServiceImpl implements InternshipService {
                     return true;
                 });
         internship.setStatus(COMPLETED);
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        return internshipMapper.toDto(internship);
     }
 
 
@@ -121,12 +128,12 @@ public class InternshipServiceImpl implements InternshipService {
                 .toList();
     }
 
-    public List<InternshipDto> getInternshipByRole(InternshipFilterDto id, TeamRole role) {
+    public List<InternshipDto> getInternshipByRole(InternshipFilterDto internshipFilterDto, TeamRole role) {
         Stream<Internship> internshipStream = internshipRepository.findAll().stream();
         return filters.stream()
-                .filter(internshipFilter -> internshipFilter.isApplicable(id))
-                .flatMap(internshipFilter -> internshipFilter.apply(internshipStream, id))
-                .filter(internship -> internship.getInterns().stream().anyMatch(intern -> intern.getRoles().contains(role)))
+                .filter(internshipFilter -> internshipFilter.isApplicable(internshipFilterDto))
+                .flatMap(internshipFilter -> internshipFilter.apply(internshipStream, internshipFilterDto))
+                //.filter(internship -> internship.getInterns().stream().anyMatch(intern -> intern.getRoles().contains(role)))
                 .map(internshipMapper::toDto)
                 .toList();
     }
