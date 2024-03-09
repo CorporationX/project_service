@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectFilterDto {
-    @Size(max = 255, message = "Имя не должно превышать 255 символов.")
+    @Size(max = 255, message = "Project's 'name' can not be greater than 255 symbols.")
     private String name;
     private ProjectStatus status;
+
 }

@@ -33,7 +33,7 @@ public class SubProjectController {
             @PathVariable @Positive(message = "Id проекта должен быть положительным числом") Long projectId,
             @RequestBody UpdateSubProjectDto updateSubProjectDto) {
         log.info("Запрос на обновление проекта с id: {}.", projectId);
-        return projectService.updateProject(projectId, updateSubProjectDto);
+        return projectService.updateSubProject(projectId, updateSubProjectDto);
     }
 
     @PostMapping("/search/{projectId}")

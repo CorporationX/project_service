@@ -1,17 +1,21 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -20,10 +24,14 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
-    private final ProjectMapper projectMapper;
+    private final ProjectJpaRepository projectJpaRepository;
+    private final UserContext userContext;
+    private final ProjectFilterService projectFilterService;
+    private final ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
     private final MomentRepository momentRepository;
     private final List<ProjectFilter> filters;
 
+    @Override
     @Transactional
     public ProjectDto createSubProject(CreateSubProjectDto createSubProjectDto) {
         Project parent = projectRepository.getProjectById(createSubProjectDto.getParentId());
@@ -32,7 +40,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Transactional
-    public ProjectDto updateProject(long projectId, UpdateSubProjectDto updateSubProjectDto) {
+    public ProjectDto updateSubProject(long projectId, UpdateSubProjectDto updateSubProjectDto) {
         Project project = getProject(projectId);
         if (updateSubProjectDto.getStatus() == ProjectStatus.COMPLETED
                 && !isEverySubProjectComplete(project)) {
@@ -67,6 +75,61 @@ public class ProjectServiceImpl implements ProjectService {
                 .distinct()
                 .map(projectMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public ProjectDto create(ProjectDto projectDto) {
+        setOwner(projectDto);
+        validateOwnerIdAndNameExist(projectDto);
+        projectDto.setStatus(ProjectStatus.CREATED);
+        Project createdProject = projectJpaRepository.save(projectMapper.toProject(projectDto));
+        return projectMapper.toDto(createdProject);
+    }
+
+    @Override
+    @Transactional
+    public ProjectDto update(ProjectDto projectDto) {
+        Project project = getProject(projectDto.getId());
+        projectMapper.updateProject(projectDto, project);
+        return projectMapper.toDto(project);
+    }
+
+    @Override
+    public List<ProjectDto> getAll() {
+        List<Project> projects = projectJpaRepository.findAll();
+        return projectMapper.toDtos(projects);
+    }
+
+    @Override
+    public ProjectDto findById(Long id) {
+        Project project = getProject(id);
+        return projectMapper.toDto(project);
+    }
+
+    @Override
+    public List<ProjectDto> getAllByFilter(ProjectFilterDto filterDto) {
+        List<Project> projects = projectJpaRepository.findAll();
+        List<Project> projectFilteredList = projectFilterService.applyFilters(projects.stream(), filterDto).toList();
+        return projectMapper.toDtos(projectFilteredList);
+    }
+
+    private Project getProject(Long id) {
+        return projectJpaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Project with id = %d not exist", id)));
+    }
+
+    private void setOwner(ProjectDto projectDto) {
+        if (projectDto.getOwnerId() == null) {
+            projectDto.setOwnerId(userContext.getUserId());
+        }
+    }
+
+    private void validateOwnerIdAndNameExist(ProjectDto projectDto) {
+        if (projectJpaRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+            throw new DataValidationException(
+                    String.format("This user already have a project with name : %s", projectDto.getName()));
+        }
     }
 
     private Project getProject(long projectId) {
@@ -114,4 +177,5 @@ public class ProjectServiceImpl implements ProjectService {
         moment.setUserIds(userIds);
         return moment;
     }
+
 }

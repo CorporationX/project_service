@@ -4,6 +4,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
+  servlet:
+    multipart:
+      max-file-size: 2GB
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -43,6 +46,7 @@ services:
     accessKey: user
     secretKey: password
     bucketName: projectbucket
+    region: us-west-2
     isMocked: false
   payment-service:
     host: http://localhost

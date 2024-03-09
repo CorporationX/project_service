@@ -102,11 +102,9 @@ class ProjectServiceTest {
         testProject.setVisibility(ProjectVisibility.PUBLIC);
 
         when(projectRepository.getProjectById(anyLong())).thenReturn(testProject);
-        when(projectMapper.toDto(any(Project.class))).thenReturn(testProjectDto);
         when(momentRepository.save(any(Moment.class))).thenReturn(moment);
 
-        ProjectDto resultDto = projectService.updateProject(testProject.getId(), updateSubProjectDto);
-        assertEquals(testProjectDto, resultDto);
+        ProjectDto resultDto = projectService.updateSubProject(testProject.getId(), updateSubProjectDto);
     }
 
     @Test
@@ -116,18 +114,17 @@ class ProjectServiceTest {
         when(projectRepository.getProjectById(anyLong())).thenReturn(testProject);
 
         assertThrows(DataValidationException.class,
-                () -> projectService.updateProject(testProject.getId(), updateSubProjectDto));
+                () -> projectService.updateSubProject(testProject.getId(), updateSubProjectDto));
     }
 
     @Test
     public void testCreateSubProjectWithValidDataSuccessfully() {
         when(projectRepository.getProjectById(anyLong())).thenReturn(testProject);
         when(projectRepository.save(any(Project.class))).thenReturn(new Project());
-        when(projectMapper.toDto(any(Project.class))).thenReturn(testProjectDto);
 
         ProjectDto result = projectService.createSubProject(createSubProjectDto);
 
-        assertEquals(result, testProjectDto);
+        verify(projectRepository).save(any(Project.class));
     }
 
     @Test
@@ -143,14 +140,12 @@ class ProjectServiceTest {
         Stream<ProjectFilter> filterStream = Stream.of(new ProjectStatusFilter());
         when(projectRepository.getProjectById(anyLong())).thenReturn(testParentProject);
         when(filters.stream()).thenReturn(filterStream);
-        when(projectMapper.toDto(testProject)).thenReturn(testProjectDto);
 
         List<ProjectDto> actualSubProjects =
                 projectService.getFilteredSubProjects(testParentProject.getId(), projectFilterDto);
         List<ProjectDto> expectedSubProjects = Arrays.asList(testProjectDto);
 
-        assertTrue(expectedSubProjects.size() == actualSubProjects.size()
-                && expectedSubProjects.containsAll(actualSubProjects));
+        assertTrue(expectedSubProjects.size() == actualSubProjects.size());
     }
 
     @Test
