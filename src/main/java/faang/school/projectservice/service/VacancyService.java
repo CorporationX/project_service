@@ -44,7 +44,8 @@ public class VacancyService {
     }
 
     public void updateVacancy(VacancyDto vacancyDto) {
-        Vacancy vacancy = vacancyMapper.toEntity(getVacancy(vacancyDto.getId()));
+        Vacancy vacancy = vacancyRepository.findById(vacancyDto.getId())
+                .orElseThrow(() -> new DataValidationException("Такой вакансии нет"));
         if (vacancy.getCandidates().size() < vacancy.getCount()) {
             log.info("Нужно больше кандидатов");
         }

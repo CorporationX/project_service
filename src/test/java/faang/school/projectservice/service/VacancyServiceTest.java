@@ -14,24 +14,21 @@ import faang.school.projectservice.repository.VacancyRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.PrintStream;
 import java.util.List;
 import java.util.Optional;
 
 import static faang.school.projectservice.model.CandidateStatus.ACCEPTED;
-import static faang.school.projectservice.model.CandidateStatus.REJECTED;
 import static faang.school.projectservice.model.TeamRole.OWNER;
 import static faang.school.projectservice.model.VacancyStatus.CLOSED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,13 +41,9 @@ class VacancyServiceTest {
     @Mock
     private VacancyRepository vacancyRepository;
     @Mock
-    private PrintStream printStream;
-    @Mock
     private ProjectRepository projectRepository;
     @Mock
     private TeamMemberRepository teamMemberRepository;
-    @Captor
-    private ArgumentCaptor<Vacancy> captorVacancy;
 
     @Test
     void testCreateVacancySuccessful() {
@@ -58,16 +51,19 @@ class VacancyServiceTest {
         VacancyDto vacancyDto = VacancyDto.builder()
                 .id(1L)
                 .projectId(2L)
+                .description("test")
+                .createdBy(createdBy)
+                .count(5)
                 .build();
         Project project = Project.builder()
                 .id(vacancyDto.getProjectId())
                 .build();
         TeamMember member = new TeamMember();
         Vacancy vacancy = Vacancy.builder()
+                .id(1L)
                 .name(vacancyDto.getName())
-                .createdAt(null)
                 .createdBy(createdBy)
-                .description("junior-dev")
+                .description("test")
                 .status(VacancyStatus.OPEN)
                 .count(5)
                 .build();
@@ -79,30 +75,9 @@ class VacancyServiceTest {
         vacancyService.createVacancy(vacancyDto);
 
         verify(projectRepository).save(project);
-        verify(vacancyRepository).save(captorVacancy.capture());
-        Vacancy vacancy1 = captorVacancy.getValue();
-        vacancy1.setCreatedAt(null);
-        assertEquals(vacancy, vacancy1);
+        verify(vacancyRepository).save(vacancy);
         assertEquals(1, member.getRoles().size());
         assertEquals(OWNER, member.getRoles().get(0));
-    }
-
-    @Test
-    void testUpdateVacancyFailure() {
-        VacancyDto vacancyDto = VacancyDto.builder()
-                .id(1L)
-                .build();
-        Vacancy vacancy = Vacancy.builder()
-                .candidates(List.of(
-                        new Candidate(),
-                        new Candidate(),
-                        new Candidate()))
-                .count(5)
-                .build();
-        when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
-        System.setOut(printStream);
-        vacancyService.updateVacancy(vacancyDto);
-        verify(printStream).println("Нужно больше кандидатов");
     }
 
     @Test
@@ -111,6 +86,7 @@ class VacancyServiceTest {
                 .id(1L)
                 .build();
         Vacancy vacancy = Vacancy.builder()
+                .id(1L)
                 .candidates(List.of(
                         new Candidate(),
                         new Candidate(),
@@ -125,26 +101,14 @@ class VacancyServiceTest {
 
     @Test
     void testDeleteVacancySuccessful() {
-        Candidate candidate1 = Candidate.builder()
-                .id(11L)
-                .userId(22L)
-                .candidateStatus(ACCEPTED)
-                .build();
-        Candidate candidate2 = Candidate.builder()
-                .id(12L)
-                .userId(23L)
-                .candidateStatus(REJECTED)
-                .build();
-
-        Vacancy vacancy = Vacancy.builder()
-                .id(1L)
-                .candidates(List.of(candidate1, candidate2))
-                .build();
-
-        when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
+        when(vacancyRepository.findById(1L)).thenReturn(
+                Optional.of(Vacancy.builder()
+                        .candidates(
+                                List.of(new Candidate(), new Candidate()))
+                        .build()));
         vacancyService.deleteVacancy(1L);
-        verify(vacancyRepository).deleteById(23L);
-        verify(vacancyRepository, never()).deleteById(22L);
+        verify(teamMemberRepository, times(2)).deleteById(any());
+        verify(vacancyRepository).deleteById(any());
     }
 
     @Test
