@@ -1,7 +1,6 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.VacancyDto;
-import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,36 +16,34 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("${server.version}/vacancy")
 @RequiredArgsConstructor
 public class VacancyController {
     private final VacancyService vacancyService;
-    private final VacancyMapper vacancyMapper;
 
-    @PostMapping("/vacancy")
-    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto,
-                                    @RequestParam("createdBy") Long createdBy) {
-        return vacancyService.createVacancy(vacancyDto, createdBy);
+    @PostMapping()
+    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
+        return vacancyService.createVacancy(vacancyDto);
     }
 
-    @PutMapping("/vacancy")
+    @PutMapping()
     public void updateVacancy(@RequestBody VacancyDto vacancyDto) {
         vacancyService.updateVacancy(vacancyDto);
     }
 
-    @DeleteMapping("/vacancy/{id}")
-    public void deleteVacancy(@PathVariable("id") Long id) {
-        vacancyService.deleteVacancy(id);
+    @DeleteMapping("/{vacancyId}")
+    public void deleteVacancy(@PathVariable("id") Long vacancyId) {
+        vacancyService.deleteVacancy(vacancyId);
     }
 
-    @GetMapping("/vacancy")
+    @GetMapping()
     public List<VacancyDto> getVacanciesWithFilters(@RequestParam("name") String name,
                                                     @RequestParam("position") String position) {
         return vacancyService.getVacanciesWithFilters(name, position);
     }
 
-    @GetMapping("/vacancy/{id}")
+    @GetMapping("/{id}")
     public VacancyDto getVacancy(@PathVariable("id") Long id) {
-        return vacancyMapper.toDto(vacancyService.getVacancy(id));
+        return vacancyService.getVacancy(id);
     }
 }

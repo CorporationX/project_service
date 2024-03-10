@@ -4,16 +4,16 @@ import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 import static faang.school.projectservice.model.CandidateStatus.ACCEPTED;
@@ -22,47 +22,44 @@ import static faang.school.projectservice.model.VacancyStatus.CLOSED;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final VacancyMapper vacancyMapper;
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
 
-    public VacancyDto createVacancy(VacancyDto vacancyDto, Long createdBy) {
+    public VacancyDto createVacancy(VacancyDto vacancyDto) {
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
-        teamMemberRepository.findById(createdBy).setRoles(Collections.singletonList(OWNER));
-        Vacancy vacancy = Vacancy.builder()
-                .name(vacancyDto.getName())
-                .createdAt(LocalDateTime.now())
-                .createdBy(createdBy)
-                .description("junior-dev")
-                .status(VacancyStatus.OPEN)
-                .count(5)
-                .build();
+        TeamMember teamMember = teamMemberRepository.findById(vacancyDto.getCreatedBy());
+        if (teamMember == null) {
+            throw new DataValidationException("такого члена команды нет");
+        }
+        teamMember.setRoles(List.of(OWNER));
+        Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
+        vacancy.setStatus(VacancyStatus.OPEN);
         project.addVacancy(vacancy);
         projectRepository.save(project);
         return vacancyMapper.toDto(vacancyRepository.save(vacancy));
     }
 
     public void updateVacancy(VacancyDto vacancyDto) {
-        Vacancy vacancy = getVacancy(vacancyDto.getId());
+        Vacancy vacancy = vacancyMapper.toEntity(getVacancy(vacancyDto.getId()));
         if (vacancy.getCandidates().size() < vacancy.getCount()) {
-            System.out.println("Нужно больше кандидатов");
+            log.info("Нужно больше кандидатов");
         }
         vacancy.getCandidates()
                 .forEach(candidate -> candidate.setCandidateStatus(ACCEPTED));
-        vacancy.setUpdatedAt(LocalDateTime.now());
         vacancy.setStatus(CLOSED);
     }
 
-    public void deleteVacancy(Long id) {
-        getVacancy(id)
+    public void deleteVacancy(Long vacancyId) {
+        vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new DataValidationException("Такой вакансии нет"))
                 .getCandidates()
-                .forEach(candidate -> {
-                    if (!candidate.getCandidateStatus().equals(ACCEPTED)) {
-                        vacancyRepository.deleteById(candidate.getUserId());
-                    }
-                });
+                .forEach(candidate ->
+                        teamMemberRepository.deleteById(candidate.getId()));
+        vacancyRepository.deleteById(vacancyId);
     }
 
     public List<VacancyDto> getVacanciesWithFilters(String name, String position) {
@@ -74,9 +71,9 @@ public class VacancyService {
                 .toList();
     }
 
-    public Vacancy getVacancy(Long id) {
-        return vacancyRepository.findById(id)
-                .orElseThrow(() -> new DataValidationException("Такой вакансии нет"));
+    public VacancyDto getVacancy(Long id) {
+        return vacancyMapper.toDto(vacancyRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("Такой вакансии нет")));
     }
 
     private List<Vacancy> filterName(List<Vacancy> vacancyWithFilter, String name) {

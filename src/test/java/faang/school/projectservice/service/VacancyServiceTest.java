@@ -22,7 +22,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.PrintStream;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,7 +76,7 @@ class VacancyServiceTest {
                 .thenReturn(project);
         when(teamMemberRepository.findById(createdBy))
                 .thenReturn(member);
-        vacancyService.createVacancy(vacancyDto, createdBy);
+        vacancyService.createVacancy(vacancyDto);
 
         verify(projectRepository).save(project);
         verify(vacancyRepository).save(captorVacancy.capture());
