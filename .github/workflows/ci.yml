@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - dev
+      - feature/pipline-BC-BJS2-3445
 
 jobs:
   test:
