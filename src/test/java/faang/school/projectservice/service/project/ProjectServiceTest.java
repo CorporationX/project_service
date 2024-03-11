@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,6 +34,7 @@ public class ProjectServiceTest {
     private ProjectMapperImpl projectMapper;
     private ProjectRepository projectRepository;
     private ProjectValidator projectValidator;
+    private ProjectFilter projectFilter;
     private List<ProjectFilter> projectFilters;
     private ProjectService projectService;
 
@@ -39,7 +42,8 @@ public class ProjectServiceTest {
     void setUp() {
         projectRepository = mock(ProjectRepository.class);
         projectValidator = mock(ProjectValidator.class);
-        projectFilters = Collections.singletonList(mock(ProjectFilter.class));
+        projectFilter = mock(ProjectFilter.class);
+        projectFilters = Collections.singletonList(projectFilter);
         projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters);
     }
 
@@ -74,6 +78,23 @@ public class ProjectServiceTest {
         verify(projectValidator, times(1)).validateProjectUpdate(any(Project.class));
         verify(projectRepository, times(1)).save(any(Project.class));
         verify(projectMapper, times(1)).toDto(any(Project.class));
+    }
+
+    @Test
+    void findAllProjectsByFilters_ReturnsAllProjectsByFilters() {
+        long userId = 1L;
+        ProjectFilterDto filters = new ProjectFilterDto();
+        List<ProjectDto> expected = getProjectDtos();
+        when(projectRepository.findAll()).thenReturn(getProjects());
+        when(projectFilter.isApplicable(any(ProjectFilterDto.class))).thenReturn(true);
+
+        List<ProjectDto> actual = projectService.findAllProjectsByFilters(userId, filters);
+
+        assertEquals(expected, actual);
+        verify(projectRepository, times(1)).findAll();
+        verify(projectFilter, times(1)).isApplicable(any(ProjectFilterDto.class));
+        verify(projectFilter, times(1)).apply(anyList(), any(ProjectFilterDto.class));
+        verify(projectMapper, times(1)).toDto(anyList());
     }
 
     @Test
@@ -133,13 +154,13 @@ public class ProjectServiceTest {
     }
 
     private List<Project> getProjects() {
-        return List.of
+        return new ArrayList<>(List.of
                 (
                         Project.builder()
                                 .id(1L)
                                 .name("project")
                                 .description("description")
-                                .ownerId(2L)
+                                .ownerId(1L)
                                 .status(ProjectStatus.CREATED)
                                 .visibility(ProjectVisibility.PUBLIC)
                                 .build(),
@@ -147,11 +168,11 @@ public class ProjectServiceTest {
                                 .id(2L)
                                 .name("project")
                                 .description("description")
-                                .ownerId(3L)
+                                .ownerId(1L)
                                 .status(ProjectStatus.CREATED)
                                 .visibility(ProjectVisibility.PUBLIC)
                                 .build()
-                );
+                ));
     }
 
     private List<ProjectDto> getProjectDtos() {
@@ -161,7 +182,7 @@ public class ProjectServiceTest {
                                 .id(1L)
                                 .name("project")
                                 .description("description")
-                                .ownerId(2L)
+                                .ownerId(1L)
                                 .status(ProjectStatus.CREATED)
                                 .visibility(ProjectVisibility.PUBLIC)
                                 .build(),
@@ -169,7 +190,7 @@ public class ProjectServiceTest {
                                 .id(2L)
                                 .name("project")
                                 .description("description")
-                                .ownerId(3L)
+                                .ownerId(1L)
                                 .status(ProjectStatus.CREATED)
                                 .visibility(ProjectVisibility.PUBLIC)
                                 .build()
