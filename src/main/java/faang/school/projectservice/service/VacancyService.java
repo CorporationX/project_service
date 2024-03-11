@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -31,11 +30,7 @@ public class VacancyService {
 
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
-        TeamMember teamMember = teamMemberRepository.findById(vacancyDto.getCreatedBy());
-        if (teamMember == null) {
-            throw new DataValidationException("такого члена команды нет");
-        }
-        teamMember.setRoles(List.of(OWNER));
+        teamMemberRepository.findById(vacancyDto.getCreatedBy()).setRoles(List.of(OWNER));
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         vacancy.setStatus(VacancyStatus.OPEN);
         project.addVacancy(vacancy);
@@ -65,8 +60,12 @@ public class VacancyService {
 
     public List<VacancyDto> getVacanciesWithFilters(String name, String position) {
         List<Vacancy> vacancyWithFilter = vacancyRepository.findAll();
-        if (name != null) vacancyWithFilter = filterName(vacancyWithFilter, name);
-        if (position != null) vacancyWithFilter = filterDescription(vacancyWithFilter, position);
+        if (name != null) {
+            vacancyWithFilter = filterName(vacancyWithFilter, name);
+        }
+        if (position != null) {
+            vacancyWithFilter = filterDescription(vacancyWithFilter, position);
+        }
         return vacancyWithFilter.stream()
                 .map(vacancyMapper::toDto)
                 .toList();
