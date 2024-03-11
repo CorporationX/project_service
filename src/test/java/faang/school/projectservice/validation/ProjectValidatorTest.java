@@ -57,17 +57,14 @@ public class ProjectValidatorTest {
         when(projectRepository.existsByOwnerUserIdAndName(anyLong(), anyString())).thenReturn(true);
 
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectCreate(getProjectNoVisibility()));
+                -> projectValidator.validateProjectCreate(getValidProject()));
         verify(projectRepository, times(1)).existsByOwnerUserIdAndName(anyLong(), anyString());
     }
 
     @Test
     void validateProjectCreate_EmptyVisibility_ThrowsException() {
-        when(projectRepository.existsByOwnerUserIdAndName(anyLong(), anyString())).thenReturn(false);
-
         assertThrows(DataValidationException.class, ()
                 -> projectValidator.validateProjectCreate(getProjectNoVisibility()));
-        verify(projectRepository, times(1)).existsByOwnerUserIdAndName(anyLong(), anyString());
     }
 
     @Test

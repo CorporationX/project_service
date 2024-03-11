@@ -14,14 +14,16 @@ public class ProjectValidator {
     private final ProjectRepository projectRepository;
 
     public void validateProjectCreate(Project project) {
-        validateName(project);
-        validateDescription(project);
+        validateFields(project);
         validateProjectNameExist(project);
-        validateProjectVisibility(project);
     }
 
     public void validateProjectUpdate(Project project) {
         validateProjectExists(project);
+        validateFields(project);
+    }
+
+    private void validateFields(Project project) {
         validateName(project);
         validateDescription(project);
         validateProjectVisibility(project);

@@ -22,6 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -110,16 +111,16 @@ public class ProjectServiceTest {
     }
 
     @Test
-    void findAllProjectsByIds_ReturnsAllProjectsByIds() {
-        List<Long> ids = List.of(1L, 2L, 3L);
-        List<ProjectDto> expected = getProjectDtos();
-        when(projectRepository.findAllByIds(anyList())).thenReturn(getProjects());
+    void findProjectById_ValidArgs() {
+        Long projectId = 1L;
+        ProjectDto expected = getProjectDto();
+        when(projectRepository.getProjectById(anyLong())).thenReturn(getProject(1L));
 
-        List<ProjectDto> actual = projectService.findAllProjectsByIds(ids);
+        ProjectDto actual = projectService.findProjectById(projectId);
 
         assertEquals(expected, actual);
-        verify(projectMapper, times(1)).toDto(anyList());
-        verify(projectRepository, times(1)).findAllByIds(anyList());
+        verify(projectMapper, times(1)).toDto(any(Project.class));
+        verify(projectRepository, times(1)).getProjectById(anyLong());
     }
 
     private ProjectDto getProjectDto() {
@@ -127,6 +128,8 @@ public class ProjectServiceTest {
                 .id(1L)
                 .name("project")
                 .description("description")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
     }

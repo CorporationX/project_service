@@ -47,9 +47,9 @@ public class ProjectController {
         return projectService.findAllProjects();
     }
 
-    @Operation(summary = "Find all projects by projects id's")
-    @PostMapping("/project/ids")
-    public List<ProjectDto> findAllProjectsByIds(@RequestBody List<Long> projectIds) {
-        return projectService.findAllProjectsByIds(projectIds);
+    @Operation(summary = "Find project by project id")
+    @PostMapping("/project/{projectId}")
+    public ProjectDto findAllProjectsByIds(@PathVariable Long projectId) {
+        return projectService.findProjectById(projectId);
     }
 }

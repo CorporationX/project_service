@@ -58,8 +58,8 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectDto> findAllProjectsByIds(List<Long> ids) {
-        return projectMapper.toDto(projectRepository.findAllByIds(ids));
+    public ProjectDto findProjectById(Long id) {
+        return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 
     private boolean isProjectPrivate(Project project) {
@@ -83,7 +83,9 @@ public class ProjectService {
     }
 
     private void setUpProjectFields(Project project, Long userId) {
-        project.setOwnerId(userId);
+        if (project.getOwnerId() == null) {
+            project.setOwnerId(userId);
+        }
         project.setStatus(ProjectStatus.CREATED);
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
