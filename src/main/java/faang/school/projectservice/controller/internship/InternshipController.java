@@ -1,11 +1,13 @@
 package faang.school.projectservice.controller.internship;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.internship.InternshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -17,16 +19,20 @@ import java.util.List;
 @Tag(name = "Internship", description = "The Internship API")
 @RestController
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/internship")
 public class InternshipController {
     private final InternshipService internshipService;
+    private final UserContext userContext;
 
     @Operation(
             summary = "Создаём стажировку",
             description = "Получает InternshipDto и создаёт стажировку"
     )
     @PostMapping
-    public InternshipDto createInternship(@Validated @RequestBody InternshipDto internshipDto) {
+    public InternshipDto createInternship(@Valid @RequestBody InternshipDto internshipDto) {
+        long userId = userContext.getUserId();
+        internshipDto.setCreatedBy(userId);
         return internshipService.createInternship(internshipDto);
     }
 

@@ -59,7 +59,10 @@ public class InternshipServiceImpl implements InternshipService {
         internship.setInterns(interns);
         internshipDto.getInternsId().forEach(id -> changeRole(teamMemberRepository.findById(id), INTERN));
         internship.setStatus(IN_PROGRESS);
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        log.info("Status is set IN_PROGRESS");
+        Internship internship1 = internshipRepository.save(internship);
+        log.info("The internship has been created");
+        return internshipMapper.toDto(internship1);
     }
 
     @Transactional

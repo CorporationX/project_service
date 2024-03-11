@@ -62,10 +62,10 @@ public class Internship {
     @NotNull
     private InternshipStatus status;
 
-    @NotBlank
+   // @NotBlank
     private String description;
 
-    @NotBlank
+   // @NotBlank
     private String name;
 
     @CreationTimestamp
