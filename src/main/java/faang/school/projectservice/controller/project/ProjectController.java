@@ -25,7 +25,7 @@ public class ProjectController {
 
     @Operation(summary = "Create project by user id")
     @PostMapping("/project")
-    public ProjectDto createProject(@RequestHeader Long userId, @RequestBody ProjectDto projectDto) {
+    public ProjectDto createProject(@RequestHeader("userId") Long userId, @RequestBody ProjectDto projectDto) {
         return projectService.createProject(userId, projectDto);
     }
 
@@ -37,7 +37,7 @@ public class ProjectController {
 
     @Operation(summary = "Find all user projects by filters")
     @PostMapping("/project/filters")
-    public List<ProjectDto> findAllProjectsByFilters(@RequestHeader Long userId, @RequestBody ProjectFilterDto filters) {
+    public List<ProjectDto> findAllProjectsByFilters(@RequestHeader("userId") Long userId, @RequestBody ProjectFilterDto filters) {
         return projectService.findAllProjectsByFilters(userId, filters);
     }
 

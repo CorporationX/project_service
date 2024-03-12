@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,6 @@ public class ProjectService {
     public ProjectDto updateProject(Long projectId, ProjectDto projectDto) {
         Project project = projectMapper.toEntity(projectDto);
         project.setId(projectId);
-        project.setUpdatedAt(LocalDateTime.now());
         projectValidator.validateProjectUpdate(project);
         return projectMapper.toDto(projectRepository.save(project));
     }
@@ -87,7 +85,5 @@ public class ProjectService {
             project.setOwnerId(userId);
         }
         project.setStatus(ProjectStatus.CREATED);
-        project.setCreatedAt(LocalDateTime.now());
-        project.setUpdatedAt(LocalDateTime.now());
     }
 }
