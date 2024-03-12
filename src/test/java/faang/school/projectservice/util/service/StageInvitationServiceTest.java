@@ -6,6 +6,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.StageInvitationService;
+import faang.school.projectservice.service.TeamMemberService;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +31,8 @@ public class StageInvitationServiceTest {
     private StageInvitationMapper stageInvitationMapper;
     @Mock
     private StageInvitationRepository stageInvitationRepository;
+    @Mock
+    private TeamMemberService teamMemberService;
     @InjectMocks
     private StageInvitationService stageInvitationService;
     @Captor
@@ -58,6 +63,7 @@ public class StageInvitationServiceTest {
         teamMember.setId(2L);
         invitation.setInvited(teamMember);
         when(stageInvitationRepository.findById(2L)).thenReturn(invitation);
+        when(teamMemberService.getTeamMember(anyLong())).thenReturn(any(TeamMember.class));
         stageInvitationService.accept(1L, 2L);
         Mockito.verify(stageInvitationRepository, times(1)).save(invitation);
     }
