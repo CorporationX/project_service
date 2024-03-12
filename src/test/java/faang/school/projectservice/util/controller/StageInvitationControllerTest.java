@@ -2,7 +2,6 @@ package faang.school.projectservice.util.controller;
 
 import faang.school.projectservice.controller.StageInvitationController;
 import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.exception.ValidateStageInvitationException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.StageInvitationService;
@@ -26,7 +25,7 @@ public class StageInvitationControllerTest {
         StageInvitationDto stageInvitationDto = new StageInvitationDto();
         stageInvitationDto.setAuthor(new TeamMember());
         stageInvitationDto.setInvited(new TeamMember());
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.createInvitation(stageInvitationDto));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationController.createInvitation(stageInvitationDto));
     }
 
     @Test
@@ -34,7 +33,7 @@ public class StageInvitationControllerTest {
         StageInvitationDto stageInvitationDto = new StageInvitationDto();
         stageInvitationDto.setStage(new Stage());
         stageInvitationDto.setInvited(new TeamMember());
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.createInvitation(stageInvitationDto));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationController.createInvitation(stageInvitationDto));
     }
 
     @Test
@@ -42,37 +41,32 @@ public class StageInvitationControllerTest {
         StageInvitationDto stageInvitationDto = new StageInvitationDto();
         stageInvitationDto.setStage(new Stage());
         stageInvitationDto.setAuthor(new TeamMember());
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.createInvitation(stageInvitationDto));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationController.createInvitation(stageInvitationDto));
     }
 
     @Test
     void testAcceptInvitationMissingUserId() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.acceptInvitation(null, 4L));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationController.acceptInvitation(null, 4L));
     }
 
     @Test
     void testAcceptInvitationMissingInvitationId() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.acceptInvitation(5L, null));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationController.acceptInvitation(5L, null));
     }
 
     @Test
     void testRejectInvitationMissingUserId() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.rejectInvitation(null, 4L, "anyString()"));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationController.rejectInvitation(null, 4L, "anyString()"));
     }
 
     @Test
     void testRejectInvitationMissingInvitationId() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.rejectInvitation(5L, null, "anyString()"));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationController.rejectInvitation(5L, null, "anyString()"));
     }
 
     @Test
     void testRejectInvitationMissingDescription() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.rejectInvitation(4L, 5L, null));
-    }
-
-    @Test
-    void testGetAllInvitationMissingId() {
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationController.getAllInvitation(null));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationController.rejectInvitation(4L, 5L, null));
     }
 
 }

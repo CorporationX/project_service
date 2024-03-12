@@ -13,7 +13,7 @@ public interface StageInvitationMapper {
 
     StageInvitationDto toDto(StageInvitation stageInvitation);
 
-    List<StageInvitationDto> toDto(List<StageInvitation> stageInvitation);
+    List<StageInvitationDto> toDtoList(List<StageInvitation> stageInvitation);
 
     StageInvitation toEntity(StageInvitationDto stageInvitationDto);
 

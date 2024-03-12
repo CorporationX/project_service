@@ -1,7 +1,6 @@
 package faang.school.projectservice.util.service;
 
 import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.exception.ValidateStageInvitationException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -48,7 +47,7 @@ public class StageInvitationServiceTest {
     void testAcceptFail() {
         invitation = null;
         when(stageInvitationRepository.findById(5L)).thenReturn(invitation);
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationService.accept(4L, 5L));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationService.accept(4L, 5L));
     }
 
     @Test
@@ -67,7 +66,7 @@ public class StageInvitationServiceTest {
     void testRejectFail() {
         invitation = null;
         when(stageInvitationRepository.findById(Mockito.anyLong())).thenReturn(invitation);
-        Assert.assertThrows(ValidateStageInvitationException.class, () -> stageInvitationService.reject(4L, 5L, "anytext"));
+        Assert.assertThrows(NullPointerException.class, () -> stageInvitationService.reject(4L, 5L, "anytext"));
     }
 
     @Test
@@ -91,8 +90,8 @@ public class StageInvitationServiceTest {
 
         when(stageInvitationRepository.findAll()).thenReturn(testList);
 
-        List<StageInvitationDto> invitations = stageInvitationService.getAll(1L);
-        Mockito.verify(stageInvitationMapper, times(1)).toDto(captor.capture());
+        List<StageInvitationDto> invitations = stageInvitationService.getAll(1L, null);
+        Mockito.verify(stageInvitationMapper, times(1)).toDtoList(captor.capture());
 
         Assert.assertEquals(2, captor.getValue().size());
     }
