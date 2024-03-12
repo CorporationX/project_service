@@ -32,6 +32,7 @@ public class VacancyService {
         vacancyValidator.validateIfProjectExistsById(vacancyDto.getProjectId());
         vacancyValidator.validateCuratorRole(vacancyDto.getCuratorId());
 
+        vacancyDto.setStatus(VacancyStatus.OPEN);
         Vacancy savedVacancy = vacancyRepository.save(vacancyMapper.toEntity(vacancyDto));
         return vacancyMapper.toDto(savedVacancy);
     }
@@ -60,7 +61,7 @@ public class VacancyService {
 
     public List<VacancyDto> getFilteredVacancies(VacancyFilterDto filter) {
         List<Vacancy> vacancies = vacancyRepository.findAll();
-        if (vacancyFilters != null && !vacancyFilters.isEmpty()) {
+        if (!vacancyFilters.isEmpty()) {
             vacancyFilters.stream()
                     .filter(vacancyFilter -> vacancyFilter.isApplicable(filter))
                     .forEach(vacancyFilter -> vacancyFilter.apply(vacancies, filter));

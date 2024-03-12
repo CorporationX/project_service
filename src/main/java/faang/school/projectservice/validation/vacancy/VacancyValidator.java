@@ -61,7 +61,7 @@ public class VacancyValidator {
                 .filter(candidate -> candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
                 .count();
 
-        if (candidatesApprovedQuantity <= workersRequiredQuantity) {
+        if (candidatesApprovedQuantity < workersRequiredQuantity) {
             throw new DataValidationException(
                     String.format("Vacation can't be closed until %d candidates accepted", workersRequiredQuantity));
         }
