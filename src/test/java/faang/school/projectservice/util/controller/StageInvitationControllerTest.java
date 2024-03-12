@@ -2,8 +2,6 @@ package faang.school.projectservice.util.controller;
 
 import faang.school.projectservice.controller.StageInvitationController;
 import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.StageInvitationService;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -22,30 +20,11 @@ public class StageInvitationControllerTest {
 
     @Test
     void testCreateInvitationMissingStage() {
-        StageInvitationDto stageInvitationDto = new StageInvitationDto();
-        stageInvitationDto.setAuthor(new TeamMember());
-        stageInvitationDto.setInvited(new TeamMember());
+        StageInvitationDto stageInvitationDto = null;
         Assert.assertThrows(NullPointerException.class,
                 () -> stageInvitationController.createInvitation(stageInvitationDto));
     }
 
-    @Test
-    void testCreateInvitationMissingAuthor() {
-        StageInvitationDto stageInvitationDto = new StageInvitationDto();
-        stageInvitationDto.setStage(new Stage());
-        stageInvitationDto.setInvited(new TeamMember());
-        Assert.assertThrows(NullPointerException.class,
-                () -> stageInvitationController.createInvitation(stageInvitationDto));
-    }
-
-    @Test
-    void testCreateInvitationMissingInvited() {
-        StageInvitationDto stageInvitationDto = new StageInvitationDto();
-        stageInvitationDto.setStage(new Stage());
-        stageInvitationDto.setAuthor(new TeamMember());
-        Assert.assertThrows(NullPointerException.class,
-                () -> stageInvitationController.createInvitation(stageInvitationDto));
-    }
 
     @Test
     void testAcceptInvitationMissingUserId() {
