@@ -28,17 +28,17 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto createProject(Long userId, ProjectDto projectDto) {
+        projectValidator.validateProjectCreate(projectDto);
         Project project = projectMapper.toEntity(projectDto);
         setUpProjectFields(project, userId);
-        projectValidator.validateProjectCreate(project);
         return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Transactional
     public ProjectDto updateProject(Long projectId, ProjectDto projectDto) {
+        projectValidator.validateProjectUpdate(projectDto);
         Project project = projectMapper.toEntity(projectDto);
         project.setId(projectId);
-        projectValidator.validateProjectUpdate(project);
         return projectMapper.toDto(projectRepository.save(project));
     }
 

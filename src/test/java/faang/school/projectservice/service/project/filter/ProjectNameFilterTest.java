@@ -2,7 +2,6 @@ package faang.school.projectservice.service.project.filter;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectNameFilterTest {

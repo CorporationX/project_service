@@ -12,44 +12,46 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Projects", description = "Endpoint for managing projects")
+@RequestMapping("/projects")
+@Tag(name = "Projects", description = "Endpoints for managing projects")
 public class ProjectController {
 
     private final ProjectService projectService;
 
-    @Operation(summary = "Create project by user id")
-    @PostMapping("/project")
+    @Operation(summary = "Create project")
+    @PostMapping
     public ProjectDto createProject(@RequestHeader("userId") Long userId, @RequestBody ProjectDto projectDto) {
         return projectService.createProject(userId, projectDto);
     }
 
-    @Operation(summary = "Update project by project id")
-    @PutMapping("/project/{projectId}")
+    @Operation(summary = "Update project")
+    @PutMapping("/{projectId}")
     public ProjectDto updateProject(@PathVariable Long projectId, @RequestBody ProjectDto projectDto) {
         return projectService.updateProject(projectId, projectDto);
     }
 
     @Operation(summary = "Find all user projects by filters")
-    @PostMapping("/project/filters")
+    @PostMapping("/filters")
     public List<ProjectDto> findAllProjectsByFilters(@RequestHeader("userId") Long userId, @RequestBody ProjectFilterDto filters) {
         return projectService.findAllProjectsByFilters(userId, filters);
     }
 
     @Operation(summary = "Find all projects")
-    @GetMapping("/project")
+    @GetMapping()
     public List<ProjectDto> findAllProjects() {
         return projectService.findAllProjects();
     }
 
     @Operation(summary = "Find project by project id")
-    @PostMapping("/project/{projectId}")
-    public ProjectDto findAllProjectsByIds(@PathVariable Long projectId) {
+    @GetMapping("/{projectId}")
+    public ProjectDto findProjectById(@PathVariable Long projectId) {
         return projectService.findProjectById(projectId);
     }
 }

@@ -59,7 +59,7 @@ public class ProjectServiceTest {
 
         assertEquals(expected, actual);
         verify(projectMapper, times(1)).toEntity(any(ProjectDto.class));
-        verify(projectValidator, times(1)).validateProjectCreate(any(Project.class));
+        verify(projectValidator, times(1)).validateProjectCreate(any(ProjectDto.class));
         verify(projectRepository, times(1)).save(any(Project.class));
         verify(projectMapper, times(1)).toDto(any(Project.class));
     }
@@ -76,7 +76,7 @@ public class ProjectServiceTest {
 
         assertEquals(expected, actual);
         verify(projectMapper, times(1)).toEntity(any(ProjectDto.class));
-        verify(projectValidator, times(1)).validateProjectUpdate(any(Project.class));
+        verify(projectValidator, times(1)).validateProjectUpdate(any(ProjectDto.class));
         verify(projectRepository, times(1)).save(any(Project.class));
         verify(projectMapper, times(1)).toDto(any(Project.class));
     }

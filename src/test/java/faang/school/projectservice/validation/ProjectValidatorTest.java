@@ -1,8 +1,8 @@
 package faang.school.projectservice.validation;
 
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Test;
@@ -31,25 +31,25 @@ public class ProjectValidatorTest {
     @Test
     void validateProjectCreate_NullName_ThrowsException() {
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectCreate(getProjectNullName()));
+                -> projectValidator.validateProjectCreate(getProjectDtoNullName()));
     }
 
     @Test
     void validateProjectCreate_BlankName_ThrowsException() {
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectCreate(getProjectBlankName()));
+                -> projectValidator.validateProjectCreate(getProjectDtoBlankName()));
     }
 
     @Test
     void validateProjectCreate_NullDescription_ThrowsException() {
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectCreate(getProjectNullDescription()));
+                -> projectValidator.validateProjectCreate(getProjectDtoNullDescription()));
     }
 
     @Test
     void validateProjectCreate_BlankDescription_ThrowsException() {
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectCreate(getProjectBlankDescription()));
+                -> projectValidator.validateProjectCreate(getProjectDtoBlankDescription()));
     }
 
     @Test
@@ -57,14 +57,14 @@ public class ProjectValidatorTest {
         when(projectRepository.existsByOwnerUserIdAndName(anyLong(), anyString())).thenReturn(true);
 
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectCreate(getValidProject()));
+                -> projectValidator.validateProjectCreate(getValidProjectDto()));
         verify(projectRepository, times(1)).existsByOwnerUserIdAndName(anyLong(), anyString());
     }
 
     @Test
     void validateProjectCreate_EmptyVisibility_ThrowsException() {
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectCreate(getProjectNoVisibility()));
+                -> projectValidator.validateProjectCreate(getProjectDtoNoVisibility()));
     }
 
     @Test
@@ -72,7 +72,7 @@ public class ProjectValidatorTest {
         when(projectRepository.existsById(anyLong())).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, ()
-                -> projectValidator.validateProjectUpdate(getProjectNoVisibility()));
+                -> projectValidator.validateProjectUpdate(getProjectDtoNoVisibility()));
         verify(projectRepository, times(1)).existsById(anyLong());
     }
 
@@ -81,7 +81,7 @@ public class ProjectValidatorTest {
         when(projectRepository.existsById(anyLong())).thenReturn(true);
 
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectUpdate(getProjectNullName()));
+                -> projectValidator.validateProjectUpdate(getProjectDtoNullName()));
         verify(projectRepository, times(1)).existsById(anyLong());
     }
 
@@ -90,7 +90,7 @@ public class ProjectValidatorTest {
         when(projectRepository.existsById(anyLong())).thenReturn(true);
 
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectUpdate(getProjectBlankName()));
+                -> projectValidator.validateProjectUpdate(getProjectDtoBlankName()));
         verify(projectRepository, times(1)).existsById(anyLong());
     }
 
@@ -99,7 +99,7 @@ public class ProjectValidatorTest {
         when(projectRepository.existsById(anyLong())).thenReturn(true);
 
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectUpdate(getProjectNullDescription()));
+                -> projectValidator.validateProjectUpdate(getProjectDtoNullDescription()));
         verify(projectRepository, times(1)).existsById(anyLong());
     }
 
@@ -108,7 +108,7 @@ public class ProjectValidatorTest {
         when(projectRepository.existsById(anyLong())).thenReturn(true);
 
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectUpdate(getProjectBlankDescription()));
+                -> projectValidator.validateProjectUpdate(getProjectDtoBlankDescription()));
         verify(projectRepository, times(1)).existsById(anyLong());
     }
 
@@ -117,7 +117,7 @@ public class ProjectValidatorTest {
         when(projectRepository.existsById(anyLong())).thenReturn(true);
 
         assertThrows(DataValidationException.class, ()
-                -> projectValidator.validateProjectUpdate(getProjectNoVisibility()));
+                -> projectValidator.validateProjectUpdate(getProjectDtoNoVisibility()));
         verify(projectRepository, times(1)).existsById(anyLong());
     }
 
@@ -125,7 +125,7 @@ public class ProjectValidatorTest {
     void validateProjectUpdate_ValidEntity_DoesNotThrowException() {
         when(projectRepository.existsById(anyLong())).thenReturn(true);
 
-        assertDoesNotThrow(() -> projectValidator.validateProjectUpdate(getValidProject()));
+        assertDoesNotThrow(() -> projectValidator.validateProjectUpdate(getValidProjectDto()));
         verify(projectRepository, times(1)).existsById(anyLong());
     }
 
@@ -133,12 +133,12 @@ public class ProjectValidatorTest {
     void validateProjectCreate_ValidEntity_DoesNotThrowException() {
         when(projectRepository.existsByOwnerUserIdAndName(anyLong(), anyString())).thenReturn(false);
 
-        assertDoesNotThrow(() -> projectValidator.validateProjectCreate(getValidProject()));
+        assertDoesNotThrow(() -> projectValidator.validateProjectCreate(getValidProjectDto()));
         verify(projectRepository, times(1)).existsByOwnerUserIdAndName(anyLong(), anyString());
     }
 
-    private Project getValidProject() {
-        return Project.builder()
+    private ProjectDto getValidProjectDto() {
+        return ProjectDto.builder()
                 .id(1L)
                 .name("name")
                 .description("description")
@@ -147,8 +147,8 @@ public class ProjectValidatorTest {
                 .build();
     }
 
-    private Project getProjectNoVisibility() {
-        return Project.builder()
+    private ProjectDto getProjectDtoNoVisibility() {
+        return ProjectDto.builder()
                 .id(1L)
                 .name("name")
                 .description("description")
@@ -156,30 +156,30 @@ public class ProjectValidatorTest {
                 .build();
     }
 
-    private Project getProjectBlankDescription() {
-        return Project.builder()
+    private ProjectDto getProjectDtoBlankDescription() {
+        return ProjectDto.builder()
                 .id(1L)
                 .name("name")
                 .description("   ")
                 .build();
     }
 
-    private Project getProjectNullDescription() {
-        return Project.builder()
+    private ProjectDto getProjectDtoNullDescription() {
+        return ProjectDto.builder()
                 .id(1L)
                 .name("name")
                 .build();
     }
 
-    private Project getProjectBlankName() {
-        return Project.builder()
+    private ProjectDto getProjectDtoBlankName() {
+        return ProjectDto.builder()
                 .id(1L)
                 .name("   ")
                 .build();
     }
 
-    private Project getProjectNullName() {
-        return Project.builder()
+    private ProjectDto getProjectDtoNullName() {
+        return ProjectDto.builder()
                 .id(1L)
                 .build();
     }
