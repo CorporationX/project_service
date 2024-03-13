@@ -48,3 +48,7 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+  jira:
+    url: https://atlassian-jira-integration-test.atlassian.net
+    username: atlassian.jira.integration@gmail.com
+    api-token: ATATT3xFfGF0iTo8KNsID1lHyJmQmQ26Nj6AcPxeAj_4simiq7wM7xFkAeucbHEC0qmIwWwGrebrelI9qyrLbtA7QG7kRDRbHj2o0ZiZjMKEKYAIXpmAcqJgoMBtHjjq4z95xQm8S0FevbOgmTdcWTdqq9NHMIHjREeJgZ94gGV-y4ryfWhH1OI=3813B801
