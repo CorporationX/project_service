@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataAccessException;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -12,58 +13,95 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
 
-    private final ProjectRepository projectRepository;
+    private final ProjectJpaRepository projectJpaRepository;
 
     private final ProjectMapper projectMapper;
 
-    public ProjectDto getProjectById(long projectId, long requestUserId){
-        Project project = projectRepository.findById( projectId )
-                .orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist") );
-        boolean isAccessible = false;
-        if(project.getVisibility().equals( ProjectVisibility.PRIVATE ))
-            isAccessible = projectRepository.isUserIsAFollower(projectId, requestUserId);
+    public ProjectDto getProjectById(long projectId, long requestUserId) {
+        Project project = projectJpaRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
 
-        if(isAccessible) return projectMapper.toDto( project );
-        else throw new DataAccessException( "This project is private" );
-    }
+        boolean isMember = checkUserMembership(project, requestUserId);
 
-    public List<ProjectDto> getAllProjects(long requestUserId){
-        List<Project> projectPublicList = projectRepository.findProjectsAccessibleToUser(ProjectVisibility.PUBLIC);
-        if (projectList.isEmpty()) {
-            throw new EntityNotFoundException("No projects found ");
+        if (!isMember) {
+            throw new DataAccessException("User ID " + requestUserId + " is not a member of private project " + projectId);
         }
-        return projectMapper.toDtoList( projectList );
+
+        return projectMapper.toDto(project);
     }
 
-    public List<ProjectDto> findProjectsByName(String name) {
-        List<Project> projectList = projectRepository.findByName(name);
+    private boolean checkUserMembership(Project project, long userId) {
+        return project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .anyMatch(teamMember -> teamMember.getUserId() == userId);
+    }
+
+    public List<ProjectDto> getAllProjects(long requestUserId) {
+        List<Project> projectList = projectJpaRepository.findAll();
+        if (projectList.isEmpty()) {
+            throw new EntityNotFoundException("No projects found");
+        }
+
+        List<Project> filteredProjects = projectList.stream()
+                .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
+                        (project.getVisibility().equals(ProjectVisibility.PRIVATE) &&
+                                checkUserMembership(project, requestUserId)))
+                .toList();
+
+        return projectMapper.toDtoList(filteredProjects);
+    }
+
+
+    public List<ProjectDto> findProjectsByName(String name, long requestUserId) {
+        List<Project> projectList = projectJpaRepository.findAll();
         if (projectList.isEmpty()) {
             throw new EntityNotFoundException("No projects found by name: " + name);
         }
-        return projectMapper.toDtoList(projectList);
+
+        List<Project> filteredProjects = projectList.stream()
+                .filter(project -> project.getName().equals(name) && (project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
+                        (project.getVisibility().equals(ProjectVisibility.PRIVATE) &&
+                                checkUserMembership(project, requestUserId))))
+                .toList();
+
+        if (filteredProjects.isEmpty()) {
+            throw new EntityNotFoundException("No projects found by name: " + name + " and available to user ID:" + requestUserId);
+        }
+        return projectMapper.toDtoList(filteredProjects);
     }
 
-    public List<ProjectDto> findProjectsByStatus(ProjectStatus status) {
-        List<Project> projectList = projectRepository.findByStatus(status);
+    public List<ProjectDto> findProjectsByStatus(ProjectStatus status, long requestUserId) {
+        List<Project> projectList = projectJpaRepository.findAll();
         if (projectList.isEmpty()) {
             throw new EntityNotFoundException("No projects found by status: " + status);
         }
-        return projectMapper.toDtoList(projectList);
-    }
 
-    public ProjectDto updateProject(long projectId, String description, ProjectStatus status){
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist") );
-        if(description == null ) project.getDescription();
-        if(status == null) project.getStatus();
-        LocalDateTime updatedAt = LocalDateTime.now();
-        projectRepository.updateDescriptionAndStatusAndUpdatedAtById( description, status,updatedAt, projectId );
+        List<Project> filteredProjects = projectList.stream()
+                .filter(project -> project.getStatus().equals(status) && (project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
+                        (project.getVisibility().equals(ProjectVisibility.PRIVATE) &&
+                                checkUserMembership(project, requestUserId))))
+                .toList();
+        if (filteredProjects.isEmpty()) {
+            throw new EntityNotFoundException("No projects found by status: " + status + " and available to user ID:" + requestUserId);
+        }
 
+        return projectMapper.toDtoList(filteredProjects);
     }
+//
+//    public ProjectDto updateProject(long projectId, String description, ProjectStatus status) {
+//        Project project = projectRepository.findById(projectId)
+//                .orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
+//        if (description == null) project.getDescription();
+//        if (status == null) project.getStatus();
+//        LocalDateTime updatedAt = LocalDateTime.now();
+//        projectRepository.updateDescriptionAndStatusAndUpdatedAtById(description, status, updatedAt, projectId);
+//
+//    }
 
 }

@@ -25,49 +25,51 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping
-    public ProjectDto save(@RequestBody ProjectDto projectDto, @RequestParam(name = "ownerId") long ownerId) {
-        Optional.ofNullable(projectDto).orElseThrow( () -> new IllegalArgumentException("Project is Null"));
-        Optional.ofNullable(projectDto).orElseThrow( () -> new IllegalArgumentException("Provide owner ID "));
-        return projectService.save(projectDto, ownerId);
-
-    }
-
-    @PutMapping("/{projectId}")
-    public ProjectDto updateProject(@PathVariable long projectId,
-                             @RequestParam(name = "description", required = false) String description,
-                             @RequestParam(name = "status", required = false) String status) {
-
-        if (status == null && description == null) {
-            throw new IllegalArgumentException( "Provide description and/or status to change" );
-        }
-        ProjectStatus projectStatus = ProjectStatus.valueOf( status );
-        return projectService.updateProject(projectId, description, projectStatus);
-    }
-
+    //    @PostMapping
+//    public ProjectDto save(@RequestBody ProjectDto projectDto, @RequestParam(name = "ownerId") long ownerId) {
+//        Optional.ofNullable(projectDto).orElseThrow( () -> new IllegalArgumentException("Project is Null"));
+//        Optional.ofNullable(projectDto).orElseThrow( () -> new IllegalArgumentException("Provide owner ID "));
+//        return projectService.save(projectDto, ownerId);
+//
+//    }
+//
+//    @PutMapping("/{projectId}")
+//    public ProjectDto updateProject(@PathVariable long projectId,
+//                             @RequestParam(name = "description", required = false) String description,
+//                             @RequestParam(name = "status", required = false) String status) {
+//
+//        if (status == null && description == null) {
+//            throw new IllegalArgumentException( "Provide description and/or status to change" );
+//        }
+//        ProjectStatus projectStatus = ProjectStatus.valueOf( status );
+//        return projectService.updateProject(projectId, description, projectStatus);
+//    }
+//
     @GetMapping
-    public List<ProjectDto> getProjects( @RequestParam(name = "name", required = false) String name,
-                                        @RequestParam(name = "status", required = false) String status ) {
-
+    public List<ProjectDto> getProjectsByNameOrStatus(@RequestParam(name = "name", required = false) String name,
+                                        @RequestParam(name = "status", required = false) String status,
+                                        @RequestParam(name = "requestUserId") long requestUserId) {
+        Optional.ofNullable(requestUserId).orElseThrow(() -> new IllegalArgumentException("User ID must not be null"));
         if (status == null && name == null) {
-            throw new IllegalArgumentException( "Provide name or status to search" );
+            throw new IllegalArgumentException("Provide name or status to search");
         }
         if (name != null) {
-            return projectService.findProjectsByName(name);
+            return projectService.findProjectsByName(name, requestUserId);
         } else {
-            ProjectStatus projectStatus = ProjectStatus.valueOf( status );
-            return projectService.findProjectsByStatus(projectStatus);
+            return projectService.findProjectsByStatus(ProjectStatus.valueOf(status.toUpperCase()), requestUserId);
         }
     }
 
-    @GetMapping()
-    public List<ProjectDto> getAllProjects(@RequestParam long requestUserId){
+    @GetMapping("/all")
+    public List<ProjectDto> getAllProjects(@RequestParam long requestUserId) {
+        Optional.ofNullable(requestUserId).orElseThrow(() -> new IllegalArgumentException("User ID must not be null"));
         return projectService.getAllProjects(requestUserId);
     }
 
     @GetMapping("/{projectId}")
-    public ProjectDto getProjectById(@PathVariable long projectId, @RequestParam long requestUserId){
-        Optional.ofNullable(projectId).orElseThrow( () -> new IllegalArgumentException("Project ID must not be null"));
+    public ProjectDto getProjectById(@PathVariable long projectId, @RequestParam long requestUserId) {
+        Optional.ofNullable(projectId).orElseThrow(() -> new IllegalArgumentException("Project ID must not be null"));
+        Optional.ofNullable(requestUserId).orElseThrow(() -> new IllegalArgumentException("User ID must not be null"));
         return projectService.getProjectById(projectId, requestUserId);
     }
 
