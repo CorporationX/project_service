@@ -1,29 +1,37 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectViewEvent;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectViewEventPublisher publisher;
     private final UserServiceClient userServiceClient;
     private final ProjectMapper projectMapper;
     private final List<Filter<Project, ProjectFilterDto>> filters;
     private final ProjectValidator projectValidator;
+    private final UserContext userContext;
 
 
     public ProjectDto create(ProjectDto projectDto) {
@@ -49,7 +57,10 @@ public class ProjectService {
         if (projectDto.getVisibility() == null) {
             projectDto.setVisibility(ProjectVisibility.PRIVATE);
         }
-        return projectMapper.toEntity(projectDto);
+
+        Project savedProject = projectRepository.save(projectMapper.toEntity(projectDto));
+        log.info("Project with ID {} was saved by user with ID {}", savedProject.getId(), savedProject.getOwnerId());
+        return savedProject;
     }
 
     public ProjectDto update(ProjectDto projectDto) {
@@ -70,12 +81,23 @@ public class ProjectService {
         }
 
         Project updatedProject = projectRepository.save(project);
+        log.info("Project with ID {} was updated by user with ID {}", updatedProject.getId(), updatedProject.getOwnerId());
         return projectMapper.toDto(updatedProject);
     }
 
     public ProjectDto getProjectDtoById(long id) {
         Project projectById = getProjectById(id);
-        projectValidator.validateAccessToProject(projectById.getOwnerId());
+        Long ownerId = projectById.getOwnerId();
+        projectValidator.validateAccessToProject(ownerId);
+
+        publisher.publish(
+                ProjectViewEvent.builder()
+                        .projectId(id)
+                        .ownerId(ownerId)
+                        .receivedAt(LocalDateTime.now())
+                        .build()
+        );
+        log.info("Project with ID {} was  viewed by user with ID {}", id, ownerId);
         return projectMapper.toDto(projectById);
     }
 
