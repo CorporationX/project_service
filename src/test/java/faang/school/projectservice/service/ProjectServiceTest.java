@@ -171,7 +171,6 @@ public class ProjectServiceTest {
         when(projectJpaRepository.findAll()).thenReturn(projects);
         when(projectMapper.toDtoList(projects)).thenReturn(projectMapper.toDtoList( projects )); // Mocking DTO conversion
 
-        // Act
         List<ProjectDto> result = projectService.findProjectsByName(projectDto.getName(), requestUserId);
 
         assertNotNull(result);
