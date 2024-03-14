@@ -174,7 +174,6 @@ public class ProjectServiceTest {
         // Act
         List<ProjectDto> result = projectService.findProjectsByName(projectDto.getName(), requestUserId);
 
-        // Assert
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
