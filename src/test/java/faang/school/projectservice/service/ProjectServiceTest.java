@@ -178,7 +178,6 @@ public class ProjectServiceTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
-        // Verify that projects are filtered by name and visibility
         assertEquals(2, projects.size()); // Ensure both projects are retrieved initially
         assertEquals(1, result.size()); // Ensure only one project is returned in the result
         assertEquals(project2.getId(), result.get(0).getId()); // Ensure the correct project is returned
