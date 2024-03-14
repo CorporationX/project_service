@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
@@ -14,4 +14,6 @@ public interface ProjectMapper {
     Project toEntity(ProjectDto projectDto);
 
     List<ProjectDto> toDtoList(List<Project> projectList);
+
+    List<Project> toProjectList(List<ProjectDto> projectDtoList);
 }
