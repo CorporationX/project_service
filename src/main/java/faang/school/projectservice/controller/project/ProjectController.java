@@ -21,7 +21,7 @@ public class ProjectController {
         return projectService.createProject(projectDto);
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public ProjectDto updateProject(@RequestBody ProjectDto projectDto) {
         return projectService.updateProject(projectDto);
     }

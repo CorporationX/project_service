@@ -27,7 +27,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
-    @Spy
     private ProjectMapper projectMapper;
     private ProjectService projectService;
     private ProjectValidation projectValidation;
@@ -42,6 +41,7 @@ public class ProjectServiceTest {
         projectRepository = mock(ProjectRepository.class);
         projectJpaRepository = mock(ProjectJpaRepository.class);
         projectFilter = mock(ProjectFilter.class);
+        projectMapper = mock(ProjectMapper.class);
         filters = List.of(projectFilter);
         projectService = new ProjectService(projectValidation, projectRepository, projectMapper, projectJpaRepository, filters);
     }

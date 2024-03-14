@@ -23,7 +23,7 @@ public class ProjectStatusFilterTest {
     @Test
     void testIsApplicableReturnsFalse() {
         boolean expected = false;
-        ProjectDtoFilter projectDtoFilter = null;
+        ProjectDtoFilter projectDtoFilter = new ProjectDtoFilter();
 
         boolean actual = projectStatusFilter.isApplicable(projectDtoFilter);
 

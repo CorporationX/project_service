@@ -10,7 +10,7 @@ import java.util.List;
 public class ProjectStatusFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectDtoFilter goalFilterDto) {
-        return goalFilterDto != null;
+        return goalFilterDto.getStatusPattern() != null;
     }
 
     @Override

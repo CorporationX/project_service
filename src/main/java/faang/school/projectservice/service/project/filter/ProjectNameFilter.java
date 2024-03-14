@@ -10,7 +10,7 @@ import java.util.List;
 public class ProjectNameFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectDtoFilter projectDtoFilter) {
-        return projectDtoFilter != null;
+        return projectDtoFilter.getTitlePattern() != null;
     }
 
     @Override
