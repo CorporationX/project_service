@@ -38,10 +38,8 @@ public class ProjectController {
     private final ResourceService resourceService;
     private final UserContext userContext;
 
-
     @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}, summary = "Create new project")
-    //^ для возможности вручную добавлять id пользователя в сваггере и добавления названия эндпоинтов там же
-    @PostMapping // не идемпотентный, всегда создает новую сущность
+    @PostMapping
     public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
         projectValidator.validateCreateProject(projectDto);
         return projectService.createProject(projectDto);
@@ -49,7 +47,6 @@ public class ProjectController {
 
     @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}, summary = "update project")
     @PutMapping("/{id}")
-    // идемпотентный andPoint - сколько бы раз не вызывали с одинаковыми параметрами-результат один и тот же
     public ProjectDto updateProject(@PathVariable Long id, @RequestBody ProjectUpdateDto projectDto) {
         projectValidator.validateUpdateProject(projectDto);
         return projectService.updateProject(id, projectDto);
@@ -69,7 +66,7 @@ public class ProjectController {
     }
 
     @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}, summary = "Get project by id")
-    @GetMapping("/{id}") // всегда идемпотентный andPoint
+    @GetMapping("/{id}")
     public ProjectDto getProjectById(@PathVariable Long id) {
         projectValidator.validateProjectId(id);
         return projectService.getProjectById(id);
