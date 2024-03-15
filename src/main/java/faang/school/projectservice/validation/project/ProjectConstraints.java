@@ -1,6 +1,5 @@
 package faang.school.projectservice.validation.project;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import lombok.Getter;
 
 @Getter
