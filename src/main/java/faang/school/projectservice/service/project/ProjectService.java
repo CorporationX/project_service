@@ -31,12 +31,13 @@ public class ProjectService {
                           ProjectRepository projectRepository,
                           ProjectMapper projectMapper,
                           ProjectJpaRepository projectJpaRepository,
-                          @Qualifier("projectFilters") List<ProjectFilter> filters) {
+                          @Qualifier("projectNameFilter") ProjectFilter projectNameFilter,
+                          @Qualifier("projectStatusFilter") ProjectFilter projectStatusFilter) {
         this.projectValidation = projectValidation;
         this.projectRepository = projectRepository;
         this.projectMapper = projectMapper;
         this.projectJpaRepository = projectJpaRepository;
-        this.filters = filters;
+        this.filters = List.of(projectNameFilter, projectStatusFilter);
     }
 
     public ProjectDto createProject(ProjectDto projectDto) {

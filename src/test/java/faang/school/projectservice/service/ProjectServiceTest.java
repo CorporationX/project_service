@@ -11,6 +11,8 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
+import faang.school.projectservice.service.project.filter.ProjectNameFilter;
+import faang.school.projectservice.service.project.filter.ProjectStatusFilter;
 import faang.school.projectservice.validation.project.ProjectValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +33,8 @@ public class ProjectServiceTest {
     private ProjectValidation projectValidation;
     private ProjectRepository projectRepository;
     private ProjectJpaRepository projectJpaRepository;
-    private ProjectFilter projectFilter;
+    private ProjectNameFilter projectNameFilter;
+    private ProjectStatusFilter projectStatusFilter;
     private List<ProjectFilter> filters;
 
     @BeforeEach
@@ -39,10 +42,11 @@ public class ProjectServiceTest {
         projectValidation = mock(ProjectValidation.class);
         projectRepository = mock(ProjectRepository.class);
         projectJpaRepository = mock(ProjectJpaRepository.class);
-        projectFilter = mock(ProjectFilter.class);
+        projectNameFilter = mock(ProjectNameFilter.class);
+        projectStatusFilter = mock(ProjectStatusFilter.class);
         projectMapper = mock(ProjectMapper.class);
-        filters = List.of(projectFilter);
-        projectService = new ProjectService(projectValidation, projectRepository, projectMapper, projectJpaRepository, filters);
+        filters = List.of(projectNameFilter, projectStatusFilter);
+        projectService = new ProjectService(projectValidation, projectRepository, projectMapper, projectJpaRepository, projectNameFilter, projectStatusFilter);
     }
 
     @Test
@@ -87,15 +91,18 @@ public class ProjectServiceTest {
         List<Project> projectsCopy = new ArrayList<>(getProjects());
 
         when(projectRepository.findAll()).thenReturn(projects);
-        when(projectFilter.isApplicable(projectDtoFilter)).thenReturn(true);
+        when(projectNameFilter.isApplicable(projectDtoFilter)).thenReturn(true);
+        when(projectStatusFilter.isApplicable(projectDtoFilter)).thenReturn(true);
         projects.removeIf(project -> Boolean.FALSE);
 
         assertDoesNotThrow(() -> projectService.findProjectByFilters(userId, projectDtoFilter));
         assertEquals(projects, projectsCopy);
 
         verify(projectRepository, times(1)).findAll();
-        verify(projectFilter, times(1)).isApplicable(projectDtoFilter);
-        verify(projectFilter, times(1)).apply(anyList(), any(ProjectDtoFilter.class));
+        verify(projectNameFilter, times(1)).isApplicable(projectDtoFilter);
+        verify(projectNameFilter, times(1)).apply(anyList(), any(ProjectDtoFilter.class));
+        verify(projectStatusFilter, times(1)).isApplicable(projectDtoFilter);
+        verify(projectStatusFilter, times(1)).apply(anyList(), any(ProjectDtoFilter.class));
     }
 
     @Test
