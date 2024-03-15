@@ -13,20 +13,31 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.validation.project.ProjectConstraints;
 import faang.school.projectservice.validation.project.ProjectValidation;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class ProjectService {
     private final ProjectValidation projectValidation;
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final ProjectJpaRepository projectJpaRepository;
     private final List<ProjectFilter> filters;
+
+    public ProjectService(ProjectValidation projectValidation,
+                          ProjectRepository projectRepository,
+                          ProjectMapper projectMapper,
+                          ProjectJpaRepository projectJpaRepository,
+                          @Qualifier("projectFilters") List<ProjectFilter> filters) {
+        this.projectValidation = projectValidation;
+        this.projectRepository = projectRepository;
+        this.projectMapper = projectMapper;
+        this.projectJpaRepository = projectJpaRepository;
+        this.filters = filters;
+    }
 
     public ProjectDto createProject(ProjectDto projectDto) {
         projectValidation.validationCreate(projectDto);
