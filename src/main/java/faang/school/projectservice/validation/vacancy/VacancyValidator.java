@@ -58,7 +58,7 @@ public class VacancyValidator {
         Vacancy vacancy = vacancyRepository.findById(vacancyDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Vacancy doesn't exist by id: " + vacancyId));
         long candidatesApprovedQuantity = vacancy.getCandidates().stream()
-                .filter(candidate -> candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
+                .filter(candidate -> CandidateStatus.ACCEPTED.equals(candidate.getCandidateStatus()))
                 .count();
 
         if (candidatesApprovedQuantity < workersRequiredQuantity) {
