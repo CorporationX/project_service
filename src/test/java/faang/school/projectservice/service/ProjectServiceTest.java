@@ -10,7 +10,6 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.project.filter.ProjectNameFilter;
 import faang.school.projectservice.service.project.filter.ProjectStatusFilter;
 import faang.school.projectservice.validation.project.ProjectValidation;
@@ -35,7 +34,6 @@ public class ProjectServiceTest {
     private ProjectJpaRepository projectJpaRepository;
     private ProjectNameFilter projectNameFilter;
     private ProjectStatusFilter projectStatusFilter;
-    private List<ProjectFilter> filters;
 
     @BeforeEach
     void setUp() {
@@ -45,7 +43,6 @@ public class ProjectServiceTest {
         projectNameFilter = mock(ProjectNameFilter.class);
         projectStatusFilter = mock(ProjectStatusFilter.class);
         projectMapper = mock(ProjectMapper.class);
-        filters = List.of(projectNameFilter, projectStatusFilter);
         projectService = new ProjectService(projectValidation, projectRepository, projectMapper, projectJpaRepository, projectNameFilter, projectStatusFilter);
     }
 
