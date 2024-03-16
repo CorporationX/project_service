@@ -68,7 +68,7 @@ public class VacancyValidator {
     public void validateCuratorRole(long userId) {
         TeamMember curator = teamMemberRepository.findById(userId);
         List<TeamRole> curatorRole = curator.getRoles().stream()
-                .filter(role -> role.equals(TeamRole.MANAGER) || role.equals(TeamRole.OWNER))
+                .filter(role -> TeamRole.MANAGER.equals(role) || TeamRole.OWNER.equals(role))
                 .toList();
         if (curatorRole.isEmpty()) {
             throw new DataValidationException("Curator hasn't got required role for creating a vacancy");
