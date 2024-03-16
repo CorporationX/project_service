@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -163,23 +162,15 @@ class VacancyValidatorTest {
     @Test
     void validateIfCandidatesNoMoreNeeded_VacancyFulfilled_ShouldNotThrow() {
         candidate.setCandidateStatus(CandidateStatus.ACCEPTED);
-        when(vacancyRepository.findById(vacancyDto.getId())).thenReturn(Optional.ofNullable(vacancy));
 
-        vacancyValidator.validateIfCandidatesNoMoreNeeded(vacancyDto);
-
-        assertAll(
-                () -> verify(vacancyRepository, times(1)).findById(vacancyDto.getId()),
-                () -> assertDoesNotThrow(() ->
-                        vacancyValidator.validateIfCandidatesNoMoreNeeded(vacancyDto))
-        );
+        assertDoesNotThrow(() ->
+                vacancyValidator.validateIfCandidatesNoMoreNeeded(vacancy));
     }
 
     @Test
     void validateIfCandidatesNoMoreNeeded_VacancyIsNotFulfilled_ShouldThrowDataValidationException() {
-        when(vacancyRepository.findById(vacancyDto.getId())).thenReturn(Optional.ofNullable(vacancy));
-
         assertThrows(DataValidationException.class, () ->
-                vacancyValidator.validateIfCandidatesNoMoreNeeded(vacancyDto));
+                vacancyValidator.validateIfCandidatesNoMoreNeeded(vacancy));
     }
 
     @Test

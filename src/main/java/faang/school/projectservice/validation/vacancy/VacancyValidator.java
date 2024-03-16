@@ -10,7 +10,6 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -40,23 +39,18 @@ public class VacancyValidator {
 
     public void validateIfVacancyCanBeClosed(VacancyDto vacancyDto) {
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
-        List<TeamMember> teamMembers = project.getTeams().stream()
+        project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .filter(member -> vacancyDto.getCandidatesIds().contains(member.getUserId()))
-                .toList();
-
-        teamMembers.forEach(teamMember -> {
-            if (teamMember.getRoles() == null || teamMember.getRoles().isEmpty()) {
-                throw new DataValidationException("Vacancy can't be closed until all team members got their roles");
-            }
-        });
+                .forEach(teamMember -> {
+                    if (teamMember.getRoles() == null || teamMember.getRoles().isEmpty()) {
+                        throw new DataValidationException("Vacancy can't be closed until all team members got their roles");
+                    }
+                });
     }
 
-    public void validateIfCandidatesNoMoreNeeded(VacancyDto vacancyDto) {
-        long vacancyId = vacancyDto.getId();
-        int workersRequiredQuantity = vacancyDto.getWorkersRequired();
-        Vacancy vacancy = vacancyRepository.findById(vacancyDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Vacancy doesn't exist by id: " + vacancyId));
+    public void validateIfCandidatesNoMoreNeeded(Vacancy vacancy) {
+        int workersRequiredQuantity = vacancy.getCount();
         long candidatesApprovedQuantity = vacancy.getCandidates().stream()
                 .filter(candidate -> CandidateStatus.ACCEPTED.equals(candidate.getCandidateStatus()))
                 .count();

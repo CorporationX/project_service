@@ -122,12 +122,13 @@ class VacancyServiceTest {
         verify(vacancyMapper, times(1)).toEntity(vacancyDto);
         verify(vacancyRepository, times(1)).save(vacancy);
         verify(vacancyMapper, times(1)).toDto(vacancy);
-        verify(vacancyValidator, times(0)).validateIfCandidatesNoMoreNeeded(vacancyDto);
+        verify(vacancyValidator, times(0)).validateIfCandidatesNoMoreNeeded(vacancy);
         verify(vacancyValidator, times(0)).validateIfVacancyCanBeClosed(vacancyDto);
     }
 
     @Test
     void update_ClosedVacancyUpdatedAndSaved_ThenReturnedAsDto() {
+        when(vacancyRepository.findById(anyLong())).thenReturn(Optional.ofNullable(vacancy));
         when(vacancyRepository.save(any(Vacancy.class))).thenReturn(vacancy);
         when(vacancyMapper.toEntity(any(VacancyDto.class))).thenReturn(vacancy);
         when(vacancyMapper.toDto(any(Vacancy.class))).thenReturn(vacancyDto);
@@ -135,10 +136,11 @@ class VacancyServiceTest {
 
         vacancyService.update(vacancyDto);
 
+        verify(vacancyRepository, times(1)).findById(vacancyDto.getId());
         verify(vacancyMapper, times(1)).toEntity(vacancyDto);
         verify(vacancyRepository, times(1)).save(vacancy);
         verify(vacancyMapper, times(1)).toDto(vacancy);
-        verify(vacancyValidator, times(1)).validateIfCandidatesNoMoreNeeded(vacancyDto);
+        verify(vacancyValidator, times(1)).validateIfCandidatesNoMoreNeeded(vacancy);
         verify(vacancyValidator, times(1)).validateIfVacancyCanBeClosed(vacancyDto);
     }
 
