@@ -122,8 +122,8 @@ class VacancyServiceTest {
         verify(vacancyMapper, times(1)).toEntity(vacancyDto);
         verify(vacancyRepository, times(1)).save(vacancy);
         verify(vacancyMapper, times(1)).toDto(vacancy);
-        verify(vacancyValidator, times(0)).validateIfCandidatesNoMoreNeeded(vacancy);
-        verify(vacancyValidator, times(0)).validateIfVacancyCanBeClosed(vacancyDto);
+        verify(vacancyValidator, never()).validateIfCandidatesNoMoreNeeded(vacancy);
+        verify(vacancyValidator, never()).validateIfVacancyCanBeClosed(vacancyDto);
     }
 
     @Test
