@@ -1,9 +1,9 @@
 package faang.school.projectservice.handler;
 
 import faang.school.projectservice.exceptions.DBException;
-import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.exceptions.FileException;
 import faang.school.projectservice.exceptions.S3Exception;
+import faang.school.projectservice.exeptions.DataValidationException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +55,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(DBException.class)
     public ResponseEntity<Object> handleDBException(DBException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
