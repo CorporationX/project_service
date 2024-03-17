@@ -19,4 +19,9 @@ public class TeamMemberRepository {
    public boolean existsById(Long id){
        return jpaRepository.existsById(id);
    }
+
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
+    }
+
 }
