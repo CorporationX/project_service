@@ -50,6 +50,7 @@ public class ProjectServiceTest {
 
     long requestUserId;
     ProjectDto projectDto, projectDto2, projectDto3, projectDto4;
+    Project project;
     ProjectStatus projectStatus;
     List<ProjectDto> projectDtoList;
 
@@ -65,6 +66,15 @@ public class ProjectServiceTest {
         projectDto.setVisibility( ProjectVisibility.PUBLIC );
         projectDto.setStatus( ProjectStatus.CREATED );
         projectDto.setOwnerId( 1L );
+
+        project = Project.builder()
+                .id( 1L )
+                .name( "Project 1" )
+                .description( "Description of project 1" )
+                .visibility( ProjectVisibility.PUBLIC )
+                .status( ProjectStatus.CREATED  )
+                .ownerId( requestUserId )
+                .build();
 
 
         projectDto2 = new ProjectDto();
@@ -91,6 +101,7 @@ public class ProjectServiceTest {
         projectDto4.setStatus( ProjectStatus.CREATED );
         projectDto4.setOwnerId( 3L );
 
+
         projectDtoList = new ArrayList<>();
         projectDtoList.add( projectDto );
         projectDtoList.add( projectDto2 );
@@ -107,32 +118,14 @@ public class ProjectServiceTest {
 
     @Test
     public void testSaveNewProjectSuccess() {
-        Project expectedProject = Project.builder()
-                .id( 1L )
-                .name( "Project 1" )
-                .description( "Description of project 1" )
-                .visibility( ProjectVisibility.PUBLIC )
-                .status( ProjectStatus.CREATED  )
-                .ownerId( requestUserId )
-                .build();
+        when(projectJpaRepository.existsByOwnerIdAndName( anyLong(), anyString() )).thenReturn( false );
+        when(projectMapper.toEntity( projectDto )).thenReturn(  project);
+        when(projectJpaRepository.save(any(Project.class))).thenReturn(project);
+        when(projectMapper.toDto( project )).thenReturn( projectDto );
 
-
-//        when(projectMapper.toEntity( projectDto )).thenReturn( project );
-//        when(projectJpaRepository.save(project)).thenReturn(project);
-//
-//        projectService.save(projectDto, requestUserId);
-//
-//        ArgumentCaptor<Project> argumentCaptor = ArgumentCaptor.forClass(Project.class);
-//        verify(projectJpaRepository, times(1)).save(argumentCaptor.capture());
-//        Project capturedUser = argumentCaptor.getValue();
-//
-//        assertEquals(project.getName(), capturedUser.getName());
-//        assertEquals(project.getId(), capturedUser.getId());
-
-        when(projectJpaRepository.save(any(Project.class))).thenReturn(expectedProject);
         ProjectDto actual = projectService.save(projectDto, requestUserId);
 
-        assertEquals( expectedProject, actual );
+        assertEquals( projectDto, actual );
     }
 
     @Test
