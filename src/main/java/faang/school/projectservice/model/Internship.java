@@ -17,8 +17,11 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -27,6 +30,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 
 @Data
 @Entity
+@Builder
 @Table(name = "internship")
 public class Internship {
 
@@ -34,15 +38,17 @@ public class Internship {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "There must one project connected to the internship")
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
 
     @ManyToOne
     @JoinColumn(name = "team_member_id")
-    @NotNull
+    @NotNull(message = "cannot be empty")
     private TeamMember mentorId;
 
+    @NotNull(message = "list if interns cannot be empty")
     @ManyToMany
     @JoinTable(
             name = "internship_interns",
@@ -87,4 +93,8 @@ public class Internship {
     @OneToOne
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
+
+    @Column(name = "internship_role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TeamRole role;
 }
