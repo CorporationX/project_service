@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import software.amazon.ion.NullValueException;
 
 @RestController
 @RequestMapping("api/v1/projects")
@@ -29,7 +28,9 @@ public class ProjectController {
     public ProjectDto save(@RequestBody ProjectDto projectDto, @RequestParam(name = "ownerId") long ownerId) {
         Optional.ofNullable( projectDto ).orElseThrow( () -> new IllegalArgumentException( "Project is Null" ) );
         Optional.ofNullable( projectDto ).orElseThrow( () -> new IllegalArgumentException( "Provide owner ID " ) );
-        return projectService.save( projectDto, ownerId );
+        Optional.ofNullable( projectDto.getName() ).orElseThrow( () -> new IllegalArgumentException( "Project name is Null" ) );
+        Optional.ofNullable( projectDto.getDescription() ).orElseThrow( () -> new IllegalArgumentException( "Project description is null " ) );
+        return projectService.createProject( projectDto, ownerId );
 
     }
 

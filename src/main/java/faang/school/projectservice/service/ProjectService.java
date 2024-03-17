@@ -10,7 +10,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,7 +22,10 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
 
 
-    public ProjectDto save(ProjectDto projectDto, long requestUserId) {
+    public ProjectDto createProject(ProjectDto projectDto, long requestUserId) {
+        if(projectDto.getName().isEmpty() || projectDto.getDescription().isEmpty()){
+            throw new IllegalStateException("Projects name and description cannot be null");
+        }
         if (projectJpaRepository.existsByOwnerIdAndName( requestUserId, projectDto.getName() )) {
             throw new IllegalStateException( "User ID " + requestUserId + "is already a member of the team associated with the existing project." );
         }
@@ -44,7 +46,6 @@ public class ProjectService {
 
         project.setStatus( status != null ? status : project.getStatus() );
         project.setDescription( description != null ? description : project.getDescription() );
-
 
         projectJpaRepository.save( project );
         return projectMapper.toDto( project );
@@ -79,6 +80,7 @@ public class ProjectService {
                         (project.getVisibility().equals( ProjectVisibility.PRIVATE ) &&
                                 isMember( project, requestUserId ))) )
                 .toList();
+
         if (filteredProjects.isEmpty()) {
             throw new EntityNotFoundException( "No projects found by status: " + status + " and available to user ID:" + requestUserId );
         }
@@ -120,7 +122,7 @@ public class ProjectService {
     private boolean isMember(Project project, long userId) {
         return project.getTeams().stream()
                 .flatMap( team -> team.getTeamMembers().stream() )
-                .anyMatch( teamMember -> teamMember.getUserId() == userId );
+                .anyMatch( teamMember -> teamMember.getUserId() == userId || project.getOwnerId() == userId);
     }
 
 }

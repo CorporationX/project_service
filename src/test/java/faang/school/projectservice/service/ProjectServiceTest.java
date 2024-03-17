@@ -3,18 +3,13 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -23,12 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -41,17 +32,15 @@ public class ProjectServiceTest {
 
     @InjectMocks
     private ProjectService projectService;
-
     @Mock
     private ProjectJpaRepository projectJpaRepository;
-
     @Spy
     private ProjectMapper projectMapper;
-
     long requestUserId;
     ProjectDto projectDto, projectDto2, projectDto3, projectDto4;
-    Project project;
+    Project project, project2, project3, project4;
     ProjectStatus projectStatus;
+    List<Project> projectList;
     List<ProjectDto> projectDtoList;
 
     @BeforeEach
@@ -65,7 +54,7 @@ public class ProjectServiceTest {
         projectDto.setDescription( "Description of project 1" );
         projectDto.setVisibility( ProjectVisibility.PUBLIC );
         projectDto.setStatus( ProjectStatus.CREATED );
-        projectDto.setOwnerId( 1L );
+        projectDto.setOwnerId( requestUserId );
 
         project = Project.builder()
                 .id( 1L )
@@ -83,7 +72,16 @@ public class ProjectServiceTest {
         projectDto2.setDescription( "Description of project 2" );
         projectDto2.setVisibility( ProjectVisibility.PRIVATE );
         projectDto2.setStatus( ProjectStatus.IN_PROGRESS );
-        projectDto2.setOwnerId( 2L );
+        projectDto2.setOwnerId( requestUserId );
+
+        project2 = Project.builder()
+                .id( 2L )
+                .name( "Project 2" )
+                .description( "Description of project 2" )
+                .visibility( ProjectVisibility.PRIVATE )
+                .status( ProjectStatus.IN_PROGRESS  )
+                .ownerId( requestUserId )
+                .build();
 
         projectDto3 = new ProjectDto();
         projectDto3.setId( 3L );
@@ -91,7 +89,16 @@ public class ProjectServiceTest {
         projectDto3.setDescription( "Description of project 3" );
         projectDto3.setVisibility( ProjectVisibility.PUBLIC );
         projectDto3.setStatus( ProjectStatus.COMPLETED );
-        projectDto3.setOwnerId( 1L );
+        projectDto3.setOwnerId( requestUserId );
+
+        project3 = Project.builder()
+                .id( 3L )
+                .name( "Project 3" )
+                .description( "Description of project 3" )
+                .visibility( ProjectVisibility.PRIVATE )
+                .status( ProjectStatus.COMPLETED  )
+                .ownerId( requestUserId )
+                .build();
 
         projectDto4 = new ProjectDto();
         projectDto4.setId( 4L );
@@ -99,84 +106,147 @@ public class ProjectServiceTest {
         projectDto4.setDescription( "Description of project 4" );
         projectDto4.setVisibility( ProjectVisibility.PRIVATE );
         projectDto4.setStatus( ProjectStatus.CREATED );
-        projectDto4.setOwnerId( 3L );
+        projectDto4.setOwnerId( requestUserId );
+
+        project4 = Project.builder()
+                .id( 4L )
+                .name( "Project 4" )
+                .description( "Description of project 4" )
+                .visibility( ProjectVisibility.PRIVATE )
+                .status( ProjectStatus.CREATED  )
+                .ownerId( requestUserId )
+                .build();
 
 
-        projectDtoList = new ArrayList<>();
-        projectDtoList.add( projectDto );
-        projectDtoList.add( projectDto2 );
-        projectDtoList.add( projectDto3 );
-        projectDtoList.add( projectDto4);
+        projectDtoList = List.of(projectDto, projectDto2, projectDto3, projectDto4);
+        projectList = List.of(project, project2, project3, project4);
     }
 
     @Test
-    public void testProjectExistsByOwnerIdAndName() {
-
-        when(projectJpaRepository.existsByOwnerIdAndName(  requestUserId, projectDto.getName() )).thenReturn( true );
-        assertThrows( IllegalStateException.class, () -> projectService.save( projectDto, requestUserId ) );
+    public void testCreateProjectExistsByOwnerIdAndName() {
+        when(projectJpaRepository.existsByOwnerIdAndName(  anyLong(), anyString())).thenReturn( true );
+        assertThrows( IllegalStateException.class, () -> projectService.createProject( projectDto, requestUserId ) );
     }
 
     @Test
-    public void testSaveNewProjectSuccess() {
+    public void testCreateProjectSuccess() {
         when(projectJpaRepository.existsByOwnerIdAndName( anyLong(), anyString() )).thenReturn( false );
-        when(projectMapper.toEntity( projectDto )).thenReturn(  project);
+        when(projectMapper.toEntity( any(ProjectDto.class) )).thenReturn(  project);
         when(projectJpaRepository.save(any(Project.class))).thenReturn(project);
-        when(projectMapper.toDto( project )).thenReturn( projectDto );
+        when(projectMapper.toDto( any(Project.class) )).thenReturn( projectDto );
 
-        ProjectDto actual = projectService.save(projectDto, requestUserId);
+        assertDoesNotThrow(() -> projectService.createProject(projectDto, requestUserId));
 
-        assertEquals( projectDto, actual );
+        verify(projectMapper, times(1)).toEntity(projectDto);
+        verify(projectJpaRepository, times(1)).save(project);
+        verify(projectMapper, times(1)).toDto(project);
+
+    }
+
+    @Test
+    public void testUpdateProjectSuccess() {
+        String updateName = "new name";
+        ProjectStatus updateStatus = ProjectStatus.COMPLETED;
+
+        TeamMember teamMember = TeamMember.builder().id(1L).userId(requestUserId).build();
+        Team team =Team.builder().id(1L).teamMembers(List.of(teamMember)).build();
+
+        project.setTeams(List.of(team));
+
+        when(projectJpaRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(projectJpaRepository.save(any(Project.class))).thenReturn(project);
+        when(projectMapper.toDto( any(Project.class) )).thenReturn( projectDto );
+
+
+        assertDoesNotThrow(() -> projectService.updateProject(1L, updateName, updateStatus, requestUserId));
+
+        verify(projectJpaRepository, times(1)).findById(1L);
+        verify(projectMapper, times(1)).toDto(project);
+        verify(projectJpaRepository, times(1)).save(project);
     }
 
     @Test
     public void testUpdateProjectIdDoesNotExist() {
-
         when(projectJpaRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () ->
                 projectService.updateProject(1L, anyString(), projectStatus, requestUserId));
 
         verify(projectJpaRepository).findById(1L);
-
         verifyNoInteractions(projectMapper);
-
         verify(projectJpaRepository, times( 0 )).save( any() );
     }
 
     @Test
-    public void testFindProjectsByName_ProjectsFoundAndAccessible() {
-        String projectName = "Project1";
-        long userId = 123;
+    public void testFindProjectsByStatus() {
+        TeamMember teamMember = TeamMember.builder().id(1L).userId(requestUserId).build();
+        Team team =Team.builder().id(1L).teamMembers(List.of(teamMember)).build();
 
-        Project project1 = new Project();
-        project1.setId(1L);
-        project1.setName(projectName);
-        project1.setVisibility(ProjectVisibility.PUBLIC);
+        project.setTeams(List.of(team));
+        project2.setTeams(List.of(team));
+        project3.setTeams(List.of(team));
+        project4.setTeams(List.of(team));
 
-        Project project2 = new Project();
-        project2.setId(2L);
-        project2.setName(projectName);
-        project2.setVisibility(ProjectVisibility.PRIVATE);
-        project2.setTeams( Arrays.asList(new Team())); // Simulating membership
+        when(projectJpaRepository.findAll()).thenReturn(projectList);
 
-        List<Project> projects = Arrays.asList(project1, project2);
+        List<Project> filteredProjectList = new ArrayList<>(projectList);
+        List<ProjectDto> fitleredProjectDtoList = new ArrayList<>(projectDtoList);
 
-        when(projectJpaRepository.findAll()).thenReturn(projects);
-        when(projectMapper.toDtoList(projects)).thenReturn(projectMapper.toDtoList( projects )); // Mocking DTO conversion
+        filteredProjectList.removeIf(project -> !project.getStatus().equals(ProjectStatus.CREATED));
+        fitleredProjectDtoList.removeIf(projectDto -> !projectDto.getStatus().equals(ProjectStatus.CREATED));
 
-        List<ProjectDto> result = projectService.findProjectsByName(projectDto.getName(), requestUserId);
+        when(projectMapper.toDtoList(filteredProjectList)).thenReturn(fitleredProjectDtoList);
 
+        List<ProjectDto> result = projectService.findProjectsByStatus(ProjectStatus.CREATED, requestUserId);
         assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertEquals(2, result.size());
 
-        assertEquals(2, projects.size()); // Ensure both projects are retrieved initially
-        assertEquals(1, result.size()); // Ensure only one project is returned in the result
-        assertEquals(project2.getId(), result.get(0).getId()); // Ensure the correct project is returned
-
+        verify(projectJpaRepository, times(1)).findAll();
     }
 
+    @Test
+    public void testFindProjectsByName() {
 
+        String projectName2 = "Project 2";
 
+        TeamMember teamMember = TeamMember.builder().id(1L).userId(requestUserId).build();
+        Team team =Team.builder().id(1L).teamMembers(List.of(teamMember)).build();
 
+        project.setTeams(List.of(team));
+        project2.setTeams(List.of(team));
+        project3.setTeams(List.of(team));
+        project4.setTeams(List.of(team));
 
+        when(projectJpaRepository.findAll()).thenReturn(projectList);
+        when(projectMapper.toDtoList(any())).thenReturn(projectDtoList);
+
+        List<ProjectDto> result = projectService.findProjectsByName(projectName2, requestUserId);
+
+        assertNotNull(result);
+        assertEquals(4, result.size());
+
+        verify(projectJpaRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void testFindAllProjects() {
+
+        when(projectJpaRepository.findAll()).thenReturn(projectList);
+
+        List<Project> projects = projectJpaRepository.findAll();
+
+        assertEquals(4, projects.size());
+        verify(projectJpaRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void testFindProjectById() {
+        when(projectJpaRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        Optional<Project> result = projectJpaRepository.findById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(project.getId(), result.get().getId());
+        verify(projectJpaRepository, times(1)).findById(1L);
+    }
 }
