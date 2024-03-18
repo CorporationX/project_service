@@ -44,22 +44,24 @@ public class StageInvitationService {
 
     public List<StageInvitationDto> getAll(Long id, StageInvitationDto filter) {
         if (filter != null) {
-            Stream<StageInvitation> recommendationRequests = stageInvitationRepository.findAll().stream();
+            Stream<StageInvitation> stageInvitationStream = stageInvitationRepository.findAll().stream();
             for (StageInvitationFilter stageInvitationFilter : stageInvitationFilterList) {
-                if (stageInvitationFilter.isApplicable(filter))
-                    recommendationRequests = stageInvitationFilter.apply(recommendationRequests, filter);
+                if (stageInvitationFilter.isApplicable(filter)) {
+                    stageInvitationStream = stageInvitationFilter.apply(stageInvitationStream, filter);
+                }
             }
-            List<StageInvitationDto> recommendationRequestDtos = new ArrayList<>();
-            for (StageInvitation requests : recommendationRequests.toList()) {
-                recommendationRequestDtos.add(stageInvitationMapper.toDto(requests));
+            List<StageInvitationDto> stageInvitationDtos = new ArrayList<>();
+            for (StageInvitation requests : stageInvitationStream.toList()) {
+                stageInvitationDtos.add(stageInvitationMapper.toDto(requests));
             }
-            return recommendationRequestDtos;
-        } else
-            return stageInvitationMapper.toDtoList(stageInvitationRepository
-                    .findAll()
-                    .stream()
-                    .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(id))
-                    .toList());
+
+            return stageInvitationDtos;
+        }
+        return stageInvitationMapper.toDtoList(stageInvitationRepository
+                .findAll()
+                .stream()
+                .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(id))
+                .toList());
     }
 
     private StageInvitation getInvitation(Long userId, Long invitationId) {
