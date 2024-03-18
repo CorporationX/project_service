@@ -20,7 +20,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
             "AND (:maxGoal IS NULL OR c.goal <= :maxGoal) " +
             "AND (:status IS NULL OR c.status = :status)"
     )
-    List<Campaign> findAllByFilters(@Param("namePattern") String namePattern,
+    List<Campaign> findAllByvalidators(@Param("namePattern") String namePattern,
                                     @Param("minGoal") BigDecimal minGoal,
                                     @Param("maxGoal") BigDecimal maxGoal,
                                     @Param("status") String status,

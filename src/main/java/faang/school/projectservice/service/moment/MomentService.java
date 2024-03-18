@@ -1,10 +1,10 @@
-package faang.school.projectservice.momentService;
+package faang.school.projectservice.service.moment;
 
-import faang.school.projectservice.filterMoment.FilterMoment;
+import faang.school.projectservice.validator.moment.ValidatorMoment;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.momentDto.MomentDto;
-import faang.school.projectservice.momentMapper.MomentMapper;
+import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,14 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class MomentService {
     private final MomentRepository momentRepository;
     private final ProjectRepository projectRepository;
-    private final FilterMoment filterMoment;
+    private final ValidatorMoment validatorMoment;
     private final MomentMapper momentMapper;
-    public MomentDto createMoment(MomentDto momentDto){
-        filterMoment.filterMomentName();
-        filterMoment.filterOpenProject();
-        return momentMapper.toMomentDto(momentRepository.save(momentDt));
-    }
     @Transactional
+    public void createMoment(MomentDto momentDto){
+        validatorMoment.ValidatorMomentName(momentDto);
+        validatorMoment.ValidatorOpenProject(momentDto);
+        validatorMoment.ValidatorMomentProject(momentDto);
+        Moment moment = momentMapper.toMoment(momentDto);
+        momentRepository.save(moment);
+    }
+
     public void updateMoment(Long id, Long projectId, Long userIds){
         Moment moment = momentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("not found"));
         Project projectAdd = projectRepository.getProjectById(projectId);
@@ -37,7 +40,7 @@ public class MomentService {
         momentRepository.save(moment);
     }
 
-    public void filterMoment(Moment data, Project project){
+    public void validatorMoment(Moment data, Project project){
 
     }
 }
