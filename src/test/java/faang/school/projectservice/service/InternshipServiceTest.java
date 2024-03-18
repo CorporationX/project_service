@@ -1,5 +1,7 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.exception.ConstraintViolation;
+import faang.school.projectservice.exception.MessageError;
 import faang.school.projectservice.mapper.InternshipMapperImpl;
 import faang.school.projectservice.repository.InternshipRepository;
 import org.junit.Assert;
@@ -79,8 +81,9 @@ class InternshipServiceTest extends TestSetUp {
     @DisplayName("There is no internship with such id")
     void test_FindById_NoSuchElementException() {
         Mockito.when(internshipRepository.findById(11111L)).thenReturn(Optional.empty());
+        ConstraintViolation exception = Assert.assertThrows(ConstraintViolation.class, () -> internshipService.findById(11111L));
 
-        Assert.assertThrows(NoSuchElementException.class, () -> internshipService.findById(11111L));
+        Assert.assertEquals(exception.getMessage(), MessageError.INTERNSHIP_NOT_FOUND_EXCEPTION.getMessage());
     }
 
     @Test
@@ -89,7 +92,6 @@ class InternshipServiceTest extends TestSetUp {
         Mockito.when(internshipRepository.findById(firstInternship.getId())).thenReturn(Optional.of(firstInternship));
         internshipService.findById(firstInternship.getId());
         verify(internshipMapper, times(1)).toDto(firstInternship);
-
     }
 
 }

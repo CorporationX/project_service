@@ -2,6 +2,8 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.exception.ConstraintViolation;
+import faang.school.projectservice.exception.MessageError;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.repository.InternshipRepository;
@@ -11,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +55,8 @@ public class InternshipService {
     }
 
     public InternshipDto findById(Long id) {
-        Internship internship = internshipRepository.findById(id).orElseThrow(NoSuchElementException::new);
+        Internship internship = internshipRepository.findById(id)
+                .orElseThrow(() -> new ConstraintViolation(MessageError.INTERNSHIP_NOT_FOUND_EXCEPTION));
         return internshipMapper.toDto(internship);
     }
 }

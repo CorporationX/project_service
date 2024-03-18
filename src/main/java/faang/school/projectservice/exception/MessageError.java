@@ -5,7 +5,8 @@ public enum MessageError {
     VALIDATION_EXCEPTION("Validation is not passed"),
     UNACCEPTABLE_EMPTY_INTERNS_LIST("The list of interns' ids is empty"),
     UNACCEPTABLE_DATE_INTERVAL("The internship should be no longer than 3 months"),
-    UNACCEPTABLE_INTERNSHIP_STATUS("The internship should be completed first")
+    UNACCEPTABLE_INTERNSHIP_STATUS("The internship should be completed first"),
+    INTERNSHIP_NOT_FOUND_EXCEPTION("The internship is not found")
 
     ;
 

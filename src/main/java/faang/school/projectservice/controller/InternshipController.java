@@ -21,19 +21,19 @@ public class InternshipController {
     private final InternshipValidator internshipValidator;
     private final InternshipService internshipService;
 
-    @PostMapping("/create")
+    @PostMapping
     public InternshipDto create (@RequestBody InternshipDto internshipDto){
         internshipValidator.validateCreation(internshipDto);
         return internshipService.create(internshipDto);
     }
 
-    @PutMapping("/update}")
+    @PutMapping
     public InternshipDto update (@RequestBody InternshipDto internshipDto){
         internshipValidator.validateUpdating(internshipDto);
         return internshipService.update(internshipDto);
     }
 
-    @GetMapping("/get")
+    @GetMapping
     public List<InternshipDto> getAllInternships(){
         return internshipService.getAllInternships();
     }
