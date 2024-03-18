@@ -6,9 +6,10 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import java.util.List;
 import java.util.Optional;
 
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,43 +27,45 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping
-    public ProjectDto save(@RequestBody ProjectDto projectDto, @RequestParam(name = "ownerId") long ownerId) {
+    public ProjectDto createProject(@RequestBody ProjectDto projectDto, @RequestParam(name = "ownerId") long ownerId) {
+        validateParameters(projectDto, ownerId);
         return projectService.createProject( projectDto, ownerId );
 
     }
 
     @PutMapping("/{projectId}")
     public ProjectDto updateProject(@PathVariable long projectId,
-                                    @RequestBody ProjectFilterDto filters,
+                                    @RequestBody ProjectDto projectDto,
                                     @RequestParam(name = "requestUserId") long requestUserId) {
-        return projectService.updateProject( projectId, filters, requestUserId );
+        validateParameters(projectId, projectDto, requestUserId);
+        return projectService.updateProject( projectId, projectDto, requestUserId );
     }
 
     @GetMapping
     public List<ProjectDto> getProjectsByFilters(@RequestBody ProjectFilterDto filters,
                                                  @RequestParam(name = "requestUserId") long requestUserId) {
-        Optional.ofNullable( requestUserId ).orElseThrow( () -> new IllegalArgumentException( "User ID must not be null" ) );
-        if (status == null && name == null) {
-            throw new IllegalArgumentException( "Provide name or status to search" );
-        }
-        if (name != null) {
-            return projectService.findProjectsByName( name, requestUserId );
-        } else {
-            return projectService.findProjectsByStatus( ProjectStatus.valueOf( status.toUpperCase() ), requestUserId );
-        }
+        validateParameters(filters, requestUserId);
+        return projectService.findAllProjectsByFilters(filters, requestUserId);
     }
 
     @GetMapping("/all")
     public List<ProjectDto> getAllProjects(@RequestParam long requestUserId) {
-        Optional.ofNullable( requestUserId ).orElseThrow( () -> new IllegalArgumentException( "User ID must not be null" ) );
+        validateParameters(requestUserId);
         return projectService.getAllProjects( requestUserId );
     }
 
     @GetMapping("/{projectId}")
     public ProjectDto getProjectById(@PathVariable long projectId, @RequestParam long requestUserId) {
-        Optional.ofNullable( projectId ).orElseThrow( () -> new IllegalArgumentException( "Project ID must not be null" ) );
-        Optional.ofNullable( requestUserId ).orElseThrow( () -> new IllegalArgumentException( "User ID must not be null" ) );
+        validateParameters(projectId, requestUserId);
         return projectService.getProjectById( projectId, requestUserId );
+    }
+
+    private void validateParameters(Object... parameters) {
+        for (Object parameter : parameters) {
+            if (ObjectUtils.isEmpty(parameter)) {
+                throw new IllegalArgumentException("Parameters must not be empty");
+            }
+        }
     }
 
 

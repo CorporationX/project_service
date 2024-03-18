@@ -3,6 +3,7 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ public interface ProjectMapper {
     List<ProjectDto> toDtoList(List<Project> projectList);
 
     List<Project> toProjectList(List<ProjectDto> projectDtoList);
+
+    void updateEntityFromDto(ProjectDto projectDto, @MappingTarget Project project);
 }
