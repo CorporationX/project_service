@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 
 import java.util.List;
@@ -26,33 +27,20 @@ public class ProjectController {
 
     @PostMapping
     public ProjectDto save(@RequestBody ProjectDto projectDto, @RequestParam(name = "ownerId") long ownerId) {
-        Optional.ofNullable( projectDto ).orElseThrow( () -> new IllegalArgumentException( "Project is Null" ) );
-        Optional.ofNullable( projectDto ).orElseThrow( () -> new IllegalArgumentException( "Provide owner ID " ) );
-        Optional.ofNullable( projectDto.getName() ).orElseThrow( () -> new IllegalArgumentException( "Project name is Null" ) );
-        Optional.ofNullable( projectDto.getDescription() ).orElseThrow( () -> new IllegalArgumentException( "Project description is null " ) );
         return projectService.createProject( projectDto, ownerId );
 
     }
 
     @PutMapping("/{projectId}")
     public ProjectDto updateProject(@PathVariable long projectId,
-                                    @RequestParam(name = "description", required = false) String description,
-                                    @RequestParam(name = "status", required = false) String status,
+                                    @RequestBody ProjectFilterDto filters,
                                     @RequestParam(name = "requestUserId") long requestUserId) {
-
-        Optional.ofNullable( requestUserId ).orElseThrow( () -> new IllegalArgumentException( "User ID must not be null" ) );
-
-        if (status == null && description == null) {
-            throw new IllegalArgumentException( "Provide description and/or status to change" );
-        }
-        ProjectStatus projectStatus = ProjectStatus.valueOf( status );
-        return projectService.updateProject( projectId, description, projectStatus,requestUserId );
+        return projectService.updateProject( projectId, filters, requestUserId );
     }
 
     @GetMapping
-    public List<ProjectDto> getProjectsByNameOrStatus(@RequestParam(name = "name", required = false) String name,
-                                                      @RequestParam(name = "status", required = false) String status,
-                                                      @RequestParam(name = "requestUserId") long requestUserId) {
+    public List<ProjectDto> getProjectsByFilters(@RequestBody ProjectFilterDto filters,
+                                                 @RequestParam(name = "requestUserId") long requestUserId) {
         Optional.ofNullable( requestUserId ).orElseThrow( () -> new IllegalArgumentException( "User ID must not be null" ) );
         if (status == null && name == null) {
             throw new IllegalArgumentException( "Provide name or status to search" );

@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataAccessException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
@@ -38,7 +39,7 @@ public class ProjectService {
         return projectMapper.toDto( savedProject );
     }
 
-    public ProjectDto updateProject(long projectId, String description, ProjectStatus status, long requestUserId) {
+    public ProjectDto updateProject(long projectId, ProjectFilterDto filters, long requestUserId) {
         Project project = projectJpaRepository.findById( projectId )
                 .orElseThrow( () -> new EntityNotFoundException( "Project with id " + projectId + " does not exist" ) );
 
