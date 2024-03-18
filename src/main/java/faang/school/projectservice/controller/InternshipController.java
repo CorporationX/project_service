@@ -27,6 +27,7 @@ public class InternshipController {
         return internshipService.create(internshipDto);
     }
 
+
     @PutMapping
     public InternshipDto update (@RequestBody InternshipDto internshipDto){
         internshipValidator.validateUpdating(internshipDto);
