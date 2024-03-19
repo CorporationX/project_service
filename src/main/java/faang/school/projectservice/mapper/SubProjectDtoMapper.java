@@ -12,11 +12,4 @@ public interface SubProjectDtoMapper {
 
     CreateSubProjectDto toDTO(Project project);
 
-    @Mapping(source = "parentProjectid", target = "")
-    Project toEntity(CreateSubProjectDto createSubProjectDto);
-
-    @Named("convertUserToId")
-    default Long convertUserToId(Project parentProject) {
-        return parentProject.getId();
-    }
 }

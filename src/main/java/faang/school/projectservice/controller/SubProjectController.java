@@ -1,8 +1,10 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.CreateSubProjectDto;
+
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.service.SubProjectService;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ public class SubProjectController {
 
     public void updateProject(ProjectDto projectDto) {
         projectValidator.checkProjectDto(projectDto);
-        subProjectService.updateProject(projectDto);
+        Moment momentProject = subProjectService.updateProject(projectDto);
     }
 
     public List<ProjectDto> getAllProjectFilter(ProjectDto projectDto, ProjectFilterDto projectFilterDto) {

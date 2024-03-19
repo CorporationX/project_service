@@ -40,7 +40,7 @@ public class ProjectValidator {
 
     private void validateSubProjectNameWritten(String name) {
         if (name.isEmpty()) {
-            throw new IllegalArgumentException("Не было указано название проекта");
+            throw new NullPointerException("Не было указано название проекта");
         }
     }
 
