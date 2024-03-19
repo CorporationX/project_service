@@ -15,7 +15,7 @@ public class MomentController {
 
     private final MomentService momentService;
 
-    @PostMapping
+    @PostMapping("/createMoment")
     public MomentDto createMoment(@RequestBody MomentDto momentDto) {
         momentService.createMoment(momentDto);
         return momentDto;

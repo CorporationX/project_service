@@ -5,7 +5,6 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.dto.moment.MomentDto;
 import io.micrometer.common.util.StringUtils;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +21,7 @@ public class ValidatorMoment {
     }
 
     public void ValidatorOpenProject(MomentDto momentDto) {
-        Moment moment = momentMapper.toMoment(momentDto);
+        Moment moment = momentMapper.toEntity(momentDto);
         moment.getProjects().stream()
                 .filter(project -> project.getStatus().equals(ProjectStatus.CANCELLED))
                 .forEach(project -> {throw new IllegalArgumentException("ProjectStatus.CANCELLED");});

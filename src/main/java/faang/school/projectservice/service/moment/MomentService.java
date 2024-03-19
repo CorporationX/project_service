@@ -12,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class MomentService {
     private final MomentRepository momentRepository;
-    private final ProjectRepository projectRepository;
     private final ValidatorMoment validatorMoment;
     private final MomentMapper momentMapper;
     @Transactional
@@ -24,21 +26,30 @@ public class MomentService {
         validatorMoment.ValidatorMomentName(momentDto);
         validatorMoment.ValidatorOpenProject(momentDto);
         validatorMoment.ValidatorMomentProject(momentDto);
-        Moment moment = momentMapper.toMoment(momentDto);
+        Moment moment = momentMapper.toEntity(momentDto);
         momentRepository.save(moment);
     }
 
-    public void updateMoment(Long id, Long projectId, Long userIds){
-        Moment moment = momentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("not found"));
-        Project projectAdd = projectRepository.getProjectById(projectId);
-        if (!moment.getProjects().contains(projectAdd)) {
-            moment.getUserIds().add(userIds);
+    public void updateMoment(MomentDto momentDto){
+       // Moment moment = momentMapper.toEntity(momentDto);
+            momentDto.getProjectIds() ==
+
+                momentDto.getUserIds()
+                        .distinct()
+                        .collect(Collectors.toList());
         }
-       if (!moment.getUserIds().contains(userIds)) {
-            moment.getProjects().add(projectAdd);
-        }
-        momentRepository.save(moment);
+
+
     }
+//        Project projectAdd = projectRepository.getProjectById();
+//        if (!momentDto.getProjects().contains(projectAdd)) {
+//            moment.getUserIds().add(userIds);
+//        }
+//       if (!moment.getUserIds().contains(userIds)) {
+//            moment.getProjects().add(projectAdd);
+//        }
+//        momentRepository.save(moment);
+//    }
 
     public void validatorMoment(Moment data, Project project){
 
