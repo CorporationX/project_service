@@ -41,6 +41,7 @@ class PromotionTest extends TestSetUp {
                 .thenReturn(thirdIntern);
 
         List<TeamMember> result = promotion.demoteFailedInterns(firstInternship, failedInterns);
+
         Assert.assertEquals(afterDemotion, result);
 
     }

@@ -15,7 +15,7 @@ public interface InternshipMapper {
 
     @Mapping(source = "mentorId.id", target = "mentorId")
     @Mapping(source = "project.id", target = "projectId")
-    @Mapping(source = "interns", target = "internsIds", qualifiedByName = "map")
+    @Mapping(source = "interns", target = "internsIds", qualifiedByName = "mapMembersToIds")
     InternshipDto toDto (Internship internship);
 
     List<InternshipDto> toDto (List<Internship> internships);
@@ -25,8 +25,8 @@ public interface InternshipMapper {
     @Mapping(target = "interns", ignore = true)
     Internship toEntity (InternshipDto internshipDto);
 
-    @Named("map")
-    default List<Long> map (List<TeamMember> members){
+    @Named("mapMembersToIds")
+    default List<Long> mapMembersToIds (List<TeamMember> members){
         return members.stream()
                 .map(TeamMember::getId)
                 .toList();

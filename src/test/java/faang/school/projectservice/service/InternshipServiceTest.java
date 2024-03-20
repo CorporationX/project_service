@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,18 +28,6 @@ class InternshipServiceTest extends TestSetUp {
     private InternshipUpdateLogicService internshipUpdateLogicService;
     @InjectMocks
     private InternshipService internshipService;
-
-
-//        private long id;//*
-//        private String name;//*
-//        @NotNull(message = "cannot be empty")
-//        private Long mentorId; // <- TeamMember mentorId
-//        private long projectId;// <- Project project
-//        private LocalDateTime startDate;
-//        private LocalDateTime endDate;
-//        private List<Long> internsIds; //<-List<Interns> interns *
-//        private InternshipStatus status;// *
-//        private TeamRole role;//*
 
 
     @Test
@@ -60,6 +47,7 @@ class InternshipServiceTest extends TestSetUp {
     @DisplayName("The updating of internship")
     void test_UpdateLogic() {
         internshipService.update(firstInternshipDto);
+
         verify(internshipUpdateLogicService, times(1)).updateLogic(firstInternshipDto);
     }
 
@@ -81,6 +69,7 @@ class InternshipServiceTest extends TestSetUp {
     @DisplayName("There is no internship with such id")
     void test_FindById_NoSuchElementException() {
         Mockito.when(internshipRepository.findById(11111L)).thenReturn(Optional.empty());
+
         ConstraintViolation exception = Assert.assertThrows(ConstraintViolation.class, () -> internshipService.findById(11111L));
 
         Assert.assertEquals(exception.getMessage(), MessageError.INTERNSHIP_NOT_FOUND_EXCEPTION.getMessage());
@@ -90,7 +79,9 @@ class InternshipServiceTest extends TestSetUp {
     @DisplayName("Testing finding internship by id")
     void test_FindById() {
         Mockito.when(internshipRepository.findById(firstInternship.getId())).thenReturn(Optional.of(firstInternship));
+
         internshipService.findById(firstInternship.getId());
+
         verify(internshipMapper, times(1)).toDto(firstInternship);
     }
 

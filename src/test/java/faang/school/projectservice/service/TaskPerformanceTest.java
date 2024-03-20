@@ -9,20 +9,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 @ExtendWith(MockitoExtension.class)
-class TaskPerformanceTest extends TestSetUp{
+class TaskPerformanceTest extends TestSetUp {
     @InjectMocks
     private TaskPerformance taskPerformance;
 
-
     @Test
     @DisplayName("Grouping all interns' ids by task assigned to them")
-    void testMapPerformerUserIdsAndTasks(){
+    void testMapPerformerUserIdsAndTasks() {
         Assert.assertEquals(map, taskPerformance.mapPerformersUserIdsAndTasks(firstInternship));
     }
 
     @Test
     @DisplayName("testTaskPerformance")
-    void testPartitionByStatusDone(){
+    void testPartitionByStatusDone() {
         Assert.assertEquals(map1, taskPerformance.partitionByStatusDone(firstInternship));
     }
 }
