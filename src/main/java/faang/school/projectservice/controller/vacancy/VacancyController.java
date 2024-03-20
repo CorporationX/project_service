@@ -3,7 +3,7 @@ package faang.school.projectservice.controller.vacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
-import faang.school.projectservice.validation.vacancy.VacancyValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,15 +13,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VacancyController {
     private final VacancyService vacancyService;
-    private final VacancyValidator vacancyValidator;
 
-    public VacancyDto create(VacancyDto vacancyDto) {
-        vacancyValidator.validateVacancyFields(vacancyDto);
+
+    public VacancyDto create(@Valid VacancyDto vacancyDto) {
         return vacancyService.create(vacancyDto);
     }
 
-    public VacancyDto update(VacancyDto vacancyDto) {
-        vacancyValidator.validateVacancyFields(vacancyDto);
+    public VacancyDto update(@Valid VacancyDto vacancyDto) {
         return vacancyService.update(vacancyDto);
     }
 
