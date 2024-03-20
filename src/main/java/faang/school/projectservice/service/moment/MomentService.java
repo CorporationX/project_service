@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,7 +30,7 @@ public class MomentService {
     }
 
     public MomentDto updateMoment(MomentDto momentDto) {
-        //момент из репы достать
+        Moment moment = momentRepository.findById(momentDto.getId()).orElseThrow();
         List<Long> oldProjectIds = moment.getProjects().stream()
                 .map(Project::getId)
                 .toList();
