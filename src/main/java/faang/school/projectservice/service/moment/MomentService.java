@@ -14,11 +14,10 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public static class MomentService {
+public class MomentService {
     private final MomentRepository momentRepository;
     private final ValidatorMoment validatorMoment;
     private final MomentMapper momentMapper;
-    private final Moment moment;
 
     @Transactional
     public void createMoment(MomentDto momentDto) {
@@ -29,7 +28,8 @@ public static class MomentService {
         momentRepository.save(moment);
     }
 
-    public void updateMoment(MomentDto momentDto) {
+    public MomentDto updateMoment(MomentDto momentDto) {
+        //момент из репы достать
         List<Long> oldProjectIds = moment.getProjects().stream()
                 .map(Project::getId)
                 .toList();
@@ -41,25 +41,28 @@ public static class MomentService {
         } else {
             moment.setUserIds(momentDto.getUserIds().stream()
                     .distinct()
-                    .toList());
-            //если пришла дто с новым айди приекта , то в момента обновляю айдишники юзеров
-            momentRepository.save(moment);
-            List<Long> oldUserIds = moment.getUserIds()
-                    .stream()
-                    .toList();
-            List<Long> newUserIds = momentDto.getUserIds()
-                    .stream()
-                    .toList();
-            if (oldUserIds.equals(newUserIds)) {
-                System.out.println("No new members");
-            } else {
-                moment.setProjects();
-            }
+                    .toList());}
+        momentRepository.save(moment);
+        //если пришла дто с новым айди приекта , то в моменте обновляю айдишники юзеров
+
+        List<Long> oldUserIds = moment.getUserIds()
+                .stream()
+                .toList();
+        List<Long> newUserIds = momentDto.getUserIds()
+                .stream()
+                .toList();
+        if (oldUserIds.equals(newUserIds)) {
+            System.out.println("No new members");
+        } else {
+            moment.setProjects()
+        //переделать айди проектов в проекты
+
         }
+        }
+        momentRepository.save(moment);
     }
 
 
-}
 //        Project projectAdd = projectRepository.getProjectById();
 //        if (!momentDto.getProjects().contains(projectAdd)) {
 //            moment.getUserIds().add(userIds);
@@ -70,7 +73,7 @@ public static class MomentService {
 //        momentRepository.save(moment);
 //    }
 
-public void validatorMoment(Moment data, Project project) {
-
-}
-}
+//public void validatorMoment(Moment data, Project project) {
+//
+//}
+//}
