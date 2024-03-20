@@ -84,19 +84,19 @@ class InternshipControllerTest {
     }
 
     @Test
-    void testGetInternshipByRoleSuccessful(){
+    void testGetInternshipByRoleSuccessful() {
         internshipController.getInternshipByRole(filter, teamRole);
         Mockito.verify(internshipService).getInternshipByRole(filter, teamRole);
     }
 
     @Test
-    void testGetAllInternshipSuccessful(){
+    void testGetAllInternshipSuccessful() {
         internshipController.getAllInternship();
         Mockito.verify(internshipService).getAllInternship();
     }
 
     @Test
-    void testGetById(){
+    void testGetById() {
         internshipController.getById(INTERNSHIP_ID);
         Mockito.verify(internshipService).getDtoById(INTERNSHIP_ID);
     }
