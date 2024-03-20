@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.internship;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
@@ -19,6 +20,8 @@ class InternshipControllerTest {
     private InternshipController internshipController;
     @Mock
     private InternshipService internshipService;
+    @Mock
+    private UserContext userContext;
     private InternshipDto internshipDto;
     private TeamMemberDto teamMemberDto;
     private InternshipFilterDto filter;
@@ -39,7 +42,7 @@ class InternshipControllerTest {
 
     @Test
     void testCreateInternshipSuccessful() {
-        internshipDto.setId(123L);
+        Mockito.when(userContext.getUserId()).thenReturn(1L);
         internshipController.createInternship(internshipDto);
         Mockito.verify(internshipService).createInternship(internshipDto);
     }
