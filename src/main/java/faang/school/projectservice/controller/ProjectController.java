@@ -90,4 +90,3 @@ public class ProjectController {
         return new ResponseEntity<>(imageBytes, httpHeaders, HttpStatus.OK);
     }
 }
-
