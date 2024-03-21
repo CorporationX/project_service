@@ -20,4 +20,9 @@ public class MomentController {
         momentService.createMoment(momentDto);
         return momentDto;
     }
+    @PostMapping("/updateMoment")
+    public MomentDto updateMoment(@RequestBody MomentDto momentDto) {
+        momentService.updateMoment(momentDto);
+        return momentDto;
+    }
 }
