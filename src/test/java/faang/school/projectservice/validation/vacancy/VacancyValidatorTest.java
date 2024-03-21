@@ -11,13 +11,9 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.VacancyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,8 +33,6 @@ class VacancyValidatorTest {
 
     @Mock
     ProjectRepository projectRepository;
-    @Mock
-    VacancyRepository vacancyRepository;
     @Mock
     TeamMemberRepository teamMemberRepository;
     @InjectMocks
@@ -97,44 +91,6 @@ class VacancyValidatorTest {
                 .projectId(project.getId())
                 .workersRequired(vacancy.getCount())
                 .build();
-    }
-
-    @Test
-    void validateVacancyFields_FieldsAreValid_ShouldNotThrow() {
-        assertDoesNotThrow(() ->
-                vacancyValidator.validateVacancyFields(vacancyDto));
-    }
-
-    @ParameterizedTest
-    @NullSource
-    @ValueSource(strings = {"", "  "})
-    void validateVacancyFields_TitleIsInvalid_ShouldThrowDataValidationException(String name) {
-        vacancyDto.setName(name);
-        assertThrows(DataValidationException.class, () ->
-                vacancyValidator.validateVacancyFields(vacancyDto));
-    }
-
-    @Test
-    void validateVacancyFields_VacancyGotNoCurator_ShouldThrowDataValidationException() {
-        vacancyDto.setCuratorId(null);
-        assertThrows(DataValidationException.class, () ->
-                vacancyValidator.validateVacancyFields(vacancyDto));
-    }
-
-    @Test
-    void validateVacancyFields_VacancyGotNoProject_ShouldThrowDataValidationException() {
-        vacancyDto.setProjectId(null);
-        assertThrows(DataValidationException.class, () ->
-                vacancyValidator.validateVacancyFields(vacancyDto));
-    }
-
-    @ParameterizedTest
-    @NullSource
-    @ValueSource(strings = {"", "  "})
-    void validateVacancyFields_VacancyGotNoCurator_ShouldThrowDataValidationException(String description) {
-        vacancyDto.setDescription(description);
-        assertThrows(DataValidationException.class, () ->
-                vacancyValidator.validateVacancyFields(vacancyDto));
     }
 
     @Test

@@ -9,7 +9,6 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,23 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VacancyValidator {
     private final ProjectRepository projectRepository;
-    private final VacancyRepository vacancyRepository;
     private final TeamMemberRepository teamMemberRepository;
-
-    public void validateVacancyFields(VacancyDto vacancyDto) {
-        if (vacancyDto.getCuratorId() == null) {
-            throw new DataValidationException("Vacancy must have a curator");
-        }
-        if (vacancyDto.getName() == null || vacancyDto.getName().isBlank()) {
-            throw new DataValidationException("Vacancy must have a name");
-        }
-        if (vacancyDto.getProjectId() == null) {
-            throw new DataValidationException("Vacancy must be assigned to a project");
-        }
-        if (vacancyDto.getDescription() == null || vacancyDto.getDescription().isBlank()) {
-            throw new DataValidationException("Vacancy must have a description");
-        }
-    }
 
     public void validateIfVacancyCanBeClosed(VacancyDto vacancyDto) {
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
