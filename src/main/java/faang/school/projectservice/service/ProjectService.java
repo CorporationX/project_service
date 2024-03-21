@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
-@Slf4j // для логирования
+@Slf4j
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
@@ -55,7 +55,7 @@ public class ProjectService {
         return projectMapper.toDto(projectToUpdate);
     }
 
-    @Transactional(readOnly = true) //консистентность данных, атомарность.
+    @Transactional(readOnly = true)
     public List<ProjectDto> getAllProjectsWithFilter(ProjectFilterDto projectFilterDto) {
         List<Project> projects = projectRepository.findAll();
         return projectFilters.stream()
@@ -88,13 +88,17 @@ public class ProjectService {
                 .filter(Objects::nonNull);
     }
 
+    public Project getById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
+
     @Transactional(readOnly = true)
     public Project getProjectModelById(Long id) {
         return projectRepository.getProjectById(id);
     }
 
     @Transactional
-    public void save(Project project){
-        projectRepository.save(project);
+    public Project save(Project project) {
+        return projectRepository.save(project);
     }
 }

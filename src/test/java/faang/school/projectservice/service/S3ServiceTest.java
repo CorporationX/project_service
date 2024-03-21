@@ -1,28 +1,37 @@
 package faang.school.projectservice.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import faang.school.projectservice.service.S3Service;
+import faang.school.projectservice.service.s3.CoverHandler;
+import faang.school.projectservice.service.s3.S3Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 public class S3ServiceTest {
 
     @Mock
     private AmazonS3 s3client;
+
+    @Mock
+    private CoverHandler coverHandler;
 
     @InjectMocks
     private S3Service s3Service;
@@ -32,7 +41,7 @@ public class S3ServiceTest {
         ReflectionTestUtils.setField(s3Service, "bucketName", "your-bucket-name");
     }
 
-    @Test
+/*    @Test
     void testUploadFile() {
         MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "content".getBytes());
         String folder = "testFolder";
@@ -40,7 +49,7 @@ public class S3ServiceTest {
         s3Service.uploadFile(file, folder);
 
         verify(s3client).putObject(any(PutObjectRequest.class));
-    }
+    }*/
 
     @Test
     void testDeleteFile() {
@@ -51,7 +60,7 @@ public class S3ServiceTest {
         verify(s3client).deleteObject("your-bucket-name", key);
     }
 
-    @Test
+/*    @Test
     void testDownloadFile() {
         String key = "testFolder/test.txt";
         S3Object s3Object = mock(S3Object.class);
@@ -62,5 +71,31 @@ public class S3ServiceTest {
         s3Service.downloadFile(key);
 
         verify(s3client).getObject("your-bucket-name", key);
+    }*/
+
+    @Test
+    void uploadFile() throws IOException {
+        MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "content".getBytes());
+        String folder = "testFolder";
+        InputStream resizedFile = mock(InputStream.class);
+        when(coverHandler.checkCoverAndResize(file)).thenReturn(resizedFile);
+
+        s3Service.uploadFile(file, folder);
+
+        verify(s3client).putObject(any(PutObjectRequest.class));
+    }
+
+    @Test
+    void downloadFile() {
+        S3ObjectInputStream inputStream = mock(S3ObjectInputStream.class);
+        S3Object s3Object = mock(S3Object.class);
+
+        when(s3client.getObject(Mockito.any(GetObjectRequest.class))).thenReturn(s3Object);
+        when(s3Object.getObjectContent()).thenReturn(inputStream);
+
+        s3Service.downloadFile("key");
+
+        verify(s3client, times(1)).getObject(any());
+        verify(s3Object, times(1)).getObjectContent();
     }
 }

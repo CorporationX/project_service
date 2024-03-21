@@ -3,6 +3,9 @@ spring:
     servlet:
       path: /api
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres
@@ -28,6 +31,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        task_channel:
+          name: task_channel
 
 server:
   port: 8082
@@ -41,6 +46,11 @@ calculations_messages_processing:
 
 services:
   s3:
+    resources:
+      cover:
+        height: 566
+        width: 1080
+        maxSize: 5242880
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password

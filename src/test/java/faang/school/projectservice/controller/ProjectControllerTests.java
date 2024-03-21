@@ -1,16 +1,23 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectUpdateDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.ResourceService;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,11 +25,15 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 public class ProjectControllerTests {
     @Mock
+    private ResourceService resourceService;
+    @Mock
     private ProjectService projectService;
     @Mock
     private ProjectValidator projectValidator;
     @InjectMocks
     private ProjectController projectController;
+    @Mock
+    private UserContext userContext;
 
     @Test
     void testCreateProject_ShouldCallServiceMethod() {
@@ -56,5 +67,24 @@ public class ProjectControllerTests {
     void testGetProjectById_ShouldCallServiceMethod() {
         projectController.getProjectById(1L);
         verify(projectService, times(1)).getProjectById(1L);
+    }
+
+    @Test
+    void shouldAddCoverToProject() {
+        MultipartFile cover = null;
+        long projectId = 1L;
+        projectController.addCover(projectId, cover);
+        Mockito.verify(resourceService).addCoverToProject(projectId, userContext.getUserId(), cover);
+    }
+
+    @Test
+    void shouldGetCover() throws IOException {
+        byte[] result = new byte[]{1, 2, 3};
+        long resourceId = 1L;
+        InputStream inputStream = Mockito.mock(InputStream.class);
+        Mockito.when(resourceService.downloadCoverByProjectId(resourceId)).thenReturn(inputStream);
+        Mockito.when(inputStream.readAllBytes()).thenReturn(result);
+        projectController.getCover(resourceId);
+        Mockito.verify(resourceService).downloadCoverByProjectId(resourceId);
     }
 }
