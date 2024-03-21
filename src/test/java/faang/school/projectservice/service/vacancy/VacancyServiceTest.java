@@ -4,13 +4,13 @@ import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import faang.school.projectservice.validation.vacancy.VacancyValidator;
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,13 +41,13 @@ class VacancyServiceTest {
     private VacancyRepository vacancyRepository;
     private VacancyMapper vacancyMapper;
     private VacancyValidator vacancyValidator;
-    private ProjectRepository projectRepository;
     private TeamMemberJpaRepository teamMemberJpaRepository;
     private List<VacancyFilter> vacancyFilters;
     private VacancyService vacancyService;
 
     private Vacancy vacancy;
     private VacancyDto vacancyDto;
+    private Candidate candidate;
     private Project project;
     private TeamMember curator;
     private VacancyFilterDto vacancyFilterDto;
@@ -58,6 +59,10 @@ class VacancyServiceTest {
                 .id(1L)
                 .userId(6L)
                 .roles(List.of(TeamRole.MANAGER))
+                .build();
+        candidate = Candidate.builder()
+                .id(15L)
+                .userId(15L)
                 .build();
         project = Project.builder()
                 .id(3L)
@@ -88,13 +93,12 @@ class VacancyServiceTest {
         vacancyRepository = mock(VacancyRepository.class);
         vacancyMapper = mock(VacancyMapper.class);
         vacancyValidator = mock(VacancyValidator.class);
-        projectRepository = mock(ProjectRepository.class);
         teamMemberJpaRepository = mock(TeamMemberJpaRepository.class);
         vacancyFilter = mock(VacancyFilter.class);
         vacancyFilters = List.of(vacancyFilter);
 
-        vacancyService = new VacancyService(vacancyRepository, vacancyMapper, vacancyValidator, projectRepository,
-                teamMemberJpaRepository, vacancyFilters);
+        vacancyService = new VacancyService(vacancyRepository, vacancyMapper, vacancyValidator, teamMemberJpaRepository,
+                vacancyFilters);
     }
 
     @Test
@@ -155,16 +159,14 @@ class VacancyServiceTest {
                 .teamMembers(List.of(teamMember))
                 .build();
         project.setTeams(List.of(team));
-        vacancyDto.setCandidatesIds(List.of(15L));
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
-        when(vacancyMapper.toEntity(any(VacancyDto.class))).thenReturn(vacancy);
+        vacancy.setCandidates(List.of(candidate));
+        when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.ofNullable(vacancy));
 
-        vacancyService.delete(vacancyDto);
+        vacancyService.delete(vacancy.getId());
 
-        verify(projectRepository, times(1)).getProjectById(anyLong());
+        verify(vacancyRepository, times(1)).findById(vacancy.getId());
         verify(teamMemberJpaRepository, times(1)).deleteAll(List.of(teamMember));
         verify(vacancyRepository, times(1)).delete(vacancy);
-        verify(vacancyMapper, times(1)).toEntity(vacancyDto);
     }
 
     @Test
@@ -180,16 +182,14 @@ class VacancyServiceTest {
                 .teamMembers(List.of(teamMember))
                 .build();
         project.setTeams(List.of(team));
-        vacancyDto.setCandidatesIds(List.of(15L));
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
-        when(vacancyMapper.toEntity(any(VacancyDto.class))).thenReturn(vacancy);
+        vacancy.setCandidates(List.of(candidate));
+        when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.ofNullable(vacancy));
 
-        vacancyService.delete(vacancyDto);
+        vacancyService.delete(vacancy.getId());
 
-        verify(projectRepository, times(1)).getProjectById(anyLong());
-        verify(teamMemberJpaRepository, times(1)).deleteAll(List.of());
+        verify(vacancyRepository, times(1)).findById(vacancy.getId());
+        verify(teamMemberJpaRepository, times(1)).deleteAll(Collections.emptyList());
         verify(vacancyRepository, times(1)).delete(vacancy);
-        verify(vacancyMapper, times(1)).toEntity(vacancyDto);
     }
 
     @Test
@@ -203,16 +203,14 @@ class VacancyServiceTest {
                 .teamMembers(List.of(teamMember))
                 .build();
         project.setTeams(List.of(team));
-        vacancyDto.setCandidatesIds(List.of(15L));
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
-        when(vacancyMapper.toEntity(any(VacancyDto.class))).thenReturn(vacancy);
+        vacancy.setCandidates(List.of(candidate));
+        when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.ofNullable(vacancy));
 
-        vacancyService.delete(vacancyDto);
+        vacancyService.delete(vacancy.getId());
 
-        verify(projectRepository, times(1)).getProjectById(anyLong());
-        verify(teamMemberJpaRepository, times(1)).deleteAll(List.of());
+        verify(vacancyRepository, times(1)).findById(vacancy.getId());
+        verify(teamMemberJpaRepository, times(1)).deleteAll(Collections.emptyList());
         verify(vacancyRepository, times(1)).delete(vacancy);
-        verify(vacancyMapper, times(1)).toEntity(vacancyDto);
     }
 
     @Test

@@ -43,10 +43,10 @@ public class VacancyController {
         return vacancyService.update(vacancyDto);
     }
 
-    @Operation(summary = "Delete a vacancy")
-    @DeleteMapping
-    public void delete(@RequestBody VacancyDto vacancyDto) {
-        vacancyService.delete(vacancyDto);
+    @Operation(summary = "Delete a vacancy by id")
+    @DeleteMapping("{vacancyId}")
+    public void delete(@PathVariable long vacancyId) {
+        vacancyService.delete(vacancyId);
     }
 
     @Operation(summary = "Get list of filtered vacancies")
