@@ -24,7 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -45,24 +47,42 @@ public class MomentServiceTest {
     private ProjectRepository projectRepository;
     @InjectMocks
     private MomentService momentService;
-
     private MomentDto momentDto;
-    private MomentDto moment;
+    private Moment moment;
+
+
     @BeforeEach
     void entity(){
-        Long id = 1L;
-        momentDto = MomentDto.builder()
+        Project project = Project.builder()
+                .id(5L)
+                .build();
+        Project project1 = Project.builder()
+                .id(6L)
+                .build();
+        Project project2 = Project.builder()
+                .id(66L)
+                .build();
+        Project project3 = Project.builder()
+                .id(67L)
+                .build();
+        MomentDto momentDto = MomentDto.builder()
                 .id(10L)
                 .name("testMomentDto")
                 .projectIds(Arrays.asList(1L, 2L))
                 .userIds(Arrays.asList(3L,4L))
                 .build();
-        moment = MomentDto.builder()
+        Moment moment = Moment.builder()
                 .id(9L)
                 .name("testMoment")
-                .projectIds(Arrays.asList(5L,6L))
+                .projects(Arrays.asList(project,project1))
                 .userIds(Arrays.asList(7L,8L))
                 .build();
+
+        List<Project> newProjects = Arrays.asList(project2,project3);
+        List<Long> newProjectIds = Arrays.asList(11L,12L,13L);
+        List<Long> oldProjectIds = Arrays.asList(111L,2L,1L);
+        List<Long> oldUserIds = Arrays.asList(15L,20L,30L);
+        List<Long> newUserIds = Arrays.asList(14L,21L,31L);
     }
 
     @Test
@@ -85,13 +105,11 @@ public class MomentServiceTest {
 
     @Test
     public void testUpdateMoment(){
-        when(momentService.updateUsers(momentDto)).thenReturn(momentDto);
-        assertThrows(EntityNotFoundException.class, () -> momentService.updateUsers(momentDto));
-        when(momentService.updateProjects(momentDto)).thenReturn(momentDto);
+        when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.ofNullable(moment));
 
         momentService.updateMoment(momentDto);
 
-        verify(momentService).updateUsers(any(MomentDto.class));
-        verify(momentService).updateProjects(any(MomentDto.class));
+        assertEquals(List<Project> test = moment.getProjects().stream().toList(),List<Project> newProjects);
+
     }
 }

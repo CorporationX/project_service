@@ -19,14 +19,12 @@ public record DataRangeFilter(@NotBlank String month) implements MomentFilter {
 
     @Override
     public boolean isApplicable(MomentFilterDto filter) {
-        return filter.getDate() != null &&
-                filter.getDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")).matches("^\\d{4}/\\d{2}/\\d{2}$");
+        return filter.getDate() != null;
+
     }
 
     @Override
     public void apply(List<Moment> moments, MomentFilterDto filter) {
-        String fiterDataString = filter.getDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        LocalDate filterLocalData = LocalDate.parse(fiterDataString, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         moments.removeIf(moment -> !moment.getDate().toLocalDate().equals(filterLocalData));
     }
 }

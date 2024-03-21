@@ -32,41 +32,35 @@ public class MomentService {
         momentRepository.save(moment);
     }
 
-    public void updateMoment(MomentDto momentDto) {
-        updateUsers(momentDto);
-        updateProjects(momentDto);
-    }
-    public MomentDto updateProjects(MomentDto momentDto){
+    public MomentDto updateMoment(MomentDto momentDto) {
         Moment moment = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new EntityNotFoundException("moment id not found"));
+        updateUsers(momentDto,moment);
+        updateProjects(momentDto, moment);
+        momentRepository.save(moment);
+        return momentDto;
+    }
+    private void updateProjects(MomentDto momentDto,Moment moment){
         List<Long> oldUserIds = moment.getUserIds();
         List<Long> newUserIds = momentDto.getUserIds();
         List<Long> newProjectIds = momentDto.getProjectIds();
         List<Project> newProjects = projectRepository.findAllByIds(newProjectIds);
-        if (oldUserIds.equals(newUserIds)) {
-            System.out.println("No new members");
-        } else {
+        if (!oldUserIds.equals(newUserIds)) {
             moment.setProjects(newProjects);
         }
-        momentRepository.save(moment);
-        return momentMapper.toDto(moment);
     }
-    public MomentDto updateUsers(MomentDto momentDto){
-        Moment moment = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new EntityNotFoundException("moment id not found"));
+    private void updateUsers(MomentDto momentDto,Moment moment){
         List<Long> oldProjectIds = moment.getProjects().stream()
                 .map(Project::getId)
                 .toList();
         List<Long> newProjectIds = momentDto.getProjectIds();
-        if (oldProjectIds.equals(newProjectIds)) {
-            System.out.println("There are no new projects");
-        } else {
+        if (!oldProjectIds.equals(newProjectIds)) {
             moment.setUserIds(momentDto.getUserIds().stream()
                     .distinct()
                     .toList());
         }
-        momentRepository.save(moment);
-        return momentMapper.toDto(moment);
     }
     public MomentDto getAllMomentsByDate(MomentDto momentDto){
+        //6.1 ,2e видео
         DataRangeFilter.
     }
 }
