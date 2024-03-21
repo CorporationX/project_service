@@ -9,7 +9,10 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.filter.ProjectFilter;
+import faang.school.projectservice.service.filter.ProjectNameFilter;
+import faang.school.projectservice.service.filter.ProjectStatusFilter;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -44,13 +47,15 @@ public class ProjectService {
 
         checkUserIsMemberOrThrowException( existingProject, requestUserId );
 
-        projectMapper.updateEntityFromDto(projectDto, existingProject);
+        existingProject.setDescription(projectDto.getDescription() == null ?
+                existingProject.getDescription() : projectDto.getDescription());
+        existingProject.setStatus(projectDto.getStatus() == null ? existingProject.getStatus() : projectDto.getStatus());
 
         projectJpaRepository.save( existingProject );
 
         return projectMapper.toDto( existingProject );
     }
-
+    @Transactional
     public List<ProjectDto> findAllProjectsByFilters(ProjectFilterDto filters, long requestUserId) {
         List<Project> projectList = projectJpaRepository.findAll();
         if (projectList.isEmpty()) {
@@ -59,16 +64,19 @@ public class ProjectService {
 
         List<Project> filteredProjects = filterProjects(projectList,requestUserId);
 
-        Stream<Project> projectStream = filteredProjects.stream();
-
         if (filteredProjects.isEmpty()) {
             throw new EntityNotFoundException( "No projects found available to user ID:" + requestUserId );
         }
-        return projectFilters.stream()
-                .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(projectStream, filters))
-                .map(projectMapper::toDto)
-                .collect(Collectors.toList());
+
+        Stream<Project> projectStream = filteredProjects.stream();
+
+        for (ProjectFilter filter : projectFilters) { //как в 2ой видео-лекции из 6.1 модуля, с использованием stream api не получается, только с помощью loop
+            if (filter.isApplicable(filters)) {
+                projectStream = filter.apply(projectStream, filters).stream();
+            }
+        }
+        return  projectStream.map(projectMapper::toDto)
+                .toList();
     }
 
     public List<ProjectDto> getAllProjects(long requestUserId) {
@@ -99,9 +107,9 @@ public class ProjectService {
     }
 
     private boolean isMember(Project project, long userId) {
-        return project.getTeams().stream()
+        return project.getOwnerId() == userId || project.getTeams().stream()
                 .flatMap( team -> team.getTeamMembers().stream() )
-                .anyMatch( teamMember -> teamMember.getUserId() == userId || project.getOwnerId() == userId);
+                .anyMatch( teamMember -> teamMember.getUserId() == userId);
     }
 
     private List<Project> filterProjects(List<Project> projects, long userId){
@@ -111,5 +119,7 @@ public class ProjectService {
                                 isMember( project, userId ))) )
               .toList();
     }
+
+
 
 }

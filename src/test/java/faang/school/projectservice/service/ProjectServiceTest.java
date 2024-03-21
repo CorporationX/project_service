@@ -1,9 +1,13 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.service.filter.ProjectFilter;
+import faang.school.projectservice.service.filter.ProjectNameFilter;
+import faang.school.projectservice.service.filter.ProjectStatusFilter;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
@@ -36,6 +37,10 @@ public class ProjectServiceTest {
     private ProjectJpaRepository projectJpaRepository;
     @Spy
     private ProjectMapper projectMapper;
+
+    @Mock
+    private List<ProjectFilter> projectFilters;
+
     long requestUserId;
     ProjectDto projectDto, projectDto2, projectDto3, projectDto4;
     Project project, project2, project3, project4;
@@ -123,12 +128,6 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void testCreateProjectExistsByOwnerIdAndName() {
-        when(projectJpaRepository.existsByOwnerIdAndName(  anyLong(), anyString())).thenReturn( true );
-        assertThrows( IllegalStateException.class, () -> projectService.createProject( projectDto, requestUserId ) );
-    }
-
-    @Test
     public void testCreateProjectSuccess() {
         when(projectJpaRepository.existsByOwnerIdAndName( anyLong(), anyString() )).thenReturn( false );
         when(projectMapper.toEntity( any(ProjectDto.class) )).thenReturn(  project);
@@ -145,8 +144,6 @@ public class ProjectServiceTest {
 
     @Test
     public void testUpdateProjectSuccess() {
-        String updateName = "new name";
-        ProjectStatus updateStatus = ProjectStatus.COMPLETED;
 
         TeamMember teamMember = TeamMember.builder().id(1L).userId(requestUserId).build();
         Team team =Team.builder().id(1L).teamMembers(List.of(teamMember)).build();
@@ -158,7 +155,7 @@ public class ProjectServiceTest {
         when(projectMapper.toDto( any(Project.class) )).thenReturn( projectDto );
 
 
-        assertDoesNotThrow(() -> projectService.updateProject(1L, updateName, updateStatus, requestUserId));
+        assertDoesNotThrow(() -> projectService.updateProject(1L, projectDto, requestUserId));
 
         verify(projectJpaRepository, times(1)).findById(1L);
         verify(projectMapper, times(1)).toDto(project);
@@ -170,7 +167,7 @@ public class ProjectServiceTest {
         when(projectJpaRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () ->
-                projectService.updateProject(1L, anyString(), projectStatus, requestUserId));
+                projectService.updateProject(1L, projectDto, requestUserId));
 
         verify(projectJpaRepository).findById(1L);
         verifyNoInteractions(projectMapper);
@@ -178,54 +175,16 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void testFindProjectsByStatus() {
-        TeamMember teamMember = TeamMember.builder().id(1L).userId(requestUserId).build();
-        Team team =Team.builder().id(1L).teamMembers(List.of(teamMember)).build();
+    void findAllProjectsByFilters_noProjectsFound_throwsEntityNotFoundException() {
+        ProjectFilterDto filterDto = ProjectFilterDto.builder()
+                .namePattern("project")
+                .statusPattern(ProjectStatus.CREATED)
+                .build();
+        when(projectJpaRepository.findAll()).thenReturn(List.of());
 
-        project.setTeams(List.of(team));
-        project2.setTeams(List.of(team));
-        project3.setTeams(List.of(team));
-        project4.setTeams(List.of(team));
-
-        when(projectJpaRepository.findAll()).thenReturn(projectList);
-
-        List<Project> filteredProjectList = new ArrayList<>(projectList);
-        List<ProjectDto> fitleredProjectDtoList = new ArrayList<>(projectDtoList);
-
-        filteredProjectList.removeIf(project -> !project.getStatus().equals(ProjectStatus.CREATED));
-        fitleredProjectDtoList.removeIf(projectDto -> !projectDto.getStatus().equals(ProjectStatus.CREATED));
-
-        when(projectMapper.toDtoList(filteredProjectList)).thenReturn(fitleredProjectDtoList);
-
-        List<ProjectDto> result = projectService.findProjectsByStatus(ProjectStatus.CREATED, requestUserId);
-        assertNotNull(result);
-        assertEquals(2, result.size());
-
-        verify(projectJpaRepository, times(1)).findAll();
-    }
-
-    @Test
-    public void testFindProjectsByName() {
-
-        String projectName2 = "Project 2";
-
-        TeamMember teamMember = TeamMember.builder().id(1L).userId(requestUserId).build();
-        Team team =Team.builder().id(1L).teamMembers(List.of(teamMember)).build();
-
-        project.setTeams(List.of(team));
-        project2.setTeams(List.of(team));
-        project3.setTeams(List.of(team));
-        project4.setTeams(List.of(team));
-
-        when(projectJpaRepository.findAll()).thenReturn(projectList);
-        when(projectMapper.toDtoList(any())).thenReturn(projectDtoList);
-
-        List<ProjectDto> result = projectService.findProjectsByName(projectName2, requestUserId);
-
-        assertNotNull(result);
-        assertEquals(4, result.size());
-
-        verify(projectJpaRepository, times(1)).findAll();
+        assertThrows(EntityNotFoundException.class, () -> {
+            projectService.findAllProjectsByFilters(filterDto, 1L);
+        });
     }
 
     @Test

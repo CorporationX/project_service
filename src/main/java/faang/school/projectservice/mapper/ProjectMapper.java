@@ -18,5 +18,4 @@ public interface ProjectMapper {
 
     List<Project> toProjectList(List<ProjectDto> projectDtoList);
 
-    void updateEntityFromDto(ProjectDto projectDto, @MappingTarget Project project);
 }
