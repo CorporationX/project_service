@@ -1,27 +1,22 @@
 package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.moment.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.filters.MomentFilter;
 import faang.school.projectservice.validator.moment.ValidatorMoment;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +24,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,6 +77,8 @@ public class MomentServiceTest {
         List<Long> oldProjectIds = Arrays.asList(111L,2L,1L);
         List<Long> oldUserIds = Arrays.asList(15L,20L,30L);
         List<Long> newUserIds = Arrays.asList(14L,21L,31L);
+        MomentFilter momentFiltersMock = Mockito.mock(MomentFilter.class);
+        List<MomentFilter> momentFilters = List.of(momentFiltersMock);
     }
 
     @Test
@@ -97,19 +93,20 @@ public class MomentServiceTest {
         verify(momentRepository).save(any(Moment.class));
     }
 
-    @Test
-    public void testUpdateUsers(){
-
-    }
-
 
     @Test
-    public void testUpdateMoment(){
+    public void testUpdateMoment() {
         when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.ofNullable(moment));
+        when(momentRepository.save(moment)).thenReturn(moment);
 
         momentService.updateMoment(momentDto);
 
-        assertEquals(List<Project> test = moment.getProjects().stream().toList(),List<Project> newProjects);
+        verify(momentRepository).save(any(MomentDto.class));
+    }
+
+    @Test
+    public void getAllMomentsByDateAndProjectTest(){
 
     }
+
 }

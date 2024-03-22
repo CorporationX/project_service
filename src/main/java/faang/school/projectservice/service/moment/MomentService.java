@@ -1,19 +1,22 @@
 package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.filter.moment.DataRangeFilter;
+import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.filters.MomentFilter;
 import faang.school.projectservice.validator.moment.ValidatorMoment;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.module.FindException;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class MomentService {
     private final ProjectRepository projectRepository;
     private final ValidatorMoment validatorMoment;
     private final MomentMapper momentMapper;
+    private final List<MomentFilter> momentFilters;
 
     @Transactional
     public void createMoment(MomentDto momentDto) {
@@ -59,9 +63,22 @@ public class MomentService {
                     .toList());
         }
     }
-    public MomentDto getAllMomentsByDate(MomentDto momentDto){
-        //6.1 ,2e видео
-        DataRangeFilter.
+    public List<MomentDto> getAllMomentsByDateAndProject(Long projectId, MomentFilterDto filters){
+        Project project = projectRepository.getProjectById(projectId);
+        Stream<Moment> momentList = project.getMoments().stream();
+        return momentFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(momentList,filters))
+                .map(momentMapper::toDto)
+                .toList();
+    }
+    public List<MomentDto> getAllMoment(){
+        momentRepository.findAll();
+        return null;
+    }
+    public MomentDto getMomentById(Long momentId){
+        Moment moment = momentRepository.findById(momentId).orElseThrow(()-> new FindException("Id is not found"));
+        return momentMapper.toDto(moment);
     }
 }
 
