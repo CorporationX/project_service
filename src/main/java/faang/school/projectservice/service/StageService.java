@@ -26,46 +26,46 @@ public class StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final StageMapper stageMapper;
-    public void makeStage(String stageName, Long projectId, List<StageRoles> stageRoles) {
+    public StageDto makeStage(String stageName, Long projectId, List<StageRoles> stageRoles) {
         List<Task> tasks = new ArrayList<>();
         List<TeamMember> executors = new ArrayList<>();
-        makeStage(stageName, projectId, stageRoles, tasks, executors);
+        return makeStage(stageName, projectId, stageRoles, tasks, executors);
     }
 
-    public void makeStage(String stageName, Long projectId, List<StageRoles> stageRoles, List<Task> tasks, List<TeamMember> executors) {
-        if (projectRepository.getProjectById(projectId).getStatus() == ProjectStatus.CANCELLED) {
+    public StageDto makeStage(String stageName, Long projectId, List<StageRoles> stageRoles, List<Task> tasks, List<TeamMember> executors) {
+        Project project = projectRepository.getProjectById(projectId);
+        if (project.getStatus() == ProjectStatus.CANCELLED) {
             throw new ProjectStatusException("You can not make stage for cancelled project!");
         }
-        if (projectRepository.getProjectById(projectId).getStatus() == ProjectStatus.COMPLETED) {
+        if (project.getStatus() == ProjectStatus.COMPLETED) {
             throw new ProjectStatusException("You can not make stage for completed project!");
         }
-        Stage stage = new Stage();
-        stage.setStageName(stageName);
-        stage.setProject(projectRepository.getProjectById(projectId));
-        stage.setStageRoles(stageRoles);
-        stage.setTasks(tasks);
-        stage.setExecutors(executors);
-        stageRepository.save(stage);
+        Stage stage = Stage.builder()
+                .stageName(stageName)
+                .stageRoles(stageRoles)
+                .project(project)
+                .tasks(tasks)
+                .executors(executors)
+                .build();
+        return stageMapper.toDto(stageRepository.save(stage));
     }
 
     public List<StageDto> getStagesByStatus(Long projectId, TaskStatus status) {
         List<Stage> projectStages = stageRepository.findAll().stream()
                 .filter(stage -> stage.getProject().getId() == projectId).toList();
         return stageMapper.toDto(projectStages.stream()
-                .filter(stage -> {
-                    if (stage.getTasks().stream().filter(task -> task.getStatus().equals(status)).toList().isEmpty()) {
-                        return false;
-                    }
-                    return true;
-                })
-                        .toList());
+                .filter(stage -> !stage.getTasks().stream()
+                                .filter(task -> task.getStatus().equals(status)).toList().isEmpty())
+                .toList());
     }
 
     public void deleteStage(Long stageId) {
         Stage stage = stageRepository.getById(stageId);
         List<Task> tasks = stage.getTasks();
         for (Task task : tasks) {
-            task.setStatus(TaskStatus.CANCELLED);
+            if (task.getStatus() != TaskStatus.DONE) {
+                task.setStatus(TaskStatus.CANCELLED);
+            }
         }
         stageRepository.delete(stage);
     }
@@ -74,9 +74,12 @@ public class StageService {
         Stage stageToDelete = stageRepository.getById(stageIdToDelete);
         Stage stageToReceive = stageRepository.getById(stageIdToReceive);
         List<Task> tasks = stageToDelete.getTasks();
+        List<Task> currentTasks = stageToReceive.getTasks();
         for (Task task : tasks) {
             task.setStage(stageToReceive);
         }
+        currentTasks.addAll(tasks);
+        stageToReceive.setTasks(currentTasks);
         stageRepository.delete(stageToDelete);
     }
 
@@ -85,27 +88,31 @@ public class StageService {
         Project project = stage.getProject();
         List<TeamMember> executors = stage.getExecutors();
         for (StageRoles stageRole : stage.getStageRoles()) {
-            TeamRole teamRole = stageRole.getTeamRole();
-            List<TeamMember> membersWithRole = executors.stream()
-                    .filter(teamMember -> teamMember.getRoles().contains(teamRole)).toList();
-            if (membersWithRole.size() < stageRole.getCount()) {
-                List<Team> teams = project.getTeams();
-                List<TeamMember> teamMembersWithInvitation = new ArrayList<>();
-                int countOfInvitations = stageRole.getCount() - membersWithRole.size();
-                int i = 0;
-                for (Team team : teams) {
-                    List<TeamMember> teamMemberToInvitate = team.getTeamMembers().stream()
-                            .filter(teamMember -> teamMember.getRoles().contains(stageRole.getTeamRole()))
-                            .filter(teamMember -> !membersWithRole.contains(teamMember))
-                            .filter(teamMember -> !teamMembersWithInvitation.contains(teamMember))
-                            .toList();
-                    for (TeamMember teamMember : teamMemberToInvitate) {
-                            // отправить приглашение участнику - нужен метод
-                            teamMembersWithInvitation.add(teamMember);
-                            i++;
-                            if (i >= countOfInvitations) {
-                                break;
-                        }
+            findTeamMemberToInvitate(project, executors, stageRole);
+        }
+    }
+
+    private void findTeamMemberToInvitate(Project project, List<TeamMember> executors, StageRoles stageRole) {
+        TeamRole teamRole = stageRole.getTeamRole();
+        List<TeamMember> membersWithRole = executors.stream()
+                .filter(teamMember -> teamMember.getRoles().contains(teamRole)).toList();
+        if (membersWithRole.size() < stageRole.getCount()) {
+            List<Team> teams = project.getTeams();
+            List<TeamMember> teamMembersWithInvitation = new ArrayList<>();
+            int countOfInvitations = stageRole.getCount() - membersWithRole.size();
+            int i = 0;
+            for (Team team : teams) {
+                List<TeamMember> teamMemberToInvitate = team.getTeamMembers().stream()
+                        .filter(teamMember -> teamMember.getRoles().contains(stageRole.getTeamRole()))
+                        .filter(teamMember -> !membersWithRole.contains(teamMember))
+                        .filter(teamMember -> !teamMembersWithInvitation.contains(teamMember))
+                        .toList();
+                for (TeamMember teamMember : teamMemberToInvitate) {
+                    // отправить приглашение участнику - нужен метод
+                    teamMembersWithInvitation.add(teamMember);
+                    i++;
+                    if (i >= countOfInvitations) {
+                        break;
                     }
                 }
             }

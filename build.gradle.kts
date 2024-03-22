@@ -21,7 +21,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     testImplementation("org.testng:testng:7.1.0")
-    testImplementation("org.testng:testng:7.1.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**

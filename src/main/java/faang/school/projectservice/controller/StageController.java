@@ -16,14 +16,14 @@ import java.util.List;
 public class StageController {
     private final StageService stageService;
 
-    public void makeStage(String stageName, Long projectId, List<StageRoles> stageRoles){
+    public StageDto makeStage(String stageName, Long projectId, List<StageRoles> stageRoles){
         if (stageName.isEmpty()) {
             throw new DataValidationException("Stage name can not be empty!");
         }
         if (stageRoles.isEmpty()) {
             throw new DataValidationException("Stage roles can not be empty!");
         }
-        stageService.makeStage(stageName, projectId, stageRoles);
+        return stageService.makeStage(stageName, projectId, stageRoles);
     }
 
     private List<StageDto> getStagesByStatus(Long projectId, TaskStatus status) {
