@@ -80,6 +80,7 @@ public class StageService {
             task.setStage(stageToReceive);
         }
         currentTasks.addAll(tasks);
+        System.out.println(currentTasks);
         stageToReceive.setTasks(currentTasks);
         stageRepository.delete(stageToDelete);
     }

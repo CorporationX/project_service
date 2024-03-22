@@ -62,11 +62,15 @@ public class StageServiceTest {
         stageService = new StageService(stageRepository, projectRepository, stageMapper);
         task1.setStage(stage);
         task2.setStage(stage);
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(task1);
+        tasks.add(task2);
         stage = Stage.builder()
                 .stageId(stageId)
                 .project(project)
-                .tasks(List.of(task1, task2))
+                .tasks(tasks)
                 .build();
+        System.out.println(stage.getTasks());
     }
 
     @Test
