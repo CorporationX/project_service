@@ -75,6 +75,7 @@ public class StageService {
         Stage stageToReceive = stageRepository.getById(stageIdToReceive);
         List<Task> tasks = stageToDelete.getTasks();
         List<Task> currentTasks = stageToReceive.getTasks();
+        System.out.println(currentTasks);
         for (Task task : tasks) {
             task.setStage(stageToReceive);
         }

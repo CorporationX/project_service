@@ -58,13 +58,15 @@ public class StageServiceTest {
     public void initialize() {
         projectId = 1000L;
         stageId = 555L;
-        stage.setStageId(stageId);
         project.setId(projectId);
         stageService = new StageService(stageRepository, projectRepository, stageMapper);
-        stage.setProject(project);
         task1.setStage(stage);
         task2.setStage(stage);
-        stage.setTasks(List.of(task1, task2));
+        stage = Stage.builder()
+                .stageId(stageId)
+                .project(project)
+                .tasks(List.of(task1, task2))
+                .build();
     }
 
     @Test
@@ -116,7 +118,10 @@ public class StageServiceTest {
         Stage stage2 = new Stage();
         Long stage2Id = 999L;
         stage2.setStageId(stage2Id);
-        stage2.setTasks(new ArrayList<>());
+        stage2 = Stage.builder()
+                .stageId(stage2Id)
+                .tasks(new ArrayList<>())
+                .build();
         when(stageRepository.getById(stageId)).thenReturn(stage);
         when(stageRepository.getById(stage2Id)).thenReturn(stage2);
         stageService.deleteStage(stageId, stage2.getStageId());
