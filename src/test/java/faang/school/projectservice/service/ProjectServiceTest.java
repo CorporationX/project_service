@@ -38,9 +38,6 @@ public class ProjectServiceTest {
     @Spy
     private ProjectMapper projectMapper;
 
-    @Mock
-    private List<ProjectFilter> projectFilters;
-
     long requestUserId;
     ProjectDto projectDto, projectDto2, projectDto3, projectDto4;
     Project project, project2, project3, project4;
@@ -130,13 +127,13 @@ public class ProjectServiceTest {
     @Test
     public void testCreateProjectSuccess() {
         when(projectJpaRepository.existsByOwnerIdAndName( anyLong(), anyString() )).thenReturn( false );
-        when(projectMapper.toEntity( any(ProjectDto.class) )).thenReturn(  project);
+        when(projectMapper.toEntity( any(ProjectDto.class), anyLong() )).thenReturn(project);
         when(projectJpaRepository.save(any(Project.class))).thenReturn(project);
-        when(projectMapper.toDto( any(Project.class) )).thenReturn( projectDto );
+        when(projectMapper.toDto( any(Project.class) )).thenReturn(projectDto );
 
         assertDoesNotThrow(() -> projectService.createProject(projectDto, requestUserId));
 
-        verify(projectMapper, times(1)).toEntity(projectDto);
+        verify(projectMapper, times(1)).toEntity(projectDto, requestUserId);
         verify(projectJpaRepository, times(1)).save(project);
         verify(projectMapper, times(1)).toDto(project);
 
@@ -180,7 +177,7 @@ public class ProjectServiceTest {
                 .namePattern("project")
                 .statusPattern(ProjectStatus.CREATED)
                 .build();
-        when(projectJpaRepository.findAll()).thenReturn(List.of());
+        when(projectJpaRepository.findProjectByOwnerIdAndTeamMember(requestUserId)).thenReturn(List.of());
 
         assertThrows(EntityNotFoundException.class, () -> {
             projectService.findAllProjectsByFilters(filterDto, 1L);
@@ -189,13 +186,15 @@ public class ProjectServiceTest {
 
     @Test
     public void testFindAllProjects() {
+        when(projectJpaRepository.findProjectByOwnerIdAndTeamMember(requestUserId)).thenReturn(projectList);
+        when(projectMapper.toDtoList(projectList)).thenReturn(projectDtoList);
 
-        when(projectJpaRepository.findAll()).thenReturn(projectList);
+        List<ProjectDto> projectsDto = projectService.getAllProjects(requestUserId);
 
-        List<Project> projects = projectJpaRepository.findAll();
+        assertEquals(4, projectsDto.size());
 
-        assertEquals(4, projects.size());
-        verify(projectJpaRepository, times(1)).findAll();
+        verify(projectJpaRepository, times(1)).findProjectByOwnerIdAndTeamMember(requestUserId);
+        verify(projectMapper, times(1)).toDtoList(projectList);
     }
 
     @Test

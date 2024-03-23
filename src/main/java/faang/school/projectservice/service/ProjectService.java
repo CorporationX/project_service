@@ -29,97 +29,73 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
 
     public ProjectDto createProject(ProjectDto projectDto, long requestUserId) {
-        if (projectJpaRepository.existsByOwnerIdAndName( requestUserId, projectDto.getName() )) {
-            throw new IllegalStateException( "User ID " + requestUserId + "is already a member of the team associated with the existing project." );
+        if (projectJpaRepository.existsByOwnerIdAndName(requestUserId, projectDto.getName())) {
+            throw new IllegalStateException("User ID " + requestUserId + "is already a member of the team associated with the existing project.");
         }
-        Project projectToSave = projectMapper.toEntity( projectDto );
-        projectToSave.setStatus( ProjectStatus.CREATED );
-        projectToSave.setOwnerId( requestUserId );
-        projectToSave.setVisibility( projectDto.getVisibility() == null ? ProjectVisibility.PUBLIC : projectDto.getVisibility() );
-        Project savedProject = projectJpaRepository.save( projectToSave );
+        Project projectToSave = projectMapper.toEntity(projectDto, requestUserId);
+        Project savedProject = projectJpaRepository.save(projectToSave);
 
-        return projectMapper.toDto( savedProject );
+        return projectMapper.toDto(savedProject);
     }
 
     public ProjectDto updateProject(long projectId, ProjectDto projectDto, long requestUserId) {
-        Project existingProject = projectJpaRepository.findById( projectId )
-                .orElseThrow( () -> new EntityNotFoundException( "Project with id " + projectId + " does not exist" ) );
+        Project existingProject = projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
 
-        checkUserIsMemberOrThrowException( existingProject, requestUserId );
+        checkUserIsMemberOrThrowException(existingProject, requestUserId);
 
-        existingProject.setDescription(projectDto.getDescription() == null ?
-                existingProject.getDescription() : projectDto.getDescription());
+        existingProject.setDescription(projectDto.getDescription() == null ? existingProject.getDescription() : projectDto.getDescription());
         existingProject.setStatus(projectDto.getStatus() == null ? existingProject.getStatus() : projectDto.getStatus());
 
-        projectJpaRepository.save( existingProject );
+        projectJpaRepository.save(existingProject);
 
-        return projectMapper.toDto( existingProject );
+        return projectMapper.toDto(existingProject);
     }
+
     @Transactional
     public List<ProjectDto> findAllProjectsByFilters(ProjectFilterDto filters, long requestUserId) {
-        List<Project> projectList = projectJpaRepository.findAll();
+        List<Project> projectList = projectJpaRepository.findProjectByOwnerIdAndTeamMember(requestUserId);
         if (projectList.isEmpty()) {
-            throw new EntityNotFoundException( "No projects found" );
+            throw new EntityNotFoundException("No projects found");
         }
 
-        List<Project> filteredProjects = filterProjects(projectList,requestUserId);
+        Stream<Project> projectStream = projectList.stream();
 
-        if (filteredProjects.isEmpty()) {
-            throw new EntityNotFoundException( "No projects found available to user ID:" + requestUserId );
-        }
-
-        Stream<Project> projectStream = filteredProjects.stream();
-
-        for (ProjectFilter filter : projectFilters) { //как в 2ой видео-лекции из 6.1 модуля, с использованием stream api не получается, только с помощью loop
+        for (ProjectFilter filter : projectFilters) {
             if (filter.isApplicable(filters)) {
                 projectStream = filter.apply(projectStream, filters).stream();
             }
         }
-        return  projectStream.map(projectMapper::toDto)
-                .toList();
+        return projectStream.map(projectMapper::toDto).toList();
     }
 
     public List<ProjectDto> getAllProjects(long requestUserId) {
-        List<Project> projectList = projectJpaRepository.findAll();
+        List<Project> projectList = projectJpaRepository.findProjectByOwnerIdAndTeamMember(requestUserId);
         if (projectList.isEmpty()) {
-            throw new EntityNotFoundException( "No projects found" );
+            throw new EntityNotFoundException("No projects found");
         }
-
-        List<Project> filteredProjects = filterProjects(projectList, requestUserId);
-
-        return projectMapper.toDtoList( filteredProjects );
+        return projectMapper.toDtoList(projectList);
     }
 
     public ProjectDto getProjectById(long projectId, long requestUserId) {
-        Project project = projectJpaRepository.findById( projectId )
-                .orElseThrow( () -> new EntityNotFoundException( "Project with id " + projectId + " does not exist" ) );
+        Project project = projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
 
-        checkUserIsMemberOrThrowException( project, requestUserId );
+        checkUserIsMemberOrThrowException(project, requestUserId);
 
-        return projectMapper.toDto( project );
+        return projectMapper.toDto(project);
     }
 
     private void checkUserIsMemberOrThrowException(Project project, long requestUserId) {
-        if (!isMember( project, requestUserId )) {
-            throw new DataAccessException( "User ID " + requestUserId + " is not a member of private project " + project.getId() );
+        if (!isMember(project, requestUserId)) {
+            throw new DataAccessException("User ID " + requestUserId + " is not a member of private project " + project.getId());
         }
 
     }
 
     private boolean isMember(Project project, long userId) {
         return project.getOwnerId() == userId || project.getTeams().stream()
-                .flatMap( team -> team.getTeamMembers().stream() )
-                .anyMatch( teamMember -> teamMember.getUserId() == userId);
+                .flatMap(team -> team.getTeamMembers().stream())
+                .anyMatch(teamMember -> teamMember.getUserId() == userId);
     }
-
-    private List<Project> filterProjects(List<Project> projects, long userId){
-        return projects.stream()
-              .filter( project -> (project.getVisibility().equals( ProjectVisibility.PUBLIC ) ||
-                        (project.getVisibility().equals( ProjectVisibility.PRIVATE ) &&
-                                isMember( project, userId ))) )
-              .toList();
-    }
-
 
 
 }
