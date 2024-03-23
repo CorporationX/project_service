@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.client.CreateSubProjectDto;
-import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 

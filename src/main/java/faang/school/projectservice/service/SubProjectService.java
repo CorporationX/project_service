@@ -2,9 +2,9 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.CreateSubProjectDto;
 
-import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
-import faang.school.projectservice.filter.ProjectFilter;
+import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
@@ -35,7 +35,7 @@ public class SubProjectService {
     public void createSubProject(CreateSubProjectDto subProjectDto) {
         Project parentProject = projectRepository.getProjectById(subProjectDto.getParentProjectId());
 
-        if (parentProject.getVisibility().equals(PRIVATE) && subProjectDto.getVisibility().equals(PUBLIC)) {
+        if (PRIVATE.equals(parentProject.getVisibility()) && PUBLIC.equals(subProjectDto.getVisibility())) {
             throw new IllegalArgumentException("Нельзя создать приватный подпроект для публичного родительского проекта ");
         } else {
             if (parentProject.getChildren() == null) {
@@ -53,7 +53,7 @@ public class SubProjectService {
         Project updateProject = projectRepository.getProjectById(projectDto.getId());
         List<Project> childrenProjects = updateProject.getChildren();
 
-        if (updateProject.getVisibility().equals(PUBLIC) && projectDto.getVisibility().equals(PRIVATE) &&
+        if (PUBLIC.equals(updateProject.getVisibility()) && PRIVATE.equals(projectDto.getVisibility()) &&
                 childrenProjects != null) {
             childrenProjects.forEach(project -> project.setVisibility(projectDto.getVisibility()));
             updateProject.setVisibility(projectDto.getVisibility());
@@ -61,9 +61,9 @@ public class SubProjectService {
             updateProject.setVisibility(projectDto.getVisibility());
         }
 
-        if (!updateProject.getStatus().equals(projectDto.getStatus()) && projectDto.getStatus().equals(COMPLETED)) {
+        if (!updateProject.getStatus().equals(projectDto.getStatus()) && COMPLETED.equals(projectDto.getStatus())){
             updateProject.setStatus(UpdateStatusProject(updateProject));
-        } else {
+        } else{
             updateProject.setStatus(projectDto.getStatus());
         }
 
@@ -85,11 +85,11 @@ public class SubProjectService {
     }
 
     private Stream<Project> getChildrenProject(ProjectDto projectDto) {
-        if (projectDto.getVisibility().equals(PUBLIC)) {
+        if (PUBLIC.equals(projectDto.getVisibility())) {
             return projectRepository.getProjectById(projectDto.getId()).
                     getChildren().
                     stream().
-                    filter(project -> project.getVisibility().equals(PUBLIC));
+                    filter(project ->PUBLIC.equals(project.getVisibility()));
         } else {
             return projectRepository.getProjectById(projectDto.getId()).
                     getChildren().
@@ -99,7 +99,7 @@ public class SubProjectService {
 
     private Moment momentForTheProject(List<Project> childrenProjects, Project updateProject) {
         int subprojects = childrenProjects.size();
-        List<Project> completeChildrenProject = childrenProjects.stream().filter(project -> project.getStatus().equals(COMPLETED)).toList();
+        List<Project> completeChildrenProject = childrenProjects.stream().filter(project -> COMPLETED.equals(project.getStatus())).toList();
         if (completeChildrenProject.size() == subprojects) {
             return Moment.builder()
                     .name(updateProject.getName())
@@ -116,7 +116,7 @@ public class SubProjectService {
             return COMPLETED;
         } else {
             List<Project> listChildrenProjectComplete = listChildrenProject.stream().
-                    filter(project -> project.getStatus().equals(COMPLETED)).
+                    filter(project -> COMPLETED.equals(project.getStatus())).
                     toList();
             if (listChildrenProjectComplete.size() == listChildrenProject.size()) {
                 return COMPLETED;
@@ -139,8 +139,7 @@ public class SubProjectService {
             newSubProject.setCreatedAt(LocalDateTime.now());
             newSubProject.setUpdatedAt(LocalDateTime.now());
         } else {
-            throw new IllegalArgumentException("Не можем создать подпроект у которого" +
-                    " приватность будет отличаться от родительского проекта");
+            throw new IllegalArgumentException("Не можем создать подпроект у которого приватность будет отличаться от родительского проекта");
         }
         return newSubProject;
     }

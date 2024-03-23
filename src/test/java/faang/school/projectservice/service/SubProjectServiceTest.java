@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import faang.school.projectservice.dto.client.CreateSubProjectDto;
-import faang.school.projectservice.dto.client.ProjectDto;
-import faang.school.projectservice.filter.ProjectFilter;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;

@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.CreateSubProjectDto;
 
-import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.service.SubProjectService;
