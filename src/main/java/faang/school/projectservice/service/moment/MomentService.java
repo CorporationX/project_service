@@ -11,13 +11,15 @@ import faang.school.projectservice.service.moment.filters.MomentFilter;
 import faang.school.projectservice.validator.moment.ValidatorMoment;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.module.FindException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MomentService {
@@ -35,13 +37,13 @@ public class MomentService {
         Moment moment = momentMapper.toEntity(momentDto);
         momentRepository.save(moment);
     }
-
+    @Transactional
     public MomentDto updateMoment(MomentDto momentDto) {
         Moment moment = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new EntityNotFoundException("moment id not found"));
-        updateUsers(momentDto,moment);
         updateProjects(momentDto, moment);
+        updateUsers(momentDto,moment);
         momentRepository.save(moment);
-        return momentDto;
+        return momentMapper.toDto(moment);
     }
     private void updateProjects(MomentDto momentDto,Moment moment){
         List<Long> oldUserIds = moment.getUserIds();
@@ -65,19 +67,21 @@ public class MomentService {
     }
     public List<MomentDto> getAllMomentsByDateAndProject(Long projectId, MomentFilterDto filters){
         Project project = projectRepository.getProjectById(projectId);
-        Stream<Moment> momentList = project.getMoments().stream();
+        Stream<Moment> momentStream = project.getMoments().stream();
         return momentFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(momentList,filters))
+                .flatMap(filter -> filter.apply(momentStream,filters))
                 .map(momentMapper::toDto)
                 .toList();
     }
-    public List<MomentDto> getAllMoment(){
-        momentRepository.findAll();
-        return null;
+    public List<MomentDto> getAllMoments(){
+        return momentRepository.findAll()
+                .stream()
+                .map(momentMapper::toDto)
+                .toList();
     }
     public MomentDto getMomentById(Long momentId){
-        Moment moment = momentRepository.findById(momentId).orElseThrow(()-> new FindException("Id is not found"));
+        Moment moment = momentRepository.findById(momentId).orElseThrow(()-> new NoSuchElementException("Id is not found"));
         return momentMapper.toDto(moment);
     }
 }

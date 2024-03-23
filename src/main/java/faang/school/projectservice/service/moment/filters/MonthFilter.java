@@ -16,13 +16,10 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 @Component
 public class MonthFilter implements MomentFilter {
-    @NotBlank String month;
-
 
     @Override
     public boolean isApplicable(MomentFilterDto filters) {
         return filters.getMonth() != null;
-
     }
 
     @Override
