@@ -61,7 +61,7 @@ public class VacancyValidationTest {
         project.setId(1L);
         project.setName("  ");
         when(projectRepository.getProjectById(vacancyDto.getProjectId())).thenReturn(project);
-        Assert.assertThrows("Не указано название проекта", DataVacancyValidation.class, () -> vacancyValidation.validationCreate(vacancyDto));
+        Assert.assertThrows(ValidationMessage.PROJECT_NOT_NAME.getMessage(), DataVacancyValidation.class, () -> vacancyValidation.validationCreate(vacancyDto));
     }
 
     @Test
@@ -69,7 +69,7 @@ public class VacancyValidationTest {
         VacancyDto vacancyDto = new VacancyDto();
         Vacancy vacancy = new Vacancy();
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
-        Assert.assertThrows("Ответственный не назначен", DataVacancyValidation.class, () -> vacancyValidation.validationTutor(vacancyDto));
+        Assert.assertThrows(ValidationMessage.VACANCY_NOT_TUTOR.getMessage(), DataVacancyValidation.class, () -> vacancyValidation.validationTutor(vacancyDto));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class VacancyValidationTest {
 
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(teamMemberRepository.findById(tutorId)).thenReturn(tutor);
-        Assert.assertThrows("Данный сотрудник не является куратором", DataVacancyValidation.class, () -> vacancyValidation.validationTutor(vacancyDto));
+        Assert.assertThrows(ValidationMessage.VACANCY_TUTOR_NOT_ROLE.getMessage(), DataVacancyValidation.class, () -> vacancyValidation.validationTutor(vacancyDto));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class VacancyValidationTest {
         vacancy.setCandidates(candidates);
 
         when(vacancyRepository.findById(vacancyDto.getId())).thenReturn(Optional.of(vacancy));
-        Assert.assertThrows("Вакансия не может быть закрыта, нужное количество не набрано", DataVacancyValidation.class, () -> vacancyValidation.validationVacancyIfCandidateNeed(vacancyDto));
+        Assert.assertThrows(ValidationMessage.VACANCY_NOT_FULL.getMessage(), DataVacancyValidation.class, () -> vacancyValidation.validationVacancyIfCandidateNeed(vacancyDto));
     }
 
     @Test
@@ -140,6 +140,6 @@ public class VacancyValidationTest {
         vacancy.setCandidates(candidates);
 
         when(vacancyRepository.findById(vacancyDto.getId())).thenReturn(Optional.of(vacancy));
-        Assert.assertThrows("Вакансия не может быть закрыта, пока вся команда не получит свои роли", DataVacancyValidation.class, () -> vacancyValidation.validationVacancyClosed(vacancyDto));
+        Assert.assertThrows(ValidationMessage.TEAM_MEMBER_NOT_EVERYONE_HAS_ROLE.getMessage(), DataVacancyValidation.class, () -> vacancyValidation.validationVacancyClosed(vacancyDto));
     }
 }

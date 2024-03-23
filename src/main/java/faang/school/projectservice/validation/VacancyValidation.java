@@ -35,18 +35,18 @@ public class VacancyValidation {
     public void validationProject(VacancyDto vacancyDto) {
         Project projectById = projectRepository.getProjectById(vacancyDto.getProjectId());
         if (projectById.getName() == null || projectById.getName().isBlank()) {
-            throw new DataVacancyValidation("Не указано название проекта");
+            throw new DataVacancyValidation(ValidationMessage.PROJECT_NOT_NAME.getMessage());
         }
     }
 
     public void validationTutor(VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         if (vacancy.getCreatedBy() == null) {
-            throw new DataVacancyValidation("Ответственный не назначен");
+            throw new DataVacancyValidation(ValidationMessage.VACANCY_NOT_TUTOR.getMessage());
         }
         TeamMember tutor = teamMemberRepository.findById(vacancy.getCreatedBy());
         if (!tutor.getRoles().contains(TeamRole.OWNER)) {
-            throw new DataVacancyValidation("Данный сотрудник не является куратором");
+            throw new DataVacancyValidation(ValidationMessage.VACANCY_TUTOR_NOT_ROLE.getMessage());
         }
     }
 
@@ -57,7 +57,7 @@ public class VacancyValidation {
                 .filter(candidate -> CandidateStatus.ACCEPTED.equals(candidate.getCandidateStatus()))
                 .count();
         if (candidatesApprove < totalVacancies) {
-            throw new DataVacancyValidation("Вакансия не может быть закрыта, нужное количество не набрано");
+            throw new DataVacancyValidation(ValidationMessage.VACANCY_NOT_FULL.getMessage());
         }
     }
 
@@ -70,7 +70,7 @@ public class VacancyValidation {
                 .filter(member -> candidates.contains(member.getId()))
                 .forEach(teamMember -> {
                     if (teamMember.getRoles() == null || teamMember.getRoles().isEmpty()) {
-                        throw new DataVacancyValidation("Вакансия не может быть закрыта, пока вся команда не получит свои роли");
+                        throw new DataVacancyValidation(ValidationMessage.TEAM_MEMBER_NOT_EVERYONE_HAS_ROLE.getMessage());
                     }
                 });
     }

@@ -45,7 +45,7 @@ public class VacancyService {
 
     public VacancyDto updateVacancy(VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyRepository.findById(vacancyDto.getId()).orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
-        if (vacancy.getStatus() == VacancyStatus.CLOSED) {
+        if (VacancyStatus.CLOSED.equals(vacancy.getStatus())) {
             vacancyValidation.validationVacancyClosed(vacancyDto);
             vacancyValidation.validationVacancyIfCandidateNeed(vacancyDto);
         }
