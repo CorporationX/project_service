@@ -154,4 +154,8 @@ public class ProjectServiceTest {
     private ProjectDtoFilter getDtoFilter() {
         return ProjectDtoFilter.builder().titlePattern("Погоды").statusPattern(ProjectStatus.IN_PROGRESS).build();
     }
+    @Test
+    public void testPipeline(){
+        fail("test");
+    }
 }
