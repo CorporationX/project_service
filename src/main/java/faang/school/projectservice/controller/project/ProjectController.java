@@ -5,7 +5,10 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/projects")
@@ -27,13 +30,13 @@ public class ProjectController {
 
     @Operation(summary = "Create project")
     @PostMapping
-    public ProjectDto createProject(@RequestHeader("userId") Long userId, @RequestBody ProjectDto projectDto) {
+    public ProjectDto createProject(@RequestHeader("userId") Long userId, @RequestBody @Valid ProjectDto projectDto) {
         return projectService.createProject(userId, projectDto);
     }
 
     @Operation(summary = "Update project")
     @PutMapping("/{projectId}")
-    public ProjectDto updateProject(@PathVariable Long projectId, @RequestBody ProjectDto projectDto) {
+    public ProjectDto updateProject(@PathVariable Long projectId, @RequestBody @Valid ProjectDto projectDto) {
         return projectService.updateProject(projectId, projectDto);
     }
 
@@ -51,7 +54,7 @@ public class ProjectController {
 
     @Operation(summary = "Find project by project id")
     @GetMapping("/{projectId}")
-    public ProjectDto findProjectById(@PathVariable Long projectId) {
+    public ProjectDto findProjectById(@PathVariable @Positive(message = "id must be greater than zero") Long projectId) {
         return projectService.findProjectById(projectId);
     }
 }
