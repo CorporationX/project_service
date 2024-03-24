@@ -18,8 +18,6 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 @Component
 public class ProjectPartnerFilter implements MomentFilter {
-    private List<Project> projects;
-
     @Override
     public boolean isApplicable(MomentFilterDto filters) {
         return filters.getProjects() != null;

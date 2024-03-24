@@ -8,14 +8,14 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filters.MomentFilter;
-import faang.school.projectservice.validator.moment.ValidatorMoment;
+import faang.school.projectservice.validator.moment.MomentValidator;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.module.FindException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
@@ -25,15 +25,16 @@ import java.util.stream.Stream;
 public class MomentService {
     private final MomentRepository momentRepository;
     private final ProjectRepository projectRepository;
-    private final ValidatorMoment validatorMoment;
+    private final MomentValidator momentValidator;
+    private final ProjectValidator projectValidator;
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilters;
 
     @Transactional
     public void createMoment(MomentDto momentDto) {
-        validatorMoment.ValidatorMomentName(momentDto);
-        validatorMoment.ValidatorOpenProject(momentDto);
-        validatorMoment.ValidatorMomentProject(momentDto);
+        momentValidator.MomentValidatorName(momentDto);
+        projectValidator.ValidatorOpenProject(momentDto.getProjectIds());
+        momentValidator.MomentValidatorProject(momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
         momentRepository.save(moment);
     }

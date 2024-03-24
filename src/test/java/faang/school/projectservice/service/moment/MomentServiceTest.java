@@ -8,7 +8,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filters.MomentFilter;
-import faang.school.projectservice.validator.moment.ValidatorMoment;
+import faang.school.projectservice.validator.moment.MomentValidator;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,8 @@ import static org.mockito.Mockito.when;
 public class MomentServiceTest {
 
     private MomentMapperImpl momentMapper;
-    private ValidatorMoment validatorMoment;
+    private MomentValidator momentValidator;
+    private ProjectValidator projectValidator;
     private MomentRepository momentRepository;
     private ProjectRepository projectRepository;
     private MomentFilter momentFilter;
@@ -110,11 +112,12 @@ public class MomentServiceTest {
 
         momentRepository = Mockito.mock(MomentRepository.class);
         projectRepository = Mockito.mock(ProjectRepository.class);
-        validatorMoment = Mockito.mock(ValidatorMoment.class);
+        momentValidator = Mockito.mock(MomentValidator.class);
+        projectValidator = Mockito.mock(ProjectValidator.class);
         momentMapper = Mockito.spy(MomentMapperImpl.class);
         momentFilter = Mockito.mock(MomentFilter.class);
         List<MomentFilter> filtersList = List.of(momentFilter);
-        momentService = new MomentService(momentRepository, projectRepository, validatorMoment, momentMapper, filtersList);
+        momentService = new MomentService(momentRepository, projectRepository, momentValidator, projectValidator, momentMapper, filtersList);
     }
 
     @Test
@@ -122,9 +125,9 @@ public class MomentServiceTest {
 
         momentService.createMoment(momentDto);
 
-        verify(validatorMoment).ValidatorMomentName(any(MomentDto.class));
-        verify(validatorMoment).ValidatorOpenProject(any(MomentDto.class));
-        verify(validatorMoment).ValidatorMomentProject(any(MomentDto.class));
+        verify(momentValidator).MomentValidatorName(any(MomentDto.class));
+        verify(projectValidator).ValidatorOpenProject(any(List.class));
+        verify(momentValidator).MomentValidatorProject(any(MomentDto.class));
         verify(momentMapper).toEntity(momentDto);
         verify(momentRepository).save(any(Moment.class));
     }

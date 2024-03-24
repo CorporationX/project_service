@@ -2,31 +2,22 @@ package faang.school.projectservice.service.moment.filters;
 
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
-import org.assertj.core.util.VisibleForTesting;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static reactor.core.publisher.Mono.when;
 
 public class MonthFilterTest {
 
-    MomentFilterDto momentFilterDto;
-    Moment moment1;
-    Moment moment2;
-    Stream<Moment> momentStream = Stream.of(moment1,moment2);
+    private MomentFilterDto momentFilterDto;
+    private Moment moment1;
+    private Moment moment2;
 
     @BeforeEach
     void init() {
@@ -56,11 +47,15 @@ public class MonthFilterTest {
     }
 
     @Test
-    public void applyTest(){
+    public void applyTest() {
+        Stream<Moment> momentStream = Stream.of(moment1, moment2);
         MonthFilter monthFilter = new MonthFilter();
-        List<Moment> returned = monthFilter.apply(momentStream,momentFilterDto).toList();
-        //проверки на длинну листа, контеин нужный момент , отфильтрованный.
+        String targetMonth = "JANUARY";
 
+        List<Moment> returnedList = monthFilter.apply(momentStream, momentFilterDto).toList();
 
+        assertEquals(returnedList.size(), 1);
+        assertEquals(returnedList.get(0).getDate().getMonth(), moment1.getDate().getMonth());
+        assertFalse(returnedList.contains(targetMonth));
     }
 }
