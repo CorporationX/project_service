@@ -45,6 +45,10 @@ public class ProjectServiceTest {
         projectMapper = mock(ProjectMapper.class);
         projectService = new ProjectService(projectValidation, projectRepository, projectMapper, projectJpaRepository, projectNameFilter, projectStatusFilter);
     }
+    @Test
+    void testPipeline(){
+        fail("тестирование pipeline");
+    }
 
     @Test
     void testCreateProjectSavingRepository() {
