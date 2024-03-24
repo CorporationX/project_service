@@ -34,6 +34,9 @@ public class StageService {
 
     public StageDto makeStage(String stageName, Long projectId, List<StageRoles> stageRoles, List<Task> tasks, List<TeamMember> executors) {
         Project project = projectRepository.getProjectById(projectId);
+        if (project == null) {
+            throw new ProjectStatusException("There is no project with this ID!");
+        }
         if (project.getStatus() == ProjectStatus.CANCELLED) {
             throw new ProjectStatusException("You can not make stage for cancelled project!");
         }
@@ -75,12 +78,10 @@ public class StageService {
         Stage stageToReceive = stageRepository.getById(stageIdToReceive);
         List<Task> tasks = stageToDelete.getTasks();
         List<Task> currentTasks = stageToReceive.getTasks();
-        System.out.println(currentTasks);
         for (Task task : tasks) {
             task.setStage(stageToReceive);
         }
         currentTasks.addAll(tasks);
-        System.out.println(currentTasks);
         stageToReceive.setTasks(currentTasks);
         stageRepository.delete(stageToDelete);
     }

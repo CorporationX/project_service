@@ -7,11 +7,12 @@ import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.service.StageService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RestController;
 
 
 import java.util.List;
 
-@Component
+@RestController
 @AllArgsConstructor
 public class StageController {
     private final StageService stageService;

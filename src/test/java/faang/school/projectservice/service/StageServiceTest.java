@@ -70,7 +70,6 @@ public class StageServiceTest {
                 .project(project)
                 .tasks(tasks)
                 .build();
-        System.out.println(stage.getTasks());
     }
 
     @Test
@@ -82,6 +81,8 @@ public class StageServiceTest {
         project.setStatus(ProjectStatus.COMPLETED);
         assertThrows(ProjectStatusException.class, () ->
                 stageService.makeStage("stage", projectId, new ArrayList<>()));
+        assertThrows(ProjectStatusException.class, () ->
+                stageService.makeStage("stage", 0L, new ArrayList<>()));
     }
 
     @Test
@@ -108,6 +109,7 @@ public class StageServiceTest {
         when(stageRepository.findAll()).thenReturn(List.of(stage, stage2));
         List<StageDto> result = stageService.getStagesByStatus(projectId, TaskStatus.IN_PROGRESS);
         assertEquals(result.get(0).getProjectId(), projectId);
+        assertEquals(result.size(), 1);
     }
 
     @Test
