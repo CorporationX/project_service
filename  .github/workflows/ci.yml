@@ -1,0 +1,25 @@
+name: Build and deploy Spring app
+
+on:
+  pull_request:
+    branches:
+      - kraken-master-bc3
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build Gradle
+        run: ./gradlew build
+      - name: Run Tests
+        run: ./gradlew test
+
+
