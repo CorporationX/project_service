@@ -11,6 +11,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.filter.ProjectFilter;
 import faang.school.projectservice.service.filter.ProjectNameFilter;
 import faang.school.projectservice.service.filter.ProjectStatusFilter;
+import faang.school.projectservice.service.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 public class ProjectService {
     private final ProjectJpaRepository projectJpaRepository;
     private final ProjectMapper projectMapper;
+    private final ProjectValidator projectValidator;
 
     private final List<ProjectFilter> projectFilters;
 
@@ -39,9 +41,9 @@ public class ProjectService {
     }
 
     public ProjectDto updateProject(long projectId, ProjectDto projectDto, long requestUserId) {
-        Project existingProject = projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
+        Project existingProject = findProjectOrThrowException( projectId );
 
-        checkUserIsMemberOrThrowException(existingProject, requestUserId);
+        projectValidator.checkUserIsMemberOrThrowException(existingProject, requestUserId);
 
         existingProject.setDescription(projectDto.getDescription() == null ? existingProject.getDescription() : projectDto.getDescription());
         existingProject.setStatus(projectDto.getStatus() == null ? existingProject.getStatus() : projectDto.getStatus());
@@ -77,25 +79,17 @@ public class ProjectService {
     }
 
     public ProjectDto getProjectById(long projectId, long requestUserId) {
-        Project project = projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
+        Project project = findProjectOrThrowException( projectId );
 
-        checkUserIsMemberOrThrowException(project, requestUserId);
+        projectValidator.checkUserIsMemberOrThrowException(project, requestUserId);
 
         return projectMapper.toDto(project);
     }
 
-    private void checkUserIsMemberOrThrowException(Project project, long requestUserId) {
-        if (!isMember(project, requestUserId)) {
-            throw new DataAccessException("User ID " + requestUserId + " is not a member of private project " + project.getId());
-        }
 
+
+    private Project findProjectOrThrowException(long projectId){
+        return projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
     }
-
-    private boolean isMember(Project project, long userId) {
-        return project.getOwnerId() == userId || project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .anyMatch(teamMember -> teamMember.getUserId() == userId);
-    }
-
 
 }

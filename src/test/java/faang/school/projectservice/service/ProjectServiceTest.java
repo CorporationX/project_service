@@ -8,6 +8,7 @@ import faang.school.projectservice.model.*;
 import faang.school.projectservice.service.filter.ProjectFilter;
 import faang.school.projectservice.service.filter.ProjectNameFilter;
 import faang.school.projectservice.service.filter.ProjectStatusFilter;
+import faang.school.projectservice.service.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,8 @@ public class ProjectServiceTest {
     private ProjectJpaRepository projectJpaRepository;
     @Spy
     private ProjectMapper projectMapper;
+    @Mock
+    private ProjectValidator projectValidator;
 
     long requestUserId;
     ProjectDto projectDto, projectDto2, projectDto3, projectDto4;
@@ -140,6 +143,16 @@ public class ProjectServiceTest {
     }
 
     @Test
+    public void testCreateProject_ThrowsExceptionForExistingProject() {
+        when(projectJpaRepository.existsByOwnerIdAndName( anyLong(), anyString() )).thenReturn( true );
+
+        assertThrows(IllegalStateException.class, () -> projectService.createProject(projectDto, requestUserId));
+        verifyNoInteractions(projectMapper);
+        verify(projectJpaRepository, times(0)).save(project);
+
+    }
+
+    @Test
     public void testUpdateProjectSuccess() {
 
         TeamMember teamMember = TeamMember.builder().id(1L).userId(requestUserId).build();
@@ -206,5 +219,13 @@ public class ProjectServiceTest {
         assertTrue(result.isPresent());
         assertEquals(project.getId(), result.get().getId());
         verify(projectJpaRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    public void testFindProjectById_ThrowsExceptionForNonExistingProject() {
+        when(projectJpaRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows( EntityNotFoundException.class, () -> projectService.getProjectById( 1L, anyLong() ) );
+        verifyNoInteractions(projectMapper);
     }
 }
