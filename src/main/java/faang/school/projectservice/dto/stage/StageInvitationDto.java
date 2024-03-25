@@ -8,6 +8,7 @@ import lombok.Builder;
 @AllArgsConstructor
 @Builder
 public class StageInvitationDto {
+    private Long stageInvitationId;
     private Long stageId;
     private Long authorId;
     private Long invitedId;
