@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.exceptions.DataVacancyValidation;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -11,24 +12,17 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.filter.VacancyFilter;
-import faang.school.projectservice.service.filter.VacancyNameFilter;
-import faang.school.projectservice.service.filter.VacancyPositionFilter;
 import faang.school.projectservice.validation.VacancyValidation;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -59,7 +53,7 @@ public class VacancyServiceTest {
 
 
     @Test
-    public void testCreateVacancySave() {
+    public void testCreateVacancySaveSuccess() {
         VacancyDto vacancyDto = new VacancyDto();
         Vacancy vacancy = new Vacancy();
 
@@ -74,6 +68,22 @@ public class VacancyServiceTest {
         Mockito.verify(vacancyMapper, Mockito.times(1)).toEntity(vacancyDto);
         Mockito.verify(vacancyRepository, Mockito.times(1)).save(vacancy);
         Mockito.verify(vacancyMapper, Mockito.times(1)).toDto(vacancy);
+    }
+
+    @Test
+    public void testCreateVacancySaveFailure() {
+        VacancyDto vacancyDto = new VacancyDto();
+        Vacancy vacancy = new Vacancy();
+
+        when(vacancyValidation.validationCreate(vacancyDto)).thenReturn(false);
+        when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
+        when(vacancyRepository.save(vacancy)).thenThrow(new RuntimeException("Ошибка при сохранении вакансии "));
+
+        Assertions.assertThrows(RuntimeException.class, () -> vacancyService.createVacancy(vacancyDto));
+
+        Mockito.verify(vacancyValidation, Mockito.times(1)).validationCreate(vacancyDto);
+        Mockito.verify(vacancyMapper, Mockito.times(1)).toEntity(vacancyDto);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).save(vacancy);
     }
 
     @Test
@@ -112,7 +122,7 @@ public class VacancyServiceTest {
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
 
-        VacancyDto result = vacancyService.getVacancy(vacancyId);
+        VacancyDto result = vacancyService.getVacancyById(vacancyId);
 
         Mockito.verify(vacancyRepository, Mockito.times(1)).findById(vacancyId);
         Mockito.verify(vacancyMapper, Mockito.times(1)).toDto(vacancy);

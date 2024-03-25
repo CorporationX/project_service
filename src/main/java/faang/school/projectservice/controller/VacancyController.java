@@ -36,8 +36,8 @@ public class VacancyController {
     public List<VacancyDto> getFiltersVacancies(@RequestBody VacancyFilterDto vacancyFilterDto) {
         return vacancyService.getFilterVacancies(vacancyFilterDto);
     }
-    @GetMapping("/vacancy/{vacancyId}")
+    @GetMapping("/{vacancyId}")
     public VacancyDto getVacancy(@PathVariable Long vacancyId) {
-        return vacancyService.getVacancy(vacancyId);
+        return vacancyService.getVacancyById(vacancyId);
     }
 }

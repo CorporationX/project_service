@@ -62,7 +62,7 @@ public class VacancyValidation {
     }
 
     public void validationVacancyClosed(VacancyDto vacancyDto) {
-        Vacancy vacancy = vacancyRepository.findById(vacancyDto.getId()).orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
+        Vacancy vacancy = vacancyRepository.findById(vacancyDto.getId()).orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена " + vacancyDto.getId()));
 
         List<Long> candidates = vacancy.getCandidates().stream().map(candidate -> candidate.getUserId()).toList();
         vacancy.getProject().getTeams().stream()

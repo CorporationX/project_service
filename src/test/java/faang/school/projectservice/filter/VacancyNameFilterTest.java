@@ -37,6 +37,14 @@ public class VacancyNameFilterTest {
     }
 
     @Test
+    public void testIsNotApplicable(){
+        VacancyFilterDto vacancyFilterDto = new VacancyFilterDto();
+
+        boolean result = vacancyNameFilter.isApplicable(vacancyFilterDto);
+
+        Assertions.assertFalse(result);
+    }
+    @Test
     public void testApply() {
         VacancyFilterDto vacancyFilterDto = new VacancyFilterDto();
         vacancyFilterDto.setName("Java developer");

@@ -39,6 +39,15 @@ public class VacancyPositionFilterTest {
     }
 
     @Test
+    public void testIsNotApplicable(){
+        VacancyFilterDto vacancyFilterDto = new VacancyFilterDto();
+
+        boolean result = vacancyPositionFilter.isApplicable(vacancyFilterDto);
+
+        Assertions.assertFalse(result);
+    }
+
+    @Test
     public void testApply(){
         VacancyFilterDto vacancyFilterDto = new VacancyFilterDto();
         vacancyFilterDto.setStatus(VacancyStatus.OPEN);
