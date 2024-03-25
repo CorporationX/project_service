@@ -17,12 +17,11 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class VacancyDto {
-    @NotNull(message = "Field id cannot be empty")
-    @Positive(message = "id must be greater than zero")
     private Long id;
     @NotBlank(message = "Vacancy must have a name")
     @Size(max = 255, message = "Name should not exceed 255 characters")
     private String name;
+    @NotBlank(message = "Vacancy must have a description")
     @Size(max = 255, message = "Description should not exceed 255 characters")
     private String description;
     @NotNull(message = "Vacancy must be assigned to a project")

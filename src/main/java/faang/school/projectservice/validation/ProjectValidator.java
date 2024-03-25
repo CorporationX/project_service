@@ -14,31 +14,13 @@ public class ProjectValidator {
     private final ProjectRepository projectRepository;
 
     public void validateProjectCreate(ProjectDto project) {
-        validateFields(project);
+        validateProjectVisibility(project);
         validateProjectNameExist(project);
     }
 
     public void validateProjectUpdate(ProjectDto project) {
         validateProjectExists(project);
-        validateFields(project);
-    }
-
-    private void validateFields(ProjectDto project) {
-        validateName(project);
-        validateDescription(project);
         validateProjectVisibility(project);
-    }
-
-    private void validateName(ProjectDto project) {
-        if (project.getName() == null || project.getName().isBlank()) {
-            throw new DataValidationException("Project must have title");
-        }
-    }
-
-    private void validateDescription(ProjectDto project) {
-        if (project.getDescription() == null || project.getDescription().isBlank()) {
-            throw new DataValidationException("Project must have description");
-        }
     }
 
     private void validateProjectNameExist(ProjectDto project) {

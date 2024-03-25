@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -36,13 +37,15 @@ public class ProjectController {
 
     @Operation(summary = "Update project")
     @PutMapping("/{projectId}")
-    public ProjectDto updateProject(@PathVariable Long projectId, @RequestBody @Valid ProjectDto projectDto) {
+    public ProjectDto updateProject(@PathVariable @Positive(message = "id must be greater than zero") Long projectId,
+                                    @RequestBody @Valid ProjectDto projectDto) {
         return projectService.updateProject(projectId, projectDto);
     }
 
     @Operation(summary = "Find all user projects by filters")
     @PostMapping("/filters")
-    public List<ProjectDto> findAllProjectsByFilters(@RequestHeader("userId") Long userId, @RequestBody ProjectFilterDto filters) {
+    public List<ProjectDto> findAllProjectsByFilters(@RequestHeader("userId") @Positive(message = "id must be greater than zero") Long userId,
+                                                     @RequestBody ProjectFilterDto filters) {
         return projectService.findAllProjectsByFilters(userId, filters);
     }
 

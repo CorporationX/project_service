@@ -16,8 +16,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectDto {
-    @NotNull(message = "Field id cannot be empty")
-    @Positive(message = "id must be greater than zero")
     private Long id;
     @NotBlank(message = "Project must have a name")
     @Size(max = 255, message = "Name should not exceed 255 characters")
