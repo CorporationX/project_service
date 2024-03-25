@@ -21,3 +21,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V010__create_offer.sql
   - include:
       file: db/changelog/changeset/project_V011_alter_removed_to_campaign.sql
+  - include:
+      file: db/changelog/changeset/project_V012_create_moment_users.sql
