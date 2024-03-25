@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         return exception.getBindingResult().getFieldErrors().stream()
                 .collect(Collectors.toMap(
                         FieldError::getField,
-                        error -> Objects.requireNonNullElse(error.getDefaultMessage(), ""))
+                        error -> Objects.requireNonNullElse(error.getDefaultMessage(), "Invalid data"))
                 );
     }
 
