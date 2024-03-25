@@ -1,8 +1,7 @@
-package faang.school.projectservice.contoller.moment;
+package faang.school.projectservice.controller.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.service.moment.MomentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,26 +22,29 @@ public class MomentController {
     private final MomentService momentService;
 
     @PostMapping
-    public MomentDto createMoment(@RequestBody MomentDto momentDto) {
+    public MomentDto create(@RequestBody MomentDto momentDto) {
         momentService.createMoment(momentDto);
         return momentDto;
     }
+
     @PutMapping
-    public MomentDto updateMoment(@RequestBody MomentDto momentDto) {
+    public MomentDto update(@RequestBody MomentDto momentDto) {
         momentService.updateMoment(momentDto);
         return momentDto;
     }
+
     @PostMapping("/{projectId}/filtered")
-    public List<MomentDto> getAllMomentsByDateAndProject(@PathVariable long projectId, @RequestBody MomentFilterDto filters){
-        return momentService.getAllMomentsByDateAndProject(projectId, filters);
-    }
-    @GetMapping
-    public List<MomentDto> getAllMoments(){
-        return momentService.getAllMoments();
-    }
-    @GetMapping("/{momentId}/")
-    public MomentDto getMomentById(@PathVariable long momentId){
-        return momentService.getMomentById(momentId);
+    public List<MomentDto> getAllMomentsByFilters(@PathVariable long projectId, @RequestBody MomentFilterDto filters) {
+        return momentService.getAllMomentsByFilters(projectId, filters);
     }
 
+    @GetMapping
+    public List<MomentDto> getAllMoments() {
+        return momentService.getAllMoments();
+    }
+
+    @GetMapping("/{momentId}")
+    public MomentDto getMomentById(@PathVariable long momentId) {
+        return momentService.getMomentById(momentId);
+    }
 }

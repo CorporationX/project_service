@@ -1,9 +1,10 @@
-package faang.school.projectservice.validator.moment;
+package faang.school.projectservice.validation.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.validator.moment.MomentValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

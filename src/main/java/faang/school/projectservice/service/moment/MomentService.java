@@ -31,22 +31,21 @@ public class MomentService {
     private final List<MomentFilter> momentFilters;
 
     @Transactional
-    public void createMoment(MomentDto momentDto) {
+    public MomentDto createMoment(MomentDto momentDto) {
         momentValidator.MomentValidatorName(momentDto);
         projectValidator.ValidatorOpenProject(momentDto.getProjectIds());
         momentValidator.MomentValidatorProject(momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
-        momentRepository.save(moment);
+        return momentMapper.toDto(momentRepository.save(moment));
     }
     @Transactional
     public MomentDto updateMoment(MomentDto momentDto) {
         Moment moment = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new EntityNotFoundException("moment id not found"));
         updateProjects(momentDto, moment);
         updateUsers(momentDto,moment);
-        momentRepository.save(moment);
-        return momentMapper.toDto(moment);
+        return momentMapper.toDto(momentRepository.save(moment));
     }
-    private void updateProjects(MomentDto momentDto,Moment moment){
+    private void updateProjects(MomentDto momentDto, Moment moment){
         List<Long> oldUserIds = moment.getUserIds();
         List<Long> newUserIds = momentDto.getUserIds();
         List<Long> newProjectIds = momentDto.getProjectIds();
@@ -55,7 +54,7 @@ public class MomentService {
             moment.setProjects(newProjects);
         }
     }
-    private void updateUsers(MomentDto momentDto,Moment moment){
+    private void updateUsers(MomentDto momentDto, Moment moment){
         List<Long> oldProjectIds = moment.getProjects().stream()
                 .map(Project::getId)
                 .toList();
@@ -66,7 +65,7 @@ public class MomentService {
                     .toList());
         }
     }
-    public List<MomentDto> getAllMomentsByDateAndProject(Long projectId, MomentFilterDto filters){
+    public List<MomentDto> getAllMomentsByFilters(Long projectId, MomentFilterDto filters){
         Project project = projectRepository.getProjectById(projectId);
         Stream<Moment> momentStream = project.getMoments().stream();
         return momentFilters.stream()

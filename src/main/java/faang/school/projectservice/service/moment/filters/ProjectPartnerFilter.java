@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Data
@@ -20,12 +21,15 @@ import java.util.stream.Stream;
 public class ProjectPartnerFilter implements MomentFilter {
     @Override
     public boolean isApplicable(MomentFilterDto filters) {
-        return filters.getProjects() != null;
+        return filters.getProjectIds() != null;
     }
 
     @Override
     public Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto filters) {
         return moments
-                .filter(moment -> moment.getProjects().containsAll(filters.getProjects()));
+                .filter(moment -> new HashSet<>(moment.getProjects().stream()
+                        .map(Project::getId)
+                        .collect(Collectors.toList()))
+                        .containsAll(filters.getProjectIds()));
     }
 }

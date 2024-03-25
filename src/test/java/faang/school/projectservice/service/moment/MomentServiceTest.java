@@ -74,7 +74,7 @@ public class MomentServiceTest {
                 .build();
         filtersDto = MomentFilterDto.builder()
                 .month(1)
-                .projects(Arrays.asList(project3, project2))
+                .projectIds(Arrays.asList(1L, 2L))
                 .build();
         momentDto = MomentDto.builder()
                 .id(10L)
@@ -156,7 +156,7 @@ public class MomentServiceTest {
         when(momentFilter.isApplicable(filtersDto)).thenReturn(true);
         when(momentFilter.apply(any(Stream.class), any(MomentFilterDto.class))).thenReturn(Stream.of(moment1, moment));
 
-        momentService.getAllMomentsByDateAndProject(projectId, filtersDto);
+        momentService.getAllMomentsByFilters(projectId, filtersDto);
 
         verify(projectRepository, times(1)).getProjectById(projectId);
         verify(momentFilter, times(1)).isApplicable(filtersDto);
