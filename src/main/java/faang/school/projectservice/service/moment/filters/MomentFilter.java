@@ -9,5 +9,5 @@ import java.util.stream.Stream;
 public interface MomentFilter {
     boolean isApplicable(MomentFilterDto filters);
 
-    public Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto filters);
+    Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto filters);
 }

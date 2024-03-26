@@ -43,33 +43,33 @@ public class ValidatorMomentTest {
     @Test
     public void shouldPassValidationWhenDtoHasValidName() {
         momentDto.setName("Valid Name");
-        momentValidator.MomentValidatorName(momentDto);
+        momentValidator.validatorMomentName(momentDto);
     }
 
     @Test
     public void TestValidatorMomentNameIsBlank() {
         momentDto.setName(" ");
-        assertThrows(EntityNotFoundException.class, () -> momentValidator.MomentValidatorName(momentDto));
+        assertThrows(EntityNotFoundException.class, () -> momentValidator.validatorMomentName(momentDto));
     }
 
     @Test
     public void TestValidatorMomentNameIsNull() {
         momentDto.setName(null);
-        assertThrows(EntityNotFoundException.class, () -> momentValidator.MomentValidatorName(momentDto));
+        assertThrows(EntityNotFoundException.class, () -> momentValidator.validatorMomentName(momentDto));
     }
 
     @Test
     public void shouldThrowExceptionWhenProjectIdsNull() {
         momentDto.setProjectIds(null);
 
-        assertThrows(IllegalArgumentException.class, () -> momentValidator.MomentValidatorProject(momentDto));
+        assertThrows(IllegalArgumentException.class, () -> momentValidator.validatorProjectOfMoment(momentDto));
     }
 
     @Test
     public void shouldThrowExceptionWhenProjectIdsEmpty() {
         momentDto.setProjectIds(new ArrayList<>());
 
-        assertThrows(IllegalArgumentException.class, () -> momentValidator.MomentValidatorProject(momentDto));
+        assertThrows(IllegalArgumentException.class, () -> momentValidator.validatorProjectOfMoment(momentDto));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class ValidatorMomentTest {
         projectIds.add(null);
         momentDto.setProjectIds(projectIds);
 
-        assertThrows(IllegalArgumentException.class, () -> momentValidator.MomentValidatorProject(momentDto));
+        assertThrows(IllegalArgumentException.class, () -> momentValidator.validatorProjectOfMoment(momentDto));
     }
 
     @Test
@@ -89,6 +89,6 @@ public class ValidatorMomentTest {
         projectIds.add(2L);
         momentDto.setProjectIds(projectIds);
 
-        momentValidator.MomentValidatorProject(momentDto);
+        momentValidator.validatorProjectOfMoment(momentDto);
     }
 }

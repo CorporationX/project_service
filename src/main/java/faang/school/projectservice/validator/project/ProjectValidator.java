@@ -1,7 +1,5 @@
 package faang.school.projectservice.validator.project;
 
-import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -14,7 +12,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectValidator {
     ProjectRepository projectRepository;
-    public void ValidatorOpenProject(List<Long> projectIds) {
+
+    public void validatorOpenProject(List<Long> projectIds) {
         List<Project> projects = projectRepository.findAllByIds(projectIds);
         projects.stream()
                 .filter(project -> project.getStatus().equals(ProjectStatus.CANCELLED))

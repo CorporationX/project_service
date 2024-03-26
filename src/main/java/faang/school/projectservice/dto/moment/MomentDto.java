@@ -18,5 +18,5 @@ public class MomentDto {
     private LocalDateTime date;
     private List<Long> userIds;
     private List<Long> projectIds;
-    private List<Long> momentIds;
+
 }

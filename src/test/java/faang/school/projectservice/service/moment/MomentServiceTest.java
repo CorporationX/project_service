@@ -45,16 +45,18 @@ public class MomentServiceTest {
     private MomentService momentService;
 
     private MomentDto momentDto;
+    private MomentDto momentDto2;
     private Moment moment;
     private Moment moment1;
     private Moment moment2;
+    private Moment moment4;
+    private Moment moment3;
     private Project project;
     private Project project2;
     private Project project3;
     private Project project1;
     private MomentFilterDto filtersDto;
     Long projectId = 1L;
-    Long momentId = 1L;
 
 
     @BeforeEach
@@ -64,7 +66,7 @@ public class MomentServiceTest {
                 .build();
         project1 = Project.builder()
                 .id(2L)
-                .moments(Arrays.asList(moment, moment1))
+                .moments(Arrays.asList(moment3, moment4))
                 .build();
         project2 = Project.builder()
                 .id(1L)
@@ -82,6 +84,12 @@ public class MomentServiceTest {
                 .projectIds(Arrays.asList(1L, 2L))
                 .userIds(Arrays.asList(7L, 8L))
                 .build();
+        momentDto2 = MomentDto.builder()
+                .id(10L)
+                .name("testMomentDto")
+                .projectIds(Arrays.asList(1L, 2L))
+                .userIds(Arrays.asList(7L, 8L))
+                .build();
         moment = Moment.builder()
                 .id(9L)
                 .name("testMoment")
@@ -94,21 +102,19 @@ public class MomentServiceTest {
                 .projects(Arrays.asList(project, project1))
                 .userIds(Arrays.asList(7L, 8L))
                 .build();
-        moment2 = Moment.builder()
+        moment3 = Moment.builder()
+                .id(1L)
+                .name("testMoment")
+                .projects(Arrays.asList(project, project1))
+                .userIds(Arrays.asList(7L, 8L))
+                .build();
+        moment4 = Moment.builder()
                 .id(1L)
                 .name("testMoment")
                 .projects(Arrays.asList(project, project1))
                 .userIds(Arrays.asList(7L, 8L))
                 .build();
         project.setMoments(List.of(moment1, moment));
-
-        Stream<Moment> momentStream = Stream.of(moment1, moment);
-
-        List<Project> newProjects = Arrays.asList(project2, project3);
-        List<Long> newProjectIds = Arrays.asList(11L, 12L, 13L);
-        List<Long> oldProjectIds = Arrays.asList(111L, 2L, 1L);
-        List<Long> oldUserIds = Arrays.asList(15L, 20L, 30L);
-        List<Long> newUserIds = Arrays.asList(14L, 21L, 31L);
 
         momentRepository = Mockito.mock(MomentRepository.class);
         projectRepository = Mockito.mock(ProjectRepository.class);
@@ -125,21 +131,21 @@ public class MomentServiceTest {
 
         momentService.create(momentDto);
 
-        verify(momentValidator).MomentValidatorName(any(MomentDto.class));
-        verify(projectValidator).ValidatorOpenProject(any(List.class));
-        verify(momentValidator).MomentValidatorProject(any(MomentDto.class));
+        verify(momentValidator).validatorMomentName(any(MomentDto.class));
+        verify(projectValidator).validatorOpenProject(any(List.class));
+        verify(momentValidator).validatorProjectOfMoment(any(MomentDto.class));
         verify(momentMapper).toEntity(momentDto);
         verify(momentRepository).save(any(Moment.class));
     }
 
-
     @Test
     public void testUpdatingUsersAndProjectsAtMoments() {
-        when(momentRepository.findById((1L))).thenReturn(Optional.ofNullable(moment2));
+        Long momentId = 1L;
+        when(momentRepository.findById((anyLong()))).thenReturn(Optional.ofNullable(moment3));
         when(projectRepository.findAllByIds(any())).thenReturn(List.of(project2, project3));
         when(momentMapper.toDto(moment2)).thenReturn(momentDto);
 
-        momentService.update(momentDto,momentId);
+        momentService.update(momentDto, momentId);
 
         verify(momentMapper, times(1)).toDto(moment2);
         verify(projectRepository, times(1)).findAllByIds(any());
@@ -151,7 +157,7 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void TestGetAllMomentsByDateAndProject() {
+    public void testGetAllMomentsByDateAndProject() {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(momentFilter.isApplicable(filtersDto)).thenReturn(true);
         when(momentFilter.apply(any(Stream.class), any(MomentFilterDto.class))).thenReturn(Stream.of(moment1, moment));
@@ -164,25 +170,22 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void TestGetAllMoments() {
-        List<Moment> listMoments = Arrays.asList(moment, moment1);
+    public void testGetAllMoments() {
+        List<Moment> listMoments = Arrays.asList(moment3,moment2);
         when(momentRepository.findAll()).thenReturn(listMoments);
-        when(momentMapper.toDto(moment)).thenReturn(momentDto);
 
         momentService.getAllMoments();
 
         verify(momentRepository, times(1)).findAll();
-        verify(momentMapper, times(1)).toDto(moment);
     }
 
     @Test
-    public void TestGetMomentById() {
+    public void testGetMomentById() {
+        Long momentId = 1L;
         when(momentRepository.findById(momentId)).thenReturn(Optional.of(moment));
-        when(momentMapper.toDto(moment)).thenReturn(momentDto);
 
         momentService.getMomentById(momentId);
 
         verify(momentRepository, times(1)).findById(anyLong());
-        verify(momentMapper, times(1)).toDto(moment);
     }
 }

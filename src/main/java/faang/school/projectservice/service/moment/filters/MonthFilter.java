@@ -2,13 +2,11 @@ package faang.school.projectservice.service.moment.filters;
 
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 @Data

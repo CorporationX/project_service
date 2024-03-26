@@ -63,11 +63,4 @@ public class ProjectValidator {
             throw new EntityNotFoundException(String.format("Project with ID %d not found", project.getId()));
         }
     }
-
-    public void validatorOpenProject(List<Long> projectIds) {
-        List<Project> projects = projectRepository.findAllByIds(projectIds);
-        projects.stream()
-                .filter(project -> project.getStatus().equals(ProjectStatus.CANCELLED))
-                .forEach(project -> {throw new IllegalArgumentException("ProjectStatus.CANCELLED");});
-    }
 }

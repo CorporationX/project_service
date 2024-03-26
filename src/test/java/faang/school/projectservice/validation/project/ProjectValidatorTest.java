@@ -35,6 +35,6 @@ public class ProjectValidatorTest {
         List<Project> projects = Arrays.asList(project1, project2);
         Mockito.when(projectRepository.findAllByIds(projectsIds)).thenReturn(projects);
 
-        assertThrows(IllegalArgumentException.class, () -> projectValidator.ValidatorOpenProject(projectsIds));
+        assertThrows(IllegalArgumentException.class, () -> projectValidator.validatorOpenProject(projectsIds));
     }
 }
