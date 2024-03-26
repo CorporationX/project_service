@@ -16,7 +16,7 @@ class InternshipStatusFilterTest extends TestFiltersSetUp{
     @Test
     @DisplayName("Testing if the filters are applicable")
     void testFiltersAreApplicable(){
-        Assert.assertEquals(true, internshipStatusFilter.isApplicable(firstFilters));
+        Assert.assertEquals(true, internshipStatusFilter.isApplicable(secondFilters));
     }
 
 

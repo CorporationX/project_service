@@ -38,7 +38,7 @@ class InternshipRoleFilterTest extends TestFiltersSetUp{
     @Test
     @DisplayName("Test if filters applied properly")
     void testFiltersFalse(){
-        Assert.assertEquals(true, internshipRoleFilter.isApplicable(secondFilters));
+        Assert.assertEquals(true, internshipRoleFilter.isApplicable(firstFilters));
         Assert.assertEquals(false, internshipRoleFilter.apply(firstInternship, secondFilters));
     }
 }
