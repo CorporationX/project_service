@@ -9,5 +9,5 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MomentMapper {
     MomentDto toDto(Moment moment);
-    Moment ProjectToMoment(Project project);
+    Moment projectToMoment(Project project);
 }

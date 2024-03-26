@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Builder;

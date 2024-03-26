@@ -1,17 +1,19 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.client.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
-import faang.school.projectservice.service.project.filter.ProjectFilter;
-import faang.school.projectservice.mapper.MomentMapper;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
+import faang.school.projectservice.validation.subproject.SubProjectValidation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,16 +29,29 @@ import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 @Service
 @RequiredArgsConstructor
 public class SubProjectService {
+    private final SubProjectValidation subProjectValidation;
     private final ProjectRepository projectRepository;
-    private final List<ProjectFilter> projectFilters;
+    private final List<SubProjectFilter> projectFilters;
     private final ProjectMapper projectMapper;
+    public SubProjectService(SubProjectValidation subProjectValidation,
+                             ProjectRepository projectRepository,
+                             ProjectMapper projectMapper,
+                             @Qualifier("subProjectNameFilter") SubProjectFilter subProjectNameFilter,
+                             @Qualifier("subProjectStatusFilter") SubProjectFilter subProjectStatusFilter){
+        this.subProjectValidation = subProjectValidation;
+        this.projectRepository = projectRepository;
+        this.projectMapper = projectMapper;
+        projectFilters = List.of(subProjectNameFilter,subProjectStatusFilter);
+    }
 
 
     public void createSubProject(CreateSubProjectDto subProjectDto) {
+        subProjectValidation.toCreate(subProjectDto);
+
         Project parentProject = projectRepository.getProjectById(subProjectDto.getParentProjectId());
 
         if (PRIVATE.equals(parentProject.getVisibility()) && PUBLIC.equals(subProjectDto.getVisibility())) {
-            throw new IllegalArgumentException("Нельзя создать приватный подпроект для публичного родительского проекта ");
+            throw new IllegalArgumentException("Нельзя создать публичный подпроект для приватного родительского проекта ");
         } else {
             if (parentProject.getChildren() == null) {
                 parentProject.setChildren(List.of(projectCreate(subProjectDto, parentProject)));
@@ -49,7 +64,8 @@ public class SubProjectService {
         }
     }
 
-    public Moment updateProject(ProjectDto projectDto) {
+    public Moment updateSubProject(SubProjectDto projectDto) {
+        subProjectValidation.checkProjectDto(projectDto);
         Project updateProject = projectRepository.getProjectById(projectDto.getId());
         List<Project> childrenProjects = updateProject.getChildren();
 
@@ -61,9 +77,9 @@ public class SubProjectService {
             updateProject.setVisibility(projectDto.getVisibility());
         }
 
-        if (!updateProject.getStatus().equals(projectDto.getStatus()) && COMPLETED.equals(projectDto.getStatus())){
-            updateProject.setStatus(UpdateStatusProject(updateProject));
-        } else{
+        if (!updateProject.getStatus().equals(projectDto.getStatus()) && COMPLETED.equals(projectDto.getStatus())) {
+            updateProject.setStatus(updateStatusProject(updateProject));
+        } else {
             updateProject.setStatus(projectDto.getStatus());
         }
 
@@ -77,19 +93,20 @@ public class SubProjectService {
         return null;
     }
 
-    public List<ProjectDto> getAllProjectFilter(ProjectDto projectDto, ProjectFilterDto projectFilterDto) {
-        return projectFilters.stream().
-                filter(projectFilter -> projectFilter.isApplicable(projectFilterDto)).
-                flatMap(projectFilter -> projectFilter.apply(getChildrenProject(projectDto), projectFilterDto)).
-                map(projectMapper::toDto).toList();
+    public List<ProjectDto> getAllProjectFilter(SubProjectDto projectDto, ProjectFilterDto projectFilterDto) {
+        subProjectValidation.checkProjectDto(projectDto);
+        return projectFilters.stream()
+                .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
+                .flatMap(projectFilter -> projectFilter.apply(getChildrenProject(projectDto), projectFilterDto))
+                .map(projectMapper::toDto).toList();
     }
 
-    private Stream<Project> getChildrenProject(ProjectDto projectDto) {
+    private Stream<Project> getChildrenProject(SubProjectDto projectDto) {
         if (PUBLIC.equals(projectDto.getVisibility())) {
             return projectRepository.getProjectById(projectDto.getId()).
                     getChildren().
                     stream().
-                    filter(project ->PUBLIC.equals(project.getVisibility()));
+                    filter(project -> PUBLIC.equals(project.getVisibility()));
         } else {
             return projectRepository.getProjectById(projectDto.getId()).
                     getChildren().
@@ -110,7 +127,7 @@ public class SubProjectService {
         return null;
     }
 
-    private ProjectStatus UpdateStatusProject(Project updateProject) {
+    private ProjectStatus updateStatusProject(Project updateProject) {
         List<Project> listChildrenProject = updateProject.getChildren();
         if (listChildrenProject == null) {
             return COMPLETED;

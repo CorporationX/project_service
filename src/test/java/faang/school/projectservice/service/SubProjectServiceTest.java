@@ -6,19 +6,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import faang.school.projectservice.dto.client.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.service.project.filter.ProjectFilter;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.exceptions.EntityNotFoundException;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.subproject.SubProjectService;
+import faang.school.projectservice.service.subproject.filter.SubProjectNameFilter;
+import faang.school.projectservice.service.subproject.filter.SubProjectStatusFilter;
+import faang.school.projectservice.validation.subproject.SubProjectValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -28,26 +29,27 @@ import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 
 @ExtendWith(MockitoExtension.class)
 public class SubProjectServiceTest {
-    @Mock
     private ProjectRepository projectRepository;
-    @Mock
-    private ProjectFilter projectFilter;
-    @InjectMocks
     private SubProjectService subProjectService;
 
     Project firstRootProject;
-    ProjectDto testUpdateRootProject;
+    SubProjectDto testUpdateRootProject;
     CreateSubProjectDto testCreateSubProject;
     Project secondSubProject;
     Project rootProjectVisibilityPrivate;
-    ProjectDto RootProjectToComplete;
-
-    List<ProjectFilter> projectFilters;
+    SubProjectDto RootProjectToComplete;
+    @BeforeEach
+    void setUp() {
+        projectRepository = mock(ProjectRepository.class);
+        SubProjectValidation subProjectValidation = new SubProjectValidation(projectRepository);
+        ProjectMapper projectMapper = mock(ProjectMapper.class);
+        SubProjectNameFilter subProjectNameFilter = mock(SubProjectNameFilter.class);
+        SubProjectStatusFilter subProjectStatusFilter = mock(SubProjectStatusFilter.class);
+        subProjectService = new SubProjectService(subProjectValidation,projectRepository, projectMapper, subProjectNameFilter, subProjectStatusFilter);
+    }
 
     @BeforeEach
     public void init() {
-        projectFilters = List.of(projectFilter);
-
         firstRootProject = Project.builder()
                 .id(1L)
                 .name("secondRootProject")
@@ -64,7 +66,7 @@ public class SubProjectServiceTest {
                 .parentProjectId(1L)
                 .visibility(PUBLIC)
                 .build();
-        testUpdateRootProject = ProjectDto.builder()
+        testUpdateRootProject = SubProjectDto.builder()
                 .id(1L)
                 .name("firstRootProject")
                 .visibility(PRIVATE)
@@ -79,10 +81,10 @@ public class SubProjectServiceTest {
                 .status(CREATED)
                 .build();
     }
-
     @Test
-    public void testCreateSubProject() {
+    public void testCreateSubProjectSuccess() {
         when(projectRepository.getProjectById(1L)).thenReturn(firstRootProject);
+        when(projectRepository.existsById(1L)).thenReturn(true);
 
         subProjectService.createSubProject(testCreateSubProject);
 
@@ -90,8 +92,32 @@ public class SubProjectServiceTest {
     }
 
     @Test
+    public void testCreateSubProjectWithChildrenProjectSuccess() {
+        when(projectRepository.getProjectById(1L)).thenReturn(firstRootProject);
+        when(projectRepository.existsById(1L)).thenReturn(true);
+        firstRootProject.setChildren(List.of(Project.builder()
+                .id(2L)
+                .name("Test SubProject")
+                .parentProject(firstRootProject)
+                .status(CREATED)
+                .visibility(PUBLIC)
+                .build()));
+        subProjectService.createSubProject(testCreateSubProject);
+
+        verify(projectRepository, times(1)).save(firstRootProject);
+    }
+
+    @Test
+    public void testCreateSubProjectFailure() {
+        when(projectRepository.existsById(1L)).thenReturn(false);
+
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(testCreateSubProject));
+    }
+
+    @Test
     public void testCreateSubProjectStatusPublic() {
         when(projectRepository.getProjectById(1L)).thenReturn(rootProjectVisibilityPrivate);
+        when(projectRepository.existsById(1L)).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> subProjectService.createSubProject(testCreateSubProject));
     }
@@ -99,6 +125,7 @@ public class SubProjectServiceTest {
     @Test
     public void testUpdateProject() {
         when(projectRepository.getProjectById(1L)).thenReturn(firstRootProject);
+        when(projectRepository.existsById(1L)).thenReturn(true);
         Project completedSubProject = Project.builder()
                 .id(3L)
                 .name("firstSubProject")
@@ -109,7 +136,7 @@ public class SubProjectServiceTest {
                 .build();
         firstRootProject.setChildren(List.of(completedSubProject));
 
-        subProjectService.updateProject(testUpdateRootProject);
+        subProjectService.updateSubProject(testUpdateRootProject);
 
         verify(projectRepository, times(1)).save(firstRootProject);
     }
@@ -117,8 +144,9 @@ public class SubProjectServiceTest {
     @Test
     public void testUpdateStatusProjectToCompleteIncorrect() {
         when(projectRepository.getProjectById(1L)).thenReturn(firstRootProject);
+        when(projectRepository.existsById(1L)).thenReturn(true);
 
-        RootProjectToComplete = ProjectDto.builder()
+        RootProjectToComplete = SubProjectDto.builder()
                 .id(1L)
                 .name("secondRootProject")
                 .visibility(PUBLIC)
@@ -134,12 +162,13 @@ public class SubProjectServiceTest {
                 .build();
         firstRootProject.setChildren(List.of(completedSubProject));
 
-        assertThrows(IllegalArgumentException.class, () -> subProjectService.updateProject(RootProjectToComplete));
+        assertThrows(IllegalArgumentException.class, () -> subProjectService.updateSubProject(RootProjectToComplete));
     }
 
     @Test
     public void testReturnMomentWhenUpdateProject() {
         when(projectRepository.getProjectById(1L)).thenReturn(firstRootProject);
+        when(projectRepository.existsById(1L)).thenReturn(true);
 
         secondSubProject = Project.builder()
                 .id(2L)
@@ -156,6 +185,6 @@ public class SubProjectServiceTest {
                 .description(firstRootProject.getDescription())
                 .projects(firstRootProject.getChildren()).build();
 
-        assertEquals(returnMoment, subProjectService.updateProject(testUpdateRootProject));
+        assertEquals(returnMoment, subProjectService.updateSubProject(testUpdateRootProject));
     }
 }
