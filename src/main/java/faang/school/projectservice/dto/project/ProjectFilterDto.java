@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectFilterDto {
-    @Size(max = 255, message = "Name_Pattern should not exceed 255 characters")
+    @Size(max = 255, message = "Name pattern should not exceed 255 characters")
     private String namePattern;
     private ProjectStatus statusPattern;
 }
