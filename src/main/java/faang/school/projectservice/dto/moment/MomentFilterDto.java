@@ -16,5 +16,4 @@ public class MomentFilterDto {
 
     private Integer month;
     private List<Long> projectIds;
-    private List<Project> projects;
 }

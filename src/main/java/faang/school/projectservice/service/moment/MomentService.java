@@ -10,16 +10,14 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filters.MomentFilter;
 import faang.school.projectservice.validator.moment.MomentValidator;
 import faang.school.projectservice.validator.project.ProjectValidator;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 public class MomentService {
@@ -31,20 +29,23 @@ public class MomentService {
     private final List<MomentFilter> momentFilters;
 
     @Transactional
-    public MomentDto createMoment(MomentDto momentDto) {
+    public MomentDto create(MomentDto momentDto) {
         momentValidator.MomentValidatorName(momentDto);
         projectValidator.ValidatorOpenProject(momentDto.getProjectIds());
         momentValidator.MomentValidatorProject(momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
         return momentMapper.toDto(momentRepository.save(moment));
     }
+
     @Transactional
-    public MomentDto updateMoment(MomentDto momentDto) {
-        Moment moment = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new EntityNotFoundException("moment id not found"));
+    public MomentDto update(MomentDto momentDto, Long momentId) {
+        Moment moment = momentRepository.findById(momentId).orElseThrow();
         updateProjects(momentDto, moment);
         updateUsers(momentDto,moment);
-        return momentMapper.toDto(momentRepository.save(moment));
+        momentRepository.save(moment);
+        return momentMapper.toDto(moment);
     }
+
     private void updateProjects(MomentDto momentDto, Moment moment){
         List<Long> oldUserIds = moment.getUserIds();
         List<Long> newUserIds = momentDto.getUserIds();
@@ -54,6 +55,7 @@ public class MomentService {
             moment.setProjects(newProjects);
         }
     }
+
     private void updateUsers(MomentDto momentDto, Moment moment){
         List<Long> oldProjectIds = moment.getProjects().stream()
                 .map(Project::getId)
@@ -65,6 +67,7 @@ public class MomentService {
                     .toList());
         }
     }
+
     public List<MomentDto> getAllMomentsByFilters(Long projectId, MomentFilterDto filters){
         Project project = projectRepository.getProjectById(projectId);
         Stream<Moment> momentStream = project.getMoments().stream();
@@ -74,12 +77,14 @@ public class MomentService {
                 .map(momentMapper::toDto)
                 .toList();
     }
+
     public List<MomentDto> getAllMoments(){
         return momentRepository.findAll()
                 .stream()
                 .map(momentMapper::toDto)
                 .toList();
     }
+
     public MomentDto getMomentById(Long momentId){
         Moment moment = momentRepository.findById(momentId).orElseThrow(()-> new NoSuchElementException("Id is not found"));
         return momentMapper.toDto(moment);

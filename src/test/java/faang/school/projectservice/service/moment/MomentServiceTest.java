@@ -123,7 +123,7 @@ public class MomentServiceTest {
     @Test
     public void testCreateMoment() {
 
-        momentService.createMoment(momentDto);
+        momentService.create(momentDto);
 
         verify(momentValidator).MomentValidatorName(any(MomentDto.class));
         verify(projectValidator).ValidatorOpenProject(any(List.class));
@@ -135,13 +135,13 @@ public class MomentServiceTest {
 
     @Test
     public void testUpdatingUsersAndProjectsAtMoments() {
-        when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.ofNullable(moment));
+        when(momentRepository.findById((1L))).thenReturn(Optional.ofNullable(moment2));
         when(projectRepository.findAllByIds(any())).thenReturn(List.of(project2, project3));
-        when(momentMapper.toDto(moment)).thenReturn(momentDto);
+        when(momentMapper.toDto(moment2)).thenReturn(momentDto);
 
-        momentService.updateMoment(momentDto);
+        momentService.update(momentDto,momentId);
 
-        verify(momentMapper, times(1)).toDto(moment);
+        verify(momentMapper, times(1)).toDto(moment2);
         verify(projectRepository, times(1)).findAllByIds(any());
         verify(momentRepository, times(1)).save(captor.capture());
         Moment momentCaptor = captor.getValue();

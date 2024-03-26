@@ -23,13 +23,13 @@ public class MomentController {
 
     @PostMapping
     public MomentDto create(@RequestBody MomentDto momentDto) {
-        momentService.createMoment(momentDto);
+        momentService.create(momentDto);
         return momentDto;
     }
 
     @PutMapping
-    public MomentDto update(@RequestBody MomentDto momentDto) {
-        momentService.updateMoment(momentDto);
+    public MomentDto update(@RequestBody MomentDto momentDto, long momentId) {
+        momentService.update(momentDto,momentId);
         return momentDto;
     }
 
