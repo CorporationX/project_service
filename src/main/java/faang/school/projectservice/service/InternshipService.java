@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-//@Service
+@Service
 @RequiredArgsConstructor
 public class InternshipService {
     private final InternshipRepository internshipRepository;
