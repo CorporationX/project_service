@@ -4,8 +4,6 @@ on:
   pull_request:
     branches:
       - dragon-master-bc3
-      - feature/pipline-BC-BJS2-3431
-      - feature-BJS2-3431
 
 jobs:
   build:
