@@ -8,5 +8,6 @@ class ProjectServiceApplicationTests {
     @Test
     void contextLoads() {
         Assertions.assertThat(40 + 2).isEqualTo(42);
+        //test
     }
 }
