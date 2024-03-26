@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
 }
@@ -71,3 +72,39 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
+/**
+ * Jacoco
+ */
+val packagesToTest = listOf(
+        "**/service/**",
+        "**/validation/**",
+        "**/controller/**"
+)
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = "CLASS"
+            classDirectories.setFrom(
+                    sourceSets.main.get().output.asFileTree.matching {
+                        include(packagesToTest)
+                    }
+            )
+            limit {
+                minimum = "0.70".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.jacocoTestReport {
+    classDirectories.setFrom(
+            sourceSets.main.get().output.asFileTree.matching {
+                include(packagesToTest)
+            }
+    )
+}
+
+
+
