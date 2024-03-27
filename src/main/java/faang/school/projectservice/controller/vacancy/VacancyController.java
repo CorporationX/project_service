@@ -6,7 +6,9 @@ import faang.school.projectservice.service.vacancy.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/vacancies")
@@ -33,7 +36,7 @@ public class VacancyController {
 
     @Operation(summary = "Get vacancy by id")
     @GetMapping("/{vacancyId}")
-    public VacancyDto getVacancyById(@PathVariable long vacancyId) {
+    public VacancyDto getVacancyById(@PathVariable @Positive(message = "id must be greater than zero") long vacancyId) {
         return vacancyService.getVacancyById(vacancyId);
     }
 
@@ -45,7 +48,7 @@ public class VacancyController {
 
     @Operation(summary = "Delete a vacancy by id")
     @DeleteMapping("{vacancyId}")
-    public void delete(@PathVariable long vacancyId) {
+    public void delete(@PathVariable @Positive(message = "id must be greater than zero") long vacancyId) {
         vacancyService.delete(vacancyId);
     }
 

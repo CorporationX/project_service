@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.VacancyStatus;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class VacancyFilterDto {
+    @Size(max = 255, message = "Name should not exceed 255 characters")
     private String name;
+    @Size(max = 255, message = "Description should not exceed 255 characters")
     private String description;
     private VacancyStatus status;
 }
