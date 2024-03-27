@@ -39,8 +39,7 @@ public class VacancyService {
 
     public VacancyDto update(VacancyDto vacancyDto) {
         if (vacancyDto.getStatus() == VacancyStatus.CLOSED) {
-            Vacancy vacancy = vacancyRepository.findById(vacancyDto.getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Vacancy doesn't exist by id: " + vacancyDto.getId()));
+            Vacancy vacancy = getVacancyFromRepository(vacancyDto.getId());
             vacancyValidator.validateIfCandidatesNoMoreNeeded(vacancy);
             vacancyValidator.validateIfVacancyCanBeClosed(vacancyDto);
         }
@@ -50,8 +49,7 @@ public class VacancyService {
     }
 
     public void delete(long vacancyId) {
-        Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new EntityNotFoundException("Vacancy doesn't exist by id: " + vacancyId));
+        Vacancy vacancy = getVacancyFromRepository(vacancyId);
         Set<Long> candidatesIds = vacancy.getCandidates().stream()
                 .map(Candidate::getUserId)
                 .collect(Collectors.toSet());
@@ -76,8 +74,12 @@ public class VacancyService {
     }
 
     public VacancyDto getVacancyById(long vacancyId) {
-        Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new EntityNotFoundException("Vacancy doesn't exist by id: " + vacancyId));
+        Vacancy vacancy = getVacancyFromRepository(vacancyId);
         return vacancyMapper.toDto(vacancy);
+    }
+
+    private Vacancy getVacancyFromRepository(long vacancyId) {
+        return vacancyRepository.findById(vacancyId)
+               .orElseThrow(() -> new EntityNotFoundException("Vacancy doesn't exist by id: " + vacancyId));
     }
 }
