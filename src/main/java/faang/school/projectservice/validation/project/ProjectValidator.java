@@ -17,6 +17,13 @@ public class ProjectValidator {
 
     private final ProjectRepository projectRepository;
 
+    public void validatorOpenProject(List<Long> projectIds) {
+        List<Project> projects = projectRepository.findAllByIds(projectIds);
+        projects.stream()
+                .filter(project -> project.getStatus().equals(ProjectStatus.CANCELLED))
+                .forEach(project -> {throw new IllegalArgumentException("ProjectStatus.CANCELLED");});
+    }
+
     public void validateProjectCreate(ProjectDto project) {
         validateFields(project);
         validateProjectNameExist(project);

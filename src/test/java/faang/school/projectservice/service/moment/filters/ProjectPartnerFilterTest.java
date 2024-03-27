@@ -1,12 +1,10 @@
 package faang.school.projectservice.service.moment.filters;
 
 import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,13 +26,13 @@ public class ProjectPartnerFilterTest {
     @BeforeEach
     void init() {
         momentFilterDto = MomentFilterDto.builder()
-                .projectIds(Arrays.asList(1L,2L))
+                .projectIds(Arrays.asList(1L, 2L))
                 .build();
         moment1 = MomentFilterDto.builder()
-                .projectIds(Arrays.asList(1L,2L))
+                .projectIds(Arrays.asList(1L, 2L))
                 .build();
         moment2 = MomentFilterDto.builder()
-                .projectIds(Arrays.asList(1L,2L))
+                .projectIds(Arrays.asList(1L, 2L))
                 .build();
         moment3 = Moment.builder()
                 .projects(Arrays.asList(project, project1))
@@ -67,13 +65,27 @@ public class ProjectPartnerFilterTest {
 
     @Test
     public void applyTest() {
-        Stream<Moment> momentStream = Stream.of(moment3, moment4);
+        moment3 = Moment.builder()
+                .projects(Arrays.asList(project, project1))
+                .build();
+        moment4 = Moment.builder()
+                .projects(Arrays.asList(project, project1))
+                .build();
+        project = Project.builder()
+                .id(1L)
+                .moments(Arrays.asList(moment3, moment4))
+                .build();
+        project1 = Project.builder()
+                .id(2L)
+                .moments(Arrays.asList(moment3, moment4))
+                .build();
+        Stream<Moment> momentStream = Stream.of(moment3);
         ProjectPartnerFilter projectPartnerFilter = new ProjectPartnerFilter();
 
         List<Moment> returnedList = projectPartnerFilter.apply(momentStream, momentFilterDto).toList();
 
-        assertEquals(returnedList.size(),2);
-        //assertEquals(returnedList.get(0).getProjects(), moment3.getProjects());
-       // assertFalse(returnedList.contains());
+        assertEquals(returnedList.size(), 1);
+        assertEquals(returnedList.get(0).getProjects(), moment3.getProjects());
+        assertTrue(returnedList.contains(moment3));
     }
 }

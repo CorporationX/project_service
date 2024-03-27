@@ -8,8 +8,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filters.MomentFilter;
-import faang.school.projectservice.validator.moment.MomentValidator;
-import faang.school.projectservice.validator.project.ProjectValidator;
+import faang.school.projectservice.validation.project.ProjectValidator;
+import faang.school.projectservice.validation.moment.MomentValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -171,21 +171,26 @@ public class MomentServiceTest {
 
     @Test
     public void testGetAllMoments() {
-        List<Moment> listMoments = Arrays.asList(moment3,moment2);
+        List<Moment> listMoments = Arrays.asList(moment,moment2);
+        List<MomentDto> dtoList = momentMapper.toListDto(listMoments);
         when(momentRepository.findAll()).thenReturn(listMoments);
 
-        momentService.getAllMoments();
+        List <MomentDto> returnedList = momentService.getAllMoments();
 
         verify(momentRepository, times(1)).findAll();
+        assertEquals(returnedList.size(), 2);
+        assertEquals(dtoList,returnedList);
     }
 
     @Test
     public void testGetMomentById() {
         Long momentId = 1L;
+        MomentDto momentDto1 = momentMapper.toDto(moment);
         when(momentRepository.findById(momentId)).thenReturn(Optional.of(moment));
 
-        momentService.getMomentById(momentId);
+        MomentDto reternMomentDto = momentService.getMomentById(momentId);
 
         verify(momentRepository, times(1)).findById(anyLong());
+        assertEquals(momentDto1,reternMomentDto);
     }
 }

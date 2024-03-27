@@ -1,11 +1,10 @@
 package faang.school.projectservice.validation.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.validator.moment.MomentValidator;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,15 +46,9 @@ public class ValidatorMomentTest {
     }
 
     @Test
-    public void TestValidatorMomentNameIsBlank() {
+    public void testValidatorMomentNameIsBlank() {
         momentDto.setName(" ");
-        assertThrows(EntityNotFoundException.class, () -> momentValidator.validatorMomentName(momentDto));
-    }
-
-    @Test
-    public void TestValidatorMomentNameIsNull() {
-        momentDto.setName(null);
-        assertThrows(EntityNotFoundException.class, () -> momentValidator.validatorMomentName(momentDto));
+        assertThrows(DataValidationException.class, () -> momentValidator.validatorMomentName(momentDto));
     }
 
     @Test

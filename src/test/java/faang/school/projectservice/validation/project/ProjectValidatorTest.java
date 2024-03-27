@@ -3,7 +3,6 @@ package faang.school.projectservice.validation.project;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +23,7 @@ public class ProjectValidatorTest {
     ProjectValidator projectValidator;
 
     @Test
-    public void TestValidatorOpenProject() {
+    public void testValidatorOpenProject() {
         Project project1 = new Project();
         Project project2 = new Project();
         project1.setStatus(ProjectStatus.CANCELLED);
