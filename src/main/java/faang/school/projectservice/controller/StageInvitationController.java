@@ -5,19 +5,17 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.StageInvitationService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
     public StageInvitationDto sendInvitation(Long stageId, Long authorId, Long invitedId, String description) {
-        if (description.isEmpty()) {
-            throw new DataValidationException("Description can not be empty!");
-        }
         return stageInvitationService.sendInvitation(stageId, authorId, invitedId, description);
     }
 

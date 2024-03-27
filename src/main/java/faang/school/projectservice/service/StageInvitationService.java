@@ -26,14 +26,8 @@ public class StageInvitationService {
 
     public StageInvitationDto sendInvitation(Long stageId, Long authorId, Long invitedId, String description) {
         Stage stage = stageRepository.getById(stageId);
-        if (stage == null) {
-            throw new DataValidationException("There is no stage with this id!");
-        }
         TeamMember author = teamMemberRepository.findById(authorId);
         TeamMember invited = teamMemberRepository.findById(invitedId);
-        if (authorId == null || invited == null) {
-            throw new DataValidationException("There is no TeamMember with this id!");
-        }
         StageInvitation stageInvitation = StageInvitation.builder()
                 .invited(invited)
                 .stage(stage)
@@ -46,9 +40,7 @@ public class StageInvitationService {
 
     public void acceptInvitation(Long invitationId, Long invitedId) {
         StageInvitation invitation = stageInvitationRepository.findById(invitationId);
-        if (!invitation.getInvited().getId().equals(invitedId)) {
-            throw new DataValidationException("You can not accept invitation if you are not invited!");
-        }
+        checkInvitedId(invitation,invitedId);
         TeamMember invited = teamMemberRepository.findById(invitedId);
         Stage stage = invitation.getStage();
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
@@ -69,9 +61,7 @@ public class StageInvitationService {
 
     public void declineInvitation(Long invitationId, Long invitedId, String description) {
         StageInvitation invitation = stageInvitationRepository.findById(invitationId);
-        if (!invitation.getInvited().getId().equals(invitedId)) {
-            throw new DataValidationException("You can not decline invitation if you are not invited!");
-        }
+        checkInvitedId(invitation, invitedId);
         invitation.setStatus(StageInvitationStatus.REJECTED);
         StringBuilder builder = new StringBuilder(invitation.getDescription());
         builder.append(" rejected by " + invitation.getInvited().getUserId() + " with cause: " + description);
@@ -79,15 +69,20 @@ public class StageInvitationService {
         stageInvitationRepository.save(invitation);
     }
 
+    private void checkInvitedId(StageInvitation invitation, Long invitedId) {
+        if (!invitation.getInvited().getId().equals(invitedId)) {
+            throw new DataValidationException("You can not interfere with invitation if you are not invited!");
+        }
+    }
 
     public List<StageInvitationDto> getAllInvitationsForUserWithStatus(Long teamMemberId, StageInvitationStatus status) {
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
-        if (teamMember == null) {
-            throw new DataValidationException("There is no TeamMember with this id!");
-        }
-        return stageInvitationMapper.toDto(stageInvitationRepository.findAll().stream()
+        List<StageInvitation> result = stageInvitationRepository.findAll().stream()
                         .filter(stageInvitation -> stageInvitation.getInvited().equals(teamMember))
                         .filter(stageInvitation -> stageInvitation.getStatus().equals(status))
-                .toList());
+                .toList();
+        System.out.println(result);
+        System.out.println(stageInvitationMapper.toDto(result));
+        return stageInvitationMapper.toDto(result);
     }
 }

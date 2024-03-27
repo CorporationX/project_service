@@ -5,6 +5,7 @@ import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -19,6 +20,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -66,24 +69,11 @@ public class StageInvitationServiceTest {
     }
 
     @Test
-    public void sendInvitationsThrowsException() {
-        DataValidationException exception = Assertions
-                .assertThrows(DataValidationException.class, () -> stageInvitationService
-                        .sendInvitation(500L, 100L, 200L, ""));
-        Assert.assertEquals(exception.getMessage().contains("stage"), true);
-        Mockito.when(stageRepository.getById(500L)).thenReturn(new Stage());
-        exception = Assertions
-                .assertThrows(DataValidationException.class, () -> stageInvitationService
-                        .sendInvitation(500L, 100L, 200L, ""));
-        Assert.assertEquals(exception.getMessage().contains("TeamMember"), true);
-    }
-
-    @Test
     public void sendInvitationTest() {
-        Mockito.when(stageRepository.getById(stageId)).thenReturn(new Stage());
-        Mockito.when(teamMemberRepository.findById(authorId)).thenReturn(new TeamMember());
-        Mockito.when(teamMemberRepository.findById(invitedId)).thenReturn(new TeamMember());
-        stageInvitationService.sendInvitation(stageId, authorId, invitedId, "smth");
+        Mockito.when(stageRepository.getById(stageId)).thenReturn(stage);
+        Mockito.when(teamMemberRepository.findById(authorId)).thenReturn(author);
+        Mockito.when(teamMemberRepository.findById(invitedId)).thenReturn(invited);
+        stageInvitationService.sendInvitation(stageId, authorId, invitedId, null);
         ArgumentCaptor<StageInvitation> argumentCaptor = ArgumentCaptor.forClass(StageInvitation.class);
         verify(stageInvitationRepository, times(1)).save(argumentCaptor.capture());
         verify(stageInvitationMapper, times(1)).toDto(stageInvitationRepository.save(argumentCaptor.capture()));
@@ -95,7 +85,7 @@ public class StageInvitationServiceTest {
         DataValidationException exception = Assertions
                 .assertThrows(DataValidationException.class, () -> stageInvitationService
                         .acceptInvitation(invitationId, authorId));
-        Assert.assertEquals(exception.getMessage().contains("can not accept"), true);
+        Assert.assertEquals(exception.getMessage().contains("can not"), true);
     }
 
     @Test
@@ -120,6 +110,14 @@ public class StageInvitationServiceTest {
         Mockito.when(stageInvitationRepository.findById(invitationId)).thenReturn(stageInvitation);
         stageInvitationService.declineInvitation(invitationId, invitedId, "addf");
         verify(stageInvitationRepository, times(1)).save(stageInvitation);
+    }
+
+    @Test
+    public void getAllInvitationsForUserWithStatusTest() {
+        stageInvitation.setStatus(StageInvitationStatus.PENDING);
+        Mockito.when(stageInvitationRepository.findAll()).thenReturn(List.of(stageInvitation));
+        Mockito.when(teamMemberRepository.findById(invitedId)).thenReturn(invited);
+        stageInvitationService.getAllInvitationsForUserWithStatus(invitedId, StageInvitationStatus.PENDING);
     }
 
 }
