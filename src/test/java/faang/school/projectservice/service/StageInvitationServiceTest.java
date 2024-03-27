@@ -1,7 +1,8 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -9,7 +10,6 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -35,7 +37,7 @@ public class StageInvitationServiceTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Spy
-    private StageInvitationMapper stageInvitationMapper;
+    private StageInvitationMapperImpl stageInvitationMapper;
     @InjectMocks
     StageInvitationService stageInvitationService;
     private Long stageId;
@@ -85,7 +87,7 @@ public class StageInvitationServiceTest {
         DataValidationException exception = Assertions
                 .assertThrows(DataValidationException.class, () -> stageInvitationService
                         .acceptInvitation(invitationId, authorId));
-        Assert.assertEquals(exception.getMessage().contains("can not"), true);
+        assertTrue(exception.getMessage().contains("can not"));
     }
 
     @Test
@@ -102,7 +104,7 @@ public class StageInvitationServiceTest {
         DataValidationException exception = Assertions
                 .assertThrows(DataValidationException.class, () -> stageInvitationService
                         .declineInvitation(invitationId, authorId, "some reason"));
-        Assert.assertEquals(exception.getMessage().contains("not invited"), true);
+        assertTrue(exception.getMessage().contains("not invited"));
     }
 
     @Test
@@ -114,10 +116,11 @@ public class StageInvitationServiceTest {
 
     @Test
     public void getAllInvitationsForUserWithStatusTest() {
-        stageInvitation.setStatus(StageInvitationStatus.PENDING);
+        stageInvitation.setStatus(StageInvitationStatus.REJECTED);
         Mockito.when(stageInvitationRepository.findAll()).thenReturn(List.of(stageInvitation));
         Mockito.when(teamMemberRepository.findById(invitedId)).thenReturn(invited);
-        stageInvitationService.getAllInvitationsForUserWithStatus(invitedId, StageInvitationStatus.PENDING);
+        List<StageInvitationDto> result = stageInvitationService.getAllInvitationsForUserWithStatus(invitedId, StageInvitationStatus.REJECTED);
+        assertSame(result.get(0).getStageInvitationId(), invitationId);
     }
 
 }

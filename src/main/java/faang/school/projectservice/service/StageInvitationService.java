@@ -64,7 +64,10 @@ public class StageInvitationService {
         checkInvitedId(invitation, invitedId);
         invitation.setStatus(StageInvitationStatus.REJECTED);
         StringBuilder builder = new StringBuilder(invitation.getDescription());
-        builder.append(" rejected by " + invitation.getInvited().getUserId() + " with cause: " + description);
+        builder.append(" rejected by ")
+                .append(invitation.getInvited().getUserId())
+                .append(" with cause: ")
+                .append(description);
         invitation.setDescription(builder.toString());
         stageInvitationRepository.save(invitation);
     }
@@ -81,8 +84,6 @@ public class StageInvitationService {
                         .filter(stageInvitation -> stageInvitation.getInvited().equals(teamMember))
                         .filter(stageInvitation -> stageInvitation.getStatus().equals(status))
                 .toList();
-        System.out.println(result);
-        System.out.println(stageInvitationMapper.toDto(result));
         return stageInvitationMapper.toDto(result);
     }
 }
