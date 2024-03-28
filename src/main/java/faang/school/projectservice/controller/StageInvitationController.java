@@ -7,6 +7,7 @@ import faang.school.projectservice.service.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -22,12 +23,14 @@ public class StageInvitationController {
     }
 
     @PostMapping("/acceptInvitation")
-    public void acceptInvitation(Long invitationId, Long invitedId) {
+    public void acceptInvitation(@RequestParam("invitationId") Long invitationId, @RequestParam("invitedId") Long invitedId) {
         stageInvitationService.acceptInvitation(invitationId, invitedId);
     }
 
     @PostMapping("/declineInvitation")
-    public void  declineInvitation(Long invitationId, Long invitedId, String description) {
+    public void  declineInvitation(@RequestParam("invitationId") Long invitationId,
+                                   @RequestParam("invitatedId")Long invitedId,
+                                   @RequestBody String description) {
         if (description.isEmpty() || description.isBlank()) {
             throw new DataValidationException("You can not decline invitation without cause!");
         }
