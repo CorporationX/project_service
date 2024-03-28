@@ -5,11 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 //spring context
-@SpringBootTest(classes = ProjectServiceApplication.class)
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@Testcontainers
 public class SpringContextTest {
     @Autowired
     private ApplicationContext applicationContext;
