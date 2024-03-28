@@ -11,14 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 @SpringBootTest(classes = ProjectServiceApplication.class)
-//@Testcontainers
+@Testcontainers
 public class SpringContextTest {
     @Autowired
     private ApplicationContext applicationContext;
-
     @Test
     @DisplayName("Spring context test check")
     public void contextLoads() {
-        assertNotNull(applicationContext);
+        assertNotNull( applicationContext );
     }
 }
