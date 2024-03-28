@@ -8,5 +8,7 @@ import java.util.List;
 public interface ProjectFilter {
     boolean isApplicable(ProjectDtoFilter projectDtoFilter);
 
+
+
     void apply(List<Project> projects, ProjectDtoFilter projectDtoFilter);
 }

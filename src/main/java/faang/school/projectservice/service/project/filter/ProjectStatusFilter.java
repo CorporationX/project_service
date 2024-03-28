@@ -12,7 +12,6 @@ public class ProjectStatusFilter implements ProjectFilter {
     public boolean isApplicable(ProjectDtoFilter goalFilterDto) {
         return goalFilterDto.getStatusPattern() != null;
     }
-
     @Override
     public void apply(List<Project> projects, ProjectDtoFilter goalFilterDto) {
         projects.removeIf(project -> !project.getStatus().equals(goalFilterDto.getStatusPattern()));
