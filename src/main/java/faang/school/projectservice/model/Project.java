@@ -20,6 +20,31 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @Builder
 public class Project {
+    @Override
+    public String toString() {
+        return "Project{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", storageSize=" + storageSize +
+                ", maxStorageSize=" + maxStorageSize +
+                ", ownerId=" + ownerId +
+                ", parentProject=" + parentProject +
+                ", children=" + children +
+                ", tasks=" + tasks +
+                ", resources=" + resources +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", status=" + status +
+                ", visibility=" + visibility +
+                ", coverImageId='" + coverImageId + '\'' +
+                ", teams=" + teams +
+                ", schedule=" + schedule +
+                ", stages=" + stages +
+                ", vacancies=" + vacancies +
+                ", moments=" + moments +
+                '}';
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
