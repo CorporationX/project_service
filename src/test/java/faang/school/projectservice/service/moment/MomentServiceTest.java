@@ -8,8 +8,10 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filters.MomentFilter;
-import faang.school.projectservice.validation.project.ProjectValidator;
 import faang.school.projectservice.validation.moment.MomentValidator;
+import faang.school.projectservice.validation.project.ProjectValidator;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -40,8 +43,6 @@ public class MomentServiceTest {
     private MomentRepository momentRepository;
     private ProjectRepository projectRepository;
     private MomentFilter momentFilter;
-    @Captor
-    private ArgumentCaptor<Moment> captor;
     private MomentService momentService;
 
     private MomentDto momentDto;
@@ -79,7 +80,7 @@ public class MomentServiceTest {
                 .projectIds(Arrays.asList(1L, 2L))
                 .build();
         momentDto = MomentDto.builder()
-                .id(10L)
+                .id(1L)
                 .name("testMomentDto")
                 .projectIds(Arrays.asList(1L, 2L))
                 .userIds(Arrays.asList(7L, 8L))
@@ -131,29 +132,27 @@ public class MomentServiceTest {
 
         momentService.create(momentDto);
 
-        verify(momentValidator).validatorMomentName(any(MomentDto.class));
         verify(projectValidator).validatorOpenProject(any(List.class));
-        verify(momentValidator).validatorProjectOfMoment(any(MomentDto.class));
+        verify(momentValidator).validateProjectOfMoment(any(MomentDto.class));
         verify(momentMapper).toEntity(momentDto);
         verify(momentRepository).save(any(Moment.class));
     }
 
     @Test
-    public void testUpdatingUsersAndProjectsAtMoments() {
-        Long momentId = 1L;
-        when(momentRepository.findById((anyLong()))).thenReturn(Optional.ofNullable(moment3));
-        when(projectRepository.findAllByIds(any())).thenReturn(List.of(project2, project3));
-        when(momentMapper.toDto(moment2)).thenReturn(momentDto);
+    public void testUpdatingMomentsFailed() {
+        Long momentId = 2L;
+        when(momentRepository.existsById((anyLong()))).thenReturn(false);
 
-        momentService.update(momentDto, momentId);
+        assertThrows(EntityNotFoundException.class, () -> momentService.update(momentDto, momentId));
+    }
 
-        verify(momentMapper, times(1)).toDto(moment2);
-        verify(projectRepository, times(1)).findAllByIds(any());
-        verify(momentRepository, times(1)).save(captor.capture());
-        Moment momentCaptor = captor.getValue();
-        assertEquals(momentCaptor.getProjects().stream().map(Project::getId).toList(), momentDto.getProjectIds());
-        assertEquals(momentDto.getUserIds(), momentCaptor.getUserIds());
-        assertEquals(moment.getProjects().stream().map(Project::getId).toList(), momentDto.getProjectIds());
+    @Test
+    public void testUpdatingMomentsTrue() {
+        Long momentId = 2L;
+        when(momentRepository.existsById((anyLong()))).thenReturn(true);
+
+        Assertions.assertDoesNotThrow(() -> momentService.update(momentDto, momentId));
+        verify(momentMapper, times(1)).toEntity(momentDto);
     }
 
     @Test
@@ -171,15 +170,15 @@ public class MomentServiceTest {
 
     @Test
     public void testGetAllMoments() {
-        List<Moment> listMoments = Arrays.asList(moment,moment2);
+        List<Moment> listMoments = Arrays.asList(moment, moment2);
         List<MomentDto> dtoList = momentMapper.toListDto(listMoments);
         when(momentRepository.findAll()).thenReturn(listMoments);
 
-        List <MomentDto> returnedList = momentService.getAllMoments();
+        List<MomentDto> returnedList = momentService.getAllMoments();
 
         verify(momentRepository, times(1)).findAll();
         assertEquals(returnedList.size(), 2);
-        assertEquals(dtoList,returnedList);
+        assertEquals(dtoList, returnedList);
     }
 
     @Test
@@ -191,6 +190,6 @@ public class MomentServiceTest {
         MomentDto reternMomentDto = momentService.getMomentById(momentId);
 
         verify(momentRepository, times(1)).findById(anyLong());
-        assertEquals(momentDto1,reternMomentDto);
+        assertEquals(momentDto1, reternMomentDto);
     }
 }

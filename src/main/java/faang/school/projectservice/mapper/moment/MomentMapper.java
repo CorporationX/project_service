@@ -9,7 +9,6 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MomentMapper {
@@ -23,10 +22,6 @@ public interface MomentMapper {
         return projects.stream().map(Project::getId).toList();
     }
 
-    default List<MomentDto> toListDto(List<Moment> moments){
-        return moments.stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-    }
+    List<MomentDto> toListDto(List<Moment> moments);
 }
 

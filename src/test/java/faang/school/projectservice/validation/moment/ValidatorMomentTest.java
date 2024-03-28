@@ -40,29 +40,17 @@ public class ValidatorMomentTest {
     }
 
     @Test
-    public void shouldPassValidationWhenDtoHasValidName() {
-        momentDto.setName("Valid Name");
-        momentValidator.validatorMomentName(momentDto);
-    }
-
-    @Test
-    public void testValidatorMomentNameIsBlank() {
-        momentDto.setName(" ");
-        assertThrows(DataValidationException.class, () -> momentValidator.validatorMomentName(momentDto));
-    }
-
-    @Test
     public void shouldThrowExceptionWhenProjectIdsNull() {
         momentDto.setProjectIds(null);
 
-        assertThrows(IllegalArgumentException.class, () -> momentValidator.validatorProjectOfMoment(momentDto));
+        assertThrows(DataValidationException.class, () -> momentValidator.validateProjectOfMoment(momentDto));
     }
 
     @Test
     public void shouldThrowExceptionWhenProjectIdsEmpty() {
         momentDto.setProjectIds(new ArrayList<>());
 
-        assertThrows(IllegalArgumentException.class, () -> momentValidator.validatorProjectOfMoment(momentDto));
+        assertThrows(DataValidationException.class, () -> momentValidator.validateProjectOfMoment(momentDto));
     }
 
     @Test
@@ -72,7 +60,7 @@ public class ValidatorMomentTest {
         projectIds.add(null);
         momentDto.setProjectIds(projectIds);
 
-        assertThrows(IllegalArgumentException.class, () -> momentValidator.validatorProjectOfMoment(momentDto));
+        assertThrows(DataValidationException.class, () -> momentValidator.validateProjectOfMoment(momentDto));
     }
 
     @Test
@@ -82,6 +70,6 @@ public class ValidatorMomentTest {
         projectIds.add(2L);
         momentDto.setProjectIds(projectIds);
 
-        momentValidator.validatorProjectOfMoment(momentDto);
+        momentValidator.validateProjectOfMoment(momentDto);
     }
 }
