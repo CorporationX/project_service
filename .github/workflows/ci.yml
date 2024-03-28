@@ -4,13 +4,16 @@ on:
   pull_request:
     branches:
       - dragon-master-bc3
+  push:
+    branches:
+      - dragon-master-bc3
 
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    #использование бд для тестирования в GitHubActions
+    #БД для тестирования в GitHubActions
     services:
       postgres:
         image: postgres:12
