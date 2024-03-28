@@ -9,10 +9,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-//spring context
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Testcontainers
+@SpringBootTest(classes = ProjectServiceApplication.class)
+//@Testcontainers
 public class SpringContextTest {
     @Autowired
     private ApplicationContext applicationContext;
