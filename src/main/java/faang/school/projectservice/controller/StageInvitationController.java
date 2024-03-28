@@ -39,7 +39,9 @@ public class StageInvitationController {
         stageInvitationService.declineInvitation(invitationId, invitedId, description);
     }
 
-    public List<StageInvitationDto> getAllInvitationsForUserWithStatus(Long teamMemberId, StageInvitationStatus status) {
+    @PostMapping("/{invitedId}/getAllInvitations")
+    public List<StageInvitationDto> getAllInvitationsForUserWithStatus(@PathVariable("invitedId") Long teamMemberId,
+                                                                       @RequestBody StageInvitationStatus status) {
         return stageInvitationService.getAllInvitationsForUserWithStatus(teamMemberId, status);
     }
 }
