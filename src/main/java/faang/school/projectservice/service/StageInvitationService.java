@@ -24,16 +24,16 @@ public class StageInvitationService {
     private final TeamMemberRepository teamMemberRepository;
     private final StageInvitationMapper stageInvitationMapper;
 
-    public StageInvitationDto sendInvitation(Long stageId, Long authorId, Long invitedId, String description) {
-        Stage stage = stageRepository.getById(stageId);
-        TeamMember author = teamMemberRepository.findById(authorId);
-        TeamMember invited = teamMemberRepository.findById(invitedId);
+    public StageInvitationDto sendInvitation(StageInvitationDto stageInvitationDto) {
+        Stage stage = stageRepository.getById(stageInvitationDto.getStageId());
+        TeamMember author = teamMemberRepository.findById(stageInvitationDto.getAuthorId());
+        TeamMember invited = teamMemberRepository.findById(stageInvitationDto.getInvitedId());
         StageInvitation stageInvitation = StageInvitation.builder()
                 .invited(invited)
                 .stage(stage)
                 .author(author)
                 .status(StageInvitationStatus.PENDING)
-                .description(description)
+                .description(stageInvitationDto.getDescription())
                 .build();
         return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
     }

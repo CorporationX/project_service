@@ -4,8 +4,9 @@ import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.StageInvitationService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -15,14 +16,17 @@ import java.util.List;
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
-    public StageInvitationDto sendInvitation(Long stageId, Long authorId, Long invitedId, String description) {
-        return stageInvitationService.sendInvitation(stageId, authorId, invitedId, description);
+    @PostMapping("/sendInvitation")
+    public StageInvitationDto sendInvitation(@RequestBody StageInvitationDto stageInvitationDto) {
+        return stageInvitationService.sendInvitation(stageInvitationDto);
     }
 
+    @PostMapping("/acceptInvitation")
     public void acceptInvitation(Long invitationId, Long invitedId) {
         stageInvitationService.acceptInvitation(invitationId, invitedId);
     }
 
+    @PostMapping("/declineInvitation")
     public void  declineInvitation(Long invitationId, Long invitedId, String description) {
         if (description.isEmpty() || description.isBlank()) {
             throw new DataValidationException("You can not decline invitation without cause!");

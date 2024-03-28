@@ -75,7 +75,7 @@ public class StageInvitationServiceTest {
         Mockito.when(stageRepository.getById(stageId)).thenReturn(stage);
         Mockito.when(teamMemberRepository.findById(authorId)).thenReturn(author);
         Mockito.when(teamMemberRepository.findById(invitedId)).thenReturn(invited);
-        stageInvitationService.sendInvitation(stageId, authorId, invitedId, null);
+        stageInvitationService.sendInvitation(stageInvitationMapper.toDto(stageInvitation));
         ArgumentCaptor<StageInvitation> argumentCaptor = ArgumentCaptor.forClass(StageInvitation.class);
         verify(stageInvitationRepository, times(1)).save(argumentCaptor.capture());
         verify(stageInvitationMapper, times(1)).toDto(stageInvitationRepository.save(argumentCaptor.capture()));
@@ -120,7 +120,7 @@ public class StageInvitationServiceTest {
         Mockito.when(stageInvitationRepository.findAll()).thenReturn(List.of(stageInvitation));
         Mockito.when(teamMemberRepository.findById(invitedId)).thenReturn(invited);
         List<StageInvitationDto> result = stageInvitationService.getAllInvitationsForUserWithStatus(invitedId, StageInvitationStatus.REJECTED);
-        assertSame(result.get(0).getStageInvitationId(), invitationId);
+        assertSame(result.get(0).getId(), invitationId);
     }
 
 }
