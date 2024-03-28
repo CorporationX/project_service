@@ -8,6 +8,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.stage.StageInvitationService;
 import faang.school.projectservice.service.stage.filters.StageInvitationFilter;
+import faang.school.projectservice.validator.StageValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,11 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationMapper stageInvitationMapper;
     private final StageInvitationRepository stageInvitationRepository;
     private final List<StageInvitationFilter> stageInvitationFilters;
+    private final StageValidator stageValidator;
 
     public StageInvitationDto create(StageInvitationDto stageInvitationDto) {
+        stageValidator.validate(stageInvitationDto);
+
         stageInvitationDto.setStatus(StageInvitationStatus.PENDING);
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
         return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
@@ -36,12 +40,29 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     }
 
     public StageInvitationDto accept(StageInvitationDto stageInvitationDto) {
-        stageInvitationDto.setStatus(StageInvitationStatus.ACCEPTED);
-        return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitationMapper.toEntity(stageInvitationDto)));
+        StageInvitation invitation = stageInvitationRepository.findById(stageInvitationDto.getId());
+
+        if (invitation.getStatus() != StageInvitationStatus.PENDING) {
+            throw new IllegalStateException("Only pending invitations can be accepted");
+        }
+
+        invitation.setStatus(StageInvitationStatus.ACCEPTED);
+        stageInvitationRepository.save(invitation);
+
+        return stageInvitationMapper.toDto(invitation);
     }
 
     public StageInvitationDto reject(StageInvitationDto stageInvitationDto) {
-        stageInvitationDto.setStatus(StageInvitationStatus.REJECTED);
-        return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitationMapper.toEntity(stageInvitationDto)));
+        StageInvitation invitation = stageInvitationRepository.findById(stageInvitationDto.getId());
+
+        if (invitation.getStatus() != StageInvitationStatus.PENDING) {
+            throw new IllegalStateException("Only pending invitations can be rejected");
+        }
+
+        invitation.setStatus(StageInvitationStatus.REJECTED);
+        invitation.setDescription(stageInvitationDto.getDescription());
+        stageInvitationRepository.save(invitation);
+
+        return stageInvitationMapper.toDto(invitation);
     }
 }
