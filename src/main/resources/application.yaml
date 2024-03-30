@@ -36,8 +36,7 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
-    isMocked: false
+    bucketName: corpbucket
   payment-service:
     host: http://localhost
     port: 9080
