@@ -1,8 +1,7 @@
 package faang.school.projectservice.controller.cover;
 
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.service.cover.CoverService;
+import faang.school.projectservice.service.resource.ResourceService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,9 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/cover")
 @Tag(name = "Cover", description = "Endpoints for managing cover")
 public class CoverController {
-    private final CoverService coverService;
+    private final ResourceService resourceService;
     @PutMapping("/{projectId}/add")
     public ResourceDto addCover(@PathVariable Long projectId, @RequestBody MultipartFile file){
-        return coverService.addCover(projectId, file);
+        return resourceService.uploadCover(projectId, file);
     }
 }

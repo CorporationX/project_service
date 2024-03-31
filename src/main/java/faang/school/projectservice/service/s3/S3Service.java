@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.s3;
 
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -19,18 +20,17 @@ import java.awt.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "services.s3.bucketName")
 public class S3Service {
-    private final AmazonS3 s3Client;
+    private static AmazonS3 s3Client;
 
     @Value("${services.s3.bucketName}")
-    private String bucketName;
+    private static String bucketName;
 
     @SneakyThrows
-    public Resource uploadFile(MultipartFile file, String folder){
+    public static Resource uploadFile(MultipartFile file, String folder){
         long fileSize = file.getSize();
         ObjectMetadata objectMetaData = new ObjectMetadata();
         objectMetaData.setContentLength(fileSize);
@@ -42,7 +42,7 @@ public class S3Service {
         s3Client.putObject(putObjectRequest);
 
         Resource resource = new Resource();
-        resource.setId(1L);
+        resource.setId(fileSize % 10);
         resource.setKey(key);
         resource.setSize(BigInteger.valueOf(fileSize));
         resource.setName(file.getOriginalFilename());

@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.resource;
 
+import faang.school.projectservice.model.Project;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -19,4 +20,5 @@ public class ResourceDto {
     private String name;
     private String key;
     private BigInteger size;
+    private Project project;
 }
