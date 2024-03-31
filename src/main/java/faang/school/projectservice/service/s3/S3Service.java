@@ -3,41 +3,50 @@ package faang.school.projectservice.service.s3;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.util.ImmutableMapParameter;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.api.ErrorMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.processing.FilerException;
-import java.io.IOException;
-import java.util.logging.ErrorManager;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "services.s3.bucketName")
 public class S3Service {
     private final AmazonS3 s3Client;
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public Project uploadFile(MultipartFile file, String folder){
+    @SneakyThrows
+    public Resource uploadFile(MultipartFile file, String folder){
         long fileSize = file.getSize();
         ObjectMetadata objectMetaData = new ObjectMetadata();
+        objectMetaData.setContentLength(fileSize);
         objectMetaData.setContentType(file.getContentType());
         String key = String.format("%s/%d%s",folder,file.getOriginalFilename());
 
-        try {
-            PutObjectRequest putObjectRequest = new PutObjectRequest(
-                    bucketName, key , file.getInputStream(), objectMetaData);
-            s3Client.putObject(putObjectRequest);
-        } catch (IOException e) {
-            log.error((e.getMessage()));
-            throw new FilerException(ErrorMessage.FILE_EXCEPTION);
-        }
+        PutObjectRequest putObjectRequest = new PutObjectRequest(
+                bucketName, key, file.getInputStream(), objectMetaData);
+        s3Client.putObject(putObjectRequest);
 
+        Resource resource = new Resource();
+        resource.setId(1L);
+        resource.setKey(key);
+        resource.setSize(BigInteger.valueOf(fileSize));
+        resource.setName(file.getOriginalFilename());
+
+        return resource;
     }
 }
