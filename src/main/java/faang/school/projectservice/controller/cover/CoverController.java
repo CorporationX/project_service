@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class CoverController {
     private final ResourceService resourceService;
     @PutMapping("/{projectId}/add")
-    public ResourceDto addCover(@PathVariable Long projectId, @RequestBody MultipartFile file){
+    public ResourceDto addCover(@PathVariable Long projectId, @RequestParam("file") MultipartFile file){
         return resourceService.uploadCover(projectId, file);
     }
 }
