@@ -42,9 +42,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     public StageInvitationDto accept(StageInvitationDto stageInvitationDto) {
         StageInvitation invitation = stageInvitationRepository.findById(stageInvitationDto.getId());
 
-        if (invitation.getStatus() != StageInvitationStatus.PENDING) {
-            throw new IllegalStateException("Only pending invitations can be accepted");
-        }
+        stageValidator.checkStageInvitationPendingStatus(invitation);
 
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
         stageInvitationRepository.save(invitation);
@@ -55,9 +53,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     public StageInvitationDto reject(StageInvitationDto stageInvitationDto) {
         StageInvitation invitation = stageInvitationRepository.findById(stageInvitationDto.getId());
 
-        if (invitation.getStatus() != StageInvitationStatus.PENDING) {
-            throw new IllegalStateException("Only pending invitations can be rejected");
-        }
+        stageValidator.checkStageInvitationPendingStatus(invitation);
 
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(stageInvitationDto.getDescription());
