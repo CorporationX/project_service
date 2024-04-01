@@ -5,7 +5,7 @@ import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.exceptions.EntityNotFoundException;
+import faang.school.projectservice.handler.exceptions.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

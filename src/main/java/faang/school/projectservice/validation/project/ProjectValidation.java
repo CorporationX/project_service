@@ -1,8 +1,9 @@
 package faang.school.projectservice.validation.project;
 
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.exceptions.EntityNotFoundException;
+import faang.school.projectservice.handler.exceptions.DataValidationException;
+import faang.school.projectservice.handler.exceptions.EntityNotFoundException;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Component;
 public class ProjectValidation {
 
     private final ProjectRepository projectRepository;
+    private final UserServiceClient userServiceClient;
 
     public void validationCreate(ProjectDto projectDto) {
         validateDtoFields(projectDto);
         validateProjectNameUnique(projectDto);
+        validateUserExistsById(projectDto);
     }
 
     public void validationUpdate(ProjectDto projectDto) {
@@ -62,6 +65,12 @@ public class ProjectValidation {
     private void validateProjectNameUnique(ProjectDto projectDto) {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException(ProjectConstraints.PROJECT_NAME_MUST_BE_UNIQUE.getMessage());
+        }
+    }
+
+    private void validateUserExistsById(ProjectDto projectDto) {
+        if(userServiceClient.getUser(projectDto.getOwnerId()) == null){
+            throw new EntityNotFoundException("User with id " + projectDto.getOwnerId() + " not found in database");
         }
     }
 }

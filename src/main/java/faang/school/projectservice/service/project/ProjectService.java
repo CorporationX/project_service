@@ -2,7 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectDtoFilter;
-import faang.school.projectservice.exceptions.EntityNotFoundException;
+import faang.school.projectservice.handler.exceptions.EntityNotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;

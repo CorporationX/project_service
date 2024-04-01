@@ -8,7 +8,7 @@ import static org.mockito.Mockito.*;
 
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
-import faang.school.projectservice.exceptions.EntityNotFoundException;
+import faang.school.projectservice.handler.exceptions.EntityNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
