@@ -30,7 +30,6 @@ public class ResourceService {
     @Transactional
     public Resource addACoverToTheProject(Long projectId, MultipartFile file) {
         ProjectDto projectDto = projectService.findProjectById(projectId);
-        final Long id = projectDto.getId();
         imageResizer.resizeAndCompressImage(file);
 
         String folder = projectDto.getId() + projectDto.getName();
@@ -38,7 +37,7 @@ public class ResourceService {
         resource.setProject(projectMapper.toEntity(projectDto));
         resource = resourceRepository.save(resource);
 
-        projectDto.setCoverImageId("ImageId: " + id);
+        projectDto.setCoverImageId(file.getName());
         projectRepository.save(projectMapper.toEntity(projectDto));
 
         return resource;
