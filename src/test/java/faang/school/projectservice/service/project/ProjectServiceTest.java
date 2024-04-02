@@ -8,6 +8,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
+import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.validation.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ public class ProjectServiceTest {
     private ProjectFilter projectFilter;
     private List<ProjectFilter> projectFilters;
     private ProjectService projectService;
+    private ResourceService resourceService;
 
     @BeforeEach
     void setUp() {
@@ -45,7 +47,8 @@ public class ProjectServiceTest {
         projectValidator = mock(ProjectValidator.class);
         projectFilter = mock(ProjectFilter.class);
         projectFilters = Collections.singletonList(projectFilter);
-        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters);
+        resourceService = mock(ResourceService.class);
+        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters, resourceService);
     }
 
     @Test

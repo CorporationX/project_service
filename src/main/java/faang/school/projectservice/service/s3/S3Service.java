@@ -24,13 +24,13 @@ import java.math.BigInteger;
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "services.s3.bucketName")
 public class S3Service {
-    private static AmazonS3 s3Client;
+    private final AmazonS3 s3Client;
 
     @Value("${services.s3.bucketName}")
-    private static String bucketName;
+    private String bucketName;
 
     @SneakyThrows
-    public static Resource uploadFile(MultipartFile file, String folder){
+    public Resource uploadFile(MultipartFile file, String folder){
         long fileSize = file.getSize();
         ObjectMetadata objectMetaData = new ObjectMetadata();
         objectMetaData.setContentLength(fileSize);
@@ -42,11 +42,13 @@ public class S3Service {
         s3Client.putObject(putObjectRequest);
 
         Resource resource = new Resource();
-        resource.setId(fileSize % 10);
         resource.setKey(key);
         resource.setSize(BigInteger.valueOf(fileSize));
         resource.setName(file.getOriginalFilename());
 
         return resource;
+    }
+    public void deleteFile(String key){
+        s3Client.deleteObject(bucketName,key);
     }
 }

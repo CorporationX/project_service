@@ -2,7 +2,9 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.resource.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -16,7 +18,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -59,5 +63,9 @@ public class ProjectController {
     @GetMapping("/{projectId}")
     public ProjectDto findProjectById(@PathVariable @Positive(message = "id must be greater than zero") Long projectId) {
         return projectService.findProjectById(projectId);
+    }
+    @PutMapping("/{projectId}/add")
+    public ProjectDto addACoverToTheProject(@PathVariable Long projectId, @RequestParam("file") MultipartFile file){
+        return projectService.addACoverToTheProject(projectId, file);
     }
 }

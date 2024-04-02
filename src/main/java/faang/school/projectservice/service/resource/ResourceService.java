@@ -1,10 +1,9 @@
 package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.image.ImageResizer;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.mapper.resource.ResourceMapper;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import static faang.school.projectservice.service.s3.S3Service.bucketName;
 
 @Service
 @RequiredArgsConstructor
@@ -25,32 +23,27 @@ public class ResourceService {
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
     private final ProjectMapper projectMapper;
-    private final ResourceMapper resourceMapper;
+    private final ImageResizer imageResizer;
+
 
     @SneakyThrows
     @Transactional
-    public ResourceDto uploadCover(Long projectId, MultipartFile file) {
-        final Long id = file.getSize() % 10; //
+    public Resource addACoverToTheProject(Long projectId, MultipartFile file) {
         ProjectDto projectDto = projectService.findProjectById(projectId);
+        final Long id = projectDto.getId();
+        imageResizer.resizeAndCompressImage(file);
 
-        String folder = projectDto.getId() + projectDto.getName() + projectDto.getCoverImageId();
-        Resource resource = S3Service.uploadFile(file, folder);
+        String folder = projectDto.getId() + projectDto.getName();
+        Resource resource = s3Service.uploadFile(file, folder);
         resource.setProject(projectMapper.toEntity(projectDto));
         resource = resourceRepository.save(resource);
 
-        projectDto.setCoverImageId(String.valueOf(id));
+        projectDto.setCoverImageId("ImageId: " + id);
         projectRepository.save(projectMapper.toEntity(projectDto));
 
-        return resourceMapper.toDto(resource);
+        return resource;
     }
-
-    @Transactional
-    public void deleteResource(Long resourceId) {
-        Resource resource = resourceRepository.findById(resourceId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Resource with id %s not found", resourceId)));
-        s3Service.deleteObject(bucketName, resource.getKey());
-        log.info("File {} deleted from file storage", resource.getKey());
-        resourceRepository.delete(resource);
-        log.info("File {} deleted from data base", resource.getKey());
+    public void deleteResource(String key){
+        s3Service.deleteFile(key);
     }
 }

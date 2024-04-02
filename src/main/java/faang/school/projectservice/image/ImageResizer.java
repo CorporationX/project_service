@@ -14,7 +14,7 @@ import java.io.File;
 @Component
 public class ImageResizer {
     @SneakyThrows
-    public static File resizeAndCompressImage(MultipartFile file) {
+    public File resizeAndCompressImage(MultipartFile file) {
         log.info("Start resize");
 
         final long MAX_FILE_SIZE = 5 * 1024 * 1024;

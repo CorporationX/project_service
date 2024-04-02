@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -20,5 +22,4 @@ public class ResourceDto {
     private String name;
     private String key;
     private BigInteger size;
-    private Project project;
 }
