@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.vacancy;
 
+
 import faang.school.projectservice.model.VacancyStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,4 +34,5 @@ public class VacancyDto {
     private Long curatorId;
     private VacancyStatus status;
     private Integer workersRequired;
+    private Long tutorId;
 }
