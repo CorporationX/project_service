@@ -4,20 +4,14 @@ package faang.school.projectservice.service.s3;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.util.ImmutableMapParameter;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @Service
@@ -30,12 +24,12 @@ public class S3Service {
     private String bucketName;
 
     @SneakyThrows
-    public Resource uploadFile(MultipartFile file, String folder){
+    public Resource uploadFile(MultipartFile file, String folder) {
         long fileSize = file.getSize();
         ObjectMetadata objectMetaData = new ObjectMetadata();
         objectMetaData.setContentLength(fileSize);
         objectMetaData.setContentType(file.getContentType());
-        String key = String.format("%s/%d%s",folder,file.getOriginalFilename());
+        String key = String.format("%s/%d%s", folder, file.getOriginalFilename());
 
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 bucketName, key, file.getInputStream(), objectMetaData);
@@ -48,7 +42,8 @@ public class S3Service {
 
         return resource;
     }
-    public void deleteFile(String key){
-        s3Client.deleteObject(bucketName,key);
+
+    public void deleteFile(String key) {
+        s3Client.deleteObject(bucketName, key);
     }
 }

@@ -16,7 +16,7 @@ public class ResourceController {
     private final ResourceService resourceService;
 
     @DeleteMapping("/{key}/delete")
-    public void deleteCover(@PathVariable String key){
+    public void deleteCover(@PathVariable String key) {
         resourceService.deleteResource(key);
     }
 }

@@ -42,7 +42,8 @@ public class ResourceService {
 
         return resource;
     }
-    public void deleteResource(String key){
+
+    public void deleteResource(String key) {
         s3Service.deleteFile(key);
     }
 }

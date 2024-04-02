@@ -10,27 +10,20 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
 import lombok.SneakyThrows;
-import org.imgscalr.Scalr;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -85,19 +78,20 @@ public class ResourceServiceTest {
 
         when(imageResizer.resizeAndCompressImage(file1)).thenReturn(file);
         when(projectService.findProjectById(1L)).thenReturn(projectDto);
-        when(s3Service.uploadFile(file1,folder)).thenReturn(resource2);
+        when(s3Service.uploadFile(file1, folder)).thenReturn(resource2);
         when(resourceRepository.save(any())).thenReturn(resource2);
 
 
         Resource resourse1 = resourceService.addACoverToTheProject(1L, file1);
 
-        verify(imageResizer,times(1)).resizeAndCompressImage(file1);
-        verify(projectService,times(1)).findProjectById(1L);
-        verify(s3Service,times(1)).uploadFile(file1,folder);
+        verify(imageResizer, times(1)).resizeAndCompressImage(file1);
+        verify(projectService, times(1)).findProjectById(1L);
+        verify(s3Service, times(1)).uploadFile(file1, folder);
         assertEquals(resource2.getId(), resourse1.getId(), "Returned resource should have the uploaded resource's ID");
         assertNotNull(resourse1, "Returned resource should not be null");
 
     }
+
     @Test
     void deleteResource() {
         resource2 = Resource.builder()
