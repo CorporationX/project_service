@@ -81,7 +81,6 @@ public class ResourceServiceTest {
         when(s3Service.uploadFile(file1, folder)).thenReturn(resource2);
         when(resourceRepository.save(any())).thenReturn(resource2);
 
-
         Resource resourse1 = resourceService.addACoverToTheProject(1L, file1);
 
         verify(imageResizer, times(1)).resizeAndCompressImage(file1);
