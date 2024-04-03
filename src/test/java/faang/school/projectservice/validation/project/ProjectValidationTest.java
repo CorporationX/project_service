@@ -1,8 +1,10 @@
 package faang.school.projectservice.validation.project;
 
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.exceptions.EntityNotFoundException;
+import faang.school.projectservice.handler.exceptions.DataValidationException;
+import faang.school.projectservice.handler.exceptions.EntityNotFoundException;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.Assert;
@@ -21,6 +23,8 @@ import static org.mockito.Mockito.*;
 public class ProjectValidationTest {
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private UserServiceClient userServiceClient;
     @InjectMocks
     private ProjectValidation projectValidation;
 
@@ -72,13 +76,15 @@ public class ProjectValidationTest {
 
     @Test
     void testValidationCreateDontThrowException() {
-        ProjectDto projectDto = ProjectDto.builder().name("Бизнес Фича").description("Дом.рф").visibility(ProjectVisibility.PUBLIC).build();
+        ProjectDto projectDto = ProjectDto.builder().name("Бизнес Фича").description("Дом.рф").ownerId(1L).visibility(ProjectVisibility.PUBLIC).build();
 
         when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())).thenReturn(false);
+        when(userServiceClient.getUser(projectDto.getOwnerId())).thenReturn(new UserDto());
 
         assertDoesNotThrow(() -> projectValidation.validationCreate(projectDto));
 
         verify(projectRepository, times(1)).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
+        verify(userServiceClient).getUser(projectDto.getOwnerId());
     }
 
     @Test

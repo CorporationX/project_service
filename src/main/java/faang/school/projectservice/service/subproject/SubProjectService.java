@@ -13,6 +13,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import faang.school.projectservice.validation.subproject.SubProjectValidation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -27,21 +28,21 @@ import static faang.school.projectservice.model.ProjectVisibility.PRIVATE;
 import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 
 @Service
-@RequiredArgsConstructor
 public class SubProjectService {
     private final SubProjectValidation subProjectValidation;
     private final ProjectRepository projectRepository;
     private final List<SubProjectFilter> projectFilters;
     private final ProjectMapper projectMapper;
+    @Autowired
     public SubProjectService(SubProjectValidation subProjectValidation,
                              ProjectRepository projectRepository,
                              ProjectMapper projectMapper,
                              @Qualifier("subProjectNameFilter") SubProjectFilter subProjectNameFilter,
-                             @Qualifier("subProjectStatusFilter") SubProjectFilter subProjectStatusFilter){
+                             @Qualifier("subProjectStatusFilter") SubProjectFilter subProjectStatusFilter) {
         this.subProjectValidation = subProjectValidation;
         this.projectRepository = projectRepository;
         this.projectMapper = projectMapper;
-        projectFilters = List.of(subProjectNameFilter,subProjectStatusFilter);
+        projectFilters = List.of(subProjectNameFilter, subProjectStatusFilter);
     }
 
 
