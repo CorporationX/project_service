@@ -39,7 +39,8 @@ public class StageInvitationServiceTest {
     private TeamMemberRepository teamMemberRepository;
     @Spy
     private StageInvitationMapperImpl stageInvitationMapper;
-    private List<StageInvitationFilter> stageInvitationFilters;
+    @Mock
+    private List<StageInvitationFilter> stageInvitationFilters = new ArrayList<>();
     @InjectMocks
     StageInvitationService stageInvitationService;
 
