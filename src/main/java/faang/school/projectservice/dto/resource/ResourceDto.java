@@ -20,6 +20,7 @@ public class ResourceDto {
     @NotBlank(message = "Project must have a name")
     @Size(max = 255, message = "Name should not exceed 255 characters")
     private String name;
+    @NotBlank
     private String key;
     private BigInteger size;
 }
