@@ -15,12 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Resource", description = "Endpoint for managing resources")
-@RequestMapping("/v1")
+@RequestMapping("/v1/resources")
 public class ResourceController {
     private final ResourceService resourceService;
     @Operation(summary = "uploading file to project ")
     @PostMapping("/{userId}/upload/files")
-    public ResourceDto uploadFileToProject(@PathVariable("userId") Long userId, @RequestBody MultipartFile file){
+    public ResourceDto uploadFileToProject(@PathVariable Long userId, @RequestBody MultipartFile file){
         return resourceService.uploadFileToProject(userId, file);
     }
 }

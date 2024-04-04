@@ -24,7 +24,7 @@ public class S3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public Resource uploadDile(MultipartFile file, String folder){
+    public Resource uploadFile(MultipartFile file, String folder){
         long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
@@ -43,8 +43,8 @@ public class S3Service {
         resource.setSize(BigInteger.valueOf(fileSize));
         resource.setType(ResourceType.getResourceType(file.getContentType()));
         resource.setStatus(ResourceStatus.ACTIVE);
-        resource.setCreatedAt(LocalDateTime.now());
-        resource.setUpdatedAt(LocalDateTime.now());
+        //resource.setCreatedAt(LocalDateTime.now());
+        //resource.setUpdatedAt(LocalDateTime.now());
         return resource;
     }
 
