@@ -9,6 +9,9 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.filter.StageInvitationFilter;
+import faang.school.projectservice.service.filter.StageInvitationStatusFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,10 +35,14 @@ public class StageInvitationServiceTest {
     private StageInvitationRepository stageInvitationRepository;
     @Mock
     private StageRepository stageRepository;
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
     @Spy
     private StageInvitationMapperImpl stageInvitationMapper;
+    private List<StageInvitationFilter> stageInvitationFilters;
     @InjectMocks
     StageInvitationService stageInvitationService;
+
     private Long stageId;
     private Long authorId;
     private Long invitedId;
@@ -47,6 +54,8 @@ public class StageInvitationServiceTest {
 
     @BeforeEach
     public void initialize() {
+        stageInvitationFilters.add(new StageInvitationStatusFilter());
+        stageInvitationFilters.add(new StageInvitationStatusFilter());
         stageId = 100L;
         authorId = 200L;
         invitedId = 300L;
@@ -65,6 +74,7 @@ public class StageInvitationServiceTest {
                 .description("")
                 .id(invitationId)
                 .build();
+
     }
 
     @Test
