@@ -11,7 +11,6 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageInvitationMapper {
 
-//        @Mapping(target = "stageInvitationId", source = "id")
         @Mapping(target = "stageId", source = "stage.stageId")
         @Mapping(target = "authorId", source = "author.id")
         @Mapping(target = "invitedId", source = "invited.id")

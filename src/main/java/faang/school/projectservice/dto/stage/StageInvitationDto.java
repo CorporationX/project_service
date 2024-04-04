@@ -8,6 +8,5 @@ public class StageInvitationDto {
     private Long stageId;
     private Long authorId;
     private Long invitedId;
-    private String description;
 
 }
