@@ -40,8 +40,8 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
-    isMocked: false
+    bucketName: project-bucket
+    max_size: 2147483648
   payment-service:
     host: http://localhost
     port: 9080
