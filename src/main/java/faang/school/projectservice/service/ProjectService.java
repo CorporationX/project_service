@@ -2,23 +2,18 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.DataAccessException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.filter.ProjectFilter;
-import faang.school.projectservice.service.filter.ProjectNameFilter;
-import faang.school.projectservice.service.filter.ProjectStatusFilter;
-import faang.school.projectservice.service.validator.ProjectValidator;
+import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -35,6 +30,7 @@ public class ProjectService {
             throw new IllegalStateException("User ID " + requestUserId + "is already a member of the team associated with the existing project.");
         }
         Project projectToSave = projectMapper.toEntity(projectDto, requestUserId);
+        projectToSave.setMaxStorageSize(BigInteger.valueOf(2000000000));
         Project savedProject = projectJpaRepository.save(projectToSave);
 
         return projectMapper.toDto(savedProject);
@@ -86,10 +82,18 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
+    Project getProjectById(long projectId){
+        return projectJpaRepository.findById(projectId).orElseThrow(EntityNotFoundException::new);
+    }
+
+    Project save(Project project){
+        return projectJpaRepository.save(project);
+    }
 
 
     private Project findProjectOrThrowException(long projectId){
         return projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
     }
+
 
 }

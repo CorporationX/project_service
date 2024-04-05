@@ -1,8 +1,6 @@
 package faang.school.projectservice.model;
 
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,6 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,9 +21,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
+@Builder
 @Table(name = "resource")
 @Data
 @NoArgsConstructor
@@ -41,12 +40,12 @@ public class Resource {
 
     private BigInteger size;
 
-    @ElementCollection(targetClass = TeamRole.class)
-    @CollectionTable(name = "resource_allowed_roles",
-            joinColumns = @JoinColumn(name = "resource_id"))
-    @Column(name = "role_id")
-    @Enumerated(EnumType.STRING)
-    private List<TeamRole> allowedRoles;
+//    @ElementCollection(targetClass = TeamRole.class)
+//    @CollectionTable(name = "resource_allowed_roles",
+//            joinColumns = @JoinColumn(name = "resource_id"))
+//    @Column(name = "role_id")
+//    @Enumerated(EnumType.STRING)
+//    private List<TeamRole> allowedRoles;
 
     @Enumerated(EnumType.STRING)
     private ResourceType type;

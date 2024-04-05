@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.filter;
+package faang.school.projectservice.filter.project;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
@@ -8,15 +8,16 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Component
-public class ProjectNameFilter implements ProjectFilter{
+public class ProjectStatusFilter implements ProjectFilter{
     @Override
     public boolean isApplicable(ProjectFilterDto filters) {
-        return filters.getNamePattern() != null;
+        return filters.getStatusPattern() != null;
     }
 
     @Override
     public List<Project> apply(Stream<Project> projects, ProjectFilterDto filters) {
         return projects
-                .filter(project -> project.getName().contains(filters.getNamePattern())).toList();
+                .filter(project -> project.getStatus().equals(filters.getStatusPattern()))
+                .toList();
     }
 }
