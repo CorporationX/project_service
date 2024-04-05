@@ -4,9 +4,9 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.image.ImageResizer;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ResourceService {
     private final ResourceRepository resourceRepository;
-    private final ProjectService projectService;
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
     private final ProjectMapper projectMapper;
@@ -29,7 +28,8 @@ public class ResourceService {
     @SneakyThrows
     @Transactional
     public Resource addACoverToTheProject(Long projectId, MultipartFile file) {
-        ProjectDto projectDto = projectService.findProjectById(projectId);
+        Project project = projectRepository.getProjectById(projectId);
+        ProjectDto projectDto = projectMapper.toDto(project);
         imageResizer.resizeAndCompressImage(file);
 
         String folder = projectDto.getId() + projectDto.getName();

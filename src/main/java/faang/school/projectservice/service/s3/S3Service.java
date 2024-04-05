@@ -28,7 +28,7 @@ public class S3Service {
         ObjectMetadata objectMetaData = new ObjectMetadata();
         objectMetaData.setContentLength(fileSize);
         objectMetaData.setContentType(file.getContentType());
-        String key = String.format("%s/%d%s", folder, file.getOriginalFilename());
+        String key = String.format("%s/%d%s", folder,System.currentTimeMillis(), file.getOriginalFilename());
 
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 bucketName, key, file.getInputStream(), objectMetaData);

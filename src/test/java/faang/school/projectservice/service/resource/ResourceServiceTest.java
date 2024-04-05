@@ -7,7 +7,6 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -35,8 +34,6 @@ public class ResourceServiceTest {
     private ResourceRepository resourceRepository;
     @Mock
     private ProjectRepository projectRepository;
-    @Mock
-    private ProjectService projectService;
     @Mock
     private S3Service s3Service;
     @Mock
@@ -77,14 +74,16 @@ public class ResourceServiceTest {
         String folder = projectDto.getId() + projectDto.getName();
 
         when(imageResizer.resizeAndCompressImage(file1)).thenReturn(file);
-        when(projectService.findProjectById(1L)).thenReturn(projectDto);
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
         when(s3Service.uploadFile(file1, folder)).thenReturn(resource2);
         when(resourceRepository.save(any())).thenReturn(resource2);
 
         Resource resourse1 = resourceService.addACoverToTheProject(1L, file1);
 
         verify(imageResizer, times(1)).resizeAndCompressImage(file1);
-        verify(projectService, times(1)).findProjectById(1L);
+        verify(projectRepository, times(1)).getProjectById(1L);
+        verify(projectMapper, times(1)).toDto(project);
         verify(s3Service, times(1)).uploadFile(file1, folder);
         assertEquals(resource2.getId(), resourse1.getId(), "Returned resource should have the uploaded resource's ID");
         assertNotNull(resourse1, "Returned resource should not be null");
