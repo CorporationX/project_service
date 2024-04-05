@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,6 +18,6 @@ public class MomentDto {
     @NotEmpty String name;
     String description;
     @NotNull LocalDateTime date;
-    @NotNull List<Long> projectIds;
+    List<Long> projectIds;
     List<Long> userIds;
 }
