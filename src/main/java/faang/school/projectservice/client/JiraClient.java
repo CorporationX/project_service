@@ -22,13 +22,13 @@ import java.util.concurrent.TimeoutException;
 public class JiraClient {
     private String username;
     private String password;
-    private String jiraUrl;
+    private String projectUrl;
     private JiraRestClient restClient;
 
     public JiraClient(JiraAccountDto jiraAccountDto) {
         this.username = jiraAccountDto.getUsername();
         this.password = jiraAccountDto.getPassword();
-        this.jiraUrl = jiraAccountDto.getProjectUrl();
+        this.projectUrl = jiraAccountDto.getProjectUrl();
         this.restClient = getJiraClient();
     }
 
@@ -43,6 +43,6 @@ public class JiraClient {
     }
 
     private URI getJiraUri() {
-        return URI.create(this.jiraUrl);
+        return URI.create(this.projectUrl);
     }
 }
