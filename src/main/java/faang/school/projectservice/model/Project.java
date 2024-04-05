@@ -71,7 +71,7 @@ public class Project {
     private ProjectVisibility visibility;
 
     @Column(name = "cover_image_id")
-    private String coverImageId;
+    private Long coverImageId;
 
     @OneToMany(mappedBy = "project")
     private List<Team> teams;
