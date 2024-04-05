@@ -11,6 +11,9 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://packages.atlassian.com/maven/repository/public")
+    }
 }
 
 dependencies {
@@ -36,7 +39,13 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
-     * Utils & Logging
+     * Jira
+     */
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4")
+    implementation("io.atlassian.fugue:fugue:5.0.0")
+
+    /**
+    * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
     implementation("org.slf4j:slf4j-api:2.0.5")
