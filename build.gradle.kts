@@ -41,7 +41,10 @@ dependencies {
     /**
      * Jira
      */
-    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4")
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4") {
+        exclude(group = "org.glassfish.jersey.core", module = "jersey-common")
+    }
+    implementation("org.glassfish.jersey.core:jersey-common:2.27")
     implementation("io.atlassian.fugue:fugue:5.0.0")
 
     /**

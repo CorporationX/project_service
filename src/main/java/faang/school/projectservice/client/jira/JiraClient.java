@@ -1,7 +1,8 @@
-package faang.school.projectservice.client;
+package faang.school.projectservice.client.jira;
 
 import com.atlassian.jira.rest.client.api.IssueRestClient;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
+import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import faang.school.projectservice.dto.jira.JiraAccountDto;
@@ -11,9 +12,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @Data
 @Component
@@ -32,9 +30,14 @@ public class JiraClient {
         this.restClient = getJiraClient();
     }
 
-    public String createIssue(IssueInput issue) throws ExecutionException, InterruptedException, TimeoutException {
+    public String createIssue(IssueInput issue) {
         IssueRestClient issueRestClient = restClient.getIssueClient();
-        return issueRestClient.createIssue(issue).get(20, TimeUnit.SECONDS).getKey();
+        return issueRestClient.createIssue(issue).claim().getKey();
+    }
+
+    public Issue getIssue(String issueKey) {
+        IssueRestClient issueRestClient = restClient.getIssueClient();
+        return issueRestClient.getIssue(issueKey).claim();
     }
 
     private JiraRestClient getJiraClient() {

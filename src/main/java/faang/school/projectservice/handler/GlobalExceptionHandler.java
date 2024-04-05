@@ -1,7 +1,6 @@
 package faang.school.projectservice.handler;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.JiraConnectionException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -37,11 +36,5 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ErrorResponse handleEntityNotFoundException(EntityNotFoundException exception) {
         return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage());
-    }
-
-    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    @ExceptionHandler(JiraConnectionException.class)
-    public ErrorResponse handleJiraConnectionException(JiraConnectionException exception) {
-        return new ErrorResponse(HttpStatus.SERVICE_UNAVAILABLE.value(), exception.getMessage());
     }
 }
