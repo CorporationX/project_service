@@ -14,7 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,7 +26,7 @@ public class MomentValidatorTest {
     private ProjectRepository projectRepository;
 
     @Test
-    public void testEmptyProjectIds(){
+    public void testEmptyProjectIds() {
         List<Long> projectIds = new ArrayList<>();
         MomentDto momentDto = MomentDto.builder()
                 .projectIds(projectIds)
@@ -34,7 +35,7 @@ public class MomentValidatorTest {
     }
 
     @Test
-    public void testNotExistedProjectIds(){
+    public void testNotExistedProjectIds() {
         List<Long> projectIds = List.of(1L);
         MomentDto momentDto = MomentDto.builder()
                 .projectIds(projectIds)
@@ -44,7 +45,7 @@ public class MomentValidatorTest {
     }
 
     @Test
-    public void testCompletedProjectIds(){
+    public void testCompletedProjectIds() {
         List<Long> projectIds = List.of(1L);
         MomentDto momentDto = MomentDto.builder()
                 .projectIds(projectIds)
@@ -53,8 +54,9 @@ public class MomentValidatorTest {
         when(projectRepository.getProjectById(1L)).thenReturn(Project.builder().status(ProjectStatus.COMPLETED).build());
         assertThrows(DataValidationException.class, () -> momentValidator.validateProjectIds(momentDto));
     }
+
     @Test
-    public void testCancelledProjectIds(){
+    public void testCancelledProjectIds() {
         List<Long> projectIds = List.of(1L);
         MomentDto momentDto = MomentDto.builder()
                 .projectIds(projectIds)
@@ -65,13 +67,12 @@ public class MomentValidatorTest {
     }
 
     @Test
-    public void testGoodProjectIds(){
+    public void testGoodProjectIds() {
         List<Long> projectIds = List.of(1L);
         MomentDto momentDto = MomentDto.builder()
                 .projectIds(projectIds)
                 .build();
-        when(projectRepository.existsById(1L)).thenReturn(true);
-        when(projectRepository.getProjectById(1L)).thenReturn(Project.builder().status(null).build());
-        assertThrows(DataValidationException.class, () -> momentValidator.validateProjectIds(momentDto));
+        when(projectRepository.findAllByIds(List.of(1L))).thenReturn(List.of(Project.builder().id(1L).build()));
+        assertDoesNotThrow(() -> momentValidator.validateProjectIds(momentDto));
     }
 }

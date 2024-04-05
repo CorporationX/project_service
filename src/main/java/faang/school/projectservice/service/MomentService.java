@@ -3,7 +3,9 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.MomentFilter;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -16,8 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 public class MomentService {
     private final MomentRepository momentRepository;
     private final ProjectRepository projectRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     private final MomentMapper momentMapper;
     private final MomentValidator momentValidator;
@@ -36,6 +38,7 @@ public class MomentService {
         momentValidator.validateMoment(momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
         addProjects(moment, momentDto);
+        addTeamMembers(moment);
         moment = momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
@@ -64,16 +67,32 @@ public class MomentService {
         momentValidator.validateMoment(momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
         addProjects(moment, momentDto);
+        addTeamMembers(moment);
         moment = momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
 
-    private void addProjects(Moment moment, MomentDto momentDto) {
-        List<Project> projects = new ArrayList<>();
-        for (long projectId : momentDto.getProjectIds()) {
-            projects.add(projectRepository.getProjectById(projectId));
+    private void addTeamMembers(Moment moment) {
+        Set<Long> teamMemberIdsSet = new HashSet<>();
+        for (long projectId : moment.getProjects().stream().map(Project::getId).toList()) {
+            teamMemberIdsSet.addAll(teamMemberRepository.findAllByProjectId(projectId).stream().map(TeamMember::getId).toList());
         }
-        moment.setProjects(projects);
+        moment.setUserIds(teamMemberIdsSet.stream().toList());
+    }
+
+    private void addProjects(Moment moment, MomentDto momentDto) {
+        Set<Project> projectSet = new HashSet<>();
+        if (momentDto.getProjectIds() != null && !momentDto.getProjectIds().isEmpty()) {
+            for (long projectId : momentDto.getProjectIds()) {
+                projectSet.add(projectRepository.getProjectById(projectId));
+            }
+        }
+        if (momentDto.getUserIds() != null && !momentDto.getUserIds().isEmpty()) {
+            for (long teamMemberId : momentDto.getUserIds()) {
+                projectSet.addAll(projectRepository.findProjectByTeamMember(teamMemberId));
+            }
+        }
+        moment.setProjects(projectSet.stream().toList());
     }
 
 }

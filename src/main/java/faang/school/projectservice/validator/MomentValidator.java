@@ -8,6 +8,8 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class MomentValidator {
@@ -19,21 +21,21 @@ public class MomentValidator {
     }
 
     public void validateProjectIds(MomentDto momentDto) {
-        if (momentDto.getProjectIds().isEmpty()) {
-            throw new DataValidationException("Empty projectIds");
-        } else {
-            for (long projectId : momentDto.getProjectIds()) {
-                if (projectRepository.existsById(projectId)) {
-                    Project project = projectRepository.getProjectById(projectId);
-                    if (project.getStatus() == ProjectStatus.COMPLETED){
-                        throw new DataValidationException("Project can't be completed");
-                    } else if (project.getStatus() == ProjectStatus.CANCELLED){
-                        throw new DataValidationException("Project can't be cancelled");
-                    }
-                } else {
-                    throw new DataValidationException("Project does not exist");
+        if (momentDto.getProjectIds() != null && !momentDto.getProjectIds().isEmpty()) {
+            List<Project> projectList = projectRepository.findAllByIds(momentDto.getProjectIds());
+            if (projectList.size() != momentDto.getProjectIds().size()) {
+                throw new DataValidationException("Project does not exist");
+            }
+            for (Project project : projectList) {
+                if (project.getStatus() == ProjectStatus.COMPLETED) {
+                    throw new DataValidationException("Project can't be completed");
+                } else if (project.getStatus() == ProjectStatus.CANCELLED) {
+                    throw new DataValidationException("Project can't be cancelled");
                 }
             }
+        }
+        else {
+            throw new DataValidationException("Projects empty");
         }
     }
 }
