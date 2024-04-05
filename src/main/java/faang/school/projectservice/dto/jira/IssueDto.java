@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.jira;
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class IssueDto {
     private String projectKey;
-    private IssueType issueType;
+    private IssueTypeDto issueType;
     @NotBlank(message = "Summary is required")
     private String summary;
     @NotBlank(message = "Description is required")

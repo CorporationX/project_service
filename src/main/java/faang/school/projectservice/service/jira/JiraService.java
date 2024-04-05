@@ -7,6 +7,7 @@ import faang.school.projectservice.client.jira.JiraClient;
 import faang.school.projectservice.dto.jira.IssueDto;
 import faang.school.projectservice.dto.jira.JiraAccountDto;
 import faang.school.projectservice.mapper.jira.IssueMapper;
+import faang.school.projectservice.mapper.jira.IssueTypeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,13 +18,14 @@ import org.springframework.stereotype.Service;
 public class JiraService {
     private final UserServiceClient userServiceClient;
     private final IssueMapper issueMapper;
+    private final IssueTypeMapper issueTypeMapper;
 
     public String createIssue(IssueDto issueDto) {
         JiraAccountDto account = getJiraAccFromUserService();
         JiraClient jiraClient = new JiraClient(account);
         IssueInput issue = new IssueInputBuilder()
                 .setProjectKey(issueDto.getProjectKey())
-                .setIssueType(issueDto.getIssueType())
+                .setIssueType(issueTypeMapper.toEntity(issueDto.getIssueType()))
                 .setSummary(issueDto.getSummary())
                 .setDescription(issueDto.getDescription())
                 .build();
