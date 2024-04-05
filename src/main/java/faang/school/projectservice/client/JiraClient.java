@@ -39,10 +39,10 @@ public class JiraClient {
 
     private JiraRestClient getJiraClient() {
         return new AsynchronousJiraRestClientFactory()
-                .createWithBasicHttpAuthentication(getJiraUri(), this.username, this.password);
+                .createWithBasicHttpAuthentication(getProjectUri(), this.username, this.password);
     }
 
-    private URI getJiraUri() {
+    private URI getProjectUri() {
         return URI.create(this.projectUrl);
     }
 }
