@@ -18,6 +18,6 @@ public class MomentDto {
     @NotEmpty String name;
     String description;
     @NotNull LocalDateTime date;
-    @NotNull List<Long> projectIds;
+    List<Long> projectIds;
     List<Long> userIds;
 }
