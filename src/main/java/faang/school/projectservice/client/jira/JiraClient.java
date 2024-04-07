@@ -34,18 +34,32 @@ public class JiraClient {
     }
 
     public String createIssue(IssueInput issue) {
-        IssueRestClient issueRestClient = restClient.getIssueClient();
-        return issueRestClient.createIssue(issue).claim().getKey();
+        IssueRestClient client = restClient.getIssueClient();
+        return client.createIssue(issue).claim().getKey();
     }
 
     public Issue getIssue(String issueKey) {
-        IssueRestClient issueRestClient = restClient.getIssueClient();
-        return issueRestClient.getIssue(issueKey).claim();
+        IssueRestClient client = restClient.getIssueClient();
+        return client.getIssue(issueKey).claim();
     }
 
     public List<Issue> getAllIssues(String projectKey) {
         SearchRestClient client = restClient.getSearchClient();
         Iterable<Issue> issues = client.searchJql("project = " + projectKey).claim().getIssues();
+        return StreamSupport.stream(issues.spliterator(), false).toList();
+    }
+
+    public List<Issue> getIssuesByStatus(String projectKey, long statusId) {
+        SearchRestClient client = restClient.getSearchClient();
+        Iterable<Issue> issues = client.searchJql(String.format("project = %s AND status = %d",
+                projectKey, statusId)).claim().getIssues();
+        return StreamSupport.stream(issues.spliterator(), false).toList();
+    }
+
+    public List<Issue> getIssuesByAssignee(String projectKey, String assigneeId) {
+        SearchRestClient client = restClient.getSearchClient();
+        Iterable<Issue> issues = client.searchJql(String.format("project = %s AND assignee = %s",
+                projectKey, assigneeId)).claim().getIssues();
         return StreamSupport.stream(issues.spliterator(), false).toList();
     }
 

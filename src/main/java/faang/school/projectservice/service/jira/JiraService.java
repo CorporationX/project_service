@@ -24,31 +24,45 @@ public class JiraService {
     private final IssueTypeMapper issueTypeMapper;
 
     public String createIssue(IssueDto issueDto) {
-        JiraAccountDto account = getJiraAccFromUserService();
-        JiraClient jiraClient = new JiraClient(account);
-        IssueInput issue = new IssueInputBuilder()
+        JiraClient jiraClient = initializeJiraClient();
+        IssueInput issue = buildIssueInput(issueDto);
+        return jiraClient.createIssue(issue);
+    }
+
+    public IssueDto getIssue(String issueKey) {
+        JiraClient jiraClient = initializeJiraClient();
+        return issueMapper.toDto(jiraClient.getIssue(issueKey));
+    }
+
+    public List<IssueDto> getAllIssues(String projectKey) {
+        JiraClient jiraClient = initializeJiraClient();
+        List<Issue> issues = jiraClient.getAllIssues(projectKey);
+        return issueMapper.toDto(issues);
+    }
+
+    public List<IssueDto> getIssuesByStatus(String projectKey, long statusId) {
+        JiraClient jiraClient = initializeJiraClient();
+        List<Issue> issues = jiraClient.getIssuesByStatus(projectKey, statusId);
+        return issueMapper.toDto(issues);
+    }
+
+    public List<IssueDto> getIssuesByAssignee(String projectKey, String assigneeId) {
+        JiraClient jiraClient = initializeJiraClient();
+        List<Issue> issues = jiraClient.getIssuesByAssignee(projectKey, assigneeId);
+        return issueMapper.toDto(issues);
+    }
+
+    private JiraClient initializeJiraClient() {
+        JiraAccountDto account = userServiceClient.getJiraAccountInfo();
+        return new JiraClient(account);
+    }
+
+    private IssueInput buildIssueInput(IssueDto issueDto) {
+        return new IssueInputBuilder()
                 .setProjectKey(issueDto.getProjectKey())
                 .setIssueType(issueTypeMapper.toEntity(issueDto.getIssueType()))
                 .setSummary(issueDto.getSummary())
                 .setDescription(issueDto.getDescription())
                 .build();
-        return jiraClient.createIssue(issue);
-    }
-
-    public IssueDto getIssue(String issueKey) {
-        JiraAccountDto account = getJiraAccFromUserService();
-        JiraClient jiraClient = new JiraClient(account);
-        return issueMapper.toDto(jiraClient.getIssue(issueKey));
-    }
-
-    public List<IssueDto> getAllIssues(String projectKey) {
-        JiraAccountDto account = getJiraAccFromUserService();
-        JiraClient jiraClient = new JiraClient(account);
-        List<Issue> issues = jiraClient.getAllIssues(projectKey);
-        return issueMapper.toDto(issues);
-    }
-
-    private JiraAccountDto getJiraAccFromUserService() {
-        return userServiceClient.getJiraAccountInfo();
     }
 }

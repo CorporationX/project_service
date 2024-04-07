@@ -8,7 +8,8 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = IssueTypeMapper.class)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        uses = {IssueTypeMapper.class, StatusMapper.class})
 public interface IssueMapper {
 
     @Mapping(source = "project.key", target = "projectKey")
