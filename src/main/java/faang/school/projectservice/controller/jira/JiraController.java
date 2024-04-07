@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/jira")
@@ -24,5 +26,10 @@ public class JiraController {
     @GetMapping("/issue/{issueKey}") // В Jira ключ задачи прямо в URL передаётся (прим. BJS2-3770)
     public IssueDto getIssue(@PathVariable String issueKey) {
         return jiraService.getIssue(issueKey);
+    }
+
+    @GetMapping("/project/{projectKey}/issues")
+    public List<IssueDto> getAllIssues(@PathVariable String projectKey) {
+        return jiraService.getAllIssues(projectKey);
     }
 }

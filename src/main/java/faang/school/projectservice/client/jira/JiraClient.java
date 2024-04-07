@@ -2,6 +2,7 @@ package faang.school.projectservice.client.jira;
 
 import com.atlassian.jira.rest.client.api.IssueRestClient;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
+import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
@@ -12,6 +13,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 @Data
 @Component
@@ -38,6 +41,12 @@ public class JiraClient {
     public Issue getIssue(String issueKey) {
         IssueRestClient issueRestClient = restClient.getIssueClient();
         return issueRestClient.getIssue(issueKey).claim();
+    }
+
+    public List<Issue> getAllIssues(String projectKey) {
+        SearchRestClient client = restClient.getSearchClient();
+        Iterable<Issue> issues = client.searchJql("project = " + projectKey).claim().getIssues();
+        return StreamSupport.stream(issues.spliterator(), false).toList();
     }
 
     private JiraRestClient getJiraClient() {
