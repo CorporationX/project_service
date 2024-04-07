@@ -1,11 +1,13 @@
 package faang.school.projectservice.dto.jira;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.joda.time.LocalDateTime;
 
 @Data
 @Builder
@@ -22,4 +24,9 @@ public class IssueDto {
     @NotBlank(message = "Description is required")
     private String description;
     private StatusDto status;
+    private LocalDateTime creationDate;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private LocalDateTime updateDate;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private LocalDateTime dueDate;
 }
