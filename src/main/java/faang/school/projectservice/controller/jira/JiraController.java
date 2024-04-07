@@ -38,12 +38,12 @@ public class JiraController {
     }
 
     @GetMapping("/project/{projectKey}/issues/status")
-    public List<IssueDto> getIssuesByStatus(@PathVariable String projectKey, @RequestParam long statusId) {
-        return jiraService.getIssuesByStatus(projectKey, statusId);
+    public List<IssueDto> getIssuesByStatusId(@PathVariable String projectKey, @RequestParam long statusId) {
+        return jiraService.getIssuesByStatusId(projectKey, statusId);
     }
 
     @GetMapping("/project/{projectKey}/issues/assignee")
-    public List<IssueDto> getIssuesByAssignee(@PathVariable String projectKey, @RequestParam String assigneeId) {
-        return jiraService.getIssuesByAssignee(projectKey, assigneeId);
+    public List<IssueDto> getIssuesByAssigneeId(@PathVariable String projectKey, @RequestParam String assigneeId) {
+        return jiraService.getIssuesByAssigneeId(projectKey, assigneeId);
     }
 }

@@ -1,8 +1,10 @@
 package faang.school.projectservice.service.jira;
 
+import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
+import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.client.jira.JiraClient;
 import faang.school.projectservice.dto.jira.IssueDto;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.List;
 
 @Slf4j
@@ -22,39 +25,45 @@ public class JiraService {
     private final UserServiceClient userServiceClient;
     private final IssueMapper issueMapper;
     private final IssueTypeMapper issueTypeMapper;
+    private final JiraClient jiraClient;
 
     public String createIssue(IssueDto issueDto) {
-        JiraClient jiraClient = initializeJiraClient();
+        authenticateUserInJiraClient();
         IssueInput issue = buildIssueInput(issueDto);
         return jiraClient.createIssue(issue);
     }
 
     public IssueDto getIssue(String issueKey) {
-        JiraClient jiraClient = initializeJiraClient();
+        authenticateUserInJiraClient();
         return issueMapper.toDto(jiraClient.getIssue(issueKey));
     }
 
     public List<IssueDto> getAllIssues(String projectKey) {
-        JiraClient jiraClient = initializeJiraClient();
+        authenticateUserInJiraClient();
         List<Issue> issues = jiraClient.getAllIssues(projectKey);
         return issueMapper.toDto(issues);
     }
 
-    public List<IssueDto> getIssuesByStatus(String projectKey, long statusId) {
-        JiraClient jiraClient = initializeJiraClient();
-        List<Issue> issues = jiraClient.getIssuesByStatus(projectKey, statusId);
+    public List<IssueDto> getIssuesByStatusId(String projectKey, long statusId) {
+        authenticateUserInJiraClient();
+        List<Issue> issues = jiraClient.getIssuesByStatusId(projectKey, statusId);
         return issueMapper.toDto(issues);
     }
 
-    public List<IssueDto> getIssuesByAssignee(String projectKey, String assigneeId) {
-        JiraClient jiraClient = initializeJiraClient();
-        List<Issue> issues = jiraClient.getIssuesByAssignee(projectKey, assigneeId);
+    public List<IssueDto> getIssuesByAssigneeId(String projectKey, String assigneeId) {
+        authenticateUserInJiraClient();
+        List<Issue> issues = jiraClient.getIssuesByAssigneeId(projectKey, assigneeId);
         return issueMapper.toDto(issues);
     }
 
-    private JiraClient initializeJiraClient() {
+    private void authenticateUserInJiraClient() {
         JiraAccountDto account = userServiceClient.getJiraAccountInfo();
-        return new JiraClient(account);
+        jiraClient.setUsername(account.getUsername());
+        jiraClient.setPassword(account.getPassword());
+        jiraClient.setProjectUrl(account.getProjectUrl());
+        JiraRestClient jiraRestClient = new AsynchronousJiraRestClientFactory()
+                .createWithBasicHttpAuthentication(URI.create(account.getProjectUrl()), account.getUsername(), account.getPassword());
+        jiraClient.setRestClient(jiraRestClient);
     }
 
     private IssueInput buildIssueInput(IssueDto issueDto) {
