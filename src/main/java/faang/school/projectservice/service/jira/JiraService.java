@@ -64,6 +64,7 @@ public class JiraService {
         JiraRestClient jiraRestClient = new AsynchronousJiraRestClientFactory()
                 .createWithBasicHttpAuthentication(URI.create(account.getProjectUrl()), account.getUsername(), account.getPassword());
         jiraClient.setRestClient(jiraRestClient);
+        log.info("Authentication for user {} completed", account.getUsername());
     }
 
     private IssueInput buildIssueInput(IssueDto issueDto) {

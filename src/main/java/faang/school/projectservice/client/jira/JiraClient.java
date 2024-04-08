@@ -8,11 +8,13 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
 
+@Slf4j
 @Data
 @Component
 @NoArgsConstructor
@@ -25,22 +27,26 @@ public class JiraClient {
 
     public String createIssue(IssueInput issue) {
         IssueRestClient client = restClient.getIssueClient();
+        log.info("Client is initialized. Creating issue for project: {}", issue.getField("projectKey"));
         return client.createIssue(issue).claim().getKey();
     }
 
     public Issue getIssue(String issueKey) {
         IssueRestClient client = restClient.getIssueClient();
+        log.info("Client is initialized. Getting issue with key: {}", issueKey);
         return client.getIssue(issueKey).claim();
     }
 
     public List<Issue> getAllIssues(String projectKey) {
         SearchRestClient client = restClient.getSearchClient();
+        log.info("Client is initialized. Getting all issues for project: {}", projectKey);
         Iterable<Issue> issues = client.searchJql("project = " + projectKey).claim().getIssues();
         return StreamSupport.stream(issues.spliterator(), false).toList();
     }
 
     public List<Issue> getIssuesByStatusId(String projectKey, long statusId) {
         SearchRestClient client = restClient.getSearchClient();
+        log.info("Client is initialized. Getting all issues for project: {} with status: {}", projectKey, statusId);
         Iterable<Issue> issues = client.searchJql(String.format("project = %s AND status = %d",
                 projectKey, statusId)).claim().getIssues();
         return StreamSupport.stream(issues.spliterator(), false).toList();
@@ -48,6 +54,7 @@ public class JiraClient {
 
     public List<Issue> getIssuesByAssigneeId(String projectKey, String assigneeId) {
         SearchRestClient client = restClient.getSearchClient();
+        log.info("Client is initialized. Getting all issues for project: {} with assignee: {}", projectKey, assigneeId);
         Iterable<Issue> issues = client.searchJql(String.format("project = %s AND assignee = %s",
                 projectKey, assigneeId)).claim().getIssues();
         return StreamSupport.stream(issues.spliterator(), false).toList();
