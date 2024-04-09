@@ -70,15 +70,10 @@ public class ProjectController {
     @Operation(summary = "Find project by project id")
     @GetMapping("/{projectId}")
     public ProjectDto findProjectById(@PathVariable @Positive(message = "id must be greater than zero") Long projectId) {
-        String userId = request.getHeader("x-user-id");
+        String userId = "1";//request.getHeader("x-user-id");
         LocalDateTime timestamp = LocalDateTime.now();
         projectViewEvent.publishProjectViewEvent(userId, projectId, timestamp);
         log.info("Project viewed: userId={}, projectId={}, timestamp={}", userId, projectId, timestamp);
         return projectService.findProjectById(projectId);
-    }
-
-    @PutMapping("/{projectId}/add")
-    public ProjectDto addACoverToTheProject(@PathVariable Long projectId, @RequestParam("file") MultipartFile file) {
-        return projectService.addACoverToTheProject(projectId, file);
     }
 }

@@ -14,8 +14,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class ProjectViewEvent {
-    HttpServletRequest request;
-    Publisher publisher;
+    private final Publisher publisher;
     public void publishProjectViewEvent(String userId, Long projectId, LocalDateTime timestamp) {
         String jsonMessage = createJsonMessage(userId, projectId, timestamp);
         log.info("message create");

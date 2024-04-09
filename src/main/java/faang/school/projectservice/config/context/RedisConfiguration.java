@@ -1,5 +1,6 @@
 package faang.school.projectservice.config.context;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.publisher.MessagePublisher;
 import faang.school.projectservice.publisher.Publisher;
 import lombok.AllArgsConstructor;
@@ -40,7 +41,7 @@ public class RedisConfiguration {
 
     @Bean
     public MessagePublisher messagePublisher() {
-        return new Publisher();
+        return new Publisher(redisTemplate(),new ObjectMapper());
     }
 
     @Bean
