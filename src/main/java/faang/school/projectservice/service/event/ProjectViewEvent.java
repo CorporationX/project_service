@@ -3,6 +3,7 @@ package faang.school.projectservice.service.event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.publisher.Publisher;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,17 +16,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class ProjectViewEvent {
+    HttpServletRequest request;
     Publisher publisher;
-    public void publishProjectViewEvent(Long userId, Long viewedProfileId, LocalDateTime timestamp) {
-        String jsonMessage = createJsonMessage(userId, viewedProfileId, timestamp);
-
+    public void publishProjectViewEvent(String userId, Long projectId, LocalDateTime timestamp) {
+        String jsonMessage = createJsonMessage(userId, projectId, timestamp);
+        log.info("message create");
         publisher.publish(jsonMessage);
+        log.info("message publish");
     }
 
-    private String createJsonMessage(Long userId, Long viewedProfileId, LocalDateTime timestamp) {
+    private String createJsonMessage(String userId, Long projectId, LocalDateTime timestamp) {
         Map<String, Object> jsonData = new HashMap<>();
         jsonData.put("userId", userId);
-        jsonData.put("viewedProfileId", viewedProfileId);
+        jsonData.put("projectId", projectId);
         jsonData.put("timestamp", timestamp.toString());
 
         ObjectMapper mapper = new ObjectMapper();

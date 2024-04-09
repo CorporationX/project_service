@@ -25,6 +25,11 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  cache:
+    type: EHCACHE
+    ehcache:
+      config: ehcache.xml
+
 server:
   port: 8082
 
@@ -43,3 +48,4 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+

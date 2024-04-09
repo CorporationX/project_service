@@ -6,7 +6,6 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
@@ -91,8 +90,8 @@ public class ProjectService {
         project.setStatus(ProjectStatus.CREATED);
     }
 
-    public ProjectDto addACoverToTheProject(Long projectId, MultipartFile file){
-        resourceService.addACoverToTheProject(projectId,file);
+    public ProjectDto addACoverToTheProject(Long projectId, MultipartFile file) {
+        resourceService.addACoverToTheProject(projectId, file);
         ProjectDto projectDto = findProjectById(projectId);
         projectRepository.save(projectMapper.toEntity(projectDto));
         return projectDto;
