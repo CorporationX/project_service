@@ -66,7 +66,6 @@ public class ProjectController {
         return projectService.findAllProjects();
     }
 
-    @Cacheable(cacheNames = "projects", key = "#projectId")
     @Async
     @Operation(summary = "Find project by project id")
     @GetMapping("/{projectId}")
