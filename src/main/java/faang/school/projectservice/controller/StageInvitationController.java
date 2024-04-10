@@ -18,7 +18,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/stage-invitation")
+@RequestMapping("/v1/stage-invitation")
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 

@@ -6,7 +6,9 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor
 public class StageValidator {
     private final StageRepository stageRepository;
