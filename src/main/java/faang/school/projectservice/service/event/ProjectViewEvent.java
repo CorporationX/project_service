@@ -15,17 +15,17 @@ import java.util.Map;
 @Slf4j
 public class ProjectViewEvent {
     private final Publisher publisher;
-    public void publishProjectViewEvent(String userId, Long projectId, LocalDateTime timestamp) {
+    public void publishProjectViewEvent(Long userId, Long projectId, LocalDateTime timestamp) {
         String jsonMessage = createJsonMessage(userId, projectId, timestamp);
         log.info("message create");
         publisher.publish(jsonMessage);
         log.info("message publish");
     }
 
-    private String createJsonMessage(String userId, Long projectId, LocalDateTime timestamp) {
-        Map<String, Object> jsonData = new HashMap<>();
-        jsonData.put("userId", userId);
-        jsonData.put("projectId", projectId);
+    private String createJsonMessage(Long userId, Long projectId, LocalDateTime timestamp) {
+        Map<String, String> jsonData = new HashMap<>();
+        jsonData.put("userId", userId.toString());
+        jsonData.put("projectId", projectId.toString());
         jsonData.put("timestamp", timestamp.toString());
 
         ObjectMapper mapper = new ObjectMapper();

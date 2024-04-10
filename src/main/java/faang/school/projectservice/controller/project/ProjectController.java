@@ -70,7 +70,7 @@ public class ProjectController {
     @Operation(summary = "Find project by project id")
     @GetMapping("/{projectId}")
     public ProjectDto findProjectById(@PathVariable @Positive(message = "id must be greater than zero") Long projectId) {
-        String userId = "1";//request.getHeader("x-user-id");
+        Long userId = 1L;//request.getHeader("x-user-id");
         LocalDateTime timestamp = LocalDateTime.now();
         projectViewEvent.publishProjectViewEvent(userId, projectId, timestamp);
         log.info("Project viewed: userId={}, projectId={}, timestamp={}", userId, projectId, timestamp);
