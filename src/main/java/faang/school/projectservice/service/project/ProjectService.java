@@ -69,6 +69,11 @@ public class ProjectService {
                 .orElseThrow(() -> new EntityNotFoundException(ProjectConstraints.PROJECT_NOT_EXIST.getMessage())));
     }
 
+    public Project findProjectEntityById(Long projectId) {
+        return projectJpaRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException(ProjectConstraints.PROJECT_NOT_EXIST.getMessage()));
+    }
+
     private void applyFilter(List<Project> projects, ProjectDtoFilter projectDtoFilter) {
         filters.stream()
                 .filter(filter -> filter.isApplicable(projectDtoFilter))

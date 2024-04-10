@@ -21,17 +21,16 @@ public class ResourceService {
     private final ProjectRepository projectRepository;
 
     public ProjectDto addCoverToProject(MultipartFile file, Long projectId) {
-        ProjectDto project = projectService.findProjectById(projectId);
-        Project projectEntity = projectMapper.toEntity(project);
+        Project project = projectService.findProjectEntityById(projectId);
 
         String folder = project.getId() + project.getName();
         Resource resource = s3Service.uploadFile(file, folder);
-        resource.setProject(projectEntity);
+        resource.setProject(project);
         resource = resourceRepository.save(resource);
 
-        projectEntity.setCoverImageId(resource.getId());
-        projectRepository.save(projectEntity);
+        project.setCoverImageId(resource.getId());
+        projectRepository.save(project);
 
-        return projectMapper.toDto(projectEntity);
+        return projectMapper.toDto(project);
     }
 }
