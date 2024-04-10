@@ -1,5 +1,6 @@
 package faang.school.projectservice.handler;
 
+import com.atlassian.jira.rest.client.api.RestClientException;
 import faang.school.projectservice.exception.DataValidationException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -43,5 +44,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ErrorResponse handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "File size exceeds limit");
+  
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(RestClientException.class)
+    public ErrorResponse handleRestClientException(RestClientException exception) {
+        String initialMessage = exception.getMessage();
+        int startIndex = initialMessage.indexOf("errorMessages=[") + "errorMessages=[".length();
+        int endIndex = initialMessage.lastIndexOf(".]}");
+        String modifiedMessage = initialMessage.substring(startIndex, endIndex);
+
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), modifiedMessage);
     }
 }
