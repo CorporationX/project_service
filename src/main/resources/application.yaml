@@ -43,3 +43,11 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+image:
+  upload:
+    maxFileSize: 5242880
+    landscape.maxWidth: 1080
+    landscape.maxHeight: 566
+    square.maxWidth: 1080
+    square.maxHeight: 1080

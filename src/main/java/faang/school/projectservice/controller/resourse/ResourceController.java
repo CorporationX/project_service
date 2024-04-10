@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Cover", description = "Endpoints for managing cover")
 public class ResourceController {
     private final ResourceService resourceService;
+
     @Operation(summary = "Removing a project cover")
     @DeleteMapping("/{key}/delete")
     public void deleteCover(@PathVariable String key) {
