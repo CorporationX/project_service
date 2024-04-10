@@ -27,12 +27,11 @@ public class FileStorageConfiguration {
                 accessKey,
                 secretKey
         );
-        AmazonS3 client = AmazonS3ClientBuilder
+        return AmazonS3ClientBuilder
                 .standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, null))
                 .withCredentials(new AWSStaticCredentialsProvider(credentials) )
                 .build();
-        return client;
     }
 
 }

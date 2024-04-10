@@ -2,15 +2,15 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.OutOfMemoryException;
+import faang.school.projectservice.exception.MessageError;
+import faang.school.projectservice.exception.SizeExceeded;
 import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.S3.S3ServiceImpl;
+import faang.school.projectservice.validator.ResourceValidator;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,12 +31,12 @@ public class ResourceService {
     private final ProjectService projectService;
     private final ResourceMapper resourceMapper;
     private final UserServiceClient userServiceClient;
-    private final TeamMemberJpaRepository teamMemberJpaRepository;
+    private final ResourceValidator resourceValidator;
 
     @Transactional
-    public ResourceDto uploadResource(Long projectId, MultipartFile file, long userId){
+    public ResourceDto uploadResource(Long projectId, MultipartFile file, long userId) {
         Project project = projectService.getProjectById(projectId);
-        TeamMember author = validateForTeamMemberExistence(userId, projectId);
+        TeamMember author = resourceValidator.validateForTeamMemberExistence(userId, projectId);
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkIfStorageSizeExceeded(project.getMaxStorageSize(), newStorageSize);
@@ -56,7 +56,7 @@ public class ResourceService {
     }
 
     @Transactional
-    public InputStream downloadResource(long sourceId){
+    public InputStream downloadResource(long sourceId) {
         Resource resource = resourceRepository.findById(sourceId)
                 .orElseThrow(() -> new EntityNotFoundException("Resource with " + sourceId + " id not found"));
         return s3Service.downloadFile(resource.getKey());
@@ -64,15 +64,15 @@ public class ResourceService {
 
 
     @Transactional
-    public void deleteResource(long resourceId, long userId){
-        try{
+    public void deleteResource(long resourceId, long userId) {
+        try {
             userServiceClient.getUser(userId);
-        }catch(FeignException e){
+        } catch (FeignException e) {
             throw new EntityNotFoundException("User with " + userId + " id not found");
         }
 
         Resource resource = resourceRepository.getReferenceById(resourceId);
-        validateForOwner(userId, resource);
+        resourceValidator.validateForOwner(userId, resource);
         String key = resource.getKey();
 
         s3Service.deleteFile(key);
@@ -84,29 +84,10 @@ public class ResourceService {
     }
 
 
-    private void checkIfStorageSizeExceeded(BigInteger maxStorageSize, BigInteger newStorageSize){
-        if (0 > maxStorageSize.compareTo(newStorageSize)){
-            throw new OutOfMemoryException("The capacity is exceed!");
+    private void checkIfStorageSizeExceeded(BigInteger maxStorageSize, BigInteger newStorageSize) {
+        if (0 > maxStorageSize.compareTo(newStorageSize)) {
+            throw new SizeExceeded(MessageError.FILE_STORAGE_CAPACITY_EXCEEDED);
         }
     }
 
-    private TeamMember validateForOwner(long userId, Resource resource){
-        TeamMember teamMember = validateForTeamMemberExistence(userId, resource.getProject().getId());
-        long teamMemberId = teamMember.getId();
-
-        long resourceAuthorId = resource.getCreatedBy().getId();
-        long projectOwnerId = resource.getProject().getOwnerId();
-        if (projectOwnerId != teamMemberId && resourceAuthorId != teamMemberId){
-            throw new DataValidationException("Only author of the file or project owner can delete it");
-        }
-
-        return teamMember;
-    }
-    private TeamMember validateForTeamMemberExistence(long userId, long projectId){
-        TeamMember author = teamMemberJpaRepository.findByUserIdAndProjectId(userId,projectId);
-        if (author == null) {
-            throw new EntityNotFoundException("TeamMember with user id: " + userId + " and project id " + projectId + " not found");
-        }
-        return author;
-    }
 }

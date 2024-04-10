@@ -17,5 +17,5 @@ public class ResourceDto implements Serializable {
     private String name;
     private String key;
     private long size;
-    private ResourceType resourceType; //TODO: should I map here like that or use String type or create one more Dto for Enum class
+    private ResourceType resourceType;
 }

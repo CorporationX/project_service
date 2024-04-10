@@ -25,13 +25,12 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "services.s3.isMocked", havingValue = "false")
-public class S3ServiceImpl implements S3Service {
+public class S3ServiceImpl {
     private final AmazonS3 s3Client;
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    @Override
     public Resource uploadFile(MultipartFile file, String folder) {
         long fileSize = file.getSize();
         ObjectMetadata objectMetaData = new ObjectMetadata();
@@ -46,6 +45,7 @@ public class S3ServiceImpl implements S3Service {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
+
         Resource resource = new Resource();
         resource.setKey(key);
         resource.setSize(BigInteger.valueOf(fileSize));
@@ -58,12 +58,10 @@ public class S3ServiceImpl implements S3Service {
         return resource;
     }
 
-    @Override
     public void deleteFile(String key) {
         s3Client.deleteObject(bucketName, key);
     }
 
-    @Override
     public InputStream downloadFile(String key) {
         try {
             S3Object s3Object = s3Client.getObject(bucketName, key);
