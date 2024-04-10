@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableFeignClients
+@EnableCaching
 public class ProjectServiceApplication {
     public static void main(String[] args) {
         new SpringApplicationBuilder(ProjectServiceApplication.class)

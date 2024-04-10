@@ -19,7 +19,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @AllArgsConstructor
 @Configuration
 public class RedisConfiguration {
-
     @Bean
     LettuceConnectionFactory lettuceConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
@@ -41,7 +40,7 @@ public class RedisConfiguration {
 
     @Bean
     public MessagePublisher messagePublisher() {
-        return new Publisher(redisTemplate(),new ObjectMapper());
+        return new Publisher(redisTemplate());
     }
 
     @Bean

@@ -1,6 +1,5 @@
 package faang.school.projectservice.publisher;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class Publisher implements MessagePublisher {
     private final RedisTemplate<String, Object> redisTemplate;
-     private final ObjectMapper objectMapper;
 
     @SneakyThrows
     @Override
