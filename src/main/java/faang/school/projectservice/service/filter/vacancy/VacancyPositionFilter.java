@@ -9,8 +9,6 @@ import java.util.stream.Stream;
 public class VacancyPositionFilter implements VacancyFilter {
     @Override
     public boolean isApplicable(VacancyFilterDto filters) {
-        System.out.println("****************");
-        System.out.println(filters.getPositionPattern());
         return filters.getPositionPattern() != null;
     }
 

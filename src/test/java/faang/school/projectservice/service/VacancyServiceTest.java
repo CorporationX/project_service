@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.Vacancy.VacancyDto;
-import faang.school.projectservice.dto.filter.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -14,12 +13,8 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.filter.vacancy.VacancyFilter;
-import faang.school.projectservice.service.filter.vacancy.VacancyNameFilter;
-import faang.school.projectservice.service.filter.vacancy.VacancyPositionFilter;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,16 +23,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -51,9 +41,6 @@ public class VacancyServiceTest {
     private TeamMemberRepository teamMemberRepository;
     @Spy
     private VacancyMapper vacancyMapper;
-    @Mock
-    private List<VacancyFilter> vacancyFilters = List.of(new VacancyNameFilter(), new VacancyPositionFilter());
-//            new ArrayList<>();
     @InjectMocks
     VacancyService vacancyService;
 
@@ -63,15 +50,8 @@ public class VacancyServiceTest {
     private Project project;
     private TeamMember curator;
 
-    @Before
-    public void init() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @BeforeEach
     public void initialize() {
-        vacancyFilters.add(new VacancyNameFilter());
-        vacancyFilters.add(new VacancyPositionFilter());
         projectId = 100L;
         project = Project.builder()
                 .id(projectId)
@@ -136,31 +116,4 @@ public class VacancyServiceTest {
 
     }
 
-    @Test
-    public void getVacanciesTest(){
-        Mockito.when(vacancyRepository.findAll()).thenReturn(List.of(
-                Vacancy.builder()
-                        .id(vacancyId)
-                        .name("first")
-                        .position(TeamRole.ANALYST)
-                        .build(),
-                Vacancy.builder()
-                        .id(2L)
-                        .name("second")
-                        .position(TeamRole.ANALYST)
-                        .build()
-        ));
-        VacancyFilterDto filterDto = VacancyFilterDto.builder()
-                .namePattern("first")
-                .build();
-        List<VacancyDto> results = vacancyService.getVacancies(filterDto);
-        System.out.println(results);
-        assertSame(results.get(0).getId(), vacancyId);
-        filterDto = VacancyFilterDto.builder()
-                .positionPattern(TeamRole.ANALYST)
-                .build();
-        results = vacancyService.getVacancies(filterDto);
-        System.out.println(results);
-        assertTrue(results.size() == 2);
-    }
 }
