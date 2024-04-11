@@ -40,7 +40,6 @@ public class MomentValidatorTest {
         MomentDto momentDto = MomentDto.builder()
                 .projectIds(projectIds)
                 .build();
-        when(projectRepository.existsById(1L)).thenReturn(false);
         assertThrows(DataValidationException.class, () -> momentValidator.validateProjectIds(momentDto));
     }
 
@@ -50,8 +49,7 @@ public class MomentValidatorTest {
         MomentDto momentDto = MomentDto.builder()
                 .projectIds(projectIds)
                 .build();
-        when(projectRepository.existsById(1L)).thenReturn(true);
-        when(projectRepository.getProjectById(1L)).thenReturn(Project.builder().status(ProjectStatus.COMPLETED).build());
+        when(projectRepository.findAllByIds(projectIds)).thenReturn(List.of(Project.builder().status(ProjectStatus.COMPLETED).build()));
         assertThrows(DataValidationException.class, () -> momentValidator.validateProjectIds(momentDto));
     }
 
@@ -61,8 +59,7 @@ public class MomentValidatorTest {
         MomentDto momentDto = MomentDto.builder()
                 .projectIds(projectIds)
                 .build();
-        when(projectRepository.existsById(1L)).thenReturn(true);
-        when(projectRepository.getProjectById(1L)).thenReturn(Project.builder().status(ProjectStatus.CANCELLED).build());
+        when(projectRepository.findAllByIds(projectIds)).thenReturn(List.of(Project.builder().status(ProjectStatus.CANCELLED).build()));
         assertThrows(DataValidationException.class, () -> momentValidator.validateProjectIds(momentDto));
     }
 
