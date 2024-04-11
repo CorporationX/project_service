@@ -47,7 +47,6 @@ public class GlobalExceptionHandler {
         int startIndex = initialMessage.indexOf("errorMessages=[") + "errorMessages=[".length();
         int endIndex = initialMessage.lastIndexOf(".]}");
         String modifiedMessage = initialMessage.substring(startIndex, endIndex);
-
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), modifiedMessage);
     }
 

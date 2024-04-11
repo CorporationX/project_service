@@ -39,6 +39,7 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
+<<<<<<<<< Temporary merge branch 1
      * Jira
      */
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4") {
@@ -48,12 +49,7 @@ dependencies {
     implementation("io.atlassian.fugue:fugue:5.0.0")
 
     /**
-     * ImgScale
-     */
-    implementation ("org.imgscalr:imgscalr-lib:4.2")
-
-    /**
-     * Utils & Logging
+    * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-joda:2.17.0")
@@ -64,6 +60,11 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+
+    /**
+     * ImgScale
+     */
+    implementation ("org.imgscalr:imgscalr-lib:4.2")
 
     /**
      * Test containers
