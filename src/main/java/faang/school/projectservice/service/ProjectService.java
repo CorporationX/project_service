@@ -2,15 +2,10 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.DataAccessException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.filter.ProjectFilter;
-import faang.school.projectservice.service.filter.ProjectNameFilter;
-import faang.school.projectservice.service.filter.ProjectStatusFilter;
 import faang.school.projectservice.service.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -18,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -41,7 +35,7 @@ public class ProjectService {
     }
 
     public ProjectDto updateProject(long projectId, ProjectDto projectDto, long requestUserId) {
-        Project existingProject = findProjectOrThrowException( projectId );
+        Project existingProject = findProjectOrThrowException(projectId);
 
         projectValidator.checkUserIsMemberOrThrowException(existingProject, requestUserId);
 
@@ -79,7 +73,7 @@ public class ProjectService {
     }
 
     public ProjectDto getProjectById(long projectId, long requestUserId) {
-        Project project = findProjectOrThrowException( projectId );
+        Project project = findProjectOrThrowException(projectId);
 
         projectValidator.checkUserIsMemberOrThrowException(project, requestUserId);
 
@@ -87,8 +81,7 @@ public class ProjectService {
     }
 
 
-
-    private Project findProjectOrThrowException(long projectId){
+    private Project findProjectOrThrowException(long projectId) {
         return projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
     }
 

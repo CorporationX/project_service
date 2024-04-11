@@ -44,7 +44,8 @@ public class MomentService {
     }
 
     public MomentDto get(long momentId) {
-        return momentMapper.toDto(momentRepository.findById(momentId).orElseThrow(() -> new DataValidationException("Invalid moment id")));
+        return momentMapper.toDto(momentRepository.findById(momentId)
+                .orElseThrow(() -> new DataValidationException("Invalid moment id")));
     }
 
     public List<MomentDto> getAll() {
@@ -74,8 +75,10 @@ public class MomentService {
 
     private void addTeamMembers(Moment moment) {
         Set<Long> teamMemberIdsSet = new HashSet<>();
-        for (long projectId : moment.getProjects().stream().map(Project::getId).toList()) {
-            teamMemberIdsSet.addAll(teamMemberRepository.findAllByProjectId(projectId).stream().map(TeamMember::getId).toList());
+        List<Long> projectIds = moment.getProjects().stream().map(Project::getId).toList();
+        for (long projectId : projectIds) {
+            teamMemberIdsSet.addAll(teamMemberRepository.findAllByProjectId(projectId).stream()
+                    .map(TeamMember::getId).toList());
         }
         moment.setUserIds(teamMemberIdsSet.stream().toList());
     }

@@ -14,26 +14,18 @@ import java.util.List;
 public interface MomentMapper {
     @Mapping(source = "projects", target = "projectIds", qualifiedByName = "mapProjectsToIds")
     MomentDto toDto(Moment moment);
+
     List<MomentDto> toDto(List<Moment> momentList);
 
-//    @Mapping(source = "projectIds", target = "projects")
     Moment toEntity(MomentDto momentDto);
+
     List<Moment> toEntity(List<MomentDto> momentDtoList);
 
     @Named("mapProjectsToIds")
-    default List<Long> mapProjectsToIds(List<Project> projects){
-        if (projects == null){
+    default List<Long> mapProjectsToIds(List<Project> projects) {
+        if (projects == null) {
             return null;
         }
-        return projects.stream()
-                .map(Project::getId)
-                .toList();
+        return projects.stream().map(Project::getId).toList();
     }
-//    @Named("mapIdsToProjects")
-//    default List<Project> mapIdsToProjects(List<Long> projectsIds){
-//        return projectsIds.stream()
-//                .map((id)->{return
-//                })
-//                .toList();
-//    }
 }
