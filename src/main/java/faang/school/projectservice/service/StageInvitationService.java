@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import faang.school.projectservice.model.stage.Stage;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
@@ -59,10 +58,15 @@ public class StageInvitationService {
     }
 
     public List<StageInvitationDto> getAllInvitationsForUserWithStatus(StageInvitationFilterDto filters) {
-        Stream<StageInvitation> stageInvitationStream = stageInvitationRepository.findAll().stream();
-        stageInvitationFilters.stream()
+        List<StageInvitation> stageInvitations = stageInvitationRepository.findAll();
+        List<StageInvitationFilter> invitationFilters = stageInvitationFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .forEach(filter -> filter.apply(stageInvitationStream, filters));
-        return stageInvitationMapper.toDto(stageInvitationStream.toList());
+                .toList();
+        return  stageInvitations.stream()
+                .filter(stageInvitation -> invitationFilters.stream()
+                        .allMatch(stageInvitationFilter -> stageInvitationFilter.apply(stageInvitation, filters)))
+                .map(stageInvitationMapper::toDto)
+                .toList();
+
     }
 }

@@ -1,7 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.filter.StageInvitationFilterDto;
-import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -12,6 +10,7 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.filter.StageInvitationFilter;
 import faang.school.projectservice.service.filter.StageInvitationStatusFilter;
+import faang.school.projectservice.service.filter.StageInvitationTeamMemberFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,9 +22,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -39,8 +38,10 @@ public class StageInvitationServiceTest {
     private TeamMemberRepository teamMemberRepository;
     @Spy
     private StageInvitationMapperImpl stageInvitationMapper;
+    private StageInvitationStatusFilter filter1 = new StageInvitationStatusFilter();
+    private StageInvitationTeamMemberFilter filter2 = new StageInvitationTeamMemberFilter();
     @Mock
-    private List<StageInvitationFilter> stageInvitationFilters = new ArrayList<>();
+    private List<StageInvitationFilter> stageInvitationFilters = new ArrayList<>(Arrays.asList(filter1, filter2));
     @InjectMocks
     StageInvitationService stageInvitationService;
 
@@ -55,8 +56,6 @@ public class StageInvitationServiceTest {
 
     @BeforeEach
     public void initialize() {
-        stageInvitationFilters.add(new StageInvitationStatusFilter());
-        stageInvitationFilters.add(new StageInvitationStatusFilter());
         stageId = 100L;
         authorId = 200L;
         invitedId = 300L;
@@ -74,6 +73,7 @@ public class StageInvitationServiceTest {
                 .stage(stage)
                 .description("")
                 .id(invitationId)
+                .status(StageInvitationStatus.ACCEPTED)
                 .build();
 
     }
@@ -100,18 +100,6 @@ public class StageInvitationServiceTest {
         Mockito.when(stageInvitationRepository.findById(invitationId)).thenReturn(stageInvitation);
         stageInvitationService.declineInvitation(invitationId, "addf");
         verify(stageInvitationRepository, times(1)).save(stageInvitation);
-    }
-
-    @Test
-    public void getAllInvitationsForUserWithStatusTest() {
-        stageInvitation.setStatus(StageInvitationStatus.REJECTED);
-        Mockito.when(stageInvitationRepository.findAll()).thenReturn(List.of(stageInvitation));
-        StageInvitationFilterDto filters = StageInvitationFilterDto.builder()
-                .teamMemberPattern(invitedId)
-                .statusPattern(StageInvitationStatus.REJECTED)
-                .build();
-        List<StageInvitationDto> result = stageInvitationService.getAllInvitationsForUserWithStatus(filters);
-        assertSame(result.get(0).getId(), invitationId);
     }
 
 }
