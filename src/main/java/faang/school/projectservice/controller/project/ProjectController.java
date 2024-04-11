@@ -3,7 +3,7 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.service.event.ProjectViewEvent;
+import faang.school.projectservice.service.project.event.ProjectViewEvent;
 import faang.school.projectservice.service.project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -34,7 +33,6 @@ import java.util.List;
 @Tag(name = "Projects", description = "Endpoints for managing projects")
 public class ProjectController {
 
-    private final UserContext userContext;
     private final ProjectService projectService;
     private final ProjectViewEvent projectViewEvent;
 
@@ -69,10 +67,6 @@ public class ProjectController {
     @Operation(summary = "Find project by project id")
     @GetMapping("/{projectId}")
     public ProjectDto findProjectById(@PathVariable @Positive(message = "id must be greater than zero") Long projectId) {
-        Long userId = userContext.getUserId();
-        LocalDateTime timestamp = LocalDateTime.now();
-        projectViewEvent.publishProjectViewEvent(userId, projectId, timestamp);
-        log.info("Project viewed: userId={}, projectId={}, timestamp={}", userId, projectId, timestamp);
         return projectService.findProjectById(projectId);
     }
 }

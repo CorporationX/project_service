@@ -1,50 +1,45 @@
 package faang.school.projectservice.config.context;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.publisher.MessagePublisher;
-import faang.school.projectservice.publisher.Publisher;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Slf4j
 @AllArgsConstructor
 @Configuration
 public class RedisConfiguration {
+
+    @Value("${spring.data.redis.host}")
+    private String host;
+    @Value("${spring.data.redis.port}")
+    private int port;
+    @Value("${spring.data.redis.channels.project_view_channel.name}")
+    private String channel;
     @Bean
-    LettuceConnectionFactory lettuceConnectionFactory() {
-        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setPort(6379);
-        configuration.setHostName("localhost");
-        return new LettuceConnectionFactory(configuration);
+    public JedisConnectionFactory redisConnectionFactory() {
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(host,port);
+        return new JedisConnectionFactory(configuration);
     }
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(lettuceConnectionFactory());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setConnectionFactory(redisConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericToStringSerializer<Object>(Object.class));
+        template.setValueSerializer(new StringRedisSerializer());
         template.afterPropertiesSet();
         return template;
     }
 
     @Bean
-    public MessagePublisher messagePublisher() {
-        return new Publisher(redisTemplate());
-    }
-
-    @Bean
     public ChannelTopic topic() {
-        return new ChannelTopic("view-project");
+        return new ChannelTopic(channel);
     }
 }

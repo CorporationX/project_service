@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -8,15 +9,18 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.event.ProjectViewEvent;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.validation.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -25,6 +29,8 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
     private final List<ProjectFilter> projectFilters;
+    private final UserContext userContext;
+    private final ProjectViewEvent projectViewEvent;
 
     @Transactional
     public ProjectDto createProject(Long userId, ProjectDto projectDto) {
@@ -55,8 +61,13 @@ public class ProjectService {
         return projectMapper.toDto(projectRepository.findAll());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ProjectDto findProjectById(Long id) {
+        Long userId = userContext.getUserId();
+        LocalDateTime timestamp = LocalDateTime.now();
+        Long projectId = id;
+        projectViewEvent.publishProjectViewEvent(userId, projectId, timestamp);
+        log.info("Project viewed: userId={}, projectId={}, timestamp={}", userId, projectId, timestamp);
         return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 

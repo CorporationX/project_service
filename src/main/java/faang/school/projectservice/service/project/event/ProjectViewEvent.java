@@ -1,9 +1,8 @@
-package faang.school.projectservice.service.event;
+package faang.school.projectservice.service.project.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.publisher.Publisher;
-import jakarta.servlet.http.HttpServletRequest;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,11 +13,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class ProjectViewEvent {
-    private final Publisher publisher;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
     public void publishProjectViewEvent(Long userId, Long projectId, LocalDateTime timestamp) {
         String jsonMessage = createJsonMessage(userId, projectId, timestamp);
         log.info("message create");
-        publisher.publish(jsonMessage);
+        projectViewEventPublisher.publish(jsonMessage);
         log.info("message publish");
     }
 

@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -7,6 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.event.ProjectViewEvent;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.validation.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +39,8 @@ public class ProjectServiceTest {
     private ProjectRepository projectRepository;
     private ProjectValidator projectValidator;
     private ProjectFilter projectFilter;
+    private UserContext userContext;
+    private ProjectViewEvent projectViewEvent;
     private List<ProjectFilter> projectFilters;
     private ProjectService projectService;
 
@@ -45,7 +50,9 @@ public class ProjectServiceTest {
         projectValidator = mock(ProjectValidator.class);
         projectFilter = mock(ProjectFilter.class);
         projectFilters = Collections.singletonList(projectFilter);
-        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters);
+        userContext = mock(UserContext.class);
+        projectViewEvent = mock(ProjectViewEvent.class);
+        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters, userContext, projectViewEvent);
     }
 
     @Test
