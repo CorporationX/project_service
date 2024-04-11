@@ -50,6 +50,7 @@ image:
     landscape.maxHeight: 566
     square.maxWidth: 1080
     square.maxHeight: 1080
+
 servlet:
   multipart:
     max-file-size: 5MB
