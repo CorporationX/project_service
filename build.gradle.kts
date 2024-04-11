@@ -39,7 +39,6 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
-<<<<<<<<< Temporary merge branch 1
      * Jira
      */
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4") {
