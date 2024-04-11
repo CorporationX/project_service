@@ -40,7 +40,8 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    region: us-west-2
+    bucketName: corpbucket
     isMocked: false
   payment-service:
     host: http://localhost

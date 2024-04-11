@@ -59,14 +59,6 @@ public class Resource {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    private TeamMember createdBy;
-
-    @ManyToOne
-    @JoinColumn(name = "updated_by")
-    private TeamMember updatedBy;
-
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
