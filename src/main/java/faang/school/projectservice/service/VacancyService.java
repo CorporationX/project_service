@@ -64,25 +64,30 @@ public class VacancyService {
         Vacancy vacancy = findVacancyOrThrowException(vacancyId);
         Project project = vacancy.getProject();
         vacancy.setCount(vacancyDto.getCount() == null ? vacancy.getCount() : vacancyDto.getCount());
-        vacancy.setSalary(vacancyDto.getSalary() == null ? vacancy.getSalary() : vacancy.getSalary());
+        vacancy.setSalary(vacancyDto.getSalary() == null ? vacancy.getSalary() : vacancyDto.getSalary());
         vacancy.setName(vacancyDto.getName() == null ? vacancy.getName() : vacancyDto.getName());
         vacancy.setDescription(vacancyDto.getDescription() == null ? vacancy.getDescription() : vacancyDto.getDescription());
         vacancy.setPosition(vacancyDto.getPosition() == null ? vacancy.getPosition() : vacancyDto.getPosition());
         int neededCount = vacancy.getCount();
+        int count = countTeamMembersWithVacancyPosition(project, vacancy.getPosition());
+        if (count >= neededCount) {
+            vacancy.setStatus(VacancyStatus.CLOSED);
+        }
+        return vacancyMapper.toDto(vacancyRepository.save(vacancy));
+    }
+
+    private int countTeamMembersWithVacancyPosition(Project project, TeamRole position) {
         int count = 0;
         List<Team> teams = project.getTeams();
         for (Team team : teams) {
             List<TeamMember> teamMembers = team.getTeamMembers();
             for (TeamMember teamMember : teamMembers) {
-                if (teamMember.getRoles().contains(vacancy.getPosition())) {
+                if (teamMember.getRoles().contains(position)) {
                     count++;
                 }
             }
         }
-        if (count >= neededCount) {
-            vacancy.setStatus(VacancyStatus.CLOSED);
-        }
-        return vacancyMapper.toDto(vacancyRepository.save(vacancy));
+        return count;
     }
 
     public VacancyDto getVacancyById(long vacancyId) {
@@ -106,7 +111,6 @@ public class VacancyService {
 
     public List<VacancyDto> getVacancies(VacancyFilterDto filters) {
         Stream<Vacancy> vacancyStream = vacancyRepository.findAll().stream();
-        System.out.println(vacancyFilters.size());
         vacancyFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .forEach(filter -> filter.apply(vacancyStream, filters));
