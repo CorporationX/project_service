@@ -5,10 +5,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.service.filter.ProjectFilter;
-import faang.school.projectservice.service.filter.ProjectNameFilter;
-import faang.school.projectservice.service.filter.ProjectStatusFilter;
-import faang.school.projectservice.service.validator.ProjectValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
-import org.junit.Assert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +11,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +32,7 @@ class PromotionTest extends TestSetUp {
 
         List<TeamMember> result = promotion.promoteSucceededInterns(firstInternship, succeededUserIds);
 
-        Assert.assertEquals(afterPromotion, result);
+        assertEquals(afterPromotion, result);
     }
 
     @Test
@@ -42,7 +43,7 @@ class PromotionTest extends TestSetUp {
 
         List<TeamMember> result = promotion.demoteFailedInterns(firstInternship, failedInterns);
 
-        Assert.assertEquals(afterDemotion, result);
+        assertEquals(afterDemotion, result);
 
     }
 }
