@@ -45,6 +45,7 @@ dependencies {
      */
     implementation ("org.imgscalr:imgscalr-lib:4.2")
 
+    /**
      * Jira
      */
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4") {
