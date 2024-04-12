@@ -39,7 +39,7 @@ public class RedisConfiguration {
     }
 
     @Bean
-    public ChannelTopic topic() {
+    public ChannelTopic postViewTopic() {
         return new ChannelTopic(channel);
     }
 }
