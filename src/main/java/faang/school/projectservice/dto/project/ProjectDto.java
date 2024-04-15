@@ -27,4 +27,6 @@ public class ProjectDto {
     private Long ownerId;
     private ProjectStatus status;
     private ProjectVisibility visibility;
+    @NotBlank(message = "Image must have a id")
+    private String coverImageId;
 }
