@@ -2,10 +2,13 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectEvent;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.mapper.JsonMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.publishers.ProjectEventPublisher;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -22,16 +25,28 @@ public class ProjectService {
     private final ProjectJpaRepository projectJpaRepository;
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
+    private final JsonMapper jsonMapper;
+    private final ProjectEventPublisher projectEventPublisher;
 
     private final List<ProjectFilter> projectFilters;
 
     public ProjectDto createProject(ProjectDto projectDto, long requestUserId) {
+        //---------------------------------------------------------------------------
         if (projectJpaRepository.existsByOwnerIdAndName(requestUserId, projectDto.getName())) {
-            throw new IllegalStateException("User ID " + requestUserId + "is already a member of the team associated with the existing project.");
+            throw new IllegalStateException("User ID " + requestUserId + " is already a member of the team associated with the existing project.");
         }
+        //---------------------------------------------------------------------------
+        //That block of code looks quite suspicious and unreasonable to me.
+        // As I have to count how many projects were created by one user.
+        //But that line of code prevent form having an ability to create several projects, where the owner is the same user :(
+
         Project projectToSave = projectMapper.toEntity(projectDto, requestUserId);
         projectToSave.setMaxStorageSize(BigInteger.valueOf(2000000000));
         Project savedProject = projectJpaRepository.save(projectToSave);
+
+        ProjectEvent projectEvent = new ProjectEvent(projectDto.getOwnerId(), projectDto.getId());
+        String json = jsonMapper.toJson(projectEvent);
+        projectEventPublisher.publish(json);
 
         return projectMapper.toDto(savedProject);
     }

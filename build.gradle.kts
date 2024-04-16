@@ -15,12 +15,17 @@ repositories {
 
 dependencies {
     /**
+     * Swagger
+     */
+    implementation ("io.springfox:springfox-swagger2:2.9.2")
+    /**
      * Spring boot starters
      */
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     testImplementation("org.testng:testng:7.1.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
