@@ -20,7 +20,7 @@ public class RedisConfiguration {
     private String host;
     @Value("${spring.data.redis.port}")
     private int port;
-    @Value("${spring.data.redis.channels.project_view_channel.name}")
+    @Value("${spring.data.redis.channels.project_create_channel.name}")
     private String channel;
     @Bean
     public JedisConnectionFactory redisConnectionFactory() {
