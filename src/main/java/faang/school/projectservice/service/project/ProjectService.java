@@ -11,11 +11,13 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.event.ProjectViewEvent;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
+import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.validation.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +34,7 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
     private final UserContext userContext;
     private final ProjectViewEvent projectViewEvent;
+    private final ResourceService resourceService;
 
     @Transactional
     public ProjectDto createProject(Long userId, ProjectDto projectDto) {
@@ -97,5 +100,11 @@ public class ProjectService {
             project.setOwnerId(userId);
         }
         project.setStatus(ProjectStatus.CREATED);
+    }
+    public ProjectDto addACoverToTheProject(Long projectId, MultipartFile file){
+        resourceService.addACoverToTheProject(projectId,file);
+        ProjectDto projectDto = findProjectById(projectId);
+        projectRepository.save(projectMapper.toEntity(projectDto));
+        return projectDto;
     }
 }
