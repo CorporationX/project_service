@@ -1,6 +1,5 @@
 package faang.school.projectservice.service.s3;
 
-
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -29,7 +28,7 @@ public class S3Service {
         ObjectMetadata objectMetaData = new ObjectMetadata();
         objectMetaData.setContentLength(fileSize);
         objectMetaData.setContentType(file.getContentType());
-        String key = String.format("%s/%d%s", folder, file.getOriginalFilename());
+        String key = String.format("%s/%d%s", folder,System.currentTimeMillis(), file.getOriginalFilename());
 
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 bucketName, key, file.getInputStream(), objectMetaData);

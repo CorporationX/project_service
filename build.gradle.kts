@@ -41,11 +41,6 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
-     * ImgScale
-     */
-    implementation ("org.imgscalr:imgscalr-lib:4.2")
-
-    /**
      * Jira
      */
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4") {
@@ -66,6 +61,11 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+
+    /**
+     * ImgScale
+     */
+    implementation ("org.imgscalr:imgscalr-lib:4.2")
 
     /**
      * Test containers

@@ -69,4 +69,10 @@ public class ProjectController {
     public ProjectDto findProjectById(@PathVariable @Positive(message = "id must be greater than zero") Long projectId) {
         return projectService.findProjectById(projectId);
     }
+
+    @Operation(summary = "Add cover to project")
+    @PutMapping("/{projectId}/add")
+    public ProjectDto addACoverToTheProject(@PathVariable @Positive(message = "id must be greater than zero") Long projectId, @RequestParam("file") MultipartFile file) {
+        return projectService.addACoverToTheProject(projectId, file);
+    }
 }
