@@ -15,6 +15,6 @@ public class ProjectViewEventPublisher {
 
     public void publish(String message) {
         redisTemplate.convertAndSend(channelTopic.getTopic(), message);
-        log.info("send message to topic: " + channelTopic.getTopic());
+        log.info("send message to topic: {}", channelTopic.getTopic());
     }
 }

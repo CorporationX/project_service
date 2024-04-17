@@ -1,32 +1,58 @@
 package faang.school.projectservice.service.project.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import faang.school.projectservice.dto.event.ProjectViewEventDto;
 import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+
 @ExtendWith(MockitoExtension.class)
 public class ProjectViewEventTest {
+
     @Mock
+    private ProjectViewEventPublisher mockPublisher;
+
+    @Spy
+    private ObjectMapper mockMapper;
+
+    @Mock
+    private ProjectViewEventDto projectViewEventDto;
+
+    @InjectMocks
     private ProjectViewEvent projectViewEvent;
-    @Mock
-    private ProjectViewEventPublisher projectViewEventPublisher;
+
+    @Captor
+    private ArgumentCaptor<String> messageCaptor;
 
     @Test
-    void testPublishProjectViewEventPublisher() throws JsonProcessingException {
-        Long userId = 10L;
-        Long projectId = 20L;
+    public void testPublishProjectViewEvent_Success() throws JsonProcessingException {
+        Long userId = 1L;
+        Long projectId = 2L;
         LocalDateTime timestamp = LocalDateTime.now();
-        ProjectViewEventPublisher mockPublisher = Mockito.mock(ProjectViewEventPublisher.class);
-        ProjectViewEvent projectViewEvent = new ProjectViewEvent(mockPublisher);
+        String expectedJson = "{'userId': 1, 'projectId': 2, 'timestamp': '2024-04-17T10:42:13.456'}";
+        mockMapper.registerModule(new JavaTimeModule());
+        Mockito.when(mockMapper.writeValueAsString(any(ProjectViewEventDto.class))).thenReturn(expectedJson);
 
         projectViewEvent.publishProjectViewEvent(userId, projectId, timestamp);
 
-        Mockito.verify(mockPublisher, Mockito.times(1)).publish(Mockito.anyString());
+        Mockito.verify(mockMapper).writeValueAsString(any(ProjectViewEventDto.class));
+        Mockito.verify(mockPublisher).publish(messageCaptor.capture());
+
+        String capturedMessage = messageCaptor.getValue();
+        assertEquals(expectedJson, capturedMessage);
     }
 }
