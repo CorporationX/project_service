@@ -204,9 +204,7 @@ public class ProjectServiceTest {
                 .build();
         when(projectJpaRepository.findProjectByOwnerIdAndTeamMember(requestUserId)).thenReturn(List.of());
 
-        assertThrows(EntityNotFoundException.class, () -> {
-            projectService.findAllProjectsByFilters(filterDto, 1L);
-        });
+        assertThrows(EntityNotFoundException.class, () -> projectService.findAllProjectsByFilters(filterDto, 1L));
     }
 
     @Test
