@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.filter;
 
+import faang.school.projectservice.filter.internship.InternshipRoleFilter;
 import org.junit.Assert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

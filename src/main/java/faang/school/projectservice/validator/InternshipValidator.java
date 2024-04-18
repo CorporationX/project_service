@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.validation;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.ConstraintViolation;

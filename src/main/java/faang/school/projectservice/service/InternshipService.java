@@ -7,7 +7,7 @@ import faang.school.projectservice.exception.MessageError;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.service.filter.InternshipFilter;
+import faang.school.projectservice.filter.internship.InternshipFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,12 +42,11 @@ public class InternshipService {
                 .filter(filter -> filter.isApplicable(filters))
                 .toList();
 
-        List<InternshipDto> filteredInternships = internships.stream()
+        return internships.stream()
                 .filter(internship -> applicableFilters.stream()
                         .allMatch(internshipFilter -> internshipFilter.apply(internship, filters)))
                 .map(internshipMapper::toDto)
                 .toList();
-        return filteredInternships;
     }
 
     public List<InternshipDto> getAllInternships() {
