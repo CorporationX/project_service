@@ -8,6 +8,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.event.ProjectCreateEvent;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.validation.project.ProjectValidator;
@@ -28,12 +29,14 @@ public class ProjectService {
     private final ProjectValidator projectValidator;
     private final List<ProjectFilter> projectFilters;
     private final ResourceService resourceService;
+    private final ProjectCreateEvent projectCreateEvent;
 
     @Transactional
     public ProjectDto createProject(Long userId, ProjectDto projectDto) {
         projectValidator.validateProjectCreate(projectDto);
         Project project = projectMapper.toEntity(projectDto);
         setUpProjectFields(project, userId);
+        projectCreateEvent.publishProjectCreateEvent(userId,projectDto.getId());
         return projectMapper.toDto(projectRepository.save(project));
     }
 
