@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.Vacancy.VacancyDto;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
@@ -19,4 +20,6 @@ public interface VacancyMapper {
     List<VacancyDto> toDto(List<Vacancy> vacancyList);
 
     List<Vacancy> toEntity(List<VacancyDto> vacancyDtoList);
+
+    void updateVacancy(@MappingTarget Vacancy vacancy, VacancyDto vacancyDto);
 }

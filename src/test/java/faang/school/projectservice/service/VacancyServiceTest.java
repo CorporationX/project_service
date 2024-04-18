@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.Vacancy.VacancyDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
@@ -15,6 +14,7 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.validator.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +45,8 @@ public class VacancyServiceTest {
     private TeamMemberRepository teamMemberRepository;
     @Spy
     private VacancyMapper vacancyMapper;
+    @Mock
+    private VacancyValidator vacancyValidator;
     @InjectMocks
     VacancyService vacancyService;
 
@@ -80,26 +82,9 @@ public class VacancyServiceTest {
     }
 
     @Test
-    public void createVacancyThrowsExceptionsTest() {
-        Mockito.when(teamMemberRepository.findById(curatorId)).thenReturn(TeamMember.builder()
-                .roles(List.of(TeamRole.DESIGNER))
-                .build());
-        VacancyDto vacancyDto = new VacancyDto();
-        Assert.assertThrows(DataValidationException.class,
-        () -> vacancyService.createVacancy(projectId, vacancyDto, curatorId));
-        Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(Project.builder()
-                .status(ProjectStatus.CANCELLED)
-                .build());
-        Mockito.when(teamMemberRepository.findById(curatorId)).thenReturn(curator);
-        Assert.assertThrows(DataValidationException.class,
-                () -> vacancyService.createVacancy(projectId, vacancyDto, curatorId));
-    }
-
-    @Test
     public void createVacancyTest() {
-        Mockito.when(teamMemberRepository.findById(curatorId)).thenReturn(curator);
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
-        vacancyService.createVacancy(projectId, new VacancyDto(), curatorId);
+        vacancyService.createVacancy(projectId, new VacancyDto());
         ArgumentCaptor<Vacancy> argumentCaptor = ArgumentCaptor.forClass(Vacancy.class);
         verify(vacancyRepository, times(1)).save(argumentCaptor.capture());
     }
@@ -134,6 +119,7 @@ public class VacancyServiceTest {
     public void updateVacancyTest() {
         Mockito.when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(Vacancy.builder()
                 .position(TeamRole.ANALYST)
+                .createdBy(curatorId)
                 .count(2)
                 .project(project)
                 .build()));

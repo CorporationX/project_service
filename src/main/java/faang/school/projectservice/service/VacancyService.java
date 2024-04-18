@@ -45,7 +45,7 @@ public class VacancyService {
     public VacancyDto updateVacancy(Long vacancyId, VacancyDto vacancyDto) {
         Vacancy vacancy = getVacancy(vacancyId);
         Project project = vacancy.getProject();
-        vacancy = vacancyMapper.toEntity(vacancyDto);
+        vacancyMapper.updateVacancy(vacancy, vacancyDto);
         int neededCount = vacancy.getCount();
         int count = countTeamMembersWithVacancyPosition(project, vacancy.getPosition());
         if (count >= neededCount) {
