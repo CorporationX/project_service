@@ -3,30 +3,26 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.Vacancy.VacancyDto;
 import faang.school.projectservice.dto.filter.VacancyFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/vacancy")
 public class VacancyController {
     private final VacancyService vacancyService;
 
-    @PutMapping("/{projectId}/createVacancy")
+    @PutMapping("/{projectId}")
     public VacancyDto createVacancy(@PathVariable long projectId,
-                                    @RequestBody VacancyDto vacancyDto,
-                                    @RequestParam(name = "curatorId") Long curatorId){
-        if (null == curatorId) {
-            throw new DataValidationException("Every vacancy should have a curator!");
-        }
-        return vacancyService.createVacancy(projectId, vacancyDto, curatorId);
+                                    @RequestBody VacancyDto vacancyDto) {
+        return vacancyService.createVacancy(projectId, vacancyDto);
     }
 
     @GetMapping("/{vacancyId}/delete")
@@ -34,7 +30,7 @@ public class VacancyController {
         vacancyService.deleteVacancy(vacancyId);
     }
 
-    @PutMapping("/{vacancyId}/delete")
+    @PutMapping("/{vacancyId}")
     public VacancyDto updateVacancy(@PathVariable long vacancyId, @RequestBody VacancyDto vacancyDto) {
         return vacancyService.updateVacancy(vacancyId, vacancyDto);
     }

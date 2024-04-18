@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.Vacancy;
 
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data public class VacancyDto {
@@ -13,4 +14,6 @@ import lombok.Data;
     private Double salary;
     private Integer count;
     private TeamRole position;
+    @NotNull
+    private long createdBy;
 }
