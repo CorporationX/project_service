@@ -54,7 +54,6 @@ public class VacancyServiceTest {
     private long vacancyId;
     private long curatorId;
     private Project project;
-    private TeamMember curator;
 
     @BeforeEach
     public void initialize() {
@@ -75,10 +74,6 @@ public class VacancyServiceTest {
                 .build();
         vacancyId = 200L;
         curatorId = 300L;
-        curator = TeamMember.builder()
-                .roles(List.of(TeamRole.OWNER))
-                .id(curatorId)
-                .build();
     }
 
     @Test
