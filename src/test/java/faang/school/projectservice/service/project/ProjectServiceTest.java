@@ -7,6 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.event.ProjectCreateEvent;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.validation.project.ProjectValidator;
@@ -40,6 +41,7 @@ public class ProjectServiceTest {
     private List<ProjectFilter> projectFilters;
     private ProjectService projectService;
     private ResourceService resourceService;
+    private ProjectCreateEvent projectCreateEvent;
 
     @BeforeEach
     void setUp() {
@@ -48,7 +50,8 @@ public class ProjectServiceTest {
         projectFilter = mock(ProjectFilter.class);
         projectFilters = Collections.singletonList(projectFilter);
         resourceService = mock(ResourceService.class);
-        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters, resourceService);
+        projectCreateEvent = mock(ProjectCreateEvent.class);
+        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters, resourceService, projectCreateEvent);
     }
 
     @Test
