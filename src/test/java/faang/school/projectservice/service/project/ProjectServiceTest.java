@@ -7,6 +7,7 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.resource.ResourceService;
@@ -26,7 +27,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,11 +39,11 @@ public class ProjectServiceTest {
     private ProjectRepository projectRepository;
     private ProjectValidator projectValidator;
     private ProjectFilter projectFilter;
-    private UserContext userContext;
-    private ProjectViewEvent projectViewEvent;
     private List<ProjectFilter> projectFilters;
     private ProjectService projectService;
+    private UserContext userContext;
     private ResourceService resourceService;
+    private ProjectViewEventPublisher projectViewEventPublisher;
 
     @BeforeEach
     void setUp() {
@@ -52,9 +52,9 @@ public class ProjectServiceTest {
         projectFilter = mock(ProjectFilter.class);
         projectFilters = Collections.singletonList(projectFilter);
         userContext = mock(UserContext.class);
-        projectViewEvent = mock(ProjectViewEvent.class);
+        projectViewEventPublisher = mock(ProjectViewEventPublisher.class);
         resourceService = mock(ResourceService.class);
-        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters, userContext, projectViewEvent, resourceService);
+        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters, userContext, resourceService, projectViewEventPublisher);
     }
 
     @Test
