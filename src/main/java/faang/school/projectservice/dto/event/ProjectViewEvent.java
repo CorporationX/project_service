@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectViewEventDto {
+public class ProjectViewEvent {
     @NotNull
     Long userId;
     @NotNull

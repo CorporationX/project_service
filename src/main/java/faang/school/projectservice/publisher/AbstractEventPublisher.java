@@ -14,7 +14,6 @@ public abstract class AbstractEventPublisher<T> implements MessagePublisher<T> {
     protected final RedisTemplate<String, Object> redisTemplate;
     protected final ChannelTopic topic;
     protected final ObjectMapper objectMapper;
-
     public void publish(T event) {
         try {
             redisTemplate.convertAndSend(topic.getTopic(), objectMapper.writeValueAsString(event));

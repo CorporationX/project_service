@@ -3,7 +3,7 @@ package faang.school.projectservice.service.project.event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import faang.school.projectservice.dto.event.ProjectViewEventDto;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ public class ProjectViewEventTest {
     private ObjectMapper mockMapper;
 
     @Mock
-    private ProjectViewEventDto projectViewEventDto;
+    private ProjectViewEvent projectViewEventDto;
 
     @InjectMocks
     private ProjectViewEvent projectViewEvent;
@@ -45,11 +45,11 @@ public class ProjectViewEventTest {
         LocalDateTime timestamp = LocalDateTime.now();
         String expectedJson = "{'userId': 1, 'projectId': 2, 'timestamp': '2024-04-17T10:42:13.456'}";
         mockMapper.registerModule(new JavaTimeModule());
-        Mockito.when(mockMapper.writeValueAsString(any(ProjectViewEventDto.class))).thenReturn(expectedJson);
+        Mockito.when(mockMapper.writeValueAsString(any(ProjectViewEvent.class))).thenReturn(expectedJson);
 
         projectViewEvent.publishProjectViewEvent(userId, projectId, timestamp);
 
-        Mockito.verify(mockMapper).writeValueAsString(any(ProjectViewEventDto.class));
+        Mockito.verify(mockMapper).writeValueAsString(any(ProjectViewEvent.class));
         Mockito.verify(mockPublisher).publish(messageCaptor.capture());
 
         String capturedMessage = messageCaptor.getValue();

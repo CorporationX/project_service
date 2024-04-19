@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -8,8 +9,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.event.ProjectViewEvent;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.validation.project.ProjectValidator;
@@ -33,8 +34,8 @@ public class ProjectService {
     private final ProjectValidator projectValidator;
     private final List<ProjectFilter> projectFilters;
     private final UserContext userContext;
-    private final ProjectViewEvent projectViewEvent;
     private final ResourceService resourceService;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     @Transactional
     public ProjectDto createProject(Long userId, ProjectDto projectDto) {
@@ -67,11 +68,13 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto findProjectById(Long id) {
-        Long userId = userContext.getUserId();
-        LocalDateTime timestamp = LocalDateTime.now();
-        Long projectId = id;
-        projectViewEvent.publishProjectViewEvent(userId, projectId, timestamp);
-        log.info("Project viewed: userId={}, projectId={}, timestamp={}", userId, projectId, timestamp);
+        ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
+                .userId(userContext.getUserId())
+                .projectId(id)
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.info("Project viewed: userId={}, projectId={}, timestamp={}", userContext.getUserId(), id, LocalDateTime.now());
+        projectViewEventPublisher.publish(projectViewEvent);
         return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 
