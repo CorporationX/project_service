@@ -3,7 +3,7 @@ package faang.school.projectservice.service.project.event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.event.ProjectViewEventDto;
-import faang.school.projectservice.publisher.ProjectViewEventPublisher;
+import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

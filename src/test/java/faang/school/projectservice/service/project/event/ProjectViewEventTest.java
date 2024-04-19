@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import faang.school.projectservice.dto.event.ProjectViewEventDto;
-import faang.school.projectservice.publisher.ProjectViewEventPublisher;
+import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
