@@ -15,17 +15,3 @@ public class ProjectViewEventPublisher extends AbstractEventPublisher<ProjectVie
         super(redisTemplate, projectViewTopic, objectMapper);
     }
 }
-
-//projectViewEventDto.setUserId(userId);
-//        projectViewEventDto.setProjectId(projectId);
-//        projectViewEventDto.setTimestamp(timestamp);
-//        log.info("message create");
-//        try {
-//String jsonMessage = objectMapper.writeValueAsString(projectViewEventDto);
-//            projectViewEventPublisher.publish(jsonMessage);
-//            log.info("message publish");
-//        } catch (
-//JsonProcessingException e) {
-//        log.error("Error processing JSON message for publishing: {}", e.getMessage());
-//        throw new RuntimeException("Error converting projectViewEventDto to JSON", e);
-//        }
