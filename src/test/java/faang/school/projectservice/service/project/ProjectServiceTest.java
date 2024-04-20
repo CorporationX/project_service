@@ -1,13 +1,15 @@
 package faang.school.projectservice.service.project;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import faang.school.projectservice.dto.project.ProjectCreateEventDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.pablisher.ProjectEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.event.ProjectCreateEvent;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.validation.project.ProjectValidator;
@@ -41,7 +43,7 @@ public class ProjectServiceTest {
     private List<ProjectFilter> projectFilters;
     private ProjectService projectService;
     private ResourceService resourceService;
-    private ProjectCreateEvent projectCreateEvent;
+    private ProjectEventPublisher projectEventPublisher;
 
     @BeforeEach
     void setUp() {
@@ -50,8 +52,8 @@ public class ProjectServiceTest {
         projectFilter = mock(ProjectFilter.class);
         projectFilters = Collections.singletonList(projectFilter);
         resourceService = mock(ResourceService.class);
-        projectCreateEvent = mock(ProjectCreateEvent.class);
-        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters, resourceService, projectCreateEvent);
+        projectEventPublisher = mock(ProjectEventPublisher.class);
+        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters, resourceService, projectEventPublisher);
     }
 
     @Test
@@ -59,6 +61,7 @@ public class ProjectServiceTest {
         long userId = 1L;
         ProjectDto projectDto = getProjectDto();
         ProjectDto expected = getExpectedProjectDto(userId);
+        ProjectCreateEventDto expectedEvent = new ProjectCreateEventDto(userId, projectDto.getId());
         when(projectRepository.save(any(Project.class))).thenReturn(getProject(userId));
 
         ProjectDto actual = projectService.createProject(userId, projectDto);
@@ -68,6 +71,7 @@ public class ProjectServiceTest {
         verify(projectValidator, times(1)).validateProjectCreate(any(ProjectDto.class));
         verify(projectRepository, times(1)).save(any(Project.class));
         verify(projectMapper, times(1)).toDto(any(Project.class));
+        verify(projectEventPublisher, times(1)).publish(expectedEvent);
     }
 
     @Test

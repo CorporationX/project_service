@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.project.ProjectCreateEventDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -7,8 +8,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.pablisher.ProjectEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.event.ProjectCreateEvent;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.validation.project.ProjectValidator;
@@ -29,14 +30,14 @@ public class ProjectService {
     private final ProjectValidator projectValidator;
     private final List<ProjectFilter> projectFilters;
     private final ResourceService resourceService;
-    private final ProjectCreateEvent projectCreateEvent;
+    private final ProjectEventPublisher projectEventPublisher;
 
     @Transactional
     public ProjectDto createProject(Long userId, ProjectDto projectDto) {
         projectValidator.validateProjectCreate(projectDto);
         Project project = projectMapper.toEntity(projectDto);
         setUpProjectFields(project, userId);
-        projectCreateEvent.publishProjectCreateEvent(userId,projectDto.getId());
+        projectEventPublisher.publish(new ProjectCreateEventDto(userId, projectDto.getId()));
         return projectMapper.toDto(projectRepository.save(project));
     }
 
@@ -93,8 +94,8 @@ public class ProjectService {
         project.setStatus(ProjectStatus.CREATED);
     }
 
-    public ProjectDto addACoverToTheProject(Long projectId, MultipartFile file){
-        resourceService.addACoverToTheProject(projectId,file);
+    public ProjectDto addACoverToTheProject(Long projectId, MultipartFile file) {
+        resourceService.addACoverToTheProject(projectId, file);
         ProjectDto projectDto = findProjectById(projectId);
         projectRepository.save(projectMapper.toEntity(projectDto));
         return projectDto;
