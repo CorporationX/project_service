@@ -1,6 +1,5 @@
 package faang.school.projectservice.config.context;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +11,6 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Slf4j
-@AllArgsConstructor
 @Configuration
 public class RedisConfiguration {
 
@@ -22,9 +20,10 @@ public class RedisConfiguration {
     private int port;
     @Value("${spring.data.redis.channels.project_create_channel.name}")
     private String channel;
+
     @Bean
     public JedisConnectionFactory redisConnectionFactory() {
-        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(host,port);
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(host, port);
         return new JedisConnectionFactory(configuration);
     }
 
