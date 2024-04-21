@@ -1,6 +1,5 @@
 package faang.school.projectservice.service.project;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.project.ProjectCreateEventDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -8,7 +7,7 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.pablisher.ProjectEventPublisher;
+import faang.school.projectservice.publisher.ProjectEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.resource.ResourceService;
