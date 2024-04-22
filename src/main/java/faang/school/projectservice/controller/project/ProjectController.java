@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +59,8 @@ public class ProjectController {
         return projectService.findAllProjects();
     }
 
+    @Async
+    @Cacheable(cacheNames = "projectId", key = "#projectId")
     @Operation(summary = "Find project by project id")
     @GetMapping("/{projectId}")
     public ProjectDto findProjectById(@PathVariable @Positive(message = "id must be greater than zero") Long projectId) {
