@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.Vacancy.VacancyDto;
 import faang.school.projectservice.dto.filter.VacancyFilterDto;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,7 +26,7 @@ public class VacancyController {
         return vacancyService.createVacancy(projectId, vacancyDto);
     }
 
-    @GetMapping("/{vacancyId}/delete")
+    @DeleteMapping("/{vacancyId}")
     public void deleteVacancy(@PathVariable long vacancyId) {
         vacancyService.deleteVacancy(vacancyId);
     }
