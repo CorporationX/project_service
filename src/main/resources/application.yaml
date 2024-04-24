@@ -48,6 +48,7 @@ services:
 
 image:
   upload:
+    max-file-size: 5242880
     landscape.maxWidth: 1080
     landscape.maxHeight: 566
     square.maxWidth: 1080

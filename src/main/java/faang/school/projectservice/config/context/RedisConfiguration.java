@@ -12,7 +12,6 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Slf4j
-@AllArgsConstructor
 @Configuration
 public class RedisConfiguration {
 
