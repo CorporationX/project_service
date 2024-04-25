@@ -16,7 +16,9 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
+
     public void deleteById(Long id) {
         jpaRepository.deleteById(id);
+
     }
 }
