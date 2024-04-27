@@ -33,14 +33,9 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
 
     public ProjectDto createProject(ProjectDto projectDto, long requestUserId) {
- //       ---------------------------------------------------------------------------
         if (projectJpaRepository.existsByOwnerIdAndName(requestUserId, projectDto.getName())) {
             throw new IllegalStateException("User ID " + requestUserId + " is already a member of the team associated with the existing project.");
         }
-  //      ---------------------------------------------------------------------------
-        //That block of code looks quite suspicious and unreasonable to me.
-        // As I have to count how many projects were created by one user.
-        //But that line of code prevent form having an ability to create several projects, where the owner is the same user :(
 
         Project projectToSave = projectMapper.toEntity(projectDto, requestUserId);
         projectToSave.setMaxStorageSize(maxCapacity);
