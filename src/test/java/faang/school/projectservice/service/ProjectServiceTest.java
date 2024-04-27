@@ -139,17 +139,16 @@ public class ProjectServiceTest {
 
     @Test
     public void testCreateProjectSuccess() {
-        when(projectJpaRepository.existsByOwnerIdAndName( anyLong(), anyString() )).thenReturn( false );
-        when(projectMapper.toEntity( any(ProjectDto.class), anyLong() )).thenReturn(project);
+//        when(projectJpaRepository.existsByOwnerIdAndName( anyLong(), anyString() )).thenReturn( false );when(projectMapper.toEntity( any(ProjectDto.class), anyLong() )).thenReturn(project);
+        when(projectMapper.toEntity( projectDto, requestUserId) ).thenReturn(project);
         when(projectJpaRepository.save(any(Project.class))).thenReturn(project);
-        when(jsonMapper.toJson(firstProjectEvent)).thenReturn(firstProjectEventInJson);
         when(projectMapper.toDto( any(Project.class) )).thenReturn(projectDto );
 
         assertDoesNotThrow(() -> projectService.createProject(projectDto, requestUserId));
 
         verify(projectMapper, times(1)).toEntity(projectDto, requestUserId);
         verify(projectJpaRepository, times(1)).save(project);
-        verify(projectEventPublisher, times(1)).publish(firstProjectEventInJson);
+        verify(projectEventPublisher, times(1)).publish(firstProjectEvent);
         verify(projectMapper, times(1)).toDto(project);
 
     }
