@@ -37,7 +37,7 @@ public class ResourceService {
 
     @Transactional
     public ResourceDto uploadFileToProject(Long userId, MultipartFile file) {
-        TeamMember user = teamMemberRepository.findById(userId);
+        TeamMember user = getTeamMember(userId);
         log.info("Успешно получили объект TeamMember {}", user.getId());
         Project project = user.getTeam().getProject();
         log.info("Успешно получили объект Project {}", project.getName());
@@ -57,9 +57,6 @@ public class ResourceService {
         resourceRepository.save(resource);
 
         project.setStorageSize(newStorageSize);
-        if (project.getResources() == null) {
-            project.setResources(new ArrayList<>());
-        }
         project.getResources().add(resource);
         projectRepository.save(project);
         log.info("Успешно загрузили объект Project в репозиторий {}", project.getName());
@@ -68,10 +65,10 @@ public class ResourceService {
     }
 
     public ResourceDto updateFileFromProject(Long user_id, Long resource_id, MultipartFile file) {
-        TeamMember user = teamMemberRepository.findById(user_id);
+        TeamMember user = getTeamMember(user_id);
         log.info("Успешно получили объект TeamMember {}", user.getId());
 
-        Resource resource = resourceRepository.findById(resource_id).orElseThrow(() -> new EntityNotFoundException(String.format("Ресурс по id: %d не найден", resource_id)));
+        Resource resource = getResource(resource_id);
         log.info("Успешно получили объект Resource {}", resource.getName());
 
         Project project = resource.getProject();
@@ -80,38 +77,28 @@ public class ResourceService {
         resourceValidation.checkingUserForUpdatingFile(user, resource);
         log.info("Успешно прошли валидацию на право изменения ресурса");
 
-        long fileSize = file.getSize();
-        BigInteger newStorageSize = project.getStorageSize().subtract(resource.getSize()).add(BigInteger.valueOf(fileSize));
+        BigInteger newStorageSize = currentSizeStorage(resource, project, file);
         int compareStorage = newStorageSize.compareTo(project.getMaxStorageSize());
         projectValidation.projectSizeIsFull(compareStorage);
         log.info("Успешно прошли валидацию на заполненность проекта ресурсами");
 
-        String key = resource.getKey();
-        Resource updatedResource = s3Client.uploadFile(file, key);
+        Resource updatedResource = updateResource(resource, user, file);
         log.info("Успешно обновили и загрузили объект в облако и получили Resource {}", updatedResource.getName());
 
-        updatedResource.setId(resource_id);
-        updatedResource.setCreatedBy(resource.getCreatedBy());
-        updatedResource.setUpdatedBy(user);
-        updatedResource.setProject(project);
-        updatedResource.setCreatedAt(resource.getCreatedAt());
         resourceRepository.save(updatedResource);
         log.info("Успешно обновили объект Resource в репозитории {}", updatedResource.getName());
 
-        project.setStorageSize(newStorageSize);
-        project.getResources().remove(resource);
-        project.getResources().add(updatedResource);
-        projectRepository.save(project);
+        upadateProject(project, resource, updatedResource, newStorageSize);
         log.info("Успешно обновили данные в объекте Project и сохранили в репозиторий {}", project.getName());
 
         return resourceMapper.toDto(updatedResource);
     }
 
     public void deleteFileFromProject(Long user_id, Long resource_id) {
-        TeamMember user = teamMemberRepository.findById(user_id);
+        TeamMember user = getTeamMember(user_id);
         log.info("Успешно получили объект TeamMember {}", user.getId());
 
-        Resource resource = resourceRepository.findById(resource_id).orElseThrow(() -> new EntityNotFoundException(String.format("Ресурс по id: %d не найден", resource_id)));
+        Resource resource = getResource(resource_id);
         log.info("Успешно получили объект Resource {}", resource.getName());
 
         Project project = resource.getProject();
@@ -128,13 +115,49 @@ public class ResourceService {
         projectRepository.save(project);
         log.info("Успешно данные в объекте Project и сохранили в репозиторий {}", project.getName());
 
+        deleteResource(resource, user);
+        resourceRepository.save(resource);
+        log.info("Успешно удалили данные о Resource {} ", resource.getName());
+    }
+
+    private TeamMember getTeamMember(Long user_id) {
+        return teamMemberRepository.findById(user_id);
+    }
+
+    private Resource getResource(Long resource_id) {
+        return resourceRepository.findById(resource_id).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Ресурс по id: %d не найден", resource_id)));
+    }
+
+    private BigInteger currentSizeStorage(Resource resource, Project project, MultipartFile file) {
+        long fileSize = file.getSize();
+        return project.getStorageSize().subtract(resource.getSize()).add(BigInteger.valueOf(fileSize));
+    }
+
+    private Resource updateResource(Resource resource, TeamMember user, MultipartFile file) {
+        String key = resource.getKey();
+        Resource updatedResource = s3Client.uploadFile(file, key);
+
+        updatedResource.setId(resource.getId());
+        updatedResource.setCreatedBy(resource.getCreatedBy());
+        updatedResource.setUpdatedBy(user);
+        updatedResource.setProject(resource.getProject());
+        updatedResource.setCreatedAt(resource.getCreatedAt());
+        return updatedResource;
+    }
+
+    private Project upadateProject(Project project, Resource removeResource, Resource saveResource, BigInteger newStorageSize) {
+        project.setStorageSize(newStorageSize);
+        project.getResources().remove(removeResource);
+        project.getResources().add(saveResource);
+        return projectRepository.save(project);
+    }
+
+    private void deleteResource(Resource resource, TeamMember user) {
         resource.setKey(null);
         resource.setSize(null);
         resource.setProject(null);
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedBy(user);
-
-        resourceRepository.save(resource);
-        log.info("Успешно удалили данные о Resource {} ", resource.getName());
     }
 }

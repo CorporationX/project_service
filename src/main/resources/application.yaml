@@ -1,4 +1,7 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 2GB
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres
@@ -48,3 +51,6 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+api:
+    base-path: /v1/resources

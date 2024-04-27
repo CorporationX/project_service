@@ -1,4 +1,4 @@
-package faang.school.projectservice.config.s3;
+package faang.school.projectservice.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

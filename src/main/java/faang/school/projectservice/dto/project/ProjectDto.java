@@ -20,6 +20,4 @@ public class ProjectDto {
     private Long ownerId;
     private ProjectStatus status;
     private ProjectVisibility visibility;
-//    private BigInteger storageSize;
-//    private BigInteger maxStorageSize;
 }
