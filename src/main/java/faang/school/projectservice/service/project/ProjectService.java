@@ -1,5 +1,7 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.dto.project.ProjectCreateEventDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -8,19 +10,23 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import faang.school.projectservice.publisher.ProjectEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.validation.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -29,7 +35,9 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
     private final List<ProjectFilter> projectFilters;
+    private final UserContext userContext;
     private final ResourceService resourceService;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
     private final ProjectEventPublisher projectEventPublisher;
 
     @Transactional
@@ -62,8 +70,15 @@ public class ProjectService {
         return projectMapper.toDto(projectRepository.findAll());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ProjectDto findProjectById(Long id) {
+        ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
+                .userId(userContext.getUserId())
+                .projectId(id)
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.info("Project viewed: userId={}, projectId={}, timestamp={}", userContext.getUserId(), id, LocalDateTime.now());
+        projectViewEventPublisher.publish(projectViewEvent);
         return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 
@@ -94,8 +109,8 @@ public class ProjectService {
         project.setStatus(ProjectStatus.CREATED);
     }
 
-    public ProjectDto addACoverToTheProject(Long projectId, MultipartFile file) {
-        resourceService.addACoverToTheProject(projectId, file);
+    public ProjectDto addACoverToTheProject(Long projectId, MultipartFile file){
+        resourceService.addACoverToTheProject(projectId,file);
         ProjectDto projectDto = findProjectById(projectId);
         projectRepository.save(projectMapper.toEntity(projectDto));
         return projectDto;

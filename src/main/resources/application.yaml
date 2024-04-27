@@ -22,8 +22,10 @@ spring:
       port: 6379
       host: localhost
       channels:
+        calculations_channel:
+          name: calculations_channel
         project_view_channel:
-          name: project_view
+          name: project_view_channel
         project_create_channel:
           name: project_create
 
@@ -48,6 +50,7 @@ services:
 
 image:
   upload:
+    maxFileSize: 5242880
     landscape.maxWidth: 1080
     landscape.maxHeight: 566
     square.maxWidth: 1080
@@ -55,5 +58,5 @@ image:
 
 servlet:
   multipart:
-    max-file-size: 5242880
+    max-file-size: 5MB
     max-request-size: 5MB
