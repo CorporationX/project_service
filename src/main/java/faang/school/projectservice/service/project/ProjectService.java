@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.event.ProjectViewEvent;
+import faang.school.projectservice.dto.project.ProjectCreateEventDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -10,6 +11,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
+import faang.school.projectservice.publisher.ProjectEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.resource.ResourceService;
@@ -36,12 +38,14 @@ public class ProjectService {
     private final UserContext userContext;
     private final ResourceService resourceService;
     private final ProjectViewEventPublisher projectViewEventPublisher;
+    private final ProjectEventPublisher projectEventPublisher;
 
     @Transactional
     public ProjectDto createProject(Long userId, ProjectDto projectDto) {
         projectValidator.validateProjectCreate(projectDto);
         Project project = projectMapper.toEntity(projectDto);
         setUpProjectFields(project, userId);
+        projectEventPublisher.publish(new ProjectCreateEventDto(userId, projectDto.getId()));
         return projectMapper.toDto(projectRepository.save(project));
     }
 
@@ -104,6 +108,7 @@ public class ProjectService {
         }
         project.setStatus(ProjectStatus.CREATED);
     }
+
     public ProjectDto addACoverToTheProject(Long projectId, MultipartFile file){
         resourceService.addACoverToTheProject(projectId,file);
         ProjectDto projectDto = findProjectById(projectId);

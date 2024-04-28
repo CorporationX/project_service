@@ -1,12 +1,14 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.project.ProjectCreateEventDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectEventPublisher;
 import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
@@ -40,9 +42,10 @@ public class ProjectServiceTest {
     private ProjectValidator projectValidator;
     private ProjectFilter projectFilter;
     private List<ProjectFilter> projectFilters;
-    private ProjectService projectService;
     private UserContext userContext;
+    private ProjectService projectService;
     private ResourceService resourceService;
+    private ProjectEventPublisher projectEventPublisher;
     private ProjectViewEventPublisher projectViewEventPublisher;
 
     @BeforeEach
@@ -50,11 +53,12 @@ public class ProjectServiceTest {
         projectRepository = mock(ProjectRepository.class);
         projectValidator = mock(ProjectValidator.class);
         projectFilter = mock(ProjectFilter.class);
-        projectFilters = Collections.singletonList(projectFilter);
         userContext = mock(UserContext.class);
-        projectViewEventPublisher = mock(ProjectViewEventPublisher.class);
+        projectFilters = Collections.singletonList(projectFilter);
         resourceService = mock(ResourceService.class);
-        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters, userContext, resourceService, projectViewEventPublisher);
+        projectEventPublisher = mock(ProjectEventPublisher.class);
+        projectViewEventPublisher = mock(ProjectViewEventPublisher.class);
+        projectService = new ProjectService(projectMapper, projectRepository, projectValidator, projectFilters,userContext, resourceService,projectViewEventPublisher, projectEventPublisher);
     }
 
     @Test
@@ -62,6 +66,7 @@ public class ProjectServiceTest {
         long userId = 1L;
         ProjectDto projectDto = getProjectDto();
         ProjectDto expected = getExpectedProjectDto(userId);
+        ProjectCreateEventDto expectedEvent = new ProjectCreateEventDto(userId, projectDto.getId());
         when(projectRepository.save(any(Project.class))).thenReturn(getProject(userId));
 
         ProjectDto actual = projectService.createProject(userId, projectDto);
@@ -71,6 +76,7 @@ public class ProjectServiceTest {
         verify(projectValidator, times(1)).validateProjectCreate(any(ProjectDto.class));
         verify(projectRepository, times(1)).save(any(Project.class));
         verify(projectMapper, times(1)).toDto(any(Project.class));
+        verify(projectEventPublisher, times(1)).publish(expectedEvent);
     }
 
     @Test
