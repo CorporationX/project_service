@@ -8,6 +8,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V003__create_campaign.sql
   - include:
+      file: db/changelog/changeset/project_V004__alter_resource.sql
+  - include:
       file: db/changelog/changeset/project_V005__create_moment.sql
   - include:
       file: db/changelog/changeset/project_V006__create_vacancy.sql
@@ -17,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V008__alter_candidate_add_vacancy.sql
   - include:
       file: db/changelog/changeset/project_V012_create_moment_users.sql
+  - include:
+      file: db/changelog/changeset/project_V013__resource_allowed_roles.sql

@@ -38,6 +38,12 @@ public class ProjectValidation {
         }
     }
 
+    public void projectSizeIsFull(int sizeStorage){
+        if (sizeStorage > 0){
+          throw new DataValidationException(ProjectConstraints.PROJECT_FILE_SIZE_IS_FULL.getMessage());
+        }
+    }
+
     private void validateTitle(ProjectDto projectDto) {
         if (projectDto.getName() == null) {
             throw new DataValidationException(ProjectConstraints.PROJECT_NAME_CAN_NOT_BE_NULL.getMessage());
