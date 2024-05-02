@@ -22,6 +22,8 @@ spring:
       port: 6379
       host: localhost
       channels:
+        project_channel:
+          name: project_channel
         calculations_channel:
           name: calculations_channel
 
@@ -48,3 +50,6 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+storage:
+  max_capacity: 2000000000

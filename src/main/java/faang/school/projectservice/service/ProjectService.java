@@ -2,14 +2,17 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectEvent;
+import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.publishers.ProjectEventPublisher;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -23,21 +26,29 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
 
+    @Value("#{new java.math.BigInteger('${storage.max_capacity}')}")
+    private BigInteger maxCapacity;
+    private final ProjectEventPublisher projectEventPublisher;
+
     private final List<ProjectFilter> projectFilters;
 
     public ProjectDto createProject(ProjectDto projectDto, long requestUserId) {
         if (projectJpaRepository.existsByOwnerIdAndName(requestUserId, projectDto.getName())) {
-            throw new IllegalStateException("User ID " + requestUserId + "is already a member of the team associated with the existing project.");
+            throw new IllegalStateException("User ID " + requestUserId + " is already a member of the team associated with the existing project.");
         }
+
         Project projectToSave = projectMapper.toEntity(projectDto, requestUserId);
-        projectToSave.setMaxStorageSize(BigInteger.valueOf(2000000000));
+        projectToSave.setMaxStorageSize(maxCapacity);
         Project savedProject = projectJpaRepository.save(projectToSave);
+
+        ProjectEvent projectEvent = new ProjectEvent(savedProject.getOwnerId(), savedProject.getId());
+        projectEventPublisher.publish(projectEvent);
 
         return projectMapper.toDto(savedProject);
     }
 
     public ProjectDto updateProject(long projectId, ProjectDto projectDto, long requestUserId) {
-        Project existingProject = findProjectOrThrowException( projectId );
+        Project existingProject = findProjectOrThrowException(projectId);
 
         projectValidator.checkUserIsMemberOrThrowException(existingProject, requestUserId);
 
@@ -75,23 +86,23 @@ public class ProjectService {
     }
 
     public ProjectDto getProjectById(long projectId, long requestUserId) {
-        Project project = findProjectOrThrowException( projectId );
+        Project project = findProjectOrThrowException(projectId);
 
         projectValidator.checkUserIsMemberOrThrowException(project, requestUserId);
 
         return projectMapper.toDto(project);
     }
 
-    Project getProjectById(long projectId){
+    Project getProjectById(long projectId) {
         return projectJpaRepository.findById(projectId).orElseThrow(EntityNotFoundException::new);
     }
 
-    Project save(Project project){
+    Project save(Project project) {
         return projectJpaRepository.save(project);
     }
 
 
-    private Project findProjectOrThrowException(long projectId){
+    private Project findProjectOrThrowException(long projectId) {
         return projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
     }
 
