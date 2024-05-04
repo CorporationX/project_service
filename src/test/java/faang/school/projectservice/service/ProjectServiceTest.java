@@ -2,13 +2,13 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectEvent;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.mapper.JsonMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.service.filter.ProjectFilter;
-import faang.school.projectservice.service.filter.ProjectNameFilter;
-import faang.school.projectservice.service.filter.ProjectStatusFilter;
-import faang.school.projectservice.service.validator.ProjectValidator;
+import faang.school.projectservice.publishers.ProjectEventPublisher;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +18,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +34,10 @@ public class ProjectServiceTest {
     private ProjectService projectService;
     @Mock
     private ProjectJpaRepository projectJpaRepository;
+    @Mock
+    JsonMapper jsonMapper;
+    @Mock
+    ProjectEventPublisher projectEventPublisher;
     @Spy
     private ProjectMapper projectMapper;
     @Mock
@@ -47,6 +49,8 @@ public class ProjectServiceTest {
     ProjectStatus projectStatus;
     List<Project> projectList;
     List<ProjectDto> projectDtoList;
+    ProjectEvent firstProjectEvent;
+    String firstProjectEventInJson;
 
     @BeforeEach
     public void init() {
@@ -125,12 +129,18 @@ public class ProjectServiceTest {
 
         projectDtoList = List.of(projectDto, projectDto2, projectDto3, projectDto4);
         projectList = List.of(project, project2, project3, project4);
+        firstProjectEvent = ProjectEvent.builder()
+                .authorId(projectDto.getOwnerId())
+                .projectId(projectDto.getId())
+                .build();
+
+        firstProjectEventInJson = String.format("{\"authorId\": %d,\"projectId\": %d}", projectDto.getOwnerId(), projectDto.getId());
     }
 
     @Test
     public void testCreateProjectSuccess() {
-        when(projectJpaRepository.existsByOwnerIdAndName( anyLong(), anyString() )).thenReturn( false );
-        when(projectMapper.toEntity( any(ProjectDto.class), anyLong() )).thenReturn(project);
+//        when(projectJpaRepository.existsByOwnerIdAndName( anyLong(), anyString() )).thenReturn( false );when(projectMapper.toEntity( any(ProjectDto.class), anyLong() )).thenReturn(project);
+        when(projectMapper.toEntity( projectDto, requestUserId) ).thenReturn(project);
         when(projectJpaRepository.save(any(Project.class))).thenReturn(project);
         when(projectMapper.toDto( any(Project.class) )).thenReturn(projectDto );
 
@@ -138,6 +148,7 @@ public class ProjectServiceTest {
 
         verify(projectMapper, times(1)).toEntity(projectDto, requestUserId);
         verify(projectJpaRepository, times(1)).save(project);
+        verify(projectEventPublisher, times(1)).publish(firstProjectEvent);
         verify(projectMapper, times(1)).toDto(project);
 
     }
@@ -192,9 +203,7 @@ public class ProjectServiceTest {
                 .build();
         when(projectJpaRepository.findProjectByOwnerIdAndTeamMember(requestUserId)).thenReturn(List.of());
 
-        assertThrows(EntityNotFoundException.class, () -> {
-            projectService.findAllProjectsByFilters(filterDto, 1L);
-        });
+        assertThrows(EntityNotFoundException.class, () -> projectService.findAllProjectsByFilters(filterDto, 1L));
     }
 
     @Test

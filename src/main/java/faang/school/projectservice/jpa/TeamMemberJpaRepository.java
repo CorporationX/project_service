@@ -16,6 +16,8 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     )
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
+    List<TeamMember> findByUserId(long userId);
+
     @Query(nativeQuery = true, value = """
             SELECT tm.* from team_member tm
             Join team ON tm.team_id = team.id

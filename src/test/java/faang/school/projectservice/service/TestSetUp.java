@@ -10,7 +10,7 @@ import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.filter.InternshipFilter;
+import faang.school.projectservice.filter.internship.InternshipFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 

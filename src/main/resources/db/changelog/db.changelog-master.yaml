@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V009__alter_internship_add_role.sql
   - include:
       file: db/changelog/changeset/project_V012_create_moment_users.sql
+  - include:
+      file: db/changelog/changeset/project_V013_alter_table_resource.sql

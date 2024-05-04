@@ -18,6 +18,12 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
+
+    public void deleteById(Long id) {
+        teamMemberJpaRepository.deleteById(id);
+
+    }
+
     public List<TeamMember> findAllByProjectId(Long projectId) {
         return teamMemberJpaRepository.findAllByProjectId(projectId);
     }

@@ -1,13 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import jakarta.persistence.EntityNotFoundException;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +32,8 @@ public class InternshipUpdateLogicService {
         List<Long> succeededInternsByUserId = internsPerformance.get(true);
 
 
-        List<TeamMember> promotedInterns = promotion.promoteSucceededInterns(internship, succeededInternsByUserId);
-        List<TeamMember> demotedAndDeletedFromProjectInterns = promotion.demoteFailedInterns(internship, failedInternsByUserId);
+        promotion.promoteSucceededInterns(internship, succeededInternsByUserId);
+        promotion.demoteFailedInterns(internship, failedInternsByUserId);
 
         internship.getInterns().clear();
 
