@@ -1,16 +1,16 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectEvent;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.publishers.ProjectEventPublisher;
 import faang.school.projectservice.validator.ProjectValidator;
-import faang.school.projectservice.service.filter.ProjectFilter;
-import faang.school.projectservice.service.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -107,5 +107,12 @@ public class ProjectService {
         return projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
     }
 
+    public List<Project> getMomentProjectsEntity(MomentDto momentDto) {
+        List<Project> projectList = projectJpaRepository.findAllById(momentDto.getProjectIds());
+        if (projectList.size() != momentDto.getProjectIds().size()) {
+            throw new DataValidationException("Project does not exist");
+        }
+        return projectList;
+    }
 
 }
