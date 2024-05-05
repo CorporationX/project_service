@@ -1,8 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectEvent;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -101,10 +103,16 @@ public class ProjectService {
         return projectJpaRepository.save(project);
     }
 
-
     private Project findProjectOrThrowException(long projectId) {
         return projectJpaRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " does not exist"));
     }
 
+    public List<Project> getMomentProjectsEntity(MomentDto momentDto) {
+        List<Project> projectList = projectJpaRepository.findAllById(momentDto.getProjectIds());
+        if (projectList.size() != momentDto.getProjectIds().size()) {
+            throw new DataValidationException("Project does not exist");
+        }
+        return projectList;
+    }
 
 }

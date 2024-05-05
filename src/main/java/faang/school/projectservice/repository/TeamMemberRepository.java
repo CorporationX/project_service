@@ -6,19 +6,25 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class TeamMemberRepository {
-    private final TeamMemberJpaRepository jpaRepository;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
 
     public TeamMember findById(Long id) {
-        return jpaRepository.findById(id).orElseThrow(() ->
+        return teamMemberJpaRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
 
     public void deleteById(Long id) {
-        jpaRepository.deleteById(id);
+        teamMemberJpaRepository.deleteById(id);
 
+    }
+
+    public List<TeamMember> findAllByProjectId(Long projectId) {
+        return teamMemberJpaRepository.findAllByProjectId(projectId);
     }
 }

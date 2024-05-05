@@ -1,8 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectEvent;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.JsonMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -236,5 +238,25 @@ public class ProjectServiceTest {
 
         assertThrows( EntityNotFoundException.class, () -> projectService.getProjectById( 1L, anyLong() ) );
         verifyNoInteractions(projectMapper);
+    }
+
+    @Test
+    public void testGetMomentProjectsEntity_NotExistedProjectIds() {
+        List<Long> projectIds = List.of(1L, 2L);
+        MomentDto momentDto = MomentDto.builder()
+                .projectIds(projectIds)
+                .build();
+        when(projectJpaRepository.findAllById(projectIds)).thenReturn(List.of(Project.builder().id(1L).build()));
+        assertThrows(DataValidationException.class, () -> projectService.getMomentProjectsEntity(momentDto));
+    }
+
+    @Test
+    public void testGetMomentProjectsEntity_GoodProjectIds() {
+        List<Long> projectIds = List.of(1L);
+        MomentDto momentDto = MomentDto.builder()
+                .projectIds(projectIds)
+                .build();
+        when(projectJpaRepository.findAllById(projectIds)).thenReturn(List.of(Project.builder().id(1L).build()));
+        assertDoesNotThrow(() -> projectService.getMomentProjectsEntity(momentDto));
     }
 }
