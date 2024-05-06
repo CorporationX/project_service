@@ -1,4 +1,4 @@
-package faang.school.projectservice.validation;
+package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -16,7 +16,7 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 
 @Component
 @RequiredArgsConstructor
-public class InternshipValidation {
+public class InternshipServiceValidation {
     private final ProjectRepository projectRepository;
     private final InternshipMapper internshipMapper;
     private final TeamMemberRepository teamMemberRepository;
