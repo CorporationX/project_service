@@ -1,11 +1,9 @@
 package faang.school.projectservice.mapper.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 
