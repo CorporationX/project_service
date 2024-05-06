@@ -1,12 +1,8 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.service.InternshipService;
-import faang.school.projectservice.validation.InternshipValidation;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -20,19 +16,8 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.INTERNSHIP_DURATION_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NULL_DTO_EXCEPTION;
 
-@Controller
-@RequiredArgsConstructor
-public class InternshipController {
-    private final InternshipService internshipService;
-    private final InternshipValidation internshipValidation;
-
-    public InternshipDto create(InternshipDto internshipDto) {
-        validationDto(internshipDto);
-
-        return internshipService.create(internshipDto);
-    }
-
-    private void validationDto(InternshipDto internshipDto) {
+public class InternshipControllerValidation {
+    public void validationDto(InternshipDto internshipDto) {
         if (internshipDto == null) {
             throw new DataValidationException(NULL_DTO_EXCEPTION.getMessage());
         }

@@ -5,6 +5,7 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public interface InternshipMapper {
 
     List<InternshipDto> toDto(List<Internship> entityList);
 
+    @Named("internsMapping")
     default List<Long> internsMapping(List<TeamMember> interns) {
         return interns.stream().map(TeamMember::getId).toList();
     }
