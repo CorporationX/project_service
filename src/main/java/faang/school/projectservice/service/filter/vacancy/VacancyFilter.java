@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.filter;
+package faang.school.projectservice.service.filter.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;

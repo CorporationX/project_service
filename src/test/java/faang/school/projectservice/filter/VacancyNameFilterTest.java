@@ -2,7 +2,7 @@ package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.service.filter.VacancyNameFilter;
+import faang.school.projectservice.service.filter.vacancy.VacancyNameFilter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

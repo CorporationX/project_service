@@ -8,7 +8,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.filter.VacancyFilter;
+import faang.school.projectservice.service.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.validation.VacancyValidation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

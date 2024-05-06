@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.exceptions.DataVacancyValidation;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -13,7 +12,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.filter.VacancyFilter;
+import faang.school.projectservice.service.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.validation.VacancyValidation;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
