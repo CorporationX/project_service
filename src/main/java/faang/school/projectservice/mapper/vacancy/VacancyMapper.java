@@ -15,11 +15,6 @@ public interface VacancyMapper {
     @Mapping(target = "project", ignore = true)
     Vacancy toEntity(VacancyDto vacancyDto);
 
-    @Mapping(source = "project", target = "projectId", qualifiedByName = "projectMapProjectId")
+    @Mapping(source = "project.id", target = "projectId")
     VacancyDto toDto(Vacancy vacancy);
-
-    @Named("projectMapProjectId")
-    private Long projectMapProjectId(Project project) {
-        return project.getId();
-    }
 }

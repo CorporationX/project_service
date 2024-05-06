@@ -14,11 +14,6 @@ public interface TeamMemberMapper {
     @Mapping(target = "team", ignore = true)
     TeamMember toEntity(TeamMemberDto teamMemberDto);
 
-    @Mapping(source = "team", target = "teamId", qualifiedByName = "teamMapToTeamId")
+    @Mapping(source = "team.id", target = "teamId")
     TeamMemberDto toDto(TeamMember teamMember);
-
-    @Named("teamMapToTeamId")
-    private Long teamMapToTeamId(Team team) {
-        return team.getId();
-    }
 }
