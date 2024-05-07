@@ -16,7 +16,7 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.INTERNSHIP_DURATION_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NULL_DTO_EXCEPTION;
 
-public class InternshipControllerValidation {
+class InternshipControllerValidation {
     public void validationDto(InternshipDto internshipDto) {
         if (internshipDto == null) {
             throw new DataValidationException(NULL_DTO_EXCEPTION.getMessage());
