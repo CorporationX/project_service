@@ -4,7 +4,11 @@ import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,6 +18,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,6 +40,11 @@ class InternshipServiceTest {
     @Mock
     private InternshipRepository internshipRepository;
 
+    @Mock
+    private ProjectRepository projectRepository;
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
+
     private InternshipDto internshipDto;
     private Internship internship;
     private ArgumentCaptor<InternshipDto> internshipDtoArgumentCaptor;
@@ -42,7 +53,12 @@ class InternshipServiceTest {
     @BeforeEach
     void init() {
         internshipDto = new InternshipDto();
+        internshipDto.setProjectId(0L);
+        internshipDto.setMentorId(0L);
+        internshipDto.setInternsIds(List.of());
+
         internship = new Internship();
+
         internshipDtoArgumentCaptor = ArgumentCaptor.forClass(InternshipDto.class);
         internshipArgumentCaptor = ArgumentCaptor.forClass(Internship.class);
     }
@@ -52,6 +68,8 @@ class InternshipServiceTest {
         @DisplayName("should call save internship when valid internship creation intended")
         @Test
         void shouldSaveInternshipWhenValidInternshipCreationIntended() {
+            doReturn(new Project()).when(projectRepository).getProjectById(0L);
+            doReturn(new TeamMember()).when(teamMemberRepository).findById(0L);
             doNothing().when(internshipServiceValidation).validationCreate(internshipDto);
             doReturn(internship).when(internshipMapper).toEntity(internshipDto);
 
@@ -69,9 +87,7 @@ class InternshipServiceTest {
         @DisplayName("should throw DataValidationException when invalid internship creation intended")
         @Test
         void shouldThrowDataValidationExceptionWhenInvalidInternshipCreationIntended() {
-            doThrow(new DataValidationException("Something went wrong"))
-                    .when(internshipServiceValidation)
-                    .validationCreate(internshipDto);
+            doThrow(new DataValidationException("Something went wrong")).when(internshipServiceValidation).validationCreate(internshipDto);
 
             assertThrows(DataValidationException.class, () -> internshipService.create(internshipDto));
 
