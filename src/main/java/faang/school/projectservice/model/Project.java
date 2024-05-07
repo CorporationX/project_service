@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -87,4 +88,10 @@ public class Project {
 
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
+
+    @OneToOne(mappedBy = "project")
+    private Initiative initiative;
+
+    @ManyToMany(mappedBy = "sharingProjects")
+    private List<Initiative> sharedInitiatives;
 }
