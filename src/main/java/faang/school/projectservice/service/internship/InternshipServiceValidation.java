@@ -16,7 +16,7 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 
 @Component
 @RequiredArgsConstructor
-public class InternshipServiceValidation {
+class InternshipServiceValidation {
     private final ProjectRepository projectRepository;
     private final InternshipMapper internshipMapper;
     private final TeamMemberRepository teamMemberRepository;
