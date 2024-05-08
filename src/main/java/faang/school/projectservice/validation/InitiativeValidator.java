@@ -14,11 +14,14 @@ public class InitiativeValidator {
         if (initiative.getProjectId() == null) {
             throw new DataValidationException("initiative projectId must not be null");
         }
-        if (initiative.getName() == null) {
+        if (initiative.getName() == null || initiative.getName().isBlank()) {
             throw new DataValidationException("initiative name must not be null");
         }
-        if (initiative.getDescription() == null) {
+        if (initiative.getDescription() == null || initiative.getDescription().isBlank()) {
             throw new DataValidationException("initiative description must not be null");
+        }
+        if (initiative.getCuratorId() == null) {
+            throw new DataValidationException("initiative curatorId must not be null");
         }
     }
 
