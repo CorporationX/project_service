@@ -17,10 +17,11 @@ class InternshipEndDateFilter implements InternshipFilter {
 
     @Override
     public Stream<Internship> apply(List<Internship> internships, InternshipFilterDto filters) {
+        LocalDateTime endDatePattern = filters.getEndDatePattern();
+
         return internships.stream()
                 .filter(internship -> {
                     LocalDateTime internshipEndDate = internship.getEndDate();
-                    LocalDateTime endDatePattern = filters.getEndDatePattern();
 
                     return internshipEndDate.isBefore(endDatePattern)
                             || internshipEndDate.equals(endDatePattern);

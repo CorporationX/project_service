@@ -17,10 +17,11 @@ class InternshipStartDateFilter implements InternshipFilter {
 
     @Override
     public Stream<Internship> apply(List<Internship> internships, InternshipFilterDto filters) {
+        LocalDateTime startDatePattern = filters.getStartDatePattern();
+
         return internships.stream()
                 .filter(internship -> {
                     LocalDateTime internshipStartDate = internship.getStartDate();
-                    LocalDateTime startDatePattern = filters.getStartDatePattern();
 
                     return internshipStartDate.isAfter(startDatePattern)
                             || internshipStartDate.equals(startDatePattern);
