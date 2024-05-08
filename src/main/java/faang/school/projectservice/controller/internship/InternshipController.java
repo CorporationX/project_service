@@ -37,4 +37,12 @@ public class InternshipController {
     public List<InternshipDto> getInternshipsOfProject(long projectId, @NonNull InternshipFilterDto filter) {
         return internshipService.getInternshipsOfProject(projectId, filter);
     }
+
+    public List<InternshipDto> getAllInternships() {
+        return internshipService.getAllInternships();
+    }
+
+    public InternshipDto getInternshipById(long internshipId) {
+        return internshipService.getInternshipById(internshipId);
+    }
 }

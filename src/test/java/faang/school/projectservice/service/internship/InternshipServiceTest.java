@@ -4,11 +4,7 @@ import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,10 +37,7 @@ class InternshipServiceTest {
     private InternshipRepository internshipRepository;
 
     @Mock
-    private ProjectRepository projectRepository;
-    @Mock
-    private TeamMemberRepository teamMemberRepository;
-
+    private InternshipServiceUtility internshipServiceUtility;
     private InternshipDto internshipDto;
     private Internship internship;
     private ArgumentCaptor<InternshipDto> internshipDtoArgumentCaptor;
@@ -68,14 +61,12 @@ class InternshipServiceTest {
         @DisplayName("should call save internship when valid internship creation intended")
         @Test
         void shouldSaveInternshipWhenValidInternshipCreationIntended() {
-            doReturn(new Project()).when(projectRepository).getProjectById(0L);
-            doReturn(new TeamMember()).when(teamMemberRepository).findById(0L);
+            doReturn(new Internship()).when(internshipServiceUtility).toEntity(internshipDto);
             doNothing().when(internshipServiceValidation).validationCreate(internshipDto);
-            doReturn(internship).when(internshipMapper).toEntity(internshipDto);
 
             internshipService.create(internshipDto);
 
-            verify(internshipMapper).toEntity(internshipDtoArgumentCaptor.capture());
+            verify(internshipServiceUtility).toEntity(internshipDtoArgumentCaptor.capture());
             verify(internshipRepository).save(internshipArgumentCaptor.capture());
             assertEquals(internship, internshipArgumentCaptor.getValue());
             assertEquals(internshipDto, internshipDtoArgumentCaptor.getValue());
