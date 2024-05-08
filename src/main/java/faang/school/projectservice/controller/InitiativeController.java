@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.initiative.InitiativeDto;
+import faang.school.projectservice.dto.initiative.InitiativeFilterDto;
 import faang.school.projectservice.service.initiative.InitiativeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,11 @@ public class InitiativeController {
     @PutMapping("/update")
     public InitiativeDto update(@RequestBody InitiativeDto initiative) {
         return initiativeService.update(initiative);
+    }
+
+    @GetMapping
+    public List<InitiativeDto> getAllByFilter(@RequestBody InitiativeFilterDto filters) {
+        return initiativeService.getAllByFilter(filters);
     }
 
     @GetMapping

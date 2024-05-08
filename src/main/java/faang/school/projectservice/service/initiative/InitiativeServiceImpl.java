@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class InitiativeServiceImpl implements InitiativeService {
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
     private final StageRepository stageRepository;
+    private final InitiativeFilterService filterService;
 
     @Override
     public InitiativeDto create(InitiativeDto initiative) {
@@ -53,7 +55,10 @@ public class InitiativeServiceImpl implements InitiativeService {
 
     @Override
     public List<InitiativeDto> getAllByFilter(InitiativeFilterDto filter) {
-        return List.of();
+        Stream<Initiative> initiatives = initiativeRepository.findAll().stream();
+        return filterService.applyAll(initiatives, filter)
+                .map(mapper::toDto)
+                .toList();
     }
 
     @Override
