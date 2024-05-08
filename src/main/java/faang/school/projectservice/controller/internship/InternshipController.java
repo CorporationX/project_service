@@ -42,7 +42,11 @@ public class InternshipController {
         return internshipService.getAllInternships();
     }
 
-    public InternshipDto getInternshipById(long internshipId) {
+    public InternshipDto getInternshipById(Long internshipId) {
+        if (internshipId == null) {
+            throw new DataValidationException(NULL_INTERNSHIP_ID_EXCEPTION.getMessage());
+        }
+
         return internshipService.getInternshipById(internshipId);
     }
 }

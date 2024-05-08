@@ -38,20 +38,6 @@ class InternshipServiceUtility {
         assignRolesToInterns(internsToBeHired);
     }
 
-    private Predicate<TeamMember> checkCompletionOfTasks() {
-        return teamMember -> {
-            var allTasks = teamMember.getStages().stream()
-                    .flatMap(stage -> stage.getTasks().stream())
-                    .toList();
-
-            var doneTasks = allTasks.stream()
-                    .filter(task -> task.getStatus().equals(TaskStatus.DONE))
-                    .toList();
-
-            return doneTasks.size() == allTasks.size();
-        };
-    }
-
     public void assignRolesToInterns(List<TeamMember> interns) {
         interns.forEach(intern -> {
             var internRoles = intern.getRoles();
@@ -84,5 +70,19 @@ class InternshipServiceUtility {
         internship.setInterns(interns);
 
         return internship;
+    }
+
+    private Predicate<TeamMember> checkCompletionOfTasks() {
+        return teamMember -> {
+            var allTasks = teamMember.getStages().stream()
+                    .flatMap(stage -> stage.getTasks().stream())
+                    .toList();
+
+            var doneTasks = allTasks.stream()
+                    .filter(task -> task.getStatus().equals(TaskStatus.DONE))
+                    .toList();
+
+            return doneTasks.size() == allTasks.size();
+        };
     }
 }
