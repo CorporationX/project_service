@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.initiative.InitiativeDto;
 import faang.school.projectservice.service.initiative.InitiativeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,5 +34,8 @@ public class InitiativeController {
         return initiativeService.getAll();
     }
 
-
+    @GetMapping("/{id}")
+    public InitiativeDto getById(@PathVariable long id) {
+        return initiativeService.getById(id);
+    }
 }

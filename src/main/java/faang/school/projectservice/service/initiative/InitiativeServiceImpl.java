@@ -65,6 +65,7 @@ public class InitiativeServiceImpl implements InitiativeService {
 
     @Override
     public InitiativeDto getById(long id) {
-        return null;
+        Initiative initiative = initiativeRepository.getById(id);
+        return mapper.toDto(initiative);
     }
 }
