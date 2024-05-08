@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.internship;
 
+import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.RoleProcessingException;
 import faang.school.projectservice.mapper.InternshipMapper;
@@ -11,10 +12,12 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.internship.filter.InternshipFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import static faang.school.projectservice.exception.RoleProcessingExceptionMessage.ABSENT_INTERN_ROLE_EXCEPTION;
 
@@ -26,6 +29,7 @@ public class InternshipService {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipMapper internshipMapper;
+    private final List<InternshipFilter> filters;
 
 
     public InternshipDto create(InternshipDto internshipDto) {
@@ -48,20 +52,23 @@ public class InternshipService {
         return internshipMapper.toDto(internshipRepository.save(internship));
     }
 
+    public List<InternshipDto> getInternshipsOfProject(long projectId, InternshipFilterDto filtersDto) {
+        List<Internship> projectInternships = internshipRepository.findAll().stream()
+                .filter(internship -> internship.getProject().getId().equals(projectId))
+                .toList();
+
+        return filters.stream()
+                .filter(filter -> filter.isApplicable(filtersDto))
+                .flatMap(filter -> filter.apply(projectInternships, filtersDto))
+                .distinct()
+                .map(internshipMapper::toDto)
+                .toList();
+    }
+
     private void processCompletedInternship(Internship internship) {
         List<TeamMember> interns = internship.getInterns();
         var internsToBeHired = interns.stream()
-                .filter(intern -> {
-                    var allTasks = intern.getStages().stream()
-                            .flatMap(stage -> stage.getTasks().stream())
-                            .toList();
-
-                    var doneTasks = allTasks.stream()
-                            .filter(task -> task.getStatus().equals(TaskStatus.DONE))
-                            .toList();
-
-                    return doneTasks.size() == allTasks.size();
-                })
+                .filter(checkCompletionOfTasks())
                 .toList();
 
         interns.removeAll(internsToBeHired);
@@ -70,6 +77,20 @@ public class InternshipService {
         interns.clear();
 
         assignRolesToInterns(internsToBeHired);
+    }
+
+    private Predicate<TeamMember> checkCompletionOfTasks() {
+        return teamMember -> {
+            var allTasks = teamMember.getStages().stream()
+                    .flatMap(stage -> stage.getTasks().stream())
+                    .toList();
+
+            var doneTasks = allTasks.stream()
+                    .filter(task -> task.getStatus().equals(TaskStatus.DONE))
+                    .toList();
+
+            return doneTasks.size() == allTasks.size();
+        };
     }
 
     private void assignRolesToInterns(List<TeamMember> interns) {
@@ -81,9 +102,11 @@ public class InternshipService {
             }
 
             if (internRoles.size() == 1) {
-                internRoles.add(TeamRole.DEVELOPER); //TODO: нормально ли делать по умолчанию бывших стажеров разработчиками?
-                internRoles.remove(TeamRole.INTERN);
+                internRoles.add(TeamRole.DEVELOPER);
+                //TODO: нормально ли делать по умолчанию бывших стажеров разработчиками, если до этого у них не было другой роли?
             }
+
+            internRoles.remove(TeamRole.INTERN);
 
             teamMemberRepository.save(intern);
         });

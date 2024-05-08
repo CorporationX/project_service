@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.internship;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.InternshipStatus;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -30,7 +31,7 @@ class InternshipControllerValidation {
         if (internshipDto.getMentorId() == null) {
             throw new DataValidationException(EMPTY_INTERNSHIP_MENTOR_ID_EXCEPTION.getMessage());
         }
-        if (internshipDto.getInternsIds() == null || internshipDto.getInternsIds().size() == 0) {
+        if (CollectionUtils.isEmpty(internshipDto.getInternsIds())) {
             throw new DataValidationException(EMPTY_INTERNS_LIST_EXCEPTION.getMessage());
         }
 
