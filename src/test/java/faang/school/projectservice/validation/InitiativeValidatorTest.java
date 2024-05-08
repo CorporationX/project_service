@@ -6,23 +6,28 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.initiative.InitiativeStatus;
+import faang.school.projectservice.repository.StageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class InitiativeValidatorTest {
+    @Mock
+    private StageRepository stageRepository;
+    @InjectMocks
     private InitiativeValidator validator;
+
     private InitiativeDto dto;
     private TeamMember curator;
     private Project project;
 
     @BeforeEach
     void init() {
-        validator = new InitiativeValidator();
-
         dto = InitiativeDto.builder()
                 .id(1L)
                 .name("name")
