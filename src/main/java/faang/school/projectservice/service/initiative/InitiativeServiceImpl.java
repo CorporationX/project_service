@@ -57,8 +57,10 @@ public class InitiativeServiceImpl implements InitiativeService {
     }
 
     @Override
-    public List<InitiativeDto> getAll(InitiativeDto initiative) {
-        return List.of();
+    public List<InitiativeDto> getAll() {
+        return initiativeRepository.findAll().stream()
+                .map(mapper::toDto)
+                .toList();
     }
 
     @Override

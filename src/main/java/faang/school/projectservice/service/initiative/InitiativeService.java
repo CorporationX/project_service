@@ -12,7 +12,7 @@ public interface InitiativeService {
 
     List<InitiativeDto> getAllByFilter(InitiativeFilterDto filter);
 
-    List<InitiativeDto> getAll(InitiativeDto initiative);
+    List<InitiativeDto> getAll();
 
     InitiativeDto getById(long id);
 }
