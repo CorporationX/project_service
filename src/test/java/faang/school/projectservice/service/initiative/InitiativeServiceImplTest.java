@@ -7,6 +7,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.repository.InitiativeRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -104,6 +105,5 @@ class InitiativeServiceImplTest {
         inOrder.verify(mapper, times(1)).toEntity(dto, project, curator, stages);
         inOrder.verify(initiativeRepository, times(1)).save(initiative);
         inOrder.verify(mapper, times(1)).toDto(initiative);
-
     }
 }
