@@ -18,7 +18,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,21 +45,19 @@ public class Initiative {
     @Column(nullable = false)
     private String description;
 
-    @NotNull
     @OneToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "curator_id",  nullable = false)
     private TeamMember curator;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private InitiativeStatus status;
 
-    @OneToMany(mappedBy = "stageId")
+    @OneToMany(mappedBy = "initiative")
     private List<Stage> stages;
 
-    @NotNull
     @OneToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
     @ManyToMany
