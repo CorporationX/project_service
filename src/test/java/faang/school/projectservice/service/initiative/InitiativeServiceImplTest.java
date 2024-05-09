@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.initiative;
 
 import faang.school.projectservice.dto.initiative.InitiativeDto;
+import faang.school.projectservice.dto.initiative.InitiativeFilterDto;
 import faang.school.projectservice.mapper.InitiativeMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
@@ -21,7 +22,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
@@ -42,6 +45,8 @@ class InitiativeServiceImplTest {
     private ProjectRepository projectRepository;
     @Mock
     private StageRepository stageRepository;
+    @Mock
+    private InitiativeFilterService filterService;
     @InjectMocks
     private InitiativeServiceImpl service;
 
@@ -74,12 +79,12 @@ class InitiativeServiceImplTest {
                 .build();
 
         dto = InitiativeDto.builder()
-                .id(0L)
+                .id(1L)
                 .name("name")
                 .description("desc")
                 .curatorId(5L)
                 .projectId(4L)
-                .status(InitiativeStatus.IN_PROGRESS)
+                .status(InitiativeStatus.ACCEPTED)
                 .stageIds(List.of(1L, 2L, 3L))
                 .build();
     }
@@ -104,6 +109,49 @@ class InitiativeServiceImplTest {
         inOrder.verify(stageRepository, times(1)).findAll();
         inOrder.verify(mapper, times(1)).toEntity(dto, project, curator, stages);
         inOrder.verify(initiativeRepository, times(1)).save(initiative);
+        inOrder.verify(mapper, times(1)).toDto(initiative);
+    }
+
+    @Test
+    void getAllByFilter() {
+        when(initiativeRepository.findAll()).thenReturn(List.of(initiative));
+        when(mapper.toDto(initiative)).thenReturn(dto);
+        when(filterService.applyAll(any(), any())).thenReturn(Stream.of(initiative));
+
+        InitiativeDto[] expected = new InitiativeDto[]{dto};
+        InitiativeDto[] actual = service.getAllByFilter(new InitiativeFilterDto()).toArray(new InitiativeDto[0]);
+        assertArrayEquals(expected, actual);
+
+        InOrder inOrder = inOrder(initiativeRepository, mapper, filterService);
+        inOrder.verify(initiativeRepository, times(1)).findAll();
+        inOrder.verify(filterService, times(1)).applyAll(any(), any());
+        inOrder.verify(mapper, times(1)).toDto(initiative);
+    }
+
+    @Test
+    void getAll() {
+        when(initiativeRepository.findAll()).thenReturn(List.of(initiative));
+        when(mapper.toDto(initiative)).thenReturn(dto);
+
+        InitiativeDto[] expected = new InitiativeDto[]{dto};
+        InitiativeDto[] actual = service.getAll().toArray(new InitiativeDto[0]);
+        assertArrayEquals(expected, actual);
+
+        InOrder inOrder = inOrder(initiativeRepository, mapper);
+        inOrder.verify(initiativeRepository, times(1)).findAll();
+        inOrder.verify(mapper, times(1)).toDto(initiative);
+    }
+
+    @Test
+    void getById() {
+        Long id = 1L;
+        when(initiativeRepository.getById(id)).thenReturn(initiative);
+        when(mapper.toDto(initiative)).thenReturn(dto);
+
+        assertEquals(dto, service.getById(id));
+
+        InOrder inOrder = inOrder(initiativeRepository, mapper);
+        inOrder.verify(initiativeRepository, times(1)).getById(id);
         inOrder.verify(mapper, times(1)).toDto(initiative);
     }
 }
