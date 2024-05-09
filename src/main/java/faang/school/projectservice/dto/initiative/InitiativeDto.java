@@ -20,4 +20,5 @@ public class InitiativeDto {
     private Long projectId;
     private InitiativeStatus status;
     private List<Long> stageIds;
+    private String coverImageId;
 }

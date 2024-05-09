@@ -3,14 +3,10 @@ package faang.school.projectservice.service.initiative;
 import faang.school.projectservice.dto.initiative.InitiativeDto;
 import faang.school.projectservice.dto.initiative.InitiativeFilterDto;
 import faang.school.projectservice.mapper.InitiativeMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.initiative.Initiative;
-import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.repository.InitiativeRepository;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validation.InitiativeValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,25 +20,15 @@ public class InitiativeServiceImpl implements InitiativeService {
     private final InitiativeMapper mapper;
     private final InitiativeValidator validator;
     private final InitiativeRepository initiativeRepository;
-    private final TeamMemberRepository teamMemberRepository;
-    private final ProjectRepository projectRepository;
-    private final StageRepository stageRepository;
     private final InitiativeFilterService filterService;
+    private final MomentService momentService;
 
     @Override
     public InitiativeDto create(InitiativeDto initiative) {
         validator.validate(initiative);
+        validator.validateCurator(initiative);
 
-        Project project = projectRepository.getProjectById(initiative.getProjectId());
-        TeamMember curator = teamMemberRepository.findById(initiative.getCuratorId());
-
-        validator.validateCuratorAndProject(curator, project);
-
-        List<Stage> stages = stageRepository.findAll().stream()
-                .filter(stage -> initiative.getStageIds().contains(stage.getStageId()))
-                .toList();
-
-        Initiative entity = mapper.toEntity(initiative, project, curator, stages);
+        Initiative entity = mapper.toEntity(initiative);
         Initiative saved = initiativeRepository.save(entity);
 
         return mapper.toDto(saved);
@@ -50,7 +36,19 @@ public class InitiativeServiceImpl implements InitiativeService {
 
     @Override
     public InitiativeDto update(InitiativeDto initiative) {
-        return null;
+        validator.validate(initiative);
+        validator.validateCurator(initiative);
+
+        Initiative entity = mapper.toEntity(initiative);
+
+        if (initiative.getStatus() == InitiativeStatus.DONE) {
+            validator.validateClosedInitiative(initiative);
+            momentService.createFromInitiative(entity);
+        }
+
+        Initiative saved = initiativeRepository.save(entity);
+
+        return mapper.toDto(saved);
     }
 
     @Override

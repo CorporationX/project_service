@@ -8,31 +8,34 @@ import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.model.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(MockitoExtension.class)
 class InitiativeMapperTest {
-    private InitiativeMapper mapper;
+    @Spy
+    private InitiativeMapper mapper = Mappers.getMapper(InitiativeMapper.class);
+
     private Initiative initiative;
     private InitiativeDto dto;
-    private List<Stage> stages;
-    private Project project;
-    private TeamMember curator;
 
     @BeforeEach
     void init() {
-        stages = List.of(
+        List<Stage> stages = List.of(
                 Stage.builder().stageId(1L).build(),
                 Stage.builder().stageId(2L).build(),
                 Stage.builder().stageId(3L).build()
         );
 
-        project = Project.builder().id(4L).build();
+        Project project = Project.builder().id(4L).build();
 
-        curator = TeamMember.builder().userId(5L).build();
+        TeamMember curator = TeamMember.builder().userId(5L).build();
 
         initiative = Initiative.builder()
                 .id(1L)
@@ -53,13 +56,11 @@ class InitiativeMapperTest {
                 .curatorId(5L)
                 .projectId(4L)
                 .build();
-
-        mapper = Mappers.getMapper(InitiativeMapper.class);
     }
 
     @Test
     void toEntity() {
-        Initiative actual = mapper.toEntity(dto, project, curator, stages);
+        Initiative actual = mapper.toEntity(dto);
         assertEquals(initiative, actual);
     }
 

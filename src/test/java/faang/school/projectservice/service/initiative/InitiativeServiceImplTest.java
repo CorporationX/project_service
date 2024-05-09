@@ -9,9 +9,7 @@ import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InitiativeRepository;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validation.InitiativeValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,33 +38,26 @@ class InitiativeServiceImplTest {
     @Mock
     private InitiativeRepository initiativeRepository;
     @Mock
-    private TeamMemberRepository teamMemberRepository;
-    @Mock
-    private ProjectRepository projectRepository;
-    @Mock
-    private StageRepository stageRepository;
-    @Mock
     private InitiativeFilterService filterService;
+    @Mock
+    private MomentService momentService;
     @InjectMocks
     private InitiativeServiceImpl service;
 
     private InitiativeDto dto;
     private Initiative initiative;
-    private List<Stage> stages;
-    private Project project;
-    private TeamMember curator;
 
     @BeforeEach
     void init() {
-        stages = List.of(
+        List<Stage> stages = List.of(
                 Stage.builder().stageId(1L).build(),
                 Stage.builder().stageId(2L).build(),
                 Stage.builder().stageId(3L).build()
         );
 
-        project = Project.builder().id(4L).build();
+        Project project = Project.builder().id(4L).build();
 
-        curator = TeamMember.builder().userId(5L).build();
+        TeamMember curator = TeamMember.builder().userId(5L).build();
 
         initiative = Initiative.builder()
                 .id(1L)
@@ -91,23 +82,55 @@ class InitiativeServiceImplTest {
 
     @Test
     void create() {
-        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
-        when(teamMemberRepository.findById(curator.getUserId())).thenReturn(curator);
-        when(stageRepository.findAll()).thenReturn(stages);
-        when(mapper.toEntity(dto, project, curator, stages)).thenReturn(initiative);
+        when(mapper.toEntity(dto)).thenReturn(initiative);
         when(initiativeRepository.save(initiative)).thenReturn(initiative);
         when(mapper.toDto(any())).thenReturn(dto);
 
         InitiativeDto actual = service.create(dto);
         assertEquals(dto, actual);
 
-        InOrder inOrder = inOrder(validator, projectRepository, teamMemberRepository,
-                stageRepository, mapper, initiativeRepository);
+        InOrder inOrder = inOrder(validator, mapper, initiativeRepository);
         inOrder.verify(validator, times(1)).validate(dto);
-        inOrder.verify(projectRepository, times(1)).getProjectById(dto.getProjectId());
-        inOrder.verify(teamMemberRepository, times(1)).findById(dto.getCuratorId());
-        inOrder.verify(stageRepository, times(1)).findAll();
-        inOrder.verify(mapper, times(1)).toEntity(dto, project, curator, stages);
+        inOrder.verify(validator, times(1)).validateCurator(dto);
+        inOrder.verify(mapper, times(1)).toEntity(dto);
+        inOrder.verify(initiativeRepository, times(1)).save(initiative);
+        inOrder.verify(mapper, times(1)).toDto(initiative);
+    }
+
+    @Test
+    void updateOpened() {
+        when(mapper.toEntity(dto)).thenReturn(initiative);
+        when(initiativeRepository.save(initiative)).thenReturn(initiative);
+        when(mapper.toDto(any())).thenReturn(dto);
+
+        InitiativeDto actual = service.update(dto);
+        assertEquals(dto, actual);
+
+        InOrder inOrder = inOrder(validator, mapper, initiativeRepository);
+        inOrder.verify(validator, times(1)).validate(dto);
+        inOrder.verify(validator, times(1)).validateCurator(dto);
+        inOrder.verify(mapper, times(1)).toEntity(dto);
+        inOrder.verify(initiativeRepository, times(1)).save(initiative);
+        inOrder.verify(mapper, times(1)).toDto(initiative);
+    }
+
+    @Test
+    void updateClosed() {
+        dto.setStatus(InitiativeStatus.DONE);
+
+        when(mapper.toEntity(dto)).thenReturn(initiative);
+        when(initiativeRepository.save(initiative)).thenReturn(initiative);
+        when(mapper.toDto(any())).thenReturn(dto);
+
+        InitiativeDto actual = service.update(dto);
+        assertEquals(dto, actual);
+
+        InOrder inOrder = inOrder(validator, mapper, initiativeRepository, momentService);
+        inOrder.verify(validator, times(1)).validate(dto);
+        inOrder.verify(validator, times(1)).validateCurator(dto);
+        inOrder.verify(mapper, times(1)).toEntity(dto);
+        inOrder.verify(validator, times(1)).validateClosedInitiative(dto);
+        inOrder.verify(momentService, times(1)).createFromInitiative(initiative);
         inOrder.verify(initiativeRepository, times(1)).save(initiative);
         inOrder.verify(mapper, times(1)).toDto(initiative);
     }

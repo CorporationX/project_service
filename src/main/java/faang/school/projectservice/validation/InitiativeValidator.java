@@ -2,11 +2,12 @@ package faang.school.projectservice.validation;
 
 import faang.school.projectservice.dto.initiative.InitiativeDto;
 import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InitiativeValidator {
     private final StageRepository stageRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     public void validate(InitiativeDto initiative) {
         if (initiative.getProjectId() == null) {
@@ -30,10 +32,19 @@ public class InitiativeValidator {
         if (initiative.getCuratorId() == null) {
             throw new DataValidationException("initiative curatorId must not be null");
         }
+        if (initiative.getStatus() == null) {
+            throw new DataValidationException("initiative status must not be null");
+        }
     }
 
-    public void validateCuratorAndProject(TeamMember curator, Project project) {
-        if (!curator.getTeam().getProject().getId().equals(project.getId())) {
+    public void validateCurator(InitiativeDto initiative) {
+        TeamMember curator = teamMemberRepository.findById(initiative.getCuratorId());
+
+        if (!curator.getRoles().contains(TeamRole.OWNER)) {
+            throw new DataValidationException("curator must have owner role");
+        }
+
+        if (!curator.getTeam().getProject().getId().equals(initiative.getProjectId())) {
             throw new DataValidationException("curator not in the initiative project");
         }
     }
