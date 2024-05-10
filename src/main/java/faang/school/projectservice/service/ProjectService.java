@@ -3,6 +3,8 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectFilterDto;
+import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static faang.school.projectservice.model.ProjectStatus.CANCELLED;
 import static faang.school.projectservice.model.ProjectStatus.COMPLETED;
@@ -28,6 +31,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final MomentService momentService;
+    private final List<SubProjectFilter> filters;
 
     @Transactional
     public ProjectDto createSubProject(Long parentId, CreateSubProjectDto subProjectDto) {
@@ -40,7 +44,7 @@ public class ProjectService {
 
         Project projectToCreate = projectMapper.toModel(subProjectDto);
 
-        if (parent.getChildren().isEmpty()) {
+        if (parent.getChildren() == null) {
             parent.setChildren(new ArrayList<>());
         }
         parent.getChildren().add(projectToCreate);
@@ -57,7 +61,7 @@ public class ProjectService {
         Project parent = projectRepository.getProjectById(projectToUpdate.getParentProject().getId());
 
         if (!projectToUpdate.getVisibility().equals(projectDto.getVisibility())) {
-            changeVisibility(parent, projectToUpdate, projectDto);
+            checkAndChangeVisibility(parent, projectToUpdate, projectDto);
         }
 
         ProjectStatus updatedStatus = checkAndChangeStatus(projectToUpdate, projectDto);
@@ -78,19 +82,42 @@ public class ProjectService {
         return projectMapper.toDto(projectToUpdate);
     }
 
+    @Transactional(readOnly = true)
+    public List<ProjectDto> getSubProjects(Long projectId, SubProjectFilterDto filterDto) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        if (project.getVisibility().equals(PRIVATE)) {
+            throw new IllegalArgumentException("Невозможно отобразить привытный проект");
+        }
+        List<ProjectDto> children = project.getChildren()
+                .stream()
+                .filter(pr -> pr.getVisibility().equals(PUBLIC))
+                .map(projectMapper::toDto)
+                .toList();
+
+        applyFilter(children, filterDto);
+        return children;
+    }
+
+    private void applyFilter(List<ProjectDto> projects, SubProjectFilterDto filterDto) {
+        filters.stream()
+                .filter(filter -> filter.isApplicable(filterDto))
+                .forEach(filter -> filter.apply(projects, filterDto));
+    }
+
     private boolean isAllSubProjectsCompleted(Project parent) {
         return parent.getChildren().stream().allMatch(pr -> pr.getStatus().equals(COMPLETED));
     }
 
-    private void changeVisibility(Project parent,Project projectToUpdate , ProjectDto projectDto) {
-
+    private void checkAndChangeVisibility(Project parent, Project projectToUpdate, ProjectDto projectDto) {
         if (projectDto.getVisibility().equals(PUBLIC) && parent.getVisibility().equals(PRIVATE)) {
             throw new IllegalArgumentException("Нельзя установить публичный статус подпроекта для приватного проекта");
-        } else {
-            projectToUpdate.setVisibility(projectDto.getVisibility());
-            if (!projectToUpdate.getChildren().isEmpty()) {
-                projectToUpdate.getChildren().forEach(pr -> pr.setVisibility(projectDto.getVisibility()));
-            }
+        }
+
+        projectToUpdate.setVisibility(projectDto.getVisibility());
+        if (projectDto.getVisibility().equals(PRIVATE) && projectDto.getChildren() != null &&
+                !projectToUpdate.getChildren().isEmpty()) {
+            projectToUpdate.getChildren().forEach(pr -> pr.setVisibility(projectDto.getVisibility()));
         }
     }
 
