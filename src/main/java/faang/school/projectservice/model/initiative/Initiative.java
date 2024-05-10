@@ -13,11 +13,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,13 +39,15 @@ public class Initiative {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false)
     private String name;
 
+    @NotBlank
     @Column(nullable = false)
     private String description;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "curator_id",  nullable = false)
     private TeamMember curator;
 
@@ -53,10 +55,15 @@ public class Initiative {
     @Column(nullable = false)
     private InitiativeStatus status;
 
-    @OneToMany(mappedBy = "initiative")
+    @ManyToMany
+    @JoinTable(
+            name = "initiative_project_stages",
+            joinColumns = @JoinColumn(name = "initiative_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_stage_id")
+    )
     private List<Stage> stages;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
