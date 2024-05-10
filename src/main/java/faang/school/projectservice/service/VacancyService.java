@@ -26,5 +26,6 @@ public class VacancyService {
         teamMemberValidator.validateTeamMember(teamMember);
         Vacancy convertedVacancy = vacancyMapper.toEntity(vacancy);
         return vacancyMapper.toDto(vacancyRepository.save(convertedVacancy));
+
     }
 }
