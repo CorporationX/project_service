@@ -3,9 +3,6 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.initiative.Initiative;
-import faang.school.projectservice.model.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +21,6 @@ class MomentMapperTest {
 
     private Moment moment;
     private MomentDto dto;
-    private Initiative initiative;
 
     @BeforeEach
     void init() {
@@ -55,21 +51,6 @@ class MomentMapperTest {
                 .userIds(userIds)
                 .imageId("1234")
                 .build();
-
-        List<Stage> stages = List.of(
-                Stage.builder().stageId(7L).executors(List.of(TeamMember.builder().userId(4L).build())).build(),
-                Stage.builder().stageId(8L).executors(List.of(TeamMember.builder().userId(5L).build())).build(),
-                Stage.builder().stageId(9L).executors(List.of(TeamMember.builder().userId(6L).build())).build()
-        );
-
-        initiative = Initiative.builder()
-                .id(1L)
-                .name("name")
-                .description("desc")
-                .stages(stages)
-                .sharingProjects(projects)
-                .coverImageId("1234")
-                .build();
     }
 
     @Test
@@ -81,13 +62,6 @@ class MomentMapperTest {
     @Test
     void toDto() {
         MomentDto actual = mapper.toDto(moment);
-        assertEquals(dto, actual);
-    }
-
-    @Test
-    void toDtoFromInitiative() {
-        dto.setId(null);
-        MomentDto actual = mapper.toDtoFromInitiative(initiative);
         assertEquals(dto, actual);
     }
 }
