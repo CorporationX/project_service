@@ -12,8 +12,6 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.internship.filter.InternshipFilterService;
 import faang.school.projectservice.validator.internship.InternshipValidator;
 import org.junit.Before;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,7 +53,7 @@ class InternshipServiceImplTest {
     private Internship internship;
 
 
-    @BeforeEach
+    @Before
     public void setUp() {
         internshipDto = new InternshipDto();
         internship = new Internship();
@@ -66,8 +64,8 @@ class InternshipServiceImplTest {
 
     @Test
     public void shouldSuccessfullyCreateInternship() {
-        // TODO я думаю что эти проверки лучше делать в тестах на валидатор
         doNothing().when(validator).validateInternshipExistence(internshipDto);
+        // TODO я думаю что эти проверки лучше делать в тестах на валидатор
         doNothing().when(validator).validateInternshipNotStarted(internship);
         when(internshipRepository.save(internship)).thenReturn(internship);
 
