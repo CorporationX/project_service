@@ -33,6 +33,10 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     @Transactional
+    // TODO нужно добавить проверки на то что стажировка относится к какому-то проекту
+    // TODO добавить проверку на на то что стажировка длится не дольше трех месяцев
+    // TODO проверить наличия ментора
+    // TODO проверить, что нам есть кого стажировать
     public InternshipDto createInternship(InternshipDto internshipDto) {
         validator.validateInternshipExistence(internshipDto);
 
@@ -65,6 +69,7 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     @Transactional
+    // TODO пишем ли мы в базу результат выполнения метода?
     public InternshipDto addNewIntern(long internshipId, long newInternId) {
 
         Internship internship = getInternshipById(internshipId);
@@ -80,6 +85,7 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     @Transactional
+    // TODO пишем ли мы в базу результат выполнения метода?
     public InternshipDto finishInternshipForIntern(long internshipId, long internId, TeamRole teamRole) {
         Internship internship = getInternshipById(internshipId);
         TeamMember intern = searchInternInInternship(internship, internId);
@@ -95,6 +101,7 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     @Transactional
+    // TODO пишем ли мы в базу результат выполнения метода?
     public InternshipDto removeInternFromInternship(long internshipId, long internId) {
 
         Internship internship = getInternshipById(internshipId);
@@ -109,6 +116,7 @@ public class InternshipServiceImpl implements InternshipService {
     }
 
     @Transactional
+    // TODO нужно вернуть дтошку из метода
     public Internship getInternshipById(long id) {
 
         return internshipRepository.findById(id)
@@ -132,7 +140,7 @@ public class InternshipServiceImpl implements InternshipService {
                 .filter(internship -> internship.getInterns().stream()
                         .anyMatch(intern -> intern.getRoles().contains(role)))
                 .toList();
-
+        // TODO я думаю это лишнее 😇👍🏽
         Stream<Internship> internshipsStream = filteredInternships.stream();
 
         return internshipFilterService.applyFilters(internshipsStream, filterDto)
@@ -172,7 +180,7 @@ public class InternshipServiceImpl implements InternshipService {
                 .orElseThrow(() -> new EntityNotFoundException("Intern with id: " + internId
                         + "not found in the internship: " + internship.getId()));
     }
-
+    // TODO думаю стоит убрать проверку getRoles().isEmpty() и нужно присвоить роль
     private void removeInternRole(TeamMember intern) {
 
         if (!intern.getRoles().isEmpty())

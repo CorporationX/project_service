@@ -17,10 +17,12 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+// TODO добавить projectId и mentorId
 public class InternshipDto {
     @NotNull(message = "id cannot be empty")
     @Positive(message = "id should be positive number")
     private Long id;
+    // TODO думаю стоит добавить аннотацию @NотNull
     @NotEmpty(message = "Team should have at least one intern")
     private List<TeamMember> interns;
     private LocalDateTime startDate;
