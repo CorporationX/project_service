@@ -10,5 +10,6 @@ public class VacancyDto {
     private String name;
     private String description;
     private long projectId;
+    private long createdBy;
     private int count;
 }
