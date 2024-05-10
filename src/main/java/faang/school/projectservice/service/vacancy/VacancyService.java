@@ -21,15 +21,15 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final ValidationTeamMember validationTeamMember;
 
-    public void createVacancy(Long creatorId, VacancyDto vacancyDto) {
-        validationTeamMember.checkMemberRole(teamService.findMemberById(creatorId));
-
+    public VacancyDto createVacancy(Long creatorId, VacancyDto vacancyDto) {
+        validationTeamMember.checkThatTheUserCanCreateAVacancy(teamService.findMemberById(creatorId));
         Vacancy vacancyEntity = vacancyMapper.toEntity(vacancyDto);
         vacancyEntity.setCreatedAt(LocalDateTime.now());
         vacancyEntity.setUpdatedAt(LocalDateTime.now());
+        vacancyEntity.setCreatedBy(creatorId);
         vacancyEntity.setStatus(VacancyStatus.OPEN);
         vacancyEntity.setCreatedBy(creatorId);
 
-        vacancyRepository.save(vacancyEntity);
+        return vacancyMapper.toDto(vacancyRepository.save(vacancyEntity));
     }
 }

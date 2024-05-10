@@ -16,7 +16,13 @@ public class ValidationVacancy {
 
     public void checkVacancyName(VacancyDto vacancyDto) {
         if (vacancyDto.getName().isBlank()) {
-            throw new DataValidationException(ExceptionMessage.NAME_IS_BLANK.getMessage());
+            throw new DataValidationException(ExceptionMessage.VACANCY_DTO_NAME_IS_BLANK.getMessage());
+        }
+    }
+
+    public void checkVacancyNameForNull(VacancyDto  vacancyDto) {
+        if (vacancyDto.getName() == null) {
+            throw new DataValidationException(ExceptionMessage.VACANCY_DTO_NAME_IS_NULL.getMessage());
         }
     }
 
