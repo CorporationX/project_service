@@ -1,12 +1,13 @@
-package faang.school.projectservice.validation;
+package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.vacancy.DataValidationException;
 import faang.school.projectservice.exception.vacancy.ExceptionMessage;
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidationVacancy {
+class ValidationVacancy {
 
     public void checkVacancy(VacancyDto vacancyDto) {
         if (vacancyDto == null) {
@@ -14,15 +15,9 @@ public class ValidationVacancy {
         }
     }
 
-    public void checkVacancyName(VacancyDto vacancyDto) {
+    public void checkVacancyName(@NonNull VacancyDto vacancyDto) {
         if (vacancyDto.getName().isBlank()) {
             throw new DataValidationException(ExceptionMessage.VACANCY_DTO_NAME_IS_BLANK.getMessage());
-        }
-    }
-
-    public void checkVacancyNameForNull(VacancyDto  vacancyDto) {
-        if (vacancyDto.getName() == null) {
-            throw new DataValidationException(ExceptionMessage.VACANCY_DTO_NAME_IS_NULL.getMessage());
         }
     }
 

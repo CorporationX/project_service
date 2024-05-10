@@ -6,7 +6,6 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.team.TeamService;
-import faang.school.projectservice.validation.ValidationTeamMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
