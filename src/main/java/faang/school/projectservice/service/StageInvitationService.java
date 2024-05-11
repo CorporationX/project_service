@@ -13,6 +13,7 @@ import faang.school.projectservice.service.filter.stage_invitation_filter.StageI
 import faang.school.projectservice.validator.StageInvitationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,8 +26,9 @@ public class StageInvitationService {
     private final StageInvitationRepository stageInvitationRepository;
     private final TeamMemberRepository teamMemberRepository;
 
+    @Transactional
     public StageInvitationDto sendInvite(StageInvitationDto stageInvitationDto) {
-        //валидация
+        stageInvitationValidator.validateAll(stageInvitationDto);
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
         stageInvitationRepository.save(stageInvitation);
@@ -34,8 +36,9 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
+    @Transactional
     public StageInvitationDto acceptInvitation(StageInvitationDto stageInvitationDto) {
-        //валидация
+        stageInvitationValidator.validateAll(stageInvitationDto);
         StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
 
         if (!stageInvitation.getStatus().equals(StageInvitationStatus.PENDING)) {
@@ -50,8 +53,9 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
+    @Transactional
     public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto) {
-        //валидация
+        stageInvitationValidator.validateAll(stageInvitationDto);
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
         Long invitationId = stageInvitation.getId();
         stageInvitation = stageInvitationRepository.findById(invitationId);
@@ -65,8 +69,9 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
+    @Transactional
     public List<StageInvitationDto> getAllInvitationsForUserWithStatus(Long userId, StageInvitationFilterDto stageInvitationFilterDto) {
-        //валидация
+        stageInvitationValidator.validateId(userId);
         List<StageInvitation> stageInvitations = stageInvitationRepository.findAll();
         List<StageInvitationFilter> invitationFilters = stageInvitationFilters.stream()
                 .filter(invFilter -> invFilter.isApplicable(stageInvitationFilterDto))
