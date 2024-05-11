@@ -11,7 +11,7 @@ import org.springframework.stereotype.Controller;
 public class ProjectController {
     private final ProjectService projectService;
 
-    public ProjectDto create(@NonNull ProjectDto project){
-        return projectService.create(project);
+    public ProjectDto create(@NonNull ProjectDto projectDto){
+        return projectService.create(projectDto);
     }
 }

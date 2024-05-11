@@ -9,4 +9,6 @@ import org.mapstruct.ReportingPolicy;
 public interface ProjectMapper {
 
     ProjectDto toDto(Project project);
+
+    Project toProject(ProjectDto projectDto);
 }
