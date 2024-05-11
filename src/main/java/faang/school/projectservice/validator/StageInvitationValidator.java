@@ -29,7 +29,7 @@ public class StageInvitationValidator {
         }
     }
 
-    public void validateAllStageInvitationDto(StageInvitationDto stageInvitationDto) {
+    public void validateAll(StageInvitationDto stageInvitationDto) {
         validateId(stageInvitationDto.getId());
         validateDescription(stageInvitationDto.getDescription());
     }
