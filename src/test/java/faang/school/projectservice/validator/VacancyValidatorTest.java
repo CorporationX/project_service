@@ -31,27 +31,27 @@ public class VacancyValidatorTest {
     @Test
     public void testIfVacancyNameIsNull() {
         vacancy.setName(null);
-        doThrow(new DataValidationException("name of vacancy doesn't exist")).when(vacancyValidator).validateVacancy(vacancy);
-        DataValidationException thrownException = assertThrows(DataValidationException.class, () -> vacancyValidator.validateVacancy(vacancy));
+        doThrow(new DataValidationException("name of vacancy doesn't exist")).when(vacancyValidator).validateVacancyName(vacancy);
+        DataValidationException thrownException = assertThrows(DataValidationException.class, () -> vacancyValidator.validateVacancyName(vacancy));
         assertEquals("name of vacancy doesn't exist", thrownException.getMessage());
-        verify(vacancyValidator, times(1)).validateVacancy(vacancy);
+        verify(vacancyValidator, times(1)).validateVacancyName(vacancy);
     }
 
     @Test
     public void testIfVacancyNameIsBlank() {
         vacancy.setName(" ");
-        doThrow(new DataValidationException("name of vacancy is blank")).when(vacancyValidator).validateVacancy(vacancy);
-        DataValidationException thrownException = assertThrows(DataValidationException.class, () -> vacancyValidator.validateVacancy(vacancy));
+        doThrow(new DataValidationException("name of vacancy is blank")).when(vacancyValidator).validateVacancyName(vacancy);
+        DataValidationException thrownException = assertThrows(DataValidationException.class, () -> vacancyValidator.validateVacancyName(vacancy));
         assertEquals("name of vacancy is blank", thrownException.getMessage());
-        verify(vacancyValidator, times(1)).validateVacancy(vacancy);
+        verify(vacancyValidator, times(1)).validateVacancyName(vacancy);
     }
 
     @Test
     public void testIfVacancyLessThenZero(){
         vacancy.setCount(0);
-        doThrow(new DataValidationException("count of vacancy is wrong")).when(vacancyValidator).validateVacancy(vacancy);
-        DataValidationException thrownException = assertThrows(DataValidationException.class, () -> vacancyValidator.validateVacancy(vacancy));
+        doThrow(new DataValidationException("count of vacancy is wrong")).when(vacancyValidator).validateCountOfVacancy(vacancy);
+        DataValidationException thrownException = assertThrows(DataValidationException.class, () -> vacancyValidator.validateCountOfVacancy(vacancy));
         assertEquals("count of vacancy is wrong", thrownException.getMessage());
-        verify(vacancyValidator, times(1)).validateVacancy(vacancy);
+        verify(vacancyValidator, times(1)).validateCountOfVacancy(vacancy);
     }
 }
