@@ -2,7 +2,6 @@ package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.internship.InternshipService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +26,7 @@ public class InternshipController {
     public InternshipDto update(InternshipDto internshipDto) {
         internshipControllerValidation.validationDto(internshipDto);
 
-        if (internshipDto.getId() == null) {
-            throw new DataValidationException(NULL_INTERNSHIP_ID_EXCEPTION.getMessage());
-        }
+        internshipControllerValidation.checkForNull(internshipDto.getId(), NULL_INTERNSHIP_ID_EXCEPTION);
 
         return internshipService.update(internshipDto);
     }
@@ -43,9 +40,7 @@ public class InternshipController {
     }
 
     public InternshipDto getInternshipById(Long internshipId) {
-        if (internshipId == null) {
-            throw new DataValidationException(NULL_INTERNSHIP_ID_EXCEPTION.getMessage());
-        }
+        internshipControllerValidation.checkForNull(internshipId, NULL_INTERNSHIP_ID_EXCEPTION);
 
         return internshipService.getInternshipById(internshipId);
     }

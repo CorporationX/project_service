@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.InternshipValidationExceptionMessage;
 import faang.school.projectservice.model.InternshipStatus;
 import org.springframework.util.CollectionUtils;
 
@@ -19,27 +20,20 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 
 class InternshipControllerValidation {
     public void validationDto(InternshipDto internshipDto) {
-        if (internshipDto == null) {
-            throw new DataValidationException(NULL_DTO_EXCEPTION.getMessage());
-        }
+        checkForNull(internshipDto, NULL_DTO_EXCEPTION);
+
         if (internshipDto.getName() == null || internshipDto.getName().isBlank()) {
             throw new DataValidationException(EMPTY_INTERNSHIP_NAME_EXCEPTION.getMessage());
         }
-        if (internshipDto.getProjectId() == null) {
-            throw new DataValidationException(EMPTY_INTERNSHIP_PROJECT_ID_EXCEPTION.getMessage());
-        }
-        if (internshipDto.getMentorId() == null) {
-            throw new DataValidationException(EMPTY_INTERNSHIP_MENTOR_ID_EXCEPTION.getMessage());
-        }
+
+        checkForNull(internshipDto.getProjectId(), EMPTY_INTERNSHIP_PROJECT_ID_EXCEPTION);
+        checkForNull(internshipDto.getMentorId(), EMPTY_INTERNSHIP_MENTOR_ID_EXCEPTION);
+
         if (CollectionUtils.isEmpty(internshipDto.getInternsIds())) {
             throw new DataValidationException(EMPTY_INTERNS_LIST_EXCEPTION.getMessage());
         }
 
-        internshipDto.getInternsIds().forEach(id -> {
-            if (id == null) {
-                throw new DataValidationException(EMPTY_INTERN_ID_EXCEPTION.getMessage());
-            }
-        });
+        internshipDto.getInternsIds().forEach(id -> checkForNull(id, EMPTY_INTERN_ID_EXCEPTION));
 
         LocalDateTime startDate = internshipDto.getStartDate();
         LocalDateTime endDate = internshipDto.getEndDate();
@@ -48,6 +42,12 @@ class InternshipControllerValidation {
         }
         if (internshipDto.getStatus() == null || internshipDto.getStatus().equals(InternshipStatus.COMPLETED)) {
             throw new DataValidationException(EMPTY_INTERNSHIP_STATUS_EXCEPTION.getMessage());
+        }
+    }
+
+    public void checkForNull(Object id, InternshipValidationExceptionMessage message) {
+        if (id == null) {
+            throw new DataValidationException(message.getMessage());
         }
     }
 }
