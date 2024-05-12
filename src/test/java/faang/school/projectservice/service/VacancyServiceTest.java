@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapperImpl;
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
@@ -18,6 +19,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class VacancyServiceTest {
@@ -35,11 +38,27 @@ public class VacancyServiceTest {
     private VacancyMapperImpl vacancyMapper;
     VacancyDto vacancyDto;
     Candidate candidate;
+    Vacancy vacancy;
+    TeamMember teamMember;
 
     @BeforeEach
     public void init() {
-        vacancyDto = new VacancyDto();
+        vacancyDto = VacancyDto.builder()
+                .id(1L)
+                .name("Google")
+//                .projectId(1L)
+                .description("developer")
+                .createdBy(1)
+                .createdBy(1L)
+                .build();
+
+        vacancy = vacancyMapper.toEntity(vacancyDto);
+
         candidate = new Candidate();
+        candidate.setId(1L);
+        candidate.setVacancy(vacancy);
+
+        vacancy.setCandidates(List.of(candidate));
     }
 
     @Test
@@ -51,16 +70,19 @@ public class VacancyServiceTest {
 
     @Test
     public void testCloseVacancy() {
-
-        List<Candidate> candidates = List.of(candidate);
-        Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         Mockito.when(vacancyRepository.getReferenceById(vacancyDto.getId()))
                 .thenReturn(vacancy);
-        Mockito.doNothing().when(vacancyValidator).checkExistsVacancy(vacancyDto);
-        Mockito.when(vacancy.getCandidates()).thenReturn(candidates);
-        vacancyService.closeVacancy(vacancyDto);
-//        Mockito.verify(vacancyRepository, Mockito.times(1)).getReferenceById(vacancyDto.getId());
-        Mockito.verify(vacancyRepository, Mockito.times(1))
-                .save(vacancyMapper.toEntity(vacancyDto));
+        VacancyDto closedVacancy = vacancyService.closeVacancy(vacancyDto);
+        assertEquals(vacancyDto, closedVacancy);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).getReferenceById(vacancyDto.getId());
+        Mockito.verify(vacancyRepository, Mockito.times(1)).save(vacancy);
     }
+
+//    @Test
+//    public void testHireCandidate(){
+//        Mockito.when(vacancyRepository.getReferenceById(vacancyDto.getId()))
+//                .thenReturn(vacancy);
+//        Mockito.when(teamMemberRepository.findById(1L))
+//    }
+
 }
