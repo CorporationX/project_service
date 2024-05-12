@@ -5,7 +5,6 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +22,6 @@ class InternshipServiceValidation {
     private final ProjectRepository projectRepository;
     private final InternshipRepository internshipRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final VacancyRepository vacancyRepository;
 
     public void validationCreate(InternshipDto internshipDto) {
         projectValidation(internshipDto.getProjectId());

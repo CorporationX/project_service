@@ -19,6 +19,9 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NULL_DTO_EXCEPTION;
 
 class InternshipControllerValidation {
+
+    public static final int INTERNSHIP_MAX_DURATION_IN_MONTHS = 3;
+
     public void validationDto(InternshipDto internshipDto) {
         checkForNull(internshipDto, NULL_DTO_EXCEPTION);
 
@@ -37,7 +40,7 @@ class InternshipControllerValidation {
 
         LocalDateTime startDate = internshipDto.getStartDate();
         LocalDateTime endDate = internshipDto.getEndDate();
-        if (startDate.isBefore(endDate.minus(3, ChronoUnit.MONTHS))) {
+        if (startDate.isBefore(endDate.minus(INTERNSHIP_MAX_DURATION_IN_MONTHS, ChronoUnit.MONTHS))) {
             throw new DataValidationException(INTERNSHIP_DURATION_EXCEPTION.getMessage());
         }
         if (internshipDto.getStatus() == null || internshipDto.getStatus().equals(InternshipStatus.COMPLETED)) {
