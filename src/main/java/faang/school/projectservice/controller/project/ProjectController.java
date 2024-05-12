@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,10 @@ public class ProjectController {
 
     public ProjectDto getProjectById(Long projectId){
         return projectService.findProjectById(projectId);
+    }
+
+    public List<ProjectDto> findAllByFilter(ProjectFilterDto projectFilterDto, Long userId){
+        return projectService.findAllByFilter(projectFilterDto, userId);
     }
 }
 
