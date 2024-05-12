@@ -8,6 +8,7 @@ public enum InternshipValidationExceptionMessage {
     EMPTY_INTERNSHIP_MENTOR_ID_EXCEPTION("The internship must have a mentor."),
     EMPTY_INTERNS_LIST_EXCEPTION("The internship can only be created with interns."),
     EMPTY_INTERN_ID_EXCEPTION("Cannot process null-valued intern id."),
+    NON_EXISTING_INTERN_EXCEPTION("Some of interns don't exist for passed ids."),
     INTERNSHIP_DURATION_EXCEPTION("The internship must last no more than 3 months."),
     EMPTY_INTERNSHIP_STATUS_EXCEPTION("The internship must have a status (IN_PROGRESS or COMPLETED)."),
     NON_EXISTING_INTERNSHIP_EXCEPTION("Unable to find passed internship in database."),

@@ -19,4 +19,8 @@ public class TeamMemberRepository {
     public TeamMember save(TeamMember teamMember) {
         return jpaRepository.save(teamMember);
     }
+
+    public boolean existsById(Long id) {
+        return jpaRepository.existsById(id);
+    }
 }
