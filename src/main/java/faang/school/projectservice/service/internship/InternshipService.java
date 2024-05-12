@@ -8,25 +8,32 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.internship.filter.InternshipFilter;
+import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.teamMember.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
+import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.FOREIGN_MENTOR_EXCEPTION;
+import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NEW_INTERNS_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NON_EXISTING_INTERNSHIP_EXCEPTION;
+import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NON_EXISTING_INTERN_EXCEPTION;
 
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
-    private final InternshipServiceValidation internshipServiceValidation;
     private final InternshipServiceUtility internshipServiceUtility;
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> filters;
+    private final TeamMemberService teamMemberService;
+    private final ProjectService projectService;
 
 
     public InternshipDto create(InternshipDto internshipDto) {
-        internshipServiceValidation.validationCreate(internshipDto);
+        validationCreate(internshipDto);
 
         Internship internship = internshipServiceUtility.toEntity(internshipDto);
 
@@ -34,7 +41,7 @@ public class InternshipService {
     }
 
     public InternshipDto update(InternshipDto internshipDto) {
-        internshipServiceValidation.validationUpdate(internshipDto);
+        validationUpdate(internshipDto);
 
         Internship internship = internshipServiceUtility.toEntity(internshipDto);
 
@@ -67,5 +74,41 @@ public class InternshipService {
                 .orElseThrow(() -> new DataValidationException(NON_EXISTING_INTERNSHIP_EXCEPTION.getMessage()));
 
         return internshipMapper.toDto(internship);
+    }
+
+    private void validationCreate(InternshipDto internshipDto) {
+        var internshipsProject = projectService.getProjectById(internshipDto.getProjectId());
+        var mentorsProject = teamMemberService.getTeamMembersProject(internshipDto.getMentorId());
+
+        if (!internshipsProject.equals(mentorsProject)) {
+            throw new DataValidationException(FOREIGN_MENTOR_EXCEPTION.getMessage());
+        }
+
+        List<Long> internsIds = internshipDto.getInternsIds();
+        var existingInternIds = internsIds.stream()
+                .filter(teamMemberService::existsById)
+                .toList();
+
+        if (!existingInternIds.equals(internsIds)) {
+            throw new DataValidationException(NON_EXISTING_INTERN_EXCEPTION.getMessage());
+        }
+    }
+
+    private void validationUpdate(InternshipDto internshipDto) {
+        validationCreate(internshipDto);
+
+
+        var internshipBeforeUpdate = internshipRepository.findById(internshipDto.getId())
+                .orElseThrow(() -> new DataValidationException(NON_EXISTING_INTERNSHIP_EXCEPTION.getMessage()));
+
+        var internsBeforeUpdate = new HashSet<>(internshipBeforeUpdate.getInterns());
+
+        var internsAfterUpdate = internshipDto.getInternsIds().stream()
+                .map(teamMemberService::getTeamMemberById)
+                .toList();
+
+        if (!internsBeforeUpdate.containsAll(internsAfterUpdate)) {
+            throw new DataValidationException(NEW_INTERNS_EXCEPTION.getMessage());
+        }
     }
 }
