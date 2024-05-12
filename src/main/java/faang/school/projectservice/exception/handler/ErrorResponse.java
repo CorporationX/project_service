@@ -1,9 +1,10 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.exception.handler;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
@@ -16,10 +17,12 @@ public class ErrorResponse {
     private LocalDateTime timestamp;
     private String url;
     private int status;
-    private String error;
     protected String message;
 
-    public ErrorResponse(String message) {
+    public ErrorResponse(String url, HttpStatus status, String message) {
+        this.timestamp = LocalDateTime.now();
+        this.url = url;
+        this.status = status.value();
         this.message = message;
     }
 }
