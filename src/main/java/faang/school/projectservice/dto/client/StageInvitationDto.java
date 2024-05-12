@@ -14,5 +14,5 @@ public class StageInvitationDto {
     private TeamMember author;
     private TeamMember invited;
     private StageInvitationStatus status;
-    private String description;
+    private String explanation;
 }

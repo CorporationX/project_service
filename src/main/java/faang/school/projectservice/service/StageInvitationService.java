@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -42,19 +43,19 @@ public class StageInvitationService {
         StageInvitation stageInvitationFromDB = stageInvitationRepository.findById(stageInvitation.getId());
 
         stageInvitationFromDB.setStatus(StageInvitationStatus.ACCEPTED);
-        addInvitationToProject(stageInvitationFromDB.getId(), stageInvitation.getInvited().getId());
+        addInvitationToProject(stageInvitationFromDB,  stageInvitation.getInvited().getId());
 
         return invitationMapper.toDto(stageInvitationFromDB);
     }
 
     @Transactional
-    public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto) {
+    public StageInvitationDto rejectInvitation(String explanation, StageInvitationDto stageInvitationDto) {
         stageInvitationValidator.acceptOrRejectInvitationService(stageInvitationDto);
         StageInvitation stageInvitation = invitationMapper.toEntity(stageInvitationDto);
         StageInvitation stageInvitationFromDB = stageInvitationRepository.findById(stageInvitation.getId());
 
         stageInvitationFromDB.setStatus(StageInvitationStatus.REJECTED);
-        stageInvitationFromDB.setDescription(stageInvitation.getDescription());
+        stageInvitationFromDB.setDescription(explanation);
 
         return invitationMapper.toDto(stageInvitationFromDB);
     }
@@ -62,15 +63,14 @@ public class StageInvitationService {
     @Transactional(readOnly = true)
     public List<StageInvitationDto> showAllInvitationForMember(Long userId, InvitationFilterDto invitationFilterDto) {
         Stream<StageInvitation> invitation = stageInvitationRepository.findAll().stream().
-                filter(filter -> filter.getInvited().getUserId().equals(userId));
+                filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(userId));
 
         return invitationFilters.stream().filter(filter -> filter.isApplicable(invitationFilterDto))
                 .flatMap(filter -> filter.apply(invitation, invitationFilterDto)).map(invitationMapper::toDto).toList();
     }
 
-    private void addInvitationToProject(Long stageInvitationId, Long invitationId) {
-        StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationId);
-        List<TeamMember> teamMembers = stageInvitation.getStage().getExecutors();
+    private void addInvitationToProject(StageInvitation stageInvitation, Long invitationId) {
+        List<TeamMember> teamMembers = new ArrayList<>(stageInvitation.getStage().getExecutors());
 
         TeamMember newExecutor = teamMemberRepository.findById(invitationId);
         teamMembers.add(newExecutor);

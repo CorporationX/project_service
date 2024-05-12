@@ -34,15 +34,15 @@ public class StageInvitationValidator {
         }
     }
 
-    public void rejectInvitationValidationController(StageInvitationDto stageInvitationDto) {
+    public void rejectInvitationValidationController(String explanation, StageInvitationDto stageInvitationDto) {
+        if (explanation == null || explanation.isBlank()) {
+            throw new DataValidationException("Передано пустое объяснение");
+        }
         if (stageInvitationDto.getStage() == null) {
             throw new DataValidationException("Передан пустой параметр этапа");
         }
         if (stageInvitationDto.getInvited() == null) {
             throw new DataValidationException("Передан пустой приглашенный");
-        }
-        if (stageInvitationDto.getDescription() == null) {
-            throw new DataValidationException("Передан пустое объяснение");
         }
     }
 
