@@ -39,14 +39,11 @@ public class StageInvitationService {
     @Transactional
     public StageInvitationDto acceptInvitation(StageInvitationDto stageInvitationDto) {
         stageInvitationValidator.validateAll(stageInvitationDto);
-        StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
+        long id = stageInvitationDto.getId();
+        StageInvitation stageInvitation = stageInvitationRepository.findById(id);
 
-        if (!stageInvitation.getStatus().equals(StageInvitationStatus.PENDING)) {
-            throw new DataValidationStageInvitationException("This task cannot be accepted yet.");
-        }
-
-        stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
-        Long userId = stageInvitation.getInvited().getUserId();
+        checkAndSetStatus(stageInvitation, StageInvitationStatus.PENDING, StageInvitationStatus.ACCEPTED);
+        long userId = stageInvitation.getInvited().getUserId();
         TeamMember teamMember = teamMemberRepository.findById(userId);
         stageInvitation.setInvited(teamMember);
         stageInvitationRepository.save(stageInvitation);
@@ -56,15 +53,11 @@ public class StageInvitationService {
     @Transactional
     public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto) {
         stageInvitationValidator.validateAll(stageInvitationDto);
-        StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
-        Long invitationId = stageInvitation.getId();
-        stageInvitation = stageInvitationRepository.findById(invitationId);
+        Long invitationId = stageInvitationDto.getId();
+        StageInvitation stageInvitation = stageInvitationRepository.findById(invitationId);
 
-        if (!stageInvitation.getStatus().equals(StageInvitationStatus.PENDING)) {
-            throw new DataValidationStageInvitationException("This task cannot be accepted yet.");
-        }
+        checkAndSetStatus(stageInvitation, StageInvitationStatus.PENDING, StageInvitationStatus.REJECTED);
 
-        stageInvitation.setStatus(StageInvitationStatus.REJECTED);
         stageInvitationRepository.save(stageInvitation);
         return stageInvitationMapper.toDto(stageInvitation);
     }
@@ -81,5 +74,12 @@ public class StageInvitationService {
                         .allMatch(stageInvitationFilter -> stageInvitationFilter.apply(stageInvitation, stageInvitationFilterDto)))
                 .map(stageInvitation -> stageInvitationMapper.toDto(stageInvitation))
                 .toList();
+    }
+
+    private void checkAndSetStatus(StageInvitation stageInvitation, StageInvitationStatus oldStatus, StageInvitationStatus updatedStatus) {
+        if (!stageInvitation.getStatus().equals(oldStatus)) {
+            throw new DataValidationStageInvitationException("This task cannot be accepted yet.");
+        }
+        stageInvitation.setStatus(updatedStatus);
     }
 }

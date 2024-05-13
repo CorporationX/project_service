@@ -16,22 +16,22 @@ public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
     private final StageInvitationValidator validator;
 
-    @PostMapping("/send")
+    @PostMapping("/sent")
     public StageInvitationDto sendAnInvitation(StageInvitationDto stageInvitationDto) {
         validator.validateId(stageInvitationDto.getId());
         validator.validateDescription(stageInvitationDto.getDescription());
         return stageInvitationService.sendInvite(stageInvitationDto);
     }
 
-    @PostMapping("/accept")
-    public StageInvitationDto acceptInvitation(StageInvitationDto stageInvitationDto) {
+    @PutMapping("/accepted")
+    public StageInvitationDto acceptInvitation(@RequestBody StageInvitationDto stageInvitationDto) {
         validator.validateId(stageInvitationDto.getId());
         validator.validateDescription(stageInvitationDto.getDescription());
         return stageInvitationService.acceptInvitation(stageInvitationDto);
     }
 
-    @PostMapping("/reject")
-    public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto) {
+    @PutMapping("/rejected")
+    public StageInvitationDto rejectInvitation(@RequestBody StageInvitationDto stageInvitationDto) {
         validator.validateId(stageInvitationDto.getId());
         validator.validateDescription(stageInvitationDto.getDescription());
         return stageInvitationService.rejectInvitation(stageInvitationDto);
