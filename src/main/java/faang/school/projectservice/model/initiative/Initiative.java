@@ -17,7 +17,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,20 +38,18 @@ public class Initiative {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false, length = 64)
     private String name;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column(name = "description", nullable = false, length = 4096)
     private String description;
 
     @ManyToOne
     @JoinColumn(name = "curator_id",  nullable = false)
     private TeamMember curator;
 
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private InitiativeStatus status;
 
     @ManyToMany
@@ -74,9 +71,6 @@ public class Initiative {
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
     private List<Project> sharingProjects;
-
-    @Column(name = "cover_image_id")
-    private String coverImageId;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

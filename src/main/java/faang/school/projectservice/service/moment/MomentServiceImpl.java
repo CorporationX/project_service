@@ -32,7 +32,6 @@ public class MomentServiceImpl implements MomentService {
 
         momentDto.setName(initiative.getName());
         momentDto.setDescription(momentDto.getDescription());
-        momentDto.setImageId(initiative.getCoverImageId());
 
         List<Long> projectIds = initiative.getSharingProjects().stream()
                 .map(Project::getId)
