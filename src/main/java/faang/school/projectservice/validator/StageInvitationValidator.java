@@ -2,14 +2,16 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.stage_invintation.StageInvitationDto;
 import faang.school.projectservice.exception.DataValidationStageInvitationException;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
-@RequiredArgsConstructor
 public class StageInvitationValidator {
-    private final StageInvitationRepository stageInvitationRepository;
 
     public void validateId(Long id) {
         if (id == null) {
