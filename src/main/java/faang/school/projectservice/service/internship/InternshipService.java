@@ -24,7 +24,7 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
-    private final InternshipServiceUtility internshipServiceUtility;
+    private final InternshipFiller internshipFiller;
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> filters;
@@ -33,23 +33,29 @@ public class InternshipService {
 
 
     public InternshipDto create(InternshipDto internshipDto) {
-        validationCreate(internshipDto);
+        verifyMentorsProject(internshipDto);
+        verifyExistenceOfInterns(internshipDto);
 
-        Internship internship = internshipServiceUtility.toEntity(internshipDto);
+        Internship internship = internshipFiller.fillEntity(internshipDto);
 
         return internshipMapper.toDto(internshipRepository.save(internship));
     }
 
     public InternshipDto update(InternshipDto internshipDto) {
-        validationUpdate(internshipDto);
+        verifyMentorsProject(internshipDto);
+        verifyExistenceOfInterns(internshipDto);
+        verifyUpdatedInterns(internshipDto);
 
-        Internship internship = internshipServiceUtility.toEntity(internshipDto);
+        Internship internshipToBeUpdated = internshipRepository.findById(internshipDto.getId())
+                .orElseThrow(() -> new DataValidationException(NON_EXISTING_INTERNSHIP_EXCEPTION.getMessage()));
 
-        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            internshipServiceUtility.processCompletedInternship(internship);
+        internshipMapper.update(internshipDto, internshipToBeUpdated);
+
+        if (internshipToBeUpdated.getStatus().equals(InternshipStatus.COMPLETED)) {
+            teamMemberService.hireInterns(internshipToBeUpdated);
         }
 
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        return internshipMapper.toDto(internshipRepository.save(internshipToBeUpdated));
     }
 
     public List<InternshipDto> getInternshipsOfProject(long projectId, InternshipFilterDto filtersDto) {
@@ -76,14 +82,7 @@ public class InternshipService {
         return internshipMapper.toDto(internship);
     }
 
-    private void validationCreate(InternshipDto internshipDto) {
-        var internshipsProject = projectService.getProjectById(internshipDto.getProjectId());
-        var mentorsProject = teamMemberService.getTeamMembersProject(internshipDto.getMentorId());
-
-        if (!internshipsProject.equals(mentorsProject)) {
-            throw new DataValidationException(FOREIGN_MENTOR_EXCEPTION.getMessage());
-        }
-
+    private void verifyExistenceOfInterns(InternshipDto internshipDto) {
         List<Long> internsIds = internshipDto.getInternsIds();
         var existingInternIds = internsIds.stream()
                 .filter(teamMemberService::existsById)
@@ -94,15 +93,20 @@ public class InternshipService {
         }
     }
 
-    private void validationUpdate(InternshipDto internshipDto) {
-        validationCreate(internshipDto);
+    private void verifyMentorsProject(InternshipDto internshipDto) {
+        var internshipsProject = projectService.getProjectById(internshipDto.getProjectId());
+        var mentorsProject = teamMemberService.getTeamMembersProject(internshipDto.getMentorId());
 
+        if (!internshipsProject.equals(mentorsProject)) {
+            throw new DataValidationException(FOREIGN_MENTOR_EXCEPTION.getMessage());
+        }
+    }
 
+    private void verifyUpdatedInterns(InternshipDto internshipDto) {
         var internshipBeforeUpdate = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new DataValidationException(NON_EXISTING_INTERNSHIP_EXCEPTION.getMessage()));
 
         var internsBeforeUpdate = new HashSet<>(internshipBeforeUpdate.getInterns());
-
         var internsAfterUpdate = internshipDto.getInternsIds().stream()
                 .map(teamMemberService::getTeamMemberById)
                 .toList();

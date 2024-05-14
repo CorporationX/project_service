@@ -5,6 +5,7 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
@@ -23,6 +24,8 @@ public interface InternshipMapper {
     Internship toEntity(InternshipDto dto);
 
     List<InternshipDto> toDto(List<Internship> entityList);
+
+    void update(InternshipDto dto, @MappingTarget Internship entity);
 
     @Named("internsMapping")
     default List<Long> internsMapping(List<TeamMember> interns) {
