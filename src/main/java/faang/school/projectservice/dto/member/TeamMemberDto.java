@@ -13,6 +13,6 @@ import java.util.List;
 public class TeamMemberDto {
     private Long id;
     private Long userId;
-    private List<TeamRole> roles;
+    private List<String> roles;
     private Long teamId;
 }

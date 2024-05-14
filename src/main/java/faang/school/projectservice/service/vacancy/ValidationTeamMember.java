@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 class ValidationTeamMember {
-    public void checkThatTheUserCanCreateAVacancy(TeamMemberDto member) {
-        if (!member.getRoles().contains(TeamRole.MANAGER)
-                || !member.getRoles().contains(TeamRole.OWNER)) {
+    public void checkRoleIsOwnerOrManager(TeamMemberDto member) {
+        if (!member.getRoles().contains(TeamRole.MANAGER.toString())
+                && !member.getRoles().contains(TeamRole.OWNER.toString())) {
             throw new DataValidationException(ExceptionMessage.INAPPROPRIATE_ROLE.getMessage());
         }
     }

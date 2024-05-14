@@ -9,12 +9,6 @@ import org.springframework.stereotype.Component;
 @Component
 class ValidationVacancy {
 
-    public void checkVacancy(VacancyDto vacancyDto) {
-        if (vacancyDto == null) {
-            throw new DataValidationException(ExceptionMessage.VACANCY_DTO_IS_NULL.getMessage());
-        }
-    }
-
     public void checkVacancyName(@NonNull VacancyDto vacancyDto) {
         if (vacancyDto.getName().isBlank()) {
             throw new DataValidationException(ExceptionMessage.VACANCY_DTO_NAME_IS_BLANK.getMessage());
