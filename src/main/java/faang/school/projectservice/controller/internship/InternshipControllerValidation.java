@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.InternshipValidationExceptionMessage;
 import faang.school.projectservice.model.InternshipStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.INTERNSHIP_DURATION_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NULL_DTO_EXCEPTION;
 
+@Component
 class InternshipControllerValidation {
 
     public static final int INTERNSHIP_MAX_DURATION_IN_MONTHS = 3;
