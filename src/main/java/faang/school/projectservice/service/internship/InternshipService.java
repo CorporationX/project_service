@@ -36,7 +36,11 @@ public class InternshipService {
         verifyMentorsProject(internshipDto);
         verifyExistenceOfInterns(internshipDto);
 
-        Internship internship = internshipFiller.fillEntity(internshipDto);
+        Internship internship = internshipMapper.toEntity(internshipDto);
+        internshipFiller.fillEntity(internship,
+                internshipDto.getProjectId(),
+                internshipDto.getMentorId(),
+                internshipDto.getInternsIds());
 
         return internshipMapper.toDto(internshipRepository.save(internship));
     }
@@ -50,6 +54,10 @@ public class InternshipService {
                 .orElseThrow(() -> new DataValidationException(NON_EXISTING_INTERNSHIP_EXCEPTION.getMessage()));
 
         internshipMapper.update(internshipDto, internshipToBeUpdated);
+        internshipFiller.fillEntity(internshipToBeUpdated,
+                internshipDto.getProjectId(),
+                internshipDto.getMentorId(),
+                internshipDto.getInternsIds());
 
         if (internshipToBeUpdated.getStatus().equals(InternshipStatus.COMPLETED)) {
             teamMemberService.hireInterns(internshipToBeUpdated);

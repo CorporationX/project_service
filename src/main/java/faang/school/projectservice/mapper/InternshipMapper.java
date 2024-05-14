@@ -25,6 +25,9 @@ public interface InternshipMapper {
 
     List<InternshipDto> toDto(List<Internship> entityList);
 
+    @Mapping(target = "project", ignore = true)
+    @Mapping(target = "mentorId", ignore = true)
+    @Mapping(target = "interns", ignore = true)
     void update(InternshipDto dto, @MappingTarget Internship entity);
 
     @Named("internsMapping")

@@ -3,27 +3,36 @@ package faang.school.projectservice.controller.internship;
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.service.internship.InternshipService;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NULL_INTERNSHIP_ID_EXCEPTION;
 
-@Controller
+@RequestMapping("/internship")
+@RestController
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
     private final InternshipControllerValidation internshipControllerValidation;
 
-    public InternshipDto create(InternshipDto internshipDto) {
+    @PostMapping
+    public InternshipDto create(@RequestBody InternshipDto internshipDto) {
         internshipControllerValidation.validationDto(internshipDto);
 
         return internshipService.create(internshipDto);
     }
 
-    public InternshipDto update(InternshipDto internshipDto) {
+    @PutMapping
+    public InternshipDto update(@RequestBody InternshipDto internshipDto) {
         internshipControllerValidation.validationDto(internshipDto);
 
         internshipControllerValidation.checkForNull(internshipDto.getId(), NULL_INTERNSHIP_ID_EXCEPTION);
@@ -31,15 +40,18 @@ public class InternshipController {
         return internshipService.update(internshipDto);
     }
 
-    public List<InternshipDto> getInternshipsOfProject(long projectId, @NonNull InternshipFilterDto filter) {
-        return internshipService.getInternshipsOfProject(projectId, filter);
-    }
+    @GetMapping("")
+    public List<InternshipDto> getInternshipsOfProject(@RequestParam(required = false) Long projectId,
+                                                       @RequestBody(required = false) InternshipFilterDto filter) {
+        if (projectId != null && filter != null) {
+            return internshipService.getInternshipsOfProject(projectId, filter);
+        }
 
-    public List<InternshipDto> getAllInternships() {
         return internshipService.getAllInternships();
     }
 
-    public InternshipDto getInternshipById(Long internshipId) {
+    @GetMapping("/{internshipId}")
+    public InternshipDto getInternshipById(@PathVariable Long internshipId) {
         internshipControllerValidation.checkForNull(internshipId, NULL_INTERNSHIP_ID_EXCEPTION);
 
         return internshipService.getInternshipById(internshipId);
