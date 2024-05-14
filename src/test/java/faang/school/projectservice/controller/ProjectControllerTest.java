@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.ProjectServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +19,7 @@ public class ProjectControllerTest {
     @InjectMocks
     ProjectController projectController;
     @Mock
-    private ProjectService projectService;
+    private ProjectServiceImpl projectService;
 
     @Test
     public void testCreateWithNPE() {

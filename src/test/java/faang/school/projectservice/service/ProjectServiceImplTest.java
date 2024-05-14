@@ -25,9 +25,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectServiceTest {
+public class ProjectServiceImplTest {
     @InjectMocks
-    private ProjectService projectService;
+    private ProjectServiceImpl projectService;
     @Mock
     private ProjectRepository projectRepository;
     @Spy
