@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
 }
@@ -64,6 +65,39 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.9"
+}
+
+val jacocoInclude = listOf(
+        "**/controller/**",
+        "**/service/**",
+        "**/validator/**",
+        "**/mapper/**"
+)
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.7".toBigDecimal()
+            }
+        }
+    }
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
