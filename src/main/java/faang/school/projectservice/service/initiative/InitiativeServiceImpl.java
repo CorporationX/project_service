@@ -8,6 +8,7 @@ import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.repository.InitiativeRepository;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validation.InitiativeValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -68,7 +69,8 @@ public class InitiativeServiceImpl implements InitiativeService {
 
     @Override
     public InitiativeDto getById(long id) {
-        Initiative initiative = initiativeRepository.getById(id);
+        Initiative initiative = initiativeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("can't find initiative with id:" + id));
         return mapper.toDto(initiative);
     }
 }

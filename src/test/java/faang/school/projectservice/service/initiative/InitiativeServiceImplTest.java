@@ -11,6 +11,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InitiativeRepository;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validation.InitiativeValidator;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,10 +21,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
@@ -166,15 +169,21 @@ class InitiativeServiceImplTest {
     }
 
     @Test
+    void getByIdNotFoundInitiative() {
+        EntityNotFoundException e = assertThrows(EntityNotFoundException.class, () -> service.getById(1L));
+        assertEquals("can't find initiative with id:1", e.getMessage());
+    }
+
+    @Test
     void getById() {
         Long id = 1L;
-        when(initiativeRepository.getById(id)).thenReturn(initiative);
+        when(initiativeRepository.findById(id)).thenReturn(Optional.of(initiative));
         when(mapper.toDto(initiative)).thenReturn(dto);
 
         assertEquals(dto, service.getById(id));
 
         InOrder inOrder = inOrder(initiativeRepository, mapper);
-        inOrder.verify(initiativeRepository, times(1)).getById(id);
+        inOrder.verify(initiativeRepository, times(1)).findById(id);
         inOrder.verify(mapper, times(1)).toDto(initiative);
     }
 }
