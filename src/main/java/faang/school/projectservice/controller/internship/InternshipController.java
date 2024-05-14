@@ -40,13 +40,14 @@ public class InternshipController {
         return internshipService.update(internshipDto);
     }
 
-    @GetMapping("")
-    public List<InternshipDto> getInternshipsOfProject(@RequestParam(required = false) Long projectId,
-                                                       @RequestBody(required = false) InternshipFilterDto filter) {
-        if (projectId != null && filter != null) {
-            return internshipService.getInternshipsOfProject(projectId, filter);
-        }
+    @PostMapping
+    public List<InternshipDto> getInternshipsOfProject(@RequestParam Long projectId,
+                                                       @RequestBody InternshipFilterDto filter) {
+        return internshipService.getInternshipsOfProject(projectId, filter);
+    }
 
+    @GetMapping
+    public List<InternshipDto> getAllInternships() {
         return internshipService.getAllInternships();
     }
 
