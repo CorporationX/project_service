@@ -20,6 +20,7 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NEW_INTERNS_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NON_EXISTING_INTERNSHIP_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NON_EXISTING_INTERN_EXCEPTION;
+import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NON_EXISTING_PROJECT_EXCEPTION;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class InternshipService {
 
 
     public InternshipDto create(InternshipDto internshipDto) {
-        verifyMentorsProject(internshipDto);
+        verifyMentorsProject(internshipDto.getProjectId(), internshipDto.getMentorId());
         verifyExistenceOfInterns(internshipDto);
 
         Internship internship = internshipMapper.toEntity(internshipDto);
@@ -46,7 +47,7 @@ public class InternshipService {
     }
 
     public InternshipDto update(InternshipDto internshipDto) {
-        verifyMentorsProject(internshipDto);
+        verifyMentorsProject(internshipDto.getProjectId(), internshipDto.getMentorId());
         verifyExistenceOfInterns(internshipDto);
         verifyUpdatedInterns(internshipDto);
 
@@ -91,21 +92,21 @@ public class InternshipService {
     }
 
     private void verifyExistenceOfInterns(InternshipDto internshipDto) {
-        List<Long> internsIds = internshipDto.getInternsIds();
-        var existingInternIds = internsIds.stream()
-                .filter(teamMemberService::existsById)
-                .toList();
+        var existingInterns = teamMemberService.findAllByIds(internshipDto.getInternsIds());
 
-        if (!existingInternIds.equals(internsIds)) {
+        if (existingInterns.size() == 0) {
             throw new DataValidationException(NON_EXISTING_INTERN_EXCEPTION.getMessage());
         }
     }
 
-    private void verifyMentorsProject(InternshipDto internshipDto) {
-        var internshipsProject = projectService.getProjectById(internshipDto.getProjectId());
-        var mentorsProject = teamMemberService.getTeamMembersProject(internshipDto.getMentorId());
+    private void verifyMentorsProject(Long projectId, Long getMentorId) {
+        if (!projectService.existsById(projectId)) {
+            throw new DataValidationException(NON_EXISTING_PROJECT_EXCEPTION.getMessage());
+        }
 
-        if (!internshipsProject.equals(mentorsProject)) {
+        Long mentorsProjectId = teamMemberService.getTeamMemberProjectId(getMentorId);
+
+        if (!projectId.equals(mentorsProjectId)) {
             throw new DataValidationException(FOREIGN_MENTOR_EXCEPTION.getMessage());
         }
     }
@@ -115,9 +116,7 @@ public class InternshipService {
                 .orElseThrow(() -> new DataValidationException(NON_EXISTING_INTERNSHIP_EXCEPTION.getMessage()));
 
         var internsBeforeUpdate = new HashSet<>(internshipBeforeUpdate.getInterns());
-        var internsAfterUpdate = internshipDto.getInternsIds().stream()
-                .map(teamMemberService::getTeamMemberById)
-                .toList();
+        var internsAfterUpdate = teamMemberService.findAllByIds(internshipDto.getInternsIds());
 
         if (!internsBeforeUpdate.containsAll(internsAfterUpdate)) {
             throw new DataValidationException(NEW_INTERNS_EXCEPTION.getMessage());

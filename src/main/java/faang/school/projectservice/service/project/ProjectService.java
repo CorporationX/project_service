@@ -13,4 +13,8 @@ public class ProjectService {
     public Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);
     }
+
+    public boolean existsById(Long projectId) {
+        return projectRepository.existsById(projectId);
+    }
 }

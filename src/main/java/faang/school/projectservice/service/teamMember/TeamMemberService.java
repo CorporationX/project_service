@@ -2,7 +2,6 @@ package faang.school.projectservice.service.teamMember;
 
 import faang.school.projectservice.exception.RoleProcessingException;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -20,17 +19,17 @@ import static faang.school.projectservice.exception.RoleProcessingExceptionMessa
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
-    public Project getTeamMembersProject(Long teamMemberId) {
-        var teamMember = teamMemberRepository.findById(teamMemberId);
-        return teamMember.getTeam().getProject();
+    public Long getTeamMemberProjectId(Long teamMemberId) {
+        var teamMember = getTeamMemberById(teamMemberId);
+        return teamMember.getTeam().getProject().getId();
     }
 
     public TeamMember getTeamMemberById(Long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId);
     }
 
-    public boolean existsById(Long teamMemberId) {
-        return teamMemberRepository.existsById(teamMemberId);
+    public List<TeamMember> findAllByIds(List<Long> teamMemberIds) {
+        return teamMemberRepository.findAllByIds(teamMemberIds);
     }
 
     public void hireInterns(Internship internship) {
