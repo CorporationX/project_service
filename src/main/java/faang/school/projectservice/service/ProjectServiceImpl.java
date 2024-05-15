@@ -9,7 +9,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validation.ProjectValidator;
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService{
     private final ProjectRepository projectRepository;
-    private final ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
+    private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
     private final UserContext userContext;
 
@@ -40,7 +39,6 @@ public class ProjectServiceImpl implements ProjectService{
         Project project = projectRepository.getProjectById(projectDto.getId());
         projectMapper.updateProject(projectDto, project);
         return projectMapper.toDto(projectRepository.save(project));
-        //todo ѕри этом дл€ аудита необходимо проставл€ть TIMESTAMP на каждое последние изменение проекта.
     }
 
     @Override

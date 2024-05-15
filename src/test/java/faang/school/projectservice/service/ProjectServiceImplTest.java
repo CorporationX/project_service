@@ -13,13 +13,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +32,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceImplTest {
     @InjectMocks
-    private ProjectServiceImpl projectService;
+    private ProjectServiceImpl projectServiceImpl;
     @Mock
     private ProjectRepository projectRepository;
     @Spy
@@ -38,10 +43,11 @@ public class ProjectServiceImplTest {
     private UserContext userContext;
     @Captor
     private ArgumentCaptor<Project> captor;
+
     private ProjectDto firstProjectDto;
 
     @BeforeEach
-    public void init() {
+    void init() {
         firstProjectDto = new ProjectDto();
         firstProjectDto.setId(1L);
         firstProjectDto.setName("First project");
@@ -49,7 +55,7 @@ public class ProjectServiceImplTest {
 
     @Test
     public void testCreateWithSaving() {
-        projectService.create(firstProjectDto);
+        projectServiceImpl.create(firstProjectDto);
         verify(projectRepository, times(1)).save(captor.capture());
 
         Project capturedProject = captor.getValue();
@@ -59,7 +65,7 @@ public class ProjectServiceImplTest {
 
     @Test
     public void testCreateWithSettingStatus() {
-        projectService.create(firstProjectDto);
+        projectServiceImpl.create(firstProjectDto);
         verify(projectValidator, times(1)).validateProjectByOwnerIdAndNameOfProject(firstProjectDto);
 
         assertEquals(ProjectStatus.CREATED, firstProjectDto.getStatus());
@@ -68,19 +74,50 @@ public class ProjectServiceImplTest {
     @Test
     public void testCreateWithSettingOwnerId() {
         when(userContext.getUserId()).thenReturn(1L);
-        projectService.create(firstProjectDto);
+        projectServiceImpl.create(firstProjectDto);
         verify(projectValidator, times(1)).validateProjectByOwnerIdAndNameOfProject(firstProjectDto);
 
         assertEquals(1L, firstProjectDto.getOwnerId());
+    }
+
+    @BeforeEach
+    public void reset() {
+        Mockito.reset(projectRepository, projectMapper);
     }
 
     @Test
     public void testCreateWithCreating() {
         Project firstProject = projectMapper.toProject(firstProjectDto);
         when(projectRepository.save(any(Project.class))).thenReturn(firstProject);
-        ProjectDto result = projectService.create(firstProjectDto);
+        ProjectDto result = projectServiceImpl.create(firstProjectDto);
 
         assertEquals(result.getId(), firstProject.getId());
         assertEquals(result.getName(), firstProject.getName());
+    }
+
+    @Test
+    public void testGetAllWithGetting() {
+        List<Project> projects = List.of(projectMapper.toProject(firstProjectDto));
+        when(projectRepository.findAll()).thenReturn(projects);
+
+        List<ProjectDto> result = projectServiceImpl.getAll();
+        assertEquals(result, projectMapper.toDtos(projects));
+
+        InOrder inOrder = inOrder(projectRepository, projectMapper);
+        inOrder.verify(projectRepository, times(1)).findAll();
+        inOrder.verify(projectMapper, times(1)).toDtos(projects);
+    }
+
+    @Test
+    public void findByIdWithFinding() {
+        Project project = projectMapper.toProject(firstProjectDto);
+        when(projectRepository.getProjectById(firstProjectDto.getId())).thenReturn(project);
+
+        ProjectDto result = projectServiceImpl.findById(firstProjectDto.getId());
+        assertEquals(result, firstProjectDto);
+
+        InOrder inOrder = inOrder(projectRepository, projectMapper);
+        inOrder.verify(projectRepository, times(1)).getProjectById(1L);
+        inOrder.verify(projectMapper, times(1)).toDto(project);
     }
 }
