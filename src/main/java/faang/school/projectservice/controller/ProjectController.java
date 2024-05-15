@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.service.ProjectServiceImpl;
 import lombok.NonNull;
@@ -30,7 +31,7 @@ public class ProjectController {
         return projectService.findById(id);
     }
 
-    public List<ProjectDto> getAllByFilter(@NonNull Predicate<ProjectDto> predicate){
-        return projectService.getAllByFilter(predicate);
+    public List<ProjectDto> getAllByFilter(@NonNull ProjectFilterDto projectFilterDto){
+        return projectService.getAllByFilter(projectFilterDto);
     }
 }

@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -12,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Service
@@ -22,6 +22,7 @@ public class ProjectServiceImpl implements ProjectService{
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
     private final UserContext userContext;
+    private final ProjectFilterService projectFilterService;
 
     @Override
     public ProjectDto create(ProjectDto projectDto) {
@@ -54,10 +55,10 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public List<ProjectDto> getAllByFilter(Predicate<ProjectDto> predicate) {
+    public List<ProjectDto> getAllByFilter(ProjectFilterDto projectFilterDto) {
         List<Project> projects = projectRepository.findAll();
 
-        Stream<Project> filteredProjects = projects.stream()
+        Stream<Project> filteredProjectsByVisibility = projects.stream()
                 .filter(project -> {
                     boolean isParticipant = true;
                     if(project.getVisibility().equals(ProjectVisibility.PRIVATE)){
@@ -68,8 +69,7 @@ public class ProjectServiceImpl implements ProjectService{
                     return isParticipant;
                 });
 
-        return filteredProjects.map(projectMapper::toDto)
-                .filter(predicate)
-                .toList();
+        List<Project> filteredProjects = projectFilterService.applyFilters(filteredProjectsByVisibility, projectFilterDto).toList();
+        return projectMapper.toDtos(filteredProjects);
     }
 }
