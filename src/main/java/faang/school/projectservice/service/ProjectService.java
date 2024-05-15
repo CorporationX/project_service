@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 public interface ProjectService {
 
