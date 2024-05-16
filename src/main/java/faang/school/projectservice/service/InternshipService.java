@@ -2,7 +2,9 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.InternshipDto;
 import faang.school.projectservice.dto.InternshipFilterDto;
+import faang.school.projectservice.jpa.InternshipJpaRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
+import faang.school.projectservice.mapper.CandidateTeamMemberMapper;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Internship;
@@ -19,15 +21,12 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.filter.InternshipFilter;
 import faang.school.projectservice.validation.InternshipValidator;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -38,6 +37,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class InternshipService {
 
+    private final InternshipJpaRepository internshipJpaRepository;
     private final InternshipRepository internshipRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
@@ -46,26 +46,21 @@ public class InternshipService {
     private final InternshipMapper internshipMapper;
     private final CandidateRepository candidateRepository;
     private final List<InternshipFilter> internshipFilters;
+    private final CandidateTeamMemberMapper candidateTeamMemberMapper;
 
     @Transactional
     public InternshipDto create(InternshipDto internshipDto) {
 
-        //Check that internship with name not exists
         internshipValidator.validateInternshipExistsByName(internshipDto.getName());
 
-        //Проверка что список кандидатов не пустой и что они существуют в БД.
         List<Candidate> candidates = getCandidates(internshipDto);
         internshipValidator.validateCandidatesList(candidates.size());
 
-        //Check that the mentor exists and he belongs to the project team
         TeamMember mentor = teamMemberRepository.findById(internshipDto.getMentorId());
         Project project = projectRepository.getProjectById(internshipDto.getProjectId());
         internshipValidator.validateMentorInTeamProject(mentor, project);
-
-        //Check that the internship lasts no more than 3 months.
         internshipValidator.validateInternshipPeriod(internshipDto);
 
-        //Create a Team Member for each internship candidate
         List<TeamMember> interns = createInterns(candidates, mentor.getTeam());
 
         Internship internship = internshipMapper.toEntity(internshipDto);
@@ -74,23 +69,20 @@ public class InternshipService {
         internship.setInterns(interns);
         internship.setStatus(InternshipStatus.IN_PROGRESS);
 
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        return internshipMapper.toDto(internshipJpaRepository.save(internship));
     }
 
     @Transactional
     public InternshipDto update(InternshipDto internshipDto, long id) {
 
-        Internship internship = internshipRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(String.format("Internship doesn't exist by id: %s", id)));
+        Internship internship = internshipRepository.findById(id);
 
         List<TeamMember> interns = internship.getInterns();
         List<Task> tasks = internship.getProject().getTasks();
 
-        //Change intern status when all tasks done
         log.info("Check interns' tasks status");
         updateInternStatusIfTasksCompleted(interns, tasks);
 
-        // Check if internship completed
         if (internship.getEndDate().isAfter(LocalDateTime.now())) {
             log.info("The internship is not yet completed");
             addNewCandidatesToInternship(internshipDto, interns, internship.getMentorId().getTeam());
@@ -100,10 +92,9 @@ public class InternshipService {
             internship.setStatus(InternshipStatus.COMPLETED);
         }
 
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        return internshipMapper.toDto(internshipJpaRepository.save(internship));
     }
 
-    @Transactional
     private void updateInternStatusIfTasksCompleted(List<TeamMember> interns, List<Task> tasks) {
         for (TeamMember intern : interns) {
             if (checkInternTasksStatus(intern, tasks)) {
@@ -117,7 +108,6 @@ public class InternshipService {
         }
     }
 
-    @Transactional
     private void addNewCandidatesToInternship(InternshipDto internshipDto, List<TeamMember> interns, Team team) {
         List<Candidate> candidates = getCandidates(internshipDto);
         List<Candidate> newCandidates = candidates.stream()
@@ -131,50 +121,29 @@ public class InternshipService {
         }
     }
 
-
-    @Transactional
     private void removeInterns(List<TeamMember> interns, List<Task> tasks) {
-        List<TeamMember> internRemoveList = new ArrayList<>();
-        for (TeamMember intern : interns) {
-            if (!checkInternTasksStatus(intern, tasks)) {
-                internRemoveList.add(intern);
-            }
-        }
-
-        if (!internRemoveList.isEmpty()) {
-            for (TeamMember intern : internRemoveList) {
-                log.info("Intern with ID: {} not completed tasks. Remove from team", intern.getUserId());
-                teamMemberJpaRepository.deleteById(intern.getId());
-                interns.remove(intern);
-            }
-        }
+        teamMemberJpaRepository.deleteAllById(
+                interns.stream()
+                        .filter(intern -> !checkInternTasksStatus(intern, tasks))
+                        .map(TeamMember::getId)
+                        .toList()
+        );
+        interns.removeIf(intern -> !checkInternTasksStatus(intern, tasks));
     }
 
-    @Transactional
     private List<Candidate> getCandidates(InternshipDto internshipDto) {
         return internshipDto.getCandidateIds().stream()
-                .map(id -> candidateRepository.findById(id).orElseThrow(() ->
-                        new EntityNotFoundException(String.format("Candidate doesn't exist by id: %s", id))))
+                .map(candidateRepository::findById)
                 .toList();
     }
 
-    @Transactional
     private List<TeamMember> createInterns(List<Candidate> candidates, Team team) {
         return candidates.stream()
-                .map(candidate -> {
-                            TeamMember intern = TeamMember.builder()
-                                    .userId(candidate.getUserId())
-                                    .roles(Arrays.asList(TeamRole.INTERN))
-                                    .team(team)
-                                    .build();
-                            return teamMemberJpaRepository.save(intern);
-                        }
-                ).toList();
+                .map(candidate -> teamMemberJpaRepository.save(candidateTeamMemberMapper.candidateToTeamMember(candidate, team)))
+                .toList();
     }
 
-    @Transactional
     private boolean checkInternTasksStatus(TeamMember intern, List<Task> tasks) {
-        // Check that the intern has tasks
         if (tasks.stream().noneMatch(task -> Objects.equals(task.getPerformerUserId(), intern.getUserId()))) {
             log.info("Intern with ID: {} hasn't task", intern.getUserId());
             return false;
@@ -186,18 +155,19 @@ public class InternshipService {
         return notDoneTasks <= 0;
     }
 
-
+    @Transactional(readOnly = true)
     public List<InternshipDto> findAll() {
-        return internshipMapper.toListDto(internshipRepository.findAll());
+        return internshipMapper.toListDto(internshipJpaRepository.findAll());
     }
 
+    @Transactional(readOnly = true)
     public InternshipDto findById(long id) {
-        return internshipMapper.toDto(internshipRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(String.format("Internship doesn't exist by id: %s", id))));
+        return internshipMapper.toDto(internshipRepository.findById(id));
     }
 
+    @Transactional(readOnly = true)
     public List<InternshipDto> findAllWithFilter(InternshipFilterDto filters) {
-        Supplier<Stream<Internship>> internships = () -> internshipRepository.findAll().stream();
+        Supplier<Stream<Internship>> internships = () -> internshipJpaRepository.findAll().stream();
 
         List<Internship> filteredInternships = internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))

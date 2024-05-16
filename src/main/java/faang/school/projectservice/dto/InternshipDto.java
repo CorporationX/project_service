@@ -23,7 +23,11 @@ public class InternshipDto {
     private List<Long> internIds;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private Long createdBy;
+    private Long updatedBy;
     private InternshipStatus status;
     private List<Long> candidateIds;
+    private Long scheduleId;
 }

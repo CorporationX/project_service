@@ -1,4 +1,4 @@
-package faang.school.projectservice.repository;
+package faang.school.projectservice.jpa;
 
 import faang.school.projectservice.model.Campaign;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public interface CampaignRepository extends JpaRepository<Campaign, Long> {
+public interface CampaignJpaRepository extends JpaRepository<Campaign, Long> {
     Optional<Campaign> findByTitleAndProjectId(String title, Long projectId);
 
     @Query(

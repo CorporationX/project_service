@@ -1,8 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.InternshipDto;
-import faang.school.projectservice.exceptions.DataValidationInternshipException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
+import faang.school.projectservice.mapper.CandidateTeamMemberMapper;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Internship;
@@ -10,8 +11,10 @@ import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.jpa.InternshipJpaRepository;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -32,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,6 +73,7 @@ class InternshipServiceTest {
     TeamMember newIntern;
     TeamMember savedIntern;
     Project project;
+    Team team;
 
     @Mock
     private CandidateRepository candidateRepository;
@@ -85,10 +88,16 @@ class InternshipServiceTest {
     private InternshipRepository internshipRepository;
 
     @Mock
+    private InternshipJpaRepository internshipJpaRepository;
+
+    @Mock
     private ProjectRepository projectRepository;
 
     @Mock
     private InternshipMapper internshipMapper;
+
+    @Mock
+    CandidateTeamMemberMapper candidateTeamMemberMapper;
 
     @Mock
     private InternshipValidator internshipValidator;
@@ -127,8 +136,11 @@ class InternshipServiceTest {
 
         candidate = new Candidate();
         candidate.setId(INTERN_ID);
+        team = Team.builder().build();
         mentor = TeamMember.builder()
-                .id(MENTOR_ID).build();
+                .id(MENTOR_ID)
+                .team(team)
+                .build();
         project = Project.builder()
                 .id(PROJECT_ID)
                 .tasks(new ArrayList<>())
@@ -158,10 +170,10 @@ class InternshipServiceTest {
     public void createIfInternshipAlreadyExists() {
         String errMessage = "Internship " + INTERN_NAME + " already exists!";
 
-        doThrow(new DataValidationInternshipException(errMessage))
+        doThrow(new DataValidationException(errMessage))
                 .when(internshipValidator).validateInternshipExistsByName(INTERN_NAME);
 
-        DataValidationInternshipException exception = assertThrows(DataValidationInternshipException.class, () ->
+        DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 internshipService.create(newInternshipDto));
         assertThat(exception.getMessage()).isEqualTo(errMessage);
     }
@@ -182,17 +194,17 @@ class InternshipServiceTest {
     public void createWhenCandidateListIsEmpty() {
         newInternshipDto.setCandidateIds(Collections.emptyList());
 
-        doThrow(new DataValidationInternshipException(NO_CANDIDATES_MSG))
+        doThrow(new DataValidationException(NO_CANDIDATES_MSG))
                 .when(internshipValidator).validateCandidatesList(newInternshipDto.getCandidateIds().size());
 
-        DataValidationInternshipException exception = assertThrows(DataValidationInternshipException.class, () ->
+        DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 internshipService.create(newInternshipDto));
         assertThat(exception.getMessage()).isEqualTo(NO_CANDIDATES_MSG);
     }
 
     @Test
     public void createWhenMentorNotFound() {
-        when(candidateRepository.findById(2L)).thenReturn(Optional.of(candidate));
+        when(candidateRepository.findById(2L)).thenReturn(candidate);
         doThrow(new EntityNotFoundException(NOT_FOUND_MEMBER + MENTOR_ID))
                 .when(teamMemberRepository).findById(MENTOR_ID);
 
@@ -203,7 +215,7 @@ class InternshipServiceTest {
 
     @Test
     public void createWhenProjectNotFound() {
-        when(candidateRepository.findById(2L)).thenReturn(Optional.of(candidate));
+        when(candidateRepository.findById(2L)).thenReturn(candidate);
         when(teamMemberRepository.findById(MENTOR_ID)).thenReturn(mentor);
 
         doThrow(new EntityNotFoundException(NOT_FOUND_PROJECT + PROJECT_ID))
@@ -218,7 +230,7 @@ class InternshipServiceTest {
     public void createWhenMentorNotInProjectTeam() {
         String errMessage = "Mentor with ID: " + MENTOR_ID + " isn't from project team";
 
-        when(candidateRepository.findById(2L)).thenReturn(Optional.of(candidate));
+        when(candidateRepository.findById(2L)).thenReturn(candidate);
         when(teamMemberRepository.findById(MENTOR_ID)).thenReturn(mentor);
         when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
         doThrow(new EntityNotFoundException(errMessage))
@@ -233,14 +245,14 @@ class InternshipServiceTest {
     public void createWhenInternGoOnMoreThanPeriod() {
         String errMessage = "The internship cannot last more than " + INTERNSHIP_PERIOD + " months";
 
-        when(candidateRepository.findById(2L)).thenReturn(Optional.of(candidate));
+        when(candidateRepository.findById(2L)).thenReturn(candidate);
         when(teamMemberRepository.findById(MENTOR_ID)).thenReturn(mentor);
         when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
-        doThrow(new DataValidationInternshipException(errMessage))
+        doThrow(new DataValidationException(errMessage))
                 .when(internshipValidator).validateInternshipPeriod(newInternshipDto);
 
 
-        DataValidationInternshipException exception = assertThrows(DataValidationInternshipException.class, () ->
+        DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 internshipService.create(newInternshipDto));
         assertThat(exception.getMessage()).isEqualTo(errMessage);
     }
@@ -248,12 +260,13 @@ class InternshipServiceTest {
     @Test
     public void createInternshipWhenSuccess() {
 
-        when(candidateRepository.findById(2L)).thenReturn(Optional.of(candidate));
+        when(candidateRepository.findById(2L)).thenReturn(candidate);
         when(teamMemberRepository.findById(MENTOR_ID)).thenReturn(mentor);
         when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
         when(internshipMapper.toEntity(newInternshipDto)).thenReturn(internship);
-        when(internshipRepository.save(internship)).thenReturn(internship);
+        when(internshipJpaRepository.save(internship)).thenReturn(internship);
         when(internshipMapper.toDto(internship)).thenReturn(savedInternshipDto);
+        when(candidateTeamMemberMapper.candidateToTeamMember(candidate, team)).thenReturn(newIntern);
         when(teamMemberJpaRepository.save(newIntern)).thenReturn(savedIntern);
 
         InternshipDto actualResult = internshipService.create(newInternshipDto);
@@ -282,8 +295,8 @@ class InternshipServiceTest {
         InternshipDto updatedInternshipDto = savedInternshipDto;
         updatedInternshipDto.setStatus(InternshipStatus.COMPLETED);
 
-        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(Optional.of(internship));
-        when(internshipRepository.save(internship)).thenReturn(internship);
+        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(internship);
+        when(internshipJpaRepository.save(internship)).thenReturn(internship);
         when(internshipMapper.toDto(internship)).thenReturn(updatedInternshipDto);
 
         InternshipDto actualResult = internshipService.update(savedInternshipDto, INTERNSHIP_ID);
@@ -302,8 +315,8 @@ class InternshipServiceTest {
         InternshipDto updatedInternshipDto = savedInternshipDto;
         updatedInternshipDto.setStatus(InternshipStatus.COMPLETED);
 
-        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(Optional.of(internship));
-        when(internshipRepository.save(internship)).thenReturn(internship);
+        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(internship);
+        when(internshipJpaRepository.save(internship)).thenReturn(internship);
         when(internshipMapper.toDto(internship)).thenReturn(updatedInternshipDto);
 
         InternshipDto actualResult = internshipService.update(savedInternshipDto, INTERNSHIP_ID);
@@ -324,8 +337,8 @@ class InternshipServiceTest {
         InternshipDto updatedInternshipDto = savedInternshipDto;
         updatedInternshipDto.setStatus(InternshipStatus.COMPLETED);
 
-        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(Optional.of(internship));
-        when(internshipRepository.save(internship)).thenReturn(internship);
+        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(internship);
+        when(internshipJpaRepository.save(internship)).thenReturn(internship);
         when(internshipMapper.toDto(internship)).thenReturn(updatedInternshipDto);
 
         InternshipDto actualResult = internshipService.update(savedInternshipDto, INTERNSHIP_ID);
@@ -346,10 +359,10 @@ class InternshipServiceTest {
         InternshipDto updatedInternshipDto = savedInternshipDto;
         updatedInternshipDto.setStatus(InternshipStatus.COMPLETED);
 
-        when(candidateRepository.findById(INTERN_ID)).thenReturn(Optional.of(candidate));
+        when(candidateRepository.findById(INTERN_ID)).thenReturn(candidate);
 
-        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(Optional.of(internship));
-        when(internshipRepository.save(internship)).thenReturn(internship);
+        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(internship);
+        when(internshipJpaRepository.save(internship)).thenReturn(internship);
         when(internshipMapper.toDto(internship)).thenReturn(updatedInternshipDto);
 
         InternshipDto actualResult = internshipService.update(savedInternshipDto, INTERNSHIP_ID);
@@ -374,9 +387,9 @@ class InternshipServiceTest {
         InternshipDto updatedInternshipDto = savedInternshipDto;
         updatedInternshipDto.setStatus(InternshipStatus.COMPLETED);
 
-        when(candidateRepository.findById(newCandidateId)).thenReturn(Optional.of(newCandidate));
-        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(Optional.of(internship));
-        when(internshipRepository.save(internship)).thenReturn(internship);
+        when(candidateRepository.findById(newCandidateId)).thenReturn(newCandidate);
+        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(internship);
+        when(internshipJpaRepository.save(internship)).thenReturn(internship);
         when(internshipMapper.toDto(internship)).thenReturn(updatedInternshipDto);
 
         InternshipDto actualResult = internshipService.update(savedInternshipDto, INTERNSHIP_ID);
@@ -385,7 +398,7 @@ class InternshipServiceTest {
 
     @Test
     public void findByIdWhenInternshipExists() {
-        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(Optional.of(internship));
+        when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(internship);
         when(internshipMapper.toDto(internship)).thenReturn(savedInternshipDto);
 
         InternshipDto actualResult = internshipService.findById(INTERNSHIP_ID);
@@ -405,7 +418,7 @@ class InternshipServiceTest {
 
     @Test
     public void findAll() {
-        when(internshipRepository.findAll()).thenReturn(List.of(internship));
+        when(internshipJpaRepository.findAll()).thenReturn(List.of(internship));
         when(internshipMapper.toListDto(List.of(internship))).thenReturn(List.of(savedInternshipDto));
 
         List<InternshipDto> actualResult = internshipService.findAll();
