@@ -40,7 +40,7 @@ public class InitiativeController {
     }
 
     @Operation(summary = "Get all initiatives by filter")
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
     public List<InitiativeDto> getAllByFilter(@RequestBody InitiativeFilterDto filters) {
         return initiativeService.getAllByFilter(filters);
