@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -58,18 +57,13 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectDto> getAllByFilter(ProjectFilterDto projectFilterDto) {
         List<Project> projects = projectRepository.findAll();
 
-        Stream<Project> filteredProjectsByVisibility = projects.stream()
-                .filter(project -> {
-                    boolean isParticipant = true;
-                    if(project.getVisibility().equals(ProjectVisibility.PRIVATE)){
-                        isParticipant = project.getTeams().stream()
-                            .flatMap(team->team.getTeamMembers().stream())
-                            .anyMatch(teamMember -> teamMember.getId().equals(userContext.getUserId()));
-                    }
-                    return isParticipant;
-                });
+        List<Project> filteredProjectsByVisibility = projects.stream()
+                .filter(project -> (project.getVisibility().equals(ProjectVisibility.PRIVATE))?project.getTeams().stream()
+                        .flatMap(team->team.getTeamMembers().stream())
+                        .anyMatch(teamMember -> teamMember.getId().equals(userContext.getUserId())):true)
+                .toList();
 
-        List<Project> filteredProjects = projectFilterService.applyFilters(filteredProjectsByVisibility, projectFilterDto).toList();
+        List<Project> filteredProjects = projectFilterService.applyFilters(filteredProjectsByVisibility.stream(), projectFilterDto).toList();
         return projectMapper.toDtos(filteredProjects);
     }
 }
