@@ -43,9 +43,6 @@ public class ProjectService {
 
         Project projectToCreate = projectMapper.toModel(subProjectDto);
 
-        if (parent.getChildren() == null) {
-            parent.setChildren(new ArrayList<>());
-        }
         parent.getChildren().add(projectToCreate);
 
         projectToCreate.setParentProject(parent);
