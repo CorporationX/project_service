@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -7,7 +7,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +24,7 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto create(ProjectDto projectDto) {
-        validator.checkCreation(projectDto);
+        validator.verifyCanBeCreated(projectDto);
 
         projectDto.setStatus(ProjectStatus.CREATED);
         Project saved = projectRepository.save(mapper.fromDto(projectDto));
@@ -34,7 +34,7 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto update(ProjectDto projectDto) {
-        validator.checkUpdate(projectDto);
+        validator.verifyCanBeUpdated(projectDto);
 
         Project saved = projectRepository.save(mapper.fromDto(projectDto));
 
