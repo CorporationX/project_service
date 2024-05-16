@@ -10,6 +10,8 @@ import faang.school.projectservice.filter.SubProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.validator.SubProjectValidator;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.DataFormatException;
 
 import static faang.school.projectservice.model.ProjectStatus.COMPLETED;
 import static faang.school.projectservice.model.ProjectStatus.CREATED;
@@ -34,7 +37,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-
 public class ProjectServiceTest {
 
     @InjectMocks
@@ -44,6 +46,8 @@ public class ProjectServiceTest {
     private ProjectMapperImpl projectMapper;
     private MomentService momentService;
     private List<SubProjectFilter> filters;
+    private SubProjectValidator validator;
+
 
     @Captor
     private ArgumentCaptor<Project> captor;
@@ -57,12 +61,13 @@ public class ProjectServiceTest {
         projectRepository = Mockito.mock(ProjectRepository.class);
         projectMapper = Mockito.spy(ProjectMapperImpl.class);
         momentService = Mockito.mock(MomentService.class);
+        validator = Mockito.mock(SubProjectValidator.class);
 
         SubProjectNameFilter subProjectNameFilter = Mockito.mock(SubProjectNameFilter.class);
         SubProjectStatusFilter subProjectStatusFilter = Mockito.mock(SubProjectStatusFilter.class);
         filters = List.of(subProjectNameFilter, subProjectStatusFilter);
 
-        projectService = new ProjectService(projectRepository, projectMapper, momentService, filters);
+        projectService = new ProjectService(projectRepository, projectMapper, momentService, filters, validator);
 
         parentId = 1L;
         projectId = 2L;
@@ -73,18 +78,6 @@ public class ProjectServiceTest {
                 .children(new ArrayList<>())
                 .build();
         parent.getChildren().add(Project.builder().status(COMPLETED).build());
-    }
-
-    @Test
-    void testCreateSubProjectWithPublicSubProjToPrivateProj() {
-        CreateSubProjectDto createSubProjectDto = CreateSubProjectDto.builder()
-                .visibility(PUBLIC)
-                .build();
-        Project parent = Project.builder().visibility(PRIVATE).build();
-        when(projectRepository.getProjectById(parentId)).thenReturn(parent);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> projectService.createSubProject(parentId, createSubProjectDto));
     }
 
     @Test
@@ -105,16 +98,13 @@ public class ProjectServiceTest {
     }
 
     @Test
-    void testUpdateSubProjectWithWrongVisibility() {
-        ProjectDto projectDto = ProjectDto.builder().visibility(PUBLIC).build();
-        Project projectToUpdate = Project.builder().visibility(PRIVATE).parentProject(parent).build();
+    void testCreateSubProjectWhenParentNotExist() {
+        when(projectRepository.getProjectById(parentId)).thenThrow(EntityNotFoundException.class);
 
-        when(projectRepository.getProjectById(projectId)).thenReturn(projectToUpdate);
-        when(projectRepository.getProjectById(projectToUpdate.getParentProject().getId())).thenReturn(parent);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> projectService.updateSubProject(projectId, projectDto));
+        assertThrows(EntityNotFoundException.class,
+                () -> projectService.createSubProject(parentId, new CreateSubProjectDto()));
     }
+
 
     @Test
     void testUpdateSubProject() {
@@ -132,6 +122,7 @@ public class ProjectServiceTest {
 
         when(projectRepository.getProjectById(projectId)).thenReturn(projectToUpdate);
         when(projectRepository.getProjectById(parentId)).thenReturn(parent);
+        when(validator.isAllSubProjectsCompleted(parent)).thenReturn(true);
 
         projectService.updateSubProject(projectId, projectDto);
         MomentDto momentDto = MomentDto.builder()
@@ -140,6 +131,14 @@ public class ProjectServiceTest {
                 .build();
         verify(momentService, times(1)).createMoment(momentDto);
         verify(projectMapper, times(1)).toDto(projectToUpdate);
+    }
+
+    @Test
+    void testUpdateSubProjectWhenProjectNotExist() {
+        when(projectRepository.getProjectById(projectId)).thenThrow(EntityNotFoundException.class);
+
+        assertThrows(EntityNotFoundException.class,
+                () -> projectService.updateSubProject(projectId, new ProjectDto()));
     }
 
     @Test

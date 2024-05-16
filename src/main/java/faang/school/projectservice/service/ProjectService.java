@@ -9,6 +9,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.validator.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,15 +33,13 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final MomentService momentService;
     private final List<SubProjectFilter> filters;
+    private final SubProjectValidator validator;
 
     @Transactional
     public ProjectDto createSubProject(Long parentId, CreateSubProjectDto subProjectDto) {
         Project parent = projectRepository.getProjectById(parentId);
 
-        if (parent.getVisibility().equals(PRIVATE) &&
-                subProjectDto.getVisibility().equals(PUBLIC)) {
-            throw new IllegalArgumentException("Нельзя добавить публичный подпроект с приватному проекту");
-        }
+        validator.validateSubProjectVisibility(parent, subProjectDto);
 
         Project projectToCreate = projectMapper.toModel(subProjectDto);
 
@@ -65,14 +64,11 @@ public class ProjectService {
         }
 
         ProjectStatus updatedStatus = checkAndChangeStatus(projectToUpdate, projectDto);
-        projectToUpdate.setStatus(updatedStatus);
 
         projectToUpdate.setName(projectDto.getName());
         projectToUpdate.setDescription(projectDto.getDescription());
 
-        projectToUpdate.setUpdatedAt(LocalDateTime.now());
-
-        if (updatedStatus.equals(COMPLETED) && isAllSubProjectsCompleted(parent)) {
+        if (updatedStatus.equals(COMPLETED) && validator.isAllSubProjectsCompleted(parent)) {
             MomentDto momentDto = MomentDto.builder()
                     .title("Проект со всеми подзадачами выполенен")
                     .projectId(projectId)
@@ -105,17 +101,11 @@ public class ProjectService {
                 .forEach(filter -> filter.apply(projects, filterDto));
     }
 
-    private boolean isAllSubProjectsCompleted(Project parent) {
-        return parent.getChildren().stream().allMatch(pr -> pr.getStatus().equals(COMPLETED));
-    }
-
     private void checkAndChangeVisibility(Project parent, Project projectToUpdate, ProjectDto projectDto) {
-        if (projectDto.getVisibility().equals(PUBLIC) && parent.getVisibility().equals(PRIVATE)) {
-            throw new IllegalArgumentException("Нельзя установить публичный статус подпроекта для приватного проекта");
-        }
+        validator.validCorrectVisibility(projectDto, parent);
 
         projectToUpdate.setVisibility(projectDto.getVisibility());
-        if (projectDto.getVisibility().equals(PRIVATE) && projectDto.getChildren() != null &&
+        if (projectDto.getVisibility().equals(PRIVATE) && projectDto.getChildrenIds() != null &&
                 !projectToUpdate.getChildren().isEmpty()) {
             projectToUpdate.getChildren().forEach(pr -> pr.setVisibility(projectDto.getVisibility()));
         }
