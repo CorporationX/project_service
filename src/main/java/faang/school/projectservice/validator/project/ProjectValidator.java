@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.project.ProjectAlreadyExistsException;
@@ -20,32 +20,21 @@ import static faang.school.projectservice.exception.project.ProjectRequestExcept
 public class ProjectValidator {
     private final ProjectRepository projectRepository;
 
-    public void checkCreation(@Valid ProjectDto projectDto) {
-        BigInteger storageSize = projectDto.getStorageSize();
-        BigInteger maxStorageSize = projectDto.getMaxStorageSize();
-        if (storageSize.compareTo(maxStorageSize) > 0) {
-            throw new ProjectStorageSizeInvalidException(STORAGE_SIZE_INVALID.getMessage());
-        }
-
-        Long ownerId = projectDto.getOwnerId();
-        String projectName = projectDto.getName();
-
-        if (projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)) {
-            throw new ProjectAlreadyExistsException(ALREADY_EXISTS.getMessage());
-        }
+    public void verifyCanBeCreated(@Valid ProjectDto projectDto) {
+        verifyStorageSize(projectDto);
+        verifyProjectDoesntExists(projectDto);
     }
 
     /*
        Сейчас метод похож на валидацию при создании
        Будет дополняться по необходимости
      */
-    public void checkUpdate(@Valid ProjectDto projectDto) {
-        Long ownerId = projectDto.getOwnerId();
-        String projectName = projectDto.getName();
+    public void verifyCanBeUpdated(@Valid ProjectDto projectDto) {
+        verifyProjectDoesntExists(projectDto);
+        verifyImmutableStatus(projectDto);
+    }
 
-        if (projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)) {
-            throw new ProjectAlreadyExistsException(ALREADY_EXISTS.getMessage());
-        }
+    private void verifyImmutableStatus(ProjectDto projectDto) {
         Project project = projectRepository.getProjectById(projectDto.getId());
         //Если пытаемся сменить статус с законченного или отмененного проекта на другой статус
         if (checkStatusFinished(project.getStatus()) && !checkStatusFinished(projectDto.getStatus())) {
@@ -53,7 +42,23 @@ public class ProjectValidator {
         }
     }
 
-    public boolean checkStatusFinished(ProjectStatus status) {
+    private void verifyProjectDoesntExists(ProjectDto projectDto) {
+        Long ownerId = projectDto.getOwnerId();
+        String projectName = projectDto.getName();
+        if (projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)) {
+            throw new ProjectAlreadyExistsException(ALREADY_EXISTS.getMessage());
+        }
+    }
+
+    private static void verifyStorageSize(ProjectDto projectDto) {
+        BigInteger storageSize = projectDto.getStorageSize();
+        BigInteger maxStorageSize = projectDto.getMaxStorageSize();
+        if (storageSize.compareTo(maxStorageSize) > 0) {
+            throw new ProjectStorageSizeInvalidException(STORAGE_SIZE_INVALID.getMessage());
+        }
+    }
+
+    private boolean checkStatusFinished(ProjectStatus status) {
         return status == ProjectStatus.CANCELLED || status == ProjectStatus.COMPLETED;
     }
 }
