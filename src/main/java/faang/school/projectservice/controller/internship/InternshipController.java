@@ -2,9 +2,9 @@ package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.internship.InternshipServiceImpl;
+import faang.school.projectservice.service.internship.InternshipService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,56 +23,53 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InternshipController {
 
-    private final InternshipServiceImpl internshipServiceImpl;
+    private final InternshipService internshipService;
 
     @PostMapping
-    public InternshipDto createInternship(@RequestBody InternshipDto internshipDto) {
-        return internshipServiceImpl.createInternship(internshipDto);
+    public InternshipDto createInternship(@RequestBody @Valid InternshipDto internshipDto) {
+        return internshipService.createInternship(internshipDto);
     }
 
-    @PutMapping("/intern/{id}/add/{internshipId}")
+    @PutMapping("/{internshipId}/add/intern/{id}")
     public InternshipDto addNewIntern(
-            @PathVariable long internshipId,
-            @PathVariable long id) {
-        return internshipServiceImpl.addNewIntern(internshipId, id);
+            @PathVariable("{internshipId}") long internshipId,
+            @PathVariable("{internId}") long internId) {
+        return internshipService.addNewIntern(internshipId, internId);
     }
 
-    @PutMapping("/intern/{internId}/finish/{internshipId}")
+    @PutMapping("/{internshipId}/finish/intern/{internId}")
     public InternshipDto finishInternshipForIntern(
-            @PathVariable long internshipId,
-            @PathVariable long internId,
-            @RequestParam TeamRole role) {
-        return internshipServiceImpl.finishInternshipForIntern(internshipId, internId, role);
+            @PathVariable("{internshipId}") long internshipId,
+            @PathVariable("{internId}") long internId,
+            @RequestParam String role) {
+        return internshipService.finishInternshipForIntern(internshipId, internId, role);
     }
 
-    @DeleteMapping("intern/{id}/delete/{internshipId}")
+    @DeleteMapping("/{internshipId}/delete/intern/{id}")
     public InternshipDto removeInternFromInternship(
             @PathVariable long internshipId,
             @PathVariable long id) {
-        return internshipServiceImpl.removeInternFromInternship(internshipId, id);
+        return internshipService.removeInternFromInternship(internshipId, id);
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto) {
-        return internshipServiceImpl.updateInternship(internshipDto);
+        return internshipService.updateInternship(internshipDto);
     }
 
-    @GetMapping("/filter/status")
-    public List<InternshipDto> getInternshipsByStatus(
-            @RequestParam InternshipStatus status,
+    @GetMapping("/filter")
+    public List<InternshipDto> getInternshipsByFilter(
             @RequestBody InternshipFilterDto filters) {
-        return internshipServiceImpl.getInternshipsByStatus(status, filters);
-    }
-
-    @GetMapping("/filter/{role}")
-    public List<InternshipDto> getInternshipsByRole(
-            @PathVariable TeamRole role,
-            @RequestBody InternshipFilterDto filters) {
-        return internshipServiceImpl.getInternshipsByRole(role, filters);
+        return internshipService.getInternshipsByFilter(filters);
     }
 
     @GetMapping("/all")
-    public List<InternshipDto> getAllInternships(@RequestBody InternshipFilterDto filters) {
-        return internshipServiceImpl.getAllInternships(filters);
+    public List<InternshipDto> getAllInternships() {
+        return internshipService.getAllInternships();
+    }
+
+    @GetMapping("/{internshipId}")
+    public InternshipDto getInternshipById(@PathVariable long internshipId) {
+        return internshipService.getInternshipById(internshipId);
     }
 }

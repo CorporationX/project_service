@@ -1,13 +1,16 @@
 package faang.school.projectservice.service.internship;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.InternshipStatus;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.internship.filter.InternshipFilterService;
 import faang.school.projectservice.validator.internship.InternshipValidator;
@@ -18,9 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
-
-import static faang.school.projectservice.model.TeamRole.INTERN;
 
 @Service
 @RequiredArgsConstructor
@@ -28,148 +28,141 @@ public class InternshipServiceImpl implements InternshipService {
     private final InternshipRepository internshipRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipValidator validator;
-    private final InternshipMapper mapper;
+    private final InternshipMapper internshipMapper;
     private final InternshipFilterService internshipFilterService;
+    private final ProjectRepository projectRepository;
 
     @Override
     @Transactional
-    // TODO нужно добавить проверки на то что стажировка относится к какому-то проекту
-    // TODO добавить проверку на на то что стажировка длится не дольше трех месяцев
     // TODO проверить наличия ментора
     // TODO проверить, что нам есть кого стажировать
     public InternshipDto createInternship(InternshipDto internshipDto) {
         validator.validateInternshipExistence(internshipDto);
 
-        Internship internship = mapper.toEntity(internshipDto);
+        Internship internship = internshipMapper.toEntity(internshipDto);
 
-        validator.validateInternshipNotStarted(internship);
+        validator.validateInternshipCreation(internship);
+
+        addInternshipToProject(internshipDto, internship);
 
         internshipRepository.save(internship);
 
-        return mapper.toDto(internship);
+        return internshipMapper.toDto(internship);
     }
 
     @Override
     @Transactional
     public InternshipDto updateInternship(InternshipDto updatedInternshipDto) {
 
-        Internship internship = getInternshipById(updatedInternshipDto.getId());
-        Internship updatedInternship = mapper.toEntity(updatedInternshipDto);
+        Internship internship = internshipRepository.findById(updatedInternshipDto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + updatedInternshipDto.getId()));
 
-        validator.validateInternshipNotStarted(internship);
-        validator.validateInternshipNotCompleted(internship);
-        validator.validateUpdatedInternshipDiffersByLast(internship, updatedInternship);
+        Internship updatedInternship = internshipMapper.toEntity(updatedInternshipDto);
+
+        validator.validateInternshipUpdate(internship, updatedInternship);
 
         internshipRepository.deleteById(internship.getId());
         internshipRepository.save(updatedInternship);
 
-        return mapper.toDto(updatedInternship);
+        return internshipMapper.toDto(updatedInternship);
 
     }
 
     @Override
     @Transactional
-    // TODO пишем ли мы в базу результат выполнения метода?
     public InternshipDto addNewIntern(long internshipId, long newInternId) {
 
-        Internship internship = getInternshipById(internshipId);
+        Internship internship = internshipRepository.findById(internshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipId));
+
         TeamMember newIntern = teamMemberRepository.findById(internshipId);
 
-        validator.validateInternshipNotStarted(internship);
-        validator.validateInternNotAlreadyInInternship(internship, newIntern);
+        validator.validateAddingNewIntern(internship, newIntern);
 
         internship.getInterns().add(newIntern);
 
-        return mapper.toDto(internship);
+        return internshipMapper.toDto(internship);
     }
 
     @Override
     @Transactional
-    // TODO пишем ли мы в базу результат выполнения метода?
-    public InternshipDto finishInternshipForIntern(long internshipId, long internId, TeamRole teamRole) {
-        Internship internship = getInternshipById(internshipId);
+    public InternshipDto finishInternshipForIntern(long internshipId, long internId, String teamRole) {
+
+        Internship internship = internshipRepository.findById(internshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipId));
+
         TeamMember intern = searchInternInInternship(internship, internId);
+        TeamRole newInternRoleAfterInternship = getTeamRole(teamRole);
 
-        validator.validateDateNotExpired(internship);
-        validator.checkAllTasksDone(intern);
+        validator.validateFinishingInternshipForIntern(internship, intern);
 
-        changeInternRole(intern, teamRole);
-        internship = updateInternsRoles(internshipId, intern);
+        changeInternRole(intern, newInternRoleAfterInternship);
 
-        return mapper.toDto(internship);
-    }
-
-    @Override
-    @Transactional
-    // TODO пишем ли мы в базу результат выполнения метода?
-    public InternshipDto removeInternFromInternship(long internshipId, long internId) {
-
-        Internship internship = getInternshipById(internshipId);
-        TeamMember intern = searchInternInInternship(internship, internId);
-
-        validator.validateInternshipContainsThisIntern(internship, intern);
-
-        removeInternRole(intern);
         internship.getInterns().remove(intern);
 
-        return mapper.toDto(internship);
+        if(internship.getInterns().isEmpty()){
+            return deleteInternship(internship);
+        }
+
+        return internshipMapper.toDto(internship);
     }
 
+    private TeamRole getTeamRole(String teamRole) {
+        try {
+            return TeamRole.valueOf(teamRole);
+        } catch (IllegalArgumentException e) {
+            throw new DataValidationException("TeamRole with name: " + teamRole + " not found");
+        }
+    }
+    @Override
     @Transactional
-    // TODO нужно вернуть дтошку из метода
-    public Internship getInternshipById(long id) {
+    public InternshipDto removeInternFromInternship(long internshipId, long internId) {
 
-        return internshipRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + id));
-    }
+        Internship internship = internshipRepository.findById(internshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipId));
 
-    @Override
-    public List<InternshipDto> getInternshipsByStatus(InternshipStatus status, InternshipFilterDto filterDto) {
+        TeamMember intern = searchInternInInternship(internship, internId);
 
-        List<Internship> filteredInternships = internshipRepository.findByStatus(status);
+        validator.validateRemovingInternFromInternship(internship, intern);
 
-        return internshipFilterService.applyFilters(filteredInternships.stream(), filterDto)
-                .map(mapper::toDto)
-                .toList();
-    }
+        internship.getInterns().remove(intern);
 
-    @Override
-    public List<InternshipDto> getInternshipsByRole(TeamRole role, InternshipFilterDto filterDto) {
+        if(internship.getInterns().isEmpty()){
+            deleteInternship(internship);
+        }
 
-        List<Internship> filteredInternships = internshipRepository.findAll().stream()
-                .filter(internship -> internship.getInterns().stream()
-                        .anyMatch(intern -> intern.getRoles().contains(role)))
-                .toList();
-        // TODO я думаю это лишнее 😇👍🏽
-        Stream<Internship> internshipsStream = filteredInternships.stream();
-
-        return internshipFilterService.applyFilters(internshipsStream, filterDto)
-                .map(mapper::toDto)
-                .toList();
+        return internshipMapper.toDto(internship);
     }
 
     @Override
     @Transactional
-    public List<InternshipDto> getAllInternships(InternshipFilterDto filterDto) {
+    public InternshipDto getInternshipById(long internshipId) {
 
-        Stream<Internship> internshipsStream = internshipRepository.findAll().stream();
+        Internship internship = internshipRepository.findById(internshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found with id: " + internshipId));
 
-        return internshipFilterService.applyFilters(internshipsStream, filterDto)
-                .map(mapper::toDto)
+        return internshipMapper.toDto(internship);
+    }
+
+    @Override
+    public List<InternshipDto> getInternshipsByFilter(InternshipFilterDto filterDto) {
+
+        List<Internship> internships = internshipRepository.findAll();
+
+        return internshipFilterService.applyFilters(internships.stream(), filterDto)
+                .map(internshipMapper::toDto)
                 .toList();
     }
 
+    @Override
     @Transactional
-    public Internship updateInternsRoles(long internshipId, TeamMember teamMember) {
+    public List<InternshipDto> getAllInternships() {
 
-        Internship internship = getInternshipById(internshipId);
+        List<Internship> internships = internshipRepository.findAll();
 
-        internship.getInterns().stream()
-                .filter(intern -> intern.getId().equals(teamMember.getId()))
-                .findFirst()
-                .ifPresent(intern -> intern.setRoles(teamMember.getRoles()));
-
-        return internship;
+        return internships.stream()
+                .map(internshipMapper::toDto)
+                .toList();
     }
 
     private TeamMember searchInternInInternship(Internship internship, long internId) {
@@ -178,25 +171,42 @@ public class InternshipServiceImpl implements InternshipService {
                 .filter(teamMember -> teamMember.getId().equals(internId))
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Intern with id: " + internId
-                        + "not found in the internship: " + internship.getId()));
-    }
-    // TODO думаю стоит убрать проверку getRoles().isEmpty() и нужно присвоить роль
-    private void removeInternRole(TeamMember intern) {
-
-        if (!intern.getRoles().isEmpty())
-            intern.getRoles().remove(TeamRole.INTERN);
+                                                               + "not found in the internship: " + internship.getId()));
     }
 
     private void changeInternRole(TeamMember teamMember, TeamRole newRole) {
 
-        List<TeamRole> roles = teamMember.getRoles();
+        if (teamMember.getRoles() == null) {
+            teamMember.setRoles(new ArrayList<>());
+        }
 
-        if (roles == null) {roles = new ArrayList<>();}
+        if (!teamMember.getRoles().contains(newRole)) {
+            teamMember.getRoles().add(newRole);
+        }
 
-        roles.remove(INTERN);
+        teamMemberRepository.save(teamMember);
+    }
 
-        if (!roles.contains(newRole)) {
-            roles.add(newRole);
+    @Transactional
+    public void addInternshipToProject(InternshipDto internshipDto, Internship internship) {
+
+        Project project = projectRepository.getProjectById(internshipDto.getProjectId());
+
+        internship.setProject(project);
+
+        if (project.getInternships() == null) {
+            project.setInternships(new ArrayList<>(List.of(internship)));
+        }
+        project.getInternships().add(internship);
+    }
+
+    private InternshipDto deleteInternship(Internship internship) {
+        try {
+            internshipRepository.deleteById(internship.getId());
+            return internshipMapper.toDto(internship);
+
+        } catch (Exception e) {
+            throw new NotFoundException("Internship with id: " + internship.getId() + " not exist");
         }
     }
 }

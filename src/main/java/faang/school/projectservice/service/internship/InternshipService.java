@@ -14,13 +14,13 @@ public interface InternshipService {
 
     InternshipDto addNewIntern(long internshipId, long newInternId);
 
-    InternshipDto finishInternshipForIntern(long internshipId, long internId, TeamRole teamRole);
+    InternshipDto finishInternshipForIntern(long internshipId, long internId, String teamRole);
 
     InternshipDto removeInternFromInternship(long internshipId, long internId);
 
-    List<InternshipDto> getInternshipsByStatus(InternshipStatus status, InternshipFilterDto filters);
+    List<InternshipDto> getInternshipsByFilter(InternshipFilterDto filterDto);
 
-    List<InternshipDto> getInternshipsByRole(TeamRole role, InternshipFilterDto filters);
+    List<InternshipDto> getAllInternships();
 
-    List<InternshipDto> getAllInternships(InternshipFilterDto filters);
+    InternshipDto getInternshipById(long id);
 }
