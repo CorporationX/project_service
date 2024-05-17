@@ -39,26 +39,19 @@ public class ProjectService {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new ProjectAlreadyExistsException("Проект с именем " + projectDto.getName() + " уже существует");
         }
-        Project project = projectMapper.toProject(projectDto);
-        project.setName(projectDto.getName());
-        project.setDescription(projectDto.getDescription());
-        project.setStatus(CREATED);
+        Project project = projectMapper.toProject(projectDto, CREATED, projectDto.getDescription());
         project = projectRepository.save(project);
-        projectDto = projectMapper.toDto(project);
-        return projectDto;
+        return projectMapper.toDto(project);
     }
 
     public ProjectDto updateProject(ProjectDto projectDto, ProjectStatus projectStatus, String description) {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new ProjectDoesNotExistInTheDatabase("Проект с именем " + projectDto.getName() + " не найден");
         }
-        Project project = projectMapper.toProject(projectDto);
-        project.setStatus(projectStatus);
-        project.setDescription(description);
+        Project project = projectMapper.toProject(projectDto, projectStatus, description);
         project.setUpdatedAt(LocalDateTime.now());
         project = projectRepository.save(project);
-        projectDto = projectMapper.toDto(project);
-        return projectDto;
+        return projectMapper.toDto(project);
     }
 
     public List<ProjectDto> getAllProjects() {
