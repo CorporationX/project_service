@@ -19,19 +19,6 @@ import static faang.school.projectservice.exception.RoleProcessingExceptionMessa
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
-    public Long getTeamMemberProjectId(Long teamMemberId) {
-        var teamMember = getTeamMemberById(teamMemberId);
-        return teamMember.getTeam().getProject().getId();
-    }
-
-    public TeamMember getTeamMemberById(Long teamMemberId) {
-        return teamMemberRepository.findById(teamMemberId);
-    }
-
-    public List<TeamMember> findAllByIds(List<Long> teamMemberIds) {
-        return teamMemberRepository.findAllByIds(teamMemberIds);
-    }
-
     public void hireInterns(Internship internship) {
         List<TeamMember> interns = internship.getInterns();
         List<TeamMember> internsToBeHired = interns.stream()
@@ -46,7 +33,7 @@ public class TeamMemberService {
         assignRolesToInterns(internsToBeHired);
     }
 
-    public void assignRolesToInterns(List<TeamMember> interns) {
+    private void assignRolesToInterns(List<TeamMember> interns) {
         interns.forEach(intern -> {
             List<TeamRole> internRoles = intern.getRoles();
 
