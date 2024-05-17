@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public class ProjectFilterService {
     private final List<ProjectFilter> projectFilters;
 
-    public Stream<Project> applyFilters(Stream<Project> projects, ProjectFilterDto projectFilterDto){
+    public Stream<Project> applyFilters(Stream<Project> projects, ProjectFilterDto projectFilterDto) {
         if (projectFilterDto != null) {
             for (ProjectFilter projectFilter : projectFilters) {
                 if (projectFilter.isApplicable(projectFilterDto)) {
