@@ -1,5 +1,6 @@
-package faang.school.projectservice.dto.vacancy;
+package faang.school.projectservice.dto.project;
 
+import faang.school.projectservice.model.ProjectStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VacancyDto {
-    private Long id;
+public class SubProjectFilterDto {
     private String name;
-    private String description;
-    private Long projectId;
-    private Long tutorId;
+    private ProjectStatus status;
 }
