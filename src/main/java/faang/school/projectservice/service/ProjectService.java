@@ -8,10 +8,10 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.project.ProjectFilter;
+import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,18 +22,21 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
+    private final ProjectValidator projectValidator;
+
 
     public ProjectDto create(ProjectDto projectDto) {
+        projectValidator.checkExistProject(projectDto);
+
         Project project = projectMapper.toEntity(projectDto);
         project.setStatus(ProjectStatus.CREATED);
-        project.setCreatedAt(LocalDateTime.now());
 
         return projectMapper.toDto(projectRepository.save(project));
+
     }
 
     public ProjectDto update(ProjectDto projectDto) {
         Project project = projectMapper.toEntity(projectDto);
-        project.setUpdatedAt(LocalDateTime.now());
 
         return projectMapper.toDto(projectRepository.save(project));
     }

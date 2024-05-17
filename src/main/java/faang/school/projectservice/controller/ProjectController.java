@@ -2,40 +2,34 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exceptions.DataProjectValidation;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class ProjectController {
 
-    private final ProjectRepository projectRepository;
     private final ProjectService projectService;
+    private final ProjectValidator projectValidator;
 
     public ProjectDto create(ProjectDto projectDto) {
-        checkIsNull(projectDto);
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new DataProjectValidation("Проект с таким названием уже существует");
-        }
+        projectValidator.checkIsNull(projectDto);
         return projectService.create(projectDto);
     }
 
     public ProjectDto update(ProjectDto projectDto) {
-        checkIsNull(projectDto);
+        projectValidator.checkIsNull(projectDto);
         return projectService.update(projectDto);
     }
 
-    public List<Project> getProjectsByFilter(ProjectFilterDto filterDto) {
-        if (filterDto == null) {
-            throw new DataProjectValidation("Аргумент filterDto не может быть null");
-        }
-        return projectService.getProjectsByFilter(filterDto);
+    public List<Project> getProjectsByFilter(ProjectFilterDto projectFilterDto) {
+        projectValidator.checkIsNull(projectFilterDto);
+        return projectService.getProjectsByFilter(projectFilterDto);
     }
 
     public List<Project> getAllProjects() {
@@ -43,15 +37,7 @@ public class ProjectController {
     }
 
     public Project getProjectById(Long projectId) {
-        if (projectId == null) {
-            throw new DataProjectValidation("Аргумент projectId не может быть null");
-        }
+        projectValidator.checkIsNull(projectId);
         return projectService.getProjectById(projectId);
-    }
-
-    private void checkIsNull(ProjectDto projectDto) {
-        if (projectDto == null) {
-            throw new DataProjectValidation("Аргумент projectDto не может быть null");
-        }
     }
 }

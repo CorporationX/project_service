@@ -14,16 +14,16 @@ import java.time.LocalDateTime;
 public class ProjectDto {
 
     @NonNull
-    @NotBlank
+    @NotBlank(message = "Имя не должно быть пустым")
     @Size(min = 1, max = 100)
     private String name;
 
     @NonNull
-    @NotBlank
+    @NotBlank(message = "Описание не должно быть пустым")
     private String description;
 
     @NonNull
-    @NotBlank
+    @NotBlank(message = "Id владельца не должно быть пустым")
     private Long ownerId;
 
     private ProjectStatus status;

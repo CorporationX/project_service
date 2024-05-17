@@ -5,6 +5,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,26 +27,31 @@ public class ProjectServiceTest {
     @Mock
     private ProjectMapper projectMapper;
 
-    private ProjectDto projectDto;
+    @Mock
+    private ProjectValidator projectValidator;
+
+    private ProjectDto projectDtoFirst;
     private Project project;
+    private ProjectDto projectDtoSecond;
 
     @BeforeEach
     public void setUp() {
-        projectDto = new ProjectDto();
+        projectDtoFirst = new ProjectDto();
         project = Project.builder().status(ProjectStatus.CREATED).build();
+        projectDtoSecond = ProjectDto.builder().ownerId(1L).name("Name").description("Description").build();
     }
 
     @Test
     public void testCreate_IsRunSave() {
-        when(projectMapper.toEntity(projectDto)).thenReturn(project);
-        projectService.create(projectDto);
+        when(projectMapper.toEntity(projectDtoFirst)).thenReturn(project);
+        projectService.create(projectDtoFirst);
         verify(projectRepository, times(1)).save(project);
     }
 
     @Test
     public void testUpdate_IsRunSave() {
-        when(projectMapper.toEntity(projectDto)).thenReturn(project);
-        projectService.create(projectDto);
+        when(projectMapper.toEntity(projectDtoFirst)).thenReturn(project);
+        projectService.create(projectDtoFirst);
         verify(projectRepository, times(1)).save(project);
     }
 
