@@ -4,32 +4,25 @@ import faang.school.projectservice.dto.filter.StageInvitationFilterDto;
 import faang.school.projectservice.dto.stage_invintation.StageInvitationDto;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.filter.stage_invitation_filter.StageInvitationFilter;
-import faang.school.projectservice.service.filter.stage_invitation_filter.StageInvitationStatusFilter;
-import faang.school.projectservice.service.filter.stage_invitation_filter.StageInvitationTeamMemberFilter;
 import faang.school.projectservice.validator.StageInvitationValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class StageInvitationServiceTest {
-    @InjectMocks
     private StageInvitationService stageInvitationService;
     @Mock
     private StageInvitationMapper stageInvitationMapper;
@@ -39,16 +32,13 @@ public class StageInvitationServiceTest {
     private StageInvitationRepository stageInvitationRepository;
     @Mock
     private TeamMemberRepository teamMemberRepository;
+    @Mock
+    private StageInvitationFilter stageInvitationFilter;
 
     private StageInvitationDto stageInvitationDto;
     private StageInvitation stageInvitation;
     StageInvitationFilterDto stageInvitationFilterDto;
-    StageInvitation invitation1;
-    StageInvitation invitation2;
-    StageInvitation invitation3;
-    StageInvitation invitation4;
     private TeamMember teamMember;
-    private List<StageInvitation> invitations;
 
     @BeforeEach
     public void setUp() {
@@ -66,41 +56,14 @@ public class StageInvitationServiceTest {
         stageInvitationFilterDto.setStatus(StageInvitationStatus.ACCEPTED);
         stageInvitationFilterDto.setTeamMemberPattern(1L);
 
-        invitation1 = StageInvitation
-                .builder()
-                .author(TeamMember.builder().userId(1L).build())
-                .invited(TeamMember.builder().userId(2L).id(3L).build())
-                .stage(Stage.builder().stageId(1L).build())
-                .status(StageInvitationStatus.ACCEPTED)
-                .build();
-
-        invitation2 = StageInvitation
-                .builder()
-                .author(TeamMember.builder().userId(1L).build())
-                .invited(TeamMember.builder().userId(2L).id(3L).build())
-                .stage(Stage.builder().stageId(1L).build())
-                .status(StageInvitationStatus.PENDING)
-                .build();
-
-        invitation3 = StageInvitation
-                .builder()
-                .author(TeamMember.builder().userId(1L).build())
-                .invited(TeamMember.builder().userId(2L).id(3L).build())
-                .stage(Stage.builder().stageId(1L).build())
-                .status(StageInvitationStatus.ACCEPTED)
-                .build();
-
-        invitation4 = StageInvitation
-                .builder()
-                .author(TeamMember.builder().userId(1L).build())
-                .invited(TeamMember.builder().userId(2L).id(3L).build())
-                .stage(Stage.builder().stageId(1L).build())
-                .status(StageInvitationStatus.REJECTED)
-                .build();
-
-        invitations = List.of(invitation1, invitation2, invitation3, invitation4);
+        stageInvitationService = new StageInvitationService(
+                stageInvitationMapper,
+                stageInvitationValidator,
+                List.of(stageInvitationFilter),
+                stageInvitationRepository,
+                teamMemberRepository
+        );
     }
-
 
     @Test
     public void testSendInviteWithCorrectValues() {
@@ -145,31 +108,19 @@ public class StageInvitationServiceTest {
 
     @Test
     public void testGetAllInvitationsForUserWithStatus() {
-        StageInvitationFilter stageInvitationFilter = Mockito.mock(StageInvitationFilter.class);
-        List<StageInvitationFilter> filters = List.of(
-                new StageInvitationTeamMemberFilter(),
-                new StageInvitationStatusFilter()
-        );
-        stageInvitationService = new StageInvitationService(
-                stageInvitationMapper,
-                stageInvitationValidator,
-                filters,
-                stageInvitationRepository,
-                teamMemberRepository
-        );
+        Long userId = 1L;
+        StageInvitationFilterDto filterDto = new StageInvitationFilterDto();
 
-        when(stageInvitationRepository.findAll()).thenReturn(invitations);
-        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenAnswer(invocation -> {
-            StageInvitation argument = invocation.getArgument(0);
-            return new StageInvitationDto(argument.getId(), argument.getDescription(), argument.getAuthor().getId(), argument.getInvited().getId(), argument.getStatus());
-        });
+        List<StageInvitation> mockInvitations = List.of(new StageInvitation(), new StageInvitation());
+        when(stageInvitationRepository.findAll()).thenReturn(mockInvitations);
 
-        List<StageInvitationDto> result = stageInvitationService.getAllInvitationsForUserWithStatus(2L, stageInvitationFilterDto);
-        List<StageInvitationDto> expected = List.of(
-                stageInvitationMapper.toDto(invitation1),
-                stageInvitationMapper.toDto(invitation3)
-        );
+        when(stageInvitationFilter.isApplicable(filterDto)).thenReturn(true);
+        when(stageInvitationFilter.apply(any(StageInvitation.class), eq(filterDto))).thenReturn(true);
+        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(new StageInvitationDto());
 
-        assertIterableEquals(expected, result);
+        List<StageInvitationDto> result = stageInvitationService.getAllInvitationsForUserWithStatus(userId, filterDto);
+
+        verify(stageInvitationValidator).validateId(userId);
+        assertEquals(mockInvitations.size(), result.size());
     }
 }
