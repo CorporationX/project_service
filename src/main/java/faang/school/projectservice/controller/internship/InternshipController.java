@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -40,8 +39,8 @@ public class InternshipController {
         return internshipService.update(internshipDto);
     }
 
-    @PostMapping
-    public List<InternshipDto> getInternshipsOfProject(@RequestParam Long projectId,
+    @PostMapping(value = "/project/{projectId}")
+    public List<InternshipDto> getInternshipsOfProject(@PathVariable Long projectId,
                                                        @RequestBody InternshipFilterDto filter) {
         return internshipService.getInternshipsOfProject(projectId, filter);
     }
