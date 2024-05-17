@@ -17,4 +17,8 @@ public class ProjectService {
         Project project = projectRepository.getProjectById(id);
         return projectMapper.toDto(project);
     }
+
+    public boolean existsById(long projectId) {
+        return projectRepository.existsById(projectId);
+    }
 }
