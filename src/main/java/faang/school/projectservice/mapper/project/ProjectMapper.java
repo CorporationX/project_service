@@ -6,18 +6,24 @@ import java.util.List;
 
 import faang.school.projectservice.model.ProjectStatus;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
     ProjectDto toDto(Project project);
     Project toProject(ProjectDto projectDto);
 
-    default Project toProject(ProjectDto projectDto, ProjectStatus projectStatus, String description) {
-        Project project = toProject(projectDto);
-        project.setStatus(projectStatus);
-        project.setDescription(description);
-        return project;
-    }
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "status", constant = "CREATED")
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    Project create(ProjectDto projectDto, String name, String description);
+
+    @Mapping(target = "status", source = "projectStatus")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    Project toProjectForUpdate(ProjectDto projectDto, ProjectStatus projectStatus, String description);
 
     List<ProjectDto> toDto(List<Project> projects);
 }

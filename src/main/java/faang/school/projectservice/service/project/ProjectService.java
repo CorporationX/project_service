@@ -17,11 +17,9 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filters.ProjectFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static faang.school.projectservice.model.ProjectStatus.CREATED;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +37,8 @@ public class ProjectService {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new ProjectAlreadyExistsException("Проект с именем " + projectDto.getName() + " уже существует");
         }
-        Project project = projectMapper.toProject(projectDto, CREATED, projectDto.getDescription());
+
+        Project project = projectMapper.create(projectDto, projectDto.getName(), projectDto.getDescription());
         project = projectRepository.save(project);
         return projectMapper.toDto(project);
     }
@@ -48,8 +47,8 @@ public class ProjectService {
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new ProjectDoesNotExistInTheDatabase("Проект с именем " + projectDto.getName() + " не найден");
         }
-        Project project = projectMapper.toProject(projectDto, projectStatus, description);
-        project.setUpdatedAt(LocalDateTime.now());
+
+        Project project = projectMapper.toProjectForUpdate(projectDto, projectStatus, description);
         project = projectRepository.save(project);
         return projectMapper.toDto(project);
     }
