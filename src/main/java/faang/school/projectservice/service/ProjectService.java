@@ -29,11 +29,16 @@ import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 @RequiredArgsConstructor
 public class ProjectService {
 
+
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    private final List<ProjectFilter> projectFilters;
-    private final ProjectValidator projectValidator;
 
+    private final MomentService momentService;
+    private final List<SubProjectFilter> filters;
+
+    private final SubProjectValidator validator;
+    private final ProjectValidator projectValidator;
+    private final List<ProjectFilter> projectFilters;
 
     public ProjectDto create(ProjectDto projectDto) {
         projectValidator.checkExistProject(projectDto);
@@ -65,10 +70,6 @@ public class ProjectService {
     public Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);
     }
-}
-    private final MomentService momentService;
-    private final List<SubProjectFilter> filters;
-    private final SubProjectValidator validator;
 
     @Transactional
     public ProjectDto createSubProject(Long parentId, CreateSubProjectDto subProjectDto) {
@@ -76,7 +77,7 @@ public class ProjectService {
 
         validator.validateSubProjectVisibility(parent, subProjectDto);
 
-        Project projectToCreate = projectMapper.toModel(subProjectDto);
+        Project projectToCreate = projectMapper.toEntity(subProjectDto);
 
         parent.getChildren().add(projectToCreate);
 

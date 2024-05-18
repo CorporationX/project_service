@@ -16,12 +16,12 @@ import java.util.List;
 public class ProjectDto {
 
     private Long id;
-    @NotNull
+
     @NotBlank(message = "Имя не должно быть пустым")
     private String name;
     private String description;
     private Long parentId;
-    @NonNull
+
     @NotBlank(message = "Id владельца не должно быть пустым")
     private Long ownerId;
     private List<Long> childrenIds;

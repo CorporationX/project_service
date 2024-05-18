@@ -44,10 +44,6 @@ public class ProjectServiceTest {
     private SubProjectValidator validator;
     private ProjectValidator projectValidator;
 
-
-
-
-
     private ProjectDto projectDtoSecond;
 
 
@@ -68,7 +64,6 @@ public class ProjectServiceTest {
         project = Project.builder().status(ProjectStatus.CREATED).build();
         projectDtoSecond = ProjectDto.builder().ownerId(1L).name("Name").description("Description").build();
 
-
         projectValidator = Mockito.mock(ProjectValidator.class);
         projectRepository = Mockito.mock(ProjectRepository.class);
         projectMapper = Mockito.spy(ProjectMapperImpl.class);
@@ -80,7 +75,7 @@ public class ProjectServiceTest {
         filters = List.of(subProjectNameFilter, subProjectStatusFilter);
 
         projectService = new ProjectService(projectRepository, projectMapper,
-                momentService, filters, validator, projectValidator);
+                momentService, filters, validator, projectValidator, new ArrayList<>());
 
 
         parentId = 1L;
@@ -96,9 +91,9 @@ public class ProjectServiceTest {
 
     @Test
     void testCreateSubProject() {
-        Project parent = Project.builder().id(1L).visibility(PUBLIC).build();
+        Project parent = Project.builder().children(new ArrayList<>()).id(1L).visibility(PUBLIC).build();
         CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder().name("name").visibility(PUBLIC).build();
-        Project projectToCreate = projectMapper.toModel(subProjectDto);
+        Project projectToCreate = projectMapper.toEntity(subProjectDto);
         projectToCreate.setParentProject(parent);
         projectToCreate.setStatus(CREATED);
 
@@ -118,7 +113,6 @@ public class ProjectServiceTest {
         assertThrows(EntityNotFoundException.class,
                 () -> projectService.createSubProject(parentId, new CreateSubProjectDto()));
     }
-
 
     @Test
     void testUpdateSubProject() {
@@ -207,6 +201,3 @@ public class ProjectServiceTest {
         verify(projectRepository, times(1)).getProjectById(1L);
     }
 }
-
-
-
