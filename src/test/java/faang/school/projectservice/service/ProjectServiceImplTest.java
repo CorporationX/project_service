@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -183,16 +182,13 @@ public class ProjectServiceImplTest {
 
     @Test
     public void testGetAllByFilterWithFilteringPresentingPrivateProject() {
-        InOrder inOrder = inOrder(projectRepository, userContext, projectFilterService, projectMapper);
         List<Project> projects = List.of(thirdProject);
         when(projectRepository.findAll()).thenReturn(projects);
         when(userContext.getUserId()).thenReturn(3L);
         projectServiceImpl.getAllByFilter(projectFilterDto);
 
-        inOrder.verify(projectRepository, times(1)).findAll();
-        inOrder.verify(userContext, times(1)).getUserId();
-        inOrder.verify(projectFilterService, times(1)).applyFilters(captorForStreamOfProject.capture(), any(ProjectFilterDto.class));
-        inOrder.verify(projectMapper, times(1)).toDtos(anyList());
+        verify(projectRepository, times(1)).findAll();
+        verify(projectFilterService, times(1)).applyFilters(captorForStreamOfProject.capture(), any(ProjectFilterDto.class));
 
         var result = captorForStreamOfProject.getValue().toList();
         assertEquals(1, result.size());
