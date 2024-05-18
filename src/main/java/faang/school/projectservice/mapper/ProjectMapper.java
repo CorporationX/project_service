@@ -16,8 +16,6 @@ public interface ProjectMapper {
 
     Project toProject(ProjectDto projectDto);
 
-    @Mapping(source = "status", target = "status")
-    @Mapping(source = "description", target = "description")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     void updateProject(ProjectDto projectDto, @MappingTarget Project project);
 

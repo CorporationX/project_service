@@ -16,11 +16,9 @@ public class ProjectFilterService {
 
     public Stream<Project> applyFilters(Stream<Project> projects, ProjectFilterDto projectFilterDto) {
         if (projectFilterDto != null) {
-            for (ProjectFilter projectFilter : projectFilters) {
-                if (projectFilter.isApplicable(projectFilterDto)) {
-                    projects = projectFilter.apply(projects, projectFilterDto);
-                }
-            }
+            projectFilters.stream()
+                    .filter(projectFilter -> projectFilter.isApplicable(projectFilterDto))
+                    .forEach(projectFilter ->projectFilter.apply(projects, projectFilterDto));
         }
         return projects;
     }

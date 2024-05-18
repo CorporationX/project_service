@@ -16,7 +16,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ProjectServiceImpl implements ProjectService{
+public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
@@ -58,9 +58,9 @@ public class ProjectServiceImpl implements ProjectService{
         List<Project> projects = projectRepository.findAll();
 
         List<Project> filteredProjectsByVisibility = projects.stream()
-                .filter(project -> (project.getVisibility().equals(ProjectVisibility.PRIVATE))?project.getTeams().stream()
-                        .flatMap(team->team.getTeamMembers().stream())
-                        .anyMatch(teamMember -> teamMember.getId().equals(userContext.getUserId())):true)
+                .filter(project -> (project.getVisibility().equals(ProjectVisibility.PRIVATE)) ? project.getTeams().stream()
+                        .flatMap(team -> team.getTeamMembers().stream())
+                        .anyMatch(teamMember -> teamMember.getId().equals(userContext.getUserId())) : true)
                 .toList();
 
         List<Project> filteredProjects = projectFilterService.applyFilters(filteredProjectsByVisibility.stream(), projectFilterDto).toList();
