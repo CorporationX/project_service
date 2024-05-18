@@ -10,9 +10,9 @@ import lombok.Data;
 @Builder
 public class StageInvitationDto {
     private Long id;
-    private Stage stage;
-    private TeamMember author;
-    private TeamMember invited;
+    private Long stageId;
+    private Long authorId;
+    private Long invitedId;
     private StageInvitationStatus status;
     private String explanation;
 }

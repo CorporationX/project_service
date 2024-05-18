@@ -13,13 +13,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class InvitationMapperTest {
 
     @Spy
-    private InvitationMapperImpl skillMapper;
+    private InvitationMapperImpl invitationMapper;
 
     private StageInvitationDto stageInvitationDto;
     private StageInvitation stageInvitation;
@@ -28,8 +28,8 @@ public class InvitationMapperTest {
     public void setUp(){
         TeamMember teamMember = TeamMember.builder().id(2L).userId(1L).build();
         Stage stage = Stage.builder().stageId(1L).stageName("Name").executors(List.of(teamMember)).build();
-        stageInvitationDto = StageInvitationDto.builder().id(1L).stage(stage).author(teamMember)
-                .invited(teamMember).status(StageInvitationStatus.REJECTED).explanation("text").build();
+        stageInvitationDto = StageInvitationDto.builder().id(1L).stageId(1L).authorId(1L)
+                .invitedId(1L).status(StageInvitationStatus.REJECTED).explanation("text").build();
 
         stageInvitation = StageInvitation.builder().id(1L).description("text").status(StageInvitationStatus.REJECTED)
                 .stage(stage).author(teamMember).invited(teamMember).build();
@@ -37,19 +37,25 @@ public class InvitationMapperTest {
 
     @Test
     public void testToEntityMapper() {
-        assertEquals(stageInvitationDto.getId(), stageInvitation.getId());
-        assertEquals(stageInvitationDto.getStage(), stageInvitation.getStage());
-        assertEquals(stageInvitationDto.getAuthor(), stageInvitation.getAuthor());
-        assertEquals(stageInvitationDto.getInvited(), stageInvitation.getInvited());
-        assertEquals(stageInvitationDto.getStatus(), stageInvitation.getStatus());
+        StageInvitation entity = invitationMapper.toEntity(stageInvitationDto);
+
+        assertThat(entity.getId()).isEqualTo(stageInvitationDto.getId());
+        assertThat(entity.getStage().getStageId()).isEqualTo(stageInvitationDto.getStageId());
+        assertThat(entity.getAuthor().getId()).isEqualTo(stageInvitationDto.getAuthorId());
+        assertThat(entity.getInvited().getId()).isEqualTo(stageInvitationDto.getInvitedId());
+        assertThat(entity.getStatus()).isEqualTo(stageInvitationDto.getStatus());
+        assertThat(entity.getDescription()).isEqualTo(stageInvitationDto.getExplanation());
     }
 
     @Test
     public void testToDtoMapper() {
-        assertEquals(stageInvitation.getId(), stageInvitationDto.getId());
-        assertEquals(stageInvitation.getStage(), stageInvitationDto.getStage());
-        assertEquals(stageInvitation.getAuthor(), stageInvitationDto.getAuthor());
-        assertEquals(stageInvitation.getInvited(), stageInvitationDto.getInvited());
-        assertEquals(stageInvitation.getStatus(), stageInvitationDto.getStatus());
+        StageInvitationDto dto = invitationMapper.toDto(stageInvitation);
+
+        assertThat(dto.getId()).isEqualTo(stageInvitation.getId());
+        assertThat(dto.getStageId()).isEqualTo(stageInvitation.getStage().getStageId());
+        assertThat(dto.getAuthorId()).isEqualTo(stageInvitation.getAuthor().getId());
+        assertThat(dto.getInvitedId()).isEqualTo(stageInvitation.getInvited().getId());
+        assertThat(dto.getStatus()).isEqualTo(stageInvitation.getStatus());
+        assertThat(dto.getExplanation()).isEqualTo(stageInvitation.getDescription());
     }
 }

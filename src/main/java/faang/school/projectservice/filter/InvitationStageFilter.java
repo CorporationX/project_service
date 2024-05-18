@@ -11,11 +11,11 @@ public class InvitationStageFilter implements InvitationFilter {
 
     @Override
     public boolean isApplicable(InvitationFilterDto filterDto) {
-        return Objects.nonNull(filterDto.getStage());
+        return filterDto.getStageId() != null;
     }
 
     @Override
-    public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitation, InvitationFilterDto filterDto) {
-        return stageInvitation.filter(invitation -> invitation.getStage().getStageId().equals(filterDto.getStage().getStageId()));
+    public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitations, InvitationFilterDto filterDto) {
+        return stageInvitations.filter(invitation -> invitation.getStage().getStageId().equals(filterDto.getStageId()));
     }
 }

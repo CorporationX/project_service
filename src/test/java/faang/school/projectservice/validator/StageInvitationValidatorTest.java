@@ -7,8 +7,6 @@ import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.validation.StageInvitationValidator;
-import faang.school.projectservice.validation.StageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,34 +27,31 @@ public class StageInvitationValidatorTest {
     @Mock
     private StageInvitationJpaRepository stageInvitationJpaRepository;
 
-    @Mock
-    private StageValidator stageValidator;
-
     private StageInvitationDto stageInvitationDto;
     private StageInvitationDto stageInvitationDtoWithNullAuthor;
     private StageInvitationDto stageInvitationDtoWithNullStage;
     private StageInvitationDto stageInvitationDtoWithNullInvited;
+    private StageInvitationDto stageInvitationDtoWithNullExplanation;
+    private StageInvitationDto stageInvitationDtoWithEmptyExplanation;
     private InvitationFilterDto invitationFilterDto;
     private InvitationFilterDto nullInvitationFilterDto;
-    private String explanation;
-    private String nullExplanation;
-    private String emptyExplanation;
     private Long userId;
     private Long nullUserId;
+    private TeamMember teamMember;
+    private Stage stage;
 
     @BeforeEach
     public void setUp() {
-        Stage stage = Stage.builder().stageId(1L).stageName("Name").build();
-        TeamMember teamMember = TeamMember.builder().id(2L).userId(1L).build();
-        stageInvitationDto = StageInvitationDto.builder().id(1L).stage(stage).author(teamMember).invited(teamMember).build();
+        stage = Stage.builder().stageId(1L).stageName("Name").build();
+        teamMember = TeamMember.builder().id(2L).userId(1L).build();
+        stageInvitationDto = StageInvitationDto.builder().id(1L).stageId(1L).authorId(1L).invitedId(1L).explanation("text").build();
         nullInvitationFilterDto = InvitationFilterDto.builder().build();
-        stageInvitationDtoWithNullStage = StageInvitationDto.builder().id(1L).author(teamMember).invited(teamMember).build();
-        stageInvitationDtoWithNullAuthor = StageInvitationDto.builder().id(1L).stage(stage).invited(teamMember).build();
-        stageInvitationDtoWithNullInvited = StageInvitationDto.builder().id(1L).stage(stage).author(teamMember).build();
-        invitationFilterDto = InvitationFilterDto.builder().stage(stage).author(teamMember).status(StageInvitationStatus.PENDING).build();
-        explanation = "explanation";
-        nullExplanation = null;
-        emptyExplanation = "";
+        stageInvitationDtoWithNullStage = StageInvitationDto.builder().id(1L).authorId(1L).invitedId(1L).build();
+        stageInvitationDtoWithNullAuthor = StageInvitationDto.builder().id(1L).stageId(1L).invitedId(1L).build();
+        stageInvitationDtoWithNullInvited = StageInvitationDto.builder().id(1L).stageId(1L).authorId(1L).build();
+        stageInvitationDtoWithNullExplanation = StageInvitationDto.builder().id(1L).stageId(1L).authorId(1L).explanation(null).build();
+        stageInvitationDtoWithEmptyExplanation = StageInvitationDto.builder().id(1L).stageId(1L).authorId(1L).explanation(" ").build();
+        invitationFilterDto = InvitationFilterDto.builder().stageId(1L).authorId(1L).status(StageInvitationStatus.PENDING).build();
         userId = 1L;
         nullUserId = null;
     }
@@ -90,44 +85,32 @@ public class StageInvitationValidatorTest {
     }
 
     @Test
-    public void testAcceptInvitationValidationControllerWithNullStage() {
-        assertThrows(DataValidationException.class, () -> stageInvitationValidator.
-                acceptInvitationValidationController(stageInvitationDtoWithNullStage));
-    }
-
-    @Test
-    public void testAcceptInvitationValidationControllerWithNullInvited() {
-        assertThrows(DataValidationException.class, () -> stageInvitationValidator.
-                acceptInvitationValidationController(stageInvitationDtoWithNullInvited));
-    }
-
-    @Test
     public void testCorrectWorkRejectInvitationValidationController() {
-        assertDoesNotThrow(() -> stageInvitationValidator.rejectInvitationValidationController(explanation, stageInvitationDto));
+        assertDoesNotThrow(() -> stageInvitationValidator.rejectInvitationValidationController(stageInvitationDto));
     }
 
     @Test
     public void testRejectInvitationValidationControllerWithNullExplanation() {
         assertThrows(DataValidationException.class, () -> stageInvitationValidator.
-                rejectInvitationValidationController(nullExplanation, stageInvitationDto));
+                rejectInvitationValidationController(stageInvitationDtoWithNullExplanation));
     }
 
     @Test
     public void testRejectInvitationValidationControllerWithEmptyExplanation() {
         assertThrows(DataValidationException.class, () -> stageInvitationValidator.
-                rejectInvitationValidationController(emptyExplanation, stageInvitationDto));
+                rejectInvitationValidationController(stageInvitationDtoWithEmptyExplanation));
     }
 
     @Test
     public void testRejectInvitationValidationControllerWithNullStage() {
         assertThrows(DataValidationException.class, () -> stageInvitationValidator.
-                rejectInvitationValidationController(explanation, stageInvitationDtoWithNullStage));
+                rejectInvitationValidationController(stageInvitationDtoWithNullStage));
     }
 
     @Test
     public void testRejectInvitationValidationControllerWithNullInvited() {
         assertThrows(DataValidationException.class, () -> stageInvitationValidator.
-                rejectInvitationValidationController(explanation, stageInvitationDtoWithNullInvited));
+                rejectInvitationValidationController(stageInvitationDtoWithNullInvited));
     }
 
     @Test
@@ -149,30 +132,25 @@ public class StageInvitationValidatorTest {
 
     @Test
     public void testCorrectWorkCreateValidationService() {
-        assertDoesNotThrow(() -> stageInvitationValidator.createValidationService(stageInvitationDto));
+        assertDoesNotThrow(() -> stageInvitationValidator.createValidationService(stage, teamMember));
     }
 
     @Test
     public void testCreateValidationServiceWithRecurringUser() {
-        when(stageInvitationJpaRepository.existsByInvitedAndStage(stageInvitationDto.getInvited(), stageInvitationDto.getStage())).
+        when(stageInvitationJpaRepository.existsByInvitedAndStage(teamMember, stage)).
                 thenReturn(true);
-        assertThrows(DataValidationException.class, () -> stageInvitationValidator.createValidationService(stageInvitationDto));
-    }
-
-    @Test
-    public void testCreateValidationServiceWithNonExistentStage() {
-        doThrow(DataValidationException.class).when(stageValidator).existsById(stageInvitationDto.getStage().getStageId());
-        assertThrows(DataValidationException.class, () -> stageInvitationValidator.createValidationService(stageInvitationDto));
+        assertThrows(DataValidationException.class, () -> stageInvitationValidator.createValidationService(stage, teamMember));
     }
 
     @Test
     public void testCorrectWorkAcceptOrRejectInvitationService() {
+        when(stageInvitationJpaRepository.existsById(stageInvitationDto.getId())).thenReturn(true);
         assertDoesNotThrow(() -> stageInvitationValidator.acceptOrRejectInvitationService(stageInvitationDto));
     }
 
     @Test
     public void testCreateValidationServiceWithNonExistentInvitation() {
-        when(stageInvitationJpaRepository.existsById(stageInvitationDto.getId())).thenReturn(true);
+        when(stageInvitationJpaRepository.existsById(stageInvitationDto.getId())).thenReturn(false);
         assertThrows(DataValidationException.class, () -> stageInvitationValidator.acceptOrRejectInvitationService(stageInvitationDto));
     }
 }

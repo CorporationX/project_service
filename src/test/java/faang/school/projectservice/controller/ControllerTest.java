@@ -7,7 +7,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.StageInvitationService;
-import faang.school.projectservice.validation.StageInvitationValidator;
+import faang.school.projectservice.validator.StageInvitationValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,16 +33,12 @@ public class ControllerTest {
 
     private StageInvitationDto stageInvitationDto;
     private InvitationFilterDto invitationFilterDto;
-    private String explanation;
     private Long userId;
 
     @BeforeEach
     public void setUp() {
-        Stage stage = Stage.builder().stageId(1L).stageName("Name").build();
-        TeamMember teamMember = TeamMember.builder().id(2L).userId(1L).build();
-        stageInvitationDto = StageInvitationDto.builder().id(1L).stage(stage).invited(teamMember).build();
-        invitationFilterDto = InvitationFilterDto.builder().stage(stage).author(teamMember).status(StageInvitationStatus.PENDING).build();
-        explanation = "explanation";
+        stageInvitationDto = StageInvitationDto.builder().id(1L).stageId(1L).invitedId(1L).build();
+        invitationFilterDto = InvitationFilterDto.builder().stageId(1L).authorId(1L).status(StageInvitationStatus.PENDING).build();
         userId = 1L;
     }
 
@@ -70,13 +66,13 @@ public class ControllerTest {
 
     @Test
     public void testCorrectWorkRejectInvitation() {
-        assertDoesNotThrow(() -> stageInvitationController.rejectInvitation(explanation, stageInvitationDto));
+        assertDoesNotThrow(() -> stageInvitationController.rejectInvitation(stageInvitationDto));
     }
 
     @Test
     public void testInCorrectWorkRejectInvitation() {
-        doThrow(DataValidationException.class).when(stageInvitationValidator).rejectInvitationValidationController(explanation, stageInvitationDto);
-        assertThrows(DataValidationException.class, () -> stageInvitationController.rejectInvitation(explanation, stageInvitationDto));
+        doThrow(DataValidationException.class).when(stageInvitationValidator).rejectInvitationValidationController(stageInvitationDto);
+        assertThrows(DataValidationException.class, () -> stageInvitationController.rejectInvitation(stageInvitationDto));
     }
 
     @Test

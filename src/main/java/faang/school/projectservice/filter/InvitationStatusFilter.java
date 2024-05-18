@@ -14,7 +14,7 @@ public class InvitationStatusFilter implements InvitationFilter{
     }
 
     @Override
-    public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitation, InvitationFilterDto filterDto) {
-        return stageInvitation.filter(invitation -> invitation.getStatus().equals(filterDto.getStatus()));
+    public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitations, InvitationFilterDto filterDto) {
+        return stageInvitations.filter(invitation -> invitation.getStatus().equals(filterDto.getStatus()));
     }
 }
