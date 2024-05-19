@@ -16,19 +16,14 @@ import faang.school.projectservice.service.teamMember.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.FOREIGN_MENTOR_EXCEPTION;
-import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NEW_INTERNS_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NON_EXISTING_INTERNSHIP_EXCEPTION;
-import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NON_EXISTING_INTERN_EXCEPTION;
 
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
-    private final InternshipFiller internshipFiller;
+    private final InternshipVerifier internshipVerifier;
     private final InternshipRepository internshipRepository;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
@@ -37,32 +32,23 @@ public class InternshipService {
     private final TeamMemberService teamMemberService;
 
     public InternshipDto create(InternshipDto internshipDto) {
-        Project project = projectRepository.getProjectById(internshipDto.getProjectId());
-        TeamMember mentor = teamMemberRepository.findById(internshipDto.getMentorId());
-        List<TeamMember> interns = teamMemberRepository.findAllByIds(internshipDto.getInternsIds());
-
-        verifyMentorsProject(project, mentor);
-        verifyExistenceOfAllInterns(interns, internshipDto.getInternsIds().size());
+        InternshipData internshipData = getInternshipData(internshipDto);
 
         Internship internship = internshipMapper.toEntity(internshipDto);
-        internshipFiller.fillEntity(internship, project, mentor, interns);
+        fillEntity(internship, internshipData.getProject(), internshipData.getMentor(), internshipData.getInterns());
 
         return internshipMapper.toDto(internshipRepository.save(internship));
     }
 
     public InternshipDto update(InternshipDto internshipDto) {
-        Project project = projectRepository.getProjectById(internshipDto.getProjectId());
-        TeamMember mentor = teamMemberRepository.findById(internshipDto.getMentorId());
-        List<TeamMember> interns = teamMemberRepository.findAllByIds(internshipDto.getInternsIds());
-        Internship internshipToBeUpdated = internshipRepository.findById(internshipDto.getId())
-                .orElseThrow(() -> new DataValidationException(NON_EXISTING_INTERNSHIP_EXCEPTION.getMessage()));
+        InternshipData internshipData = getInternshipData(internshipDto);
+        List<TeamMember> interns = internshipData.getInterns();
+        Internship internshipToBeUpdated = getInternship(internshipDto.getId());
 
-        verifyMentorsProject(project, mentor);
-        verifyExistenceOfAllInterns(interns, internshipDto.getInternsIds().size());
-        verifyUpdatedInterns(internshipToBeUpdated, interns);
+        internshipVerifier.verifyUpdatedInterns(internshipToBeUpdated, interns);
 
-        internshipMapper.update(internshipDto, internshipToBeUpdated);
-        internshipFiller.fillEntity(internshipToBeUpdated, project, mentor, interns);
+        internshipMapper.updateEntity(internshipDto, internshipToBeUpdated);
+        fillEntity(internshipToBeUpdated, internshipData.getProject(), internshipData.getMentor(), interns);
 
         if (internshipToBeUpdated.getStatus().equals(InternshipStatus.COMPLETED)) {
             teamMemberService.hireInterns(internshipToBeUpdated);
@@ -89,31 +75,34 @@ public class InternshipService {
     }
 
     public InternshipDto getInternshipById(long internshipId) {
-        Internship internship = internshipRepository.findById(internshipId)
-                .orElseThrow(() -> new DataValidationException(NON_EXISTING_INTERNSHIP_EXCEPTION.getMessage()));
+        Internship internship = getInternship(internshipId);
 
         return internshipMapper.toDto(internship);
     }
 
-    private void verifyExistenceOfAllInterns(List<TeamMember> interns, Integer internsNumInDto) {
-        if (interns.size() != internsNumInDto) {
-            throw new DataValidationException(NON_EXISTING_INTERN_EXCEPTION.getMessage());
-        }
+    private void fillEntity(Internship internship, Project project, TeamMember mentor, List<TeamMember> interns) {
+        internship.setProject(project);
+        internship.setMentorId(mentor);
+        internship.setInterns(interns);
     }
 
-    private void verifyMentorsProject(Project project, TeamMember mentor) {
-        Project mentorsProject = mentor.getTeam().getProject();
-
-        if (!project.equals(mentorsProject)) {
-            throw new DataValidationException(FOREIGN_MENTOR_EXCEPTION.getMessage());
-        }
+    private Internship getInternship(Long internshipDto) {
+        return internshipRepository.findById(internshipDto)
+                .orElseThrow(() -> new DataValidationException(NON_EXISTING_INTERNSHIP_EXCEPTION.getMessage()));
     }
 
-    private void verifyUpdatedInterns(Internship internshipBeforeUpdate, List<TeamMember> internsAfterUpdate) {
-        Set<TeamMember> internsBeforeUpdate = new HashSet<>(internshipBeforeUpdate.getInterns());
+    private InternshipData getInternshipData(InternshipDto internshipDto) {
+        Project project = projectRepository.getProjectById(internshipDto.getProjectId());
+        TeamMember mentor = teamMemberRepository.findById(internshipDto.getMentorId());
+        List<TeamMember> interns = teamMemberRepository.findAllByIds(internshipDto.getInternsIds());
 
-        if (!internsBeforeUpdate.containsAll(internsAfterUpdate)) {
-            throw new DataValidationException(NEW_INTERNS_EXCEPTION.getMessage());
-        }
+        internshipVerifier.verifyMentorsProject(project, mentor);
+        internshipVerifier.verifyExistenceOfAllInterns(interns, internshipDto.getInternsIds().size());
+
+        return InternshipData.builder()
+                .project(project)
+                .mentor(mentor)
+                .interns(interns)
+                .build();
     }
 }
