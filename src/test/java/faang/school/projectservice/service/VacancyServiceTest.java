@@ -2,7 +2,9 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.CandidateJpaRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
+import faang.school.projectservice.jpa.VacancyJpaRepository;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
@@ -11,8 +13,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.repository.CandidateRepository;
-import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,11 +51,11 @@ class VacancyServiceTest {
     private static final Long TEAM_MEMBER_ID = 3L;
 
     @Mock
-    private VacancyRepository vacancyRepository;
+    private VacancyJpaRepository vacancyRepository;
     @Mock
     private TeamMemberJpaRepository teamMemberJpaRepository;
     @Mock
-    private CandidateRepository candidateRepository;
+    private CandidateJpaRepository candidateRepository;
     @Mock
     private VacancyValidator vacancyValidator;
     @Mock

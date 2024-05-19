@@ -3,14 +3,15 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.dto.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.CandidateJpaRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
+import faang.school.projectservice.jpa.VacancyJpaRepository;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.CandidateRepository;
-import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.filter.VacancyFilter;
 import faang.school.projectservice.validator.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,9 +31,9 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class VacancyService {
 
-    private final VacancyRepository vacancyRepository;
+    private final VacancyJpaRepository vacancyRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
-    private final CandidateRepository candidateRepository;
+    private final CandidateJpaRepository candidateRepository;
     private final VacancyValidator vacancyValidator;
     private final VacancyMapper vacancyMapper;
     private final List<VacancyFilter> vacancyFilters;
