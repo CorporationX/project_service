@@ -13,7 +13,8 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.internship.filter.InternshipFilter;
 import faang.school.projectservice.service.teamMember.TeamMemberService;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,14 +22,15 @@ import java.util.List;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NON_EXISTING_INTERNSHIP_EXCEPTION;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
+@Setter
 public class InternshipService {
     private final InternshipVerifier internshipVerifier;
     private final InternshipRepository internshipRepository;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipMapper internshipMapper;
-    private final List<InternshipFilter> filters;
+    private List<InternshipFilter> filters;
     private final TeamMemberService teamMemberService;
 
     public InternshipDto create(InternshipDto internshipDto) {
@@ -71,7 +73,7 @@ public class InternshipService {
     }
 
     public List<InternshipDto> getAllInternships() {
-        return internshipMapper.toDto(internshipRepository.findAll());
+        return internshipMapper.toDtoList(internshipRepository.findAll());
     }
 
     public InternshipDto getInternshipById(long internshipId) {

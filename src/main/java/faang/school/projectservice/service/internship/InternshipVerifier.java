@@ -6,9 +6,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.FOREIGN_MENTOR_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NEW_INTERNS_EXCEPTION;
@@ -31,9 +29,7 @@ class InternshipVerifier {
     }
 
     public void verifyUpdatedInterns(Internship internshipBeforeUpdate, List<TeamMember> internsAfterUpdate) {
-        Set<TeamMember> internsBeforeUpdate = new HashSet<>(internshipBeforeUpdate.getInterns());
-
-        if (!internsBeforeUpdate.containsAll(internsAfterUpdate)) {
+        if (!internshipBeforeUpdate.getInterns().containsAll(internsAfterUpdate)) {
             throw new DataValidationException(NEW_INTERNS_EXCEPTION.getMessage());
         }
     }

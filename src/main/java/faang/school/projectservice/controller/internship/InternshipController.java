@@ -2,7 +2,9 @@ package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.internship.InternshipService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,17 +26,19 @@ public class InternshipController {
     private final InternshipControllerValidation internshipControllerValidation;
 
     @PostMapping
-    public InternshipDto create(@RequestBody InternshipDto internshipDto) {
-        internshipControllerValidation.validationDto(internshipDto);
+    public InternshipDto create(@Valid @RequestBody InternshipDto internshipDto) {
+        internshipControllerValidation.validateInternshipDuration(internshipDto);
 
         return internshipService.create(internshipDto);
     }
 
     @PutMapping
-    public InternshipDto update(@RequestBody InternshipDto internshipDto) {
-        internshipControllerValidation.validationDto(internshipDto);
+    public InternshipDto update(@Valid @RequestBody InternshipDto internshipDto) {
+        internshipControllerValidation.validateInternshipDuration(internshipDto);
 
-        internshipControllerValidation.checkForNull(internshipDto.getId(), NULL_INTERNSHIP_ID_EXCEPTION);
+        if (internshipDto.getId() == null) {
+            throw new DataValidationException(NULL_INTERNSHIP_ID_EXCEPTION.getMessage());
+        }
 
         return internshipService.update(internshipDto);
     }
@@ -52,8 +56,6 @@ public class InternshipController {
 
     @GetMapping("/{internshipId}")
     public InternshipDto getInternshipById(@PathVariable Long internshipId) {
-        internshipControllerValidation.checkForNull(internshipId, NULL_INTERNSHIP_ID_EXCEPTION);
-
         return internshipService.getInternshipById(internshipId);
     }
 }
