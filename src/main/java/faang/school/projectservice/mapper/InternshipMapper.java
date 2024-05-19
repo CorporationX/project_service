@@ -23,7 +23,7 @@ public interface InternshipMapper {
     @Mapping(target = "interns", ignore = true)
     Internship toEntity(InternshipDto dto);
 
-    List<InternshipDto> toDto(List<Internship> entityList);
+    List<InternshipDto> toDtoList(List<Internship> entityList);
 
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "mentorId", ignore = true)

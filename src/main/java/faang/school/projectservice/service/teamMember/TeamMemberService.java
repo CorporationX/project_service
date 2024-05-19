@@ -46,9 +46,9 @@ public class TeamMemberService {
             }
 
             internRoles.remove(TeamRole.INTERN);
-
-            teamMemberRepository.save(intern);
         });
+
+        interns.forEach(teamMemberRepository::save);
     }
 
     private Predicate<TeamMember> allTasksDonePredicate() {
