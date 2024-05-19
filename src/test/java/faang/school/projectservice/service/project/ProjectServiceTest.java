@@ -34,16 +34,14 @@ import static org.assertj.core.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
 
-    private final Long PROJECT_ID = 1L;
-    private final String PROJECT_NAME = "Name";
-    private final String PROJECT_DESCRIPTION = "Description";
-    private final Long USER_ID = 1L;
-    public ProjectService projectService;
-    public ProjectDto projectDto;
-    public Project project;
-    public ProjectFilterDto projectFilterDto;
-    public UserDto userDto;
-    public List<ProjectFilter> projectFilters;
+    private static final String PROJECT_DESCRIPTION = "Description";
+    private static final Long USER_ID = 1L;
+    private ProjectService projectService;
+    private ProjectDto projectDto;
+    private Project project;
+    private ProjectFilterDto projectFilterDto;
+    private UserDto userDto;
+    private List<ProjectFilter> projectFilters;
 
     @Mock
     public ProjectRepository projectRepository;
@@ -66,7 +64,9 @@ class ProjectServiceTest {
     @BeforeEach
     void setUp() {
         projectDto = new ProjectDto();
+        Long PROJECT_ID = 1L;
         projectDto.setOwnerId(PROJECT_ID);
+        String PROJECT_NAME = "Name";
         projectDto.setName(PROJECT_NAME);
         projectDto.setDescription(PROJECT_DESCRIPTION);
         project = new Project();

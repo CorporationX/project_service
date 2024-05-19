@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ProjectFilterStatusTest {
 
-    ProjectFilterDto projectFilterDto;
-    ProjectFilterStatus projectFilterStatus;
-    ProjectDto first = new ProjectDto();
-    ProjectDto second = new ProjectDto();
-    Stream<ProjectDto> projectDtoStream;
+    private ProjectFilterDto projectFilterDto;
+    private ProjectFilterStatus projectFilterStatus;
+    private ProjectDto first = new ProjectDto();
+    private ProjectDto second = new ProjectDto();
+    private Stream<ProjectDto> projectDtoStream;
 
     @BeforeEach
     void setUp(){

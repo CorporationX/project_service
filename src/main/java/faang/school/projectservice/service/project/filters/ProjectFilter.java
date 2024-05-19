@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
-@Component
 public interface ProjectFilter {
     boolean isApplicable(ProjectFilterDto projectFilterDto);
     Stream<ProjectDto> filter(Stream<ProjectDto> projectDtoStream, ProjectFilterDto projectFilterDto);
