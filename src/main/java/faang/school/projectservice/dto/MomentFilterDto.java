@@ -1,21 +1,16 @@
 package faang.school.projectservice.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MomentDto {
-    private String name;
-    private String description;
+public class MomentFilterDto {
     private LocalDateTime date;
 }
