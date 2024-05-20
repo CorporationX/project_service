@@ -6,10 +6,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class VacancyDto {
-    private long id;
+    private Long id;
     private String name;
     private String description;
-    private long projectId;
-    private long createdBy;
-    private int count;
+    private Long projectId;
+    private Long createdBy;
+    private Long count;
 }

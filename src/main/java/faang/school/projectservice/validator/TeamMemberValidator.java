@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class TeamMemberValidator {
 
     public void validateTeamMember(TeamMember teamMember) {
-        if (teamMember.getRoles().contains(TeamRole.OWNER)) {
+        if (!teamMember.getRoles().contains(TeamRole.OWNER)) {
             throw new DataValidationException("Team member with Id " + teamMember.getId() + " is not " + TeamRole.OWNER);
         }
     }
