@@ -1,5 +1,6 @@
 package faang.school.projectservice.client;
 
+import faang.school.projectservice.dto.client.SkillDto;
 import faang.school.projectservice.dto.client.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,4 +18,10 @@ public interface UserServiceClient {
 
     @PostMapping("/users")
     List<UserDto> getUsersByIds(@RequestBody List<Long> ids);
+
+    @GetMapping("/skills")
+    List<SkillDto> getAllSkills();
+
+    @GetMapping("/skills/{id}")
+    SkillDto getSkillById(@PathVariable long id);
 }
