@@ -54,7 +54,6 @@ public class VacancyServiceTest {
                 .id(1L)
                 .name("Google")
                 .description("developer")
-                .createdBy(1)
                 .createdBy(1L)
                 .build();
 
