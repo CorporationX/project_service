@@ -1,19 +1,21 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto.moment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VacancyDto {
+@Builder
+public class MomentDto {
     private Long id;
     private String name;
     private String description;
-    private Long projectId;
-    private Long createdBy;
-    private Long count;
+    private List<Long> projectIds;
+    private List<Long> userIds;
+    private String imageId;
 }
