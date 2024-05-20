@@ -3,7 +3,7 @@ package faang.school.projectservice.validation;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.jpa.MomentJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 public class MomentValidation {
-    private final MomentRepository momentRepository;
+    private final MomentJpaRepository momentRepository;
 
     public void nameIsFilled(String name) {
         if (Objects.isNull(name) || "".equals(name)) {

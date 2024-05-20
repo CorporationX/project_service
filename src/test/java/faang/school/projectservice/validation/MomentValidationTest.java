@@ -2,7 +2,7 @@ package faang.school.projectservice.validation;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.jpa.MomentJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +19,7 @@ class MomentValidationTest {
     private static final long MOMENT_ID = 1;
 
     @Mock
-    private MomentRepository momentRepository;
+    private MomentJpaRepository momentRepository;
     @InjectMocks
     private MomentValidation momentValidation;
 

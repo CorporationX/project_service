@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentFilterDto;
+import faang.school.projectservice.jpa.MomentJpaRepository;
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.project.filters.MomentDataFilter;
 import faang.school.projectservice.service.project.filters.MomentFilter;
 import faang.school.projectservice.validation.ProjectValidation;
@@ -35,7 +35,7 @@ class MomentServiceTest {
     @Mock
     ProjectValidation projectValidation;
     @Mock
-    MomentRepository momentRepository;
+    MomentJpaRepository momentRepository;
     @Mock
     List<MomentFilter> momentFilters;
     @InjectMocks

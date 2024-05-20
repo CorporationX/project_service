@@ -2,9 +2,9 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.MomentFilterDto;
+import faang.school.projectservice.jpa.MomentJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filters.MomentFilter;
 import faang.school.projectservice.validation.MomentValidation;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class MomentService {
 
-    private final MomentRepository momentRepository;
+    private final MomentJpaRepository momentRepository;
     private final MomentValidation momentValidation;
     private final ProjectRepository projectRepository;
     private final ProjectValidation projectValidation;
