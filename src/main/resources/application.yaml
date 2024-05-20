@@ -27,6 +27,8 @@ spring:
 
 server:
   port: 8082
+  servlet:
+    context-path: /api/v1
 
 logging:
   level:
@@ -48,3 +50,7 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+
+internship:
+  period: 3
