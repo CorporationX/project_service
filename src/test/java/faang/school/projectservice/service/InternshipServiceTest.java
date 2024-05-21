@@ -20,7 +20,7 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.filter.InternshipFilter;
-import faang.school.projectservice.validation.InternshipValidator;
+import faang.school.projectservice.validator.InternshipValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

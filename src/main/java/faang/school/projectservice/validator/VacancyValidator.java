@@ -26,31 +26,10 @@ public class VacancyValidator {
     private final UserServiceClient userServiceClient;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
 
-    public void validateVacancyDto(VacancyDto vacancyDto) {
-        if (vacancyDto.getName().isBlank()) {
-            throw new DataValidationException("Vacancy name can't be empty");
-        }
-        if (vacancyDto.getDescription().isBlank()) {
-            throw new DataValidationException("Vacancy description can't be empty");
-        }
-        if (vacancyDto.getStatus() == null) {
-            throw new DataValidationException("Vacancy status can't be null");
-        }
-        if (vacancyDto.getProjectId() == null || vacancyDto.getProjectId() <= 0) {
-            throw new DataValidationException("Project Id in vacancy must be set and can't be 0");
-        }
-    }
-
     public void validateCreateVacancyStatus(VacancyDto vacancyDto) {
         log.info("Validate create vacancy status");
         if (!vacancyDto.getStatus().equals(VacancyStatus.OPEN)) {
             throw new DataValidationException("New vacancy must be with status OPEN");
-        }
-    }
-
-    public void validateVacancyId(Long id) {
-        if (id == null || id <= 0) {
-            throw new DataValidationException("Vacancy id can't be null and must be more then 0");
         }
     }
 
