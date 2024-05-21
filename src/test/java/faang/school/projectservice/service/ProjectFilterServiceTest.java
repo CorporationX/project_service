@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,8 +39,8 @@ public class ProjectFilterServiceTest {
 
     @Test
     public void testApplyFiltersWithNullProjectFilterDto() {
-        Stream<Project> result = projectFilterService.applyFilters(Stream.of(firstProject), null);
-        assertEquals(result.toList().get(0), firstProject);
+        var exception = assertThrows(NullPointerException.class, ()->projectFilterService.applyFilters(Stream.of(firstProject), null));
+        assertEquals(exception.getMessage(), "projectFilterDto is marked non-null but is null");
     }
 
     @Test

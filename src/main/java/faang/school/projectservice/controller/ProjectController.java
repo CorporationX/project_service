@@ -21,25 +21,25 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/project")
+@RequestMapping("/api/v1/projects")
 @Tag(name = "Project")
 public class ProjectController {
     private final ProjectServiceImpl projectService;
 
     @Operation(summary = "Create project")
-    @PostMapping("/creating")
+    @PostMapping
     public ProjectDto create(@ParameterObject @RequestBody @NonNull ProjectDto projectDto) {
         return projectService.create(projectDto);
     }
 
     @Operation(summary = "Update project")
-    @PutMapping("/updating")
+    @PutMapping
     public ProjectDto update(@ParameterObject @RequestBody @NonNull ProjectDto projectDto) {
         return projectService.update(projectDto);
     }
 
     @Operation(summary = "Get all projects")
-    @GetMapping("/projects")
+    @GetMapping
     public List<ProjectDto> getAll() {
         return projectService.getAll();
     }
@@ -51,9 +51,8 @@ public class ProjectController {
     }
 
     @Operation(summary = "Get all projects by filter")
-    @GetMapping("/projects/filter")
-    public List<ProjectDto> getAllByFilter(
-            @ParameterObject @RequestBody(required = false) @NonNull ProjectFilterDto projectFilterDto) {
+    @GetMapping("/filter")
+    public List<ProjectDto> getAllByFilter(@NonNull @ParameterObject ProjectFilterDto projectFilterDto) {
         return projectService.getAllByFilter(projectFilterDto);
     }
 }
