@@ -11,7 +11,6 @@ import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.service.filter.VacancyFilter;
 import faang.school.projectservice.validator.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
