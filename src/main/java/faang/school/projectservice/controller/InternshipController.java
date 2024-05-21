@@ -4,7 +4,10 @@ import faang.school.projectservice.dto.InternshipDto;
 import faang.school.projectservice.dto.InternshipFilterDto;
 import faang.school.projectservice.service.InternshipService;
 import faang.school.projectservice.validator.InternshipValidator;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,25 +21,26 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/internship")
+@Validated
 public class InternshipController {
 
     private final InternshipService internshipService;
     private final InternshipValidator internshipValidator;
+    private static final String ID_ERR_MESSAGE = "Internship id must be more then 0";
 
     @PostMapping
-    public InternshipDto create(@RequestBody InternshipDto internshipDto) {
-        internshipValidator.validateInternshipDto(internshipDto);
+    public InternshipDto create(@Valid @RequestBody InternshipDto internshipDto) {
         return internshipService.create(internshipDto);
     }
 
     @PutMapping("/{id}")
-    public InternshipDto update(@RequestBody InternshipDto internshipDto, @PathVariable long id) {
-        internshipValidator.validateInternshipDto(internshipDto);
+    public InternshipDto update(@Valid @RequestBody InternshipDto internshipDto,
+                                @PathVariable @Min(value = 1, message = ID_ERR_MESSAGE) long id) {
         return internshipService.update(internshipDto, id);
     }
 
     @GetMapping("/filter")
-    public List<InternshipDto> findAllWithFilter(@RequestBody InternshipFilterDto internshipFilterDto) {
+    public List<InternshipDto> findAllWithFilter(@Valid @RequestBody InternshipFilterDto internshipFilterDto) {
         return internshipService.findAllWithFilter(internshipFilterDto);
     }
 
@@ -46,7 +50,7 @@ public class InternshipController {
     }
 
     @GetMapping("/{id}")
-    public InternshipDto findById(@PathVariable long id) {
+    public InternshipDto findById(@PathVariable @Min(value = 1, message = ID_ERR_MESSAGE) long id) {
         return internshipService.findById(id);
     }
 }
