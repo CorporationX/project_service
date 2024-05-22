@@ -2,9 +2,9 @@ name: Java CI with Gradle (Basilisk)
 
 on:
   pull_request:
+    branches: [ "basilisk-master-bc4" ]
   push:
-    branches:
-      - 'basilisk-master-bc4'
+    branches: [ "basilisk-master-bc4" ]
 
 jobs:
   build:
@@ -26,6 +26,9 @@ jobs:
 
       - name: Build with Gradle Wrapper
         run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
 
   dependency-submission:
 
