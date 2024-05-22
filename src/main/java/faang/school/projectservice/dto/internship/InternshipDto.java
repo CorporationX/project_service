@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -19,22 +20,18 @@ import java.util.List;
 @NoArgsConstructor
 public class InternshipDto {
 
-    private Long id;
-
-    @Positive(message = "projectId should be positive number")
     private long projectId;
-
-    @Positive(message = "mentorId should be positive number")
     private long mentorId;
-
-    @NotNull
-    @NotEmpty(message = "Team should have at least one intern")
-    private List<TeamMember> interns;
-
+    private List<Long> internsId = new ArrayList<>();
+    @NotNull(message = "description cannot be empty")
+    private String description;
+    @NotNull(message = "name cannot be empty")
+    private String name;
+    @NotNull(message = "start date cannot be empty")
     private LocalDateTime startDate;
-
+    @NotNull(message = "end date cannot be empty")
     private LocalDateTime endDate;
-
     @NotNull(message = "status cannot be empty")
-    private InternshipStatus status;
+    private String status;
+    private long scheduleId;
 }

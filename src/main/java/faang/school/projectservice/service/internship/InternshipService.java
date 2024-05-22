@@ -2,15 +2,13 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.TeamRole;
 
 import java.util.List;
 
 public interface InternshipService {
-    InternshipDto createInternship(InternshipDto internshipDto);
+    InternshipDto createInternship(long userId, InternshipDto internshipDto);
 
-    InternshipDto updateInternship(InternshipDto updatedInternshipDto);
+    InternshipDto updateInternship(long internshipId, InternshipDto updatedInternshipDto);
 
     InternshipDto addNewIntern(long internshipId, long newInternId);
 
