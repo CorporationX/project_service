@@ -3,25 +3,25 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.SubProjectFilterDto;
 import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filter.project.ProjectFilter;
+import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static faang.school.projectservice.model.ProjectStatus.CANCELLED;
-import static faang.school.projectservice.model.ProjectStatus.COMPLETED;
-import static faang.school.projectservice.model.ProjectStatus.CREATED;
-import static faang.school.projectservice.model.ProjectStatus.ON_HOLD;
+import static faang.school.projectservice.model.ProjectStatus.*;
 import static faang.school.projectservice.model.ProjectVisibility.PRIVATE;
 import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 
@@ -29,11 +29,47 @@ import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 @RequiredArgsConstructor
 public class ProjectService {
 
+
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+
     private final MomentService momentService;
     private final List<SubProjectFilter> filters;
+
     private final SubProjectValidator validator;
+    private final ProjectValidator projectValidator;
+    private final List<ProjectFilter> projectFilters;
+
+    public ProjectDto create(ProjectDto projectDto) {
+        projectValidator.checkExistProject(projectDto);
+
+        Project project = projectMapper.toEntity(projectDto);
+        project.setStatus(ProjectStatus.CREATED);
+
+        return projectMapper.toDto(projectRepository.save(project));
+
+    }
+
+    public ProjectDto update(ProjectDto projectDto) {
+        Project project = projectMapper.toEntity(projectDto);
+
+        return projectMapper.toDto(projectRepository.save(project));
+    }
+
+    public List<Project> getProjectsByFilter(ProjectFilterDto filterDto) {
+        return projectFilters.stream().filter(projectFilter -> projectFilter.isApplicable(filterDto))
+                .flatMap(projectFilter -> projectFilter.apply(projectRepository.findAll(), filterDto))
+                .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC))
+                .collect(Collectors.toList());
+    }
+
+    public List<Project> getAllProjects() {
+        return projectRepository.findAll();
+    }
+
+    public Project getProjectById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
 
     @Transactional
     public ProjectDto createSubProject(Long parentId, CreateSubProjectDto subProjectDto) {
@@ -41,7 +77,7 @@ public class ProjectService {
 
         validator.validateSubProjectVisibility(parent, subProjectDto);
 
-        Project projectToCreate = projectMapper.toModel(subProjectDto);
+        Project projectToCreate = projectMapper.toEntity(subProjectDto);
 
         parent.getChildren().add(projectToCreate);
 

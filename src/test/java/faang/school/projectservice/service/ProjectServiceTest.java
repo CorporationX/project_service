@@ -7,34 +7,29 @@ import faang.school.projectservice.dto.project.SubProjectFilterDto;
 import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.filter.SubProjectNameFilter;
 import faang.school.projectservice.filter.SubProjectStatusFilter;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.SubProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.DataFormatException;
 
-import static faang.school.projectservice.model.ProjectStatus.COMPLETED;
-import static faang.school.projectservice.model.ProjectStatus.CREATED;
-import static faang.school.projectservice.model.ProjectStatus.IN_PROGRESS;
+import static faang.school.projectservice.model.ProjectStatus.*;
 import static faang.school.projectservice.model.ProjectVisibility.PRIVATE;
 import static faang.school.projectservice.model.ProjectVisibility.PUBLIC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
@@ -47,17 +42,29 @@ public class ProjectServiceTest {
     private MomentService momentService;
     private List<SubProjectFilter> filters;
     private SubProjectValidator validator;
+    private ProjectValidator projectValidator;
+
+    private ProjectDto projectDtoSecond;
+
 
 
     @Captor
     private ArgumentCaptor<Project> captor;
 
+    private Project project;
     private Long parentId;
     private Long projectId;
     private Project parent;
+    private ProjectDto projectDtoFirst;
 
     @BeforeEach
     void setUp() {
+
+        projectDtoFirst = new ProjectDto();
+        project = Project.builder().status(ProjectStatus.CREATED).build();
+        projectDtoSecond = ProjectDto.builder().ownerId(1L).name("Name").description("Description").build();
+
+        projectValidator = Mockito.mock(ProjectValidator.class);
         projectRepository = Mockito.mock(ProjectRepository.class);
         projectMapper = Mockito.spy(ProjectMapperImpl.class);
         momentService = Mockito.mock(MomentService.class);
@@ -67,7 +74,9 @@ public class ProjectServiceTest {
         SubProjectStatusFilter subProjectStatusFilter = Mockito.mock(SubProjectStatusFilter.class);
         filters = List.of(subProjectNameFilter, subProjectStatusFilter);
 
-        projectService = new ProjectService(projectRepository, projectMapper, momentService, filters, validator);
+        projectService = new ProjectService(projectRepository, projectMapper,
+                momentService, filters, validator, projectValidator, new ArrayList<>());
+
 
         parentId = 1L;
         projectId = 2L;
@@ -82,9 +91,9 @@ public class ProjectServiceTest {
 
     @Test
     void testCreateSubProject() {
-        Project parent = Project.builder().id(1L).visibility(PUBLIC).build();
+        Project parent = Project.builder().children(new ArrayList<>()).id(1L).visibility(PUBLIC).build();
         CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder().name("name").visibility(PUBLIC).build();
-        Project projectToCreate = projectMapper.toModel(subProjectDto);
+        Project projectToCreate = projectMapper.toEntity(subProjectDto);
         projectToCreate.setParentProject(parent);
         projectToCreate.setStatus(CREATED);
 
@@ -104,7 +113,6 @@ public class ProjectServiceTest {
         assertThrows(EntityNotFoundException.class,
                 () -> projectService.createSubProject(parentId, new CreateSubProjectDto()));
     }
-
 
     @Test
     void testUpdateSubProject() {
@@ -165,5 +173,31 @@ public class ProjectServiceTest {
         List<ProjectDto> actual = projectService.getSubProjects(projectId, new SubProjectFilterDto());
 
         assertEquals(2, actual.size());
+    }
+
+    @Test
+    public void testCreate_IsRunSave() {
+        when(projectMapper.toEntity(projectDtoFirst)).thenReturn(project);
+        projectService.create(projectDtoFirst);
+        verify(projectRepository, times(1)).save(project);
+    }
+
+    @Test
+    public void testUpdate_IsRunSave() {
+        when(projectMapper.toEntity(projectDtoFirst)).thenReturn(project);
+        projectService.create(projectDtoFirst);
+        verify(projectRepository, times(1)).save(project);
+    }
+
+    @Test
+    public void testGetAllProjects() {
+        projectService.getAllProjects();
+        verify(projectRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void testGetProjectById() {
+        projectService.getProjectById(1L);
+        verify(projectRepository, times(1)).getProjectById(1L);
     }
 }
