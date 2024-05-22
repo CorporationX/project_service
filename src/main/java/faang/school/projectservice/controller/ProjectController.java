@@ -14,7 +14,7 @@ public class ProjectController {
 
     @GetMapping("/project/{projectId}")
     public ProjectDto getProject(@PathVariable long projectId) {
-        return projectService.getById(projectId);
+        return projectService.getProjectById(projectId);
     }
 
     @GetMapping("/project/{projectId}/exists")
