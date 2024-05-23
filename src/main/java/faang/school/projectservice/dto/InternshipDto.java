@@ -3,6 +3,7 @@ package faang.school.projectservice.dto;
 import faang.school.projectservice.model.InternshipStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class InternshipDto {
     private Long id;
 
     @NotBlank(message = "Internship's name can't be empty")
+    @Size(max = 255, message = "The name length should not exceed 255 characters")
     private String name;
 
     @NotBlank(message = "Internship's desc can't be empty")
@@ -47,6 +49,8 @@ public class InternshipDto {
     private Long createdBy;
 
     private Long updatedBy;
+
+    @Size(max = 50, message = "Status cannot be more than 50 characters")
     private InternshipStatus status;
     private List<Long> candidateIds;
     private Long scheduleId;

@@ -4,6 +4,7 @@ import faang.school.projectservice.model.VacancyStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ public class VacancyDto {
     private Long id;
 
     @NotBlank(message = "Vacancy name can't be empty")
+    @Size(max = 255, message = "The name length should not exceed 255 characters")
     private String name;
 
     @NotBlank(message = "Vacancy description can't be empty")
@@ -29,6 +31,7 @@ public class VacancyDto {
     private Long createdBy;
 
     @NotNull(message = "Vacancy status can't be null")
+    @Size(max = 50, message = "Status cannot be more than 50 characters")
     private VacancyStatus status;
 
     private Double salary;
