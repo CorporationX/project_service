@@ -11,16 +11,11 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class VacancyFilterService {
-    private final List<VacancyFilter> vacancyFilters;
+    private final List<VacancyFilter> filters;
 
     public Stream<Vacancy> applyFilter(Stream<Vacancy> vacancies, VacancyFilterDto vacancyFilterDto) {
-        if (vacancyFilterDto != null) {
-            for (VacancyFilter vacancyFilter : vacancyFilters) {
-                if (vacancyFilter.isAcceptable(vacancyFilterDto)) {
-                    vacancies = vacancyFilter.applyFilter(vacancies, vacancyFilterDto);
-                }
-            }
-        }
-        return vacancies;
+        return filters.stream()
+                .filter(filter -> filter.isAcceptable(vacancyFilterDto))
+                .flatMap(filter -> filter.applyFilter(vacancies, vacancyFilterDto));
     }
 }

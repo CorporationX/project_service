@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(MockitoExtension.class)
 public class VacancyFilterTest {
     @Spy
-    private VacancyFilter vacancyFilter;
+    private VacancyFilterByName vacancyFilter;
     private VacancyFilterDto vacancyFilterDto;
     private Vacancy vacancy1;
     private Vacancy vacancy2;

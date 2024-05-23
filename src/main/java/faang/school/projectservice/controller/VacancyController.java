@@ -18,20 +18,16 @@ public class VacancyController {
         return vacancyService.createVacancy(vacancy);
     }
 
-    public VacancyDto closeVacancy(VacancyDto vacancy) {
-        return vacancyService.closeVacancy(vacancy);
-    }
-
-    public VacancyDto hireCandidate(VacancyDto vacancy, long userId, TeamRole teamRole) {
-        return vacancyService.hireCandidate(vacancy, userId, teamRole);
+    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+        return vacancyService.updateVacancy(vacancyDto);
     }
 
     public void deleteVacancy(VacancyDto vacancy) {
         vacancyService.deleteVacancy(vacancy);
     }
 
-    public List<VacancyDto> getVacancyByNameAndPosition(VacancyFilterDto vacancyFilter) {
-        return vacancyService.getVacancyByNameAndPosition(vacancyFilter);
+    public List<VacancyDto> getVacanciesWithFilter(VacancyFilterDto vacancyFilter) {
+        return vacancyService.getVacanciesWithFilter(vacancyFilter);
     }
 
     public VacancyDto getVacancy(long id) {

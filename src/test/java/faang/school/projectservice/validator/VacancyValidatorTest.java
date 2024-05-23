@@ -3,6 +3,8 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,14 +29,20 @@ public class VacancyValidatorTest {
     private ProjectRepository projectRepository;
     private VacancyDto vacancyDto;
     private Vacancy vacancy;
+    private TeamMember teamMember;
     @BeforeEach
     public void init() {
         vacancyDto = new VacancyDto();
+        vacancyDto.setId(1L);
+        vacancyDto.setProjectId(1L);
         vacancyDto.setName("Yandex");
         vacancyDto.setCount(3);
 
         vacancy = new Vacancy();
         vacancy.setCandidates(List.of(new Candidate(), new Candidate()));
+
+        teamMember = new TeamMember();
+        teamMember.setId(1L);
     }
 
     @Test
@@ -86,5 +94,12 @@ public class VacancyValidatorTest {
         DataValidationException thrownException = assertThrows(DataValidationException.class, () -> vacancyValidator.checkExistsVacancy(vacancyDto));
         assertEquals("Vacancy with id" + vacancyDto.getId() + "doesn't exist", thrownException.getMessage());
         verify(vacancyValidator, times(1)).checkExistsVacancy(vacancyDto);
+    }
+
+    @Test
+    public void testIfTeamMemberNotOwnerInVacancy() {
+        doThrow(new DataValidationException("Team member with Id " + teamMember.getId() + " is not " + TeamRole.OWNER)).when(vacancyValidator).validateTeamMember(teamMember);
+        DataValidationException thrownException = assertThrows(DataValidationException.class, () -> vacancyValidator.validateTeamMember(teamMember));
+        assertEquals("Team member with Id 1 is not OWNER", thrownException.getMessage());
     }
 }

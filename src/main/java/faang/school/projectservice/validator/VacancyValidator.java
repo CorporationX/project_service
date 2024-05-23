@@ -2,7 +2,12 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exceptions.NotFoundException;
+import faang.school.projectservice.model.CandidateStatus;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +46,33 @@ public class VacancyValidator {
     }
 
     public void checkExistsVacancy(VacancyDto vacancy) {
-        if (vacancyRepository.existsById(vacancy.getId()))
+        if (vacancy.getId() == null) {
+            throw new NotFoundException("Vacancy doesn't have id");
+        } else if (vacancyRepository.existsById(vacancy.getId())) {
             throw new DataValidationException("Vacancy with id" + vacancy.getId() + "doesn't exist");
+        }
+    }
+
+    public void validateTeamMember(TeamMember teamMember) {
+        if (!teamMember.getRoles().contains(TeamRole.OWNER)) {
+            throw new DataValidationException("Team member with Id " + teamMember.getId() + " is not " + TeamRole.OWNER);
+        }
+    }
+
+    public void checkVacancyStatusIsClosed(Vacancy vacancy) {
+        if (vacancy.getStatus() != VacancyStatus.CLOSED) {
+            throw new DataValidationException("Vacancy can't be closed");
+        }
+    }
+
+    public void checkIfAllCandidatesHaveStatusAccepted(Vacancy vacancy) {
+        long countOfAcceptedCandidates = vacancy.getCandidates()
+                .stream()
+                .filter(candidate -> candidate.getCandidateStatus() == CandidateStatus.ACCEPTED)
+                .count();
+
+        if (countOfAcceptedCandidates < vacancy.getCount()) {
+            throw new DataValidationException("Don't have enough candidates");
+        }
     }
 }

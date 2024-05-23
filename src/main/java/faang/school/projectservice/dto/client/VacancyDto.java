@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -15,5 +17,6 @@ public class VacancyDto {
     private String description;
     private Long projectId;
     private Long createdBy;
-    private Long count;
+    private Integer count;
+    private List<Long> candidatesIds;
 }
