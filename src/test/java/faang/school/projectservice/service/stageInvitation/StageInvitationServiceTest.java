@@ -1,6 +1,8 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.stageInvitation;
 
-import faang.school.projectservice.dto.client.StageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.AcceptStageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.CreateStageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.RejectStageInvitationDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.*;
 import faang.school.projectservice.mapper.InvitationMapper;
@@ -10,6 +12,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.StageInvitationService;
 import faang.school.projectservice.validator.StageInvitationValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +57,9 @@ public class StageInvitationServiceTest {
     @Mock
     private StageRepository stageRepository;
 
-    private StageInvitationDto stageInvitationDto;
+    private CreateStageInvitationDto createStageInvitationDto;
+    private AcceptStageInvitationDto acceptStageInvitationDto;
+    private RejectStageInvitationDto rejectStageInvitationDto;
     private StageInvitation stageInvitation;
     private StageInvitation stageInvitation1;
     private StageInvitation stageInvitation2;
@@ -70,7 +75,9 @@ public class StageInvitationServiceTest {
     public void setUp() {
         teamMember = TeamMember.builder().id(2L).userId(1L).build();
         stage = Stage.builder().stageId(1L).stageName("Name").executors(List.of(teamMember)).build();
-        stageInvitationDto = StageInvitationDto.builder().id(1L).stageId(1L).authorId(1L).invitedId(1L).build();
+        createStageInvitationDto = CreateStageInvitationDto.builder().id(1L).stageId(1L).authorId(1L).invitedId(1L).build();
+        acceptStageInvitationDto = AcceptStageInvitationDto.builder().id(1L).build();
+        rejectStageInvitationDto = RejectStageInvitationDto.builder().id(1L).explanation("text").build();
         stageInvitation = StageInvitation.builder().id(1L).stage(stage).author(teamMember).invited(teamMember).build();
         stageInvitation1 = StageInvitation.builder().id(1L).stage(stage).author(teamMember).invited(teamMember).build();
         stageInvitation2 = StageInvitation.builder().id(1L).stage(new Stage()).author(teamMember).invited(teamMember).build();
@@ -88,87 +95,87 @@ public class StageInvitationServiceTest {
 
     @Test
     public void testCorrectWorkCreateInvitation() {
-        when(stageRepository.getById(stageInvitationDto.getStageId())).thenReturn(stage);
-        when(teamMemberRepository.findById(stageInvitationDto.getInvitedId())).thenReturn(teamMember);
+        when(stageRepository.getById(createStageInvitationDto.getStageId())).thenReturn(stage);
+        when(teamMemberRepository.findById(createStageInvitationDto.getInvitedId())).thenReturn(teamMember);
 
         assertDoesNotThrow(() -> stageInvitationValidator.createValidationService(stage, teamMember));
 
-        when(invitationMapper.toEntity(stageInvitationDto)).thenReturn(stageInvitation);
+        when(invitationMapper.createDtoToEntity(createStageInvitationDto)).thenReturn(stageInvitation);
         when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
-        when(invitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
+        when(invitationMapper.entityToCreateDto(stageInvitation)).thenReturn(createStageInvitationDto);
 
-        StageInvitationDto result = stageInvitationService.createInvitation(stageInvitationDto);
+        CreateStageInvitationDto result = stageInvitationService.createInvitation(createStageInvitationDto);
 
-        assertEquals(stageInvitationDto, result);
-        verify(stageRepository).getById(stageInvitationDto.getStageId());
-        verify(teamMemberRepository).findById(stageInvitationDto.getInvitedId());
-        verify(invitationMapper).toEntity(stageInvitationDto);
+        assertEquals(createStageInvitationDto, result);
+        verify(stageRepository).getById(createStageInvitationDto.getStageId());
+        verify(teamMemberRepository).findById(createStageInvitationDto.getInvitedId());
+        verify(invitationMapper).createDtoToEntity(createStageInvitationDto);
         verify(stageInvitationRepository).save(stageInvitation);
-        verify(invitationMapper).toDto(stageInvitation);
+        verify(invitationMapper).entityToCreateDto(stageInvitation);
     }
 
     @Test
     public void testCreateInvitationWithRepeatStageInvitationDto() {
-        when(stageRepository.getById(stageInvitationDto.getStageId())).thenReturn(stage);
-        when(teamMemberRepository.findById(stageInvitationDto.getInvitedId())).thenReturn(teamMember);
+        when(stageRepository.getById(createStageInvitationDto.getStageId())).thenReturn(stage);
+        when(teamMemberRepository.findById(createStageInvitationDto.getInvitedId())).thenReturn(teamMember);
 
         doThrow(DataValidationException.class).when(stageInvitationValidator).createValidationService(stage, teamMember);
-        assertThrows(DataValidationException.class, () -> stageInvitationService.createInvitation(stageInvitationDto));
+        assertThrows(DataValidationException.class, () -> stageInvitationService.createInvitation(createStageInvitationDto));
     }
 
     @Test
     public void testCreateInvitationWithStageNotAttendInDb() {
-        doThrow(DataValidationException.class).when(stageRepository).getById((stageInvitationDto.getStageId()));
-        assertThrows(DataValidationException.class, () -> stageInvitationService.createInvitation(stageInvitationDto));
+        doThrow(DataValidationException.class).when(stageRepository).getById((createStageInvitationDto.getStageId()));
+        assertThrows(DataValidationException.class, () -> stageInvitationService.createInvitation(createStageInvitationDto));
     }
 
     @Test
     public void testCreateInvitationWithInvitedNotAttendInDb() {
-        doThrow(DataValidationException.class).when(teamMemberRepository).findById((stageInvitationDto.getInvitedId()));
-        assertThrows(DataValidationException.class, () -> stageInvitationService.createInvitation(stageInvitationDto));
+        doThrow(DataValidationException.class).when(teamMemberRepository).findById((createStageInvitationDto.getInvitedId()));
+        assertThrows(DataValidationException.class, () -> stageInvitationService.createInvitation(createStageInvitationDto));
     }
 
     @Test
     public void testCorrectWorkAcceptInvitation() {
-        assertDoesNotThrow(() -> stageInvitationValidator.acceptOrRejectInvitationService(stageInvitationDto));
-        when(invitationMapper.toEntity(stageInvitationDto)).thenReturn(stageInvitation);
-        when(stageInvitationRepository.findById(anyLong())).thenReturn(stageInvitationFromDB);
+        assertDoesNotThrow(() -> stageInvitationValidator.acceptOrRejectInvitationService(acceptStageInvitationDto.getId()));
+        when(invitationMapper.acceptDtoToEntity(acceptStageInvitationDto)).thenReturn(stageInvitation);
+        when(stageInvitationRepository.findById(stageInvitation.getId())).thenReturn(stageInvitationFromDB);
         when(teamMemberRepository.findById(stageInvitationFromDB.getInvited().getId())).thenReturn(teamMember);
-        when(invitationMapper.toDto(stageInvitationFromDB)).thenReturn(stageInvitationDto);
+        when(invitationMapper.entityToAcceptDto(stageInvitationFromDB)).thenReturn(acceptStageInvitationDto);
 
-        StageInvitationDto result = stageInvitationService.acceptInvitation(stageInvitationDto);
+        AcceptStageInvitationDto result = stageInvitationService.acceptInvitation(acceptStageInvitationDto);
 
-        assertEquals(stageInvitationDto, result);
-        verify(invitationMapper).toEntity(stageInvitationDto);
+        assertEquals(acceptStageInvitationDto, result);
+        verify(invitationMapper).acceptDtoToEntity(acceptStageInvitationDto);
         verify(stageInvitationRepository).findById(anyLong());
-        verify(invitationMapper).toDto(stageInvitationFromDB);
+        verify(invitationMapper).entityToAcceptDto(stageInvitationFromDB);
         verify(stageInvitationRepository).save(stageInvitationFromDB);
     }
 
     @Test void testAcceptInvitationWithIncorrectInput() {
-        doThrow(DataValidationException.class).when(stageInvitationValidator).acceptOrRejectInvitationService(stageInvitationDto);
-        assertThrows(DataValidationException.class, () -> stageInvitationService.acceptInvitation(stageInvitationDto));
+        doThrow(DataValidationException.class).when(stageInvitationValidator).acceptOrRejectInvitationService(acceptStageInvitationDto.getId());
+        assertThrows(DataValidationException.class, () -> stageInvitationService.acceptInvitation(acceptStageInvitationDto));
     }
 
     @Test
     public void testCorrectWorkRejectInvitation() {
-        assertDoesNotThrow(() -> stageInvitationValidator.acceptOrRejectInvitationService(stageInvitationDto));
-        when(invitationMapper.toEntity(stageInvitationDto)).thenReturn(stageInvitation);
-        when(stageInvitationRepository.findById(anyLong())).thenReturn(stageInvitationFromDB);
-        when(invitationMapper.toDto(stageInvitationFromDB)).thenReturn(stageInvitationDto);
+        assertDoesNotThrow(() -> stageInvitationValidator.acceptOrRejectInvitationService(rejectStageInvitationDto.getId()));
+        when(invitationMapper.rejectDtoToEntity(rejectStageInvitationDto)).thenReturn(stageInvitation);
+        when(stageInvitationRepository.findById(stageInvitation.getId())).thenReturn(stageInvitationFromDB);
+        when(invitationMapper.entityToRejectDto(stageInvitationFromDB)).thenReturn(rejectStageInvitationDto);
 
-        StageInvitationDto result = stageInvitationService.rejectInvitation(stageInvitationDto);
+        RejectStageInvitationDto result = stageInvitationService.rejectInvitation(rejectStageInvitationDto);
 
-        assertEquals(stageInvitationDto, result);
-        verify(invitationMapper).toEntity(stageInvitationDto);
+        assertEquals(rejectStageInvitationDto, result);
+        verify(invitationMapper).rejectDtoToEntity(rejectStageInvitationDto);
         verify(stageInvitationRepository).findById(stageInvitation.getId());
-        verify(invitationMapper).toDto(stageInvitationFromDB);
+        verify(invitationMapper).entityToRejectDto(stageInvitationFromDB);
     }
 
     @Test
     public void testRejectInvitationWithIncorrectInputInfo() {
-        doThrow(DataValidationException.class).when(stageInvitationValidator).acceptOrRejectInvitationService(stageInvitationDto);
-        assertThrows(DataValidationException.class, () -> stageInvitationService.rejectInvitation(stageInvitationDto));
+        doThrow(DataValidationException.class).when(stageInvitationValidator).acceptOrRejectInvitationService(rejectStageInvitationDto.getId());
+        assertThrows(DataValidationException.class, () -> stageInvitationService.rejectInvitation(rejectStageInvitationDto));
     }
 
     @Test
@@ -186,7 +193,7 @@ public class StageInvitationServiceTest {
 
         when(invitationStageFilter.apply(any(), eq(invitationFilterDto))).thenReturn(Stream.of(stageInvitation, stageInvitation1));
 
-        List<StageInvitationDto> expected = Stream.of(stageInvitation, stageInvitation1).map(invitationMapper::toDto).toList();
+        List<CreateStageInvitationDto> expected = Stream.of(stageInvitation, stageInvitation1).map(invitationMapper::entityToCreateDto).toList();
 
         assertEquals(expected, stageInvitationService.showAllInvitationForMember(2L, invitationFilterDto));
     }

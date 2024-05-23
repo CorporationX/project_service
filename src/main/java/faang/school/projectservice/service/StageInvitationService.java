@@ -1,6 +1,8 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.StageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.AcceptStageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.CreateStageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.RejectStageInvitationDto;
 import faang.school.projectservice.filter.InvitationFilter;
 import faang.school.projectservice.filter.InvitationFilterDto;
 import faang.school.projectservice.mapper.InvitationMapper;
@@ -30,50 +32,50 @@ public class StageInvitationService {
     private final TeamMemberRepository teamMemberRepository;
 
     @Transactional
-    public StageInvitationDto createInvitation(StageInvitationDto stageInvitationDto) {
-        Stage stage = stageRepository.getById(stageInvitationDto.getStageId());
-        TeamMember invited = teamMemberRepository.findById(stageInvitationDto.getInvitedId());
+    public CreateStageInvitationDto createInvitation(CreateStageInvitationDto createStageInvitationDto) {
+        Stage stage = stageRepository.getById(createStageInvitationDto.getStageId());
+        TeamMember invited = teamMemberRepository.findById(createStageInvitationDto.getInvitedId());
 
         stageInvitationValidator.createValidationService(stage, invited);
-        StageInvitation stageInvitation = invitationMapper.toEntity(stageInvitationDto);
+        StageInvitation stageInvitation = invitationMapper.createDtoToEntity(createStageInvitationDto);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
 
-        return invitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
+        return invitationMapper.entityToCreateDto(stageInvitationRepository.save(stageInvitation));
     }
 
     @Transactional
-    public StageInvitationDto acceptInvitation(StageInvitationDto stageInvitationDto) {
-        stageInvitationValidator.acceptOrRejectInvitationService(stageInvitationDto);
-        StageInvitation stageInvitation = invitationMapper.toEntity(stageInvitationDto);
+    public AcceptStageInvitationDto acceptInvitation(AcceptStageInvitationDto acceptStageInvitationDto) {
+        stageInvitationValidator.acceptOrRejectInvitationService(acceptStageInvitationDto.getId());
+        StageInvitation stageInvitation = invitationMapper.acceptDtoToEntity(acceptStageInvitationDto);
         StageInvitation stageInvitationFromDB = stageInvitationRepository.findById(stageInvitation.getId());
 
         stageInvitationFromDB.setStatus(StageInvitationStatus.ACCEPTED);
         addInvitationToProject(stageInvitationFromDB,  stageInvitationFromDB.getInvited().getId());
 
-        return invitationMapper.toDto(stageInvitationFromDB);
+        return invitationMapper.entityToAcceptDto(stageInvitationFromDB);
     }
 
     @Transactional
-    public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto) {
-        stageInvitationValidator.acceptOrRejectInvitationService(stageInvitationDto);
-        StageInvitation stageInvitation = invitationMapper.toEntity(stageInvitationDto);
+    public RejectStageInvitationDto rejectInvitation(RejectStageInvitationDto rejectStageInvitationDto) {
+        stageInvitationValidator.acceptOrRejectInvitationService(rejectStageInvitationDto.getId());
+        StageInvitation stageInvitation = invitationMapper.rejectDtoToEntity(rejectStageInvitationDto);
         StageInvitation stageInvitationFromDB = stageInvitationRepository.findById(stageInvitation.getId());
 
         stageInvitationFromDB.setStatus(StageInvitationStatus.REJECTED);
-        stageInvitationFromDB.setDescription(stageInvitationDto.getExplanation());
+        stageInvitationFromDB.setDescription(rejectStageInvitationDto.getExplanation());
 
-        return invitationMapper.toDto(stageInvitationFromDB);
+        return invitationMapper.entityToRejectDto(stageInvitationFromDB);
     }
 
     @Transactional(readOnly = true)
-    public List<StageInvitationDto> showAllInvitationForMember(Long userId, InvitationFilterDto invitationFilterDto) {
+    public List<CreateStageInvitationDto> showAllInvitationForMember(Long userId, InvitationFilterDto invitationFilterDto) {
         List<StageInvitation> invitations = stageInvitationRepository.findAll().stream()
                 .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(userId)).toList();
 
         return invitationFilters.stream()
                 .filter(filter -> filter.isApplicable(invitationFilterDto))
                 .flatMap(filter -> filter.apply(invitations.stream(), invitationFilterDto))
-                .map(invitationMapper::toDto).toList();
+                .map(invitationMapper::entityToCreateDto).toList();
     }
 
     private void addInvitationToProject(StageInvitation stageInvitation, Long invitationId) {

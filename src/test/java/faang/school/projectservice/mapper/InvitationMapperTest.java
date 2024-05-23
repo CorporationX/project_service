@@ -1,6 +1,8 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.StageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.AcceptStageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.CreateStageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.RejectStageInvitationDto;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -21,41 +23,73 @@ public class InvitationMapperTest {
     @Spy
     private InvitationMapperImpl invitationMapper;
 
-    private StageInvitationDto stageInvitationDto;
+    private CreateStageInvitationDto createStageInvitationDto;
     private StageInvitation stageInvitation;
+    private RejectStageInvitationDto rejectStageInvitationDto;
+    private AcceptStageInvitationDto acceptStageInvitationDto;
 
     @BeforeEach
     public void setUp(){
         TeamMember teamMember = TeamMember.builder().id(2L).userId(1L).build();
         Stage stage = Stage.builder().stageId(1L).stageName("Name").executors(List.of(teamMember)).build();
-        stageInvitationDto = StageInvitationDto.builder().id(1L).stageId(1L).authorId(1L)
-                .invitedId(1L).status(StageInvitationStatus.REJECTED).explanation("text").build();
+        createStageInvitationDto = CreateStageInvitationDto.builder().id(1L).stageId(1L).authorId(1L)
+                .invitedId(1L).build();
 
         stageInvitation = StageInvitation.builder().id(1L).description("text").status(StageInvitationStatus.REJECTED)
                 .stage(stage).author(teamMember).invited(teamMember).build();
+
+        rejectStageInvitationDto = RejectStageInvitationDto.builder().id(1L).explanation("text").build();
+        acceptStageInvitationDto = AcceptStageInvitationDto.builder().id(1L).build();
     }
 
     @Test
-    public void testToEntityMapper() {
-        StageInvitation entity = invitationMapper.toEntity(stageInvitationDto);
+    public void testCreateDtoToEntityMapper() {
+        StageInvitation entity = invitationMapper.createDtoToEntity(createStageInvitationDto);
 
-        assertThat(entity.getId()).isEqualTo(stageInvitationDto.getId());
-        assertThat(entity.getStage().getStageId()).isEqualTo(stageInvitationDto.getStageId());
-        assertThat(entity.getAuthor().getId()).isEqualTo(stageInvitationDto.getAuthorId());
-        assertThat(entity.getInvited().getId()).isEqualTo(stageInvitationDto.getInvitedId());
-        assertThat(entity.getStatus()).isEqualTo(stageInvitationDto.getStatus());
-        assertThat(entity.getDescription()).isEqualTo(stageInvitationDto.getExplanation());
+        assertThat(entity.getId()).isEqualTo(createStageInvitationDto.getId());
+        assertThat(entity.getStage().getStageId()).isEqualTo(createStageInvitationDto.getStageId());
+        assertThat(entity.getAuthor().getId()).isEqualTo(createStageInvitationDto.getAuthorId());
+        assertThat(entity.getInvited().getId()).isEqualTo(createStageInvitationDto.getInvitedId());
+
     }
 
     @Test
-    public void testToDtoMapper() {
-        StageInvitationDto dto = invitationMapper.toDto(stageInvitation);
+    public void testEntityToCreateDtoMapper() {
+        CreateStageInvitationDto dto = invitationMapper.entityToCreateDto(stageInvitation);
 
         assertThat(dto.getId()).isEqualTo(stageInvitation.getId());
         assertThat(dto.getStageId()).isEqualTo(stageInvitation.getStage().getStageId());
         assertThat(dto.getAuthorId()).isEqualTo(stageInvitation.getAuthor().getId());
         assertThat(dto.getInvitedId()).isEqualTo(stageInvitation.getInvited().getId());
-        assertThat(dto.getStatus()).isEqualTo(stageInvitation.getStatus());
+    }
+
+    @Test
+    public void testRejectDtoToEntityMapper() {
+        StageInvitation entity = invitationMapper.rejectDtoToEntity(rejectStageInvitationDto);
+
+        assertThat(entity.getId()).isEqualTo(rejectStageInvitationDto.getId());
+        assertThat(entity.getDescription()).isEqualTo(rejectStageInvitationDto.getExplanation());
+    }
+
+    @Test
+    public void testEntityToRejectDtoMapper() {
+        RejectStageInvitationDto dto = invitationMapper.entityToRejectDto(stageInvitation);
+
+        assertThat(dto.getId()).isEqualTo(stageInvitation.getId());
         assertThat(dto.getExplanation()).isEqualTo(stageInvitation.getDescription());
+    }
+
+    @Test
+    public void testAcceptDtoToEntityMapper() {
+        StageInvitation entity = invitationMapper.acceptDtoToEntity(acceptStageInvitationDto);
+
+        assertThat(entity.getId()).isEqualTo(acceptStageInvitationDto.getId());
+    }
+
+    @Test
+    public void testEntityToAcceptDtoMapper() {
+        AcceptStageInvitationDto dto = invitationMapper.entityToAcceptDto(stageInvitation);
+
+        assertThat(dto.getId()).isEqualTo(stageInvitation.getId());
     }
 }
