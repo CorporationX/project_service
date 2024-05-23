@@ -38,4 +38,8 @@ public class ProjectRepository {
     public boolean existsById(Long id){
         return projectJpaRepository.existsById(id);
     }
+
+    public void delete(long id) {
+        projectJpaRepository.deleteById(id);
+    }
 }

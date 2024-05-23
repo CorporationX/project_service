@@ -1,6 +1,9 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,33 +20,37 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("/project")
 public class ProjectController {
+
+    private final ProjectService projectService;
+    private final ProjectMapper projectMapper;
+
     @PostMapping
     public ProjectDto create(@RequestBody ProjectDto projectDto) {
-        return null;
+        return projectService.create(projectDto);
     }
 
     @PutMapping("/{projectId}")
     public ProjectDto update(@PathVariable long projectId, ProjectDto projectDto) {
-        return null;
+        return projectService.update(projectId, projectDto);
     }
 
-    @GetMapping
-    public List<ProjectDto> getFilteredProject() {
-        return null;
+    @GetMapping("/filtered")
+    public List<ProjectDto> getFilteredProject(@RequestBody ProjectFilterDto filters) {
+        return projectService.getFilteredProject(filters);
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     public List<ProjectDto> getAllProject() {
-        return null;
+        return projectService.getAllProject();
     }
 
     @GetMapping("/{projectId}")
     public ProjectDto getProject(@PathVariable long projectId) {
-        return null;
+        return projectMapper.projectToDto(projectService.findById(projectId));
     }
 
     @DeleteMapping("/{projectId}")
-    public void deleteProject(@PathVariable long projectId) {
-
+    public void delete(@PathVariable long projectId) {
+        projectService.delete(projectId);
     }
 }
