@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.InternshipDto;
 import faang.school.projectservice.dto.InternshipFilterDto;
 import faang.school.projectservice.service.InternshipService;
-import faang.school.projectservice.validation.InternshipValidator;
+import faang.school.projectservice.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
