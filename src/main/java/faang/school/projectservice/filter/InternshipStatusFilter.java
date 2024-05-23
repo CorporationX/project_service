@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.filter;
+package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
@@ -8,14 +8,14 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Component
-public class InternshipRoleFilter implements InternshipFilter {
+public class InternshipStatusFilter implements InternshipFilter {
     @Override
     public boolean isApplicable(InternshipFilterDto filters) {
-        return filters.getName() != null;
+        return filters.getStatus() != null;
     }
 
     @Override
     public Stream<Internship> apply(Supplier<Stream<Internship>> internships, InternshipFilterDto filters) {
-        return internships.get().filter(internship -> filters.getName().equals(internship.getName()));
+        return internships.get().filter(internship -> filters.getStatus().equals(internship.getStatus()));
     }
 }
