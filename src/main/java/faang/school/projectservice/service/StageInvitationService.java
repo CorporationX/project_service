@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.StageInvitationFilterDto;
 import faang.school.projectservice.dto.stage_invintation.StageInvitationDto;
-import faang.school.projectservice.exception.DataValidationStageInvitationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -78,7 +78,7 @@ public class StageInvitationService {
 
     private void checkAndSetStatus(StageInvitation stageInvitation, StageInvitationStatus oldStatus, StageInvitationStatus updatedStatus) {
         if (!stageInvitation.getStatus().equals(oldStatus)) {
-            throw new DataValidationStageInvitationException("This task cannot be accepted yet.");
+            throw new DataValidationException("This task cannot be accepted yet.");
         }
         stageInvitation.setStatus(updatedStatus);
     }
