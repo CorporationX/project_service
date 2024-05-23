@@ -162,6 +162,7 @@ public class InternshipService {
 
     @Transactional(readOnly = true)
     public InternshipDto findById(long id) {
+        log.info("Find by id {}", id);
         return internshipMapper.toDto(internshipRepository.findById(id));
     }
 

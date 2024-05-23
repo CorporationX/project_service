@@ -17,6 +17,7 @@ public class InternshipRepository {
     }
 
     public Internship findById(Long id) {
+        System.out.println("Find by ID from repository: " + id);
         return internshipJpaRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Internship doesn't exist by id: %s", id)));
     }
