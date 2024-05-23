@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    jacoco
 }
 
 group = "faang.school"
@@ -71,3 +72,36 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+    executionData(fileTree(project.rootDir.absolutePath).include("**/build/jacocoHtml/index.xml"))
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                isEnabled = false
+                minimum = 0.7.toBigDecimal()
+            }
+        }
+
+        rule {
+            isEnabled = true
+            element = "CLASS"
+            includes = listOf("faang.school.postservice.*")
+        }
+    }
+}
+
