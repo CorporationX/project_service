@@ -38,8 +38,8 @@ public class StageInvitationController {
         return stageInvitationService.rejectInvitation(rejectStageInvitationDto);
     }
 
-    @GetMapping("/filter/{userId}")
-    public List<CreateStageInvitationDto> showAllInvitationForMember(@PathVariable @NotNull Long userId, @RequestBody InvitationFilterDto invitationFilterDto) {
+    @GetMapping("/filter")
+    public List<CreateStageInvitationDto> showAllInvitationForMember(@RequestParam("userId") @NotNull Long userId, @RequestBody InvitationFilterDto invitationFilterDto) {
         log.info("Received show all invitations request for userId: {}, with filter: {}", userId, invitationFilterDto);
         return stageInvitationService.showAllInvitationForMember(userId, invitationFilterDto);
     }
