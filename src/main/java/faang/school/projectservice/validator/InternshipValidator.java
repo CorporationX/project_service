@@ -24,33 +24,6 @@ public class InternshipValidator {
     @Value("${internship.period}")
     private long INTERNSHIP_PERIOD;
 
-    public void validateInternshipDto(InternshipDto internshipDto) {
-        if (internshipDto.getName().isBlank()) {
-            throw new DataValidationException("Internship's name can't be empty");
-        }
-        if (internshipDto.getDescription().isBlank()) {
-            throw new DataValidationException("Internship's desc can't be empty");
-        }
-        if (internshipDto.getProjectId() == null) {
-            throw new DataValidationException("Project ID can't be null");
-        }
-        if (internshipDto.getMentorId() == null) {
-            throw new DataValidationException("Mentor ID can't be null");
-        }
-        if (internshipDto.getCandidateIds() == null) {
-            throw new DataValidationException("Candidate's list can't be null");
-        }
-        if (internshipDto.getStartDate() == null) {
-            throw new DataValidationException("Internship's start date can't be null");
-        }
-        if (internshipDto.getEndDate() == null) {
-            throw new DataValidationException("Internship's end date can't be null");
-        }
-        if (internshipDto.getCreatedBy() == null) {
-            throw new DataValidationException("Created by can't be null");
-        }
-    }
-
     public void validateCandidatesList(int countInternMembers) {
         if (countInternMembers == 0) {
             String message = "Intern's list is empty";
