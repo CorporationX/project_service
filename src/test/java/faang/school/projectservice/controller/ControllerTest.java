@@ -4,7 +4,7 @@ import faang.school.projectservice.controller.stageInvitation.StageInvitationCon
 import faang.school.projectservice.dto.stageInvitation.AcceptStageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.CreateStageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.RejectStageInvitationDto;
-import faang.school.projectservice.filter.InvitationFilterDto;
+import faang.school.projectservice.filter.invitationFilter.InvitationFilterDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.StageInvitationService;
 import org.junit.jupiter.api.BeforeEach;

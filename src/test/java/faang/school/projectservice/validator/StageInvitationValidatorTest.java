@@ -2,13 +2,10 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.stageInvitation.AcceptStageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.CreateStageInvitationDto;
-import faang.school.projectservice.dto.stageInvitation.RejectStageInvitationDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.InvitationFilterDto;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

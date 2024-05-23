@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.stageInvitation.AcceptStageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.CreateStageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.RejectStageInvitationDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.*;
+import faang.school.projectservice.filter.invitationFilter.*;
 import faang.school.projectservice.mapper.InvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -131,6 +131,8 @@ public class StageInvitationServiceTest {
 
     @Test
     public void testCreateInvitationWithInvitedNotAttendInDb() {
+        when(stageRepository.getById(createStageInvitationDto.getStageId())).thenReturn(stage);
+
         doThrow(DataValidationException.class).when(teamMemberRepository).findById((createStageInvitationDto.getInvitedId()));
         assertThrows(DataValidationException.class, () -> stageInvitationService.createInvitation(createStageInvitationDto));
     }

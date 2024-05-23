@@ -1,7 +1,6 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.invitationFilter;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
