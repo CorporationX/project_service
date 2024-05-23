@@ -44,13 +44,13 @@ public class VacancyService {
 
         Vacancy vacancy = vacancyRepository.getReferenceById(vacancyDto.getId());
 
-//        if (vacancy.getStatus() == VacancyStatus.CLOSED) {
-//            vacancyValidator.validateCountOfCandidate(vacancy);
-//            vacancyValidator.checkIfAllCandidatesHaveStatusAccepted(vacancy);
-//
-//            Vacancy savedVacancy = vacancyRepository.save(vacancy);
-//            return vacancyMapper.toDto(savedVacancy);
-//        }
+        if (vacancy.getStatus() == VacancyStatus.CLOSED) {
+            vacancyValidator.validateCountOfCandidate(vacancy);
+            vacancyValidator.checkIfAllCandidatesHaveStatusAccepted(vacancy);
+
+            Vacancy savedVacancy = vacancyRepository.save(vacancy);
+            return vacancyMapper.toDto(savedVacancy);
+        }
 
         Vacancy savedVacancy = vacancyRepository.save(vacancy);
         return vacancyMapper.toDto(savedVacancy);

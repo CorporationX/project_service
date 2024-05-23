@@ -86,6 +86,17 @@ public class VacancyServiceTest {
         vacancyService.updateVacancy(vacancyDto);
         Mockito.verify(vacancyRepository, Mockito.times(1)).save(vacancy);
     }
+
+    @Test
+    public void testUpdateVacancyIfClosed(){
+        vacancy.setStatus(VacancyStatus.CLOSED);
+        Mockito.doNothing().when(vacancyValidator).checkExistsVacancy(vacancyDto);
+        Mockito.when(vacancyRepository.getReferenceById(vacancyDto.getId())).thenReturn(vacancy);
+        Mockito.when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
+        vacancyService.updateVacancy(vacancyDto);
+        Mockito.verify(vacancyRepository, Mockito.times(1)).save(vacancy);
+    }
+
     @Test
     public void testDeleteVacancy() {
         List<Long> candidatesIds = List.of(1L);
