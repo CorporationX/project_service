@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.exception.DataValidationStageInvitationException;
+import faang.school.projectservice.exception.DataValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,13 +24,13 @@ public class StageInvitationValidatorTest {
     @Test
     public void testValidateIdWithNull() {
         Long id = null;
-        assertThrows(DataValidationStageInvitationException.class, () -> stageInvitationValidator.validateId(id));
+        assertThrows(DataValidationException.class, () -> stageInvitationValidator.validateId(id));
     }
 
     @Test
     public void testValidateIdLessThanOrEqualZero() {
         Long id = 0L;
-        assertThrows(DataValidationStageInvitationException.class, () -> stageInvitationValidator.validateId(id));
+        assertThrows(DataValidationException.class, () -> stageInvitationValidator.validateId(id));
     }
 
     @Test
@@ -42,12 +42,12 @@ public class StageInvitationValidatorTest {
     @Test
     public void testValidateDescriptionWithNull() {
         String description = null;
-        assertThrows(DataValidationStageInvitationException.class, () -> stageInvitationValidator.validateDescription(description));
+        assertThrows(DataValidationException.class, () -> stageInvitationValidator.validateDescription(description));
     }
 
     @Test
     public void testValidateDescriptionWithEmpty() {
         String description = "     ";
-        assertThrows(DataValidationStageInvitationException.class, () -> stageInvitationValidator.validateDescription(description));
+        assertThrows(DataValidationException.class, () -> stageInvitationValidator.validateDescription(description));
     }
 }
