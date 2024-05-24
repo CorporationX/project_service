@@ -1,6 +1,6 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.service.vacancy.filters;
 
-import faang.school.projectservice.dto.client.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;
 import org.springframework.stereotype.Component;
 

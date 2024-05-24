@@ -1,9 +1,8 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.VacancyDto;
-import faang.school.projectservice.dto.client.VacancyFilterDto;
-import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.VacancyService;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.service.vacancy.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 

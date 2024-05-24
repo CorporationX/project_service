@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto.teammember;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -6,6 +6,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class TeamMemberDto {
-    private long id;
-    private long userId;
+    private Long id;
+    private Long userId;
 }

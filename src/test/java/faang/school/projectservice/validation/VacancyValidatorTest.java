@@ -1,12 +1,13 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validation;
 
-import faang.school.projectservice.dto.client.VacancyDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.validation.vacancy.VacancyValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

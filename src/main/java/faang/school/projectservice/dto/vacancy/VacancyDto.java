@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto.vacancy;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

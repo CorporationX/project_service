@@ -1,14 +1,17 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.service.vacancy.filters;
 
-import faang.school.projectservice.dto.client.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;
 
 import java.util.stream.Stream;
 
 public class VacancyFilterByCount implements VacancyFilter {
+
     @Override
     public boolean isAcceptable(VacancyFilterDto vacancyFilterDto) {
-        return vacancyFilterDto.getCount() > 0;
+        if (vacancyFilterDto != null) {
+            return true;
+        } else return vacancyFilterDto.getCount() > 0;
     }
 
     @Override

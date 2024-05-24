@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto.vacancy;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,5 +7,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class VacancyFilterDto {
     private String name;
-    private long count;
+    private Long count;
 }

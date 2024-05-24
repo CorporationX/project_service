@@ -1,13 +1,12 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validation.vacancy;
 
-import faang.school.projectservice.dto.client.VacancyDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class VacancyValidator {
+
     private final ProjectRepository projectRepository;
     private final VacancyRepository vacancyRepository;
 
@@ -59,13 +59,7 @@ public class VacancyValidator {
         }
     }
 
-    public void checkVacancyStatusIsClosed(Vacancy vacancy) {
-        if (vacancy.getStatus() != VacancyStatus.CLOSED) {
-            throw new DataValidationException("Vacancy can't be closed");
-        }
-    }
-
-    public void checkIfAllCandidatesHaveStatusAccepted(Vacancy vacancy) {
+    public void checkAcceptedCandidatesCount(Vacancy vacancy) {
         long countOfAcceptedCandidates = vacancy.getCandidates()
                 .stream()
                 .filter(candidate -> candidate.getCandidateStatus() == CandidateStatus.ACCEPTED)

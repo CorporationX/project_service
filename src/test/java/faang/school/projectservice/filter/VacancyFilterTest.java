@@ -1,6 +1,7 @@
 package faang.school.projectservice.filter;
 
-import faang.school.projectservice.dto.client.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.service.vacancy.filters.VacancyFilterByName;
 import faang.school.projectservice.model.Vacancy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,21 +39,21 @@ public class VacancyFilterTest {
     @Test
     public void testVacancyFilterIsAccept() {
         vacancyFilterDto.setName("Java");
-        vacancyFilterDto.setCount(9999);
+        vacancyFilterDto.setCount(9999L);
         assertTrue(vacancyFilter.isAcceptable(vacancyFilterDto));
     }
 
     @Test
     public void testVacancyFilterIsNotAccept() {
         vacancyFilterDto.setName(null);
-        vacancyFilterDto.setCount(0);
+        vacancyFilterDto.setCount(0L);
         assertFalse(vacancyFilter.isAcceptable(vacancyFilterDto));
     }
 
     @Test
     public void testApplyFilter() {
         vacancyFilterDto.setName("Java");
-        vacancyFilterDto.setCount(3000);
+        vacancyFilterDto.setCount(3000L);
         Vacancy[] expected = new Vacancy[]{vacancy1};
         Stream<Vacancy> out = vacancyFilter.applyFilter(Stream.of(vacancy1, vacancy2), vacancyFilterDto);
         assertArrayEquals(expected, out.toArray());
