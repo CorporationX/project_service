@@ -6,11 +6,13 @@ import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.service.commonServiceMethods.CommonMethods;
 import faang.school.projectservice.service.internship.filter.InternshipFilterService;
 import faang.school.projectservice.validation.internship.InternshipValidator;
@@ -19,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +35,7 @@ public class InternshipServiceImpl implements InternshipService {
     private final InternshipMapper internshipMapper;
     private final InternshipFilterService internshipFilterService;
     private final ProjectRepository projectRepository;
+    private final TeamRepository teamRepository;
     private final CommonMethods commonMethods;
 
     @Override
@@ -39,7 +43,6 @@ public class InternshipServiceImpl implements InternshipService {
     public InternshipDto createInternship(long userId, InternshipDto internshipDto) {
 
         Internship internship = internshipMapper.toEntity(internshipDto);
-        setMentorToInternship(internship);
         internship.setCreatedBy(userId);
 
         validator.validateCreateInternship(userId, internship, internshipDto);
@@ -48,26 +51,46 @@ public class InternshipServiceImpl implements InternshipService {
         internshipRepository.save(internship);
         log.info("Created internship {}", internship.getId());
         return internshipMapper.toDto(internship);
+
+//        Duration duration = Duration.between(internshipDto.getStartDate(), internshipDto.getEndDate());
+//        if (duration.toDays() > 90) {
+//            throw new IllegalArgumentException("Internship duration cannot exceed 3 months");
+//        }
+//
+//        TeamMember mentor = teamMemberRepository.findById(internshipDto.getMentorId());
+//        Team t = mentor.getTeam();
+//        Team team = teamRepository.findById(t.getId())
+//                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+//
+//        Project p = team.getProject();
+//        if (p.getId() != internshipDto.getProjectId()) {
+//            throw new IllegalArgumentException("Mentor is not part of the project team");
+//        }
+//
+//        // Validate interns
+//        List<TeamMember> interns = new ArrayList<>();
+//        for (Long internId : internshipDto.getInternsId()) {
+//            TeamMember intern = teamMemberRepository.findById(internId);
+//            interns.add(intern);
+//        }
+//
+//        Internship internship = internshipMapper.toEntity(internshipDto);
+//        internship.setCreatedBy(userId);
+//        internshipRepository.save(internship);
+//        return internshipMapper.toDto(internship);
     }
 
-    private void addInternsToInternship(Internship internship) {
-        List<TeamMember> interns = internship.getInterns();
-        for (TeamMember intern : interns) {
-            internshipRepository.addInternToInternship(internship.getId(), intern.getId());
-        }
-    }
-
-    private void setMentorToInternship(Internship internship) {
+    private TeamMember setMentorToInternship(long userId, InternshipDto internshipDto) {
         TeamMember mentor = teamMemberRepository.findByUserIdAndProjectId(
-                internship.getMentor().getUserId(),
-                internship.getProject().getId());
+                userId,
+                internshipDto.getProjectId());
 
         if(mentor == null){
             throw new NotFoundException(
-                    String.format("Mentor %s not found", internship.getMentor().getId()));
+                    String.format("Mentor %s not found", internshipDto.getMentorId()));
         }
 
-        internship.setMentor(mentor);
+        return mentor;
     }
 
     @Override

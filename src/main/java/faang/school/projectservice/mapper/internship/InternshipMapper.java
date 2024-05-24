@@ -18,20 +18,15 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface InternshipMapper {
 
-    @Mappings({
-            @Mapping(target = "mentorId", source = "mentor", qualifiedByName = "mentorToMentorId"),
-            @Mapping(target = "projectId", source = "project.id"),
-            @Mapping(source = "interns", target = "internsId", qualifiedByName = "toInternId")
-    })
+    @Mapping(target = "mentorId", source = "mentor", qualifiedByName = "mentorToMentorId")
+    @Mapping(target = "projectId", source = "project.id")
+    @Mapping(source = "interns", target = "internsId", qualifiedByName = "toInternId")
     InternshipDto toDto(Internship entity);
 
-    @Mappings({
-            @Mapping(target = "mentor", source = "mentorId", qualifiedByName = "mentorIdToMentor"),
-            @Mapping(target = "project.id", source = "projectId"),
-            @Mapping(target = "schedule.id", source = "scheduleId"),
-            @Mapping(source = "internsId", target = "interns", qualifiedByName = "internIdToInterns")
-
-    })
+    @Mapping(target = "mentor", source = "mentorId", qualifiedByName = "mentorIdToMentor")
+    @Mapping(target = "project.id", source = "projectId")
+    @Mapping(target = "schedule.id", source = "scheduleId")
+    @Mapping(source = "internsId", target = "interns", qualifiedByName = "internIdToInterns")
     Internship toEntity(InternshipDto dto);
 
     void update(InternshipDto dto, @MappingTarget Internship entity);
@@ -44,7 +39,7 @@ public interface InternshipMapper {
     @Named("mentorIdToMentor")
     default TeamMember mentorIdToMentor(long mentorId) {
         TeamMember teamMember = new TeamMember();
-        teamMember.setUserId(mentorId);
+        teamMember.setId(mentorId);
         return teamMember;
     }
 
@@ -54,12 +49,15 @@ public interface InternshipMapper {
             return new ArrayList<>();
         }
         return interns.stream()
-                .map(TeamMember::getUserId)
-                .toList();
+                .map(TeamMember::getId)
+                .collect(Collectors.toList());
     }
 
     @Named("internIdToInterns")
     default List<TeamMember> internIdToInterns(List<Long> internsId) {
+        if (internsId == null) {
+            return new ArrayList<>();
+        }
         return internsId.stream()
                 .map(id -> {
                     TeamMember intern = new TeamMember();

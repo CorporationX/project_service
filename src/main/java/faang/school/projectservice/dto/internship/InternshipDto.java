@@ -1,17 +1,13 @@
 package faang.school.projectservice.dto.internship;
 
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.TeamMember;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -20,18 +16,22 @@ import java.util.List;
 @NoArgsConstructor
 public class InternshipDto {
 
+    @NotNull(message = "Project ID cannot be null")
     private long projectId;
+    @NotNull(message = "Mentor ID cannot be null")
     private long mentorId;
-    private List<Long> internsId = new ArrayList<>();
-    @NotNull(message = "description cannot be empty")
+    @NotEmpty(message = "Interns ID list cannot be empty")
+    private List<Long> internsId;
+    @NotNull(message = "Description cannot be null")
     private String description;
-    @NotNull(message = "name cannot be empty")
+    @NotNull(message = "Name cannot be null")
     private String name;
-    @NotNull(message = "start date cannot be empty")
+    @NotNull(message = "Start date cannot be null")
     private LocalDateTime startDate;
-    @NotNull(message = "end date cannot be empty")
+    @NotNull(message = "End date cannot be null")
     private LocalDateTime endDate;
-    @NotNull(message = "status cannot be empty")
+    @NotNull(message = "Status cannot be null")
     private String status;
-    private long scheduleId;
+    @NotNull(message = "Schedule ID cannot be null")
+    private Long scheduleId;
 }

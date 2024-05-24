@@ -25,4 +25,9 @@ public class TeamMemberRepository {
         return jpaRepository.findByUserIdAndProjectId(userId, projectId).orElseThrow(() ->
                 new NotFoundException(String.format("Team member doesn't exist by id: %s", userId)));
     }
+
+    public TeamMember findByTeamMemberUserId(long userId) {
+        return jpaRepository.findByTeamMemberUserId(userId).orElseThrow(() ->
+                new NotFoundException(String.format("Team member doesn't exist by id: %s", userId)));
+    }
 }

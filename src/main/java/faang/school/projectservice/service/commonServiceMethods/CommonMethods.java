@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.commonServiceMethods;
 
-import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.exceptions.NotFoundException;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 

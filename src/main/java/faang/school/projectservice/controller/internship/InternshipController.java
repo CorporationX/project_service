@@ -44,7 +44,6 @@ public class InternshipController {
     @ResponseStatus(HttpStatus.CREATED)
     public InternshipDto createInternship(@RequestBody @Valid InternshipDto internshipDto) {
         long userId = userContext.getUserId();
-        System.out.println("USER ID:" + userId);
         return internshipService.createInternship(userId, internshipDto);
     }
 

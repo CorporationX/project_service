@@ -34,10 +34,8 @@ public class InternshipValidator {
     private final ScheduleRepository scheduleRepository;
 
     public void validateCreateInternship(long userId, Internship internship, InternshipDto internshipDto) {
-        ;
 
-//        userValidator.validateUserExistence(userId);
-        validateDates(internship.getStartDate(), internship.getEndDate());
+        userValidator.validateUserExistence(userId);
         validateInternshipProperties(internship, internshipDto);
     }
 
@@ -79,9 +77,11 @@ public class InternshipValidator {
     private void validateInternshipProperties(Internship internship, InternshipDto internshipDto) {
         validateProjectExistence(internship);
         validateInternsExistence(internship);
-        validateInternshipDuration(internship);
         validateStatusExistence(internshipDto);
         validateScheduleExistence(internship);
+        validateInternshipDuration(internship);
+        validateDates(internship.getStartDate(), internship.getEndDate());
+
     }
 
     private void validateStatusExistence(InternshipDto internshipDto) {
