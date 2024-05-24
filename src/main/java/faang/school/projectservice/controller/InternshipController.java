@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.InternshipDto;
 import faang.school.projectservice.dto.InternshipFilterDto;
 import faang.school.projectservice.service.InternshipService;
+import faang.school.projectservice.validator.InternshipValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
