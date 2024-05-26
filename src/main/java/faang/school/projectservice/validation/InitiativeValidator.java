@@ -19,24 +19,6 @@ public class InitiativeValidator {
     private final StageRepository stageRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-    public void validate(InitiativeDto initiative) {
-        if (initiative.getProjectId() == null) {
-            throw new DataValidationException("initiative projectId must not be null");
-        }
-        if (initiative.getName() == null || initiative.getName().isBlank()) {
-            throw new DataValidationException("initiative name must not be null");
-        }
-        if (initiative.getDescription() == null || initiative.getDescription().isBlank()) {
-            throw new DataValidationException("initiative description must not be null");
-        }
-        if (initiative.getCuratorId() == null) {
-            throw new DataValidationException("initiative curatorId must not be null");
-        }
-        if (initiative.getStatus() == null) {
-            throw new DataValidationException("initiative status must not be null");
-        }
-    }
-
     public void validateCurator(InitiativeDto initiative) {
         TeamMember curator = teamMemberRepository.findById(initiative.getCuratorId());
 
