@@ -6,6 +6,8 @@ import faang.school.projectservice.service.ProjectServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -21,20 +23,20 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/projects")
+@RequestMapping("${api.default:/api/v1}/projects")
 @Tag(name = "Project")
 public class ProjectController {
     private final ProjectServiceImpl projectService;
 
     @Operation(summary = "Create project")
     @PostMapping
-    public ProjectDto create(@ParameterObject @RequestBody @NonNull ProjectDto projectDto) {
+    public ProjectDto create(@Valid @ParameterObject @RequestBody @NonNull ProjectDto projectDto) {
         return projectService.create(projectDto);
     }
 
     @Operation(summary = "Update project")
     @PutMapping
-    public ProjectDto update(@ParameterObject @RequestBody @NonNull ProjectDto projectDto) {
+    public ProjectDto update(@Valid @ParameterObject @RequestBody @NonNull ProjectDto projectDto) {
         return projectService.update(projectDto);
     }
 
@@ -46,7 +48,7 @@ public class ProjectController {
 
     @Operation(summary = "Get project by projectId")
     @GetMapping("/{id}")
-    public ProjectDto findById(@Parameter @PathVariable long id) {
+    public ProjectDto findById(@Positive @Parameter @PathVariable long id) {
         return projectService.findById(id);
     }
 
