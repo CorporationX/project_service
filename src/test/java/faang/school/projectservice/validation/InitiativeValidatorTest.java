@@ -74,67 +74,6 @@ class InitiativeValidatorTest {
     }
 
     @Test
-    void validateNullProject() {
-        dto.setProjectId(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative projectId must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateNullName() {
-        dto.setName(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative name must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateBlankName() {
-        dto.setName("  ");
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative name must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateNullDescription() {
-        dto.setDescription(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative description must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateBlankDescription() {
-        dto.setDescription("   ");
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative description must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateNullCuratorId() {
-        dto.setCuratorId(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative curatorId must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateNullStatus() {
-        dto.setStatus(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative status must not be null", e.getMessage());
-    }
-
-    @Test
-    void validate() {
-        assertDoesNotThrow(() -> validator.validate(dto));
-    }
-
-    @Test
     void validateCuratorNotOwner() {
         curator.setRoles(List.of(TeamRole.INTERN));
 

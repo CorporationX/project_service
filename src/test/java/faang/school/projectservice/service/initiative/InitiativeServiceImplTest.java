@@ -93,7 +93,6 @@ class InitiativeServiceImplTest {
         assertEquals(dto, actual);
 
         InOrder inOrder = inOrder(validator, mapper, initiativeRepository);
-        inOrder.verify(validator, times(1)).validate(dto);
         inOrder.verify(validator, times(1)).validateCurator(dto);
         inOrder.verify(mapper, times(1)).toEntity(dto);
         inOrder.verify(initiativeRepository, times(1)).save(initiative);
@@ -110,7 +109,6 @@ class InitiativeServiceImplTest {
         assertEquals(dto, actual);
 
         InOrder inOrder = inOrder(validator, mapper, initiativeRepository);
-        inOrder.verify(validator, times(1)).validate(dto);
         inOrder.verify(validator, times(1)).validateCurator(dto);
         inOrder.verify(mapper, times(1)).toEntity(dto);
         inOrder.verify(initiativeRepository, times(1)).save(initiative);
@@ -129,7 +127,6 @@ class InitiativeServiceImplTest {
         assertEquals(dto, actual);
 
         InOrder inOrder = inOrder(validator, mapper, initiativeRepository, momentService);
-        inOrder.verify(validator, times(1)).validate(dto);
         inOrder.verify(validator, times(1)).validateCurator(dto);
         inOrder.verify(mapper, times(1)).toEntity(dto);
         inOrder.verify(validator, times(1)).validateClosedInitiative(dto);

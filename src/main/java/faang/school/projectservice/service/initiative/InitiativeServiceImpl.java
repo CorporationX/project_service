@@ -26,7 +26,6 @@ public class InitiativeServiceImpl implements InitiativeService {
 
     @Override
     public InitiativeDto create(InitiativeDto initiative) {
-        validator.validate(initiative);
         validator.validateCurator(initiative);
 
         Initiative entity = mapper.toEntity(initiative);
@@ -37,7 +36,6 @@ public class InitiativeServiceImpl implements InitiativeService {
 
     @Override
     public InitiativeDto update(InitiativeDto initiative) {
-        validator.validate(initiative);
         validator.validateCurator(initiative);
 
         Initiative entity = mapper.toEntity(initiative);
