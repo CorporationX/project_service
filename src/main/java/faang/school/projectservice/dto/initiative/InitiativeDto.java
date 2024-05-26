@@ -4,6 +4,7 @@ import faang.school.projectservice.model.initiative.InitiativeStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,9 +23,11 @@ public class InitiativeDto {
     private Long id;
 
     @NotBlank(message = "Name should not be blank")
+    @Size(max = 64)
     private String name;
 
     @NotBlank(message = "Description should not be blank")
+    @Size(max = 4096)
     private String description;
 
     @Positive(message = "CuratorId should be positive")
