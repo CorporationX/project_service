@@ -16,6 +16,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class InitiativeValidator {
+
     private final StageRepository stageRepository;
     private final TeamMemberRepository teamMemberRepository;
 
