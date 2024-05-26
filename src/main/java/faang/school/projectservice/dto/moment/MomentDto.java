@@ -20,11 +20,9 @@ public class MomentDto {
     @NotNull(message = "Id should not be null")
     private Long id;
 
-    @NotNull(message = "Name should not be null")
     @NotBlank(message = "Name should not be blank")
     private String name;
 
-    @NotNull(message = "Description should not be null")
     @NotBlank(message = "Description should not be blank")
     private String description;
 
