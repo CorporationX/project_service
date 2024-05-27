@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
+import  com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageInvitationFilterDTO;
 import faang.school.projectservice.mapper.StageInvitationMapper;
@@ -8,6 +8,8 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.filter.InvitationFilter;
+import faang.school.projectservice.validation.StageInvitationValidation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,22 +22,17 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationRepository stageInvitationRepository;
     private final StageInvitationMapper stageInvitationMapper;
     private final List<InvitationFilter> invitationFilters;
+    private final StageInvitationValidation stageInvitationValidation;
 
     @Override
-    public void sendInvitation(StageInvitationDto stageInvitationDto) {
-        if (stageInvitationDto == null) {
-            throw new IllegalArgumentException("StageInvitationDto cannot be null");
-        }
+    public void sendInvitation(@Valid StageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
         stageInvitationRepository.save(stageInvitation);
     }
 
     @Override
     public void acceptInvitation(Long invitationId) {
-        StageInvitation stageInvitation = stageInvitationRepository.findById(invitationId);
-        if (stageInvitation == null) {
-            throw new NotFoundException("Invitation not found with id: " + invitationId);
-        }
+        StageInvitation stageInvitation = stageInvitationValidation.validateInvitationExists(invitationId);
         if (stageInvitation.getStatus() == StageInvitationStatus.PENDING) {
             stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
             stageInvitationRepository.save(stageInvitation);
@@ -46,6 +43,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
 
     @Override
     public void rejectInvitationWithReason(Long invitationId, String rejectionReason) {
+
         StageInvitation stageInvitation = stageInvitationRepository.findById(invitationId);
         if (stageInvitation == null) {
             throw new NotFoundException("Invitation not found with id: " + invitationId);
