@@ -8,7 +8,5 @@ public interface ProjectResourceValidator {
 
     void validateMaxStorageSize(Project project, long newFileLength);
 
-    void validateExistence(String key);
-
     void validateDeletePermission(TeamMember teamMember, Resource resource);
 }

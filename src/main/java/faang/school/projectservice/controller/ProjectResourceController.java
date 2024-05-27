@@ -37,10 +37,10 @@ public class ProjectResourceController {
         return projectResourceService.saveFile(currentUserId, projectId, file);
     }
 
-    @GetMapping("/projects/{projectId}/resources/{resourceID}")
+    @GetMapping("/projects/{projectId}/resources/{resourceId}")
     @Operation(summary = "Get project file by id")
     public InputStream getFile(@Positive @PathVariable long projectId,
-                               @Positive @PathVariable long resourceId) {
+                                         @Positive @PathVariable long resourceId) {
         long currentUserId = userContext.getUserId();
         return projectResourceService.getFile(currentUserId, projectId, resourceId);
     }

@@ -19,6 +19,7 @@ import java.util.List;
 public class ResourceDto {
     private Long id;
     private String key;
+    private String name;
     private BigInteger size;
     private List<TeamRole> allowedRoles;
     private ResourceType type;
