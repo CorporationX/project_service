@@ -45,6 +45,7 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    maxFreeStorageSizeBytes: 2147483648
   payment-service:
     host: http://localhost
     port: 9080
