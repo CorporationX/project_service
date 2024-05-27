@@ -1,9 +1,10 @@
-package faang.school.projectservice.service.filter;
+package faang.school.projectservice.filter;
 
 
 import faang.school.projectservice.dto.stage.StageInvitationFilterDTO;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.service.filter.InvitationAuthorFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

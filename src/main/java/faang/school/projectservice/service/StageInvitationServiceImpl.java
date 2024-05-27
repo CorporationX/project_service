@@ -8,7 +8,6 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.filter.InvitationFilter;
-import faang.school.projectservice.validation.StageInvitationValidation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,17 +21,23 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationRepository stageInvitationRepository;
     private final StageInvitationMapper stageInvitationMapper;
     private final List<InvitationFilter> invitationFilters;
-    private final StageInvitationValidation stageInvitationValidation;
+
 
     @Override
     public void sendInvitation(@Valid StageInvitationDto stageInvitationDto) {
+        if (stageInvitationDto == null) {
+            throw new IllegalArgumentException("StageInvitationDto cannot be null");
+        }
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
         stageInvitationRepository.save(stageInvitation);
     }
 
     @Override
     public void acceptInvitation(Long invitationId) {
-        StageInvitation stageInvitation = stageInvitationValidation.validateInvitationExists(invitationId);
+        StageInvitation stageInvitation = stageInvitationRepository.findById(invitationId);
+        if ( stageInvitation == null) {
+            throw new NotFoundException("Invitation not found with id: " + invitationId);
+        }
         if (stageInvitation.getStatus() == StageInvitationStatus.PENDING) {
             stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
             stageInvitationRepository.save(stageInvitation);
