@@ -2,7 +2,7 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exceptions.DataProjectValidation;
+import faang.school.projectservice.exception.DataProjectValidation;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
