@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 public interface AmazonS3Service {
 
-    String uploadFile(MultipartFile file);
+    String uploadFile(String path, MultipartFile file);
 
     InputStream downloadFile(String key);
 

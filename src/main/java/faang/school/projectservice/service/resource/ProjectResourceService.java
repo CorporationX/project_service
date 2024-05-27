@@ -9,7 +9,7 @@ public interface ProjectResourceService {
 
     ResourceDto saveFile(long projectId, MultipartFile file);
 
-    InputStream getFile(long projectId);
+    InputStream getFile(long resourceId);
 
-    String deleteFile(long userId, String key);
+    void deleteFile(long resourceId);
 }

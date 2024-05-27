@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.service.resource.ProjectResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
@@ -20,30 +21,30 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 
 @RestController
-@RequestMapping("/projects/resources")
+@RequestMapping("/resources")
 @RequiredArgsConstructor
 @Tag(name = "Project Resources")
 public class ProjectResourceController {
 
-    @PostMapping("/{projectId}")
+    private final ProjectResourceService projectResourceService;
+
+    @PostMapping("/project/{projectId}")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Save new file to project")
-    public ResourceDto saveFiles(@Positive @PathVariable long projectId,
+    public ResourceDto saveFile(@Positive @PathVariable long projectId,
                                  @NotNull @RequestParam("file") MultipartFile file) {
-        return null;
+        return projectResourceService.saveFile(projectId, file);
     }
 
-    @GetMapping("/{projectId}")
-    @Operation(summary = "Get project files by id")
-    public InputStream getFile(@Positive @PathVariable long projectId,
-                               @NotNull @RequestParam("key") String key) {
-        return null;
+    @GetMapping("/{resourceID}")
+    @Operation(summary = "Get project file by id")
+    public InputStream getFile(@Positive @PathVariable long resourceId) {
+        return projectResourceService.getFile(resourceId);
     }
 
-    @DeleteMapping("/{projectId}")
+    @DeleteMapping("/{resourceId}")
     @Operation(summary = "Delete project file")
-    public String deleteFile(@Positive @PathVariable long userId,
-                             @NotNull @RequestParam("key") String key) {
-        return null;
+    public void deleteFile(@Positive @PathVariable long resourceId) {
+        projectResourceService.deleteFile(resourceId);
     }
 }

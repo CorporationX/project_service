@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
@@ -34,11 +35,12 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
 
         projectResourceValidator.validateMaxStorageSize(project, file.getSize());
 
-        String key = amazonS3Service.uploadFile(file);
+        String path = "project/" + projectId + "/";
+        String key = amazonS3Service.uploadFile(path, file);
 
         Resource resource = Resource.builder()
                 .key(key)
-                .name(file.getOriginalFilename())
+                .name(file.getName())
                 .size(BigInteger.valueOf(file.getSize()))
                 .type(ResourceType.valueOf(file.getContentType()))
                 .project(project)
@@ -52,12 +54,30 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
     }
 
     @Override
-    public InputStream getFile(long projectId) {
-        return null;
+    public InputStream getFile(long resourceId) {
+        Resource resource = findById(resourceId);
+        return amazonS3Service.downloadFile(resource.getKey());
     }
 
     @Override
-    public String deleteFile(long userId, String key) {
-        return "";
+    public void deleteFile(long resourceId) {
+        Resource resource = findById(resourceId);
+
+        amazonS3Service.deleteFile(resource.getKey());
+
+        Project project = resource.getProject();
+        project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
+
+        resource.setKey(null);
+        resource.setSize(null);
+        resource.setStatus(ResourceStatus.DELETED);
+        //resource.setUpdatedBy();
+
+        resourceRepository.save(resource);
+    }
+
+    private Resource findById(Long id) {
+        return resourceRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Resource with id=" + id + " not found"));
     }
 }
