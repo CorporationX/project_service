@@ -14,11 +14,11 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.AmazonS3Service;
 import faang.school.projectservice.validation.resource.ProjectResourceValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
@@ -66,7 +66,7 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
 
     @Override
     @Transactional(readOnly = true)
-    public InputStream getFile(long userId, long projectId, long resourceId) {
+    public InputStreamResource getFile(long userId, long projectId, long resourceId) {
 
         Resource resource = findResourceById(resourceId);
         findTeamMemberByUserIdAndProjectId(userId, projectId);

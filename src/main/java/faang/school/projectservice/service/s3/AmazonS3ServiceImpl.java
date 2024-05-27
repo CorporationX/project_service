@@ -2,14 +2,15 @@ package faang.school.projectservice.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.exceptions.S3Exception;
 import faang.school.projectservice.property.AmazonS3Properties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -46,10 +47,11 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
     }
 
     @Override
-    public InputStream downloadFile(String key) {
-        return amazonS3
+    public InputStreamResource downloadFile(String key) {
+        S3ObjectInputStream object = amazonS3
                 .getObject(amazonS3Properties.getBucketName(), key)
                 .getObjectContent();
+        return new InputStreamResource(object);
     }
 
     @Override

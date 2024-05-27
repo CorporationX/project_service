@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.InputStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,8 +38,8 @@ public class ProjectResourceController {
 
     @GetMapping("/projects/{projectId}/resources/{resourceId}")
     @Operation(summary = "Get project file by id")
-    public InputStream getFile(@Positive @PathVariable long projectId,
-                                         @Positive @PathVariable long resourceId) {
+    public InputStreamResource getFile(@Positive @PathVariable long projectId,
+                                       @Positive @PathVariable long resourceId) {
         long currentUserId = userContext.getUserId();
         return projectResourceService.getFile(currentUserId, projectId, resourceId);
     }

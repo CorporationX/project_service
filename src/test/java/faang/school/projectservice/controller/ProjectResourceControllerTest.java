@@ -16,7 +16,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -111,10 +111,9 @@ class ProjectResourceControllerTest {
     @Test
     void getFile() throws Exception {
         when(userContext.getUserId()).thenReturn(userId);
-        when(projectResourceService.getFile(userId, projectId, resourceId)).thenReturn(file.getInputStream());
+        when(projectResourceService.getFile(userId, projectId, resourceId)).thenReturn(new InputStreamResource(file.getInputStream()));
 
-        mockMvc.perform(get("/projects/" + projectId + "/resources/" + resourceId)
-                        .contentType(MediaType.ALL))
+        mockMvc.perform(get("/projects/" + projectId + "/resources/" + resourceId))
                 .andExpect(status().isOk());
 
         InOrder inOrder = inOrder(userContext, projectResourceService);

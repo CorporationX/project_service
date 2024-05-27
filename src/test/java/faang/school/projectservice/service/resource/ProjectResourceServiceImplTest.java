@@ -21,6 +21,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -141,13 +142,13 @@ class ProjectResourceServiceImplTest {
 
     @Test
     void getFile() {
-        InputStream expected = InputStream.nullInputStream();
+        InputStreamResource expected = new InputStreamResource(InputStream.nullInputStream());
 
         when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
         when(teamMemberRepository.findByUserIdAndProjectId(userId, projectId)).thenReturn(Optional.of(teamMember));
         when(amazonS3Service.downloadFile(resource.getKey())).thenReturn(expected);
 
-        InputStream actual = service.getFile(userId, projectId, resourceId);
+        InputStreamResource actual = service.getFile(userId, projectId, resourceId);
         assertEquals(expected, actual);
 
         InOrder inOrder = inOrder(teamMemberRepository, amazonS3Service, resourceRepository);
