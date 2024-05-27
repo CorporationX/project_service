@@ -50,5 +50,5 @@ services:
     port: 8080
 
 api:
-  default: /api/v1
+  version: /api/v1
 

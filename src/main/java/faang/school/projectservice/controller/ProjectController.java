@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("${api.default:/api/v1}/projects")
+@RequestMapping("${api.version}/projects")
 @Tag(name = "Project")
 public class ProjectController {
     private final ProjectServiceImpl projectService;
