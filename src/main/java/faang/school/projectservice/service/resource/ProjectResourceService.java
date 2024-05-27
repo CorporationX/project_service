@@ -7,9 +7,9 @@ import java.io.InputStream;
 
 public interface ProjectResourceService {
 
-    ResourceDto saveFile(long projectId, MultipartFile file);
+    ResourceDto saveFile(long userId, long projectId, MultipartFile file);
 
-    InputStream getFile(long resourceId);
+    InputStream getFile(long userId, long projectId, long resourceId);
 
-    void deleteFile(long resourceId);
+    void deleteFile(long userId, long projectId, long resourceId);
 }

@@ -1,8 +1,12 @@
 package faang.school.projectservice.validation.resource;
 
 import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exceptions.NoAccessException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.property.AmazonS3Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -28,6 +32,13 @@ public class ProjectResourceValidatorImpl implements ProjectResourceValidator {
     public void validateExistence(String key) {
         if (!resourceRepository.existsByKey(key)) {
             throw new DataValidationException("Resource with key=" + key + " not found");
+        }
+    }
+
+    @Override
+    public void validateDeletePermission(TeamMember teamMember, Resource resource) {
+        if (!resource.getCreatedBy().equals(teamMember) && !teamMember.getRoles().contains(TeamRole.MANAGER)) {
+            throw new NoAccessException("TeamMember with id=" + teamMember.getId() + " has no permissions to delete resource with id=" + resource.getId());
         }
     }
 }
