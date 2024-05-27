@@ -17,8 +17,4 @@ public class ErrorResponse {
     private LocalDateTime timestamp;
     private String url;
     private String message;
-
-    public ErrorResponse(String message) {
-        this.message = message;
-    }
 }

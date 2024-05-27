@@ -1,6 +1,7 @@
 package faang.school.projectservice.handler.ExceptionHandler;
 
 import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exceptions.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleDataValidationExceptions(DataValidationException ex, HttpServletRequest request) {
         log.warn("DataValidationException", ex);
+        return buildErrorResponse(ex, request);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundExceptions(NotFoundException ex, HttpServletRequest request) {
+        log.warn("NotFoundException", ex);
         return buildErrorResponse(ex, request);
     }
 
