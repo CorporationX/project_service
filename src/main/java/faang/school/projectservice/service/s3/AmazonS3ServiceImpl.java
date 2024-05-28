@@ -40,7 +40,7 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
                     metadata
             );
         } catch (IOException e) {
-            throw new S3Exception("Cant upload file to the storage");
+            throw new S3Exception(e.getMessage());
         }
 
         return key;
