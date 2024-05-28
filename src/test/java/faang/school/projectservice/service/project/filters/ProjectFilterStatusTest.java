@@ -29,7 +29,8 @@ class ProjectFilterStatusTest {
 
     @Test
     public void testIsApplicableFalse(){
-        assertFalse(projectFilterStatus.isApplicable(projectFilterDto));
+        ProjectFilterDto projectFilterDtoNew = new ProjectFilterDto();
+        assertFalse(projectFilterStatus.isApplicable(projectFilterDtoNew));
     }
 
     @Test
