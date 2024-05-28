@@ -5,29 +5,38 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.image.ImageService;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
-    private final ProjectMapper projectMapper;
-    private final ProjectValidator projectValidator;
-    private final List<ProjectFilter> projectFilters;
-    private final UserContext userContext;
+    private final S3Service s3Service;
+    private final ImageService imageService;
 
     @Transactional
     public ProjectDto create(ProjectDto projectDto) {
@@ -56,9 +65,8 @@ public class ProjectService {
         return projectMapper.projectToDto(project);
     }
 
-    @Transactional(readOnly = true)
-    public ProjectDto findById(Long id) {
-        return projectMapper.projectToDto(projectRepository.getProjectById(id));
+    public Project findById(Long id) {
+        return projectRepository.getProjectById(id);
     }
 
     @Transactional(readOnly = true)
@@ -87,5 +95,15 @@ public class ProjectService {
 
     public void delete(long projectId) {
         projectRepository.delete(projectId);
+    }
+
+    @Transactional
+    public void uploadFile(MultipartFile file, Long projectId, String folder) {
+        Project project = projectRepository.getProjectById(projectId);
+        log.info("Image preprocessing");
+        file = imageService.imageProcessing(file);
+        String imageId = s3Service.uploadFile(file, folder);
+        project.setCoverImageId(imageId);
+        projectRepository.save(project);
     }
 }

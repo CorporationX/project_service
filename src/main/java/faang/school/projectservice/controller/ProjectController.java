@@ -17,7 +17,13 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/project")
+@RequestMapping("/projects")
+
+
+@RestController
+@RequestMapping("/projects")
+@RequiredArgsConstructor
+@Validated
 public class ProjectController {
 
     private final ProjectService projectService;
@@ -50,5 +56,14 @@ public class ProjectController {
     @DeleteMapping("/{projectId}")
     public void delete(@PathVariable long projectId) {
         projectService.delete(projectId);
+    }
+
+    @PostMapping("/{projectId}/cover")
+    public ResponseEntity<String> uploadCover(@PathVariable @Min(value = 1, message = "Project ID must be more than 0") Long projectId,
+                                              @RequestParam("cover") @NotNull MultipartFile multipartFile) {
+        String fileName = multipartFile.getOriginalFilename();
+        projectService.uploadFile(multipartFile, projectId, "cover");
+        return ResponseEntity.ok("Image uploaded: " + fileName);
+
     }
 }

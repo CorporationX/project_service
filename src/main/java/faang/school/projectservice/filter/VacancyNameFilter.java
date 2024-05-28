@@ -1,22 +1,21 @@
-package faang.school.projectservice.service.filter;
+package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Component
-public class VacancySkillFilter implements VacancyFilter {
+public class VacancyNameFilter implements VacancyFilter {
     @Override
     public boolean isApplicable(VacancyFilterDto filters) {
-        return filters.getSkillIds() != null && !filters.getSkillIds().isEmpty();
+        return !filters.getName().isBlank();
     }
 
     @Override
     public Stream<Vacancy> apply(Supplier<Stream<Vacancy>> vacancies, VacancyFilterDto filters) {
-        return vacancies.get().filter(vacancy -> new HashSet<>(vacancy.getRequiredSkillIds()).containsAll(filters.getSkillIds()));
+        return vacancies.get().filter(vacancy -> vacancy.getName().equals(filters.getName()));
     }
 }
