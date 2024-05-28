@@ -2,7 +2,6 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,7 +21,6 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
-    private final ProjectMapper projectMapper;
 
     @PostMapping
     public ProjectDto create(@RequestBody ProjectDto projectDto) {
@@ -45,8 +43,8 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}")
-    public ProjectDto getProject(@PathVariable long projectId) {
-        return projectMapper.projectToDto(projectService.findById(projectId));
+    public ProjectDto getProjectById(@PathVariable long projectId) {
+        return projectService.findById(projectId);
     }
 
     @DeleteMapping("/{projectId}")
