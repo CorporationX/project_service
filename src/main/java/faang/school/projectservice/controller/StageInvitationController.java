@@ -4,30 +4,32 @@ import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageInvitationFilterDTO;
 import faang.school.projectservice.service.StageInvitationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Component
+@RestController(value = "/stageInvitation")
 @RequiredArgsConstructor
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
-    void sendInvitation(StageInvitationDto stageInvitationDto) {
-        stageInvitationService.sendInvitation(stageInvitationDto);
+    @PostMapping
+    StageInvitationDto sendInvitation(@RequestBody StageInvitationDto stageInvitationDto) {
+        return stageInvitationService.sendInvitation(stageInvitationDto);
     }
 
-    void acceptInvitation(Long invitationId) {
-        stageInvitationService.acceptInvitation(invitationId);
+    @PutMapping("acceptInvitation/{invitationId}")
+    StageInvitationDto acceptInvitation(@PathVariable Long invitationId) {
+        return stageInvitationService.acceptInvitation(invitationId);
     }
 
-    void rejectInvitationWithReason(Long invitationId, String rejectionReason) {
-        stageInvitationService.rejectInvitationWithReason(invitationId, rejectionReason);
+    @PutMapping("/rejectInvitation/{invitationId}")
+    StageInvitationDto rejectInvitationWithReason(@PathVariable Long invitationId, @RequestParam String rejectionReason) {
+        return stageInvitationService.rejectInvitationWithReason(invitationId, rejectionReason);
     }
 
-    List<StageInvitationDto> getInvitationsWithFilters(StageInvitationFilterDTO stageInvitationFilterDTO) {
+    @PostMapping("/getWithFilter")
+    List<StageInvitationDto> getInvitationsWithFilters(@RequestBody StageInvitationFilterDTO stageInvitationFilterDTO) {
         return stageInvitationService.getInvitationsWithFilters(stageInvitationFilterDTO);
     }
-
-
 }

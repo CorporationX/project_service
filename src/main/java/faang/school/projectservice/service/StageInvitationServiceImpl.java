@@ -24,16 +24,17 @@ public class StageInvitationServiceImpl implements StageInvitationService {
 
 
     @Override
-    public void sendInvitation(@Valid StageInvitationDto stageInvitationDto) {
+    public StageInvitationDto sendInvitation(@Valid StageInvitationDto stageInvitationDto) {
         if (stageInvitationDto == null) {
             throw new IllegalArgumentException("StageInvitationDto cannot be null");
         }
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
         stageInvitationRepository.save(stageInvitation);
+        return stageInvitationDto;
     }
 
     @Override
-    public void acceptInvitation(Long invitationId) {
+    public StageInvitationDto acceptInvitation(Long invitationId) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(invitationId);
         if ( stageInvitation == null) {
             throw new NotFoundException("Invitation not found with id: " + invitationId);
@@ -44,11 +45,11 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         } else {
             throw new IllegalStateException("Cannot accept invitation with status: " + stageInvitation.getStatus());
         }
+        return stageInvitationMapper.toDto(stageInvitation);
     }
 
     @Override
-    public void rejectInvitationWithReason(Long invitationId, String rejectionReason) {
-
+    public StageInvitationDto rejectInvitationWithReason(Long invitationId, String rejectionReason) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(invitationId);
         if (stageInvitation == null) {
             throw new NotFoundException("Invitation not found with id: " + invitationId);
@@ -61,6 +62,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         } else {
             throw new IllegalStateException("Cannot reject invitation with status: " + stageInvitation.getStatus());
         }
+        return stageInvitationMapper.toDto(stageInvitation);
 
     }
 
@@ -70,12 +72,15 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         Stream<StageInvitation> invitationStream = invitations.stream();
 
         List<InvitationFilter> applicableFilters = invitationFilters.stream()
-                .filter(filter -> filter.isApplicable(filterDTO)).toList();
+                .filter(filter -> filter.isApplicable(filterDTO))
+                .toList();
 
         for (InvitationFilter filter : applicableFilters) {
             invitationStream = filter.filter(invitationStream, filterDTO);
         }
 
-        return invitationStream.map(stageInvitationMapper::toDto).toList();
+        return invitationStream
+                .map(stageInvitationMapper::toDto)
+                .toList();
     }
 }
