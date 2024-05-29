@@ -25,6 +25,11 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  OAuth2:
+    clientId: 281280578889-u8ph8024u07cfst354ao7ch42bi4r2kb.apps.googleusercontent.com
+    clientSecret: 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
+    applicationName: corporationX
+
 server:
   port: 8083
 
