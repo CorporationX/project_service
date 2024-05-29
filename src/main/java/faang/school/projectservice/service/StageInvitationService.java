@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.stage.RejectionDTO;
 import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageInvitationFilterDTO;
 
@@ -10,7 +11,7 @@ public interface StageInvitationService {
 
     StageInvitationDto acceptInvitation(Long invitationId);
 
-    StageInvitationDto rejectInvitationWithReason(Long invitationId, String rejectionReason);
+    StageInvitationDto rejectInvitationWithReason(Long invitationId, RejectionDTO rejectionReason);
 
     List<StageInvitationDto> getInvitationsWithFilters(StageInvitationFilterDTO stageInvitationFilterDTO);
 }

@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import  com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.dto.stage.RejectionDTO;
 import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageInvitationFilterDTO;
 import faang.school.projectservice.mapper.StageInvitationMapper;
@@ -49,12 +50,12 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     }
 
     @Override
-    public StageInvitationDto rejectInvitationWithReason(Long invitationId, String rejectionReason) {
+    public StageInvitationDto rejectInvitationWithReason(Long invitationId, RejectionDTO rejectionReason) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(invitationId);
         if (stageInvitation == null) {
             throw new NotFoundException("Invitation not found with id: " + invitationId);
         }
-        stageInvitation.setDescription(rejectionReason);
+        stageInvitation.setDescription(rejectionReason.getReason());
 
         if (stageInvitation.getStatus() == StageInvitationStatus.PENDING) {
             stageInvitation.setStatus(StageInvitationStatus.REJECTED);

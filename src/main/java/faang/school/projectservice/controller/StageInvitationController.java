@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.stage.RejectionDTO;
 import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageInvitationFilterDTO;
 import faang.school.projectservice.service.StageInvitationService;
@@ -8,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController(value = "/stageInvitation")
+@RestController()
+@RequestMapping("/stageInvitation")
 @RequiredArgsConstructor
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
@@ -24,7 +26,7 @@ public class StageInvitationController {
     }
 
     @PutMapping("/rejectInvitation/{invitationId}")
-    StageInvitationDto rejectInvitationWithReason(@PathVariable Long invitationId, @RequestParam String rejectionReason) {
+    StageInvitationDto rejectInvitationWithReason(@PathVariable Long invitationId, @RequestBody RejectionDTO rejectionReason) {
         return stageInvitationService.rejectInvitationWithReason(invitationId, rejectionReason);
     }
 

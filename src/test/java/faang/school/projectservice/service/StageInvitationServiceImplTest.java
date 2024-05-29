@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.dto.stage.RejectionDTO;
 import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageInvitationFilterDTO;
 import faang.school.projectservice.mapper.StageInvitationMapper;
@@ -41,7 +42,6 @@ class StageInvitationServiceImplTest {
     private InvitationFilter invitationFilter2;
 
     private List<StageInvitation> invitations;
-    private List<InvitationFilter> invitationFilters;
 
     private static final Long INVITATION_ID = 1L;
     private static final String REJECTION_REASON = "no time";
@@ -54,9 +54,10 @@ class StageInvitationServiceImplTest {
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
 
         invitations = List.of(new StageInvitation(), new StageInvitation());
-        invitationFilters = List.of(invitationFilter1, invitationFilter2);
+        List<InvitationFilter> invitationFilters = List.of(invitationFilter1, invitationFilter2);
 
         stageInvitationService = new StageInvitationServiceImpl(stageInvitationRepository, mapper, invitationFilters);
+
     }
 
 
@@ -113,7 +114,7 @@ class StageInvitationServiceImplTest {
     void rejectInvitationWithReason_ShouldUpdateStatusAndSave_WhenStatusIsPending() {
         when(stageInvitationRepository.findById(INVITATION_ID)).thenReturn(stageInvitation);
 
-        stageInvitationService.rejectInvitationWithReason(INVITATION_ID, REJECTION_REASON);
+        stageInvitationService.rejectInvitationWithReason(INVITATION_ID, new RejectionDTO(REJECTION_REASON));
 
         assertEquals(StageInvitationStatus.REJECTED, stageInvitation.getStatus());
         assertEquals(REJECTION_REASON, stageInvitation.getDescription());
@@ -126,7 +127,7 @@ class StageInvitationServiceImplTest {
         when(stageInvitationRepository.findById(INVITATION_ID)).thenReturn(stageInvitation);
 
         assertThrows(IllegalStateException.class,
-                () -> stageInvitationService.rejectInvitationWithReason(INVITATION_ID, REJECTION_REASON));
+                () -> stageInvitationService.rejectInvitationWithReason(INVITATION_ID, new RejectionDTO(REJECTION_REASON)));
         verify(stageInvitationRepository, never()).save(stageInvitation);
     }
 

@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StageInvitationDto {
-@NotNull
+    @NotNull
     private Long id;
 
     @NotNull(message = "Description cannot be null")
