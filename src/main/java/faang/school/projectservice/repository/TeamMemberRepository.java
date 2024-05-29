@@ -15,4 +15,12 @@ public class TeamMemberRepository {
         return jpaRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
+
+    public TeamMember findByUserIdAndProjectId(long userId, long projectId) {
+        TeamMember teamMember = jpaRepository.findByUserIdAndProjectId(userId, projectId);
+        if (teamMember == null) {
+            throw new EntityNotFoundException(String.format("Team member doesn't exist by User ID: %s and Project ID: %s", userId, projectId));
+        }
+        return teamMember;
+    }
 }
