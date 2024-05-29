@@ -1,2 +1,6 @@
 calculations_messages_processing:
   enabled: false
+
+logging:
+  level:
+    root: debug
