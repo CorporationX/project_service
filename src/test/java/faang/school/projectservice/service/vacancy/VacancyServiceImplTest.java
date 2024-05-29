@@ -97,7 +97,7 @@ class VacancyServiceImplTest {
 
     @Test
     public void whenUpdateVacancyWithWrongIdThenThrowException() {
-      when(vacancyRepository.findById(VACANCY_ID)).thenThrow(EntityNotFoundException.class);
+        when(vacancyRepository.findById(VACANCY_ID)).thenThrow(EntityNotFoundException.class);
         Assert.assertThrows(EntityNotFoundException.class,
                 () -> vacancyService.update(vacancyDto));
     }

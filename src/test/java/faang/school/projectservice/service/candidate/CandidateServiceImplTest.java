@@ -1,5 +1,4 @@
 package faang.school.projectservice.service.candidate;
-
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.repository.CandidateRepository;
 import jakarta.persistence.EntityNotFoundException;

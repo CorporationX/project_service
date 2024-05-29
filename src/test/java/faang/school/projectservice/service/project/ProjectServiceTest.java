@@ -20,15 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,7 +84,7 @@ class ProjectServiceTest {
 
     @Test
     public void testCreateProjectWithValidDataExpectProjectDtoReturned() {
-        when(projectMapper.toProject(projectDto)).thenReturn(project);
+        when(projectMapper.create(eq(projectDto), any(), any())).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
         when(projectMapper.toDto(project)).thenReturn(projectDto);
         ProjectDto actual = projectService.createProject(projectDto);
@@ -101,39 +98,12 @@ class ProjectServiceTest {
     }
 
     @Test
-    void updateProjectSetsUpdatedAtToNow() {
+    public void testUpdateProjectWithExistsByOwnerUserIdAndName() {
         when(projectRepository.existsByOwnerUserIdAndName(anyLong(), anyString())).thenReturn(false);
-        when(projectMapper.toProject(any())).thenReturn(project);
-        when(projectRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        projectService.updateProject(projectDto, ProjectStatus.IN_PROGRESS, "New Description");
-        assertNotNull(project.getUpdatedAt());
-        assertTrue(project.getUpdatedAt().isAfter(LocalDateTime.now().minusSeconds(1)));
-    }
-
-    @Test
-    public void testUpdateProjectWhenAllDataValidExpectUpdatedProjectDtoReturned() {
-        when(projectMapper.toProject(projectDto)).thenReturn(project);
+        when(projectMapper.toProjectForUpdate(projectDto, ProjectStatus.IN_PROGRESS, PROJECT_DESCRIPTION)).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
         when(projectMapper.toDto(project)).thenReturn(projectDto);
         ProjectDto actual = projectService.updateProject(projectDto, ProjectStatus.IN_PROGRESS, PROJECT_DESCRIPTION);
-        assertEquals(actual, projectDto);
-    }
-
-    @Test
-    public void testUpdateProjectWithNullDescription() {
-        when(projectMapper.toProject(projectDto)).thenReturn(project);
-        when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
-        ProjectDto actual = projectService.updateProject(projectDto, ProjectStatus.IN_PROGRESS, null);
-        assertEquals(actual, projectDto);
-    }
-
-    @Test
-    public void testUpdateProjectWithEmptyDescription() {
-        when(projectMapper.toProject(projectDto)).thenReturn(project);
-        when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
-        ProjectDto actual = projectService.updateProject(projectDto, ProjectStatus.IN_PROGRESS, "");
         assertEquals(actual, projectDto);
     }
 

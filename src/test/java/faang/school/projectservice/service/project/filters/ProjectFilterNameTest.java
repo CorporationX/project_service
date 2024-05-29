@@ -32,7 +32,8 @@ class ProjectFilterNameTest {
 
     @Test
     public void testIsApplicableFalse() {
-        assertFalse(projectFilterName.isApplicable(projectFilterDto));
+        ProjectFilterDto projectFilterDtoNew = new ProjectFilterDto();
+        assertFalse(projectFilterName.isApplicable(projectFilterDtoNew));
     }
 
     @Test
