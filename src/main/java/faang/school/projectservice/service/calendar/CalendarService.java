@@ -6,7 +6,6 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import faang.school.projectservice.model.CalendarToken;
-import faang.school.projectservice.repository.CalendarTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CalendarService {
-    private final CalendarTokenRepository calendarTokenRepository;
     private final GoogleAuthorizationService OAuthService;
     @Value("${spring.OAuth2.applicationName}")
     private String applicationName;
