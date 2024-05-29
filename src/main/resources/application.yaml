@@ -35,7 +35,7 @@ server:
 
 logging:
   level:
-    root: info
+    root: debug
 
 calculations_messages_processing:
   enabled: true
