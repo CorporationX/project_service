@@ -25,4 +25,12 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
                                     @Param("maxGoal") BigDecimal maxGoal,
                                     @Param("status") String status,
                                     Pageable pageable);
+
+    @Query(nativeQuery = true, value = """
+        SELECT CASE WHEN c.status = 'ACTIVE' THEN TRUE ELSE FALSE END
+        FROM campaign c
+        WHERE c.id = :campaignId
+        """)
+    boolean isCampaignActive(@Param("campaignId") long campaignId);
+
 }
