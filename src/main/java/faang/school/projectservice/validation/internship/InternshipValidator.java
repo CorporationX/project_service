@@ -1,56 +1,48 @@
 package faang.school.projectservice.validation.internship;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipToCreateDto;
+import faang.school.projectservice.dto.internship.InternshipToUpdateDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.exceptions.NotFoundException;
-import faang.school.projectservice.jpa.ScheduleRepository;
-import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validation.user.UserValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Optional;
-
-import static faang.school.projectservice.model.TaskStatus.DONE;
 
 @Component
 @RequiredArgsConstructor
 public class InternshipValidator {
     private final InternshipRepository internshipRepository;
     private final ProjectRepository projectRepository;
+    private final TeamMemberRepository teamMemberRepository;
     private final UserValidator userValidator;
-    private final InternshipMapper internshipMapper;
-    private final ScheduleRepository scheduleRepository;
 
-    public void validateCreateInternship(long userId, Internship internship, InternshipDto internshipDto) {
-
+    public void validateCreateInternship(long userId, Internship internship, InternshipToCreateDto internshipDto) {
         userValidator.validateUserExistence(userId);
-        validateInternshipProperties(internship, internshipDto);
+        validateMentorExistence(internshipDto.getMentorId());
+        validateInternsExistence(internship.getInterns());
+        validateProjectExistence(internship.getProject().getId());
+        validateInternshipHaveAnyIntern(internship);
+        validateInternshipDuration(internship);
+        validateDates(internship.getStartDate(), internship.getEndDate());
     }
 
-    public void validateUpdateInternship(Internship internship, InternshipDto updatedInternshipDto) {
-        Internship updatedInternship = internshipMapper.toEntity(updatedInternshipDto);
-        validateInternshipNotExist(internship);
-        validateInternshipNotStarted(internship);
-        validateDates(updatedInternship.getStartDate(), updatedInternship.getEndDate());
-        validateInternshipProperties(updatedInternship, updatedInternshipDto);
-    }
-
-    public void validateAddNewIntern(Internship internship, TeamMember newIntern) {
-        validateInternshipNotStarted(internship);
-//        validateInternshipProperties(internship);
-        validateInternNotAlreadyInInternship(internship, newIntern);
+    public void validateUpdateInternship(Internship internship, InternshipToUpdateDto updatedInternshipDto) {
+        validateInternshipExists(internship);
+        validateDates(updatedInternshipDto.getStartDate(), updatedInternshipDto.getEndDate());
+        validateMentorExistence(updatedInternshipDto.getMentorId());
+        validateInternsExistence(internship.getInterns());
+        validateProjectExistence(internship.getProject().getId());
+        validateInternshipDuration(internship);
     }
 
     public void validateFinishInternshipForIntern(Internship internship, TeamMember intern) {
@@ -68,46 +60,29 @@ public class InternshipValidator {
         }
     }
 
-    private void validateInternshipNotExist(Internship internship) {
-        if (internshipRepository.existsById(internship.getId())) {
-            throw new DataValidationException("Internship already exists.");
+    private void validateInternshipExists(Internship internship) {
+        if (!internshipRepository.existsById(internship.getId())) {
+            throw new NotFoundException("Internship does not exist.");
         }
     }
 
-    private void validateInternshipProperties(Internship internship, InternshipDto internshipDto) {
-        validateProjectExistence(internship);
-        validateInternsExistence(internship);
-        validateStatusExistence(internshipDto);
-        validateScheduleExistence(internship);
-        validateInternshipDuration(internship);
-        validateDates(internship.getStartDate(), internship.getEndDate());
-
+    private void validateMentorExistence(long mentorId) {
+        TeamMember mentor = teamMemberRepository.findById(mentorId);
+        userValidator.validateUserExistence(mentor.getUserId());
     }
 
-    private void validateStatusExistence(InternshipDto internshipDto) {
-
-        boolean checkStatusExist = Arrays.stream(InternshipStatus.values())
-                .anyMatch((status -> status.name().equals(internshipDto.getStatus())));
-
-        if (!checkStatusExist) {
-            throw new NotFoundException(String.format("Status %s not found", internshipDto.getStatus()));
+    private void validateInternsExistence(Iterable<TeamMember> interns) {
+        for (TeamMember intern : interns) {
+            TeamMember user = teamMemberRepository.findById(intern.getId());
+            userValidator.validateUserExistence(user.getUserId());
         }
     }
 
-    private void validateScheduleExistence(Internship internship) {
-        if(scheduleRepository.findById(internship.getSchedule().getId()).isEmpty()){
-            throw new NotFoundException(String.format("Schedule %d not found", internship.getSchedule().getId()));
-        }
+    private void validateProjectExistence(long projectId) {
+        projectRepository.findById(projectId);
     }
 
-    private void validateProjectExistence(Internship internship) {
-        Project project = projectRepository.getProjectById(internship.getProject().getId());
-        if (project == null) {
-            throw new NotFoundException(String.format("Project %s not found", internship.getProject().getId()));
-        }
-    }
-
-    private void validateInternsExistence(Internship internship) {
+    private void validateInternshipHaveAnyIntern(Internship internship) {
         if (internship.getInterns().isEmpty()) {
             throw new DataValidationException("Internship must have at least one intern.");
         }
@@ -120,30 +95,9 @@ public class InternshipValidator {
         }
     }
 
-    private void validateMentorExistence(TeamMember mentor) {
-        if (mentor == null || mentor.getUserId() == null) {
-            throw new DataValidationException("Mentor is invalid.");
-        }
-        userValidator.validateUserExistence(mentor.getUserId());
-    }
-
-    private void validateInternNotAlreadyInInternship(Internship internship, TeamMember intern) {
-        if (internship.getInterns().contains(intern)) {
-            throw new DataValidationException("Intern with id: " + intern.getId() +
-                                              " already is in internship with id: " + internship.getId());
-        }
-    }
-
     private void validateInternshipContainsThisIntern(Internship internship, TeamMember intern) {
         if (!internship.getInterns().contains(intern)) {
-            throw new DataValidationException("Intern with id: " + intern.getId() +
-                                              " is not in internship with id: " + internship.getId());
-        }
-    }
-
-    private void validateInternshipNotStarted(Internship internship) {
-        if (LocalDateTime.now().isAfter(internship.getStartDate())) {
-            throw new DataValidationException("Internship start date has already begun.");
+            throw new DataValidationException(String.format("Intern with id %d is not in internship with id %d", intern.getId(), internship.getId()));
         }
     }
 
@@ -160,14 +114,11 @@ public class InternshipValidator {
     }
 
     private void checkAllTasksDone(TeamMember intern) {
-        Optional<Task> notDoneTask = intern.getStages().stream()
+        boolean notDoneTask = intern.getStages().stream()
                 .flatMap(stage -> stage.getTasks().stream())
-                .filter(task -> !task.getStatus().equals(DONE))
-                .findFirst();
-
-        if (notDoneTask.isPresent()) {
-            throw new DataValidationException("Intern with id: " + intern.getId() +
-                                              " has unfinished task: " + notDoneTask.get().getName());
+                .anyMatch(task -> !task.getStatus().equals(TaskStatus.DONE));
+        if (notDoneTask) {
+            throw new DataValidationException(String.format("Intern with id %d has unfinished tasks.", intern.getId()));
         }
     }
 }

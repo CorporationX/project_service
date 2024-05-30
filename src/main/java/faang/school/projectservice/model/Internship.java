@@ -50,6 +50,7 @@ public class Internship {
     @NotNull
     private TeamMember mentor;
 
+
     @ManyToMany
     @JoinTable(
             name = "internship_interns",

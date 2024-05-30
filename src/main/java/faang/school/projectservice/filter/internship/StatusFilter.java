@@ -1,7 +1,9 @@
 package faang.school.projectservice.filter.internship;
 
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
@@ -16,6 +18,11 @@ public class StatusFilter implements InternshipFilter {
 
     @Override
     public Stream<Internship> applyFilter(Stream<Internship> internships, InternshipFilterDto internshipFilterDto) {
-        return internships.filter(internship -> !internship.getStatus().equals(internshipFilterDto.getStatus()));
+        try {
+            InternshipStatus filterStatus = InternshipStatus.valueOf(internshipFilterDto.getStatus());
+            return internships.filter(internship -> internship.getStatus().equals(filterStatus));
+        } catch (IllegalArgumentException e) {
+            throw new DataValidationException("Incorrect filter value");
+        }
     }
 }

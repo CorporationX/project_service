@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class UserValidator {
     private final UserServiceClient userServiceClient;
 
-    public void validateUserExistence(Long userId) {
+    public void validateUserExistence(long userId) {
         try {
             log.debug("Fetching user with ID: " + userId);
             UserDto userDto = userServiceClient.getUser(userId);
