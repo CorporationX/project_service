@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class ProjectStatusFilter implements ProjectFilter {
+class ProjectStatusFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectFilterDto filter) {
         return filter.getStatus() != null;

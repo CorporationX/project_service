@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Component
-public class ProjectPrivacyFilter implements ProjectFilter {
+class ProjectPrivacyFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectFilterDto filter) {
         return true;

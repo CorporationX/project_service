@@ -27,7 +27,7 @@ public class ProjectService {
         validator.verifyCanBeCreated(projectDto);
 
         projectDto.setStatus(ProjectStatus.CREATED);
-        Project saved = projectRepository.save(mapper.fromDto(projectDto));
+        Project saved = projectRepository.save(mapper.toModel(projectDto));
 
         return mapper.toDto(saved);
     }
@@ -36,22 +36,26 @@ public class ProjectService {
     public ProjectDto update(ProjectDto projectDto) {
         validator.verifyCanBeUpdated(projectDto);
 
-        Project saved = projectRepository.save(mapper.fromDto(projectDto));
+        Project saved = projectRepository.save(mapper.toModel(projectDto));
 
         return mapper.toDto(saved);
     }
 
     public ProjectDto getById(Long id) {
         Project project = projectRepository.getProjectById(id);
+        
         return mapper.toDto(project);
     }
 
     public List<ProjectDto> getAll() {
-        return mapper.toDto(projectRepository.findAll());
+        List<Project> projects = projectRepository.findAll();
+        
+        return mapper.toDto(projects);
     }
 
     public List<ProjectDto> search(ProjectFilterDto filter) {
         List<Project> projects = projectRepository.findAll();
+        
         return filters.stream()
                 .filter(streamFilter -> streamFilter.isApplicable(filter))
                 .flatMap(streamFilter -> streamFilter.apply(projects.stream(), filter))

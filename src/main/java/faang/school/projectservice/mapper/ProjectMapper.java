@@ -9,10 +9,10 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
-    Project fromDto(ProjectDto project);
+    Project toModel(ProjectDto project);
     ProjectDto toDto(Project project);
 
-    List<Project> fromDto(List<ProjectDto> project);
+    List<Project> toModelList(List<ProjectDto> project);
 
     List<ProjectDto> toDto(List<Project> project);
 }
