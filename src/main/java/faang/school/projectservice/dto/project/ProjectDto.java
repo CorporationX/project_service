@@ -8,6 +8,9 @@ import lombok.Data;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Data
 public class ProjectDto {
     private Long id;
@@ -31,11 +34,23 @@ public class ProjectDto {
     @NotNull(message = "Project owner id")
     private Long ownerId;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 
     private ProjectStatus status;
 
     private ProjectVisibility visibility;
+    
+    @JsonIgnore
+    public boolean isStatusFinished() {
+        return this.status == ProjectStatus.CANCELLED || this.status == ProjectStatus.COMPLETED;
+    }
+    
+    @JsonIgnore
+    public boolean isStorageSizeGreaterThanMaxStorageSize() {
+        return storageSize.compareTo(maxStorageSize) > 0;
+    }
 }

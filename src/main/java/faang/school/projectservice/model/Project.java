@@ -87,4 +87,8 @@ public class Project {
 
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
+    
+    public boolean isStatusFinished() {
+        return this.status == ProjectStatus.CANCELLED || this.status == ProjectStatus.COMPLETED;
+    }
 }
