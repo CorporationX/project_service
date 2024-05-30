@@ -17,6 +17,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+    //TODO: Доделать тесты
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
     private final ProjectValidator validator;
