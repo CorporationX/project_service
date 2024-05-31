@@ -51,3 +51,9 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+internship:
+  duration:
+    max:
+      month:
+        3

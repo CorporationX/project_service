@@ -19,7 +19,7 @@ public class StatusFilter implements InternshipFilter {
     @Override
     public Stream<Internship> applyFilter(Stream<Internship> internships, InternshipFilterDto internshipFilterDto) {
         try {
-            InternshipStatus filterStatus = InternshipStatus.valueOf(internshipFilterDto.getStatus());
+            InternshipStatus filterStatus = internshipFilterDto.getStatus();
             return internships.filter(internship -> internship.getStatus().equals(filterStatus));
         } catch (IllegalArgumentException e) {
             throw new DataValidationException("Incorrect filter value");

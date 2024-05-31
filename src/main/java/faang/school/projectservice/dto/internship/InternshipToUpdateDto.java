@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.internship;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -22,13 +23,13 @@ public class InternshipToUpdateDto {
     private List<Long> internsId;
     @NotNull(message = "Description cannot be null")
     private String description;
-    @NotNull(message = "Name cannot be null")
+    @NotBlank(message = "Name cannot be null")
     private String name;
     @NotNull(message = "Start date cannot be null")
     private LocalDateTime startDate;
     @NotNull(message = "End date cannot be null")
     private LocalDateTime endDate;
-    @NotNull(message = "Status cannot be null")
+    @NotBlank(message = "Status cannot be null")
     private String status;
     private Long scheduleId;
 }

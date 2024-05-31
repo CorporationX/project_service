@@ -43,14 +43,10 @@ public class InternshipServiceImpl implements InternshipService {
     public InternshipDto createInternship(long userId, InternshipToCreateDto internshipDto) {
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setCreatedBy(userId);
-        List<TeamMember> interns = internshipDto.getInternsId().stream()
-                .map(teamMemberRepository::findById)
-                .peek(teamMember -> changeInternRole(teamMember, TeamRole.INTERN))
-                .toList();
-        internship.setInterns(interns);
+
         internship.setStatus(InternshipStatus.IN_PROGRESS);
 
-        validator.validateCreateInternship(userId, internship, internshipDto);
+        validator.validateCreateInternship(userId, internshipDto);
 
         internshipRepository.save(internship);
         log.info("Created internship {}", internship.getId());

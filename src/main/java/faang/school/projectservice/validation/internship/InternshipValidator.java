@@ -13,10 +13,12 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validation.user.UserValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -25,24 +27,26 @@ public class InternshipValidator {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final UserValidator userValidator;
+    @Value("${internship.duration.max.month}")
+    private int MONTH_AMOUNT;
 
-    public void validateCreateInternship(long userId, Internship internship, InternshipToCreateDto internshipDto) {
+    public void validateCreateInternship(long userId, InternshipToCreateDto internshipDto) {
         userValidator.validateUserExistence(userId);
         validateMentorExistence(internshipDto.getMentorId());
-        validateInternsExistence(internship.getInterns());
-        validateProjectExistence(internship.getProject().getId());
-        validateInternshipHaveAnyIntern(internship);
-        validateInternshipDuration(internship);
-        validateDates(internship.getStartDate(), internship.getEndDate());
+        validateInternsExistence(internshipDto.getInternsId());
+        validateProjectExistence(internshipDto.getProjectId());
+        validateInternshipHaveAnyIntern(internshipDto.getInternsId());
+        validateInternshipDuration(internshipDto.getStartDate(), internshipDto.getEndDate());
+        validateDates(internshipDto.getStartDate(), internshipDto.getEndDate());
     }
 
-    public void validateUpdateInternship(Internship internship, InternshipToUpdateDto updatedInternshipDto) {
-        validateInternshipExists(internship);
-        validateDates(updatedInternshipDto.getStartDate(), updatedInternshipDto.getEndDate());
-        validateMentorExistence(updatedInternshipDto.getMentorId());
-        validateInternsExistence(internship.getInterns());
-        validateProjectExistence(internship.getProject().getId());
-        validateInternshipDuration(internship);
+    public void validateUpdateInternship(Internship internship, InternshipToUpdateDto internshipDto) {
+        validateInternshipExists(internship.getId());
+        validateDates(internshipDto.getStartDate(), internshipDto.getEndDate());
+        validateMentorExistence(internshipDto.getMentorId());
+        validateInternsExistence(internshipDto.getInternsId());
+        validateProjectExistence(internshipDto.getProjectId());
+        validateInternshipDuration(internshipDto.getStartDate(), internshipDto.getEndDate());
     }
 
     public void validateFinishInternshipForIntern(Internship internship, TeamMember intern) {
@@ -60,8 +64,8 @@ public class InternshipValidator {
         }
     }
 
-    private void validateInternshipExists(Internship internship) {
-        if (!internshipRepository.existsById(internship.getId())) {
+    private void validateInternshipExists(long internshipId) {
+        if (!internshipRepository.existsById(internshipId)) {
             throw new NotFoundException("Internship does not exist.");
         }
     }
@@ -71,10 +75,10 @@ public class InternshipValidator {
         userValidator.validateUserExistence(mentor.getUserId());
     }
 
-    private void validateInternsExistence(Iterable<TeamMember> interns) {
-        for (TeamMember intern : interns) {
-            TeamMember user = teamMemberRepository.findById(intern.getId());
-            userValidator.validateUserExistence(user.getUserId());
+    private void validateInternsExistence(List<Long> internIds) {
+        for (Long internId : internIds) {
+            TeamMember intern = teamMemberRepository.findById(internId);
+            userValidator.validateUserExistence(intern.getUserId());
         }
     }
 
@@ -82,16 +86,16 @@ public class InternshipValidator {
         projectRepository.findById(projectId);
     }
 
-    private void validateInternshipHaveAnyIntern(Internship internship) {
-        if (internship.getInterns().isEmpty()) {
+    private void validateInternshipHaveAnyIntern(List<Long> internIds) {
+        if (internIds.isEmpty()) {
             throw new DataValidationException("Internship must have at least one intern.");
         }
     }
 
-    private void validateInternshipDuration(Internship internship) {
-        long monthsBetween = ChronoUnit.MONTHS.between(internship.getStartDate(), internship.getEndDate());
-        if (monthsBetween > 3 || (monthsBetween == 3 && ChronoUnit.DAYS.between(internship.getStartDate().plusMonths(3), internship.getEndDate()) > 0)) {
-            throw new DataValidationException("Internship duration exceeds three months.");
+    private void validateInternshipDuration(LocalDateTime startDate, LocalDateTime endDate) {
+        long monthsBetween = ChronoUnit.MONTHS.between(startDate, endDate);
+        if (monthsBetween > MONTH_AMOUNT || (monthsBetween == MONTH_AMOUNT && ChronoUnit.DAYS.between(startDate.plusMonths(MONTH_AMOUNT), endDate) > 0)) {
+            throw new DataValidationException("Internship duration exceeds the maximum allowed duration.");
         }
     }
 

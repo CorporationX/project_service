@@ -81,7 +81,7 @@ public class InternshipController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = InternshipDto.class))})
     })
-    @GetMapping("/all")
+    @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public List<InternshipDto> getAllInternships(
             @ParameterObject @RequestBody(required = false) InternshipFilterDto filter) {

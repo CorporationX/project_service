@@ -26,28 +26,23 @@ public interface InternshipMapper {
     @Mapping(target = "mentor.id", source = "mentorId")
     @Mapping(target = "project.id", source = "projectId")
     @Mapping(target = "schedule.id", source = "scheduleId")
-    @Mapping(source = "internsId", target = "interns", qualifiedByName = "internIdToInterns")
+    @Mapping(source = "internsId", target = "interns", qualifiedByName = "internIdToIntern")
     Internship toEntity(InternshipToCreateDto dto);
 
     void update(InternshipToUpdateDto dto, @MappingTarget Internship entity);
 
     @Named("toInternId")
-    default List<Long> toInternId(List<TeamMember> interns) {
-        return interns == null ? List.of() : interns.stream()
-                .map(TeamMember::getId)
-                .distinct()
-                .collect(Collectors.toList());
+    default Long toInternId(TeamMember intern) {
+        return intern == null ? null : intern.getId();
     }
 
-    @Named("internIdToInterns")
-    default List<TeamMember> internIdToInterns(List<Long> internsId) {
-        return internsId == null ? List.of() : internsId.stream()
-                .map(id -> {
-                    TeamMember intern = new TeamMember();
-                    intern.setId(id);
-                    return intern;
-                })
-                .distinct()
-                .collect(Collectors.toList());
+    @Named("internIdToIntern")
+    default TeamMember internIdToIntern(Long internId) {
+        if (internId == null) {
+            return null;
+        }
+        TeamMember intern = new TeamMember();
+        intern.setId(internId);
+        return intern;
     }
 }
