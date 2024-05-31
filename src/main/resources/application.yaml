@@ -35,6 +35,14 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+google-service:
+  application-name: corporation X - chimera-BC-4
+  credentialsFilePath: /credentials.json
+  calendarId: primary
+  redirectUrl: http://localhost:8082/calendar/authorization
+  accessType: offline
+  scopes: https://www.googleapis.com/auth/calendar
+
 services:
   s3:
     endpoint: http://localhost:9000
