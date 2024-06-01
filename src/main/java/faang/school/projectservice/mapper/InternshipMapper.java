@@ -2,6 +2,7 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.InternshipDto;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.ScheduleService;
@@ -43,4 +44,6 @@ public interface InternshipMapper {
         }
         return resultList;
     }
+
+    Project map(Long projectId);
 }

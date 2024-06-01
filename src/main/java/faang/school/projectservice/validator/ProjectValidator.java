@@ -20,13 +20,13 @@ public class ProjectValidator {
         }
     }
 
-    public void isUniqOwnerAndName(long userId, String name) {
-        if (!projectRepository.existsByOwnerUserIdAndName(userId, name)) {
+    public void isUniqOwnerAndName(Long userId, String name) {
+        if (projectRepository.existsByOwnerUserIdAndName(userId, name)) {
             throw new DataValidationException("A project with the same owner and name exists.");
         }
     }
 
-    public void nameExistsAndNotAmpty(String name) {
+    public void nameExistsAndNotEmpty(String name) {
         if (Objects.isNull(name) || name.isEmpty()) {
             throw new DataValidationException("Project name must not be null or empty.");
         }
@@ -34,7 +34,7 @@ public class ProjectValidator {
 
     public void descExistsAndNotEmpty(String description) {
         if(Objects.isNull(description) || description.isEmpty()) {
-            throw new EntityNotFoundException("Project description must not be null or empty.");
+            throw new DataValidationException("Project description must not be null or empty.");
         }
     }
 }

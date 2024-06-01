@@ -2,6 +2,7 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.ProjectService;
 import org.mapstruct.Mapper;
@@ -41,4 +42,5 @@ public interface VacancyMapper {
         }
         return resultList;
     }
+    Project map(Long value);
 }

@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.project;
 
+import faang.school.projectservice.model.ProjectStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,5 +10,6 @@ public class ProjectDto {
     private long id;
     private String name;
     private String description;
-    private long ownerId;
+    private Long ownerId;
+    private ProjectStatus status;
 }
