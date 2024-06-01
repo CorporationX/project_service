@@ -11,7 +11,6 @@ import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.AmazonS3Service;
 import faang.school.projectservice.validation.resource.ProjectResourceValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,9 +42,6 @@ class ProjectResourceServiceImplTest {
 
     @Mock
     private AmazonS3Service amazonS3Service;
-
-    @Mock
-    private ProjectRepository projectRepository;
 
     @Mock
     private ResourceRepository resourceRepository;
@@ -121,7 +117,6 @@ class ProjectResourceServiceImplTest {
 
     @Test
     void saveFile() {
-        when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(teamMemberRepository.findByUserIdAndProjectId(userId, projectId)).thenReturn(Optional.of(teamMember));
         when(amazonS3Service.uploadFile("project/" + projectId +"/", file)).thenReturn("key");
         when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
@@ -130,9 +125,8 @@ class ProjectResourceServiceImplTest {
         ResourceDto actual = service.saveFile(userId, projectId, file);
         assertEquals(resourceDto, actual);
 
-        InOrder inOrder = inOrder(projectRepository, teamMemberRepository, amazonS3Service,
+        InOrder inOrder = inOrder(teamMemberRepository, amazonS3Service,
                 resourceRepository, resourceMapper, projectResourceValidator);
-        inOrder.verify(projectRepository, times(1)).getProjectById(projectId);
         inOrder.verify(teamMemberRepository, times(1)).findByUserIdAndProjectId(userId, projectId);
         inOrder.verify(projectResourceValidator, times(1)).validateMaxStorageSize(project, file.getSize());
         inOrder.verify(amazonS3Service, times(1)).uploadFile("project/" + projectId +"/", file);
