@@ -21,7 +21,7 @@ public class CalendarController {
 
     @GetMapping("/auth")
     public URL getAuthorizationUrl() {
-        return calendarService.getAuthorizationUrl();
+        return calendarService.getAuthUrl();
     }
 
     @PostMapping("/auth/projects/{projectId}")
