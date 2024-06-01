@@ -35,13 +35,16 @@ public class MomentService {
 
     @Transactional
     public MomentDto update(Long momentId, MomentDto momentDto) {
-        findMomentFindById(momentId);
-//todo  Если добавляется новый партнёр, то должен обновиться список участников и наоборот: если добавляется участник из другого проекта, то проект автоматически добавляется в партнеры по моменту.
+        Moment oldMoment = findMomentById(momentId);
+        momentValidator.projectsUpdateValidator(oldMoment, momentDto);
+        momentValidator.membersUpdateValidator(oldMoment, momentDto);
+
         momentDto.setId(momentId);
 
         return momentMapper.toDto(momentRepository.save(momentMapper.toEntity(momentDto)));
     }
 
+    @Transactional(readOnly = true)
     public List<MomentDto> getAllMomentsByFilters(Long projectId, MomentFilterDto filters) {
         return momentFilters.stream()
                 .flatMap(filter -> filter.apply(projectRepository.getProjectById(projectId).getMoments().stream(), filters))
@@ -56,10 +59,10 @@ public class MomentService {
 
     @Transactional(readOnly = true)
     public MomentDto getMomentById(Long momentId) {
-        return momentMapper.toDto(findMomentFindById(momentId));
+        return momentMapper.toDto(findMomentById(momentId));
     }
 
-    private Moment findMomentFindById(Long id) {
+    private Moment findMomentById(Long id) {
         return momentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Moment not found"));
     }
 }
