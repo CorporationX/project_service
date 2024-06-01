@@ -10,7 +10,6 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.AmazonS3Service;
 import faang.school.projectservice.validation.resource.ProjectResourceValidator;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ import java.time.LocalDateTime;
 public class ProjectResourceServiceImpl implements ProjectResourceService {
 
     private final AmazonS3Service amazonS3Service;
-    private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
     private final TeamMemberJpaRepository teamMemberRepository;
     private final ProjectResourceValidator projectResourceValidator;
@@ -37,28 +35,15 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
     @Transactional
     public ResourceDto saveFile(long userId, long projectId, MultipartFile file) {
 
-        Project project = projectRepository.getProjectById(projectId);
         TeamMember teamMember = findTeamMemberByUserIdAndProjectId(userId, projectId);
+        Project project = teamMember.getTeam().getProject();
 
         projectResourceValidator.validateMaxStorageSize(project, file.getSize());
 
         String path = "project/" + projectId + "/";
         String key = amazonS3Service.uploadFile(path, file);
 
-        Resource resource = Resource.builder()
-                .key(key)
-                .name(file.getName())
-                .size(BigInteger.valueOf(file.getSize()))
-                .allowedRoles(teamMember.getRoles())
-                .type(ResourceType.valueOf(file.getContentType()))
-                .status(ResourceStatus.ACTIVE)
-                .createdBy(teamMember)
-                .updatedBy(teamMember)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .project(project)
-                .build();
-
+        Resource resource = buildResource(key, file, teamMember);
         resource = resourceRepository.save(resource);
 
         return resourceMapper.toDto(resource);
@@ -92,7 +77,6 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
         resource.setSize(null);
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedBy(teamMember);
-        resource.setUpdatedAt(LocalDateTime.now());
 
         resourceRepository.save(resource);
     }
@@ -105,5 +89,21 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
     private TeamMember findTeamMemberByUserIdAndProjectId(long userId, long projectId) {
         return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotFoundException("TeamMember with userId=" + userId + " and projectId= " + projectId + " not found"));
+    }
+
+    private Resource buildResource(String key, MultipartFile file, TeamMember creator) {
+
+        return Resource.builder()
+                .key(key)
+                .name(file.getName())
+                .size(BigInteger.valueOf(file.getSize()))
+                .allowedRoles(creator.getRoles())
+                .type(ResourceType.valueOf(file.getContentType()))
+                .status(ResourceStatus.ACTIVE)
+                .createdBy(creator)
+                .updatedBy(creator)
+                .createdAt(LocalDateTime.now())
+                .project(creator.getTeam().getProject())
+                .build();
     }
 }

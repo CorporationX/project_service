@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/projects")
 @Tag(name = "Project Resources")
 public class ProjectResourceController {
 
@@ -33,7 +35,7 @@ public class ProjectResourceController {
             summary = "Save new file to project",
             parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}
     )
-    @PostMapping("/projects/{projectId}/resources")
+    @PostMapping("/{projectId}/resources")
     @ResponseStatus(HttpStatus.CREATED)
     public ResourceDto saveFile(@Positive @PathVariable long projectId,
                                 @NotNull @RequestParam("file") MultipartFile file) {
@@ -45,7 +47,7 @@ public class ProjectResourceController {
             summary = "Get project file by id",
             parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}
     )
-    @GetMapping("/projects/{projectId}/resources/{resourceId}")
+    @GetMapping("/{projectId}/resources/{resourceId}")
     public InputStreamResource getFile(@Positive @PathVariable long projectId,
                                        @Positive @PathVariable long resourceId) {
         long currentUserId = userContext.getUserId();
@@ -56,7 +58,7 @@ public class ProjectResourceController {
             summary = "Delete project file",
             parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}
     )
-    @DeleteMapping("/projects/{projectId}/resources/{resourceId}")
+    @DeleteMapping("/{projectId}/resources/{resourceId}")
     public void deleteFile(@Positive @PathVariable long projectId,
                            @Positive @PathVariable long resourceId) {
         long currentUserId = userContext.getUserId();
