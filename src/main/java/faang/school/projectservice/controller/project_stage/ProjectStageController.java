@@ -1,8 +1,8 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.project_stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.service.StageService;
+import faang.school.projectservice.service.ProjectStageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,38 +13,37 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("stages")
-public class StageController {
-    private final StageService stageService;
+@RequestMapping("project/stages")
+public class ProjectStageController {
+    private final ProjectStageService projectStageService;
 
     @PostMapping
     public StageDto createStage(@RequestBody @Valid StageDto stageDto) {
-        log.info("Create stage");
-        return stageService.createStage(stageDto);
+        return projectStageService.createStage(stageDto);
     }
 
     @GetMapping("/{projectId}")
-    public List<StageDto> getFilterStageByStatus(@PathVariable("projectId") long projectId, @RequestParam("status") TaskStatus status) {
-        return stageService.getStagesProjectByStatus(projectId, status);
+    public List<StageDto> getStageByStatus(@PathVariable("projectId") Long projectId, @RequestParam TaskStatus status) {
+        return projectStageService.getStagesProjectByStatus(projectId, status);
     }
 
     @DeleteMapping("/{stageId}")
     public void deleteStage(@PathVariable("stageId") Long stageId) {
-        stageService.deleteStage(stageId);
+        projectStageService.deleteStage(stageId);
     }
 
     @PutMapping("/{stageId}")
     public StageDto updateStage(@PathVariable("stageId") Long stageId) {
-        return stageService.updateStage(stageId);
+        return projectStageService.updateStage(stageId);
     }
 
     @GetMapping("/project/{projectId}")
     public List<StageDto> getAllStages(@PathVariable("projectId") Long projectId) {
-        return stageService.getAllStages(projectId);
+        return projectStageService.getAllStages(projectId);
     }
 
-    @GetMapping("/sadf/{stageId}")
+    @GetMapping("/get/{stageId}")
     public StageDto getStageById(@PathVariable("stageId") Long stageId) {
-        return stageService.getStage(stageId);
+        return projectStageService.getStage(stageId);
     }
 }

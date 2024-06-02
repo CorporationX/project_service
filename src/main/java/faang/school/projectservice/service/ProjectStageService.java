@@ -11,7 +11,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.validation.StageValidation;
+import faang.school.projectservice.validation.StageValidator;
 import faang.school.projectservice.validation.ValidationMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,26 +24,25 @@ import static faang.school.projectservice.model.stage_invitation.StageInvitation
 
 @Service
 @RequiredArgsConstructor
-public class StageService {
-    private final StageValidation stageValidation;
+public class ProjectStageService {
+    private final StageValidator stageValidator;
     private final StageMapper stageMapper;
     private final StageRepository stageRepository;
     private final StageInvitationRepository stageInvitationRepository;
     private final ProjectRepository projectRepository;
 
     public StageDto createStage(StageDto stageDto) {
-        stageValidation.projectValidate(stageDto.getProjectId());
+        stageValidator.projectValidateCreate(stageDto.getProjectId());
+
         Stage stage = stageMapper.toEntity(stageDto);
         stage.getStageRoles().forEach((role) -> role.setStage(stage));
+
         return stageMapper.toDto(stageRepository.save(stage));
     }
 
     public List<StageDto> getStagesProjectByStatus(Long projectId, TaskStatus status) {
-        List<Stage> stagesFilter = stageRepository.findAll().stream()
+        return stageRepository.findAll().stream()
                 .filter(stage -> stage.getProject().getId() == projectId)
-                .toList();
-
-        return stagesFilter.stream()
                 .filter(stage -> !stage.getTasks().stream()
                         .filter(task -> task.getStatus().equals(status)).toList().isEmpty())
                 .map(stageMapper::toDto)
@@ -53,11 +52,13 @@ public class StageService {
     public void deleteStage(Long stageId) {
         Stage stage = stageRepository.getById(stageId);
         List<Task> tasks = stage.getTasks();
-        for (Task task : tasks) {
+
+        tasks.forEach(task -> {
             if (task.getStatus() != TaskStatus.DONE) {
                 task.setStatus(TaskStatus.CANCELLED);
             }
-        }
+        });
+
         stageRepository.delete(stage);
     }
 
@@ -65,11 +66,32 @@ public class StageService {
         Stage stage = stageRepository.getById(stageId);
         List<StageRoles> stageRoles = stage.getStageRoles();
         List<TeamMember> teamMembers = stage.getExecutors();
+
         Map<TeamRole, Long> missedMembers = getMissedMembers(stageRoles, teamMembers);
         if (!missedMembers.isEmpty()) {
             inviteMember(stage, missedMembers);
         }
+
         return stageMapper.toDto(stageRepository.getById(stage.getStageId()));
+    }
+
+    public List<StageDto> getAllStages(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new DataValidationException(ValidationMessage.PROJECT_STAGE_NOT_FOUND.getMessage());
+        }
+
+        return stageRepository.findAll().stream()
+                .filter(stage -> stage.getProject().equals(projectRepository.getProjectById(projectId)))
+                .map(stageMapper::toDto)
+                .toList();
+    }
+
+    public StageDto getStage(Long stageId) {
+        if (!stageRepository.existsById(stageId)) {
+            throw new DataValidationException(ValidationMessage.STAGE_NOT_FOUND.getMessage());
+        }
+
+        return stageMapper.toDto(stageRepository.getById(stageId));
     }
 
     private Map<TeamRole, Long> getMissedMembers(List<StageRoles> stageRoles, List<TeamMember> teamMembers) {
@@ -85,6 +107,7 @@ public class StageService {
                     }
                 }
         );
+
         return missedMembers;
     }
 
@@ -109,23 +132,7 @@ public class StageService {
                 .stage(stage)
                 .status(PENDING)
                 .build();
+
         stageInvitationRepository.save(stageInvitation);
-    }
-
-    public List<StageDto> getAllStages(Long projectId) {
-        if (!projectRepository.existsById(projectId)) {
-            throw new DataValidationException(ValidationMessage.PROJECT_STAGE_NOT_FOUND.getMessage());
-        }
-        return stageRepository.findAll().stream()
-                .filter(stage -> stage.getProject().equals(projectRepository.getProjectById(projectId)))
-                .map(stageMapper::toDto)
-                .toList();
-    }
-
-    public StageDto getStage(Long stageId) {
-        if (!stageRepository.existsById(stageId)) {
-            throw new DataValidationException(ValidationMessage.STAGE_NOT_FOUND.getMessage());
-        }
-        return stageMapper.toDto(stageRepository.getById(stageId));
     }
 }
