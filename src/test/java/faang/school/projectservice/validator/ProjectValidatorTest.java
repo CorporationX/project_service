@@ -2,14 +2,15 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static faang.school.projectservice.util.TestProject.PROJECT;
 import static faang.school.projectservice.util.TestProject.PROJECT_ID;
 import static faang.school.projectservice.util.TestProject.PROJECT_NAME;
 import static faang.school.projectservice.util.TestUser.USER_ID;
@@ -37,14 +38,13 @@ class ProjectValidatorTest {
                 entityNotFoundException.getMessage());
     }
 
-    @Disabled
     @Test
     public void testIsUniqOwnerAndName() {
         when(projectRepository.existsByOwnerUserIdAndName(USER_ID, PROJECT_NAME))
-                .thenReturn(false);
+                .thenReturn(true);
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
-                () -> projectValidator.isUniqOwnerAndName(USER_ID, PROJECT_NAME)
+                () -> projectValidator.validateProjectParams(PROJECT)
         );
         assertEquals("A project with the same owner and name exists.",
                 dataValidationException.getMessage());
@@ -54,7 +54,7 @@ class ProjectValidatorTest {
     public void testNameExists() {
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
-                () -> projectValidator.nameExistsAndNotEmpty(null)
+                () -> projectValidator.validateProjectParams(Project.builder().build())
         );
         assertEquals("Project name must not be null or empty.",
                 dataValidationException.getMessage());
@@ -64,7 +64,7 @@ class ProjectValidatorTest {
     public void testNameNotEmpty() {
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
-                () -> projectValidator.nameExistsAndNotEmpty("")
+                () -> projectValidator.validateProjectParams(Project.builder().name("").build())
         );
         assertEquals("Project name must not be null or empty.",
                 dataValidationException.getMessage());
@@ -74,17 +74,18 @@ class ProjectValidatorTest {
     public void testDescExists() {
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
-                () -> projectValidator.descExistsAndNotEmpty(null)
+                () -> projectValidator.validateProjectParams(Project.builder().name(PROJECT_NAME).build())
         );
         assertEquals("Project description must not be null or empty.",
                 dataValidationException.getMessage());
     }
 
     @Test
-    public void testNotEmpty() {
+    public void testDescriptionNotEmpty() {
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
-                () -> projectValidator.descExistsAndNotEmpty("")
+                () -> projectValidator.validateProjectParams(Project.builder()
+                        .name(PROJECT_NAME).description("").build())
         );
         assertEquals("Project description must not be null or empty.",
                 dataValidationException.getMessage());

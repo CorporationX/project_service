@@ -7,6 +7,7 @@ import java.util.List;
 
 public class TestProject {
     public static long PROJECT_ID = 1L;
+    public static long OWNER_ID = 1L;
     public static String PROJECT_NAME = "Project";
     public static String PROJECT_DESC = "Desc";
 
@@ -14,6 +15,7 @@ public class TestProject {
             .id(PROJECT_ID)
             .name(PROJECT_NAME)
             .description(PROJECT_DESC)
+            .ownerId(OWNER_ID)
             .build();
 
     public static ProjectDto PROJECT_DTO = ProjectDto.builder()

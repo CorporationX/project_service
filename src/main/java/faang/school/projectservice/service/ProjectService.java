@@ -38,7 +38,7 @@ public class ProjectService {
     @Transactional
     public ProjectDto create(ProjectCreateDto projectCreateDto) {
         Project project = projectMapper.createDtoToProject(projectCreateDto);
-        complexValidate(project);
+        projectValidator.validateProjectParams(project);
         log.warn("The owner ID does not match the authorized user ID.");
         return projectMapper.projectToDto(projectRepository.save(project));
     }
@@ -90,11 +90,5 @@ public class ProjectService {
         Stream<TeamMember> teamMemberStream = team.getTeamMembers().stream();
         return teamMemberStream.anyMatch(teamMember ->
                 teamMember.getUserId() == userContext.getUserId());
-    }
-
-    private void complexValidate(Project project) {
-        projectValidator.nameExistsAndNotEmpty(project.getName());
-        projectValidator.descExistsAndNotEmpty(project.getDescription());
-        projectValidator.isUniqOwnerAndName(project.getOwnerId(), project.getName());
     }
 }

@@ -2,6 +2,7 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,21 +21,14 @@ public class ProjectValidator {
         }
     }
 
-    public void isUniqOwnerAndName(Long userId, String name) {
-        if (projectRepository.existsByOwnerUserIdAndName(userId, name)) {
-            throw new DataValidationException("A project with the same owner and name exists.");
-        }
-    }
-
-    public void nameExistsAndNotEmpty(String name) {
-        if (Objects.isNull(name) || name.isEmpty()) {
+    public void validateProjectParams(Project project) {
+        boolean isUniq = projectRepository.existsByOwnerUserIdAndName(project.getOwnerId(), project.getName());
+        if (Objects.isNull(project.getName()) || project.getName().isEmpty()) {
             throw new DataValidationException("Project name must not be null or empty.");
-        }
-    }
-
-    public void descExistsAndNotEmpty(String description) {
-        if(Objects.isNull(description) || description.isEmpty()) {
+        } else if (Objects.isNull(project.getDescription()) || project.getDescription().isEmpty()) {
             throw new DataValidationException("Project description must not be null or empty.");
+        } else if (isUniq) {
+            throw new DataValidationException("A project with the same owner and name exists.");
         }
     }
 }
