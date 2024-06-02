@@ -1,31 +1,25 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static faang.school.projectservice.util.TestProject.PROJECT;
 import static faang.school.projectservice.util.TestProject.PROJECTS;
 import static faang.school.projectservice.util.TestProject.PROJECTS_DTOS;
+import static faang.school.projectservice.util.TestProject.PROJECT_CREATE_DTO;
 import static faang.school.projectservice.util.TestProject.PROJECT_DTO;
 import static faang.school.projectservice.util.TestProject.PROJECT_ID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -34,8 +28,6 @@ class ProjectServiceTest {
     ProjectValidator projectValidator;
     @Mock
     ProjectRepository projectRepository;
-    @Mock
-    UserContext userContext;
     @Mock
     ProjectMapper projectMapper;
     @InjectMocks
@@ -47,19 +39,14 @@ class ProjectServiceTest {
         when(projectMapper.projectToDto(PROJECT)).thenReturn(PROJECT_DTO);
         var project = projectRepository.save(PROJECT);
         var dto = projectMapper.projectToDto(PROJECT);
-//        var rrr = projectService.create(new ProjectCreateDto());
+        var ProjectDto = projectService.create(PROJECT_CREATE_DTO);
+
         verify(projectRepository, times(1)).save(PROJECT);
         verify(projectMapper, times(1)).projectToDto(PROJECT);
-    }
 
-    @Test
-    public void testCreateProjectIsOwnerNotPresent() {
-        // Используем пользователя из контекста
-    }
-
-    @Test
-    public void testUpdateProject() {
-
+        assertEquals(PROJECT_DTO.getName(), project.getName());
+        assertEquals(PROJECT_DTO.getDescription(), project.getDescription());
+        assertEquals(ProjectStatus.CREATED, project.getStatus());
     }
 
     @Test
@@ -75,11 +62,6 @@ class ProjectServiceTest {
         assertEquals(project.getDescription(), dto.getDescription());
     }
 
-    @Test
-    public void testIsUserExistInTeams() {
-
-
-    }
 
     @Test
     public void testGetAllProjects() {

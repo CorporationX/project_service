@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDtoRequest;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.constraints.Min;
@@ -35,13 +35,13 @@ public class ProjectController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProjectDto create(@RequestBody ProjectCreateDto projectCreateDto) {
-        return projectService.create(projectCreateDto);
+    public ProjectDto create(@RequestBody ProjectDtoRequest projectDtoRequest) {
+        return projectService.create(projectDtoRequest);
     }
 
     @PutMapping("/{projectId}")
     @ResponseStatus(HttpStatus.OK)
-    public ProjectDto update(@PathVariable long projectId, ProjectDto projectDto) {
+    public ProjectDto update(@PathVariable Long projectId, @RequestBody ProjectDto projectDto) {
         return projectService.update(projectId, projectDto);
     }
 

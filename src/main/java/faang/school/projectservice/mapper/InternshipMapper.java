@@ -18,6 +18,7 @@ import java.util.List;
 @Mapper(
         componentModel = "spring",
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
         uses = {ScheduleService.class, TeamMemberService.class, ProjectService.class}
 )
 public interface InternshipMapper {

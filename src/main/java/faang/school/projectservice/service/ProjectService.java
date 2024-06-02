@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDtoRequest;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -36,20 +36,23 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
 
     @Transactional
-    public ProjectDto create(ProjectCreateDto projectCreateDto) {
-        Project project = projectMapper.createDtoToProject(projectCreateDto);
+    public ProjectDto create(ProjectDtoRequest projectDtoRequest) {
+        Project project = projectMapper.requestDtoToProject(projectDtoRequest);
         projectValidator.validateProjectParams(project);
         log.warn("The owner ID does not match the authorized user ID.");
         return projectMapper.projectToDto(projectRepository.save(project));
     }
 
     @Transactional
-    public ProjectDto update(long projectId, ProjectDto projectDto) {
+    public ProjectDto update(Long projectId, ProjectDto projectDto) {
         projectValidator.isExists(projectId);
-        Project project = projectRepository.save(projectMapper.dtoToProject(projectDto));
-        return projectMapper.projectToDto(project);
+        Project project = projectRepository.getProjectById(projectId);
+        ;
+        return projectMapper.projectToDto(
+                projectRepository.save(projectMapper.dtoToProject(projectDto, project)));
     }
 
+    @Transactional(readOnly = true)
     public ProjectDto findById(Long id) {
         return projectMapper.projectToDto(projectRepository.getProjectById(id));
     }
