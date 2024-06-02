@@ -17,11 +17,11 @@ public class StageValidator {
         Project project = projectRepository.getProjectById(id);
 
         if (!projectRepository.existsById(id)) {
-            throw new DataValidationException(ValidationMessage.PROJECT_STAGE_NOT_FOUND.getMessage());
+            throw new DataValidationException(ProjectStageMessage.PROJECT_STAGE_NOT_FOUND.getMessage());
         }
 
         if (project.getStatus().equals(ProjectStatus.CANCELLED) || project.getStatus().equals(ProjectStatus.COMPLETED)) {
-            throw new DataValidationException(ValidationMessage.PROJECT_INCORRECT_STATUS.getMessage());
+            throw new DataValidationException(ProjectStageMessage.PROJECT_INCORRECT_STATUS.getMessage());
         }
     }
 }

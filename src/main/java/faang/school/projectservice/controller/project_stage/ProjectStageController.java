@@ -2,7 +2,7 @@ package faang.school.projectservice.controller.project_stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.service.ProjectStageService;
+import faang.school.projectservice.service.projectStage.ProjectStageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.projectStage;
 
 
 import faang.school.projectservice.dto.stage.StageDto;
@@ -12,7 +12,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validation.StageValidator;
-import faang.school.projectservice.validation.ValidationMessage;
+import faang.school.projectservice.validation.ProjectStageMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +77,7 @@ public class ProjectStageService {
 
     public List<StageDto> getAllStages(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
-            throw new DataValidationException(ValidationMessage.PROJECT_STAGE_NOT_FOUND.getMessage());
+            throw new DataValidationException(ProjectStageMessage.PROJECT_STAGE_NOT_FOUND.getMessage());
         }
 
         return stageRepository.findAll().stream()
@@ -88,7 +88,7 @@ public class ProjectStageService {
 
     public StageDto getStage(Long stageId) {
         if (!stageRepository.existsById(stageId)) {
-            throw new DataValidationException(ValidationMessage.STAGE_NOT_FOUND.getMessage());
+            throw new DataValidationException(ProjectStageMessage.STAGE_NOT_FOUND.getMessage());
         }
 
         return stageMapper.toDto(stageRepository.getById(stageId));
