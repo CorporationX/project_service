@@ -39,45 +39,41 @@ public class MomentValidator {
     }
 
     public void projectsUpdateValidator(Moment oldMoment, MomentDto newMomentDto) {
-        List<Long> oldProject = oldMoment.getProjects()
-                .stream()
-                .map(Project::getId)
-                .toList();
-
         List<Long> newProject = new ArrayList<>(newMomentDto.getProjectIds());
-        newProject.removeAll(oldProject);
+        newProject.removeAll(
+                oldMoment.getProjects()
+                        .stream()
+                        .map(Project::getId)
+                        .toList()
+        );
 
         List<Long> momentUserIds = new ArrayList<>(newMomentDto.getUserIds());
-        newProject.forEach(projectId -> {
-            List<Long> userIds = projectRepository.getProjectById(projectId)
-                    .getTeams()
-                    .stream()
-                    .flatMap(team -> team.getTeamMembers().stream())
-                    .map(TeamMember::getId)
-                    .distinct()
-                    .toList();
-            momentUserIds.addAll(userIds);
-        });
+        newProject.forEach(projectId ->
+                momentUserIds.addAll(projectRepository.getProjectById(projectId)
+                        .getTeams()
+                        .stream()
+                        .flatMap(team -> team.getTeamMembers().stream())
+                        .map(TeamMember::getId)
+                        .distinct()
+                        .toList()
+                ));
         newMomentDto.setUserIds(new ArrayList<>(momentUserIds));
 
         momentMapper.toEntity(newMomentDto);
     }
 
     public void membersUpdateValidator(Moment oldMoment, MomentDto newMomentDto) {
-        List<Long> oldMember = oldMoment.getUserIds();
-
         List<Long> newMember = new ArrayList<>(newMomentDto.getUserIds());
-        newMember.removeAll(oldMember);
+        newMember.removeAll(oldMoment.getUserIds());
 
         List<Long> projectIds = newMomentDto.getProjectIds();
-        newMember.forEach(userId -> {
-            Long team = teamMemberRepository.findById(userId)
-                    .getTeam()
-                    .getProject()
-                    .getId();
-            projectIds.add(team);
-        });
-        newMomentDto.setProjectIds(projectIds);
+        newMember.forEach(userId ->
+                projectIds.add(teamMemberRepository.findById(userId)
+//                    .getTeam()
+//                  .getProject()
+                                .getId()
+                ));
+        newMomentDto.setProjectIds(new ArrayList<>(projectIds));
 
         momentMapper.toEntity(newMomentDto);
     }

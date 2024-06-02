@@ -19,7 +19,7 @@ public class MomentController {
         return momentService.create(momentDto);
     }
 
-    @PutMapping("/update/{momentId}")
+    @PatchMapping("/update/{momentId}")
     public MomentDto update(@PathVariable Long momentId, @RequestBody MomentDto momentDto) {
         return momentService.update(momentId, momentDto);
     }
