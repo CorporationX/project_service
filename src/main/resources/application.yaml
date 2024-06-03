@@ -24,6 +24,9 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+      pubsub:
+        topic:
+          invite-sent: inviteSent
 
   profiles:
     active: test
