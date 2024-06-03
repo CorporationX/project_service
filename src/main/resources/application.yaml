@@ -25,6 +25,9 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  profiles:
+    active: test
+
 server:
   port: 8082
 
@@ -48,7 +51,3 @@ services:
   user-service:
     host: http://localhost
     port: 8080
-
-api:
-  version: /api/v1
-
