@@ -12,6 +12,7 @@ import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validation.initiative.InitiativeValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
