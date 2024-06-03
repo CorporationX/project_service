@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter.project;
+package faang.school.projectservice.service.project.filter;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;

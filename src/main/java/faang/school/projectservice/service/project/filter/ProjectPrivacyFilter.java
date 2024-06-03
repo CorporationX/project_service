@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter.project;
+package faang.school.projectservice.service.project.filter;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
@@ -18,10 +18,10 @@ class ProjectPrivacyFilter implements ProjectFilter {
 
     @Override
     public Stream<Project> apply(Stream<Project> projectStream, ProjectFilterDto filter) {
-        return projectStream.filter(visibleToMember(filter.getUserId()));
+        return projectStream.filter(isVisibleToMember(filter.getUserId()));
     }
 
-    private Predicate<Project> visibleToMember(Long userId) {
+    private Predicate<Project> isVisibleToMember(Long userId) {
         return project -> {
             if (project.getVisibility() == ProjectVisibility.PUBLIC) {
                 return true;
