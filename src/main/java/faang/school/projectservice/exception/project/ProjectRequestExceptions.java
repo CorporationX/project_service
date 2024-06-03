@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum ProjectRequestExceptions {
-    OWNER_ID_EMPTY("Project request owner ID is empty"),
+    OWNER_ID_EMPTY("Project request owner %s is empty"),
     NAME_EMPTY("Project request name is empty"),
     DESCRIPTION_EMPTY("Project description name is empty"),
     ALREADY_EXISTS("Project with this name and owner id already exists"),
