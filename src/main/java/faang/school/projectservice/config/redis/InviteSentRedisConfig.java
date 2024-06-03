@@ -14,12 +14,12 @@ public class InviteSentRedisConfig {
     private String topicName;
 
     @Bean
-    ChannelTopic inviteSentTopic() {
+    public ChannelTopic inviteSentTopic() {
         return new ChannelTopic(topicName);
     }
 
     @Bean
-    InviteSentPublisher completedGoalPublisher(RedisTemplate<String, Object> redisTemplate) {
+    public InviteSentPublisher completedGoalPublisher(RedisTemplate<String, Object> redisTemplate) {
         return new InviteSentPublisher(redisTemplate, inviteSentTopic());
     }
 }
