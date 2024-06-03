@@ -1,6 +1,8 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.service.ProjectService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/projects")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "Project", description = "Operations related to project")
 public class ProjectController {
 
     private final ProjectService projectService;
 
     @PostMapping("/{projectId}/cover")
+    @Operation(summary = "Upload project cover", description = "Uploads a cover image for the specified project")
     public ResponseEntity<String> uploadCover(@PathVariable @Min(value = 1, message = "Project ID must be more than 0") Long projectId,
                                               @RequestParam("cover") @NotNull MultipartFile multipartFile) {
         String fileName = multipartFile.getOriginalFilename();
