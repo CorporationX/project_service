@@ -10,7 +10,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 @Configuration
 public class InviteSentRedisConfig {
 
-    @Value("${redis.pubsub.topic:invite-sent")
+    @Value("${spring.data.redis.channels.invitation_channel.name}")
     private String topicName;
 
     @Bean
