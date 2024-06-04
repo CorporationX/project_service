@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.InternshipStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "Internship entity")
 public class InternshipDto {
 
     private Long id;

@@ -62,3 +62,7 @@ images:
   max_width: 1080
   max_height: 566
   image_format: jpg
+
+springdoc:
+  api-docs:
+    path: /api-docs
