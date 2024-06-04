@@ -29,7 +29,7 @@ public class StageInvitationController {
     private final UserContext userContext;
 
     @Operation(summary = "Send new invite")
-    @PostMapping()
+    @PostMapping
     public StageInvitationDto sendInvite(@Valid @RequestBody StageInvitationCreateDto stageInvitationCreateDto) {
         stageInvitationCreateDto.setAuthorId(userContext.getUserId());
         return stageInvitationService.sendInvitation(stageInvitationCreateDto);
@@ -50,7 +50,7 @@ public class StageInvitationController {
     }
 
     @Operation(summary = "Get invites with filters")
-    @GetMapping()
+    @GetMapping
     public List<StageInvitationDto> getInvites(StageInvitationFilterDto stageInvitationFilterDto) {
         return stageInvitationService.getInvitationsWithFilters(stageInvitationFilterDto);
     }
