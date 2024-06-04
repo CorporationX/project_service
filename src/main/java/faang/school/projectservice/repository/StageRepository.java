@@ -30,4 +30,8 @@ public class StageRepository {
     public List<Stage> findAll() {
         return jpaRepository.findAll();
     }
+
+    public boolean existsById(Long stageId) {
+        return jpaRepository.existsById(stageId);
+    }
 }
