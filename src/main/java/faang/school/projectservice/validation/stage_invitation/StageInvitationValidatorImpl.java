@@ -7,9 +7,9 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.validation.stage.StageValidator;
 import faang.school.projectservice.validation.team_member.TeamMemberValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class StageInvitationValidatorImpl implements StageInvitationValidator {
 

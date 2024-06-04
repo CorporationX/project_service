@@ -3,9 +3,9 @@ package faang.school.projectservice.validation.stage;
 import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class StageValidatorImpl implements StageValidator {
 

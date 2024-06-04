@@ -3,9 +3,9 @@ package faang.school.projectservice.validation.team_member;
 import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class TeamMemberValidatorImpl implements TeamMemberValidator {
 
