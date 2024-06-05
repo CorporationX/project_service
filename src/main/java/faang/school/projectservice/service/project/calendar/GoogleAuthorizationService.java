@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.calendar;
+package faang.school.projectservice.service.project.calendar;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
 import com.google.api.client.auth.oauth2.BearerToken;
@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
@@ -31,7 +30,7 @@ import static java.time.LocalDateTime.now;
 @RequiredArgsConstructor
 class GoogleAuthorizationService {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
+    private static final List<String> SCOPES = List.of(CalendarScopes.CALENDAR_EVENTS, CalendarScopes.CALENDAR);
     private static final int ACCESS_TOKEN_EXPIRES_IN_SECONDS = 3499;
     private final CalendarTokenRepository calendarTokenRepository;
     private final ProjectRepository projectRepository;
