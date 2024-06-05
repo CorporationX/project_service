@@ -28,8 +28,8 @@ public class Stage {
     @Column(name = "project_stage_name", nullable = false)
     private String stageName;
 
-    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     private StageStatus stageStatus;
 
     @ManyToOne
