@@ -1,15 +1,19 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.initiative;
 
-import jakarta.persistence.CollectionTable;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -25,44 +29,48 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "moment")
-@Builder
+@Table(name = "initiative")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Moment {
+@Builder
+public class Initiative {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "name", nullable = false, length = 64)
     private String name;
 
+    @Column(name = "description", nullable = false, length = 4096)
     private String description;
 
-    private LocalDateTime date;
+    @ManyToOne
+    @JoinColumn(name = "curator_id",  nullable = false)
+    private TeamMember curator;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private InitiativeStatus status;
 
     @ManyToMany
     @JoinTable(
-            name = "moment_resource",
-            joinColumns = @JoinColumn(name = "moment_id"),
-            inverseJoinColumns = @JoinColumn(name = "resource_id")
+            name = "initiative_project_stages",
+            joinColumns = @JoinColumn(name = "initiative_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_stage_id")
     )
-    private List<Resource> resource;
+    private List<Stage> stages;
+
+    @ManyToOne
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     @ManyToMany
     @JoinTable(
-            name = "moment_project",
-            joinColumns = @JoinColumn(name = "moment_id"),
+            name = "initiative_project",
+            joinColumns = @JoinColumn(name = "initiative_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    private List<Project> projects;
-
-    @ElementCollection
-    @CollectionTable(name = "moment_user", joinColumns = @JoinColumn(name = "moment_id"))
-    @Column(name = "team_member_id")
-    private List<Long> userIds;
-
-    @Column(name = "image_id")
-    private String imageId;
+    private List<Project> sharingProjects;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -73,10 +81,4 @@ public class Moment {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Column(name = "created_by")
-    private Long createdBy;
-
-    @Column(name = "updated_by")
-    private Long updatedBy;
 }
