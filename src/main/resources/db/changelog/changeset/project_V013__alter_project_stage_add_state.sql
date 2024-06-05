@@ -1,0 +1,2 @@
+ALTER TABLE project_stage
+ADD COLUMN status VARCHAR(20) DEFAULT 'TODO';

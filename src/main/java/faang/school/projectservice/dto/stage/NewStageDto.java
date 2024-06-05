@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.stage;
 
+import faang.school.projectservice.dto.stagerole.NewStageRolesDto;
 import faang.school.projectservice.model.StageStatus;
 import faang.school.projectservice.validator.enumvalidator.EnumValidator;
 import jakarta.validation.constraints.NotBlank;
@@ -16,9 +17,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StageDto {
-    private Long stageId;
-
+public class NewStageDto {
     @NotBlank
     private String stageName;
 
@@ -30,7 +29,7 @@ public class StageDto {
     private Long projectId;
 
     @NotNull
-    private List<Long> stageRolesIds;
+    private List<NewStageRolesDto> stageRoles;
 
     private List<Long> tasksIds;
 

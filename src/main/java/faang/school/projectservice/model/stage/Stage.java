@@ -1,8 +1,10 @@
 package faang.school.projectservice.model.stage;
 
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.StageStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +27,10 @@ public class Stage {
 
     @Column(name = "project_stage_name", nullable = false)
     private String stageName;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StageStatus stageStatus;
 
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)

@@ -1,6 +1,7 @@
 package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.StageJpaRepository;
+import faang.school.projectservice.model.StageStatus;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

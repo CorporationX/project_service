@@ -1,18 +1,24 @@
 package faang.school.projectservice.mapper;
 
+import faang.school.projectservice.dto.stage.NewStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
+
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",
+        uses = StageRolesMapper.class,
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
 
     @Mapping(source = "project.id", target = "projectId")
@@ -21,11 +27,13 @@ public interface StageMapper {
     @Mapping(source = "executors", target = "executorsIds", qualifiedByName = "executorsToExecutorsIds")
     StageDto toDto(Stage entity);
 
+    @Mapping(target = "stageId", ignore = true)
     @Mapping(target = "project", ignore = true)
-    @Mapping(target = "stageRoles", ignore = true)
     @Mapping(target = "tasks", ignore = true)
     @Mapping(target = "executors", ignore = true)
-    Stage toEntity(StageDto dto);
+    Stage toEntity(NewStageDto dto);
+
+    List<StageDto> toDtoList(List<Stage> entities);
 
     @Named("stageRolesToStageRolesIds")
     default List<Long> stageRolesToStageRolesIds(List<StageRoles> stageRoles) {
