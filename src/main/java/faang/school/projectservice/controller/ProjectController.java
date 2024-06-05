@@ -4,12 +4,12 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectDtoRequest;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
-@Validated
+@Valid
 public class ProjectController {
 
     private final ProjectService projectService;

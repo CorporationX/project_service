@@ -13,5 +13,4 @@ import lombok.NoArgsConstructor;
 public class ProjectFilterDto {
     private String name;
     private ProjectStatus status;
-    private boolean isPrivate;
 }

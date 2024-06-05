@@ -20,6 +20,7 @@ public class TestProject {
             .description(PROJECT_DESC)
             .ownerId(OWNER_ID)
             .status(ProjectStatus.CREATED)
+            .visibility(ProjectVisibility.PRIVATE)
             .build();
 
     public static ProjectDto PROJECT_DTO = ProjectDto.builder()
@@ -27,13 +28,22 @@ public class TestProject {
             .name(PROJECT_NAME)
             .description(PROJECT_DESC)
             .status(ProjectStatus.CREATED)
-            .visibility(ProjectVisibility.PUBLIC)
+            .visibility(ProjectVisibility.PRIVATE)
             .build();
 
-    public static ProjectDtoRequest PROJECT_CREATE_DTO = ProjectDtoRequest.builder()
+    public static ProjectDtoRequest PROJECT_DTO_REQUEST = ProjectDtoRequest.builder()
             .name(PROJECT_NAME)
             .description(PROJECT_DESC)
             .ownerId(OWNER_ID)
+            .visibility(ProjectVisibility.PRIVATE)
+            .build();
+
+    public static Project SAVED_PROJECT = Project.builder()
+            .id(PROJECT_ID)
+            .name(PROJECT_NAME)
+            .description(PROJECT_DESC)
+            .ownerId(OWNER_ID)
+            .status(ProjectStatus.CREATED)
             .build();
     public static List<Project> PROJECTS = List.of(PROJECT);
     public static List<ProjectDto> PROJECTS_DTOS = List.of(PROJECT_DTO);

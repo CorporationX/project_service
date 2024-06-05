@@ -13,6 +13,8 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.image.ImageService;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.ProjectValidator;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Valid
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -38,22 +41,20 @@ public class ProjectService {
     @Transactional
     public ProjectDto create(ProjectDtoRequest projectDtoRequest) {
         Project project = projectMapper.requestDtoToProject(projectDtoRequest);
-        projectValidator.validateProjectParams(project);
-        log.warn("The owner ID does not match the authorized user ID.");
+        projectValidator.validateProjectIsUniqByIdAndName(project);
         return projectMapper.projectToDto(projectRepository.save(project));
     }
 
     @Transactional
-    public ProjectDto update(Long projectId, ProjectDto projectDto) {
+    public ProjectDto update(@Min(1) Long projectId, ProjectDto projectDto) {
         projectValidator.isExists(projectId);
         Project project = projectRepository.getProjectById(projectId);
-        ;
         return projectMapper.projectToDto(
                 projectRepository.save(projectMapper.dtoToProject(projectDto, project)));
     }
 
     @Transactional(readOnly = true)
-    public ProjectDto findById(Long id) {
+    public ProjectDto findById(@Min(1) Long id) {
         return projectMapper.projectToDto(projectRepository.getProjectById(id));
     }
 
@@ -75,12 +76,12 @@ public class ProjectService {
         return projectMapper.projectsToDtos(projectRepository.findAll());
     }
 
-    public void delete(Long projectId) {
+    public void delete(@Min(1) Long projectId) {
         projectRepository.delete(projectId);
     }
 
     @Transactional
-    public void uploadFile(MultipartFile file, Long projectId, String folder) {
+    public void uploadFile(MultipartFile file, @Min(1) Long projectId, String folder) {
         Project project = projectRepository.getProjectById(projectId);
         log.info("Image preprocessing");
         file = imageService.imageProcessing(file);

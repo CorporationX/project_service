@@ -7,8 +7,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 @Component
 @AllArgsConstructor
 public class ProjectValidator {
@@ -21,13 +19,9 @@ public class ProjectValidator {
         }
     }
 
-    public void validateProjectParams(Project project) {
+    public void validateProjectIsUniqByIdAndName(Project project) {
         boolean isUniq = projectRepository.existsByOwnerUserIdAndName(project.getOwnerId(), project.getName());
-        if (Objects.isNull(project.getName()) || project.getName().isEmpty()) {
-            throw new DataValidationException("Project name must not be null or empty.");
-        } else if (Objects.isNull(project.getDescription()) || project.getDescription().isEmpty()) {
-            throw new DataValidationException("Project description must not be null or empty.");
-        } else if (isUniq) {
+        if (isUniq) {
             throw new DataValidationException("A project with the same owner and name exists.");
         }
     }
