@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,13 +30,13 @@ public class ProjectController {
 
     @Operation(summary = "Create project")
     @PostMapping
-    public ProjectDto create(@Valid @ParameterObject @RequestBody ProjectDto projectDto) {
+    public ProjectDto create(@Valid @NonNull @ParameterObject @RequestBody ProjectDto projectDto) {
         return projectService.create(projectDto);
     }
 
     @Operation(summary = "Update project")
     @PutMapping
-    public ProjectDto update(@Valid @ParameterObject @RequestBody ProjectDto projectDto) {
+    public ProjectDto update(@Valid @NonNull @ParameterObject @RequestBody ProjectDto projectDto) {
         return projectService.update(projectDto);
     }
 
@@ -53,7 +54,7 @@ public class ProjectController {
 
     @Operation(summary = "Get all projects by filter")
     @GetMapping("/filter")
-    public List<ProjectDto> getAllByFilter(@Valid @ParameterObject ProjectFilterDto projectFilterDto) {
+    public List<ProjectDto> getAllByFilter(@Valid @NonNull @ParameterObject ProjectFilterDto projectFilterDto) {
         return projectService.getAllByFilter(projectFilterDto);
     }
 }
