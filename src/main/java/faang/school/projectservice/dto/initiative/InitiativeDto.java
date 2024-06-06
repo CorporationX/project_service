@@ -22,16 +22,18 @@ public class InitiativeDto {
     @NotNull(message = "Id should not be null")
     private Long id;
 
+    @NotNull(message = "Name should not be null")
     @NotBlank(message = "Name should not be blank")
-    @Length(max = 64)
+    @Length(max = 64, message = "Name length should be less than 64")
     private String name;
 
+    @NotNull(message = "Description should not be null")
     @NotBlank(message = "Description should not be blank")
-    @Length(max = 4096)
+    @Length(max = 4096, message = "Description length should be less than 4096")
     private String description;
 
-    @Positive(message = "CuratorId should be positive")
     @NotNull(message = "CuratorId should not be null")
+    @Positive(message = "CuratorId should be positive")
     private Long curatorId;
 
     @Positive(message = "ProjectId should be positive")

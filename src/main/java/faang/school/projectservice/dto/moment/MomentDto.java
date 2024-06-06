@@ -18,22 +18,26 @@ import java.util.List;
 @Builder
 public class MomentDto {
 
-    @Positive(message = "Id should be positive")
     @NotNull(message = "Id should not be null")
+    @Positive(message = "Id should be positive")
     private Long id;
 
+    @NotNull(message = "Name should not be null")
     @NotBlank(message = "Name should not be blank")
-    @Length(max = 64)
+    @Length(max = 64, message = "Name length should be less than 64")
     private String name;
 
+    @NotNull(message = "Description should not be null")
     @NotBlank(message = "Description should not be blank")
-    @Length(max = 4098)
+    @Length(max = 4096, message = "Description length should be less than 4096")
     private String description;
 
-    @NotEmpty
+    @NotNull(message = "ProjectIds should not be null")
+    @NotEmpty(message = "ProjectIds should not be empty")
     private List<Long> projectIds;
 
-    @NotEmpty
+    @NotNull(message = "UserIds should not be null")
+    @NotEmpty(message = "UserIds should not be empty")
     private List<Long> userIds;
 
     private String imageId;
