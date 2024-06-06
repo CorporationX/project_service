@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 public class CalendarDto {
     private String id;
-    @NotNull
+    @NotNull(message = "Summary is required field of calendar.")
     private String summary;
     private String description;
     private String location;

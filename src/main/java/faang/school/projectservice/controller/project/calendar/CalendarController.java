@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.project.calendar;
 
+import faang.school.projectservice.dto.project.calendar.AclDto;
 import faang.school.projectservice.dto.project.calendar.CalendarDto;
 import faang.school.projectservice.dto.project.calendar.EventDto;
 import faang.school.projectservice.service.project.calendar.CalendarService;
@@ -63,5 +64,25 @@ public class CalendarController {
     @GetMapping("{projectId}/calendars")
     public CalendarDto getCalendar(@PathVariable long projectId, @RequestParam String calendarId) {
         return calendarService.getCalendar(projectId, calendarId);
+    }
+
+    @PostMapping("{projectId}/calendars/acl")
+    public AclDto createAclRule(@PathVariable long projectId,
+                                @RequestParam String calendarId,
+                                @Valid @RequestBody AclDto aclDto) {
+        return calendarService.createAcl(projectId, calendarId, aclDto);
+    }
+
+    @GetMapping("{projectId}/calendars/acl")
+    public List<AclDto> listAclRules(@PathVariable long projectId,
+                                     @RequestParam String calendarId) {
+        return calendarService.listAcl(projectId, calendarId);
+    }
+
+    @DeleteMapping("{projectId}/calendars/acl")
+    public void deleteAclRule(@PathVariable long projectId,
+                              @RequestParam String calendarId,
+                              @RequestParam String aclId) {
+        calendarService.deleteAcl(projectId, calendarId, aclId);
     }
 }

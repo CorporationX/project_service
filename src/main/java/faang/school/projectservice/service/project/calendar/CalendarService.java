@@ -2,9 +2,12 @@ package faang.school.projectservice.service.project.calendar;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Event;
+import faang.school.projectservice.dto.project.calendar.AclDto;
 import faang.school.projectservice.dto.project.calendar.CalendarDto;
 import faang.school.projectservice.dto.project.calendar.EventDto;
+import faang.school.projectservice.mapper.AclMapper;
 import faang.school.projectservice.mapper.CalendarMapper;
 import faang.school.projectservice.mapper.EventMapper;
 import faang.school.projectservice.model.CalendarToken;
@@ -23,6 +26,7 @@ public class CalendarService {
     private final GoogleAuthorizationService OAuthService;
     private final EventMapper eventMapper;
     private final CalendarMapper calendarMapper;
+    private final AclMapper aclMapper;
     @Value("${spring.OAuth2.applicationName}")
     private String applicationName;
 
@@ -119,6 +123,51 @@ public class CalendarService {
                     .execute();
 
             return calendarMapper.toDto(calendar);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Transactional
+    public AclDto createAcl(long projectId, String calendarId, AclDto aclDto) {
+        Calendar service = buildCalendar(projectId);
+
+        AclRule newAcl = aclMapper.toModel(aclDto);
+        try {
+            AclRule createdAcl = service.acl()
+                    .insert(calendarId, newAcl)
+                    .execute();
+
+            return aclMapper.toDto(createdAcl);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Transactional
+    public List<AclDto> listAcl(long projectId, String calendarId) {
+        Calendar service = buildCalendar(projectId);
+
+        try {
+            List<AclRule> aclRuleList = service.acl()
+                    .list(calendarId)
+                    .execute()
+                    .getItems();
+
+            return aclMapper.toDtos(aclRuleList);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Transactional
+    public void deleteAcl(long projectId, String calendarId, String aclId) {
+        Calendar service = buildCalendar(projectId);
+
+        try {
+            service.acl()
+                    .delete(calendarId, aclId)
+                    .execute();
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
