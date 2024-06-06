@@ -8,6 +8,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +22,11 @@ public class MomentValidator {
     private final MomentMapper momentMapper;
     private final TeamMemberRepository teamMemberRepository;
 
-    public void momentProjectValidation(MomentDto momentDto) {
+    public void momentHasProjectValidation(MomentDto momentDto) {
         momentDto.getProjectIds()
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Moment has no project"));
+                .orElseThrow(() -> new EntityNotFoundException("Moment has no project"));
     }
 
     //Todo Перенести в ProjectValidator
@@ -69,9 +70,9 @@ public class MomentValidator {
         List<Long> projectIds = newMomentDto.getProjectIds();
         newMember.forEach(userId ->
                 projectIds.add(teamMemberRepository.findById(userId)
-//                    .getTeam()
-//                  .getProject()
-                                .getId()
+                        .getTeam()
+                        .getProject()
+                        .getId()
                 ));
         newMomentDto.setProjectIds(new ArrayList<>(projectIds));
 

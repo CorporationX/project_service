@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class MomentService {
 
     @Transactional
     public MomentDto create(MomentDto momentDto) {
-        momentValidator.momentProjectValidation(momentDto);
+        momentValidator.momentHasProjectValidation(momentDto);
         momentValidator.projectNotCancelledValidator(momentDto.getProjectIds());
 
         return momentMapper.toDto(momentRepository.save(momentMapper.toEntity(momentDto)));
@@ -46,15 +47,17 @@ public class MomentService {
 
     @Transactional(readOnly = true)
     public List<MomentDto> getAllMomentsByFilters(Long projectId, MomentFilterDto filters) {
+        Stream<Moment> projectMomentStream = projectRepository.getProjectById(projectId).getMoments().stream();
         return momentFilters.stream()
-                .flatMap(filter -> filter.apply(projectRepository.getProjectById(projectId).getMoments().stream(), filters))
+                .filter(momentFilter -> momentFilter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(projectMomentStream, filters))
                 .map(momentMapper::toDto)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<MomentDto> getAllMoments() {
-        return momentMapper.toListDto(momentRepository.findAll());
+        return momentMapper.toDtoList(momentRepository.findAll());
     }
 
     @Transactional(readOnly = true)

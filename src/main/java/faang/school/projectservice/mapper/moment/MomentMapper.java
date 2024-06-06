@@ -17,7 +17,7 @@ public interface MomentMapper {
     MomentDto toDto(Moment moment);
 
     @Mapping(source = "projects", target = "projectIds", qualifiedByName = "toProjectIds")
-    List<MomentDto> toListDto(List<Moment> momentList);
+    List<MomentDto> toDtoList(List<Moment> momentList);
 
     @Mapping(source = "projectIds", target = "projects", qualifiedByName = "toProjects")
     Moment toEntity(MomentDto momentDto);
