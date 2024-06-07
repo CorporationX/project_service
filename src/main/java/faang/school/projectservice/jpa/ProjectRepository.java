@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
+public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query(
             "SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END " +
                     "FROM Project p " +

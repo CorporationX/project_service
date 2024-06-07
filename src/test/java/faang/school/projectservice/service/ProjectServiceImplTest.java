@@ -3,13 +3,13 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.jpa.ProjectRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validation.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +24,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -132,26 +133,26 @@ public class ProjectServiceImplTest {
     @Test
     public void testFindByIdWithFinding() {
         Project project = projectMapper.toProject(firstProjectDto);
-        when(projectRepository.getProjectById(firstProjectDto.getId())).thenReturn(project);
+        when(projectRepository.findById(firstProjectDto.getId())).thenReturn(Optional.of(project));
 
         ProjectDto result = projectServiceImpl.findById(firstProjectDto.getId());
         assertEquals(result, firstProjectDto);
 
         InOrder inOrder = inOrder(projectRepository, projectMapper);
-        inOrder.verify(projectRepository, times(1)).getProjectById(1L);
+        inOrder.verify(projectRepository, times(1)).findById(1L);
         inOrder.verify(projectMapper, times(1)).toDto(project);
     }
 
     @Test
     public void testUpdateWithUpdating() {
-        when(projectRepository.getProjectById(firstProjectDto.getId())).thenReturn(secondProject);
+        when(projectRepository.findById(firstProjectDto.getId())).thenReturn(Optional.of(secondProject));
         when(projectRepository.save(secondProject)).thenReturn(secondProject);
         ProjectDto result = projectServiceImpl.update(firstProjectDto);
         assertEquals(result.getName(), firstProjectDto.getName());
         assertEquals(result.getId(), firstProjectDto.getId());
 
         InOrder inOrder = inOrder(projectRepository, projectMapper);
-        inOrder.verify(projectRepository, times(1)).getProjectById(1L);
+        inOrder.verify(projectRepository, times(1)).findById(1L);
         inOrder.verify(projectMapper, times(1)).updateProject(firstProjectDto, secondProject);
         inOrder.verify(projectMapper, times(1)).toDto(secondProject);
     }

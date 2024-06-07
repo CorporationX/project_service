@@ -3,12 +3,13 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.jpa.ProjectRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validation.ProjectValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDto update(ProjectDto projectDto) {
-        Project project = projectRepository.getProjectById(projectDto.getId());
+        Project project = getProjectById(projectDto.getId());
         projectMapper.updateProject(projectDto, project);
         return projectMapper.toDto(projectRepository.save(project));
     }
@@ -51,7 +52,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDto findById(long id) {
-        Project project = projectRepository.getProjectById(id);
+        Project project = getProjectById(id);
         return projectMapper.toDto(project);
     }
 
@@ -59,11 +60,9 @@ public class ProjectServiceImpl implements ProjectService {
     public List<ProjectDto> getAllByFilter(ProjectFilterDto projectFilterDto) {
         List<Project> projects = projectRepository.findAll();
 
-        Predicate<Project> filterByVisibility = project -> (project.getVisibility().equals(ProjectVisibility.PRIVATE))
-                ? project.getTeams().stream()
+        Predicate<Project> filterByVisibility = project -> !project.getVisibility().equals(ProjectVisibility.PRIVATE) || project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
-                .anyMatch(teamMember -> teamMember.getId().equals(userContext.getUserId()))
-                : true;
+                .anyMatch(teamMember -> teamMember.getId().equals(userContext.getUserId()));
 
         Stream<Project> filteredProjectsByVisibility = projects.stream()
                 .filter(filterByVisibility);
@@ -71,5 +70,11 @@ public class ProjectServiceImpl implements ProjectService {
         return projectFilterService.applyFilters(filteredProjectsByVisibility, projectFilterDto)
                 .map(projectMapper::toDto)
                 .toList();
+    }
+
+    private Project getProjectById(Long projectId) {
+        return projectRepository.findById(projectId).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
+        );
     }
 }
