@@ -12,6 +12,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validation.stage_invitation.StageInvitationValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,8 +45,8 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     @Transactional
     public StageInvitationDto acceptInvitation(long userId, long inviteId) {
 
-        TeamMember invited = teamMemberRepository.findById(userId);
-        StageInvitation stageInvitation = findById(inviteId);
+        TeamMember invited = findTeamMemberById(userId);
+        StageInvitation stageInvitation = findStageInvitationById(inviteId);
 
         stageInvitationValidator.validateUserInvitePermission(invited, stageInvitation);
 
@@ -61,8 +62,8 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     @Transactional
     public StageInvitationDto rejectInvitation(long userId, long inviteId, String reason) {
 
-        TeamMember invited = teamMemberRepository.findById(userId);
-        StageInvitation stageInvitation = findById(inviteId);
+        TeamMember invited = findTeamMemberById(userId);
+        StageInvitation stageInvitation = findStageInvitationById(inviteId);
 
         stageInvitationValidator.validateUserInvitePermission(invited, stageInvitation);
 
@@ -83,9 +84,14 @@ public class StageInvitationServiceImpl implements StageInvitationService {
                 .toList();
     }
 
-    private StageInvitation findById(Long stageInvitationId) {
+    private StageInvitation findStageInvitationById(long stageInvitationId) {
         return stageInvitationRepository.findById(stageInvitationId)
                 .orElseThrow(() -> new NotFoundException(String.format("Stage invitation doesn't exist by id: %s", stageInvitationId))
         );
+    }
+
+    private TeamMember findTeamMemberById(long teamMemberId) {
+        return teamMemberRepository.findById(teamMemberId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", teamMemberId)));
     }
 }
