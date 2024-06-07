@@ -1,30 +1,16 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.exceptions.NotFoundException;
-import faang.school.projectservice.jpa.StageInvitationJpaRepository;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-@RequiredArgsConstructor
-public class StageInvitationRepository {
+public interface StageInvitationRepository extends JpaRepository<StageInvitation, Long>, JpaSpecificationExecutor<StageInvitation> {
 
-    private final StageInvitationJpaRepository repository;
+    boolean existsByAuthorAndInvitedAndStage(TeamMember author, TeamMember invited, Stage stage);
 
-    public StageInvitation save(StageInvitation stageInvitation) {
-        return repository.save(stageInvitation);
-    }
-
-    public StageInvitation findById(Long stageInvitationId) {
-        return repository.findById(stageInvitationId).orElseThrow(
-                () -> new NotFoundException(String.format("Stage invitation doesn't exist by id: %s", stageInvitationId))
-        );
-    }
-
-    public List<StageInvitation> findAll() {
-        return repository.findAll();
-    }
+    boolean existsByInvitedAndStage(TeamMember invited, Stage stage);
 }

@@ -3,6 +3,7 @@ package faang.school.projectservice.service.stage_invitation;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationCreateDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
+import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -44,7 +45,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     public StageInvitationDto acceptInvitation(long userId, long inviteId) {
 
         TeamMember invited = teamMemberRepository.findById(userId);
-        StageInvitation stageInvitation = stageInvitationRepository.findById(inviteId);
+        StageInvitation stageInvitation = findById(inviteId);
 
         stageInvitationValidator.validateUserInvitePermission(invited, stageInvitation);
 
@@ -61,7 +62,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     public StageInvitationDto rejectInvitation(long userId, long inviteId, String reason) {
 
         TeamMember invited = teamMemberRepository.findById(userId);
-        StageInvitation stageInvitation = stageInvitationRepository.findById(inviteId);
+        StageInvitation stageInvitation = findById(inviteId);
 
         stageInvitationValidator.validateUserInvitePermission(invited, stageInvitation);
 
@@ -80,5 +81,11 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         return stageInvitationFilterService.applyAll(invitations, stageInvitationFilterDto)
                 .map(stageInvitationMapper::toDto)
                 .toList();
+    }
+
+    private StageInvitation findById(Long stageInvitationId) {
+        return stageInvitationRepository.findById(stageInvitationId)
+                .orElseThrow(() -> new NotFoundException(String.format("Stage invitation doesn't exist by id: %s", stageInvitationId))
+        );
     }
 }
