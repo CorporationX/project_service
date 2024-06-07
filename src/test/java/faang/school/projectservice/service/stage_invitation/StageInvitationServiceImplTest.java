@@ -101,7 +101,7 @@ class StageInvitationServiceImplTest {
 
     @Test
     void acceptInvitation() {
-        when(teamMemberRepository.findById(authorId)).thenReturn(author);
+        when(teamMemberRepository.findById(authorId)).thenReturn(Optional.of(author));
         when(stageInvitationRepository.findById(stageId)).thenReturn(Optional.of(stageInvitation));
         when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
@@ -121,7 +121,7 @@ class StageInvitationServiceImplTest {
 
     @Test
     void rejectInvitation() {
-        when(teamMemberRepository.findById(authorId)).thenReturn(author);
+        when(teamMemberRepository.findById(authorId)).thenReturn(Optional.of(author));
         when(stageInvitationRepository.findById(stageId)).thenReturn(Optional.of(stageInvitation));
         when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
