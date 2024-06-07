@@ -1,4 +1,4 @@
-package faang.school.projectservice.handler.ExceptionHandler;
+package faang.school.projectservice.handler;
 
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.exceptions.NoAccessException;

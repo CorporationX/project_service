@@ -1,4 +1,4 @@
-package faang.school.projectservice.jpa;
+package faang.school.projectservice.repository;
 
 import faang.school.projectservice.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
