@@ -13,11 +13,11 @@ import org.springframework.stereotype.Component;
 public class InviteSentPublisher implements MessagePublisher<InviteSentEvent> {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ChannelTopic channelTopic;
+    private final ChannelTopic inviteSentTopic;
 
     @Override
     public void publish(InviteSentEvent event) {
-        redisTemplate.convertAndSend(channelTopic.getTopic(), event);
+        redisTemplate.convertAndSend(inviteSentTopic.getTopic(), event);
         log.info("Published goal completed event: {}", event);
     }
 }
