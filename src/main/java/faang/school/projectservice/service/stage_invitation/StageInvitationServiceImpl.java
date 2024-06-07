@@ -8,7 +8,9 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.InviteSentPublisher;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validation.stage_invitation.StageInvitationValidator;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +27,10 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationRepository stageInvitationRepository;
     private final StageInvitationMapper stageInvitationMapper;
     private final TeamMemberRepository teamMemberRepository;
+    private final StageRepository stageRepository;
     private final StageInvitationValidator stageInvitationValidator;
     private final StageInvitationFilterService stageInvitationFilterService;
+    private final InviteSentPublisher inviteSentPublisher;
 
     @Override
     @Transactional
@@ -35,6 +39,9 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationCreateDto);
 
         stageInvitationValidator.validateExistences(stageInvitationCreateDto);
+
+        long projectId = stageRepository.getById(stageInvitationCreateDto.getStageId()).getProject().getId();
+        inviteSentPublisher.publish(stageInvitationMapper.toEvent(stageInvitationCreateDto, projectId));
 
         return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
     }
