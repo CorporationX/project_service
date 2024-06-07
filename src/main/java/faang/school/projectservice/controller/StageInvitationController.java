@@ -32,6 +32,7 @@ public class StageInvitationController {
     @PostMapping
     public StageInvitationDto sendInvite(@Valid @RequestBody StageInvitationCreateDto stageInvitationCreateDto) {
         stageInvitationCreateDto.setAuthorId(userContext.getUserId());
+        stageInvitationCreateDto.setAuthorId(1L);
         return stageInvitationService.sendInvitation(stageInvitationCreateDto);
     }
 

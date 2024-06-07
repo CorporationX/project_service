@@ -4,11 +4,14 @@ import faang.school.projectservice.dto.stage_invitation.StageInvitationCreateDto
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.InviteSentPublisher;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validation.stage_invitation.StageInvitationValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,9 +43,13 @@ class StageInvitationServiceImplTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Mock
+    private StageRepository stageRepository;
+    @Mock
     private StageInvitationValidator stageInvitationValidator;
     @Mock
     private StageInvitationFilterService stageInvitationFilterService;
+    @Mock
+    private InviteSentPublisher inviteSentPublisher;
 
     @InjectMocks
     private StageInvitationServiceImpl stageInvitationService;
@@ -53,6 +60,7 @@ class StageInvitationServiceImplTest {
     private StageInvitationDto stageInvitationDto;
     private StageInvitation stageInvitation;
     private TeamMember author;
+    private Stage stage;
 
     @BeforeEach
     void setUp() {
@@ -74,11 +82,17 @@ class StageInvitationServiceImplTest {
 
         author = TeamMember.builder().id(authorId).build();
 
+        stage = Stage.builder()
+                .stageId(stageId)
+                .project(Project.builder().id(5L).build())
+                .executors(new ArrayList<>())
+                .build();
+
         stageInvitation = StageInvitation.builder()
                 .id(4L)
                 .author(author)
                 .invited(TeamMember.builder().id(invitedId).build())
-                .stage(Stage.builder().stageId(stageId).executors(new ArrayList<>()).build())
+                .stage(stage)
                 .build();
     }
 
@@ -87,13 +101,16 @@ class StageInvitationServiceImplTest {
         when(stageInvitationMapper.toEntity(stageInvitationCreateDto)).thenReturn(stageInvitation);
         when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
+        when(stageRepository.getById(stageId)).thenReturn(stage);
 
         StageInvitationDto actual = stageInvitationService.sendInvitation(stageInvitationCreateDto);
         assertEquals(stageInvitationDto, actual);
 
-        InOrder inOrder = inOrder(stageInvitationMapper, stageInvitationValidator, stageInvitationRepository);
+        InOrder inOrder = inOrder(stageInvitationMapper, stageRepository, inviteSentPublisher, stageInvitationValidator, stageInvitationRepository);
         inOrder.verify(stageInvitationMapper).toEntity(stageInvitationCreateDto);
         inOrder.verify(stageInvitationValidator).validateExistences(stageInvitationCreateDto);
+        inOrder.verify(stageRepository).getById(stageId);
+        inOrder.verify(inviteSentPublisher).publish(any());
         inOrder.verify(stageInvitationRepository).save(stageInvitation);
         inOrder.verify(stageInvitationMapper).toDto(stageInvitation);
     }
