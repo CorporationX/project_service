@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,39 +37,45 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @Operation(summary = "Upload cover for Project", tags = "Project")
+    @Operation(summary = "Create project", tags = "Project")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto create(@RequestBody @Valid ProjectDtoRequest projectDtoRequest) {
         return projectService.create(projectDtoRequest);
     }
 
+    @Operation(summary = "Update project", tags = "Project")
     @PutMapping("/{projectId}")
     @ResponseStatus(HttpStatus.OK)
     public ProjectDto update(@PathVariable Long projectId, @RequestBody @Valid ProjectDto projectDto) {
         return projectService.update(projectId, projectDto);
     }
 
+    @Operation(summary = "Get filtered project. Filter conditions are passed in the request body.", tags = "Project")
     @GetMapping("/filtered")
     public List<ProjectDto> getFilteredProject(@RequestBody ProjectFilterDto filters) {
         return projectService.getFilteredProject(filters);
     }
 
+    @Operation(summary = "Get all project", tags = "Project")
     @GetMapping()
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProject();
     }
 
+    @Operation(summary = "Get project by id", tags = "Project")
     @GetMapping("/{projectId}")
     public ProjectDto getProjectById(@PathVariable long projectId) {
         return projectService.findById(projectId);
     }
 
+    @Operation(summary = "Delete project by id", tags = "Project")
     @DeleteMapping("/{projectId}")
     public void delete(@PathVariable long projectId) {
         projectService.delete(projectId);
     }
 
+    @Operation(summary = "Upload cover for Project", tags = "Project")
     @PostMapping("/{projectId}/cover")
     public ResponseEntity<String> uploadCover(@PathVariable @Min(value = 1, message = "Project ID must be more than 0") Long projectId,
                                               @RequestParam("cover") @NotNull MultipartFile multipartFile) {
