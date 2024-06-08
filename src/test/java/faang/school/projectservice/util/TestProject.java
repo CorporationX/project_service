@@ -28,6 +28,7 @@ public class TestProject {
             .name(PROJECT_NAME)
             .description(PROJECT_DESC)
             .status(ProjectStatus.CREATED)
+            .ownerId(OWNER_ID)
             .visibility(ProjectVisibility.PRIVATE)
             .build();
 

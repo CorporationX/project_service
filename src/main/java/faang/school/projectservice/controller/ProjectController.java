@@ -28,20 +28,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
-@Valid
 public class ProjectController {
 
     private final ProjectService projectService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProjectDto create(@RequestBody ProjectDtoRequest projectDtoRequest) {
+    public ProjectDto create(@RequestBody @Valid ProjectDtoRequest projectDtoRequest) {
         return projectService.create(projectDtoRequest);
     }
 
     @PutMapping("/{projectId}")
     @ResponseStatus(HttpStatus.OK)
-    public ProjectDto update(@PathVariable Long projectId, @RequestBody ProjectDto projectDto) {
+    public ProjectDto update(@PathVariable Long projectId, @RequestBody @Valid ProjectDto projectDto) {
         return projectService.update(projectId, projectDto);
     }
 

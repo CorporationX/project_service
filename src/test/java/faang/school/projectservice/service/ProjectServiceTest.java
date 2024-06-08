@@ -57,9 +57,9 @@ class ProjectServiceTest {
         verify(projectMapper, times(1)).requestDtoToProject(any(ProjectDtoRequest.class));
 
         assertNotNull(resultDto);
-        assertEquals(resultDto.getName(), PROJECT_DTO_REQUEST.getName());
-        assertEquals(resultDto.getDescription(), PROJECT_DTO_REQUEST.getDescription());
-        assertEquals(resultDto.getOwnerId(), resultDto.getOwnerId());
+        assertEquals(PROJECT_DTO_REQUEST.getName(), resultDto.getName());
+        assertEquals(PROJECT_DTO_REQUEST.getDescription(), resultDto.getDescription());
+        assertEquals(PROJECT_DTO_REQUEST.getOwnerId(), resultDto.getOwnerId());
         assertEquals(ProjectStatus.CREATED, resultDto.getStatus());
         assertEquals(ProjectVisibility.PRIVATE, resultDto.getVisibility());
     }

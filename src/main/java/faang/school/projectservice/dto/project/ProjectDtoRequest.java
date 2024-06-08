@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ProjectDtoRequest {
-    @Min(value = 1, message = "ID cannot be less than or equal to 0")
+    @Min(value = 1, message = "Id does not match the required value - must be a number greater than 0")
     @NotBlank
     private String name;
     @NotBlank
