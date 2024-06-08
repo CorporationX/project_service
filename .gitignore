@@ -50,3 +50,5 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+/src/main/resources/google/credentials-dev.json
+/src/main/resources/application-dev.yaml

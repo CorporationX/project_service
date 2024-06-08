@@ -151,6 +151,7 @@ class MeetServiceTest {
                 CREATOR_ID, UPDATER_ID);
 
         when(meetRepository.findById(MEET_ID)).thenReturn(savedMeet);
+        doThrow(new DataValidationException(errMessage)).when(meetValidator).validateMeetCreator(UPDATER_ID, CREATOR_ID);
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> meetService.update(meetDto, MEET_ID));

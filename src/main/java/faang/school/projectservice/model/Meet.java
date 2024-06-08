@@ -44,7 +44,7 @@ public class Meet {
     @Column(name = "description", length = 4096)
     private String description;
 
-    @Column(name = "location", length = 512)
+    @Column(name = "location", length = 64)
     private String location;
 
     @Column(name = "time_zone")

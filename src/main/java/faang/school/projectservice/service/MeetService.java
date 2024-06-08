@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import com.google.api.services.calendar.model.Event;
 import faang.school.projectservice.dto.MeetDto;
 import faang.school.projectservice.dto.filter.MeetFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.MeetFilter;
 import faang.school.projectservice.jpa.MeetJpaRepository;
 import faang.school.projectservice.mapper.EventMeetMapper;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -52,7 +50,7 @@ public class MeetService {
     @Transactional
     public MeetDto update(MeetDto meetDto, long id) {
         Meet foundMeet = meetRepository.findById(id);
-        validateMeetCreator(meetDto.getCreatedBy(), foundMeet.getCreatedBy());
+        meetValidator.validateMeetCreator(meetDto.getCreatedBy(), foundMeet.getCreatedBy());
         if (meetDto.getMeetStatus().equals(MeetStatus.CANCELLED)) {
             googleCalendarService.deleteEvent(meetDto.getEventGoogleId());
         } else {
@@ -67,7 +65,7 @@ public class MeetService {
     public void delete(Long id, Long userId) {
         Meet meet = meetRepository.findById(id);
         TeamMember updater = teamMemberRepository.findByUserIdAndProjectId(userId, meet.getProject().getId());
-        validateMeetCreator(updater.getId(), meet.getCreatedBy());
+        meetValidator.validateMeetCreator(updater.getId(), meet.getCreatedBy());
 
         log.info("Delete meeting with id {}", id);
         googleCalendarService.deleteEvent(meet.getEventGoogleId());
@@ -105,13 +103,5 @@ public class MeetService {
 
     public String getAcl(String userEmail) {
         return googleCalendarService.getAclById(userEmail);
-    }
-
-    private void validateMeetCreator(Long updaterId, Long creatorId) {
-        if (!Objects.equals(updaterId, creatorId)) {
-            throw new DataValidationException(
-                    String.format("Team member not creator for this meet. Creator ID: %d, Updater ID: %d",
-                            creatorId, updaterId));
-        }
     }
 }

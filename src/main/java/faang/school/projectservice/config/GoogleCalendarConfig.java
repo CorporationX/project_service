@@ -30,6 +30,9 @@ public class GoogleCalendarConfig {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final List<String> SCOPES = List.of(CalendarScopes.CALENDAR);
 
+    @Value("${google.redirect_port}")
+    private int redirect_port;
+
     @Value("${google.auth_user_id}")
     private String authUserId;
 
@@ -68,7 +71,7 @@ public class GoogleCalendarConfig {
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(tokensDirectoryPath)))
                 .setAccessType("offline")
                 .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(redirect_port).build();
 
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize(authUserId);
     }
