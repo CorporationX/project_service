@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.VacancyStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Data
 @Builder
+@Schema(description = "Vacancy entity")
 public class VacancyDto {
 
     private Long id;

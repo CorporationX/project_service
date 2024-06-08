@@ -71,3 +71,7 @@ google:
   redirect_port: 8888
   event_popup_time_min: 10
   event_email_notify_time_min: 1440
+
+springdoc:
+  api-docs:
+    path: /api-docs
