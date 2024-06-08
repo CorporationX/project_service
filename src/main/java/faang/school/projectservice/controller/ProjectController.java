@@ -4,6 +4,8 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectDtoRequest;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -28,10 +30,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
+@Validated
+@Tag(name = "Project", description = "The Project API")
 public class ProjectController {
 
     private final ProjectService projectService;
 
+    @Operation(summary = "Upload cover for Project", tags = "Project")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto create(@RequestBody @Valid ProjectDtoRequest projectDtoRequest) {
@@ -70,6 +75,5 @@ public class ProjectController {
         String fileName = multipartFile.getOriginalFilename();
         projectService.uploadFile(multipartFile, projectId, "cover");
         return ResponseEntity.ok("Image uploaded: " + fileName);
-
     }
 }
