@@ -41,6 +41,7 @@ public class CalendarController {
     public EventDto createEvent(@PathVariable long projectId,
                                 @RequestParam String calendarId,
                                 @Valid @RequestBody EventDto eventDto) {
+        eventDto.verifyEndIsAfterStartTime();
         return calendarService.createEvent(projectId, calendarId, eventDto);
     }
 
