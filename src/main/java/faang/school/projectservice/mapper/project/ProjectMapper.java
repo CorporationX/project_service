@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",implementationName = "ProjectControllerSupport")
 public interface ProjectMapper {
     Project toModel(ProjectDto project);
 
