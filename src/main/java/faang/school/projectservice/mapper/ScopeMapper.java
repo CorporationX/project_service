@@ -26,7 +26,7 @@ public interface ScopeMapper {
     }
 
     @Named("string2Enum")
-    default AclScopeType enum2String(String type) {
+    default AclScopeType string2Enum(String type) {
         return AclScopeType.findByKey(type);
     }
 }

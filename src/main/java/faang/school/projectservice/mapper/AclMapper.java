@@ -26,7 +26,7 @@ public interface AclMapper {
     }
 
     @Named("string2Enum")
-    default AclRole enum2String(String role) {
+    default AclRole string2Enum(String role) {
         return AclRole.findByKey(role);
     }
 }
