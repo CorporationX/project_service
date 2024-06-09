@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V012_create_moment_users.sql
   - include:
       file: db/changelog/changeset/project_V013_insert_data.sql
+  - include:
+      file: db/changelog/changeset/project_V014_create_meet.sql
