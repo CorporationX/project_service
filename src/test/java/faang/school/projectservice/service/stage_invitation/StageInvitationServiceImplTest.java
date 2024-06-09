@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -100,8 +101,8 @@ class StageInvitationServiceImplTest {
 
     @Test
     void acceptInvitation() {
-        when(teamMemberRepository.findById(authorId)).thenReturn(author);
-        when(stageInvitationRepository.findById(stageId)).thenReturn(stageInvitation);
+        when(teamMemberRepository.findById(authorId)).thenReturn(Optional.of(author));
+        when(stageInvitationRepository.findById(stageId)).thenReturn(Optional.of(stageInvitation));
         when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
 
@@ -120,8 +121,8 @@ class StageInvitationServiceImplTest {
 
     @Test
     void rejectInvitation() {
-        when(teamMemberRepository.findById(authorId)).thenReturn(author);
-        when(stageInvitationRepository.findById(stageId)).thenReturn(stageInvitation);
+        when(teamMemberRepository.findById(authorId)).thenReturn(Optional.of(author));
+        when(stageInvitationRepository.findById(stageId)).thenReturn(Optional.of(stageInvitation));
         when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
 

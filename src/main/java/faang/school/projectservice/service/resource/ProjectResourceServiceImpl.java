@@ -2,14 +2,14 @@ package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.exceptions.NotFoundException;
-import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.ResourceRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.s3.AmazonS3Service;
 import faang.school.projectservice.validation.resource.ProjectResourceValidator;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
 
     private final AmazonS3Service amazonS3Service;
     private final ResourceRepository resourceRepository;
-    private final TeamMemberJpaRepository teamMemberRepository;
+    private final TeamMemberRepository teamMemberRepository;
     private final ProjectResourceValidator projectResourceValidator;
     private final ResourceMapper resourceMapper;
 
