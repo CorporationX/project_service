@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -138,7 +139,7 @@ class InitiativeValidatorTest {
     void validateCuratorNotOwner() {
         curator.setRoles(List.of(TeamRole.INTERN));
 
-        when(teamMemberRepository.findById(dto.getCuratorId())).thenReturn(curator);
+        when(teamMemberRepository.findById(dto.getCuratorId())).thenReturn(Optional.of(curator));
 
         DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validateCurator(dto));
         assertEquals("curator must have owner role", e.getMessage());
@@ -150,7 +151,7 @@ class InitiativeValidatorTest {
     void validateCuratorNotInTheSameProject() {
         curator.getTeam().getProject().setId(1L);
 
-        when(teamMemberRepository.findById(dto.getCuratorId())).thenReturn(curator);
+        when(teamMemberRepository.findById(dto.getCuratorId())).thenReturn(Optional.of(curator));
 
         DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validateCurator(dto));
         assertEquals("curator not in the initiative project", e.getMessage());
@@ -160,7 +161,7 @@ class InitiativeValidatorTest {
 
     @Test
     void validateCurator() {
-        when(teamMemberRepository.findById(dto.getCuratorId())).thenReturn(curator);
+        when(teamMemberRepository.findById(dto.getCuratorId())).thenReturn(Optional.of(curator));
 
         assertDoesNotThrow(() -> validator.validateCurator(dto));
 
