@@ -24,12 +24,10 @@ public interface InternshipRepository extends JpaRepository<Internship, Long> {
     @Query(value = "INSERT INTO internship_interns (internship_id, team_member_id) VALUES (:internshipId, :teamMemberId)", nativeQuery = true)
     void addInternToInternship(long internshipId, long teamMemberId);
 
-    @Transactional
     @Query(value = "SELECT * FROM internship WHERE project_id = :projectId", nativeQuery = true)
     List<Internship> findByProjectId(@Param("projectId") long projectId);
 
     @Modifying
-    @Transactional
     @Query(value = "DELETE FROM internship_interns WHERE team_member_id = :teamMemberId AND internship_id = :internshipId", nativeQuery = true)
     void removeInternFromInternship(@Param("teamMemberId") long teamMemberId, @Param("internshipId") long internshipId);
 }

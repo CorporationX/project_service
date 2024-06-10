@@ -38,8 +38,7 @@ public class InternshipController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Internship created",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = InternshipDto.class))})
-    })
+                            schema = @Schema(implementation = InternshipDto.class))})})
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public InternshipDto createInternship(@RequestBody @Valid InternshipToCreateDto internshipDto) {
@@ -51,8 +50,7 @@ public class InternshipController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Internship updated",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = InternshipDto.class))})
-    })
+                            schema = @Schema(implementation = InternshipDto.class))})})
     @PutMapping("/{internshipId}")
     @ResponseStatus(HttpStatus.OK)
     public InternshipDto updateInternship(@PathVariable("internshipId") long internshipId,
@@ -65,8 +63,7 @@ public class InternshipController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of internships",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = InternshipDto.class))})
-    })
+                            schema = @Schema(implementation = InternshipDto.class))})})
     @GetMapping("/project/{projectId}")
     @ResponseStatus(HttpStatus.OK)
     public List<InternshipDto> getAllProjectInternships(
@@ -79,8 +76,7 @@ public class InternshipController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of all internships",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = InternshipDto.class))})
-    })
+                            schema = @Schema(implementation = InternshipDto.class))})})
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public List<InternshipDto> getAllInternships(
@@ -92,8 +88,7 @@ public class InternshipController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Internship details",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = InternshipDto.class))})
-    })
+                            schema = @Schema(implementation = InternshipDto.class))})})
     @GetMapping("/{internshipId}")
     @ResponseStatus(HttpStatus.OK)
     public InternshipDto getInternshipById(@PathVariable("internshipId") long internshipId) {

@@ -71,13 +71,13 @@ public class InternshipValidator {
     }
 
     private void validateMentorExistence(long mentorId) {
-        TeamMember mentor = teamMemberRepository.findById(mentorId);
+        TeamMember mentor = teamMemberRepository.findById(mentorId).orElseThrow(() -> new NotFoundException(""));
         userValidator.validateUserExistence(mentor.getUserId());
     }
 
     private void validateInternsExistence(List<Long> internIds) {
         for (Long internId : internIds) {
-            TeamMember intern = teamMemberRepository.findById(internId);
+            TeamMember intern = teamMemberRepository.findById(internId).orElseThrow(() -> new NotFoundException(""));
             userValidator.validateUserExistence(intern.getUserId());
         }
     }

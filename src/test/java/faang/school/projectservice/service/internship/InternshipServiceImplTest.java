@@ -64,7 +64,7 @@ class InternshipServiceImplTest {
 
         when(internshipMapper.toEntity(createDto)).thenReturn(internship);
         when(internshipDto.getInternsId()).thenReturn(Collections.singletonList(1L));
-        when(teamMemberRepository.findById(1L)).thenReturn((new TeamMember()));
+        when(teamMemberRepository.findById(1L)).thenReturn(Optional.of((new TeamMember())));
         when(internshipMapper.toDto(internship)).thenReturn(internshipDto);
 
         InternshipDto result = internshipService.createInternship(1L, createDto);
