@@ -37,6 +37,7 @@ public class CalendarService {
      * @param code      код авторизации. Его можно получить, предоставив доступ, перейдя по ссылке аутентификации (events/auth)
      * @return объект Credential для доступа к Calendar API
      */
+    @Transactional
     public Credential auth(long projectId, String code) {
         CalendarToken calendarToken = OAuthService.authorizeProject(projectId, code);
         return OAuthService.generateCredential(calendarToken);

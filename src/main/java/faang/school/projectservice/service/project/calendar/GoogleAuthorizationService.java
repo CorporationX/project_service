@@ -128,10 +128,6 @@ class GoogleAuthorizationService {
                 .toURL();
     }
 
-    public GoogleAuthorizationCodeFlow getFlow() {
-        return flow;
-    }
-
     public NetHttpTransport getHttp_transport() {
         return http_transport;
     }
