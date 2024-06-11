@@ -1,7 +1,6 @@
 package faang.school.projectservice.validation.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -12,13 +11,15 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class MomentValidator {
     private final ProjectRepository projectRepository;
-    private final MomentMapper momentMapper;
     private final TeamMemberRepository teamMemberRepository;
 
     public void momentHasProjectValidation(MomentDto momentDto) {
@@ -39,40 +40,41 @@ public class MomentValidator {
     }
 
     public void projectsUpdateValidator(Moment oldMoment, MomentDto newMomentDto) {
-        newMomentDto.getProjectIds().retainAll(
-                oldMoment.getProjects()
-                        .stream()
-                        .map(Project::getId)
-                        .toList()
-        );
+        Set<Long> newProjectIds = new HashSet<>(newMomentDto.getProjectIds());
+        newProjectIds.retainAll(oldMoment.getProjects()
+                .stream()
+                .map(Project::getId)
+                .collect(Collectors.toSet()));
 
-        List<Long> momentUserIds = newMomentDto.getUserIds();
-        newMomentDto.getProjectIds().forEach(projectId ->
-                momentUserIds.addAll(projectRepository.getProjectById(projectId)
-                        .getTeams()
-                        .stream()
-                        .flatMap(team -> team.getTeamMembers().stream())
-                        .map(TeamMember::getId)
-                        .distinct()
-                        .toList()
-                ));
-        newMomentDto.setUserIds(momentUserIds);
-
-        momentMapper.toEntity(newMomentDto);
+        if (newProjectIds.size() > 0) {
+            Set<Long> momentUserIds = new HashSet<>(newMomentDto.getUserIds());
+            newProjectIds.forEach(projectId ->
+                    momentUserIds.addAll(projectRepository.getProjectById(projectId)
+                            .getTeams()
+                            .stream()
+                            .flatMap(team -> team.getTeamMembers().stream())
+                            .map(TeamMember::getId)
+                            .distinct()
+                            .toList()));
+            newMomentDto.setUserIds(momentUserIds.stream().toList());
+        }
     }
 
     public void membersUpdateValidator(Moment oldMoment, MomentDto newMomentDto) {
-        newMomentDto.getUserIds().retainAll(oldMoment.getUserIds());
+        Set<Long> newUserIds = new HashSet<>(newMomentDto.getUserIds());
+        Set<Long> oldUserIds = new HashSet<>(oldMoment.getUserIds());
+        newUserIds.retainAll(oldUserIds);
 
-        List<Long> projectIds = newMomentDto.getProjectIds();
-        newMomentDto.getUserIds().forEach(userId ->
-                newMomentDto.getProjectIds().add(teamMemberRepository.findById(userId)
+        if (newUserIds.size() > 0) {
+            Set<Long> projectIds = new HashSet<>(newMomentDto.getProjectIds());
+            newUserIds.forEach(userId -> {
+                Long userProjectId = teamMemberRepository.findById(userId)
                         .getTeam()
                         .getProject()
-                        .getId()
-                ));
-        newMomentDto.setProjectIds(projectIds);
-
-        momentMapper.toEntity(newMomentDto);
+                        .getId();
+                projectIds.add(userProjectId);
+            });
+            newMomentDto.setProjectIds(projectIds.stream().toList());
+        }
     }
 }
