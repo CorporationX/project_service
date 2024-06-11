@@ -12,7 +12,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -40,16 +39,15 @@ public class MomentValidator {
     }
 
     public void projectsUpdateValidator(Moment oldMoment, MomentDto newMomentDto) {
-        List<Long> newProject = new ArrayList<>(newMomentDto.getProjectIds());
-        newProject.removeAll(
+        newMomentDto.getProjectIds().retainAll(
                 oldMoment.getProjects()
                         .stream()
                         .map(Project::getId)
                         .toList()
         );
 
-        List<Long> momentUserIds = new ArrayList<>(newMomentDto.getUserIds());
-        newProject.forEach(projectId ->
+        List<Long> momentUserIds = newMomentDto.getUserIds();
+        newMomentDto.getProjectIds().forEach(projectId ->
                 momentUserIds.addAll(projectRepository.getProjectById(projectId)
                         .getTeams()
                         .stream()
@@ -58,23 +56,22 @@ public class MomentValidator {
                         .distinct()
                         .toList()
                 ));
-        newMomentDto.setUserIds(new ArrayList<>(momentUserIds));
+        newMomentDto.setUserIds(momentUserIds);
 
         momentMapper.toEntity(newMomentDto);
     }
 
     public void membersUpdateValidator(Moment oldMoment, MomentDto newMomentDto) {
-        List<Long> newMember = new ArrayList<>(newMomentDto.getUserIds());
-        newMember.removeAll(oldMoment.getUserIds());
+        newMomentDto.getUserIds().retainAll(oldMoment.getUserIds());
 
         List<Long> projectIds = newMomentDto.getProjectIds();
-        newMember.forEach(userId ->
-                projectIds.add(teamMemberRepository.findById(userId)
+        newMomentDto.getUserIds().forEach(userId ->
+                newMomentDto.getProjectIds().add(teamMemberRepository.findById(userId)
                         .getTeam()
                         .getProject()
                         .getId()
                 ));
-        newMomentDto.setProjectIds(new ArrayList<>(projectIds));
+        newMomentDto.setProjectIds(projectIds);
 
         momentMapper.toEntity(newMomentDto);
     }

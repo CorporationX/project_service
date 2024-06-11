@@ -36,9 +36,8 @@ public class MomentService {
 
     @Transactional
     public MomentDto update(Long momentId, MomentDto momentDto) {
-        Moment oldMoment = findMomentById(momentId);
-        momentValidator.projectsUpdateValidator(oldMoment, momentDto);
-        momentValidator.membersUpdateValidator(oldMoment, momentDto);
+        momentValidator.projectsUpdateValidator(findMomentById(momentId), momentDto);
+        momentValidator.membersUpdateValidator(findMomentById(momentId), momentDto);
 
         momentDto.setId(momentId);
 
