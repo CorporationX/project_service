@@ -1,6 +1,9 @@
 package faang.school.projectservice.validator.project;
 
+import org.springframework.stereotype.Component;
+
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.project.ProjectAlreadyExistsException;
 import faang.school.projectservice.exception.project.ProjectStatusImmutableException;
@@ -8,9 +11,13 @@ import faang.school.projectservice.exception.project.ProjectStorageSizeInvalidEx
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.*;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.ALREADY_EXISTS;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NOT_FOUND;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NO_THUMBNAIL;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STATUS_IMMUTABLE;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STORAGE_SIZE_INVALID;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STORAGE_SIZE_MAX_EXCEED;
 
 @Component
 @RequiredArgsConstructor
@@ -30,6 +37,18 @@ public class ProjectValidator {
         
         if (!isProjectExists(projectDto)) {
             throw new EntityNotFoundException(NOT_FOUND.getMessage());
+        }
+    }
+    
+    public void verifyStorageSizeNotExceeding(Project project, Long fileSize) {
+        if (project.isMaximumStorageSizeExceed(fileSize)) {
+            throw new DataValidationException(STORAGE_SIZE_MAX_EXCEED.getMessage());
+        }
+    }
+    
+    public void verifyNoThumbnail(Project project) {
+        if (!project.hasThumbnail()) {
+            throw new DataValidationException(NO_THUMBNAIL.getMessage());
         }
     }
     
@@ -54,5 +73,4 @@ public class ProjectValidator {
             throw new ProjectStorageSizeInvalidException(STORAGE_SIZE_INVALID.getMessage());
         }
     }
-
 }

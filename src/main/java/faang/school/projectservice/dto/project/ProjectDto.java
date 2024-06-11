@@ -45,6 +45,7 @@ public class ProjectDto {
 
     private ProjectStatus status;
 
+    @NotNull(message = "Project visibility can't be empty")
     private ProjectVisibility visibility;
 
     @JsonIgnore

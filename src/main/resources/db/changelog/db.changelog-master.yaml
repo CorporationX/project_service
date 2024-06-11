@@ -1,19 +1,4 @@
 databaseChangeLog:
-  - include:
-      file: db/changelog/changeset/project_V000__initial.sql
-  - include:
-      file: db/changelog/changeset/project_V001_create_stage.sql
-  - include:
-      file: db/changelog/changeset/project_V001_create_stage_invitation.sql
-  - include:
-      file: db/changelog/changeset/project_V003__create_campaign.sql
-  - include:
-      file: db/changelog/changeset/project_V005__create_moment.sql
-  - include:
-      file: db/changelog/changeset/project_V006__create_vacancy.sql
-  - include:
-      file: db/changelog/changeset/project_V007__create_internship.sql
-  - include:
-      file: db/changelog/changeset/project_V008__alter_candidate_add_vacancy.sql
-  - include:
-      file: db/changelog/changeset/project_V012_create_moment_users.sql
+  - includeAll:
+#     TODO: Уточнить у Сабины, может сломать миграции у остальных
+      path: db/changelog/changeset/
