@@ -5,13 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MomentFilterDto {
-    private Integer month;
-    private List<Long> projectIds;
+    private LocalDateTime dateTimePattern;
+    private String projectPattern;
 }

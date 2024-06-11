@@ -6,6 +6,6 @@ import faang.school.projectservice.model.Moment;
 import java.util.stream.Stream;
 
 public interface MomentFilter {
-    boolean isApplicable(MomentFilterDto filters);
-    Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto filters);
+    boolean isApplicable(MomentFilterDto filterDto);
+    Stream<Moment> apply(Stream<Moment> momentStream, MomentFilterDto filterDto);
 }
