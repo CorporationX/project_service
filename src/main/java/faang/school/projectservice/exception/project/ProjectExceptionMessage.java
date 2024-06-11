@@ -11,7 +11,7 @@ public enum ProjectExceptionMessage {
     NOT_FOUND("Project with this name and owner id not found"),
     STORAGE_SIZE_INVALID("Project with this name and owner id already exists"),
     STORAGE_SIZE_MAX_EXCEED("If file will be uploaded, it exceeds project max storage size"),
-    NO_THUMBNAIL("Project don't have a thumbnail"),
+    NO_COVER("Project don't have cover"),
     STATUS_IMMUTABLE("Project status can't be changed");
 
     private final String message;

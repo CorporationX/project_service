@@ -6,7 +6,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import faang.school.projectservice.dto.resource.MultipartFileResourceDto;
 
-public interface S3Request<T> {
+public interface S3Request {
     PutObjectRequest putRequest(MultipartFileResourceDto multipartFileResource);
     
     String createKey(MultipartFileResourceDto multipartFileResource);

@@ -119,7 +119,7 @@ public class Project {
         return this.getStorageSize().add(BigInteger.valueOf(fileSize));
     }
     
-    public boolean hasThumbnail() {
+    public boolean hasCover() {
         return !StringUtils.isBlank(this.coverImageId);
     }
 }

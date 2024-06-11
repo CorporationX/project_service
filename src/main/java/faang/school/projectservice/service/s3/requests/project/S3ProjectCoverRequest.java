@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class S3ProjectThumbnailRequest implements S3Request<Project> {
+public class S3ProjectCoverRequest implements S3Request {
     private final S3Properties properties;
     
     @Override

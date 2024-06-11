@@ -15,7 +15,7 @@ public class ProjectImage extends ImageResource {
     }
     
     @Override
-    public BufferedImage convertToThumbnail() {
+    public BufferedImage convertToCover() {
         switch (this.getOrientation()) {
             case VERTICAL -> {
                 if (isImageHeightGreater(VerticalImageBorders.HEIGHT_BORDER)) {
@@ -41,7 +41,7 @@ public class ProjectImage extends ImageResource {
                 .outputQuality(1)
                 .asBufferedImage();
         } catch (IOException e) {
-            String error = "IO exception while converting image to thumbnail";
+            String error = "IO exception while converting image to cover";
             log.error(error, e);
             throw new FileException(error);
         }

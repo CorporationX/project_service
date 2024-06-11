@@ -6,7 +6,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
-import faang.school.projectservice.config.properties.S3Properties;
 import faang.school.projectservice.exception.aws.s3.NotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +15,6 @@ import static faang.school.projectservice.exception.aws.s3.S3ExceptionMessages.B
 @RequiredArgsConstructor
 public class S3Service {
     private final AmazonS3 amazonS3Client;
-    private final S3Properties properties;
     
     public void uploadFile(PutObjectRequest request) {
         verifyBucketExist(request.getBucketName());

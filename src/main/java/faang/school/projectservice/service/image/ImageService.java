@@ -16,6 +16,10 @@ import faang.school.projectservice.exception.FileException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static faang.school.projectservice.exception.file.FileExceptionMessage.CALCULATE_IMAGE_SIZE;
+import static faang.school.projectservice.exception.file.FileExceptionMessage.CONVERTING_IMAGE_TO_INPUT_STREAM;
+import static faang.school.projectservice.exception.file.FileExceptionMessage.CONVERTING_INPUT_STREAM_TO_COVER;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -25,14 +29,13 @@ public class ImageService {
         try {
             return ImageIO.read(inputStream);
         } catch (IOException e) {
-            String error = "IO exception while converting input stream to thumbnail";
-            log.error(error,e);
-            throw new FileException(error);
+            log.error(CONVERTING_INPUT_STREAM_TO_COVER.getMessage(),e);
+            throw new FileException(CONVERTING_INPUT_STREAM_TO_COVER.getMessage());
         }
     }
     
-    public BufferedImage convertImageToThumbnail(Supplier<ImageResource> imageSupplier) {
-        return imageSupplier.get().convertToThumbnail();
+    public BufferedImage convertImageToCover(Supplier<ImageResource> imageSupplier) {
+        return imageSupplier.get().convertToCover();
     }
     
     public InputStream convertBufferedImageToInputStream(BufferedImage image) {
@@ -42,9 +45,8 @@ public class ImageService {
             byte[] bytes = bas.toByteArray();
             return new ByteArrayInputStream(bytes);
         } catch (IOException e) {
-            String error = "IO exception while converting image to input stream";
-            log.error(error,e);
-            throw new FileException(error);
+            log.error(CONVERTING_IMAGE_TO_INPUT_STREAM.getMessage(),e);
+            throw new FileException(CONVERTING_IMAGE_TO_INPUT_STREAM.getMessage());
         }
     }
     
@@ -54,10 +56,8 @@ public class ImageService {
             tmp.close();
             return (long) tmp.size();
         } catch (IOException e) {
-            String error = "IO exception while calculating image size";
-            log.error(error,e);
-            throw new FileException(error);
+            log.error(CALCULATE_IMAGE_SIZE.getMessage(),e);
+            throw new FileException(CALCULATE_IMAGE_SIZE.getMessage());
         }
     }
-    
 }

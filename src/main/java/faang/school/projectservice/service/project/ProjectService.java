@@ -52,8 +52,8 @@ public class ProjectService {
     private final ProjectValidator projectValidator;
     private final ImageService imageService;
     private final List<ProjectFilter> filters;
-    @Qualifier("s3ProjectThumbnailRequest")
-    private final S3Request s3ThumbnailRequest;
+    @Qualifier("s3ProjectCoverRequest")
+    private final S3Request s3CoverRequest;
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;
 
@@ -109,55 +109,55 @@ public class ProjectService {
     }
     
     @Transactional
-    public ResourceDto uploadThumbnail(Long projectId, Long teamMemberId, MultipartFile file) {
+    public ResourceDto uploadCover(Long projectId, Long teamMemberId, MultipartFile file) {
         Project project = projectRepository.getProjectById(projectId);
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         
         //TODO: Спросить как избавиться от этих проверяемых ошибок? SneakyThrows? Из-за этого метод разросся
-        BufferedImage thumbnail = imageService.convertImageToThumbnail(() -> {
+        BufferedImage cover = imageService.convertImageToCover(() -> {
             try {
                 return new ProjectImage(imageService.convertInputStreamToImage(file.getInputStream()));
             } catch (IOException e) {
-                String error = "IO exception in project thumbnail resource";
+                String error = "IO exception in project cover resource";
                 log.error(error,e);
                 throw new FileException(error);
             }
         });
-        Long thumbnailSize = imageService.calculateImageSize(thumbnail);
-        projectValidator.verifyStorageSizeNotExceeding(project, thumbnailSize);
+        Long coverSize = imageService.calculateImageSize(cover);
+        projectValidator.verifyStorageSizeNotExceeding(project, coverSize);
         
 
-        MultipartFileResourceDto projectThumbnailResource = MultipartFileResourceDto.builder()
-            .size(thumbnailSize)
+        MultipartFileResourceDto resourceDto = MultipartFileResourceDto.builder()
+            .size(coverSize)
             .contentType(file.getContentType())
             .fileName(file.getOriginalFilename())
             .folderName(getDefaultProjectFolderName(project))
-            .resourceInputStream(imageService.convertBufferedImageToInputStream(thumbnail))
+            .resourceInputStream(imageService.convertBufferedImageToInputStream(cover))
             .build();
             
-        PutObjectRequest thumbnailPutRequest = s3ThumbnailRequest.putRequest(projectThumbnailResource);
-        s3Service.uploadFile(thumbnailPutRequest);
+        PutObjectRequest projectCoverPutRequest = s3CoverRequest.putRequest(resourceDto);
+        s3Service.uploadFile(projectCoverPutRequest);
         
-        String key = thumbnailPutRequest.getKey();
-        Resource thumbnailProjectResource = createThumbnailProjectResource(key, projectThumbnailResource);
-        thumbnailProjectResource.setProject(project);
-        thumbnailProjectResource.setCreatedBy(teamMember);
-        thumbnailProjectResource.setUpdatedBy(teamMember);
+        String key = projectCoverPutRequest.getKey();
+        Resource projectCoverResource = createCoverProjectResource(key, resourceDto);
+        projectCoverResource.setProject(project);
+        projectCoverResource.setCreatedBy(teamMember);
+        projectCoverResource.setUpdatedBy(teamMember);
         
-        project.addStorageSize(thumbnailSize);
+        project.addStorageSize(coverSize);
         project.setCoverImageId(key);
         
-        Resource savedResource = resourceRepository.save(thumbnailProjectResource);
+        Resource savedResource = resourceRepository.save(projectCoverResource);
         
         return resourceMapper.toDto(savedResource);
     }
     
     @Transactional
-    public void deleteThumbnail(Long projectId) {
+    public void deleteCover(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
-        projectValidator.verifyNoThumbnail(project);
+        projectValidator.verifyNoCover(project);
         
-        DeleteObjectRequest request = s3ThumbnailRequest.deleteRequest(project.getCoverImageId());
+        DeleteObjectRequest request = s3CoverRequest.deleteRequest(project.getCoverImageId());
         s3Service.deleteFile(request);
         
         project.setCoverImageId(null);
@@ -167,13 +167,13 @@ public class ProjectService {
         return String.format("%s%s%s", project.getId(), defaultFolderResourceDelimiter, project.getName());
     }
     
-    private Resource createThumbnailProjectResource(String key, MultipartFileResourceDto projectThumbnailResource) {
+    private Resource createCoverProjectResource(String key, MultipartFileResourceDto multipartFileResourceDto) {
         Resource resource = new Resource();
         resource.setKey(key);
-        resource.setSize(BigInteger.valueOf(projectThumbnailResource.getSize()));
+        resource.setSize(BigInteger.valueOf(multipartFileResourceDto.getSize()));
         resource.setStatus(ResourceStatus.ACTIVE);
-        resource.setName(projectThumbnailResource.getFileName());
-        resource.setType(ResourceType.getResourceType(projectThumbnailResource.getContentType()));
+        resource.setName(multipartFileResourceDto.getFileName());
+        resource.setType(ResourceType.getResourceType(multipartFileResourceDto.getContentType()));
         return resource;
     }
 }

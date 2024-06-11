@@ -13,7 +13,7 @@ public abstract class ImageResource {
     protected Integer targetWidth;
     protected Orientation orientation;
     protected BufferedImage image;
-    protected BufferedImage thumbnail;
+    protected BufferedImage rescaledImage;
     protected ImageExtension targetImageExtension;
     
     public ImageResource(BufferedImage image) {
@@ -25,7 +25,7 @@ public abstract class ImageResource {
         this.orientation = calculateOrientation(height, width);
     }
     
-    public abstract BufferedImage convertToThumbnail();
+    public abstract BufferedImage convertToCover();
     
     public abstract ImageExtension getTargetImageExtension();
     

@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.ALREADY_EXISTS;
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NOT_FOUND;
-import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NO_THUMBNAIL;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NO_COVER;
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STATUS_IMMUTABLE;
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STORAGE_SIZE_INVALID;
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STORAGE_SIZE_MAX_EXCEED;
@@ -46,9 +46,9 @@ public class ProjectValidator {
         }
     }
     
-    public void verifyNoThumbnail(Project project) {
-        if (!project.hasThumbnail()) {
-            throw new DataValidationException(NO_THUMBNAIL.getMessage());
+    public void verifyNoCover(Project project) {
+        if (!project.hasCover()) {
+            throw new DataValidationException(NO_COVER.getMessage());
         }
     }
     
