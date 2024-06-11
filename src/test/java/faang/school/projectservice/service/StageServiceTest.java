@@ -333,7 +333,7 @@ public class StageServiceTest {
                                                  Stage stageEntity,
                                                  StageDto stageDto) {
         when(stageMapper.toEntity(newStageDto)).thenReturn(stageEntity);
-        when(stageValidator.validateStageBeforeCreation(stageEntity, newStageDto)).thenReturn(stageEntity);
+        doNothing().when(stageValidator).validateCreation(newStageDto);
         when(stageRepository.save(stageEntity)).thenReturn(stageEntity);
         when(stageMapper.toDto(stageEntity)).thenReturn(stageDto);
 
@@ -342,7 +342,7 @@ public class StageServiceTest {
         verify(stageMapper, times(1))
                 .toEntity(newStageDtoArgumentCaptor1.capture());
         verify(stageValidator, times(1))
-                .validateStageBeforeCreation(stageArgumentCaptor1.capture(), newStageDtoArgumentCaptor2.capture());
+                .validateCreation(newStageDtoArgumentCaptor2.capture());
         verify(stageRepository, times(1))
                 .save(stageArgumentCaptor2.capture());
         verify(stageMapper, times(1))
@@ -371,7 +371,7 @@ public class StageServiceTest {
                                                                            List<Stage> stageEntities,
                                                                            List<StageDto> stageDtoEntities
     ) {
-        when(projectValidator.validateProjectExistence(projectId)).thenReturn(projectWithId1);
+        doNothing().when(projectValidator).validateProjectExistence(projectId);
         when(stageRepository.findAllByProjectIdAndStageStatus(projectId, statusFilter)).thenReturn(stageEntities);
         when(stageMapper.toDtoList(stageEntities)).thenReturn(stageDtoEntities);
 
@@ -405,7 +405,7 @@ public class StageServiceTest {
     public void testGetAllStagesShouldReturnListOfStages(Long projectId,
                                                          List<Stage> stageEntities,
                                                          List<StageDto> stageDtoEntities) {
-        when(projectValidator.validateProjectExistence(projectId)).thenReturn(projectWithId1);
+        doNothing().when(projectValidator).validateProjectExistence(projectId);
         when(stageRepository.findAllByProjectId(projectId)).thenReturn(stageEntities);
         when(stageMapper.toDtoList(stageEntities)).thenReturn(stageDtoEntities);
 
@@ -459,7 +459,7 @@ public class StageServiceTest {
             StageDto stageDto,
             List<NewStageRolesDto> newStageRolesDtoList,
             List<StageRoles> stageRolesEntities) {
-        when(stageValidator.validateStageExistence(stageId)).thenReturn(stageEntity);
+        doNothing().when(stageValidator).validateStageExistence(stageId);
         when(stageRolesMapper.toEntityList(newStageRolesDtoList)).thenReturn(stageRolesEntities);
         when(stageRolesRepository.saveAll(stageRolesEntities)).thenReturn(null);
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stageEntity));
@@ -500,7 +500,7 @@ public class StageServiceTest {
             Long stageId,
             Stage stageEntity,
             StageDto stageDto) {
-        when(stageValidator.validateStageExistence(stageId)).thenReturn(stageEntity);
+        doNothing().when(stageValidator).validateStageExistence(stageId);
         when(stageMapper.toDto(stageEntity)).thenReturn(stageDto);
 
         var actual = stageService.getStageById(stageId);

@@ -12,7 +12,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
-
 import java.util.List;
 
 @Mapper(componentModel = "spring",
@@ -28,9 +27,9 @@ public interface StageMapper {
     StageDto toDto(Stage entity);
 
     @Mapping(target = "stageId", ignore = true)
-    @Mapping(target = "project", ignore = true)
-    @Mapping(target = "tasks", ignore = true)
-    @Mapping(target = "executors", ignore = true)
+    @Mapping(source = "projectId", target = "project.id")
+    @Mapping(source = "tasksIds", target = "tasks", qualifiedByName = "taskIdsToTasks")
+    @Mapping(source = "executorsIds", target = "executors", qualifiedByName = "executorIdsToExecutors")
     Stage toEntity(NewStageDto dto);
 
     List<StageDto> toDtoList(List<Stage> entities);
@@ -49,10 +48,24 @@ public interface StageMapper {
                 .toList();
     }
 
+    @Named("taskIdsToTasks")
+    default List<Task> taskIdsToTasks(List<Long> taskIds) {
+        return taskIds.stream()
+                .map(id -> Task.builder().id(id).build())
+                .toList();
+    }
+
     @Named("executorsToExecutorsIds")
     default List<Long> executorsToExecutorsIds(List<TeamMember> executors) {
         return executors.stream()
                 .map(TeamMember::getId)
+                .toList();
+    }
+
+    @Named("executorIdsToExecutors")
+    default List<TeamMember> executorIdsToExecutors(List<Long> executorIds) {
+        return executorIds.stream()
+                .map(id -> TeamMember.builder().id(id).build())
                 .toList();
     }
 }

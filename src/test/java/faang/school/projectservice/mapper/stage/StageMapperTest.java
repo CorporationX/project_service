@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class StageMapperTest {
@@ -272,9 +272,6 @@ public class StageMapperTest {
         newStageDtoWithId1.setStageName(stageName);
         stageEntityWithId1.setStageName(stageName);
         stageEntityWithId1.setStageId(null);
-        stageEntityWithId1.setProject(null);
-        stageEntityWithId1.setTasks(null);
-        stageEntityWithId1.setExecutors(null);
         var stageRoles = stageEntityWithId1.getStageRoles();
         stageRoles.forEach(r -> r.setId(null));
 
@@ -290,9 +287,6 @@ public class StageMapperTest {
         newStageDtoWithId1.setStageStatus(stageStatus.toString());
         stageEntityWithId1.setStageStatus(stageStatus);
         stageEntityWithId1.setStageId(null);
-        stageEntityWithId1.setProject(null);
-        stageEntityWithId1.setTasks(null);
-        stageEntityWithId1.setExecutors(null);
         var stageRoles = stageEntityWithId1.getStageRoles();
         stageRoles.forEach(r -> r.setId(null));
 

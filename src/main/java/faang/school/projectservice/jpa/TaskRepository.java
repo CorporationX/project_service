@@ -22,7 +22,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query(nativeQuery = true, value = """
             DELETE FROM task
-            WHERE stage_id = :id
+            WHERE stage_id = :stageId
             """)
     void deleteAllByStageId(long stageId);
 

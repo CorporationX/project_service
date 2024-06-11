@@ -49,7 +49,7 @@ public class ProjectValidatorTest {
     @Captor
     private ArgumentCaptor<Long> idCaptor;
 
-    private static Stream<Arguments> provideArgumentsForTestValidateProjectExistenceShouldReturnProject() {
+    private static Stream<Arguments> provideArgumentsForTestValidateProjectExistence() {
         return Stream.of(
                 Arguments.of(projectId1, projectWithId1),
                 Arguments.of(projectId2, projectWithId2),
@@ -75,18 +75,17 @@ public class ProjectValidatorTest {
 
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateProjectExistenceShouldReturnProject")
-    public void testValidateProjectExistenceShouldReturnProject(long projectId, Project project) {
-        when(projectJpaRepository.findById(projectId))
-                .thenReturn(Optional.of(project));
+    @MethodSource("provideArgumentsForTestValidateProjectExistence")
+    public void testValidateProjectExistence(long projectId, Project project) {
+        when(projectJpaRepository.existsById(projectId))
+                .thenReturn(true);
 
-        var actualProject = projectValidator.validateProjectExistence(projectId);
+        projectValidator.validateProjectExistence(projectId);
         verify(projectJpaRepository, times(1))
-                .findById(idCaptor.capture());
+                .existsById(idCaptor.capture());
         var actualProjectId = idCaptor.getValue();
 
         assertEquals(projectId, actualProjectId);
-        assertEquals(project, actualProject);
 
         verifyNoMoreInteractions(projectJpaRepository);
     }
@@ -94,12 +93,12 @@ public class ProjectValidatorTest {
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateProjectExistenceShouldThrowException")
     public void testValidateProjectExistenceShouldThrowException(long projectId, Project project) {
-        when(projectJpaRepository.findById(projectId))
-                .thenReturn(Optional.ofNullable(project));
+        when(projectJpaRepository.existsById(projectId))
+                .thenReturn(false);
         DataValidationException actualException = assertThrows(DataValidationException.class,
                 () -> projectValidator.validateProjectExistence(projectId));
         verify(projectJpaRepository, times(1))
-                .findById(idCaptor.capture());
+                .existsById(idCaptor.capture());
 
         var expectedMessage = String.format("a project with id %d does not exist", projectId);
         var actualMessage = actualException.getMessage();

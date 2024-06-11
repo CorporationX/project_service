@@ -14,6 +14,7 @@ import lombok.Data;
 public class NewStageRolesDto {
     @EnumValidator(enumClass = TeamRole.class, message = "Invalid Team Role")
     private String teamRole;
+
     @Positive
     @NotNull
     private Integer count;

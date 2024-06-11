@@ -48,7 +48,7 @@ public class TaskValidatorTest {
     @Captor
     private ArgumentCaptor<Long> idCaptor;
 
-    private static Stream<Arguments> provideArgumentsForTestValidateTaskExistenceShouldReturnTask() {
+    private static Stream<Arguments> provideArgumentsForTestValidateTaskExistence() {
         return Stream.of(
                 Arguments.of(taskId1, taskWithId1),
                 Arguments.of(taskId2, taskWithId2),
@@ -74,18 +74,17 @@ public class TaskValidatorTest {
 
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateTaskExistenceShouldReturnTask")
-    public void testValidateTaskExistenceShouldReturnTask(long taskId, Task task) {
-        when(taskRepository.findById(taskId))
-                .thenReturn(Optional.of(task));
+    @MethodSource("provideArgumentsForTestValidateTaskExistence")
+    public void testValidateTaskExistence(long taskId, Task task) {
+        when(taskRepository.existsById(taskId))
+                .thenReturn(true);
 
-        var actualTask = taskValidator.validateTaskExistence(taskId);
+        taskValidator.validateTaskExistence(taskId);
         verify(taskRepository, times(1))
-                .findById(idCaptor.capture());
+                .existsById(idCaptor.capture());
         var actualTaskId = idCaptor.getValue();
 
         assertEquals(taskId, actualTaskId);
-        assertEquals(task, actualTask);
 
         verifyNoMoreInteractions(taskRepository);
     }
@@ -93,12 +92,12 @@ public class TaskValidatorTest {
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateTaskExistenceShouldThrowException")
     public void testValidateTaskExistenceShouldThrowException(long taskId, Task task) {
-        when(taskRepository.findById(taskId))
-                .thenReturn(Optional.ofNullable(task));
+        when(taskRepository.existsById(taskId))
+                .thenReturn(false);
         DataValidationException actualException = assertThrows(DataValidationException.class,
                 () -> taskValidator.validateTaskExistence(taskId));
         verify(taskRepository, times(1))
-                .findById(idCaptor.capture());
+                .existsById(idCaptor.capture());
 
         var expectedMessage = String.format("a task with %d does not exist", taskId);
         var actualMessage = actualException.getMessage();

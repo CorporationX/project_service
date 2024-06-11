@@ -36,10 +36,10 @@ public class StageServiceImpl implements StageService {
 
     @Override
     @Transactional
-    public StageDto createStage(final NewStageDto dto) {
-        Stage stageEntity = stageMapper.toEntity(dto);
+    public StageDto createStage(final NewStageDto newStageDto) {
+        stageValidator.validateCreation(newStageDto);
 
-        stageEntity = stageValidator.validateStageBeforeCreation(stageEntity, dto);
+        Stage stageEntity = stageMapper.toEntity(newStageDto);
         stageEntity = stageRepository.save(stageEntity);
 
         return stageMapper.toDto(stageEntity);

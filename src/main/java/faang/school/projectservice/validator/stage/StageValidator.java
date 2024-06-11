@@ -8,5 +8,5 @@ public interface StageValidator {
 
     void validateStageForToMigrateExistence(Long stageToMigrateId);
 
-    Stage validateStageBeforeCreation(Stage stageEntity, NewStageDto stageDto);
+    void validateCreation(NewStageDto stageDto);
 }

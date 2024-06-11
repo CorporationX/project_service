@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -211,17 +212,16 @@ public class StageValidatorTest {
         );
     }
 
-    private static Stream<Arguments> provideArgumentsForTestValidateStageBeforeCreationReturnStage() {
+    private static Stream<Arguments> provideArgumentsForTestValidateCreation() {
 
         return Stream.of(
-                Arguments.of(stageWithId1, expectedStageWithId1, newStageDtoWithId1, projectWithId1, taskWithId32, executorWithId42),
-                Arguments.of(stageWithId2, expectedStageWithId2, newStageDtoWithId2, projectWithId2, taskWithId32, executorWithId42),
-                Arguments.of(stageWithId2, expectedStageWithId2, newStageDtoWithId2, projectWithId2, taskWithId32, executorWithId42),
-                Arguments.of(stageWithId3, expectedStageWithId3, newStageDtoWithId3, projectWithId3, taskWithId32, executorWithId42),
-                Arguments.of(stageWithId4, expectedStageWithId4, newStageDtoWithId4, projectWithId4, taskWithId32, executorWithId42),
-                Arguments.of(stageWithId5, expectedStageWithId5, newStageDtoWithId5, projectWithId5, taskWithId32, executorWithId42),
-                Arguments.of(stageWithId6, expectedStageWithId6, newStageDtoWithId6, projectWithId6, taskWithId32, executorWithId42),
-                Arguments.of(stageWithId7, expectedStageWithId7, newStageDtoWithId7, projectWithId7, taskWithId32, executorWithId42)
+                Arguments.of(newStageDtoWithId1),
+                Arguments.of(newStageDtoWithId2),
+                Arguments.of(newStageDtoWithId3),
+                Arguments.of(newStageDtoWithId4),
+                Arguments.of(newStageDtoWithId5),
+                Arguments.of(newStageDtoWithId6),
+                Arguments.of(newStageDtoWithId7)
         );
     }
 
@@ -230,12 +230,11 @@ public class StageValidatorTest {
     public void testValidateStageExistenceShouldReturnStage(long stageId, Stage stage) {
         when(stageJpaRepository.findById(stageId)).thenReturn(Optional.of(stage));
 
-        var actualStage = stageValidator.validateStageExistence(stageId);
+        stageValidator.validateStageExistence(stageId);
         verify(stageJpaRepository, times(1)).findById(idCaptor.capture());
         var actualStageId = idCaptor.getValue();
 
         assertEquals(stageId, actualStageId);
-        assertEquals(stage, actualStage);
 
         verifyNoMoreInteractions(stageJpaRepository);
     }
@@ -257,18 +256,13 @@ public class StageValidatorTest {
 
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateStageBeforeCreationReturnStage")
-    public void testValidateStageBeforeCreationShouldReturnStage(Stage stageEntity,
-                                                                 Stage expectedStageEntity,
-                                                                 NewStageDto newStageDto,
-                                                                 Project projectEntity,
-                                                                 Task taskEntity,
-                                                                 TeamMember teamMemberEntity) {
-        when(projectValidator.validateProjectExistence(newStageDto.getProjectId())).thenReturn(projectEntity);
-        when(taskValidator.validateTaskExistence(anyLong())).thenReturn(taskEntity);
-        when(teamMemberValidator.validateTeamMemberExistence(anyLong())).thenReturn(teamMemberEntity);
+    @MethodSource("provideArgumentsForTestValidateCreation")
+    public void testValidateCreation(NewStageDto newStageDto) {
+        doNothing().when(projectValidator).validateProjectExistence(newStageDto.getProjectId());
+        doNothing().when(taskValidator).validateTaskExistence(anyLong());
+        doNothing().when(teamMemberValidator).validateTeamMemberExistence(anyLong());
 
-        var actualStage = stageValidator.validateStageBeforeCreation(stageEntity, newStageDto);
+        stageValidator.validateCreation(newStageDto);
 
         verify(projectValidator, times(1)).validateProjectExistence(idCaptor.capture());
         verify(taskValidator, times(3)).validateTaskExistence(idCaptor1.capture());
@@ -281,7 +275,6 @@ public class StageValidatorTest {
         assertEquals(newStageDto.getProjectId(), actualProjectId);
         assertEquals(newStageDto.getTasksIds(), actualTaskIds);
         assertEquals(newStageDto.getExecutorsIds(), actualExecutorsIds);
-        assertEquals(expectedStageEntity, actualStage);
 
         verifyNoMoreInteractions(projectValidator, taskValidator, teamMemberValidator);
     }

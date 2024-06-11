@@ -5,7 +5,7 @@ import faang.school.projectservice.model.StageStatus;
 import faang.school.projectservice.validator.enumvalidator.EnumValidator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +15,6 @@ import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class NewStageDto {
     @NotBlank
@@ -24,9 +23,8 @@ public class NewStageDto {
     @EnumValidator(enumClass = StageStatus.class, message = "Invalid Stage Status")
     private String stageStatus;
 
-    @PositiveOrZero
-    @NotNull
-    private Long projectId;
+    @Positive
+    private long projectId;
 
     @NotNull
     private List<NewStageRolesDto> stageRoles;

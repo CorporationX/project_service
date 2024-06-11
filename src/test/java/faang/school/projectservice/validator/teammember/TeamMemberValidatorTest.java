@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +46,7 @@ public class TeamMemberValidatorTest {
     @Captor
     private ArgumentCaptor<Long> idCaptor;
 
-    private static Stream<Arguments> provideArgumentsForTestValidateTeamMemberExistenceShouldReturnExecutor() {
+    private static Stream<Arguments> provideArgumentsForTestValidateTeamMemberExistence() {
         return Stream.of(
                 Arguments.of(executorId1, executorWithId1),
                 Arguments.of(executorId2, executorWithId2),
@@ -72,18 +71,16 @@ public class TeamMemberValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateTeamMemberExistenceShouldReturnExecutor")
-    public void testValidateTeamMemberExistenceShouldReturnExecutor(long executorId, TeamMember executor) {
-        when(teamMemberJpaRepository.findById(executorId))
-                .thenReturn(Optional.of(executor));
-
-        var actualExecutor = teamMemberValidator.validateTeamMemberExistence(executorId);
+    @MethodSource("provideArgumentsForTestValidateTeamMemberExistence")
+    public void testValidateTeamMemberExistence(long executorId, TeamMember executor) {
+        when(teamMemberJpaRepository.existsById(executorId))
+                .thenReturn(true);
+        teamMemberValidator.validateTeamMemberExistence(executorId);
         verify(teamMemberJpaRepository, times(1))
-                .findById(idCaptor.capture());
+                .existsById(idCaptor.capture());
         var actualExecutorId = idCaptor.getValue();
 
         assertEquals(executorId, actualExecutorId);
-        assertEquals(executor, actualExecutor);
 
         verifyNoMoreInteractions(teamMemberJpaRepository);
     }
@@ -91,12 +88,12 @@ public class TeamMemberValidatorTest {
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateTeamMemberExistenceShouldThrowException")
     public void testValidateTeamMemberExistenceShouldThrowException(long executorId, TeamMember executor) {
-        when(teamMemberJpaRepository.findById(executorId))
-                .thenReturn(Optional.ofNullable(executor));
+        when(teamMemberJpaRepository.existsById(executorId))
+                .thenReturn(false);
         DataValidationException actualException = assertThrows(DataValidationException.class,
                 () -> teamMemberValidator.validateTeamMemberExistence(executorId));
         verify(teamMemberJpaRepository, times(1))
-                .findById(idCaptor.capture());
+                .existsById(idCaptor.capture());
 
         var expectedMessage = String.format("a team member with %d does not exist", executorId);
         var actualMessage = actualException.getMessage();

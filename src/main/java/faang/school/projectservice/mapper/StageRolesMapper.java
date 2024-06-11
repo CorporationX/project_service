@@ -15,7 +15,7 @@ public interface StageRolesMapper {
     @Mapping(source = "stage.stageId", target = "stageId")
     StageRolesDto toDto(StageRoles entity);
 
-    @Mapping(target = "stage", ignore = true)
+    @Mapping(source = "stageId", target = "stage.stageId")
     StageRoles toEntity(StageRolesDto dto);
 
     @Mapping(target = "id", ignore = true)
@@ -25,5 +25,4 @@ public interface StageRolesMapper {
     List<StageRolesDto> toDtoList(List<StageRoles> entities);
 
     List<StageRoles> toEntityList(List<NewStageRolesDto> dtoList);
-
 }

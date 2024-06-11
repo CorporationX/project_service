@@ -143,6 +143,7 @@ public class StageRolesMapperTest {
         StageRoles expected = StageRoles.builder()
                 .id(stageRolesId1)
                 .teamRole(teamRole)
+                .stage(Stage.builder().stageId(stageId1).build())
                 .count(countOfStageRolesWithId1)
                 .build();
 
@@ -158,6 +159,7 @@ public class StageRolesMapperTest {
     public void shouldMapStageRolesDtoToStageRolesEntityWithDifferentIds(long stageRolesId) {
         StageRoles expected = StageRoles.builder()
                 .id(stageRolesId)
+                .stage(Stage.builder().stageId(stageId1).build())
                 .teamRole(teamRoleOfStageRolesWithId1)
                 .count(countOfStageRolesWithId1)
                 .build();
@@ -173,6 +175,7 @@ public class StageRolesMapperTest {
     public void shouldMapStageRolesDtoToStageRolesEntityWithDifferentCounts(int count) {
         StageRoles expected = StageRoles.builder()
                 .id(stageRolesId1)
+                .stage(Stage.builder().stageId(stageId1).build())
                 .teamRole(teamRoleOfStageRolesWithId1)
                 .count(count)
                 .build();
@@ -188,9 +191,9 @@ public class StageRolesMapperTest {
     public void shouldMapStageRolesDtoToStageRolesEntityWithStageNull(long stageId) {
         StageRoles expected = StageRoles.builder()
                 .id(stageRolesId1)
+                .stage(Stage.builder().stageId(stageId).build())
                 .teamRole(teamRoleOfStageRolesWithId1)
                 .count(countOfStageRolesWithId1)
-                .stage(null)
                 .build();
 
         stageRolesDtoWithId1.setStageId(stageId);
