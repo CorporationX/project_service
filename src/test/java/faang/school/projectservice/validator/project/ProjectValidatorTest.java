@@ -2,8 +2,8 @@ package faang.school.projectservice.validator.project;
 
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.project.impl.ProjectValidatorImpl;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,7 +42,7 @@ public class ProjectValidatorTest {
     private static final Project projectWithId6 = Project.builder().id(projectId6).build();
     private static final Project projectWithId7 = Project.builder().id(projectId7).build();
     @Mock
-    private ProjectJpaRepository projectJpaRepository;
+    private ProjectRepository projectRepository;
     @InjectMocks
     private ProjectValidatorImpl projectValidator;
     @Captor
@@ -77,33 +76,33 @@ public class ProjectValidatorTest {
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateProjectExistence")
     public void testValidateProjectExistence(long projectId, Project project) {
-        when(projectJpaRepository.existsById(projectId))
+        when(projectRepository.existsById(projectId))
                 .thenReturn(true);
 
         projectValidator.validateProjectExistence(projectId);
-        verify(projectJpaRepository, times(1))
+        verify(projectRepository, times(1))
                 .existsById(idCaptor.capture());
         var actualProjectId = idCaptor.getValue();
 
         assertEquals(projectId, actualProjectId);
 
-        verifyNoMoreInteractions(projectJpaRepository);
+        verifyNoMoreInteractions(projectRepository);
     }
 
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateProjectExistenceShouldThrowException")
     public void testValidateProjectExistenceShouldThrowException(long projectId, Project project) {
-        when(projectJpaRepository.existsById(projectId))
+        when(projectRepository.existsById(projectId))
                 .thenReturn(false);
         DataValidationException actualException = assertThrows(DataValidationException.class,
                 () -> projectValidator.validateProjectExistence(projectId));
-        verify(projectJpaRepository, times(1))
+        verify(projectRepository, times(1))
                 .existsById(idCaptor.capture());
 
         var expectedMessage = String.format("a project with id %d does not exist", projectId);
         var actualMessage = actualException.getMessage();
 
         assertEquals(expectedMessage, actualMessage);
-        verifyNoMoreInteractions(projectJpaRepository);
+        verifyNoMoreInteractions(projectRepository);
     }
 }

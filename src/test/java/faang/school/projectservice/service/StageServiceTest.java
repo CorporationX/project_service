@@ -3,9 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.stage.NewStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stagerole.NewStageRolesDto;
-import faang.school.projectservice.jpa.StageJpaRepository;
-import faang.school.projectservice.jpa.StageRolesRepository;
-import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
@@ -15,6 +12,9 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.pattern.strategy.stage.StrategyCascadeForDeletingStage;
 import faang.school.projectservice.pattern.strategy.stage.StrategyForDeletingStage;
+import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.StageRolesRepository;
+import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.service.stage.impl.StageServiceImpl;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import faang.school.projectservice.validator.stage.StageValidator;
@@ -48,7 +48,7 @@ public class StageServiceTest {
     @Mock
     private StageRolesRepository stageRolesRepository;
     @Mock
-    private StageJpaRepository stageRepository;
+    private StageRepository stageRepository;
     @Mock
     private TaskRepository taskRepository;
 
@@ -332,17 +332,17 @@ public class StageServiceTest {
     public void testCreateStageShouldReturnStage(NewStageDto newStageDto,
                                                  Stage stageEntity,
                                                  StageDto stageDto) {
-        when(stageMapper.toEntity(newStageDto)).thenReturn(stageEntity);
         doNothing().when(stageValidator).validateCreation(newStageDto);
+        when(stageMapper.toEntity(newStageDto)).thenReturn(stageEntity);
         when(stageRepository.save(stageEntity)).thenReturn(stageEntity);
         when(stageMapper.toDto(stageEntity)).thenReturn(stageDto);
 
         var actual = stageService.createStage(newStageDto);
 
-        verify(stageMapper, times(1))
-                .toEntity(newStageDtoArgumentCaptor1.capture());
         verify(stageValidator, times(1))
-                .validateCreation(newStageDtoArgumentCaptor2.capture());
+                .validateCreation(newStageDtoArgumentCaptor1.capture());
+        verify(stageMapper, times(1))
+                .toEntity(newStageDtoArgumentCaptor2.capture());
         verify(stageRepository, times(1))
                 .save(stageArgumentCaptor2.capture());
         verify(stageMapper, times(1))
@@ -350,14 +350,12 @@ public class StageServiceTest {
 
         var actualNewStageDtoArgumentCaptor1 = newStageDtoArgumentCaptor1.getValue();
         var actualNewStageDtoArgumentCaptor2 = newStageDtoArgumentCaptor2.getValue();
-        var actualStageArgumentCaptor1 = stageArgumentCaptor1.getValue();
         var actualStageArgumentCaptor2 = stageArgumentCaptor2.getValue();
         var actualStageArgumentCaptor3 = stageArgumentCaptor3.getValue();
 
         assertEquals(stageDto, actual);
         assertEquals(newStageDto, actualNewStageDtoArgumentCaptor1);
         assertEquals(newStageDto, actualNewStageDtoArgumentCaptor2);
-        assertEquals(stageEntity, actualStageArgumentCaptor1);
         assertEquals(stageEntity, actualStageArgumentCaptor2);
         assertEquals(stageEntity, actualStageArgumentCaptor3);
 
@@ -459,7 +457,7 @@ public class StageServiceTest {
             StageDto stageDto,
             List<NewStageRolesDto> newStageRolesDtoList,
             List<StageRoles> stageRolesEntities) {
-        doNothing().when(stageValidator).validateStageExistence(stageId);
+        when(stageValidator.validateStageExistence(stageId)).thenReturn(stageEntity);
         when(stageRolesMapper.toEntityList(newStageRolesDtoList)).thenReturn(stageRolesEntities);
         when(stageRolesRepository.saveAll(stageRolesEntities)).thenReturn(null);
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stageEntity));
@@ -500,7 +498,7 @@ public class StageServiceTest {
             Long stageId,
             Stage stageEntity,
             StageDto stageDto) {
-        doNothing().when(stageValidator).validateStageExistence(stageId);
+        when(stageValidator.validateStageExistence(stageId)).thenReturn(stageEntity);
         when(stageMapper.toDto(stageEntity)).thenReturn(stageDto);
 
         var actual = stageService.getStageById(stageId);

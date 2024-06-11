@@ -1,8 +1,8 @@
 package faang.school.projectservice.validator.teammember;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.teammember.impl.TeamMemberValidatorImpl;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +40,7 @@ public class TeamMemberValidatorTest {
     private static final TeamMember executorWithId6 = TeamMember.builder().id(executorId6).build();
     private static final TeamMember executorWithId7 = TeamMember.builder().id(executorId7).build();
     @Mock
-    private TeamMemberJpaRepository teamMemberJpaRepository;
+    private TeamMemberRepository teamMemberRepository;
     @InjectMocks
     private TeamMemberValidatorImpl teamMemberValidator;
     @Captor
@@ -73,32 +73,32 @@ public class TeamMemberValidatorTest {
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateTeamMemberExistence")
     public void testValidateTeamMemberExistence(long executorId, TeamMember executor) {
-        when(teamMemberJpaRepository.existsById(executorId))
+        when(teamMemberRepository.existsById(executorId))
                 .thenReturn(true);
         teamMemberValidator.validateTeamMemberExistence(executorId);
-        verify(teamMemberJpaRepository, times(1))
+        verify(teamMemberRepository, times(1))
                 .existsById(idCaptor.capture());
         var actualExecutorId = idCaptor.getValue();
 
         assertEquals(executorId, actualExecutorId);
 
-        verifyNoMoreInteractions(teamMemberJpaRepository);
+        verifyNoMoreInteractions(teamMemberRepository);
     }
 
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateTeamMemberExistenceShouldThrowException")
     public void testValidateTeamMemberExistenceShouldThrowException(long executorId, TeamMember executor) {
-        when(teamMemberJpaRepository.existsById(executorId))
+        when(teamMemberRepository.existsById(executorId))
                 .thenReturn(false);
         DataValidationException actualException = assertThrows(DataValidationException.class,
                 () -> teamMemberValidator.validateTeamMemberExistence(executorId));
-        verify(teamMemberJpaRepository, times(1))
+        verify(teamMemberRepository, times(1))
                 .existsById(idCaptor.capture());
 
         var expectedMessage = String.format("a team member with %d does not exist", executorId);
         var actualMessage = actualException.getMessage();
 
         assertEquals(expectedMessage, actualMessage);
-        verifyNoMoreInteractions(teamMemberJpaRepository);
+        verifyNoMoreInteractions(teamMemberRepository);
     }
 }

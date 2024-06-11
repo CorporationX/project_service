@@ -1,6 +1,7 @@
-package faang.school.projectservice.handler.ExceptionHandler;
+package faang.school.projectservice.handler;
 
 import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exceptions.NoAccessException;
 import faang.school.projectservice.exceptions.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,13 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(NoAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleNoAccessExceptions(NoAccessException ex, HttpServletRequest request) {
+        log.warn("NoAccessException", ex);
+        return buildErrorResponse(ex, request);
+    }
 
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

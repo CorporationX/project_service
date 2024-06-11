@@ -1,8 +1,8 @@
 package faang.school.projectservice.validator.task;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.validator.task.impl.TaskValidatorImpl;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

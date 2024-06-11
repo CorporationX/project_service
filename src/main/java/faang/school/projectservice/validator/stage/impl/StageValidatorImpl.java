@@ -2,8 +2,8 @@ package faang.school.projectservice.validator.stage.impl;
 
 import faang.school.projectservice.dto.stage.NewStageDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import faang.school.projectservice.validator.stage.StageValidator;
 import faang.school.projectservice.validator.task.TaskValidator;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class StageValidatorImpl implements StageValidator {
     private final TeamMemberValidator teamMemberValidator;
-    private final StageJpaRepository stageJpaRepository;
+    private final StageRepository stageRepository;
     private final ProjectValidator projectValidator;
     private final TaskValidator taskValidator;
 
@@ -31,7 +31,7 @@ public class StageValidatorImpl implements StageValidator {
 
     @Override
     public Stage validateStageExistence(long id) {
-        Optional<Stage> optional = stageJpaRepository.findById(id);
+        Optional<Stage> optional = stageRepository.findById(id);
         return optional.orElseThrow(() -> {
             String message = String.format("a stage with %d does not exist", id);
 

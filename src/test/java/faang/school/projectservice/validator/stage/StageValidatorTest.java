@@ -2,11 +2,11 @@ package faang.school.projectservice.validator.stage;
 
 import faang.school.projectservice.dto.stage.NewStageDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.project.impl.ProjectValidatorImpl;
 import faang.school.projectservice.validator.stage.impl.StageValidatorImpl;
 import faang.school.projectservice.validator.task.impl.TaskValidatorImpl;
@@ -174,7 +174,7 @@ public class StageValidatorTest {
     @Mock
     private TeamMemberValidatorImpl teamMemberValidator;
     @Mock
-    private StageJpaRepository stageJpaRepository;
+    private StageRepository stageRepository;
     @Mock
     private ProjectValidatorImpl projectValidator;
     @Mock
@@ -228,30 +228,30 @@ public class StageValidatorTest {
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateStageExistenceShouldReturnStage")
     public void testValidateStageExistenceShouldReturnStage(long stageId, Stage stage) {
-        when(stageJpaRepository.findById(stageId)).thenReturn(Optional.of(stage));
+        when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
 
         stageValidator.validateStageExistence(stageId);
-        verify(stageJpaRepository, times(1)).findById(idCaptor.capture());
+        verify(stageRepository, times(1)).findById(idCaptor.capture());
         var actualStageId = idCaptor.getValue();
 
         assertEquals(stageId, actualStageId);
 
-        verifyNoMoreInteractions(stageJpaRepository);
+        verifyNoMoreInteractions(stageRepository);
     }
 
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateStageExistenceShouldThrowException")
     public void testValidateStageExistenceShouldThrowException(long stageId, Stage stage) {
-        when(stageJpaRepository.findById(stageId)).thenReturn(Optional.ofNullable(stage));
+        when(stageRepository.findById(stageId)).thenReturn(Optional.ofNullable(stage));
         DataValidationException actualException = assertThrows(DataValidationException.class,
                 () -> stageValidator.validateStageExistence(stageId));
-        verify(stageJpaRepository, times(1)).findById(idCaptor.capture());
+        verify(stageRepository, times(1)).findById(idCaptor.capture());
 
         var expectedMessage = String.format("a stage with %d does not exist", stageId);
         var actualMessage = actualException.getMessage();
 
         assertEquals(expectedMessage, actualMessage);
-        verifyNoMoreInteractions(stageJpaRepository);
+        verifyNoMoreInteractions(stageRepository);
     }
 
 

@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator.task.impl;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.TaskRepository;
+import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.validator.task.TaskValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
