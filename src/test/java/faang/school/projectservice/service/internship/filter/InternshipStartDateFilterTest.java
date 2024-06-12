@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.internship.filter;
 
-import faang.school.projectservice.dto.filter.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.filter.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.testData.internship.InternshipTestData;
 import org.junit.jupiter.api.BeforeEach;

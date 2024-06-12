@@ -9,12 +9,15 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Builder;
 import lombok.Data;
-
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.List;
+
 
 @Data
+@Builder
 public class ProjectDto {
     private Long id;
 
@@ -37,6 +40,10 @@ public class ProjectDto {
     @NotNull(message = "Project owner id")
     private Long ownerId;
 
+    private Long parentProjectId;
+
+    private List<@NotNull Long> children;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
@@ -45,6 +52,7 @@ public class ProjectDto {
 
     private ProjectStatus status;
 
+    @NotNull(message = "Visibility can't be null")
     private ProjectVisibility visibility;
 
     @JsonIgnore

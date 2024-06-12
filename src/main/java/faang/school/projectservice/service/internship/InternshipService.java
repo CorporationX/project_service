@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.filter.InternshipFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
