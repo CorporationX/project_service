@@ -25,7 +25,6 @@ public interface MomentMapper {
     @Mapping(source = "projectIds", target = "projects", qualifiedByName = "toProjects")
     List<Moment> toEntityList(List<MomentDto> momentDtoList);
 
-    //Костыль для projects
     @Named("toProjectIds")
     default List<Long> toProjectIds(List<Project> projects) {
             return projects.stream()
