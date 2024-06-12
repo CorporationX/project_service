@@ -30,6 +30,15 @@ public class ProjectService {
     private final ProjectValidator validator;
     private final List<ProjectFilter> filters;
 
+    public ProjectDto getProjectById(Long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+        return projectMapper.toDto(project);
+    }
+
+    public boolean existsById(Long projectId) {
+        return projectRepository.existsById(projectId);
+    }
+
     @Transactional
     public ProjectDto create(ProjectDto projectDto) {
         validator.verifyCanBeCreated(projectDto);
@@ -42,7 +51,7 @@ public class ProjectService {
         return mapper.toDto(saved);
     }
 
-    @Transactional
+@Transactional
     public ProjectDto update(ProjectDto projectDto) {
         validator.verifyCanBeUpdated(projectDto);
 
@@ -78,7 +87,7 @@ public class ProjectService {
                 .filter(streamFilter -> streamFilter.isApplicable(filter))
                 .flatMap(streamFilter -> streamFilter.apply(projects.stream(), filter))
                 .distinct()
-                .map(mapper::toDto)
+                .map(projectMapper::toDto)
                 .toList();
     }
 

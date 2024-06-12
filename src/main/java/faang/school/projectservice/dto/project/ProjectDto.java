@@ -11,10 +11,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Data;
-
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Data
 @Builder
@@ -28,8 +28,8 @@ public class ProjectDto {
     private String description;
 
     @Positive(message = "Storage size can't be negative")
-    @Min(value = 1,message = "Storage size can't be less than 1")
-    @Max(value = 1000,message = "Storage size can't be greater than 1000")
+    @Min(value = 1, message = "Storage size can't be less than 1")
+    @Max(value = 1000, message = "Storage size can't be greater than 1000")
     private BigInteger storageSize;
 
     @Positive(message = "Storage max size can't be negative")
@@ -54,12 +54,12 @@ public class ProjectDto {
 
     @NotNull(message = "Visibility can't be null")
     private ProjectVisibility visibility;
-    
+
     @JsonIgnore
     public boolean isStatusFinished() {
         return this.status == ProjectStatus.CANCELLED || this.status == ProjectStatus.COMPLETED;
     }
-    
+
     @JsonIgnore
     public boolean isStorageSizeGreaterThanMaxStorageSize() {
         return storageSize.compareTo(maxStorageSize) > 0;
