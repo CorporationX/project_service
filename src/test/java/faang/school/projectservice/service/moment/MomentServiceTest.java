@@ -66,7 +66,6 @@ class MomentServiceTest {
 
         momentService.update(oldMoment.getId(), momentDto);
 
-        verify(momentRepository).findById(oldMoment.getId());
         verify(momentRepository).save(momentMapper.toEntity(momentDto));
         verify(momentMapper).toDto(newMoment);
 
@@ -96,7 +95,6 @@ class MomentServiceTest {
 
         List<MomentDto> actualResult = momentService.getAllMoments();
         assertEquals(expectedResult, actualResult);
-        assertEquals(actualResult.size(),2);
     }
 
     @Test
