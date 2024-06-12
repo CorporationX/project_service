@@ -103,4 +103,7 @@ public class Project {
 
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
+
+    @OneToMany(mappedBy = "project")
+    private List<Internship> internships;
 }
