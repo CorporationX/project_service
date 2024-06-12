@@ -42,7 +42,6 @@ public class ProjectService {
         return mapper.toDto(saved);
     }
 
-
     @Transactional
     public ProjectDto update(ProjectDto projectDto) {
         validator.verifyCanBeUpdated(projectDto);
