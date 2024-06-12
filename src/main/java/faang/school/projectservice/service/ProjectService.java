@@ -13,12 +13,12 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.image.ImageService;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.ProjectValidator;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Valid
+@Validated
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -53,9 +53,13 @@ public class ProjectService {
                 projectRepository.save(projectMapper.dtoToProject(projectDto, project)));
     }
 
+    public Project findById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
+
     @Transactional(readOnly = true)
-    public ProjectDto findById(@Min(1) Long id) {
-        return projectMapper.projectToDto(projectRepository.getProjectById(id));
+    public ProjectDto findProjectById(@Min(1) Long id) {
+        return projectMapper.projectToDto(findById(id));
     }
 
     @Transactional(readOnly = true)

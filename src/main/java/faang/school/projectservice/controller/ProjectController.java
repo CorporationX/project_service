@@ -66,7 +66,7 @@ public class ProjectController {
     @Operation(summary = "Get project by id", tags = "Project")
     @GetMapping("/{projectId}")
     public ProjectDto getProjectById(@PathVariable long projectId) {
-        return projectService.findById(projectId);
+        return projectService.findProjectById(projectId);
     }
 
     @Operation(summary = "Delete project by id", tags = "Project")
