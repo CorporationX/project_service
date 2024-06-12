@@ -8,13 +8,12 @@ import java.util.stream.Stream;
 public class MomentDateFilter implements MomentFilter {
     @Override
     public boolean isApplicable(MomentFilterDto filterDto) {
-        return filterDto.getDateTimePattern() != null;
+        return filterDto.getStartDate() != null && filterDto.getEndDate() != null;
     }
 
     @Override
     public Stream<Moment> apply(Stream<Moment> momentStream, MomentFilterDto filterDto) {
-        return momentStream.filter(
-                moment -> moment.getDate().isAfter(filterDto.getDateTimePattern())
-        );
+        return momentStream.filter(moment -> moment.getDate().isAfter(filterDto.getStartDate()) &&
+                moment.getDate().isBefore(filterDto.getEndDate()));
     }
 }

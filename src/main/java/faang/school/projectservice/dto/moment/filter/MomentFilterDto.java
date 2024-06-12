@@ -6,12 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MomentFilterDto {
-    private LocalDateTime dateTimePattern;
-    private String projectPattern;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private List<Long> projectIds;
 }
