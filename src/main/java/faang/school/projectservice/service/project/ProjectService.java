@@ -32,7 +32,7 @@ public class ProjectService {
 
     public ProjectDto getProjectById(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
-        return projectMapper.toDto(project);
+        return mapper.toDto(project);
     }
 
     public boolean existsById(Long projectId) {
@@ -87,7 +87,7 @@ public class ProjectService {
                 .filter(streamFilter -> streamFilter.isApplicable(filter))
                 .flatMap(streamFilter -> streamFilter.apply(projects.stream(), filter))
                 .distinct()
-                .map(projectMapper::toDto)
+                .map(mapper::toDto)
                 .toList();
     }
 
