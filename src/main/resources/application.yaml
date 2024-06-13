@@ -55,11 +55,5 @@ services:
     host: http://localhost
     port: 8080
 
-jira:
-  username: name
-  password: password
-  jiraURL: https://jira.company.com
-
-
 api:
   version: v1

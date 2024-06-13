@@ -1,56 +1,62 @@
 package faang.school.projectservice.service.jira;
 
-import com.atlassian.jira.rest.client.api.IssueRestClient;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
-import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
+import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.client.jira.JiraClient;
 import faang.school.projectservice.dto.jira.IssueDto;
+import faang.school.projectservice.dto.jira.JiraAccountDto;
 import faang.school.projectservice.mapper.jira.IssueMapper;
 import faang.school.projectservice.mapper.jira.IssueTypeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class JiraServiceImpl implements JiraService {
 
-    private final JiraRestClient restClient;
+    private final UserServiceClient userServiceClient;
+    private final JiraClient jiraClient;
     private final IssueMapper issueMapper;
     private final IssueTypeMapper issueTypeMapper;
 
     @Override
     public String createIssue(IssueDto issueDto) {
 
-        IssueRestClient client = restClient.getIssueClient();
-        IssueInput issue = buildInput(issueDto);
-        String key = client.createIssue(issue).claim().getKey();
+        authorizeUser();
 
-        log.info("Creating issue for project: {}", issueDto.getProjectKey());
+        IssueInput issue = buildInput(issueDto);
+        String key = jiraClient.createIssue(issue);
+
+        log.info("Created issue {} for project: {}", key, issueDto.getProjectKey());
 
         return key;
     }
 
     @Override
     public IssueDto getIssue(String issueKey) {
-        IssueRestClient client = restClient.getIssueClient();
-        Issue issue = client.getIssue(issueKey).claim();
+
+        authorizeUser();
+
+        Issue issue = jiraClient.getIssue(issueKey);
         return issueMapper.toDto(issue);
     }
 
     @Override
     public List<IssueDto> getAllIssues(String projectKey) {
 
-        SearchRestClient client = restClient.getSearchClient();
-        Iterable<Issue> issues = client.searchJql("project = " + projectKey).claim().getIssues();
+        authorizeUser();
 
-        return StreamSupport.stream(issues.spliterator(), false)
+        List<Issue> issues = jiraClient.getAllIssues(projectKey);
+        return issues.stream()
                 .map(issueMapper::toDto)
                 .toList();
     }
@@ -58,11 +64,10 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public List<IssueDto> getIssuesByStatusId(String projectKey, long statusId) {
 
-        SearchRestClient client = restClient.getSearchClient();
-        Iterable<Issue> issues = client.searchJql(String.format("project = %s AND status = %d",
-                projectKey, statusId)).claim().getIssues();
+        authorizeUser();
 
-        return StreamSupport.stream(issues.spliterator(), false)
+        List<Issue> issues = jiraClient.getIssuesByStatusId(projectKey, statusId);
+        return issues.stream()
                 .map(issueMapper::toDto)
                 .toList();
     }
@@ -70,13 +75,26 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public List<IssueDto> getIssuesByAssigneeId(String projectKey, String assigneeId) {
 
-        SearchRestClient client = restClient.getSearchClient();
-        Iterable<Issue> issues = client.searchJql(String.format("project = %s AND assignee = %s",
-                projectKey, assigneeId)).claim().getIssues();
+        authorizeUser();
 
-        return StreamSupport.stream(issues.spliterator(), false)
+        List<Issue> issues = jiraClient.getIssuesByAssigneeId(projectKey, assigneeId);
+        return issues.stream()
                 .map(issueMapper::toDto)
                 .toList();
+    }
+
+    public void authorizeUser() {
+
+        JiraAccountDto account = userServiceClient.getJiraAccount();
+
+        jiraClient.setUsername(account.getUsername());
+        jiraClient.setPassword(account.getPassword());
+        jiraClient.setProjectUrl(account.getProjectUrl());
+
+        JiraRestClient jiraRestClient = new AsynchronousJiraRestClientFactory()
+                .createWithBasicHttpAuthentication(URI.create(account.getProjectUrl()), account.getUsername(), account.getPassword());
+
+        jiraClient.setRestClient(jiraRestClient);
     }
 
     private IssueInput buildInput(IssueDto issueDto) {
