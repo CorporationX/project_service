@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.donation;
 
+import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationToSendDto;
@@ -49,6 +50,9 @@ class DonationServiceImplTest {
 
     @Mock
     private CampaignRepository campaignRepository;
+
+    @Mock
+    private PaymentServiceClient paymentServiceClient;
 
     @Mock
     private UserValidator userValidator;
@@ -144,7 +148,6 @@ class DonationServiceImplTest {
 
     @Test
     void getAllDonationsByUserId_shouldReturnDonationList() {
-//        when(userValidator.validateUserExistence(anyLong())).thenReturn(true);
         when(donationRepository.findAllByUserId(anyLong())).thenReturn(Collections.singletonList(donation));
         when(donationFilterService.applyFilters(any(), any(DonationFilterDto.class))).thenReturn(Stream.of(donation));
         when(donationMapper.toDto(any(Donation.class))).thenReturn(donationDto);
