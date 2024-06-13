@@ -3,8 +3,10 @@ package faang.school.projectservice.model.aclRole;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Getter
 public enum AclRole {
@@ -17,10 +19,8 @@ public enum AclRole {
     private static final Map<String, AclRole> map;
 
     static {
-        map = new HashMap<>();
-        for (AclRole v : AclRole.values()) {
-            map.put(v.role, v);
-        }
+        map = Arrays.stream(AclRole.values())
+                .collect(Collectors.toMap(AclRole::getRole, Function.identity()));
     }
 
     @JsonValue

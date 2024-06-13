@@ -23,6 +23,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CalendarService {
+    public static final int EVENTS_COUNT_TO_BE_RETURNED = 10;
     private final GoogleAuthorizationService OAuthService;
     private final EventMapper eventMapper;
     private final CalendarMapper calendarMapper;
@@ -44,7 +45,7 @@ public class CalendarService {
     }
 
     /**
-     * Возвращает ссылку аутентификации. Предоставив доступ по этой ссылке, вы получите код дял авторизации
+     * Возвращает ссылку аутентификации. Предоставив доступ по этой ссылке, вы получите код для авторизации
      *
      * @return URL
      */
@@ -75,7 +76,7 @@ public class CalendarService {
         try {
             List<Event> eventsOfProject = service.events()
                     .list(calendarId)
-                    .setMaxResults(10)
+                    .setMaxResults(EVENTS_COUNT_TO_BE_RETURNED)
                     .execute()
                     .getItems();
 
