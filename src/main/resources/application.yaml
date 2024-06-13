@@ -24,9 +24,11 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        invitation_channel:
+          name: invitation_channel
 
   profiles:
-    active: test
+    active: none
 
 server:
   port: 8082
@@ -45,9 +47,18 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    maxFreeStorageSizeBytes: 2147483648
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+api:
+  version: v1
+
+internship:
+  duration:
+    max:
+      month: 3
