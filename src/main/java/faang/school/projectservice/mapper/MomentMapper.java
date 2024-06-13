@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper.moment;
+package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.model.Moment;
