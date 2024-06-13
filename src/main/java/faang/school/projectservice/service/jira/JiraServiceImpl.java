@@ -14,6 +14,7 @@ import faang.school.projectservice.mapper.jira.IssueMapper;
 import faang.school.projectservice.mapper.jira.IssueTypeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -95,7 +96,7 @@ public class JiraServiceImpl implements JiraService {
                 .setIssueType(issueTypeMapper.toEntity(issueDto.getIssueType()))
                 .setDescription(issueDto.getDescription())
                 .setSummary(issueDto.getSummary())
-                .setDueDate(issueDto.getDueDate().toDateTime())
+                .setDueDate(DateTime.parse(issueDto.getDueDate().toString()))
                 .build();
     }
 }

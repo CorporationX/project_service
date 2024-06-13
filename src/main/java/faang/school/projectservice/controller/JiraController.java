@@ -14,13 +14,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @Tag(name = "Jira Issues")
-@RestController("/jira")
+@RestController
+@RequestMapping(("/jira"))
 @RequiredArgsConstructor
 public class JiraController {
 
@@ -45,7 +47,7 @@ public class JiraController {
         return jiraService.getIssue(issueKey);
     }
 
-    @GetMapping("/projects/{projectKey}/issues")
+    @GetMapping("/{projectKey}/issues")
     @Operation(
             summary = "Get all project issues",
             parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}
@@ -54,7 +56,7 @@ public class JiraController {
         return jiraService.getAllIssues(projectKey);
     }
 
-    @GetMapping("/projects/{projectKey}/issues/filter")
+    @GetMapping("/{projectKey}/issues/filter")
     @Operation(
             summary = "Get all project issues by filter",
             parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}
