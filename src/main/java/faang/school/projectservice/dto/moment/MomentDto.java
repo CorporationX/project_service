@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.moment;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,9 +16,10 @@ import java.util.List;
 @AllArgsConstructor
 public class MomentDto {
     private Long id;
+    @NotBlank(message = "Moment name can't be blank")
     private String name;
+    private String description;
     private LocalDateTime date;
     private List<@NotNull Long> userIds;
     private List<@NotNull Long> projectIds;
-
 }

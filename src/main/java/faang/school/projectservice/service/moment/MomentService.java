@@ -20,10 +20,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class MomentService {
     private final MomentRepository momentRepository;
+    private final ProjectRepository projectRepository;
     private final MomentMapper momentMapper;
     private final MomentValidator momentValidator;
     private final List<MomentFilter> momentFilters;
-    private final ProjectRepository projectRepository;
 
 
     @Transactional
@@ -62,6 +62,17 @@ public class MomentService {
     @Transactional(readOnly = true)
     public MomentDto getMomentById(Long momentId) {
         return momentMapper.toDto(findMomentById(momentId));
+    }
+
+    public MomentDto createMoment(MomentDto momentDto) {
+        Moment momentEntity = momentMapper.toEntity(momentDto);
+        fillMoment(momentEntity, momentDto.getUserIds());
+
+        return momentMapper.toDto(momentRepository.save(momentEntity));
+    }
+
+    private void fillMoment(Moment moment, List<Long> projectsIds) {
+        moment.setProjects(projectRepository.findAllByIds(projectsIds));
     }
 
     private Moment findMomentById(Long id) {
