@@ -8,6 +8,7 @@ import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientF
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.client.jira.JiraClient;
 import faang.school.projectservice.dto.jira.IssueDto;
+import faang.school.projectservice.dto.jira.IssueFilterDto;
 import faang.school.projectservice.dto.jira.JiraAccountDto;
 import faang.school.projectservice.mapper.jira.IssueMapper;
 import faang.school.projectservice.mapper.jira.IssueTypeMapper;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -27,6 +29,7 @@ public class JiraServiceImpl implements JiraService {
     private final JiraClient jiraClient;
     private final IssueMapper issueMapper;
     private final IssueTypeMapper issueTypeMapper;
+    private final JiraFilterService jiraFilterService;
 
     @Override
     public String createIssue(IssueDto issueDto) {
@@ -62,23 +65,12 @@ public class JiraServiceImpl implements JiraService {
     }
 
     @Override
-    public List<IssueDto> getIssuesByStatusId(String projectKey, long statusId) {
+    public List<IssueDto> getIssuesByFilter(String projectKey, IssueFilterDto issueFilterDto) {
 
         authorizeUser();
 
-        List<Issue> issues = jiraClient.getIssuesByStatusId(projectKey, statusId);
-        return issues.stream()
-                .map(issueMapper::toDto)
-                .toList();
-    }
-
-    @Override
-    public List<IssueDto> getIssuesByAssigneeId(String projectKey, String assigneeId) {
-
-        authorizeUser();
-
-        List<Issue> issues = jiraClient.getIssuesByAssigneeId(projectKey, assigneeId);
-        return issues.stream()
+        Stream<Issue> allIssues = jiraClient.getAllIssues(projectKey).stream();
+        return jiraFilterService.applyAll(allIssues, issueFilterDto)
                 .map(issueMapper::toDto)
                 .toList();
     }

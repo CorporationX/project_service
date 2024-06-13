@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.jira;
 
 import faang.school.projectservice.dto.jira.IssueDto;
+import faang.school.projectservice.dto.jira.IssueFilterDto;
 
 import java.util.List;
 
@@ -12,7 +13,5 @@ public interface JiraService {
 
     List<IssueDto> getAllIssues(String projectKey);
 
-    List<IssueDto> getIssuesByStatusId(String projectKey, long statusId);
-
-    List<IssueDto> getIssuesByAssigneeId(String projectKey, String assigneeId);
+    List<IssueDto> getIssuesByFilter(String projectKey, IssueFilterDto issueFilterDto);
 }

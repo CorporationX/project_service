@@ -42,22 +42,4 @@ public class JiraClient {
 
         return StreamSupport.stream(issues.spliterator(), false).toList();
     }
-
-    public List<Issue> getIssuesByStatusId(String projectKey, long statusId) {
-
-        SearchRestClient client = restClient.getSearchClient();
-        Iterable<Issue> issues = client.searchJql(String.format("project = %s AND status = %d",
-                projectKey, statusId)).claim().getIssues();
-
-        return StreamSupport.stream(issues.spliterator(), false).toList();
-    }
-
-    public List<Issue> getIssuesByAssigneeId(String projectKey, String assigneeId) {
-
-        SearchRestClient client = restClient.getSearchClient();
-        Iterable<Issue> issues = client.searchJql(String.format("project = %s AND assignee = %s",
-                projectKey, assigneeId)).claim().getIssues();
-
-        return StreamSupport.stream(issues.spliterator(), false).toList();
-    }
 }
