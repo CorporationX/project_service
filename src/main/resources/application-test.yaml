@@ -4,4 +4,4 @@ calculations_messages_processing:
 
 logging:
   level:
-    root: info
+    root: debug
