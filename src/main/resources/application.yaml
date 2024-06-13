@@ -57,3 +57,8 @@ services:
 
 api:
   version: v1
+
+internship:
+  duration:
+    max:
+      month: 3
