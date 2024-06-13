@@ -59,7 +59,7 @@ public class JiraController {
             summary = "Get all project issues by filter",
             parameters = {@Parameter(in = ParameterIn.HEADER, name = "x-user-id", required = true)}
     )
-    public List<IssueDto> getIssuesByStatusId(@PathVariable String projectKey, IssueFilterDto issueFilterDto) {
+    public List<IssueDto> getIssuesByFilter(@PathVariable String projectKey, IssueFilterDto issueFilterDto) {
         return jiraService.getIssuesByFilter(projectKey, issueFilterDto);
     }
 }
