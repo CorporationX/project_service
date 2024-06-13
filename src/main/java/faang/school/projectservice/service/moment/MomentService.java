@@ -29,7 +29,7 @@ public class MomentService {
     @Transactional
     public MomentDto create(MomentDto momentDto) {
         momentValidator.momentHasProjectValidation(momentDto);
-        momentValidator.projectNotCancelledValidator(momentDto.getProjectIds());
+        momentValidator.projectNotCancelledValidator(momentDto.getProjects());
 
         return momentMapper.toDto(momentRepository.save(momentMapper.toEntity(momentDto)));
     }

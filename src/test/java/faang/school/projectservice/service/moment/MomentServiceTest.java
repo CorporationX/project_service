@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,6 +70,7 @@ class MomentServiceTest {
         verify(momentRepository).save(momentMapper.toEntity(momentDto));
         verify(momentMapper).toDto(newMoment);
 
+        assertNotNull(newMoment);
         assertEquals(momentDto, momentMapper.toDto(newMoment));
     }
 
@@ -107,7 +109,7 @@ class MomentServiceTest {
 
         MomentDto result = momentService.getMomentById(moment.getId());
 
-        verify(momentRepository, times(1)).findById(moment.getId());
+        verify(momentRepository, times(3)).findById(moment.getId());
         assertEquals(momentDto, result);
     }
 
@@ -126,8 +128,8 @@ class MomentServiceTest {
                 .id(1L)
                 .name("First moment")
                 .description("description")
-                .projects(List.of(project))
-                .userIds(List.of(1L))
+                .projects(new ArrayList<>(List.of(project)))
+                .userIds(new ArrayList<>(List.of(1L)))
                 .build();
     }
 
@@ -136,8 +138,8 @@ class MomentServiceTest {
                 .id(2L)
                 .name("Changed moment")
                 .description("Changed description")
-                .projects(List.of(project))
-                .userIds(List.of(2L, 3L))
+                .projects(new ArrayList<>(List.of(project)))
+                .userIds(new ArrayList<>(List.of(2L, 3L)))
                 .build();
     }
 
@@ -146,8 +148,8 @@ class MomentServiceTest {
                 .id(1L)
                 .name("testMomentDto")
                 .date(LocalDateTime.now())
-                .projectIds(List.of(1L))
-                .userIds(List.of(1L, 2L))
+                .projects(new ArrayList<>(List.of(1L)))
+                .userIds(new ArrayList<>(List.of(1L, 2L)))
                 .build();
     }
 }

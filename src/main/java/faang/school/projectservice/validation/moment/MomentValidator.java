@@ -23,7 +23,7 @@ public class MomentValidator {
     private final TeamMemberRepository teamMemberRepository;
 
     public void momentHasProjectValidation(MomentDto momentDto) {
-        momentDto.getProjectIds()
+        momentDto.getProjects()
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Moment has no project"));
@@ -40,7 +40,7 @@ public class MomentValidator {
     }
 
     public void projectsUpdateValidator(Moment oldMoment, MomentDto newMomentDto) {
-        Set<Long> newProjectIds = new HashSet<>(newMomentDto.getProjectIds());
+        Set<Long> newProjectIds = new HashSet<>(newMomentDto.getProjects());
         newProjectIds.retainAll(oldMoment.getProjects()
                 .stream()
                 .map(Project::getId)
@@ -66,7 +66,7 @@ public class MomentValidator {
         newUserIds.retainAll(oldUserIds);
 
         if (newUserIds.size() > 0) {
-            Set<Long> projectIds = new HashSet<>(newMomentDto.getProjectIds());
+            Set<Long> projectIds = new HashSet<>(newMomentDto.getProjects());
             newUserIds.forEach(userId -> {
                 Long userProjectId = teamMemberRepository.findById(userId)
                         .getTeam()
@@ -74,7 +74,7 @@ public class MomentValidator {
                         .getId();
                 projectIds.add(userProjectId);
             });
-            newMomentDto.setProjectIds(projectIds.stream().toList());
+            newMomentDto.setProjects(projectIds.stream().toList());
         }
     }
 }

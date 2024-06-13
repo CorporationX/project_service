@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 public class MomentProjectFilter implements MomentFilter {
     @Override
     public boolean isApplicable(MomentFilterDto momentFilterDto) {
-        return momentFilterDto.getProjectIds() != null;
+        return momentFilterDto.getProjects() != null;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class MomentProjectFilter implements MomentFilter {
                         .stream()
                         .map(Project::getId)
                         .toList())
-                .containsAll(momentFilterDto.getProjectIds())
+                .containsAll(momentFilterDto.getProjects())
         );
     }
 }

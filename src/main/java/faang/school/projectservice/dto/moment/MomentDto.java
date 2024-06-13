@@ -20,6 +20,6 @@ public class MomentDto {
     private String name;
     private String description;
     private LocalDateTime date;
+    private List<@NotNull Long> projects;
     private List<@NotNull Long> userIds;
-    private List<@NotNull Long> projectIds;
 }

@@ -15,5 +15,5 @@ import java.util.List;
 public class MomentFilterDto {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-    private List<Long> projectIds;
+    private List<Long> projects;
 }
