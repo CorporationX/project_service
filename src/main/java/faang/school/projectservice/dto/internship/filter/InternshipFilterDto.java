@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.filter;
+package faang.school.projectservice.dto.internship.filter;
 
 import faang.school.projectservice.model.InternshipStatus;
 import lombok.Data;
