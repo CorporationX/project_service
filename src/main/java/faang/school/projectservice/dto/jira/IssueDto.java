@@ -52,6 +52,7 @@ public class IssueDto {
     private LocalDateTime updateDate;
 
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime dueDate;
 }
