@@ -19,10 +19,9 @@ import java.util.List;
         componentModel = "spring",
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        uses = {ScheduleService.class, TeamMemberService.class, ProjectService.class}
+        uses = {ScheduleService.class, TeamMemberService.class}
 )
 public interface InternshipMapper {
-
     @Mapping(source = "projectId", target = "project")
     @Mapping(target = "interns", ignore = true)
     @Mapping(source = "scheduleId", target = "schedule")

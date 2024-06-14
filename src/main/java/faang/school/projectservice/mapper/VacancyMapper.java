@@ -17,11 +17,9 @@ import java.util.List;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        uses = {ProjectService.class}
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface VacancyMapper {
-
     @Mapping(source = "projectId", target = "project")
     Vacancy toEntity(VacancyDto vacancyDto);
 
