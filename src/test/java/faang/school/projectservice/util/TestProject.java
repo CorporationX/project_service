@@ -1,7 +1,6 @@
 package faang.school.projectservice.util;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.ProjectDtoRequest;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -32,13 +31,6 @@ public class TestProject {
             .visibility(ProjectVisibility.PRIVATE)
             .build();
 
-    public static ProjectDtoRequest PROJECT_DTO_REQUEST = ProjectDtoRequest.builder()
-            .name(PROJECT_NAME)
-            .description(PROJECT_DESC)
-            .ownerId(OWNER_ID)
-            .visibility(ProjectVisibility.PRIVATE)
-            .build();
-
     public static Project SAVED_PROJECT = Project.builder()
             .id(PROJECT_ID)
             .name(PROJECT_NAME)
@@ -48,4 +40,14 @@ public class TestProject {
             .build();
     public static List<Project> PROJECTS = List.of(PROJECT);
     public static List<ProjectDto> PROJECTS_DTOS = List.of(PROJECT_DTO);
+
+    private static final Project project_first = Project.builder()
+            .name("Project first")
+            .build();
+    private static final Project project_second = Project.builder()
+            .name("Project second")
+            .build();
+
+    public static List<Project> PROJECTS_LIST = List.of(project_first, project_second);
+    public static List<Project> PROJECT_FILTERED = List.of(project_first);
 }

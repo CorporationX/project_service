@@ -1,7 +1,6 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.ProjectDtoRequest;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,8 +39,8 @@ public class ProjectController {
     @Operation(summary = "Create project", tags = "Project")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProjectDto create(@RequestBody @Valid ProjectDtoRequest projectDtoRequest) {
-        return projectService.create(projectDtoRequest);
+    public ProjectDto create(@RequestBody @Valid ProjectDto projectDto) {
+        return projectService.create(projectDto);
     }
 
     @Operation(summary = "Update project", tags = "Project")

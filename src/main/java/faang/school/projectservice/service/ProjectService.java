@@ -2,11 +2,12 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.ProjectDtoRequest;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -22,6 +23,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -39,18 +41,25 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
 
     @Transactional
-    public ProjectDto create(ProjectDtoRequest projectDtoRequest) {
-        Project project = projectMapper.requestDtoToProject(projectDtoRequest);
+    public ProjectDto create(ProjectDto projectDto) {
+        Project project = projectMapper.toEntity(projectDto, null);
         projectValidator.validateProjectIsUniqByIdAndName(project);
-        return projectMapper.projectToDto(projectRepository.save(project));
+        project.setStatus(ProjectStatus.CREATED);
+        if (Objects.isNull(projectDto.getOwnerId())) {
+            project.setOwnerId(userContext.getUserId());
+        }
+        if(Objects.isNull(projectDto.getVisibility())) {
+            project.setVisibility(ProjectVisibility.PRIVATE);
+        }
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Transactional
     public ProjectDto update(@Min(1) Long projectId, ProjectDto projectDto) {
-        projectValidator.isExists(projectId);
+        projectValidator.exists(projectId);
         Project project = projectRepository.getProjectById(projectId);
-        return projectMapper.projectToDto(
-                projectRepository.save(projectMapper.dtoToProject(projectDto, project)));
+        return projectMapper.toDto(
+                projectRepository.save(projectMapper.toEntity(projectDto, project)));
     }
 
     public Project findById(Long id) {
@@ -59,25 +68,25 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public ProjectDto findProjectById(@Min(1) Long id) {
-        return projectMapper.projectToDto(findById(id));
+        return projectMapper.toDto(findById(id));
     }
 
     @Transactional(readOnly = true)
     public List<ProjectDto> getFilteredProject(ProjectFilterDto filters) {
         List<Project> projects = projectRepository.findAll().stream()
-                .filter(project -> project.getTeams().stream().anyMatch(this::isUserExistInTeams))
+                .filter(project -> project.getTeams().stream().anyMatch(this::isTeamMember))
                 .toList();
 
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .flatMap(filter -> filter.apply(projects.stream(), filters))
-                .map(projectMapper::projectToDto)
+                .map(projectMapper::toDto)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ProjectDto> getAllProject() {
-        return projectMapper.projectsToDtos(projectRepository.findAll());
+        return projectMapper.toDtos(projectRepository.findAll());
     }
 
     public void delete(@Min(1) Long projectId) {
@@ -94,7 +103,7 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
-    private boolean isUserExistInTeams(Team team) {
+    private boolean isTeamMember(Team team) {
         Stream<TeamMember> teamMemberStream = team.getTeamMembers().stream();
         return teamMemberStream.anyMatch(teamMember ->
                 teamMember.getUserId() == userContext.getUserId());
