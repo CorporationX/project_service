@@ -13,15 +13,15 @@ public class ProjectValidator {
 
     private final ProjectRepository projectRepository;
 
-    public void isExists(long projectId) {
+    public void exists(long projectId) {
         if (!projectRepository.existsById(projectId)) {
             throw new EntityNotFoundException("Entity project with projectId=" + projectId + " not found.");
         }
     }
 
     public void validateProjectIsUniqByIdAndName(Project project) {
-        boolean isUniq = projectRepository.existsByOwnerUserIdAndName(project.getOwnerId(), project.getName());
-        if (isUniq) {
+        boolean unique = projectRepository.existsByOwnerUserIdAndName(project.getOwnerId(), project.getName());
+        if (unique) {
             throw new DataValidationException("A project with the same owner and name exists.");
         }
     }

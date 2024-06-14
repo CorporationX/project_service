@@ -31,7 +31,7 @@ class ProjectValidatorTest {
         when(projectRepository.existsById(PROJECT_ID)).thenReturn(false);
         EntityNotFoundException entityNotFoundException = assertThrows(
                 EntityNotFoundException.class,
-                () -> projectValidator.isExists(PROJECT_ID)
+                () -> projectValidator.exists(PROJECT_ID)
         );
         assertEquals("Entity project with projectId=" + PROJECT_ID + " not found.",
                 entityNotFoundException.getMessage());
