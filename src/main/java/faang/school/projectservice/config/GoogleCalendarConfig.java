@@ -42,6 +42,9 @@ public class GoogleCalendarConfig {
     @Value("${google.credentials_file_path}")
     private String credentialsFilePath;
 
+    @Value("${google.mode}")
+    private String mode;
+
     @Bean
     public Calendar calendar() {
         final NetHttpTransport HTTP_TRANSPORT;
@@ -58,6 +61,9 @@ public class GoogleCalendarConfig {
 
     private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
             throws IOException {
+        if (mode.equals("disable")){
+            return null;
+        }
 
         InputStream in = GoogleCalendarService.class.getResourceAsStream(credentialsFilePath);
         if (in == null) {

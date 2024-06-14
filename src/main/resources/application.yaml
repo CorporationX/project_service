@@ -64,6 +64,7 @@ images:
   image_format: jpg
 
 google:
+  mode: disable
   calendar_id: test@gmail.com
   auth_user_id: test@gmail.com
   tokens_directory_path: tokens
