@@ -7,5 +7,6 @@ import java.util.stream.Stream;
 
 public interface MomentFilter {
     boolean isApplicable(MomentFilterDto filterDto);
+
     Stream<Moment> apply(Stream<Moment> momentStream, MomentFilterDto filterDto);
 }

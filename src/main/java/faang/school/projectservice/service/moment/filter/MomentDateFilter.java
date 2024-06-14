@@ -2,16 +2,14 @@ package faang.school.projectservice.service.moment.filter;
 
 import faang.school.projectservice.dto.moment.filter.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
 @Data
-@Builder
-@AllArgsConstructor
+@NoArgsConstructor
 @Component
 public class MomentDateFilter implements MomentFilter {
     @Override
