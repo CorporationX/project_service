@@ -41,11 +41,7 @@ public abstract class ImageResource {
         if (Objects.equals(width, height)) {
             return Orientation.SQUARE;
         }
-        if (width > height) {
-            return Orientation.HORIZONTAL;
-        } else {
-            return Orientation.VERTICAL;
-        }
+        return width > height? Orientation.HORIZONTAL : Orientation.VERTICAL;
     }
 }
 

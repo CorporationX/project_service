@@ -57,11 +57,6 @@ public class ProjectService {
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-    public ProjectDto getProjectById(Long projectId) {
-        Project project = projectRepository.getProjectById(projectId);
-        return projectMapper.toDto(project);
-    }
-
     public boolean existsById(Long projectId) {
         return projectRepository.existsById(projectId);
     }
