@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -46,10 +45,11 @@ public class MomentService {
 
     @Transactional(readOnly = true)
     public List<MomentDto> getAllMomentsByFilters(Long projectId, MomentFilterDto filters) {
-        Stream<Moment> projectMomentStream = projectRepository.getProjectById(projectId).getMoments().stream();
+        var projectMomentList = projectRepository.getProjectById(projectId).getMoments();
         return momentFilters.stream()
                 .filter(momentFilter -> momentFilter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(projectMomentStream, filters))
+                .flatMap(momentFilter -> momentFilter.apply(projectMomentList, filters))
+                .distinct()
                 .map(momentMapper::toDto)
                 .toList();
     }
