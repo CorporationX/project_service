@@ -5,6 +5,9 @@ spring:
     username: user
     password: password
 
+  config:
+    import: "classpath:properties/google/credentials.properties"
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:

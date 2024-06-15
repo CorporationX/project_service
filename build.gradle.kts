@@ -22,6 +22,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("org.springframework.retry:spring-retry:2.0.2")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
@@ -64,8 +65,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     /**
-     * Swagger
+     * Google Calendar
      */
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
 
     /**
      * Swagger / SpringDoc
