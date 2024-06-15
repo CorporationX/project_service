@@ -21,12 +21,12 @@ public interface ScopeMapper {
     List<ScopeDto> toDtos(List<AclRule.Scope> scopes);
 
     @Named("enum2String")
-    default String enum2String(AclScopeType type) {
+    default String enumToString(AclScopeType type) {
         return type.getType();
     }
 
     @Named("string2Enum")
-    default AclScopeType string2Enum(String type) {
+    default AclScopeType stringToEnum(String type) {
         return AclScopeType.findByKey(type);
     }
 }

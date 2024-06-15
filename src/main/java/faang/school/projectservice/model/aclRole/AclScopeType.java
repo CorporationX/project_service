@@ -15,12 +15,8 @@ public enum AclScopeType {
     GROUP("group"),
     DOMAIN("domain");
 
-    private static final Map<String, AclScopeType> map;
-
-    static {
-        map = Arrays.stream(AclScopeType.values())
-                .collect(Collectors.toMap(AclScopeType::getType, Function.identity()));
-    }
+    private static final Map<String, AclScopeType> ACL_SCOPE_TYPE_MAP = Arrays.stream(AclScopeType.values())
+            .collect(Collectors.toMap(AclScopeType::getType, Function.identity()));
 
     @JsonValue
     private final String type;
@@ -30,6 +26,6 @@ public enum AclScopeType {
     }
 
     public static AclScopeType findByKey(String v) {
-        return map.get(v);
+        return ACL_SCOPE_TYPE_MAP.get(v);
     }
 }

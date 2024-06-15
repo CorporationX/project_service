@@ -9,28 +9,25 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Getter
-public enum AclRole {
+public enum AclRule {
     NONE("none"),
     FREE_BUSY_READER("freeBusyReader"),
     READER("reader"),
     WRITER("writer"),
     OWNER("owner");
 
-    private static final Map<String, AclRole> map;
+    private static final Map<String, AclRule> ACL_RULE_MAP = Arrays.stream(AclRule.values())
+            .collect(Collectors.toMap(AclRule::getRole, Function.identity()));
 
-    static {
-        map = Arrays.stream(AclRole.values())
-                .collect(Collectors.toMap(AclRole::getRole, Function.identity()));
-    }
 
     @JsonValue
     private final String role;
 
-    AclRole(String role) {
+    AclRule(String role) {
         this.role = role;
     }
 
-    public static AclRole findByKey(String v) {
-        return map.get(v);
+    public static AclRule findByKey(String v) {
+        return ACL_RULE_MAP.get(v);
     }
 }

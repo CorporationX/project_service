@@ -1,8 +1,7 @@
 package faang.school.projectservice.mapper;
 
-import com.google.api.services.calendar.model.AclRule;
 import faang.school.projectservice.dto.project.calendar.AclDto;
-import faang.school.projectservice.model.aclRole.AclRole;
+import faang.school.projectservice.model.aclRole.AclRule;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -13,20 +12,20 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = ScopeMapper.class)
 public interface AclMapper {
     @Mapping(source = "role", target = "role", qualifiedByName = "enum2String")
-    AclRule toModel(AclDto aclDto);
+    com.google.api.services.calendar.model.AclRule toModel(AclDto aclDto);
 
     @Mapping(source = "role", target = "role", qualifiedByName = "string2Enum")
-    AclDto toDto(AclRule acl);
+    AclDto toDto(com.google.api.services.calendar.model.AclRule acl);
 
-    List<AclDto> toDtos(List<AclRule> aclList);
+    List<AclDto> toDtos(List<com.google.api.services.calendar.model.AclRule> aclList);
 
     @Named("enum2String")
-    default String enum2String(AclRole role) {
+    default String enum2String(AclRule role) {
         return role.getRole();
     }
 
     @Named("string2Enum")
-    default AclRole string2Enum(String role) {
-        return AclRole.findByKey(role);
+    default AclRule string2Enum(String role) {
+        return AclRule.findByKey(role);
     }
 }
