@@ -2,8 +2,8 @@ package faang.school.projectservice.service.donation;
 
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.dto.client.Currency;
+import faang.school.projectservice.dto.donation.DonationCreateDto;
 import faang.school.projectservice.dto.donation.DonationDto;
-import faang.school.projectservice.dto.donation.DonationToSendDto;
 import faang.school.projectservice.dto.donation.filter.DonationFilterDto;
 import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.mapper.donation.DonationMapper;
@@ -63,14 +63,14 @@ class DonationServiceImplTest {
     @InjectMocks
     private DonationServiceImpl donationService;
 
-    private DonationToSendDto donationToSendDto;
+    private DonationCreateDto donationCreateDto;
     private Donation donation;
     private Campaign campaign;
     private DonationDto donationDto;
 
     @BeforeEach
     void setUp() {
-        donationToSendDto = DonationToSendDto.builder()
+        donationCreateDto = DonationCreateDto.builder()
                 .paymentNumber(123456L)
                 .amount(new BigDecimal("100"))
                 .campaignId(1L)
@@ -103,17 +103,17 @@ class DonationServiceImplTest {
     @Test
     void sendDonation_shouldSendDonation() {
         when(campaignRepository.findById(anyLong())).thenReturn(Optional.of(campaign));
-        when(donationMapper.toEntity(any(DonationToSendDto.class))).thenReturn(donation);
+        when(donationMapper.toEntity(any(DonationCreateDto.class))).thenReturn(donation);
         when(donationRepository.save(any(Donation.class))).thenReturn(donation);
         when(donationMapper.toDto(any(Donation.class))).thenReturn(donationDto);
 
-        DonationDto result = donationService.sendDonation(1L, donationToSendDto);
+        DonationDto result = donationService.sendDonation(1L, donationCreateDto);
 
         assertNotNull(result);
         assertEquals(123456L, result.getPaymentNumber());
 
         verify(userValidator).validateUserExistence(1L);
-        verify(donationValidator).validateSendDonation(donationToSendDto);
+        verify(donationValidator).validateSendDonation(donationCreateDto);
         verify(donationRepository).save(donation);
     }
 
@@ -121,7 +121,7 @@ class DonationServiceImplTest {
     void sendDonation_shouldThrowNotFoundException_whenCampaignNotFound() {
         when(campaignRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> donationService.sendDonation(1L, donationToSendDto));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> donationService.sendDonation(1L, donationCreateDto));
 
         assertEquals("Campaign with id 1 not found", exception.getMessage());
     }

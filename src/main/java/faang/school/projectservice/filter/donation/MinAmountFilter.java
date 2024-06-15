@@ -18,6 +18,6 @@ public class MinAmountFilter implements DonationFilter{
     @Override
     public Stream<Donation> applyFilter(Stream<Donation> donations, DonationFilterDto donationFilterDto) {
         BigDecimal minAmount = donationFilterDto.getMinAmount();
-        return donations.filter(donation -> donation.getAmount().compareTo(minAmount) <= 0);
+        return donations.filter(donation -> donation.getAmount().compareTo(minAmount) >= 0);
     }
 }

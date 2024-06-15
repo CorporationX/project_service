@@ -1,6 +1,6 @@
 package faang.school.projectservice.validation.donation;
 
-import faang.school.projectservice.dto.donation.DonationToSendDto;
+import faang.school.projectservice.dto.donation.DonationCreateDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.repository.CampaignRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,11 +25,11 @@ class DonationValidatorTest {
     @InjectMocks
     private DonationValidator validator;
 
-    private DonationToSendDto dto;
+    private DonationCreateDto dto;
 
     @BeforeEach
     void init() {
-        dto = DonationToSendDto.builder()
+        dto = DonationCreateDto.builder()
                 .paymentNumber(1234L)
                 .amount(BigDecimal.valueOf(567L))
                 .campaignId(1L)

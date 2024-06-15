@@ -2,8 +2,8 @@ package faang.school.projectservice.service.donation;
 
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.dto.client.PaymentRequest;
+import faang.school.projectservice.dto.donation.DonationCreateDto;
 import faang.school.projectservice.dto.donation.DonationDto;
-import faang.school.projectservice.dto.donation.DonationToSendDto;
 import faang.school.projectservice.dto.donation.filter.DonationFilterDto;
 import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.mapper.donation.DonationMapper;
@@ -26,6 +26,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class DonationServiceImpl implements DonationService {
+
     private final DonationMapper donationMapper;
     private final DonationValidator donationValidator;
     private final DonationRepository donationRepository;
@@ -36,7 +37,7 @@ public class DonationServiceImpl implements DonationService {
 
     @Override
     @Transactional
-    public DonationDto sendDonation(long userId, DonationToSendDto donationDto) {
+    public DonationDto sendDonation(long userId, DonationCreateDto donationDto) {
 
         Campaign campaign = campaignRepository.findById(donationDto.getCampaignId())
                 .orElseThrow(() -> new NotFoundException(String.format("Campaign with id %d not found",
@@ -49,10 +50,10 @@ public class DonationServiceImpl implements DonationService {
         userValidator.validateUserExistence(userId);
         donationValidator.validateSendDonation(donationDto);
 
+        sendPaymentRequest(donation);
+
         donationRepository.save(donation);
         log.info("Saved donation {} to user {}", donation.getId(), userId);
-
-        sendPaymentRequest(donation);
 
         return donationMapper.toDto(donation);
     }

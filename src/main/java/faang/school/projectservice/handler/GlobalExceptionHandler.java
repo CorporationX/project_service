@@ -47,10 +47,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException e, HttpServletRequest request) {
         log.error("Not found: {}", e.getMessage());
-        return buildErrorResponse(e, request, HttpStatus.BAD_REQUEST);
+        return buildErrorResponse(e, request, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(RuntimeException.class)

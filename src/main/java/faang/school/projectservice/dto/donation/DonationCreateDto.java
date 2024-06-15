@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class DonationToSendDto {
+public class DonationCreateDto {
     private long paymentNumber;
     @Positive(message = "Amount cannot be negative")
     private BigDecimal amount;
