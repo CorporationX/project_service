@@ -28,6 +28,7 @@ public class InternshipController {
     @PostMapping
     public InternshipDto create(@Valid @RequestBody InternshipDto internshipDto) {
         internshipControllerValidation.validateInternshipDuration(internshipDto);
+        internshipControllerValidation.validateInternshipDates(internshipDto);
 
         return internshipService.create(internshipDto);
     }
