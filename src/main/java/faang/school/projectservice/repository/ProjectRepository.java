@@ -9,9 +9,8 @@ import org.springframework.stereotype.Repository;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query(
             "SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END " +
-                    "FROM Project p " +
-                    "WHERE p.ownerId = :ownerId AND p.name = :name"
+            "FROM Project p " +
+            "WHERE p.ownerId = :ownerId AND p.name = :name"
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
 }
-

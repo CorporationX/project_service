@@ -11,9 +11,9 @@ import java.util.Optional;
 @Repository
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     @Query(
-        "SELECT tm FROM TeamMember tm JOIN tm.team t " +
-        "WHERE tm.userId = :userId " +
-        "AND t.project.id = :projectId"
+            "SELECT tm FROM TeamMember tm JOIN tm.team t " +
+            "WHERE tm.userId = :userId " +
+            "AND t.project.id = :projectId"
     )
     Optional<TeamMember> findByUserIdAndProjectId(long userId, long projectId);
 
