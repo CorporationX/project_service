@@ -2,7 +2,7 @@ package faang.school.projectservice.pattern.strategy.stage;
 
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.validation.stage.StageValidator;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -39,7 +39,7 @@ public class StrategyCloseForDeletingStageTest {
         strategyCloseForDeletingStage.manageTasksOfStage(stageId, null);
 
         verify(stageValidator, times(1))
-                .validateStageExistence(stageIdCaptor.capture());
+                .validateExistence(stageIdCaptor.capture());
         verify(taskRepository, times(1))
                 .updateStatusByStageId(stageToMigrateIdCaptor.capture(), taskStatusCaptor.capture());
 

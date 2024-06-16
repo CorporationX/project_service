@@ -1,20 +1,22 @@
 package faang.school.projectservice.validation.team_member;
 
-import faang.school.projectservice.exceptions.NotFoundException;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class TeamMemberValidatorImpl implements TeamMemberValidator {
-
     private final TeamMemberRepository teamMemberRepository;
 
     @Override
     public void validateExistence(long id) {
-        if (!teamMemberRepository.existsById(id)) {
-            throw new NotFoundException("TeamMember with id=" + id + " does not exist");
+        boolean exists = teamMemberRepository.existsById(id);
+        if (!exists) {
+            var message = String.format("a team member with %d does not exist", id);
+
+            throw new DataValidationException(message);
         }
     }
 }

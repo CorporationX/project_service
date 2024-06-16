@@ -1,4 +1,4 @@
-package faang.school.projectservice.validation;
+package faang.school.projectservice.validation.initiative;
 
 import faang.school.projectservice.dto.initiative.InitiativeDto;
 import faang.school.projectservice.exceptions.DataValidationException;
@@ -36,7 +36,7 @@ class InitiativeValidatorTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @InjectMocks
-    private InitiativeValidator validator;
+    private InitiativeValidatorImpl validator;
 
     private InitiativeDto dto;
     private TeamMember curator;

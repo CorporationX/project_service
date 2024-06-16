@@ -1,9 +1,9 @@
-package faang.school.projectservice.validator.task;
+package faang.school.projectservice.validation.task;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.validator.task.impl.TaskValidatorImpl;
+import faang.school.projectservice.validation.task.impl.TaskValidatorImpl;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.stage;
 
-import faang.school.projectservice.dto.stagerole.NewStageRolesDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,7 @@ public class StageDto {
     private String stageName;
     private String stageStatus;
     private long projectId;
-    private List<NewStageRolesDto> stageRoles;
+    private List<Long> stageRolesIds;
     private List<Long> tasksIds;
     private List<Long> executorsIds;
 }

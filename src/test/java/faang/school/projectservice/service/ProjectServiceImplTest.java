@@ -10,7 +10,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.validation.ProjectValidator;
+import faang.school.projectservice.validation.project.ProjectValidatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +43,7 @@ public class ProjectServiceImplTest {
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
     @Mock
-    private ProjectValidator projectValidator;
+    private ProjectValidatorImpl projectValidator;
     @Mock
     private UserContext userContext;
     @Mock

@@ -10,7 +10,7 @@ import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InitiativeRepository;
 import faang.school.projectservice.service.moment.MomentService;
-import faang.school.projectservice.validation.InitiativeValidator;
+import faang.school.projectservice.validation.initiative.InitiativeValidatorImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class InitiativeServiceImplTest {
     @Mock
     private InitiativeMapper mapper;
     @Mock
-    private InitiativeValidator validator;
+    private InitiativeValidatorImpl validator;
     @Mock
     private InitiativeRepository initiativeRepository;
     @Mock

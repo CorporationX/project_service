@@ -3,7 +3,7 @@ package faang.school.projectservice.service.stage.impl;
 import faang.school.projectservice.dto.stage.NewStageDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stagerole.NewStageRolesDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.StageDeleteMode;
@@ -14,8 +14,8 @@ import faang.school.projectservice.pattern.strategy.stage.StrategyForDeletingSta
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.service.stage.StageService;
-import faang.school.projectservice.validator.project.ProjectValidator;
-import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.validation.project.ProjectValidator;
+import faang.school.projectservice.validation.stage.StageValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,7 +75,7 @@ public class StageServiceImpl implements StageService {
     @Override
     @Transactional
     public StageDto updateStage(Long stageId, List<NewStageRolesDto> newStageRolesDtoList) {
-        Stage stageEntity = stageValidator.validateStageExistence(stageId);
+        Stage stageEntity = stageValidator.validateExistence(stageId);
         List<StageRoles> stageRolesEntities = stageRolesMapper.toEntityList(newStageRolesDtoList);
 
         stageRolesEntities.forEach(s -> s.setStage(stageEntity));
@@ -88,7 +88,7 @@ public class StageServiceImpl implements StageService {
     @Override
     @Transactional(readOnly = true)
     public StageDto getStageById(Long stageId) {
-        Stage stageEntity = stageValidator.validateStageExistence(stageId);
+        Stage stageEntity = stageValidator.validateExistence(stageId);
 
         return stageMapper.toDto(stageEntity);
     }

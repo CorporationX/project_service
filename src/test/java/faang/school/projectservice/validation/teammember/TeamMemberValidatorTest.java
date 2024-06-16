@@ -1,9 +1,9 @@
-package faang.school.projectservice.validator.teammember;
+package faang.school.projectservice.validation.teammember;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.validator.teammember.impl.TeamMemberValidatorImpl;
+import faang.school.projectservice.validation.team_member.TeamMemberValidatorImpl;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -46,7 +46,7 @@ public class TeamMemberValidatorTest {
     @Captor
     private ArgumentCaptor<Long> idCaptor;
 
-    private static Stream<Arguments> provideArgumentsForTestValidateTeamMemberExistence() {
+    private static Stream<Arguments> provideArgumentsForTestValidateExistence() {
         return Stream.of(
                 Arguments.of(executorId1, executorWithId1),
                 Arguments.of(executorId2, executorWithId2),
@@ -58,7 +58,7 @@ public class TeamMemberValidatorTest {
         );
     }
 
-    private static Stream<Arguments> provideArgumentsForTestValidateTeamMemberExistenceShouldThrowException() {
+    private static Stream<Arguments> provideArgumentsForTestValidateExistenceShouldThrowException() {
         return Stream.of(
                 Arguments.of(executorId1, null),
                 Arguments.of(executorId2, null),
@@ -71,11 +71,11 @@ public class TeamMemberValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateTeamMemberExistence")
-    public void testValidateTeamMemberExistence(long executorId, TeamMember executor) {
+    @MethodSource("provideArgumentsForTestValidateExistence")
+    public void testValidateExistence(long executorId, TeamMember executor) {
         when(teamMemberRepository.existsById(executorId))
                 .thenReturn(true);
-        teamMemberValidator.validateTeamMemberExistence(executorId);
+        teamMemberValidator.validateExistence(executorId);
         verify(teamMemberRepository, times(1))
                 .existsById(idCaptor.capture());
         var actualExecutorId = idCaptor.getValue();
@@ -86,12 +86,12 @@ public class TeamMemberValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateTeamMemberExistenceShouldThrowException")
-    public void testValidateTeamMemberExistenceShouldThrowException(long executorId, TeamMember executor) {
+    @MethodSource("provideArgumentsForTestValidateExistenceShouldThrowException")
+    public void testValidateExistenceShouldThrowException(long executorId, TeamMember executor) {
         when(teamMemberRepository.existsById(executorId))
                 .thenReturn(false);
         DataValidationException actualException = assertThrows(DataValidationException.class,
-                () -> teamMemberValidator.validateTeamMemberExistence(executorId));
+                () -> teamMemberValidator.validateExistence(executorId));
         verify(teamMemberRepository, times(1))
                 .existsById(idCaptor.capture());
 
