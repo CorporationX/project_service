@@ -12,7 +12,7 @@ public class ProjectValidator {
     private final ProjectRepository projectRepository;
 
     public void validateProjectByOwnerIdAndNameOfProject(ProjectDto projectDto) {
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+        if (projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("The user with id: "+projectDto.getOwnerId()+ " already has a project with name "+projectDto.getName());
         }
     }

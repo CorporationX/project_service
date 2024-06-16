@@ -8,6 +8,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,8 @@ public class InitiativeValidator {
     private final TeamMemberRepository teamMemberRepository;
 
     public void validateCurator(InitiativeDto initiative) {
-        TeamMember curator = teamMemberRepository.findById(initiative.getCuratorId());
+        TeamMember curator = teamMemberRepository.findById(initiative.getCuratorId()).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", initiative.getCuratorId())));
 
         if (!curator.getRoles().contains(TeamRole.OWNER)) {
             throw new DataValidationException("curator must have owner role");
