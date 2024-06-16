@@ -31,6 +31,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Table(name = "project")
 @Data

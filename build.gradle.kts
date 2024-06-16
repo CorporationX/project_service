@@ -65,6 +65,8 @@ dependencies {
      * Image Scaling
      */
     implementation("net.coobird:thumbnailator:0.4.20")
+    testImplementation("org.projectlombok:lombok:1.18.26")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.26")
 }
 
 tasks.withType<Test> {
