@@ -15,7 +15,9 @@ import java.util.List;
 )
 public interface ProjectMapper {
 
-    Project toEntity(ProjectDto projectDto, @MappingTarget Project entity);
+    Project toEntity(ProjectDto projectDto);
+
+    Project updateEntity(ProjectDto projectDto, @MappingTarget Project entity);
 
     ProjectDto toDto(Project project);
 

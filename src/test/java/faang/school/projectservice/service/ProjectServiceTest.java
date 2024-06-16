@@ -7,7 +7,6 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,29 +39,28 @@ class ProjectServiceTest {
     @InjectMocks
     ProjectService projectService;
 
-    //Todo test commented
-//    @Test
-//    public void testCreateProjectIsOwnerPresent() {
-//
-//        when(projectMapper.toEntity(any(ProjectDto.class), null)).thenReturn(PROJECT);
-//        lenient().when(projectMapper.toDto(any(Project.class))).thenReturn(PROJECT_DTO);
-//        lenient().when(projectRepository.save(any(Project.class))).thenReturn(SAVED_PROJECT);
-//        when(projectMapper.toDto(any(Project.class))).thenReturn(PROJECT_DTO);
-//
-//        ProjectDto resultDto = projectService.create(PROJECT_DTO);
-//
-//        verify(projectRepository, times(1)).save(any(Project.class));
-//        verify(projectValidator, times(1)).validateProjectIsUniqByIdAndName(any(Project.class));
-//        verify(projectMapper, times(1)).toDto(any(Project.class));
-//        verify(projectMapper, times(1)).toEntity(any(ProjectDto.class), null);
-//
-//        assertNotNull(resultDto);
-//        assertEquals(PROJECT_DTO.getName(), resultDto.getName());
-//        assertEquals(PROJECT_DTO.getDescription(), resultDto.getDescription());
-//        assertEquals(PROJECT_DTO.getOwnerId(), resultDto.getOwnerId());
-//        assertEquals(ProjectStatus.CREATED, resultDto.getStatus());
-//        assertEquals(ProjectVisibility.PRIVATE, resultDto.getVisibility());
-//    }
+    @Test
+    public void testCreateProjectIsOwnerPresent() {
+
+        when(projectMapper.toEntity(any(ProjectDto.class))).thenReturn(PROJECT);
+        lenient().when(projectMapper.toDto(any(Project.class))).thenReturn(PROJECT_DTO);
+        lenient().when(projectRepository.save(any(Project.class))).thenReturn(SAVED_PROJECT);
+        when(projectMapper.toDto(any(Project.class))).thenReturn(PROJECT_DTO);
+
+        ProjectDto resultDto = projectService.create(PROJECT_DTO);
+
+        verify(projectRepository, times(1)).save(any(Project.class));
+        verify(projectValidator, times(1)).validateProjectIsUniqByIdAndName(any(Project.class));
+        verify(projectMapper, times(1)).toDto(any(Project.class));
+        verify(projectMapper, times(1)).toEntity(any(ProjectDto.class));
+
+        assertNotNull(resultDto);
+        assertEquals(PROJECT_DTO.getName(), resultDto.getName());
+        assertEquals(PROJECT_DTO.getDescription(), resultDto.getDescription());
+        assertEquals(PROJECT_DTO.getOwnerId(), resultDto.getOwnerId());
+        assertEquals(ProjectStatus.CREATED, resultDto.getStatus());
+        assertEquals(ProjectVisibility.PRIVATE, resultDto.getVisibility());
+    }
 
     @Test
     public void testFindProjectById() {
