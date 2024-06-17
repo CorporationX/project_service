@@ -2,6 +2,7 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.ProjectService;
 import org.mapstruct.Mapper;
@@ -16,11 +17,9 @@ import java.util.List;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        uses = {ProjectService.class}
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface VacancyMapper {
-
     @Mapping(source = "projectId", target = "project")
     Vacancy toEntity(VacancyDto vacancyDto);
 
@@ -41,4 +40,5 @@ public interface VacancyMapper {
         }
         return resultList;
     }
+    Project map(Long value);
 }

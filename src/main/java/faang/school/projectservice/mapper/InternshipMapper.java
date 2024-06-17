@@ -2,6 +2,7 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.InternshipDto;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.ScheduleService;
@@ -17,10 +18,10 @@ import java.util.List;
 @Mapper(
         componentModel = "spring",
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
-        uses = {ScheduleService.class, TeamMemberService.class, ProjectService.class}
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        uses = {ScheduleService.class, TeamMemberService.class}
 )
 public interface InternshipMapper {
-
     @Mapping(source = "projectId", target = "project")
     @Mapping(target = "interns", ignore = true)
     @Mapping(source = "scheduleId", target = "schedule")
@@ -43,4 +44,6 @@ public interface InternshipMapper {
         }
         return resultList;
     }
+
+    Project map(Long projectId);
 }
