@@ -50,6 +50,12 @@ class InternshipControllerValidationTest {
             assertDoesNotThrow(() -> internshipControllerValidation.validateInternshipDuration(internshipDto));
         }
 
+        @DisplayName("shouldn't throw DataValidationException when the dates of the passed internship aren't in the past")
+        @Test
+        void validateInternshipDatesTest() {
+            assertDoesNotThrow(() -> internshipControllerValidation.validateInternshipDates(internshipDto));
+        }
+
         @DisplayName("shouldn't throw exception when the passed dto has valid fields")
         @Test
         void validInternshipDtoTest() {
@@ -61,16 +67,40 @@ class InternshipControllerValidationTest {
 
     @Nested
     class NegativeTests {
-        @DisplayName("should throw DataValidationException " +
-                "when the passed internship has a duration of more than " + INTERNSHIP_MAX_DURATION_IN_MONTHS + " months")
+        @DisplayName("should throw DataValidationException when the passed internship has the start date after end date")
         @Test
-        void validateInternshipDurationTest() {
+        void validateInternshipDurationForStartDateAfterEndDateTest() {
             internshipDto.setEndDate(LocalDateTime.of(2024, 12, 31, 16, 0));
 
             assertThrows(DataValidationException.class, () -> internshipControllerValidation.validateInternshipDuration(internshipDto));
         }
 
-        @DisplayName("should violate validation when passed dto has empty name")
+        @DisplayName("should throw DataValidationException " +
+                "when the passed internship has a duration of more than " + INTERNSHIP_MAX_DURATION_IN_MONTHS + " months")
+        @Test
+        void validateInternshipDurationTest() {
+            internshipDto.setEndDate(LocalDateTime.of(3024, 12, 31, 16, 0));
+
+            assertThrows(DataValidationException.class, () -> internshipControllerValidation.validateInternshipDuration(internshipDto));
+        }
+
+        @DisplayName("should throw DataValidationException when the start date of the passed internship is in the past")
+        @Test
+        void validateInternshipStartDateTest() {
+            internshipDto.setStartDate(LocalDateTime.of(2023, 12, 31, 16, 0));
+
+            assertThrows(DataValidationException.class, () -> internshipControllerValidation.validateInternshipDates(internshipDto));
+        }
+
+        @DisplayName("should throw DataValidationException when the end date of the passed internship is in the past")
+        @Test
+        void validateInternshipEndDateTest() {
+            internshipDto.setEndDate(LocalDateTime.of(2023, 12, 31, 16, 0));
+
+            assertThrows(DataValidationException.class, () -> internshipControllerValidation.validateInternshipDates(internshipDto));
+        }
+
+        @DisplayName("should violate validation when passed dto has blank name")
         @ParameterizedTest
         @EmptySource
         @NullSource
@@ -82,6 +112,20 @@ class InternshipControllerValidationTest {
 
             assertEquals(1, violations.size());
             assertEquals("The internship must have a name.", violations.iterator().next().getMessage());
+        }
+
+        @DisplayName("should violate validation when passed dto has blank description")
+        @ParameterizedTest
+        @EmptySource
+        @NullSource
+        @ValueSource(strings = {" ", "\t", "\n"})
+        void invalidDescriptionTest(String description) {
+            internshipDto.setDescription(description);
+
+            Set<ConstraintViolation<InternshipDto>> violations = validator.validate(internshipDto);
+
+            assertEquals(1, violations.size());
+            assertEquals("The internship must have a description.", violations.iterator().next().getMessage());
         }
 
         @DisplayName("should violate validation when passed dto has null projectId")
@@ -107,6 +151,19 @@ class InternshipControllerValidationTest {
 
             assertEquals(1, violations.size());
             assertEquals("The internship must have a mentor.",
+                    violations.iterator().next().getMessage());
+        }
+
+        @DisplayName("should violate validation when passed dto has null createdBy fiedl")
+        @ParameterizedTest
+        @NullSource
+        void nullCreatedByTest(Long createdBy) {
+            internshipDto.setCreatedBy(createdBy);
+
+            Set<ConstraintViolation<InternshipDto>> violations = validator.validate(internshipDto);
+
+            assertEquals(1, violations.size());
+            assertEquals("To create internship we need to know who crates it.",
                     violations.iterator().next().getMessage());
         }
 
@@ -138,15 +195,27 @@ class InternshipControllerValidationTest {
                     violations.iterator().next().getMessage());
         }
 
-        @DisplayName("should violate validation when passed dto has past endDate")
+        @DisplayName("should violate validation when passed dto has null-valued endDate")
         @Test
         void pastEndDateTest() {
-            internshipDto.setEndDate(LocalDateTime.of(2023, 12, 31, 16, 0));
+            internshipDto.setEndDate(null);
 
             Set<ConstraintViolation<InternshipDto>> violations = validator.validate(internshipDto);
 
             assertEquals(1, violations.size());
-            assertEquals("The internship cannot be created in the past.",
+            assertEquals("The internship must have an end date.",
+                    violations.iterator().next().getMessage());
+        }
+
+        @DisplayName("should violate validation when passed dto has null-valued startDate")
+        @Test
+        void pastStartDateTest() {
+            internshipDto.setStartDate(null);
+
+            Set<ConstraintViolation<InternshipDto>> violations = validator.validate(internshipDto);
+
+            assertEquals(1, violations.size());
+            assertEquals("The internship must have a start date.",
                     violations.iterator().next().getMessage());
         }
 

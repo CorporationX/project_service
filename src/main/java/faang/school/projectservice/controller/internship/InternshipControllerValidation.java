@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.INTERNSHIP_DATES_WRONG_ORDER_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.INTERNSHIP_DURATION_EXCEPTION;
+import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.INTERNSHIP_IN_THE_PAST_CREATION_EXCEPTION;
 
 @Component
 class InternshipControllerValidation {
@@ -17,8 +19,29 @@ class InternshipControllerValidation {
     public void validateInternshipDuration(InternshipDto internshipDto) {
         LocalDateTime startDate = internshipDto.getStartDate();
         LocalDateTime endDate = internshipDto.getEndDate();
+
+        if (startDate.isAfter(endDate)) {
+            throw new DataValidationException(INTERNSHIP_DATES_WRONG_ORDER_EXCEPTION.getMessage());
+        }
+
         if (startDate.isBefore(endDate.minus(INTERNSHIP_MAX_DURATION_IN_MONTHS, ChronoUnit.MONTHS))) {
-            throw new DataValidationException(INTERNSHIP_DURATION_EXCEPTION.getMessage() + INTERNSHIP_MAX_DURATION_IN_MONTHS + " months.");
+            String exceptionMessage = String.format(INTERNSHIP_DURATION_EXCEPTION.getMessage(),
+                    INTERNSHIP_MAX_DURATION_IN_MONTHS);
+            throw new DataValidationException(exceptionMessage);
+        }
+    }
+
+    /**
+     * The internship cannot be created in the past.
+     *
+     * @param internshipDto dto object of internship
+     */
+    public void validateInternshipDates(InternshipDto internshipDto) {
+        LocalDateTime startDate = internshipDto.getStartDate();
+        LocalDateTime endDate = internshipDto.getEndDate();
+
+        if (startDate.isBefore(LocalDateTime.now()) || endDate.isBefore(LocalDateTime.now())) {
+            throw new DataValidationException(INTERNSHIP_IN_THE_PAST_CREATION_EXCEPTION.getMessage());
         }
     }
 }
