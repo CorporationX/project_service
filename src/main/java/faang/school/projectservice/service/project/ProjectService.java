@@ -1,8 +1,5 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.dto.moment.MomentDto;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -14,34 +11,32 @@ import org.springframework.web.multipart.MultipartFile;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
-import faang.school.projectservice.dto.resource.MultipartFileResourceDto;
-import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.dto.image.ProjectImage;
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.exception.FileException;
+import faang.school.projectservice.dto.resource.MultipartFileResourceDto;
+import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ResourceMapper;
-import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.image.ImageService;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.service.s3.requests.S3Request;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -49,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProjectService {
     private static final String ALL_SUBPROJECTS_DONE_MOMENT_NAME = "All subprojects completed";
-    private static String defaultFolderResourceDelimiter = "_";
+    private static final String DEFAULT_FOLDER_RESOURCE_DELIMITER = "_";
     
     //TODO: Доделать тесты (RickHammerson/Radmir)
     private final S3Service s3Service;
@@ -59,17 +54,11 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ResourceMapper resourceMapper;
     private final ProjectValidator projectValidator;
-    private final ImageService imageService;
     private final List<ProjectFilter> filters;
     @Qualifier("s3ProjectCoverRequest")
     private final S3Request s3CoverRequest;
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;
-
-    public ProjectDto getProjectById(Long projectId) {
-        Project project = projectRepository.getProjectById(projectId);
-        return mapper.toDto(project);
-    }
 
     public boolean existsById(Long projectId) {
         return projectRepository.existsById(projectId);
@@ -80,24 +69,24 @@ public class ProjectService {
         projectValidator.verifyCanBeCreated(projectDto);
 
         projectDto.setStatus(ProjectStatus.CREATED);
-        Project projectToBeCreated = mapper.toModel(projectDto);
+        Project projectToBeCreated = projectMapper.toModel(projectDto);
         fillProject(projectToBeCreated, projectDto);
 
         Project saved = projectRepository.save(projectToBeCreated);
-        return mapper.toDto(saved);
+        return projectMapper.toDto(saved);
     }
 
     @Transactional
     public ProjectDto update(ProjectDto projectDto) {
         projectValidator.verifyCanBeUpdated(projectDto);
 
-        Project projectToBeUpdated = mapper.toModel(projectDto);
+        Project projectToBeUpdated = projectMapper.toModel(projectDto);
         manageFinishedProject(projectToBeUpdated);
         manageVisibilityChange(projectToBeUpdated);
 
         Project saved = projectRepository.save(projectToBeUpdated);
         fillProject(saved, projectDto);
-        return mapper.toDto(saved);
+        return projectMapper.toDto(saved);
     }
 
     public ProjectDto getById(Long id) {
@@ -117,43 +106,25 @@ public class ProjectService {
 
         return filterProjects(filter, projects);
     }
-
-    private List<ProjectDto> filterProjects(ProjectFilterDto filter, List<Project> projects) {
-        return filters.stream()
-                .filter(streamFilter -> streamFilter.isApplicable(filter))
-                .flatMap(streamFilter -> streamFilter.apply(projects.stream(), filter))
-                .distinct()
-                .map(projectMapper::toDto)
-                .toList();
-    }
     
+    @SneakyThrows
     @Transactional
-    public ResourceDto uploadCover(Long projectId, Long teamMemberId, MultipartFile file) {
+    public ResourceDto uploadCover(Long projectId, Long teamMemberId, MultipartFile file){
         Project project = projectRepository.getProjectById(projectId);
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         
-        //TODO: Спросить как избавиться от этих проверяемых ошибок? SneakyThrows? Из-за этого метод разросся
-        BufferedImage cover = imageService.convertImageToCover(() -> {
-            try {
-                return new ProjectImage(imageService.convertInputStreamToImage(file.getInputStream()));
-            } catch (IOException e) {
-                String error = "IO exception in project cover resource";
-                log.error(error,e);
-                throw new FileException(error);
-            }
-        });
-        Long coverSize = imageService.calculateImageSize(cover);
+        ProjectImage projectImage = new ProjectImage(file.getInputStream());
+        Long coverSize = projectImage.calculateCoverSize();
         projectValidator.verifyStorageSizeNotExceeding(project, coverSize);
         
-
         MultipartFileResourceDto resourceDto = MultipartFileResourceDto.builder()
             .size(coverSize)
             .contentType(file.getContentType())
             .fileName(file.getOriginalFilename())
             .folderName(getDefaultProjectFolderName(project))
-            .resourceInputStream(imageService.convertBufferedImageToInputStream(cover))
+            .resourceInputStream(projectImage.getCoverInputStream())
             .build();
-            
+        
         PutObjectRequest projectCoverPutRequest = s3CoverRequest.putRequest(resourceDto);
         s3Service.uploadFile(projectCoverPutRequest);
         
@@ -181,9 +152,18 @@ public class ProjectService {
         
         project.setCoverImageId(null);
     }
+
+    private List<ProjectDto> filterProjects(ProjectFilterDto filter, List<Project> projects) {
+        return filters.stream()
+                .filter(streamFilter -> streamFilter.isApplicable(filter))
+                .flatMap(streamFilter -> streamFilter.apply(projects.stream(), filter))
+                .distinct()
+                .map(projectMapper::toDto)
+                .toList();
+    }
     
     private String getDefaultProjectFolderName(Project project) {
-        return String.format("%s%s%s", project.getId(), defaultFolderResourceDelimiter, project.getName());
+        return String.format("%s%s%s", project.getId(), DEFAULT_FOLDER_RESOURCE_DELIMITER, project.getName());
     }
     
     private Resource createCoverProjectResource(String key, MultipartFileResourceDto multipartFileResourceDto) {

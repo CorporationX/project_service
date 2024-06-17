@@ -15,17 +15,13 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.ALREADY_EXISTS;
-import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NOT_FOUND;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NOT_FOUND_BY_NAME_AND_OWNER_ID;
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NO_COVER;
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STATUS_IMMUTABLE;
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STORAGE_SIZE_INVALID;
 import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STORAGE_SIZE_MAX_EXCEED;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.ALREADY_EXISTS;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.NOT_FOUND_BY_NAME_AND_OWNER_ID;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.STATUS_IMMUTABLE;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.STORAGE_SIZE_INVALID;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.SUBPROJECT_NOT_FINISHED_EXCEPTION;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.SUBPROJECT_VISIBILITY_INVALID;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.SUBPROJECT_NOT_FINISHED_EXCEPTION;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.SUBPROJECT_VISIBILITY_INVALID;
 
 @Component
 @RequiredArgsConstructor
@@ -105,7 +101,7 @@ public class ProjectValidator {
         }
     }
 
-    private static void verifyStorageSizeLimitsCorrect(ProjectDto projectDto) {
+    private void verifyStorageSizeLimitsCorrect(ProjectDto projectDto) {
         if (projectDto.isStorageSizeGreaterThanMaxStorageSize()) {
             throw new ProjectStorageSizeInvalidException(STORAGE_SIZE_INVALID.getMessage());
         }

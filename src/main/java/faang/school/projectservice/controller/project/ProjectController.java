@@ -19,16 +19,6 @@ import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -69,8 +59,10 @@ public class ProjectController {
     }
 
     @PostMapping("/{parentProjectId}/search")
-    public List<ProjectDto> searchSubprojects(@Valid @RequestBody ProjectFilterDto filter,
-                                              @PathVariable Long parentProjectId) {
-        return service.searchSubprojects(parentProjectId, filter);
+    public List<ProjectDto> searchSubprojects(
+        @Valid @RequestBody ProjectFilterDto filter,
+        @PathVariable Long parentProjectId
+    ) {
+        return projectService.searchSubprojects(parentProjectId, filter);
     }
 }

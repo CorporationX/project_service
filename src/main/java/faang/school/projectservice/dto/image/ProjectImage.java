@@ -1,33 +1,37 @@
 package faang.school.projectservice.dto.image;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.imageio.ImageIO;
+
 import faang.school.projectservice.exception.FileException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
+import static faang.school.projectservice.exception.file.FileExceptionMessage.CONVERTING_IMAGE_TO_INPUT_STREAM;
 
 @Slf4j
 public class ProjectImage extends ImageResource {
     private static final int IMAGE_QUALITY = 1;
-
-    public ProjectImage(BufferedImage image) {
-        super(image);
-    }
     
-    @Override
-    public BufferedImage convertToCover() {
+    public ProjectImage(InputStream inputStream) {
+        super(inputStream);
+        this.createCover();
+    }
+
+    private void createCover() {
         switch (this.getOrientation()) {
-            case VERTICAL -> {
-                resize(VerticalImageBorders.HEIGHT_TARGET_BORDER, VerticalImageBorders.WIDTH_TARGET_BORDER);
-            }
-            case SQUARE -> {
-                resize(SquareImageBorders.HEIGHT_TARGET_BORDER, SquareImageBorders.WIDTH_TARGET_BORDER);
-            }
+            case VERTICAL -> resize(VerticalImageBorders.HEIGHT_TARGET_BORDER,
+                                    VerticalImageBorders.WIDTH_TARGET_BORDER);
+            case SQUARE -> resize(SquareImageBorders.HEIGHT_TARGET_BORDER,
+                                  SquareImageBorders.WIDTH_TARGET_BORDER);
         }
         try {
-            return Thumbnails.of(image)
+            this.rescaledImage = Thumbnails.of(image)
                 .size(this.targetWidth, this.targetHeight)
                 .outputFormat(getTargetImageExtension().name())
                 .outputQuality(IMAGE_QUALITY)
@@ -38,6 +42,27 @@ public class ProjectImage extends ImageResource {
             throw new FileException(error);
         }
     }
+    
+    @Override
+    public ImageExtension getTargetImageExtension() {
+        return ImageExtension.JPEG;
+    }
+    
+    public InputStream getCoverInputStream() {
+        try {
+            ByteArrayOutputStream bas = new ByteArrayOutputStream();
+            ImageIO.write(this.rescaledImage,"jpg", bas);
+            byte[] bytes = bas.toByteArray();
+            return new ByteArrayInputStream(bytes);
+        } catch (IOException e) {
+            log.error(CONVERTING_IMAGE_TO_INPUT_STREAM.getMessage(),e);
+            throw new FileException(CONVERTING_IMAGE_TO_INPUT_STREAM.getMessage());
+        }
+    }
+    
+    public Long calculateCoverSize() {
+        return calculateImageSize(this.rescaledImage);
+    }
 
     private void resize(Integer targetHeightBorder, Integer targetWidthBorder) {
         if (isImageHeightGreater(targetHeightBorder)) {
@@ -46,11 +71,6 @@ public class ProjectImage extends ImageResource {
         if (isImageWidthGreater(targetWidthBorder)) {
             this.targetWidth = targetWidthBorder;
         }
-    }
-
-    @Override
-    public ImageExtension getTargetImageExtension() {
-        return ImageExtension.JPEG;
     }
     
     @Data
