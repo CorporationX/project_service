@@ -1,6 +1,7 @@
 package faang.school.projectservice.model.aclRole;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -9,7 +10,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Getter
+@AllArgsConstructor
 public enum AclScopeType {
+    /**
+     * The permissions granted to the "default", or public, scope apply to any user, authenticated or not.
+     */
     DEFAULT("default"),
     USER("user"),
     GROUP("group"),
@@ -20,10 +25,6 @@ public enum AclScopeType {
 
     @JsonValue
     private final String type;
-
-    AclScopeType(String type) {
-        this.type = type;
-    }
 
     public static AclScopeType findByKey(String v) {
         return ACL_SCOPE_TYPE_MAP.get(v);

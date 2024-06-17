@@ -1,4 +1,3 @@
-
 package faang.school.projectservice.mapper;
 
 import com.google.api.client.util.DateTime;
@@ -10,14 +9,14 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EventMapper {
-    int MS_IN_S = 1000; //milliseconds in second
-
     @Mapping(source = "startTime", target = "start", qualifiedByName = "eventDateMapping")
     @Mapping(source = "endTime", target = "end", qualifiedByName = "eventDateMapping")
     Event toModel(EventDto event);
@@ -28,13 +27,13 @@ public interface EventMapper {
 
     @Named("eventDateMapping")
     default EventDateTime eventDateMapping(LocalDateTime date) {
-        DateTime dateTime = new DateTime(date.toEpochSecond(ZoneOffset.UTC) * MS_IN_S);
+        DateTime dateTime = new DateTime(ZonedDateTime.of(date, ZoneId.systemDefault()).toInstant().toEpochMilli());
         return new EventDateTime().setDateTime(dateTime);
     }
 
     @Named("timeMapping")
     default LocalDateTime timeMapping(EventDateTime date) {
-        return LocalDateTime.ofEpochSecond(date.getDateTime().getValue() / MS_IN_S, 0, ZoneOffset.UTC);
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getDateTime().getValue()), ZoneId.systemDefault());
     }
 
     List<EventDto> toDtos(List<Event> eventsOfProject);

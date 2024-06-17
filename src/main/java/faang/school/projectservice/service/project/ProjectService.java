@@ -30,9 +30,9 @@ public class ProjectService {
     private final ProjectValidator validator;
     private final List<ProjectFilter> filters;
 
-    public ProjectDto getProjectById(Long projectId) {
-        Project project = projectRepository.getProjectById(projectId);
-        return mapper.toDto(project);
+
+    public Project getProjectModel(Long projectId) {
+        return projectRepository.getProjectById(projectId);
     }
 
     public boolean existsById(Long projectId) {
@@ -51,7 +51,7 @@ public class ProjectService {
         return mapper.toDto(saved);
     }
 
-@Transactional
+    @Transactional
     public ProjectDto update(ProjectDto projectDto) {
         validator.verifyCanBeUpdated(projectDto);
 
@@ -65,9 +65,7 @@ public class ProjectService {
     }
 
     public ProjectDto getById(Long id) {
-        Project project = projectRepository.getProjectById(id);
-
-        return mapper.toDto(project);
+        return mapper.toDto(getProjectModel(id));
     }
 
     public List<ProjectDto> getAll() {

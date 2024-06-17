@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.project.calendar.AclDto;
-import faang.school.projectservice.model.aclRole.AclRule;
+import faang.school.projectservice.model.aclRole.AclRole;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -20,12 +20,12 @@ public interface AclMapper {
     List<AclDto> toDtos(List<com.google.api.services.calendar.model.AclRule> aclList);
 
     @Named("enum2String")
-    default String enum2String(AclRule role) {
+    default String enum2String(AclRole role) {
         return role.getRole();
     }
 
     @Named("string2Enum")
-    default AclRule string2Enum(String role) {
-        return AclRule.findByKey(role);
+    default AclRole string2Enum(String role) {
+        return AclRole.findByKey(role);
     }
 }

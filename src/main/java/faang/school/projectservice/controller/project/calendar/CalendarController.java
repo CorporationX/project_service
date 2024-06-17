@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.project.calendar.CalendarDto;
 import faang.school.projectservice.dto.project.calendar.EventDto;
 import faang.school.projectservice.service.project.calendar.CalendarService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,7 +34,7 @@ public class CalendarController {
     }
 
     @PostMapping("{projectId}/calendars/auth")
-    public void setCredentials(@PathVariable long projectId, @RequestParam String code) {
+    public void setCredentials(@PathVariable long projectId, @NotBlank @RequestParam String code) {
         calendarService.auth(projectId, code);
     }
 

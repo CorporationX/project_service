@@ -11,6 +11,9 @@ import faang.school.projectservice.mapper.AclMapper;
 import faang.school.projectservice.mapper.CalendarMapper;
 import faang.school.projectservice.mapper.EventMapper;
 import faang.school.projectservice.model.CalendarToken;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.service.project.ProjectService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,12 +27,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CalendarService {
     public static final int EVENTS_COUNT_TO_BE_RETURNED = 10;
-    private final GoogleAuthorizationService OAuthService;
+    private final GoogleAuthorizationService oAuthService;
+    private final ProjectService projectService;
     private final EventMapper eventMapper;
     private final CalendarMapper calendarMapper;
     private final AclMapper aclMapper;
     @Value("${spring.OAuth2.applicationName}")
     private String applicationName;
+
+
+    /**
+     * Возвращает ссылку аутентификации. Предоставив доступ по этой ссылке, вы получите код для авторизации
+     *
+     * @return URL
+     */
+    public URL getAuthUrl() {
+        return oAuthService.getAuthUrl();
+    }
 
     /**
      * Авторизация проекта по коду авторизации (Сохраняет токен авторизации в БД)
@@ -39,18 +53,10 @@ public class CalendarService {
      * @return объект Credential для доступа к Calendar API
      */
     @Transactional
-    public Credential auth(long projectId, String code) {
-        CalendarToken calendarToken = OAuthService.authorizeProject(projectId, code);
-        return OAuthService.generateCredential(calendarToken);
-    }
-
-    /**
-     * Возвращает ссылку аутентификации. Предоставив доступ по этой ссылке, вы получите код для авторизации
-     *
-     * @return URL
-     */
-    public URL getAuthUrl() {
-        return OAuthService.getAuthUrl();
+    public Credential auth(long projectId, @NotNull String code) {
+        Project project = projectService.getProjectModel(projectId);
+        CalendarToken calendarToken = oAuthService.authorizeProject(project, code);
+        return oAuthService.generateCredential(calendarToken);
     }
 
     @Transactional
@@ -175,10 +181,10 @@ public class CalendarService {
         }
     }
 
-    private Calendar buildCalendar(long projectId) {
+    Calendar buildCalendar(long projectId) {
         Credential credential = auth(projectId, null);
 
-        return new Calendar.Builder(OAuthService.getHttp_transport(), OAuthService.getJsonFactory(), credential)
+        return new Calendar.Builder(oAuthService.getHttp_transport(), oAuthService.getJsonFactory(), credential)
                 .setApplicationName(applicationName)
                 .build();
     }

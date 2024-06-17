@@ -11,8 +11,8 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.calendar.CalendarScopes;
 import faang.school.projectservice.model.CalendarToken;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.CalendarTokenRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,6 @@ class GoogleAuthorizationService {
     private static final List<String> SCOPES = List.of(CalendarScopes.CALENDAR_EVENTS, CalendarScopes.CALENDAR);
     private static final int ACCESS_TOKEN_EXPIRES_IN_SECONDS = 3499;
     private final CalendarTokenRepository calendarTokenRepository;
-    private final ProjectRepository projectRepository;
     @Value("${spring.OAuth2.accessType}")
     public String accessType;
     private GoogleAuthorizationCodeFlow flow;
@@ -89,17 +88,12 @@ class GoogleAuthorizationService {
         }
     }
 
-    public CalendarToken authorizeProject(long projectId, String code) {
-        return calendarTokenRepository.findByProjectId(projectId)
+    public CalendarToken authorizeProject(Project project, String code) {
+        return calendarTokenRepository.findByProjectId(project.getId())
                 .orElseGet(() -> {
-                    if (code == null) {
-                        throw new RuntimeException("Authorization code is required to connect your project with CalendarAPI.");
-                    }
-
                     TokenResponse tokenResponse = requestToken(code);
-
                     CalendarToken calendarToken = CalendarToken.builder()
-                            .project(projectRepository.getProjectById(projectId))
+                            .project(project)
                             .accessToken(tokenResponse.getAccessToken())
                             .refreshToken(tokenResponse.getRefreshToken())
                             .build();
@@ -112,14 +106,11 @@ class GoogleAuthorizationService {
         AuthorizationCodeTokenRequest tokenRequest = flow.newTokenRequest(code);
         tokenRequest.setRedirectUri(redirectUri);
 
-        TokenResponse tokenResponse;
-
         try {
-            tokenResponse = tokenRequest.execute();
+            return tokenRequest.execute();
         } catch (IOException tokenRequestFailed) {
             throw new RuntimeException("Token request failed");
         }
-        return tokenResponse;
     }
 
     public URL getAuthUrl() {
