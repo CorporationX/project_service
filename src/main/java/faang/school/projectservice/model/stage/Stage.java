@@ -1,11 +1,14 @@
 package faang.school.projectservice.model.stage;
 
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.StageStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,6 +39,10 @@ public class Stage {
 
     @Column(name = "project_stage_name", nullable = false)
     private String stageName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private StageStatus stageStatus;
 
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)

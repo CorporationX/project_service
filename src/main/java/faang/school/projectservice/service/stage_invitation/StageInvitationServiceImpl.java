@@ -3,6 +3,7 @@ package faang.school.projectservice.service.stage_invitation;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationCreateDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
+import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -13,6 +14,7 @@ import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validation.stage_invitation.StageInvitationValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,8 +52,8 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     @Transactional
     public StageInvitationDto acceptInvitation(long userId, long inviteId) {
 
-        TeamMember invited = teamMemberRepository.findById(userId);
-        StageInvitation stageInvitation = stageInvitationRepository.findById(inviteId);
+        TeamMember invited = findTeamMemberById(userId);
+        StageInvitation stageInvitation = findStageInvitationById(inviteId);
 
         stageInvitationValidator.validateUserInvitePermission(invited, stageInvitation);
 
@@ -67,8 +69,8 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     @Transactional
     public StageInvitationDto rejectInvitation(long userId, long inviteId, String reason) {
 
-        TeamMember invited = teamMemberRepository.findById(userId);
-        StageInvitation stageInvitation = stageInvitationRepository.findById(inviteId);
+        TeamMember invited = findTeamMemberById(userId);
+        StageInvitation stageInvitation = findStageInvitationById(inviteId);
 
         stageInvitationValidator.validateUserInvitePermission(invited, stageInvitation);
 
@@ -87,5 +89,16 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         return stageInvitationFilterService.applyAll(invitations, stageInvitationFilterDto)
                 .map(stageInvitationMapper::toDto)
                 .toList();
+    }
+
+    private StageInvitation findStageInvitationById(long stageInvitationId) {
+        return stageInvitationRepository.findById(stageInvitationId)
+                .orElseThrow(() -> new NotFoundException(String.format("Stage invitation doesn't exist by id: %s", stageInvitationId))
+        );
+    }
+
+    private TeamMember findTeamMemberById(long teamMemberId) {
+        return teamMemberRepository.findById(teamMemberId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", teamMemberId)));
     }
 }

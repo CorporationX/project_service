@@ -31,7 +31,7 @@ public class ProjectValidatorTest {
 
     @Test
     public void testValidateProjectByOwnerIdAndNameOfProjectWithException() {
-        when(projectRepository.existsByOwnerUserIdAndName(firstProjectDto.getOwnerId(), firstProjectDto.getName())).thenReturn(true);
+        when(projectRepository.existsByOwnerIdAndName(firstProjectDto.getOwnerId(), firstProjectDto.getName())).thenReturn(true);
         var exception = assertThrows(DataValidationException.class, () -> projectValidator.validateProjectByOwnerIdAndNameOfProject(firstProjectDto));
         assertEquals("The user with id: "+firstProjectDto.getOwnerId()+ " already has a project with name "+firstProjectDto.getName(), exception.getMessage());
     }
