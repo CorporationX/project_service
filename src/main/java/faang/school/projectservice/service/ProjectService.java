@@ -16,4 +16,6 @@ public interface ProjectService {
     ProjectDto findById(long id);
 
     List<ProjectDto> getAllByFilter(ProjectFilterDto projectFilterDto);
+
+    boolean isUserProjectOwner(long projectId, long userId);
 }

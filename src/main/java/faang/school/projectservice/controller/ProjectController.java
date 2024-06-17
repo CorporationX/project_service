@@ -57,4 +57,11 @@ public class ProjectController {
     public List<ProjectDto> getAllByFilter(@NonNull @ParameterObject ProjectFilterDto projectFilterDto) {
         return projectService.getAllByFilter(projectFilterDto);
     }
+
+    @Operation(summary = "Check is user project owner")
+    @GetMapping("/{projectId}/check/owner/{userId}")
+    public boolean checkProjectOwner(@PathVariable("projectId") long projectId,
+                                     @PathVariable("userId") long userId) {
+        return projectService.isUserProjectOwner(projectId, userId);
+    }
 }
