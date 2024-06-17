@@ -63,7 +63,7 @@ class InternshipStartDateFilterTest {
         @DisplayName("should return empty list when all of them have startDate af startDatePattern")
         @Test
         void applyTest() {
-            filter.setStartDatePattern(LocalDateTime.of(2024, 10, 30, 16, 0));
+            filter.setStartDatePattern(LocalDateTime.of(3024, 10, 30, 16, 0));
             var filteredInternships = internshipStartDateFilter.apply(allInternships, filter).toList();
 
             assertEquals(List.of(), filteredInternships);

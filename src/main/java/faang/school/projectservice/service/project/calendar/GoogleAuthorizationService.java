@@ -31,7 +31,7 @@ import static java.time.LocalDateTime.now;
 class GoogleAuthorizationService {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final List<String> SCOPES = List.of(CalendarScopes.CALENDAR_EVENTS, CalendarScopes.CALENDAR);
-    private static final int ACCESS_TOKEN_EXPIRES_IN_SECONDS = 3499;
+    private static final int ACCESS_TOKEN_EXPIRES_IN_SECONDS = 100;
     private final CalendarTokenRepository calendarTokenRepository;
     @Value("${spring.OAuth2.accessType}")
     public String accessType;
