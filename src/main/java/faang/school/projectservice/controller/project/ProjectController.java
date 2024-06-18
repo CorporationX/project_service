@@ -5,16 +5,18 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
 
-    public ProjectDto createProject(ProjectDto projectDto){
+    @PostMapping("/")
+    public ProjectDto createProject(@RequestBody ProjectDto projectDto){
         return projectService.createProject(projectDto);
     }
 
@@ -26,7 +28,8 @@ public class ProjectController {
         return projectService.getAllProjects();
     }
 
-    public ProjectDto getProjectById(Long projectId){
+    @GetMapping("/{id}")
+    public ProjectDto getProjectById(@PathVariable("id") long projectId) {
         return projectService.findProjectById(projectId);
     }
 
