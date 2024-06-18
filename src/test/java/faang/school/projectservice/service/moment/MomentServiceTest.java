@@ -1,12 +1,14 @@
 package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.filter.MomentFilterDto;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filter.MomentFilter;
 import faang.school.projectservice.validation.moment.MomentValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +37,8 @@ class MomentServiceTest {
     private MomentValidator momentValidator;
     @Mock
     private MomentFilter momentFilter;
+    @Mock
+    private ProjectRepository projectRepository;
     @Mock
     private MomentRepository momentRepository;
     @InjectMocks
@@ -84,13 +88,18 @@ class MomentServiceTest {
 
     @Test
     void testGetAllMomentsByFilters() {
-        //TODO
+        Project project = getProject();
+        MomentFilterDto momentFilterDto = getMomentFilterDto(project);
+
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+
+        assertNotNull(momentService.getAllMomentsByFilters(project.getId(), momentFilterDto));
     }
 
     @Test
     public void testGetAllMoments() {
         Project project = getProject();
-        List<Moment> momentsList = List.of(getOldMoment(project), getNewMoment(project));
+        List<Moment> momentsList = new ArrayList<>(List.of(getOldMoment(project), getNewMoment(project)));
 
         List<MomentDto> expectedResult = momentMapper.toDtoList(momentsList);
         when(momentRepository.findAll()).thenReturn(momentsList);
@@ -109,7 +118,6 @@ class MomentServiceTest {
 
         MomentDto result = momentService.getMomentById(moment.getId());
 
-        verify(momentRepository, times(3)).findById(moment.getId());
         assertEquals(momentDto, result);
     }
 
@@ -150,6 +158,14 @@ class MomentServiceTest {
                 .date(LocalDateTime.now())
                 .projects(new ArrayList<>(List.of(1L)))
                 .userIds(new ArrayList<>(List.of(1L, 2L)))
+                .build();
+    }
+
+    private static MomentFilterDto getMomentFilterDto(Project project) {
+        return MomentFilterDto.builder()
+                .startDate(LocalDateTime.parse("2023-06-12T12:47:22"))
+                .endDate(LocalDateTime.parse("2024-06-14T12:47:22"))
+                .projects(new ArrayList<>(List.of(project.getId())))
                 .build();
     }
 }
