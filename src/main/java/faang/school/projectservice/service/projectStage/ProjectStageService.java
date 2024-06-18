@@ -11,8 +11,8 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.validation.StageValidator;
 import faang.school.projectservice.validation.ProjectStageMessage;
+import faang.school.projectservice.validation.StageValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,7 @@ public class ProjectStageService {
 
     public List<StageDto> getStagesProjectByStatus(Long projectId, TaskStatus status) {
         return stageRepository.findAll().stream()
-                .filter(stage -> stage.getProject().getId() == projectId)
+                .filter(stage -> stage.getProject().getId().equals(projectId))
                 .filter(stage -> !stage.getTasks().stream()
                         .filter(task -> task.getStatus().equals(status)).toList().isEmpty())
                 .map(stageMapper::toDto)
@@ -113,8 +113,7 @@ public class ProjectStageService {
 
     private void inviteMember(Stage stage, Map<TeamRole, Long> missedMembers) {
         Project project = projectRepository.getProjectById(stage.getProject().getId());
-        List<Team> teamsProject = project.getTeams();
-        List<TeamMember> members = teamsProject.stream()
+        List<TeamMember> members = project.getTeams().stream()
                 .flatMap((team -> team.getTeamMembers().stream()
                         .filter((member) -> !member.getStages().contains(stage))))
                 .toList();

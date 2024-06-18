@@ -14,5 +14,6 @@ public class StageDto {
     @PositiveOrZero
     private Long projectId;
     @NotEmpty
+    @NotNull
     private List<StageRolesDto> stageRolesDto;
 }
