@@ -34,6 +34,11 @@ public class ProjectController {
         return service.getById(id);
     }
 
+    @GetMapping("/{projectId}/exists")
+    public boolean existsById(@PathVariable long projectId) {
+        return service.existsById(projectId);
+    }
+
     @PostMapping
     public ProjectDto createProject(@Valid @RequestBody ProjectDto projectDto) {
         return service.create(projectDto);

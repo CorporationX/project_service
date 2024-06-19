@@ -27,7 +27,7 @@ class InternshipEndDateFilterTest {
         allInternships.forEach(internship -> internship.setInterns(List.of()));
 
         filter = new InternshipFilterDto();
-        filter.setEndDatePattern(LocalDateTime.of(2024, 9, 30, 16, 0));
+        filter.setEndDatePattern(LocalDateTime.of(3024, 9, 30, 16, 0));
     }
 
     @Nested

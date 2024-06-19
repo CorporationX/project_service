@@ -93,6 +93,9 @@ public class Project {
     private List<Team> teams;
 
     @OneToOne(mappedBy = "project")
+    private CalendarToken calendarToken;
+
+    @OneToOne(mappedBy = "project")
     private Schedule schedule;
 
     @OneToMany(mappedBy = "project")

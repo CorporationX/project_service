@@ -18,3 +18,8 @@ VALUES (1,
         null,
         null,
         null);
+
+INSERT INTO project (name, status, visibility)
+VALUES ('Project Alpha', 'CREATED', 'PUBLIC'),
+       ('Project Beta', 'CREATED', 'PUBLIC'),
+       ('Project Gamma', 'IN_PROGRESS', 'PUBLIC');
