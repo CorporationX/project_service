@@ -22,6 +22,8 @@ public abstract class ImageResource {
     protected Integer targetHeight;
     protected Integer width;
     protected Integer targetWidth;
+    protected Long originalImageSize;
+    protected Long resizedImageSize;
     protected Orientation orientation;
     protected BufferedImage image;
     protected BufferedImage rescaledImage;
@@ -34,6 +36,7 @@ public abstract class ImageResource {
         this.targetHeight = height;
         this.targetWidth = width;
         this.orientation = calculateOrientation(height, width);
+        this.originalImageSize = calculateImageSize(this.image);
     }
     
     public abstract ImageExtension getTargetImageExtension();
@@ -55,6 +58,11 @@ public abstract class ImageResource {
             log.error(CALCULATE_IMAGE_SIZE.getMessage(),e);
             throw new FileException(CALCULATE_IMAGE_SIZE.getMessage());
         }
+    }
+    
+    public Long calculateResizedImageSize() {
+        this.resizedImageSize = calculateImageSize(this.rescaledImage);
+        return this.resizedImageSize;
     }
     
     private Orientation calculateOrientation(Integer height, Integer width) {

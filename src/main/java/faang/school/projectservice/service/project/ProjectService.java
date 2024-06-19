@@ -113,33 +113,68 @@ public class ProjectService {
         Project project = projectRepository.getProjectById(projectId);
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         
-        ProjectImage projectImage = new ProjectImage(file.getInputStream());
-        Long coverSize = projectImage.calculateCoverSize();
-        projectValidator.verifyStorageSizeNotExceeding(project, coverSize);
+        Resource resource = uploadCoverToS3(file, project, teamMember);
         
-        MultipartFileResourceDto resourceDto = MultipartFileResourceDto.builder()
-            .size(coverSize)
+        project.addStorageSize(resource.getSize());
+        project.setCoverImageId(resource.getKey());
+        
+        Resource savedResource = resourceRepository.save(resource);
+        return resourceMapper.toDto(savedResource);
+    }
+    
+    public PutObjectRequest putObjectToS3(MultipartFileResourceDto resourceDto) {
+        PutObjectRequest putRequest = s3CoverRequest.putRequest(resourceDto);
+        s3Service.uploadFile(putRequest);
+        return putRequest;
+    }
+    
+    @SneakyThrows
+    private Resource uploadCoverToS3(
+        MultipartFile file,
+        Project project,
+        TeamMember teamMember
+    ) {
+        ProjectImage projectImage = new ProjectImage(file.getInputStream());
+        projectValidator.verifyStorageSizeNotExceeding(project, projectImage.getResizedImageSize());
+        
+        MultipartFileResourceDto resourceDto = getMultipartFileResourceDto(file, project, projectImage);
+        
+        PutObjectRequest projectCoverPutRequest = putObjectToS3(resourceDto);
+        
+        return createResource(file, project, teamMember, projectCoverPutRequest, resourceDto);
+    }
+    
+    private MultipartFileResourceDto getMultipartFileResourceDto(
+        MultipartFile file,
+        Project project,
+        ProjectImage projectImage
+    ) {
+        return MultipartFileResourceDto.builder()
+            .size(projectImage.getResizedImageSize())
             .contentType(file.getContentType())
             .fileName(file.getOriginalFilename())
             .folderName(getDefaultProjectFolderName(project))
             .resourceInputStream(projectImage.getCoverInputStream())
             .build();
-        
-        PutObjectRequest projectCoverPutRequest = s3CoverRequest.putRequest(resourceDto);
-        s3Service.uploadFile(projectCoverPutRequest);
-        
-        String key = projectCoverPutRequest.getKey();
-        Resource projectCoverResource = createCoverProjectResource(key, resourceDto);
-        projectCoverResource.setProject(project);
-        projectCoverResource.setCreatedBy(teamMember);
-        projectCoverResource.setUpdatedBy(teamMember);
-        
-        project.addStorageSize(coverSize);
-        project.setCoverImageId(key);
-        
-        Resource savedResource = resourceRepository.save(projectCoverResource);
-        
-        return resourceMapper.toDto(savedResource);
+    }
+    
+    private Resource createResource(
+        MultipartFile file,
+        Project project,
+        TeamMember teamMember,
+        PutObjectRequest projectCoverPutRequest,
+        MultipartFileResourceDto resourceDto
+    ) {
+        Resource resource = new Resource();
+        resource.setKey(projectCoverPutRequest.getKey());
+        resource.setSize(BigInteger.valueOf(resourceDto.getSize()));
+        resource.setStatus(ResourceStatus.ACTIVE);
+        resource.setName(resourceDto.getFileName());
+        resource.setType(ResourceType.getResourceType(file.getContentType()));
+        resource.setProject(project);
+        resource.setCreatedBy(teamMember);
+        resource.setUpdatedBy(teamMember);
+        return resource;
     }
     
     @Transactional
@@ -164,16 +199,6 @@ public class ProjectService {
     
     private String getDefaultProjectFolderName(Project project) {
         return String.format("%s%s%s", project.getId(), DEFAULT_FOLDER_RESOURCE_DELIMITER, project.getName());
-    }
-    
-    private Resource createCoverProjectResource(String key, MultipartFileResourceDto multipartFileResourceDto) {
-        Resource resource = new Resource();
-        resource.setKey(key);
-        resource.setSize(BigInteger.valueOf(multipartFileResourceDto.getSize()));
-        resource.setStatus(ResourceStatus.ACTIVE);
-        resource.setName(multipartFileResourceDto.getFileName());
-        resource.setType(ResourceType.getResourceType(multipartFileResourceDto.getContentType()));
-        return resource;
     }
 
     public List<ProjectDto> searchSubprojects(Long parentProjectId, ProjectFilterDto filter) {

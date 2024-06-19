@@ -41,14 +41,6 @@ public class Resource {
 
     private BigInteger size;
 
-    //TODO: Спросить у Сабины, почему нет миграции на эту таблицу
-//    @ElementCollection(targetClass = TeamRole.class)
-//    @CollectionTable(name = "resource_allowed_roles",
-//            joinColumns = @JoinColumn(name = "resource_id"))
-//    @Column(name = "role_id")
-//    @Enumerated(EnumType.STRING)
-//    private List<TeamRole> allowedRoles;
-
     @Enumerated(EnumType.STRING)
     private ResourceType type;
 

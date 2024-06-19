@@ -13,10 +13,6 @@ public interface S3Request {
     
     DeleteObjectRequest deleteRequest(String key);
     
-    default String getDefaultFolderDelimiter() {
-        return "_";
-    }
-    
     default ObjectMetadata createObjectMetadata(MultipartFileResourceDto multipartFileResource) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(multipartFileResource.getSize());

@@ -21,6 +21,7 @@ public class ProjectImage extends ImageResource {
     public ProjectImage(InputStream inputStream) {
         super(inputStream);
         this.createCover();
+        this.resizedImageSize = calculateResizedImageSize();
     }
 
     private void createCover() {
@@ -58,10 +59,6 @@ public class ProjectImage extends ImageResource {
             log.error(CONVERTING_IMAGE_TO_INPUT_STREAM.getMessage(),e);
             throw new FileException(CONVERTING_IMAGE_TO_INPUT_STREAM.getMessage());
         }
-    }
-    
-    public Long calculateCoverSize() {
-        return calculateImageSize(this.rescaledImage);
     }
 
     private void resize(Integer targetHeightBorder, Integer targetWidthBorder) {
