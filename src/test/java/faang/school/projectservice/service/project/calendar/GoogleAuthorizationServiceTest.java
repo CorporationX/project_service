@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleAuthorizationServiceTest {
+    public static final int ACCESS_TOKEN_EXPIRES_IN_SECONDS = 100;
     @Spy
     @InjectMocks
     private GoogleAuthorizationService oAuthService;
@@ -70,6 +71,7 @@ class GoogleAuthorizationServiceTest {
         changeField(oAuthService, "accessType", testData.getAccessType());
         changeField(oAuthService, "flow", flow);
         changeField(oAuthService, "redirectUri", "url");
+        changeField(oAuthService, "accessTokenExpiresInSeconds", ACCESS_TOKEN_EXPIRES_IN_SECONDS);
         oAuthService.setUp();
     }
 
@@ -123,7 +125,7 @@ class GoogleAuthorizationServiceTest {
         void refreshTokenTest() throws IOException {
             Credential credential = mock(Credential.class);
             var calendarToken = testData.getCalendarToken();
-            when(credential.getExpiresInSeconds()).thenReturn(testData.getExpiresInSeconds() + 100);
+            when(credential.getExpiresInSeconds()).thenReturn(testData.getExpiresInSeconds() + ACCESS_TOKEN_EXPIRES_IN_SECONDS);
 
             assertDoesNotThrow(() -> oAuthService.refreshToken(calendarToken, credential));
 

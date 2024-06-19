@@ -34,7 +34,7 @@ class GoogleAuthorizationService {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final List<String> SCOPES = List.of(CalendarScopes.CALENDAR_EVENTS, CalendarScopes.CALENDAR);
     @Value("${spring.OAuth2.accessTokenExpiresInSeconds}")
-    private int accessTokenExpiresInSeconds;
+    private long accessTokenExpiresInSeconds;
     private final CalendarTokenRepository calendarTokenRepository;
     @Value("${spring.OAuth2.accessType}")
     public String accessType;
