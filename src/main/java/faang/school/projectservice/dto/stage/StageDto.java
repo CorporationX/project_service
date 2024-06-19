@@ -1,6 +1,10 @@
 package faang.school.projectservice.dto.stage;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 import java.util.List;
@@ -15,5 +19,5 @@ public class StageDto {
     private Long projectId;
     @NotEmpty
     @NotNull
-    private List<StageRolesDto> stageRolesDto;
+    private List<@Valid StageRolesDto> stageRoles;
 }

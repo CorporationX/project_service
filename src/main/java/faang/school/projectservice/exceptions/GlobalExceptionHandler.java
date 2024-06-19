@@ -1,6 +1,7 @@
 package faang.school.projectservice.exceptions;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -36,5 +37,10 @@ public class GlobalExceptionHandler {
                         error -> ((FieldError) error).getField(),
                         error -> Objects.requireNonNullElse(error.getDefaultMessage(), "")
                 ));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
 }
