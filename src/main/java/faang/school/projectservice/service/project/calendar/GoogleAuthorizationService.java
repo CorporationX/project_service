@@ -4,6 +4,7 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -16,6 +17,7 @@ import faang.school.projectservice.repository.CalendarTokenRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,7 +33,8 @@ import static java.time.LocalDateTime.now;
 class GoogleAuthorizationService {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final List<String> SCOPES = List.of(CalendarScopes.CALENDAR_EVENTS, CalendarScopes.CALENDAR);
-    private static final int ACCESS_TOKEN_EXPIRES_IN_SECONDS = 100;
+    @Value("${spring.OAuth2.accessTokenExpiresInSeconds}")
+    private int accessTokenExpiresInSeconds;
     private final CalendarTokenRepository calendarTokenRepository;
     @Value("${spring.OAuth2.accessType}")
     public String accessType;
@@ -74,7 +77,7 @@ class GoogleAuthorizationService {
     }
 
     public void refreshToken(CalendarToken calendarToken, Credential credential) {
-        if (credential.getExpiresInSeconds() < ACCESS_TOKEN_EXPIRES_IN_SECONDS) {
+        if (credential.getExpiresInSeconds() < accessTokenExpiresInSeconds) {
             try {
                 credential.refreshToken();
             } catch (IOException e) {
@@ -102,6 +105,7 @@ class GoogleAuthorizationService {
                 });
     }
 
+    @Retryable(retryFor = TokenResponseException.class)
     public TokenResponse requestToken(String code) {
         AuthorizationCodeTokenRequest tokenRequest = flow.newTokenRequest(code);
         tokenRequest.setRedirectUri(redirectUri);
@@ -109,7 +113,7 @@ class GoogleAuthorizationService {
         try {
             return tokenRequest.execute();
         } catch (IOException tokenRequestFailed) {
-            throw new RuntimeException("Token request failed");
+            throw new RuntimeException("The token parsing failed.");
         }
     }
 

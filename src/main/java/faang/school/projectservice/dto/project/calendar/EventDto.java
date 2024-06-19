@@ -9,7 +9,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-import static faang.school.projectservice.exception.project.calendar.CalendarValidationExceptionMessage.END_TIME_IS_BEFORE_START_EXCEPTION;
+import static faang.school.projectservice.exception.project.CalendarValidationExceptionMessage.END_TIME_IS_BEFORE_START_EXCEPTION;
 
 @Data
 @Builder

@@ -1,4 +1,4 @@
-package faang.school.projectservice.exception.project.calendar;
+package faang.school.projectservice.exception.project;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
