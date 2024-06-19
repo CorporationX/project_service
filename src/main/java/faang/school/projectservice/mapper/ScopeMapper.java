@@ -12,20 +12,20 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ScopeMapper {
-    @Mapping(source = "type", target = "type", qualifiedByName = "enum2String")
+    @Mapping(source = "type", target = "type", qualifiedByName = "enumToString")
     AclRule.Scope toModel(ScopeDto scopeDto);
 
-    @Mapping(source = "type", target = "type", qualifiedByName = "string2Enum")
+    @Mapping(source = "type", target = "type", qualifiedByName = "stringToEnum")
     ScopeDto toDto(AclRule.Scope scope);
 
     List<ScopeDto> toDtos(List<AclRule.Scope> scopes);
 
-    @Named("enum2String")
+    @Named("enumToString")
     default String enumToString(AclScopeType type) {
         return type.getType();
     }
 
-    @Named("string2Enum")
+    @Named("stringToEnum")
     default AclScopeType stringToEnum(String type) {
         return AclScopeType.findByKey(type);
     }
