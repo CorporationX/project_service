@@ -65,3 +65,12 @@ internship:
   duration:
     max:
       month: 3
+
+google:
+  calendar_id: basiliskbc4@gmail.com
+  auth_user_id: basiliskbc4@gmail.com
+  tokens_directory_path: tokens
+  credentials_file_path: /google/credentials.json
+  redirect_port: 8888
+  event_popup_time_min: 10
+  event_email_notify_time_min: 1440
