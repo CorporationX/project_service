@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.calendar;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.services.calendar.Calendar;
 import faang.school.projectservice.dto.calendar.AclDto;
 import faang.school.projectservice.dto.calendar.CalendarDto;
 import faang.school.projectservice.dto.calendar.CalendarEventDto;
@@ -12,7 +13,7 @@ import java.util.List;
 @Component
 public interface CalendarService {
 
-    URL getAuthUrl();
+    URL getAccessCode();
 
     Credential auth(long projectId, String code);
 
@@ -22,7 +23,7 @@ public interface CalendarService {
 
     List<CalendarEventDto> getEvents(long projectId, String calendarId);
 
-    void deleteEvent(long projectId, String calendarId, String eventId);
+    void deleteEvent(long projectId, String calendarId, long eventId);
 
     CalendarDto createCalendar(long projectId, CalendarDto calendarDto);
 
@@ -30,5 +31,7 @@ public interface CalendarService {
 
     List<AclDto> listAcl(long projectId, String calendarId);
 
-    void deleteAcl(long projectId, String calendarId, String aclId);
+    void deleteAcl(long projectId, String calendarId, long aclId);
+
+    Calendar buildCalendar(long projectId);
 }

@@ -1,20 +1,8 @@
 package faang.school.projectservice.model.calendar;
 
 import faang.school.projectservice.model.Project;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -27,26 +15,26 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CalendarToken {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @Column(name = "access_token")
+    @Column(name = "access_token", nullable = false)
     private String accessToken;
 
-    @Column(name = "refresh_token")
+    @Column(name = "refresh_token", nullable = false)
     private String refreshToken;
 
     @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }

@@ -8,6 +8,7 @@ import com.google.api.services.calendar.model.Event;
 import faang.school.projectservice.dto.calendar.AclDto;
 import faang.school.projectservice.dto.calendar.CalendarDto;
 import faang.school.projectservice.dto.calendar.CalendarEventDto;
+import faang.school.projectservice.exceptions.NoCredentialsException;
 import faang.school.projectservice.mapper.calendar.AclMapper;
 import faang.school.projectservice.mapper.calendar.CalendarMapper;
 import faang.school.projectservice.mapper.calendar.CalenderEventMapper;
@@ -17,6 +18,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +31,10 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CalendarServiceImpl implements CalendarService {
-    public static final int EVENTS_COUNT_TO_BE_RETURNED = 10;
-    private final GoogleAuthorizationService oAuthService;
+
+    @Value("${calendar.event.count_to_return}")
+    private int eventsCountToBeReturned;
+    private final GoogleAuthorizationServiceImpl oAuthService;
     private final ProjectRepository projectRepository;
     private final CalenderEventMapper eventMapper;
     private final CalendarMapper calendarMapper;
@@ -38,7 +42,7 @@ public class CalendarServiceImpl implements CalendarService {
     private final Environment env;
 
     @Override
-    public URL getAuthUrl() {
+    public URL getAccessCode() {
         return oAuthService.getAuthUrl();
     }
 
@@ -47,9 +51,7 @@ public class CalendarServiceImpl implements CalendarService {
     public Credential auth(long projectId, @NotNull String code) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NotFoundException(String.format("Project with id: %d not found!", projectId)));
-        log.info("Found project {}", project.getId());
         CalendarToken calendarToken = oAuthService.authorizeProject(project, code);
-        log.info("Got calendarToken {}", calendarToken.getAccessToken());
         return oAuthService.generateCredential(calendarToken);
     }
     @Override
@@ -60,9 +62,10 @@ public class CalendarServiceImpl implements CalendarService {
         Event event = eventMapper.toModel(eventDto);
         try {
             Event savedEvent = service.events()
-                    .insert(calendarId, event)
+                    .insert(String.valueOf(calendarId), event)
                     .execute();
 
+            log.info("Created new event");
             return eventMapper.toDto(savedEvent);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
@@ -77,7 +80,7 @@ public class CalendarServiceImpl implements CalendarService {
         try {
             List<Event> eventsOfProject = service.events()
                     .list(calendarId)
-                    .setMaxResults(EVENTS_COUNT_TO_BE_RETURNED)
+                    .setMaxResults(eventsCountToBeReturned)
                     .execute()
                     .getItems();
 
@@ -89,12 +92,12 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     @Transactional
-    public void deleteEvent(long projectId, String calendarId, String eventId) {
+    public void deleteEvent(long projectId, String calendarId, long eventId) {
         Calendar service = buildCalendar(projectId);
 
         try {
             service.events()
-                    .delete(calendarId, eventId)
+                    .delete(calendarId, String.valueOf(eventId))
                     .execute();
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
@@ -167,23 +170,32 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Transactional
-    public void deleteAcl(long projectId, String calendarId, String aclId) {
+    public void deleteAcl(long projectId, String calendarId, long aclId) {
         Calendar service = buildCalendar(projectId);
 
         try {
             service.acl()
-                    .delete(calendarId, aclId)
+                    .delete(calendarId, String.valueOf(aclId))
                     .execute();
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
-    Calendar buildCalendar(long projectId) {
-        Credential credential = auth(projectId, null);
+    @Override
+    @Transactional
+    public Calendar buildCalendar(long projectId) {
+        Credential credential;
+        try {
+            credential = auth(projectId, null);
+        } catch (Exception e) {
+            throw new NoCredentialsException(
+                    String.format("Project: %d dont have credentials, set credentials for this", projectId));
+        }
 
         return new Calendar.Builder(oAuthService.getHttp_transport(), oAuthService.getJsonFactory(), credential)
                 .setApplicationName(env.getProperty("google.applicationName"))
                 .build();
     }
 }
+

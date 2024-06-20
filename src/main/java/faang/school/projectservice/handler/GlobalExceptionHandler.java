@@ -1,5 +1,6 @@
 package faang.school.projectservice.handler;
 
+import faang.school.projectservice.exceptions.NoCredentialsException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -49,6 +50,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         log.error("Runtime exception: {}", e.getMessage(), e);
         return buildErrorResponse(e, request, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(NoCredentialsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNoCredentialsException(NoCredentialsException e, HttpServletRequest request) {
+        log.error("NoCredentialsException: {}", e.getMessage(), e);
+        return buildErrorResponse(e, request, HttpStatus.BAD_REQUEST);
     }
 
     private ErrorResponse buildErrorResponse(Exception e, HttpServletRequest request, HttpStatus status) {

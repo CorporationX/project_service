@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.calendar.AclDto;
 import faang.school.projectservice.dto.calendar.CalendarDto;
 import faang.school.projectservice.dto.calendar.CalendarEventDto;
 import faang.school.projectservice.service.calendar.CalendarService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
@@ -29,14 +31,23 @@ public class CalendarController {
 
 
     @GetMapping("calendars/auth")
-    public URL getAuthorizationUrl() {
-        return calendarService.getAuthUrl();
+    public void getAccessCode(HttpServletResponse response) throws IOException {
+        URL url = calendarService.getAccessCode();
+        response.sendRedirect(url.toString());
     }
 
+    // Эндпоит getGoogleCalenderToken перекидывает пользователя на страничку для разрешения доступа к Google Calendar,
+    // после подтверждения пользователя перенаправляет на страницу
+    // http://localhost:8888/Callback?code=КОД_ДОСТУПА&scope=... Нужно достать код и после этого вызвать
+    // эндпоит setCredentialsForProject для того, чтобы разрешить проекту доступ
+
     @PostMapping("{projectId}/calendars/auth")
-    public void setCredentials(@PathVariable long projectId, @NotBlank @RequestParam String code) {
+    public String setProjectCredentials(@PathVariable long projectId, @NotBlank @RequestParam String code) {
         calendarService.auth(projectId, code);
+        return "credential.getAccessToken().toString()";
     }
+
+    //На один гугл аккаунт, можно выставить один проект
 
     @PostMapping("{projectId}/calendars/events")
     public CalendarEventDto createEvent(@PathVariable long projectId,
@@ -54,7 +65,7 @@ public class CalendarController {
     @DeleteMapping("{projectId}/calendars/events/{eventId}")
     public void deleteEvent(@PathVariable long projectId,
                             @RequestParam String calendarId,
-                            @PathVariable String eventId) {
+                            @PathVariable long eventId) {
         calendarService.deleteEvent(projectId, calendarId, eventId);
     }
 
@@ -84,7 +95,7 @@ public class CalendarController {
     @DeleteMapping("{projectId}/calendars/acl")
     public void deleteAclRule(@PathVariable long projectId,
                               @RequestParam String calendarId,
-                              @RequestParam String aclId) {
+                              @RequestParam long aclId) {
         calendarService.deleteAcl(projectId, calendarId, aclId);
     }
 }
