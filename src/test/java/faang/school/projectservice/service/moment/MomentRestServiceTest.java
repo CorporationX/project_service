@@ -1,8 +1,8 @@
 package faang.school.projectservice.service.moment;
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentRestDto;
 import faang.school.projectservice.dto.moment.filter.MomentFilterDto;
-import faang.school.projectservice.mapper.MomentMapper;
+import faang.school.projectservice.mapper.MomentRestMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -11,7 +11,7 @@ import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.moment.filter.MomentDateFilter;
 import faang.school.projectservice.service.moment.filter.MomentFilter;
 import faang.school.projectservice.service.moment.filter.MomentProjectFilter;
-import faang.school.projectservice.validation.moment.MomentValidator;
+import faang.school.projectservice.validation.moment.MomentRestValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,23 +33,23 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class MomentServiceTest {
+class MomentRestServiceTest {
     @Mock
-    private MomentMapper momentMapper;
+    private MomentRestMapper momentMapper;
     @Mock
-    private MomentValidator momentValidator;
+    private MomentRestValidator momentValidator;
     @Mock
     private MomentRepository momentRepository;
     @InjectMocks
-    private MomentService momentService;
+    private MomentRestService momentService;
 
     @Test
     public void testCreate() {
-        MomentDto momentDto = getMomentDto();
+        MomentRestDto momentDto = getMomentDto();
 
         momentService.create(momentDto);
 
-        verify(momentValidator).momentHasProjectValidation(any(MomentDto.class));
+        verify(momentValidator).momentHasProjectValidation(any(MomentRestDto.class));
         verify(momentValidator).projectNotCancelledValidator(anyList());
         verify(momentRepository).save(momentMapper.toEntity(momentDto));
 
@@ -59,7 +59,7 @@ class MomentServiceTest {
     @Test
     public void testUpdate() {
         Project project = getProject();
-        MomentDto momentDto = getMomentDto();
+        MomentRestDto momentDto = getMomentDto();
         Moment newMoment = getNewMoment(project);
         Moment oldMoment = getOldMoment(project);
 
@@ -79,7 +79,7 @@ class MomentServiceTest {
 
     @Test
     public void testUpdateException() {
-        MomentDto momentDto = getMomentDto();
+        MomentRestDto momentDto = getMomentDto();
 
         assertThrows(EntityNotFoundException.class, () -> momentService.update(-1L, momentDto));
     }
@@ -117,10 +117,10 @@ class MomentServiceTest {
         Project project = getProject();
         List<Moment> momentsList = new ArrayList<>(List.of(getOldMoment(project), getNewMoment(project)));
 
-        List<MomentDto> expectedResult = momentMapper.toDtoList(momentsList);
+        List<MomentRestDto> expectedResult = momentMapper.toDtoList(momentsList);
         when(momentRepository.findAll()).thenReturn(momentsList);
 
-        List<MomentDto> actualResult = momentService.getAllMoments();
+        List<MomentRestDto> actualResult = momentService.getAllMoments();
         assertEquals(expectedResult, actualResult);
     }
 
@@ -128,11 +128,11 @@ class MomentServiceTest {
     public void testGetMomentById() {
         Project project = getProject();
         Moment moment = getOldMoment(project);
-        MomentDto momentDto = momentMapper.toDto(moment);
+        MomentRestDto momentDto = momentMapper.toDto(moment);
 
         when(momentRepository.findById(moment.getId())).thenReturn(Optional.of(moment));
 
-        MomentDto result = momentService.getMomentById(moment.getId());
+        MomentRestDto result = momentService.getMomentById(moment.getId());
 
         assertEquals(momentDto, result);
     }
@@ -167,8 +167,8 @@ class MomentServiceTest {
                 .build();
     }
 
-    private static MomentDto getMomentDto() {
-        return MomentDto.builder()
+    private static MomentRestDto getMomentDto() {
+        return MomentRestDto.builder()
                 .id(1L)
                 .name("testMomentDto")
                 .date(LocalDateTime.now())
@@ -214,6 +214,7 @@ class MomentServiceTest {
                         .build()
         );
     }
+
     private static List<Moment> getExpectedMomentProjectList() {
         return List.of(Moment.builder()
                         .id(1L)

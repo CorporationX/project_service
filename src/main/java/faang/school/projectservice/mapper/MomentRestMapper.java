@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentRestDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
@@ -11,18 +11,18 @@ import org.mapstruct.ReportingPolicy;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface MomentMapper {
+public interface MomentRestMapper {
     @Mapping(source = "projects", target = "projects", qualifiedByName = "toProjectIds")
-    MomentDto toDto(Moment moment);
+    MomentRestDto toDto(Moment moment);
 
     @Mapping(source = "projects", target = "projects", qualifiedByName = "toProjectIds")
-    List<MomentDto> toDtoList(List<Moment> momentList);
+    List<MomentRestDto> toDtoList(List<Moment> momentList);
 
     @Mapping(source = "projects", target = "projects", qualifiedByName = "toProjects")
-    Moment toEntity(MomentDto momentDto);
+    Moment toEntity(MomentRestDto momentDto);
 
     @Mapping(source = "projects", target = "projects", qualifiedByName = "toProjects")
-    List<Moment> toEntityList(List<MomentDto> momentDtoList);
+    List<Moment> toEntityList(List<MomentRestDto> momentDtoList);
 
     @Named("toProjectIds")
     default List<Long> toProjectIds(List<Project> projects) {

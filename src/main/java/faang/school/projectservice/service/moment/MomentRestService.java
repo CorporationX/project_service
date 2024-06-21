@@ -1,13 +1,13 @@
 package faang.school.projectservice.service.moment;
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentRestDto;
 import faang.school.projectservice.dto.moment.filter.MomentFilterDto;
-import faang.school.projectservice.mapper.MomentMapper;
+import faang.school.projectservice.mapper.MomentRestMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filter.MomentFilter;
-import faang.school.projectservice.validation.moment.MomentValidator;
+import faang.school.projectservice.validation.moment.MomentRestValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,16 +17,16 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class MomentService {
+public class MomentRestService {
     private final MomentRepository momentRepository;
     private final ProjectRepository projectRepository;
-    private final MomentMapper momentMapper;
-    private final MomentValidator momentValidator;
+    private final MomentRestMapper momentMapper;
+    private final MomentRestValidator momentValidator;
     private final List<MomentFilter> momentFilters;
 
 
     @Transactional
-    public MomentDto create(MomentDto momentDto) {
+    public MomentRestDto create(MomentRestDto momentDto) {
         momentValidator.momentHasProjectValidation(momentDto);
         momentValidator.projectNotCancelledValidator(momentDto.getProjects());
 
@@ -34,9 +34,12 @@ public class MomentService {
     }
 
     @Transactional
-    public MomentDto update(Long momentId, MomentDto momentDto) {
-        momentValidator.projectsUpdateValidator(findMomentById(momentId), momentDto);
-        momentValidator.membersUpdateValidator(findMomentById(momentId), momentDto);
+    public MomentRestDto update(Long momentId, MomentRestDto momentDto) {
+        Moment findMomentById = momentRepository.findById(momentId)
+                .orElseThrow(() -> new EntityNotFoundException("Moment not found"));
+
+        momentValidator.projectsUpdateValidator(findMomentById, momentDto);
+        momentValidator.membersUpdateValidator(findMomentById, momentDto);
 
         momentDto.setId(momentId);
 
@@ -44,7 +47,7 @@ public class MomentService {
     }
 
     @Transactional(readOnly = true)
-    public List<MomentDto> getAllMomentsByFilters(Long projectId, MomentFilterDto filters) {
+    public List<MomentRestDto> getAllMomentsByFilters(Long projectId, MomentFilterDto filters) {
         var projectMomentList = projectRepository.getProjectById(projectId).getMoments();
         return momentFilters.stream()
                 .filter(momentFilter -> momentFilter.isApplicable(filters))
@@ -55,27 +58,14 @@ public class MomentService {
     }
 
     @Transactional(readOnly = true)
-    public List<MomentDto> getAllMoments() {
+    public List<MomentRestDto> getAllMoments() {
         return momentMapper.toDtoList(momentRepository.findAll());
     }
 
     @Transactional(readOnly = true)
-    public MomentDto getMomentById(Long momentId) {
-        return momentMapper.toDto(findMomentById(momentId));
-    }
-
-    public MomentDto createMoment(MomentDto momentDto) {
-        Moment momentEntity = momentMapper.toEntity(momentDto);
-        fillMoment(momentEntity, momentDto.getUserIds());
-
-        return momentMapper.toDto(momentRepository.save(momentEntity));
-    }
-
-    private void fillMoment(Moment moment, List<Long> projectsIds) {
-        moment.setProjects(projectRepository.findAllByIds(projectsIds));
-    }
-
-    private Moment findMomentById(Long id) {
-        return momentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Moment not found"));
+    public MomentRestDto getMomentById(Long momentId) {
+        Moment findMomentById = momentRepository.findById(momentId)
+                .orElseThrow(() -> new EntityNotFoundException("Moment not found"));
+        return momentMapper.toDto(findMomentById);
     }
 }

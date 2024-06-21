@@ -1,6 +1,6 @@
 package faang.school.projectservice.validation.moment;
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentRestDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class MomentValidator {
+public class MomentRestValidator {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-    public void momentHasProjectValidation(MomentDto momentDto) {
+    public void momentHasProjectValidation(MomentRestDto momentDto) {
         momentDto.getProjects()
                 .stream()
                 .findFirst()
@@ -39,7 +39,7 @@ public class MomentValidator {
                 });
     }
 
-    public void projectsUpdateValidator(Moment oldMoment, MomentDto newMomentDto) {
+    public void projectsUpdateValidator(Moment oldMoment, MomentRestDto newMomentDto) {
         Set<Long> newProjectIds = new HashSet<>(newMomentDto.getProjects());
         newProjectIds.retainAll(oldMoment.getProjects()
                 .stream()
@@ -60,7 +60,7 @@ public class MomentValidator {
         }
     }
 
-    public void membersUpdateValidator(Moment oldMoment, MomentDto newMomentDto) {
+    public void membersUpdateValidator(Moment oldMoment, MomentRestDto newMomentDto) {
         Set<Long> newUserIds = new HashSet<>(newMomentDto.getUserIds());
         Set<Long> oldUserIds = new HashSet<>(oldMoment.getUserIds());
         newUserIds.retainAll(oldUserIds);
