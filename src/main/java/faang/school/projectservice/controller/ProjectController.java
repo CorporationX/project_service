@@ -59,7 +59,7 @@ public class ProjectController {
     }
 
     @Operation(summary = "Check is user project owner")
-    @GetMapping("/{projectId}/check/owner/{userId}")
+    @GetMapping("/{projectId}/owner/{userId}")
     public boolean checkProjectOwner(@PathVariable("projectId") long projectId,
                                      @PathVariable("userId") long userId) {
         return projectService.isUserProjectOwner(projectId, userId);
