@@ -1,5 +1,9 @@
 package faang.school.projectservice.handler;
 
+import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exceptions.ErrorResponse;
+import faang.school.projectservice.exceptions.NoAccessException;
+import faang.school.projectservice.exceptions.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -8,9 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.exceptions.NotFoundException;
-import faang.school.projectservice.exceptions.ErrorResponse;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleDataValidationException(DataValidationException e, HttpServletRequest request) {
@@ -35,6 +37,13 @@ public class GlobalExceptionHandler {
                         error -> ((FieldError) error).getField(),
                         error -> Objects.requireNonNullElse(error.getDefaultMessage(), "")
                 ));
+    }
+
+    @ExceptionHandler(NoAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleNoAccessException(NoAccessException e, HttpServletRequest request) {
+        log.error("Access denied: {}", e.getMessage());
+        return buildErrorResponse(e, request, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(NotFoundException.class)
