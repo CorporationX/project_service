@@ -1,5 +1,7 @@
 package faang.school.projectservice.publisher;
 
-public interface MessagePublisher<T> {
+import faang.school.projectservice.event.Event;
+
+public interface MessagePublisher<T extends Event> {
     void publish(T event);
 }

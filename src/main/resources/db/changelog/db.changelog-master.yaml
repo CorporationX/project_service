@@ -20,4 +20,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V013_create_initiative.sql
   - include:
-      file: db/changelog/changeset/project_V014_create_project_calendar_token.sql
+      file: db/changelog/changeset/project_V014__alter_project_stage_add_state.sql
+  - include:
+      file: db/changelog/changeset/project_V015_create_project_calendar_token.sql

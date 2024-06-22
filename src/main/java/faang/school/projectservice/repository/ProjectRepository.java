@@ -13,4 +13,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             "WHERE p.ownerId = :ownerId AND p.name = :name"
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
+
+    @Query(nativeQuery = true, value = """
+            select case when count(*) > 0 then true else false end from project p
+            where p.id = :projectId AND p.owner_id = :userId 
+            """)
+    boolean checkUserIsProjectOwner(long projectId, long userId);
 }

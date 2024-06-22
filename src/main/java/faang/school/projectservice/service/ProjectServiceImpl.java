@@ -11,12 +11,15 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.validation.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
@@ -76,5 +79,12 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findById(projectId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isUserProjectOwner(long projectId, long userId) {
+        log.info("Received GET request on project {} and user {}", projectId, userId);
+        return projectRepository.checkUserIsProjectOwner(projectId,userId);
     }
 }
