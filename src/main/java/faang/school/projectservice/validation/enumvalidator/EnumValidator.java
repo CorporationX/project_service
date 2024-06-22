@@ -1,6 +1,6 @@
-package faang.school.projectservice.validator.enumvalidator;
+package faang.school.projectservice.validation.enumvalidator;
 
-import faang.school.projectservice.validator.enumvalidator.impl.EnumValidatorConstraint;
+import faang.school.projectservice.validation.enumvalidator.impl.EnumValidatorConstraint;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import jakarta.validation.constraints.NotNull;

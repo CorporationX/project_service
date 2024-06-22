@@ -14,8 +14,8 @@ import faang.school.projectservice.pattern.strategy.stage.StrategyForDeletingSta
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.service.stage.StageService;
-import faang.school.projectservice.validator.project.ProjectValidator;
-import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.validation.project.ProjectValidator;
+import faang.school.projectservice.validation.stage.StageValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

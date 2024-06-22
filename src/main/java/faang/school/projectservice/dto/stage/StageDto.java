@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.stage;
 
 import faang.school.projectservice.model.StageStatus;
-import faang.school.projectservice.validator.enumvalidator.EnumValidator;
+import faang.school.projectservice.validation.enumvalidator.EnumValidator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

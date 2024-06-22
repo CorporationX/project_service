@@ -1,7 +1,7 @@
 package faang.school.projectservice.pattern.strategy.stage;
 
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.validation.stage.StageValidator;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

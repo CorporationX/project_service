@@ -1,8 +1,8 @@
-package faang.school.projectservice.validator.project.impl;
+package faang.school.projectservice.validation.project.impl;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validator.project.ProjectValidator;
+import faang.school.projectservice.validation.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

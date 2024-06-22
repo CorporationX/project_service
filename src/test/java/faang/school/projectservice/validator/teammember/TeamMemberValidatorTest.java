@@ -1,9 +1,9 @@
 package faang.school.projectservice.validator.teammember;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.validator.teammember.impl.TeamMemberValidatorImpl;
+import faang.school.projectservice.validation.team_member.TeamMemberValidatorImpl;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -75,7 +75,7 @@ public class TeamMemberValidatorTest {
     public void testValidateTeamMemberExistence(long executorId, TeamMember executor) {
         when(teamMemberRepository.existsById(executorId))
                 .thenReturn(true);
-        teamMemberValidator.validateTeamMemberExistence(executorId);
+        teamMemberValidator.validateExistence(executorId);
         verify(teamMemberRepository, times(1))
                 .existsById(idCaptor.capture());
         var actualExecutorId = idCaptor.getValue();
@@ -90,12 +90,12 @@ public class TeamMemberValidatorTest {
     public void testValidateTeamMemberExistenceShouldThrowException(long executorId, TeamMember executor) {
         when(teamMemberRepository.existsById(executorId))
                 .thenReturn(false);
-        DataValidationException actualException = assertThrows(DataValidationException.class,
-                () -> teamMemberValidator.validateTeamMemberExistence(executorId));
+        NotFoundException actualException = assertThrows(NotFoundException.class,
+                () -> teamMemberValidator.validateExistence(executorId));
         verify(teamMemberRepository, times(1))
                 .existsById(idCaptor.capture());
 
-        var expectedMessage = String.format("a team member with %d does not exist", executorId);
+        var expectedMessage = String.format("TeamMember with id=%d does not exist", executorId);
         var actualMessage = actualException.getMessage();
 
         assertEquals(expectedMessage, actualMessage);

@@ -7,10 +7,10 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.validator.project.impl.ProjectValidatorImpl;
-import faang.school.projectservice.validator.stage.impl.StageValidatorImpl;
-import faang.school.projectservice.validator.task.impl.TaskValidatorImpl;
-import faang.school.projectservice.validator.teammember.impl.TeamMemberValidatorImpl;
+import faang.school.projectservice.validation.project.impl.ProjectValidatorImpl;
+import faang.school.projectservice.validation.stage.StageValidatorImpl;
+import faang.school.projectservice.validation.task.impl.TaskValidatorImpl;
+import faang.school.projectservice.validation.team_member.TeamMemberValidatorImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -260,13 +260,13 @@ public class StageValidatorTest {
     public void testValidateCreation(NewStageDto newStageDto) {
         doNothing().when(projectValidator).validateProjectExistence(newStageDto.getProjectId());
         doNothing().when(taskValidator).validateTaskExistence(anyLong());
-        doNothing().when(teamMemberValidator).validateTeamMemberExistence(anyLong());
+        doNothing().when(teamMemberValidator).validateExistence(anyLong());
 
         stageValidator.validateCreation(newStageDto);
 
         verify(projectValidator, times(1)).validateProjectExistence(idCaptor.capture());
         verify(taskValidator, times(3)).validateTaskExistence(idCaptor1.capture());
-        verify(teamMemberValidator, times(4)).validateTeamMemberExistence(idCaptor2.capture());
+        verify(teamMemberValidator, times(4)).validateExistence(idCaptor2.capture());
 
         var actualProjectId = idCaptor.getValue();
         var actualTaskIds = idCaptor1.getAllValues();

@@ -1,12 +1,11 @@
 package faang.school.projectservice.dto.stagerole;
 
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.validator.enumvalidator.EnumValidator;
+import faang.school.projectservice.validation.enumvalidator.EnumValidator;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Builder
