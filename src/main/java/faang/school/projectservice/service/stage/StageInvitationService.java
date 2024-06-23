@@ -1,20 +1,23 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.dto.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stage.StageInvitationDto;
+import faang.school.projectservice.dto.filter.StageInvitationFilterDto;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.stage.filters.StageInvitationFilter;
+import faang.school.projectservice.service.stage.filter.StageInvitationFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StageInvitationService {
@@ -29,17 +32,20 @@ public class StageInvitationService {
 
         stageInvitationDto.setStatus(StageInvitationStatus.PENDING);
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
-        return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
+        StageInvitation savedInvitation = stageInvitationRepository.save(stageInvitation);
+
+        return stageInvitationMapper.toDto(savedInvitation);
     }
 
-    @Transactional
-    public List<StageInvitationDto> getStageInvitations(long id, StageInvitationFilterDto filters) {
-        List<StageInvitation> stageInvitations = stageInvitationRepository.findAll();
-        stageInvitationFilters.stream()
-                .filter(filter -> filter.isApplicable(filters))
-                .forEach(filter -> filter.apply(stageInvitations, filters));
+    @Transactional(readOnly = true)
+    public List<StageInvitationDto> getUserStageInvitations(long userId, StageInvitationFilterDto filters) {
+        List<StageInvitation> filteredInvitations = stageInvitationRepository.findAll().stream()
+                .filter(invitation -> invitation.getInvited().getId() == userId)
+                .filter(invitation -> stageInvitationFilters.stream()
+                        .allMatch(filter -> filter.apply(invitation, filters)))
+                .collect(Collectors.toList());
 
-        return stageInvitationMapper.toDto(stageInvitations);
+        return stageInvitationMapper.toDto(filteredInvitations);
     }
 
     @Transactional
@@ -47,11 +53,10 @@ public class StageInvitationService {
         StageInvitation invitation = stageInvitationRepository.findById(stageInvitationDto.getId());
 
         checkStageInvitationPendingStatus(invitation);
-
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
-        stageInvitationRepository.save(invitation);
+        StageInvitation savedInvitation = stageInvitationRepository.save(invitation);
 
-        return stageInvitationMapper.toDto(invitation);
+        return stageInvitationMapper.toDto(savedInvitation);
     }
 
     @Transactional
@@ -59,24 +64,24 @@ public class StageInvitationService {
         StageInvitation invitation = stageInvitationRepository.findById(stageInvitationDto.getId());
 
         checkStageInvitationPendingStatus(invitation);
-
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(stageInvitationDto.getReason());
-        stageInvitationRepository.save(invitation);
+        StageInvitation savedInvitation = stageInvitationRepository.save(invitation);
 
-        return stageInvitationMapper.toDto(invitation);
+        return stageInvitationMapper.toDto(savedInvitation);
     }
 
     private void checkStageForExists(long stageId) {
         boolean isExist = stageRepository.exist(stageId);
-
         if (!isExist) {
+            log.error("Stage not found by id: {}", stageId);
             throw new EntityNotFoundException(String.format("Stage not found by id: %s", stageId));
         }
     }
 
     private void checkStageInvitationPendingStatus(StageInvitation invitation) {
         if (invitation.getStatus() != StageInvitationStatus.PENDING) {
+            log.error("Only pending invitations can be accepted");
             throw new IllegalStateException("Only pending invitations can be accepted");
         }
     }

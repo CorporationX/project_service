@@ -1,12 +1,11 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.dto.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stage.StageInvitationDto;
+import faang.school.projectservice.dto.filter.StageInvitationFilterDto;
 import faang.school.projectservice.service.stage.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,8 +27,8 @@ public class StageInvitationController {
     }
 
     @GetMapping("/{id}")
-    public List<StageInvitationDto> getStageInvitations(@PathVariable("id") long id, @ModelAttribute StageInvitationFilterDto filter) {
-        return stageInvitationService.getStageInvitations(id, filter);
+    public List<StageInvitationDto> getStageInvitations(@PathVariable("id") long id, @Valid @RequestBody StageInvitationFilterDto filter) {
+        return stageInvitationService.getUserStageInvitations(id, filter);
     }
 
     @PutMapping("/accept")
