@@ -23,6 +23,13 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
+     * Spring
+     */
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+    implementation("org.springframework.retry:spring-retry:2.0.6")
+    implementation("org.springframework:spring-aspects:6.1.9")
+
+    /**
      * Database
      */
     implementation("org.liquibase:liquibase-core")
@@ -35,6 +42,13 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
+     * Gogle Calendar API
+     */
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
+
+    /**
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
@@ -44,7 +58,6 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
     /**
      * Test containers
@@ -61,6 +74,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito:mockito-inline:2.13.0")
     testImplementation("org.projectlombok:lombok:1.18.26")
 
     /**

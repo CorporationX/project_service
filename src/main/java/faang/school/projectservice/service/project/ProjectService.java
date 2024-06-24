@@ -59,6 +59,10 @@ public class ProjectService {
     private final S3Request s3CoverRequest;
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;
+    
+    public Project getProjectModel(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
 
     public boolean existsById(Long projectId) {
         return projectRepository.existsById(projectId);
@@ -90,9 +94,7 @@ public class ProjectService {
     }
 
     public ProjectDto getById(Long id) {
-        Project project = projectRepository.getProjectById(id);
-
-        return projectMapper.toDto(project);
+        return mapper.toDto(getProjectModel(id));
     }
 
     public List<ProjectDto> getAll() {

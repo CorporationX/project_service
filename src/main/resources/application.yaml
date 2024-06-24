@@ -29,6 +29,15 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  #Google API authentication
+  OAuth2:
+    clientId: 281280578889-u8ph8024u07cfst354ao7ch42bi4r2kb.apps.googleusercontent.com
+    clientSecret: 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
+    applicationName: corporationX
+    redirectUri: urn:ietf:wg:oauth:2.0:oob
+    accessType: offline
+    accessTokenExpiresInSeconds: 100
+
 server:
   port: 8083
 
