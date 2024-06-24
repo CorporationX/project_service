@@ -10,7 +10,7 @@ import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InitiativeRepository;
 import faang.school.projectservice.service.moment.MomentService;
-import faang.school.projectservice.validation.InitiativeValidator;
+import faang.school.projectservice.validation.initiative.InitiativeValidatorImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class InitiativeServiceImplTest {
     @Mock
     private InitiativeMapper mapper;
     @Mock
-    private InitiativeValidator validator;
+    private InitiativeValidatorImpl validator;
     @Mock
     private InitiativeRepository initiativeRepository;
     @Mock
@@ -93,7 +93,6 @@ class InitiativeServiceImplTest {
         assertEquals(dto, actual);
 
         InOrder inOrder = inOrder(validator, mapper, initiativeRepository);
-        inOrder.verify(validator, times(1)).validate(dto);
         inOrder.verify(validator, times(1)).validateCurator(dto);
         inOrder.verify(mapper, times(1)).toEntity(dto);
         inOrder.verify(initiativeRepository, times(1)).save(initiative);
@@ -110,7 +109,6 @@ class InitiativeServiceImplTest {
         assertEquals(dto, actual);
 
         InOrder inOrder = inOrder(validator, mapper, initiativeRepository);
-        inOrder.verify(validator, times(1)).validate(dto);
         inOrder.verify(validator, times(1)).validateCurator(dto);
         inOrder.verify(mapper, times(1)).toEntity(dto);
         inOrder.verify(initiativeRepository, times(1)).save(initiative);
@@ -129,7 +127,6 @@ class InitiativeServiceImplTest {
         assertEquals(dto, actual);
 
         InOrder inOrder = inOrder(validator, mapper, initiativeRepository, momentService);
-        inOrder.verify(validator, times(1)).validate(dto);
         inOrder.verify(validator, times(1)).validateCurator(dto);
         inOrder.verify(mapper, times(1)).toEntity(dto);
         inOrder.verify(validator, times(1)).validateClosedInitiative(dto);

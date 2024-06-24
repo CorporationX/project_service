@@ -1,7 +1,7 @@
 package faang.school.projectservice.pattern.strategy.stage;
 
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.validation.stage.StageValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ public class StrategyCascadeForDeletingStage implements StrategyForDeletingStage
 
     @Override
     public void manageTasksOfStage(long stageId, Long stageToMigrateId) {
-        stageValidator.validateStageExistence(stageId);
+        stageValidator.validateExistence(stageId);
         taskRepository.deleteAllByStageId(stageId);
     }
 }

@@ -1,4 +1,4 @@
-package faang.school.projectservice.validation;
+package faang.school.projectservice.validation.initiative;
 
 import faang.school.projectservice.dto.initiative.InitiativeDto;
 import faang.school.projectservice.exceptions.DataValidationException;
@@ -36,7 +36,7 @@ class InitiativeValidatorTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @InjectMocks
-    private InitiativeValidator validator;
+    private InitiativeValidatorImpl validator;
 
     private InitiativeDto dto;
     private TeamMember curator;
@@ -72,67 +72,6 @@ class InitiativeValidatorTest {
                 .team(Team.builder().project(project).build())
                 .roles(List.of(TeamRole.OWNER))
                 .build();
-    }
-
-    @Test
-    void validateNullProject() {
-        dto.setProjectId(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative projectId must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateNullName() {
-        dto.setName(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative name must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateBlankName() {
-        dto.setName("  ");
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative name must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateNullDescription() {
-        dto.setDescription(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative description must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateBlankDescription() {
-        dto.setDescription("   ");
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative description must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateNullCuratorId() {
-        dto.setCuratorId(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative curatorId must not be null", e.getMessage());
-    }
-
-    @Test
-    void validateNullStatus() {
-        dto.setStatus(null);
-
-        DataValidationException e = assertThrows(DataValidationException.class, () -> validator.validate(dto));
-        assertEquals("initiative status must not be null", e.getMessage());
-    }
-
-    @Test
-    void validate() {
-        assertDoesNotThrow(() -> validator.validate(dto));
     }
 
     @Test

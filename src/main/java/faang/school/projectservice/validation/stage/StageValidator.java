@@ -1,6 +1,12 @@
 package faang.school.projectservice.validation.stage;
 
-public interface StageValidator {
+import faang.school.projectservice.dto.stage.NewStageDto;
+import faang.school.projectservice.model.stage.Stage;
 
-    void validateExistence(long id);
+public interface StageValidator {
+    Stage validateExistence(long id);
+
+    void validateStageForToMigrateExistence(Long stageToMigrateId);
+
+    void validateCreation(NewStageDto stageDto);
 }

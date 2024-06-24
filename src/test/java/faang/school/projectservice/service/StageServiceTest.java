@@ -16,8 +16,8 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.service.stage.impl.StageServiceImpl;
-import faang.school.projectservice.validator.project.ProjectValidator;
-import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.validation.project.ProjectValidator;
+import faang.school.projectservice.validation.stage.StageValidator;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -457,7 +457,7 @@ public class StageServiceTest {
             StageDto stageDto,
             List<NewStageRolesDto> newStageRolesDtoList,
             List<StageRoles> stageRolesEntities) {
-        when(stageValidator.validateStageExistence(stageId)).thenReturn(stageEntity);
+        when(stageValidator.validateExistence(stageId)).thenReturn(stageEntity);
         when(stageRolesMapper.toEntityList(newStageRolesDtoList)).thenReturn(stageRolesEntities);
         when(stageRolesRepository.saveAll(stageRolesEntities)).thenReturn(null);
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stageEntity));
@@ -466,7 +466,7 @@ public class StageServiceTest {
         var actual = stageService.updateStage(stageId, newStageRolesDtoList);
 
         verify(stageValidator, times(1))
-                .validateStageExistence(stageIdCaptor1.capture());
+                .validateExistence(stageIdCaptor1.capture());
         verify(stageRolesMapper, times(1))
                 .toEntityList(newStageRolesDtoListCaptor.capture());
         verify(stageRolesRepository, times(1))
@@ -498,13 +498,13 @@ public class StageServiceTest {
             Long stageId,
             Stage stageEntity,
             StageDto stageDto) {
-        when(stageValidator.validateStageExistence(stageId)).thenReturn(stageEntity);
+        when(stageValidator.validateExistence(stageId)).thenReturn(stageEntity);
         when(stageMapper.toDto(stageEntity)).thenReturn(stageDto);
 
         var actual = stageService.getStageById(stageId);
 
         verify(stageValidator, times(1))
-                .validateStageExistence(stageIdCaptor1.capture());
+                .validateExistence(stageIdCaptor1.capture());
         verify(stageMapper, times(1))
                 .toDto(stageArgumentCaptor1.capture());
 

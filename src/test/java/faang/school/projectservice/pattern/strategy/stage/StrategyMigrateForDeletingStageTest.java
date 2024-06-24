@@ -1,7 +1,7 @@
 package faang.school.projectservice.pattern.strategy.stage;
 
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.validation.stage.StageValidator;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -51,7 +51,7 @@ public class StrategyMigrateForDeletingStageTest {
         strategyMigrateForDeletingStage.manageTasksOfStage(stageId, stageToMigrateId);
 
         verify(stageValidator, times(1))
-                .validateStageExistence(stageIdCaptor.capture());
+                .validateExistence(stageIdCaptor.capture());
         verify(stageValidator, times(1))
                 .validateStageForToMigrateExistence(stageToMigrateIdCaptor.capture());
         verify(taskRepository, times(1))

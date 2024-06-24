@@ -5,6 +5,8 @@ import faang.school.projectservice.dto.initiative.InitiativeFilterDto;
 import faang.school.projectservice.service.initiative.InitiativeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,21 +30,21 @@ public class InitiativeController {
     @Operation(summary = "Create new initiative")
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public InitiativeDto create(@RequestBody InitiativeDto initiative) {
+    public InitiativeDto create(@Valid @RequestBody InitiativeDto initiative) {
         return initiativeService.create(initiative);
     }
 
     @Operation(summary = "Update initiative")
     @PutMapping("/update")
     @ResponseStatus(HttpStatus.OK)
-    public InitiativeDto update(@RequestBody InitiativeDto initiative) {
+    public InitiativeDto update(@Valid @RequestBody InitiativeDto initiative) {
         return initiativeService.update(initiative);
     }
 
     @Operation(summary = "Get all initiatives by filter")
     @PostMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
-    public List<InitiativeDto> getAllByFilter(@RequestBody InitiativeFilterDto filters) {
+    public List<InitiativeDto> getAllByFilter(@Valid @RequestBody InitiativeFilterDto filters) {
         return initiativeService.getAllByFilter(filters);
     }
 
@@ -56,7 +58,7 @@ public class InitiativeController {
     @Operation(summary = "Get initiative by id")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public InitiativeDto getById(@PathVariable long id) {
+    public InitiativeDto getById(@Positive @PathVariable long id) {
         return initiativeService.getById(id);
     }
 }
