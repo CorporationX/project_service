@@ -40,6 +40,13 @@ public class Resource {
     private String key;
 
     private BigInteger size;
+    
+    //TODO: Нет миграций на таблицу resource_allowed_roles
+    @ElementCollection(targetClass = TeamRole.class)
+    @CollectionTable(name = "resource_allowed_roles", joinColumns = @JoinColumn(name = "resource_id"))
+    @Column(name = "role_id")
+    @Enumerated(EnumType.STRING)
+    private List<TeamRole> allowedRoles;
 
     @Enumerated(EnumType.STRING)
     private ResourceType type;

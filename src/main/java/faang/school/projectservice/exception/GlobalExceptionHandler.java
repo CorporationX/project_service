@@ -33,30 +33,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.internalServerError().body(ex.getMessage());
     }
     
-    
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+    @ExceptionHandler(FileException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity handleS3Exceptions(RuntimeException ex) {
+    public ResponseEntity handleFileExceptions(FileException ex) {
         return ResponseEntity.internalServerError().body(ex.getMessage());
     }
-        
-        @ExceptionHandler(FileException.class)
-        @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-        public ResponseEntity handleFileExceptions(FileException ex) {
-            return ResponseEntity.internalServerError().body(ex.getMessage());
-        }
-        
-        @ExceptionHandler(MethodArgumentNotValidException.class)
-        @ResponseStatus(HttpStatus.BAD_REQUEST)
-        public ResponseEntity handleValidationExceptions(MethodArgumentNotValidException ex) {
-            Map<String, String> errors = ex.getBindingResult()
-                .getAllErrors()
-                .stream()
-                .collect(Collectors.toMap(error -> ((FieldError) error).getField(), error -> error.getDefaultMessage()));
-            return ResponseEntity.badRequest().body(errors);
-        }
-
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = ex.getBindingResult()
+            .getAllErrors()
+            .stream()
+            .collect(Collectors.toMap(error -> ((FieldError) error).getField(), error -> error.getDefaultMessage()));
+        return ResponseEntity.badRequest().body(errors);
+    }
+    
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException constraintViolationException) {
         return ResponseEntity.badRequest().body(constraintViolationException.getMessage());

@@ -1,21 +1,14 @@
 package faang.school.projectservice.service.project;
 
-import java.math.BigInteger;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-
-import faang.school.projectservice.dto.image.ProjectImage;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.dto.resource.MultipartFileResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -24,15 +17,12 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
-import faang.school.projectservice.service.s3.S3Service;
-import faang.school.projectservice.service.s3.requests.S3Request;
+import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -44,19 +34,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProjectService {
     private static final String ALL_SUBPROJECTS_DONE_MOMENT_NAME = "All subprojects completed";
-    private static final String DEFAULT_FOLDER_RESOURCE_DELIMITER = "_";
     
     //TODO: Доделать тесты (RickHammerson/Radmir)
-    private final S3Service s3Service;
     private final ProjectRepository projectRepository;
     private final MomentService momentService;
+    private final ResourceService resourceService;
     private final ProjectValidator validator;
     private final ProjectMapper projectMapper;
     private final ResourceMapper resourceMapper;
     private final ProjectValidator projectValidator;
     private final List<ProjectFilter> filters;
-    @Qualifier("s3ProjectCoverRequest")
-    private final S3Request s3CoverRequest;
+ 
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;
     
@@ -94,7 +82,7 @@ public class ProjectService {
     }
 
     public ProjectDto getById(Long id) {
-        return mapper.toDto(getProjectModel(id));
+        return projectMapper.toDto(getProjectModel(id));
     }
 
     public List<ProjectDto> getAll() {
@@ -114,69 +102,14 @@ public class ProjectService {
     public ResourceDto uploadCover(Long projectId, Long teamMemberId, MultipartFile file){
         Project project = projectRepository.getProjectById(projectId);
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
+        projectValidator.verifyStorageSizeNotExceeding(project, file.getSize());
         
-        Resource resource = uploadCoverToS3(file, project, teamMember);
-        
+        Resource resource = resourceService.uploadProjectCover(file, project, teamMember);
         project.addStorageSize(resource.getSize());
         project.setCoverImageId(resource.getKey());
-        
         Resource savedResource = resourceRepository.save(resource);
+        
         return resourceMapper.toDto(savedResource);
-    }
-    
-    public PutObjectRequest putObjectToS3(MultipartFileResourceDto resourceDto) {
-        PutObjectRequest putRequest = s3CoverRequest.putRequest(resourceDto);
-        s3Service.uploadFile(putRequest);
-        return putRequest;
-    }
-    
-    @SneakyThrows
-    private Resource uploadCoverToS3(
-        MultipartFile file,
-        Project project,
-        TeamMember teamMember
-    ) {
-        ProjectImage projectImage = new ProjectImage(file.getInputStream());
-        projectValidator.verifyStorageSizeNotExceeding(project, projectImage.getResizedImageSize());
-        
-        MultipartFileResourceDto resourceDto = getMultipartFileResourceDto(file, project, projectImage);
-        
-        PutObjectRequest projectCoverPutRequest = putObjectToS3(resourceDto);
-        
-        return createResource(file, project, teamMember, projectCoverPutRequest, resourceDto);
-    }
-    
-    private MultipartFileResourceDto getMultipartFileResourceDto(
-        MultipartFile file,
-        Project project,
-        ProjectImage projectImage
-    ) {
-        return MultipartFileResourceDto.builder()
-            .size(projectImage.getResizedImageSize())
-            .contentType(file.getContentType())
-            .fileName(file.getOriginalFilename())
-            .folderName(getDefaultProjectFolderName(project))
-            .resourceInputStream(projectImage.getCoverInputStream())
-            .build();
-    }
-    
-    private Resource createResource(
-        MultipartFile file,
-        Project project,
-        TeamMember teamMember,
-        PutObjectRequest projectCoverPutRequest,
-        MultipartFileResourceDto resourceDto
-    ) {
-        Resource resource = new Resource();
-        resource.setKey(projectCoverPutRequest.getKey());
-        resource.setSize(BigInteger.valueOf(resourceDto.getSize()));
-        resource.setStatus(ResourceStatus.ACTIVE);
-        resource.setName(resourceDto.getFileName());
-        resource.setType(ResourceType.getResourceType(file.getContentType()));
-        resource.setProject(project);
-        resource.setCreatedBy(teamMember);
-        resource.setUpdatedBy(teamMember);
-        return resource;
     }
     
     @Transactional
@@ -184,8 +117,7 @@ public class ProjectService {
         Project project = projectRepository.getProjectById(projectId);
         projectValidator.verifyNoCover(project);
         
-        DeleteObjectRequest request = s3CoverRequest.deleteRequest(project.getCoverImageId());
-        s3Service.deleteFile(request);
+        resourceService.deleteProjectCover(project.getCoverImageId());
         
         project.setCoverImageId(null);
     }
@@ -197,10 +129,6 @@ public class ProjectService {
                 .distinct()
                 .map(projectMapper::toDto)
                 .toList();
-    }
-    
-    private String getDefaultProjectFolderName(Project project) {
-        return String.format("%s%s%s", project.getId(), DEFAULT_FOLDER_RESOURCE_DELIMITER, project.getName());
     }
 
     public List<ProjectDto> searchSubprojects(Long parentProjectId, ProjectFilterDto filter) {

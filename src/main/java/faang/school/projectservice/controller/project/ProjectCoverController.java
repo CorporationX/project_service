@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Validated
 @RequestMapping("projects")
-public class ProjectImageController {
+public class ProjectCoverController {
     private final ProjectService projectService;
     
     @PostMapping("/{projectId}/cover")
