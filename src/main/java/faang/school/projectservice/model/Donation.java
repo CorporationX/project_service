@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class Donation {
     private Long id;
     private Long paymentNumber;
     private BigDecimal amount;
+    @CreationTimestamp
     private LocalDateTime donationTime;
     @ManyToOne
     @JoinColumn(name = "campaign_id")
