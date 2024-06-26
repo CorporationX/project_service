@@ -2,6 +2,7 @@ package faang.school.projectservice.model;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -107,6 +108,13 @@ public class Project {
 
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
+    
+    public void addResource(Resource resource) {
+        if (this.resources == null) {
+            this.resources = new ArrayList<>();
+        }
+        this.resources.add(resource);
+    }
     
     public boolean isStatusFinished() {
         return this.status == ProjectStatus.CANCELLED || this.status == ProjectStatus.COMPLETED;

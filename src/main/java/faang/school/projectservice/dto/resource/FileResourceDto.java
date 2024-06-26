@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MultipartFileResourceDto {
+public class FileResourceDto {
     private String fileName;
     private String folderName;
     private InputStream resourceInputStream;
