@@ -4,15 +4,16 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.exception.S3Exception;
+import faang.school.projectservice.model.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Date;
 import java.time.Instant;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +22,7 @@ public class AmazonS3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public String uploadFile(String path, MultipartFile file) {
-        String key = path + "/" + UUID.randomUUID();
+    public Resource uploadFile(String key, MultipartFile file) {
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());
@@ -35,21 +35,15 @@ public class AmazonS3Service {
             throw new S3Exception(e.getMessage());
         }
 
-        return key;
+        return new Resource();
     }
 
-    public S3ObjectInputStream downloadFile(String key) {
-        return amazonS3
+    public InputStreamResource downloadFile(String key) {
+        S3ObjectInputStream s3ObjectInputStream = amazonS3
                 .getObject(bucketName, key)
                 .getObjectContent();
+        return new InputStreamResource(s3ObjectInputStream);
     }
-
-//    public InputStreamResource downloadFile(String key) {
-//        S3ObjectInputStream s3ObjectInputStream = amazonS3
-//                .getObject(bucketName, key)
-//                .getObjectContent();
-//        return new InputStreamResource(s3ObjectInputStream);
-//    }
 
     public void deleteFile(String key) {
         amazonS3.deleteObject(bucketName, key);

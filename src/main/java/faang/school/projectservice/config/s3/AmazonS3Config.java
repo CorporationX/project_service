@@ -29,7 +29,6 @@ public class AmazonS3Config {
                 new AWSStaticCredentialsProvider(
                         new BasicAWSCredentials(accessKey, secretKey)
                 );
-
         AwsClientBuilder.EndpointConfiguration endpointConfiguration =
                 new AwsClientBuilder.EndpointConfiguration(endpoint, Regions.DEFAULT_REGION.getName());
 

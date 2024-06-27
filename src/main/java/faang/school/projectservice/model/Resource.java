@@ -1,21 +1,7 @@
 package faang.school.projectservice.model;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -28,7 +14,6 @@ import java.util.List;
 @Entity
 @Table(name = "resource")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Resource {
@@ -47,6 +32,7 @@ public class Resource {
     @CollectionTable(name = "resource_allowed_roles",
             joinColumns = @JoinColumn(name = "resource_id"))
     @Column(name = "role_id")
+    //TODO Murzin34* TeamRole это Enum, а здесь фигурирует role_id bigint. Возможно нужно изменить таблицу.
     @Enumerated(EnumType.STRING)
     private List<TeamRole> allowedRoles;
 
