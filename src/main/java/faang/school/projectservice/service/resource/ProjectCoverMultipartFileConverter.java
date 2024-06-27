@@ -9,10 +9,10 @@ import faang.school.projectservice.model.Project;
 import lombok.SneakyThrows;
 
 @Component
-public class ProjectCoverResource extends MultipartFileResourceConverter {
+public class ProjectCoverMultipartFileConverter extends MultipartFileResourceConverter {
     @SneakyThrows
     @Override
-    public FileResourceDto createFileResourceDto(MultipartFile file, Project project) {
+    public FileResourceDto convertToFileResourceDto(MultipartFile file, Project project) {
         ProjectImage projectImage = new ProjectImage(file.getInputStream());
         return FileResourceDto.builder()
             .size(projectImage.getResizedImageSize())
@@ -24,7 +24,7 @@ public class ProjectCoverResource extends MultipartFileResourceConverter {
     }
     
     @Override
-    public ProjectResourceType getSupportedType() {
+    public ProjectResourceType getProjectResourceSupportedType() {
         return ProjectResourceType.PROJECT_COVER;
     }
 }

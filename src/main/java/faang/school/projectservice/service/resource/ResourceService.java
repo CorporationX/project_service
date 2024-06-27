@@ -28,6 +28,9 @@ import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+/**
+ * Сервис обработки ресурсов проекта
+ */
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
@@ -41,6 +44,16 @@ public class ResourceService {
     private final TeamMemberRepository teamMemberRepository;
     private final List<MultipartFileResourceConverter> fileResourceConverters;
     
+    /**
+     * Общий метод загрузки ресурса в s3
+     *
+     * @param projectId ID проекта, к которому прикрепляется ресурс
+     * @param teamMemberId ID члена команды, который прикрепляет ресурс
+     * @param file MultipartFile, который хотят загрузить
+     * @param resourceType тип ресурса для проекта. Вся логика накрутки находится в методах, вызывающих этот метод
+     *
+     * @return DTO сохраненного ресурса
+     */
     @Transactional
     public ResourceDto uploadResource(
         Long projectId,
@@ -53,7 +66,7 @@ public class ResourceService {
         
         projectValidator.verifyStorageSizeNotExceeding(project, file.getSize());
         
-        FileResourceDto resourceDto = getFileResourceDtoByType(file, project, resourceType);
+        FileResourceDto resourceDto = convertMultipartFileToFileResourceDto(file, project, resourceType);
         PutObjectRequest putRequest = s3RequestService.createPutRequest(resourceDto);
         s3Service.uploadFile(putRequest);
         
@@ -63,6 +76,9 @@ public class ResourceService {
         return resourceMapper.toDto(saved);
     }
     
+    /**
+     * Метод сохранения обложки проекта
+     */
     @SneakyThrows
     @Transactional
     public ResourceDto uploadProjectCover(Long projectId, Long teamMemberId, MultipartFile file) {
@@ -76,20 +92,22 @@ public class ResourceService {
         return resourceDto;
     }
     
+    /**
+     * Метод удаления обложки проекта
+     */
     public void deleteProjectCover(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
         projectValidator.verifyNoCover(project);
         
-        deleteProjectCover(project.getCoverImageId());
+        DeleteObjectRequest deleteRequest = s3RequestService.createDeleteRequest(project.getCoverImageId());
+        s3Service.deleteFile(deleteRequest);
         
         project.setCoverImageId(null);
     }
     
-    public void deleteProjectCover(String coverImageId) {
-        DeleteObjectRequest deleteRequest = s3RequestService.createDeleteRequest(coverImageId);
-        s3Service.deleteFile(deleteRequest);
-    }
-    
+    /**
+     * Создание ресурса для вставки в БД
+     */
     private Resource createResource(
         Project project,
         TeamMember teamMember,
@@ -108,11 +126,18 @@ public class ResourceService {
         return resource;
     }
     
-    private FileResourceDto getFileResourceDtoByType(MultipartFile file, Project project, ProjectResourceType resourceType) {
+    /**
+     * Конвертация MultipartFile в DTO, для последующей обработки в S3
+     */
+    private FileResourceDto convertMultipartFileToFileResourceDto(
+        MultipartFile file,
+        Project project,
+        ProjectResourceType resourceType
+    ) {
         return fileResourceConverters.stream()
-            .filter(converter -> converter.getSupportedType().equals(resourceType))
+            .filter(converter -> converter.getProjectResourceSupportedType().equals(resourceType))
             .findFirst()
-            .map(converter -> converter.createFileResourceDto(file, project))
+            .map(converter -> converter.convertToFileResourceDto(file, project))
             .orElseThrow(
                 () -> new IllegalArgumentException(String.format("Не найден конвертер для типа %s", resourceType))
             );
