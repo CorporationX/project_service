@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -43,12 +44,13 @@ public class ResourceService {
         resource.setName(file.getOriginalFilename());
         resource.setSize(BigInteger.valueOf(file.getSize()));
         resource.setType(ResourceType.getResourceType(file.getContentType()));
+        resource.setAllowedRoles(new HashSet<>(teamMember.getRoles()));
         resource.setStatus(ResourceStatus.ACTIVE);
         resource.setCreatedBy(teamMember);
         resource.setUpdatedBy(teamMember);
         resource.setProject(project);
         //TODO Murzin34* TeamRole это Enum, а в модели Resource фигурирует role_id bigint. Возможно нужно изменить таблицу.
-        //resource.setAllowedRoles(teamMember.getRoles());
+
         resourceRepository.save(resource);
 
         project.setStorageSize(newStorageSize);
@@ -69,7 +71,7 @@ public class ResourceService {
     }
 
     @Transactional
-    public void deleteFileFromProject(Long userid, Long resourceId) {
+    public void deleteFile(Long userid, Long resourceId) {
         TeamMember teamMember = getTeamMember(userid);
         Resource resource = getResource(resourceId);
         Project project = teamMember.getTeam().getProject();
@@ -84,6 +86,7 @@ public class ResourceService {
 
         resource.setKey(null);
         resource.setSize(null);
+        resource.setAllowedRoles(null);
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedBy(teamMember);
 

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -21,7 +21,7 @@ public class ResourceDto {
     private String key;
     private String name;
     private BigInteger size;
-    private List<TeamRole> allowedRoles;
+    private Set<TeamRole> allowedRoles;
     private ResourceType type;
     private ResourceStatus status;
     private Long createdById;

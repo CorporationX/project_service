@@ -10,7 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "resource")
@@ -33,10 +33,9 @@ public class Resource {
     @ElementCollection(targetClass = TeamRole.class)
     @CollectionTable(name = "resource_allowed_roles",
             joinColumns = @JoinColumn(name = "resource_id"))
-    @Column(name = "role_id")
-    //TODO Murzin34* TeamRole это Enum, а здесь фигурирует role_id bigint. Возможно нужно изменить таблицу.
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private List<TeamRole> allowedRoles;
+    private Set<TeamRole> allowedRoles;
 
     @Enumerated(EnumType.STRING)
     private ResourceType type;

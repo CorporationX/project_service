@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,7 +96,7 @@ class ResourceServiceTest {
 
         BigInteger expectedLength = project.getStorageSize().subtract(resource.getSize());
 
-        resourceService.deleteFileFromProject(userId, resourceId);
+        resourceService.deleteFile(userId, resourceId);
 
         assertNull(resource.getKey());
         assertNull(resource.getSize());
@@ -127,7 +128,7 @@ class ResourceServiceTest {
                 .key("TestKeyName")
                 .name(file.getName())
                 .size(BigInteger.valueOf(file.getSize()))
-                .allowedRoles(teamMember.getRoles())
+                .allowedRoles(new HashSet<>(teamMember.getRoles()))
                 .type(ResourceType.valueOf(file.getContentType()))
                 .status(ResourceStatus.ACTIVE)
                 .createdBy(teamMember)
@@ -144,7 +145,7 @@ class ResourceServiceTest {
                 .key("TestKeyName")
                 .name(file.getName())
                 .size(BigInteger.valueOf(file.getSize()))
-                .allowedRoles(teamMember.getRoles())
+                .allowedRoles(new HashSet<>(teamMember.getRoles()))
                 .type(ResourceType.valueOf(file.getContentType()))
                 .status(ResourceStatus.ACTIVE)
                 .createdById(teamMember.getId())

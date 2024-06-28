@@ -30,9 +30,8 @@ public class ResourceController {
     }
 
     @DeleteMapping("/{userId}/files/{resourceId}")
-    @ResponseStatus(HttpStatus.OK)
     public void deleteFile(@PathVariable @Positive Long userId,
                            @PathVariable @Positive Long resourceId) {
-        resourceService.deleteFileFromProject(userId, resourceId);
+        resourceService.deleteFile(userId, resourceId);
     }
 }
