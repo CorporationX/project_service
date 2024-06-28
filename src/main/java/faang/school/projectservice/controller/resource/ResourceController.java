@@ -23,16 +23,16 @@ public class ResourceController {
         return resourceService.saveFile(userId, file);
     }
 
-    @GetMapping("/{projectId}/files/{resourceId}")
-    public InputStreamResource getFile(@PathVariable @Positive Long projectId,
+    @GetMapping("/{userId}/files/{resourceId}")
+    public InputStreamResource getFile(@PathVariable @Positive Long userId,
                                        @PathVariable @Positive Long resourceId) {
-        return resourceService.getFile(projectId, resourceId);
+        return resourceService.getFile(userId, resourceId);
     }
 
-    @DeleteMapping("/{projectId}/files/{resourceId}")
+    @DeleteMapping("/{userId}/files/{resourceId}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteFile(@PathVariable @Positive Long projectId,
+    public void deleteFile(@PathVariable @Positive Long userId,
                            @PathVariable @Positive Long resourceId) {
-        resourceService.deleteFileFromProject(projectId, resourceId);
+        resourceService.deleteFileFromProject(userId, resourceId);
     }
 }

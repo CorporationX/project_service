@@ -23,14 +23,18 @@ public class ResourceValidator {
         }
     }
 
-    public void validateDownloadFilePermission(Project project, Resource resource) {
-        if (!resource.getProject().equals(project)) {
-            throw new NoAccessException("Only project members can download files from storage.");
+    public void validateDownloadFilePermission(TeamMember teamMember, Resource resource) {
+        if (!resource.getProject().equals(teamMember.getTeam().getProject())
+                && !teamMember.getRoles().contains(TeamRole.MANAGER)
+                && !teamMember.getRoles().contains(TeamRole.OWNER)) {
+            throw new NoAccessException("Only project members, managers and owners can download files from storage.");
         }
     }
 
     public void validateDeleteFilePermission(TeamMember teamMember, Resource resource) {
-        if (!resource.getCreatedBy().equals(teamMember) && !teamMember.getRoles().contains(TeamRole.MANAGER)) {
+        if (!resource.getCreatedBy().equals(teamMember)
+                && !teamMember.getRoles().contains(TeamRole.MANAGER)
+                && !teamMember.getRoles().contains(TeamRole.OWNER)) {
             throw new NoAccessException("TeamMember with id: " + teamMember.getId() +
                     " has no permissions to delete resource with id: " + resource.getId());
         }

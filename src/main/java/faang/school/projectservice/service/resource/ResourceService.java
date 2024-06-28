@@ -59,11 +59,11 @@ public class ResourceService {
     }
 
     @Transactional(readOnly = true)
-    public InputStreamResource getFile(Long projectId, Long resourceId) {
+    public InputStreamResource getFile(Long userId, Long resourceId) {
+        TeamMember teamMember = getTeamMember(userId);
         Resource resource = getResource(resourceId);
-        Project project = projectRepository.getProjectById(projectId);
 
-        resourceValidator.validateDownloadFilePermission(project, resource);
+        resourceValidator.validateDownloadFilePermission(teamMember, resource);
 
         return amazonS3Service.downloadFile(resource.getKey());
     }
@@ -72,7 +72,7 @@ public class ResourceService {
     public void deleteFileFromProject(Long userid, Long resourceId) {
         TeamMember teamMember = getTeamMember(userid);
         Resource resource = getResource(resourceId);
-        Project project = resource.getProject();
+        Project project = teamMember.getTeam().getProject();
 
         resourceValidator.validateDeleteFilePermission(teamMember, resource);
 
