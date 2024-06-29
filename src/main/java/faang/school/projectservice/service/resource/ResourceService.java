@@ -29,8 +29,8 @@ public class ResourceService {
     private final ResourceValidator resourceValidator;
 
     @Transactional
-    public ResourceDto saveFile(Long userId, MultipartFile file) {
-        TeamMember teamMember = getTeamMember(userId);
+    public ResourceDto saveFile(Long teamMemberId, MultipartFile file) {
+        TeamMember teamMember = getTeamMember(teamMemberId);
         Project project = teamMember.getTeam().getProject();
 
         resourceValidator.validateMaxFreeStorageSize(project, file.getSize());
@@ -61,8 +61,8 @@ public class ResourceService {
     }
 
     @Transactional(readOnly = true)
-    public InputStreamResource getFile(Long userId, Long resourceId) {
-        TeamMember teamMember = getTeamMember(userId);
+    public InputStreamResource getFile(Long teamMemberId, Long resourceId) {
+        TeamMember teamMember = getTeamMember(teamMemberId);
         Resource resource = getResource(resourceId);
 
         resourceValidator.validateDownloadFilePermission(teamMember, resource);
@@ -98,8 +98,8 @@ public class ResourceService {
                 .orElseThrow(() -> new NotFoundException("Not found resource with this id: " + resourceId));
     }
 
-    private TeamMember getTeamMember(Long userId) {
-        return teamMemberRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Not found teamMember with this userId: " + userId));
+    private TeamMember getTeamMember(Long teamMemberId) {
+        return teamMemberRepository.findById(teamMemberId)
+                .orElseThrow(() -> new NotFoundException("Not found teamMember with this userId: " + teamMemberId));
     }
 }

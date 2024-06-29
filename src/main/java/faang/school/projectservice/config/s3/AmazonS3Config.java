@@ -6,42 +6,38 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Data
+@Slf4j
 @Configuration
-@RequiredArgsConstructor
+@ConfigurationProperties(prefix = "services.s3")
+@ConfigurationPropertiesScan
 public class AmazonS3Config {
-    @Value("${services.s3.endpoint}")
     private String endpoint;
-    @Value("${services.s3.accessKey}")
     private String accessKey;
-    @Value("${services.s3.secretKey}")
     private String secretKey;
-    @Value("${services.s3.bucketName}")
     private String bucketName;
 
     @Bean
     public AmazonS3 amazonS3() {
-        AWSStaticCredentialsProvider awsStaticCredentialsProvider =
-                new AWSStaticCredentialsProvider(
-                        new BasicAWSCredentials(accessKey, secretKey)
-                );
-        AwsClientBuilder.EndpointConfiguration endpointConfiguration =
-                new AwsClientBuilder.EndpointConfiguration(endpoint, Regions.DEFAULT_REGION.getName());
-
         AmazonS3 s3client = AmazonS3ClientBuilder
                 .standard()
-                .withCredentials(awsStaticCredentialsProvider)
-                .withEndpointConfiguration(endpointConfiguration)
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+                .withEndpointConfiguration(new AwsClientBuilder
+                        .EndpointConfiguration(endpoint, Regions.DEFAULT_REGION.getName()))
                 .withPathStyleAccessEnabled(true)
                 .build();
 
         if (!s3client.doesBucketExistV2(bucketName)) {
             s3client.createBucket(bucketName);
         }
+        log.info("Connected to AmazonS3.");
         return s3client;
     }
 }

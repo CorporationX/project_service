@@ -23,7 +23,6 @@ public class AmazonS3Service {
     private String bucketName;
 
     public Resource uploadFile(String key, MultipartFile file) {
-
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
