@@ -49,7 +49,6 @@ public class ResourceRestService {
         resource.setCreatedBy(teamMember);
         resource.setUpdatedBy(teamMember);
         resource.setProject(project);
-        //TODO Murzin34* TeamRole это Enum, а в модели Resource фигурирует role_id bigint. Возможно нужно изменить таблицу.
 
         resourceRepository.save(resource);
 

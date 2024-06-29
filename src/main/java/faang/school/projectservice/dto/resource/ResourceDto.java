@@ -17,7 +17,6 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class ResourceDto {
     private Long id;
     private String name;

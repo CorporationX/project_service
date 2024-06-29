@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.resource;
 
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -120,6 +121,7 @@ public class ResourceService {
         resource.setSize(BigInteger.valueOf(resourceDto.getSize()));
         resource.setStatus(ResourceStatus.ACTIVE);
         resource.setName(resourceDto.getFileName());
+        resource.setAllowedRoles(new HashSet<>(teamMember.getRoles()));
         resource.setType(ResourceType.getResourceType(resourceDto.getContentType()));
         resource.setProject(project);
         resource.setCreatedBy(teamMember);
