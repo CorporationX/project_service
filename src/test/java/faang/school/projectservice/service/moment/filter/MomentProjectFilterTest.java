@@ -4,6 +4,9 @@ import faang.school.projectservice.dto.moment.filter.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,17 +14,21 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class MomentProjectFilterTest {
+    @InjectMocks
+    private MomentProjectFilter momentProjectFilter;
 
     @Test
     public void testGetAllMomentsByProjects() {
-        MomentFilter momentProjectFilter = new MomentProjectFilter();
+
         List<Moment> moments = getMomentProjectList();
         List<Moment> expectedList = getExpectedMomentProjectList();
         MomentFilterDto momentFilterDto = MomentFilterDto.builder()
                 .projects(List.of(1L, 2L))
                 .build();
 
+        momentProjectFilter.isApplicable(momentFilterDto);
         Stream<Moment> momentStream = momentProjectFilter.apply(moments, momentFilterDto);
         assertEquals(expectedList, momentStream.toList());
     }

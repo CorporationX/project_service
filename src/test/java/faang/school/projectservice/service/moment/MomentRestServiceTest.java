@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentRestDto;
+import faang.school.projectservice.dto.moment.filter.MomentFilterDto;
 import faang.school.projectservice.mapper.MomentRestMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -79,6 +80,24 @@ class MomentRestServiceTest {
         assertThrows(EntityNotFoundException.class, () -> momentService.update(-1L, momentDto));
     }
 
+//    @Test
+//    public void testGetAllFilteredMomentsOfProject() {
+//        Project project = getProject();
+//        MomentFilterDto momentFilterDto = getMomentDto();
+//
+//        List<Moment> momentList = new ArrayList<>(List.of(1L, 2L));
+//
+//        when(momentRepository.findAllByProjectId(getProject().getId())).thenReturn(getProject());
+//        when(momentFilters.stream()).thenReturn(Stream.of(new MomentDataFilter()));
+//
+//        List<Moment> filteredMoments = momentService.getFilteredMomentsOfProject(PROJECT_ID, momentFilterDto);
+//
+//        assertIterableEquals(momentList, filteredMoments);
+//        verify(momentRepository, times(1)).findAllByProjectId(PROJECT_ID);
+//        verify(projectValidation, times(1)).checkProjectExists(PROJECT_ID);
+//    }
+
+
     @Test
     public void testGetAllMoments() {
         Project project = getProject();
@@ -142,5 +161,43 @@ class MomentRestServiceTest {
                 .projects(new ArrayList<>(List.of(1L)))
                 .userIds(new ArrayList<>(List.of(1L, 2L)))
                 .build();
+    }
+
+    private static List<Moment> getMomentDateList() {
+        return List.of(Moment.builder()
+                        .id(1L)
+                        .name("Moment1")
+                        .date(LocalDateTime.now().plusHours(1))
+                        .build(),
+                Moment.builder()
+                        .id(2L)
+                        .name("Moment2")
+                        .date(LocalDateTime.of(2024, 6, 1, 12, 0))
+                        .build(),
+                Moment.builder()
+                        .id(3L)
+                        .name("Moment3")
+                        .date(LocalDateTime.of(2024, 4, 1, 12, 0))
+                        .build(),
+                Moment.builder()
+                        .id(4L)
+                        .name("Moment4")
+                        .date(LocalDateTime.of(2024, 6, 5, 15, 30))
+                        .build()
+        );
+    }
+
+    private static List<Moment> getExpectedDateList() {
+        return List.of(Moment.builder()
+                        .id(2L)
+                        .name("Moment2")
+                        .date(LocalDateTime.of(2024, 6, 1, 12, 0))
+                        .build(),
+                Moment.builder()
+                        .id(4L)
+                        .name("Moment4")
+                        .date(LocalDateTime.of(2024, 6, 5, 15, 30))
+                        .build()
+        );
     }
 }
