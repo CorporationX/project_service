@@ -34,6 +34,7 @@ import lombok.SneakyThrows;
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
+    //TODO: НАПИСАТЬ ТЕСТЫ!!! (@RickHammerson/Radmir)
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
     private final S3Service s3Service;
