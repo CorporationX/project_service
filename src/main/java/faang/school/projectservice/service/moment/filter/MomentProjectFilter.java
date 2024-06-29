@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 @Data
 @NoArgsConstructor
 @Component
-public class MomentProjectFilter implements MomentFilter {
+class MomentProjectFilter implements MomentFilter {
     @Override
     public boolean isApplicable(MomentFilterDto momentFilterDto) {
         return momentFilterDto.getProjects() != null && !momentFilterDto.getProjects().isEmpty();

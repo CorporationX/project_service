@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 @Data
 @NoArgsConstructor
 @Component
-public class MomentDateFilter implements MomentFilter {
+class MomentDateFilter implements MomentFilter {
     @Override
     public boolean isApplicable(MomentFilterDto momentFilterDto) {
         return momentFilterDto.getStartDate() != null || momentFilterDto.getEndDate() != null;

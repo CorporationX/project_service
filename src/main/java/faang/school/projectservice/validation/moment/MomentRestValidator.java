@@ -29,7 +29,7 @@ public class MomentRestValidator {
                 .orElseThrow(() -> new EntityNotFoundException("Moment has no project"));
     }
 
-    //Todo Перенести в ProjectValidator
+    //Todo Murzin34* Перенести в ProjectValidator
     public void projectNotCancelledValidator(List<Long> projectIds) {
         projectRepository.findAllByIds(projectIds)
                 .stream()
@@ -44,19 +44,11 @@ public class MomentRestValidator {
         newProjectIds.retainAll(oldMoment.getProjects()
                 .stream()
                 .map(Project::getId)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toSet())
+        );
 
         if (newProjectIds.size() > 0) {
-            Set<Long> momentUserIds = new HashSet<>(newMomentDto.getUserIds());
-            newProjectIds.forEach(projectId ->
-                    momentUserIds.addAll(projectRepository.getProjectById(projectId)
-                            .getTeams()
-                            .stream()
-                            .flatMap(team -> team.getTeamMembers().stream())
-                            .map(TeamMember::getId)
-                            .distinct()
-                            .toList()));
-            newMomentDto.setUserIds(momentUserIds.stream().toList());
+            convertAfterProjectCheck(newMomentDto, newProjectIds);
         }
     }
 
@@ -66,15 +58,32 @@ public class MomentRestValidator {
         newUserIds.retainAll(oldUserIds);
 
         if (newUserIds.size() > 0) {
-            Set<Long> projectIds = new HashSet<>(newMomentDto.getProjects());
-            newUserIds.forEach(userId -> {
-                Long userProjectId = teamMemberRepository.findById(userId)
-                        .getTeam()
-                        .getProject()
-                        .getId();
-                projectIds.add(userProjectId);
-            });
-            newMomentDto.setProjects(projectIds.stream().toList());
+            convertAfterMembersCheck(newMomentDto, newUserIds);
         }
+    }
+
+    private void convertAfterProjectCheck(MomentRestDto newMomentDto, Set<Long> newProjectIds) {
+        Set<Long> momentUserIds = new HashSet<>(newMomentDto.getUserIds());
+        newProjectIds.forEach(projectId ->
+                momentUserIds.addAll(projectRepository.getProjectById(projectId)
+                        .getTeams()
+                        .stream()
+                        .flatMap(team -> team.getTeamMembers().stream())
+                        .map(TeamMember::getId)
+                        .distinct()
+                        .toList()));
+        newMomentDto.setUserIds(momentUserIds.stream().toList());
+    }
+
+    private void convertAfterMembersCheck(MomentRestDto newMomentDto, Set<Long> newUserIds) {
+        Set<Long> projectIds = new HashSet<>(newMomentDto.getProjects());
+        newUserIds.forEach(userId -> {
+            Long userProjectId = teamMemberRepository.findById(userId)
+                    .getTeam()
+                    .getProject()
+                    .getId();
+            projectIds.add(userProjectId);
+        });
+        newMomentDto.setProjects(projectIds.stream().toList());
     }
 }
