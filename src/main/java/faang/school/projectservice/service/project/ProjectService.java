@@ -1,5 +1,10 @@
 package faang.school.projectservice.service.project;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -14,23 +19,21 @@ import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
     private static final String ALL_SUBPROJECTS_DONE_MOMENT_NAME = "All subprojects completed";
-    //TODO: Доделать тесты
+    
     private final ProjectRepository projectRepository;
     private final MomentService momentService;
-    private final ProjectMapper mapper;
     private final ProjectValidator validator;
+    private final ProjectMapper projectMapper;
+    private final ProjectValidator projectValidator;
     private final List<ProjectFilter> filters;
-
-
+    
     public Project getProjectModel(Long projectId) {
         return projectRepository.getProjectById(projectId);
     }
@@ -41,37 +44,37 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto create(ProjectDto projectDto) {
-        validator.verifyCanBeCreated(projectDto);
+        projectValidator.verifyCanBeCreated(projectDto);
 
         projectDto.setStatus(ProjectStatus.CREATED);
-        Project projectToBeCreated = mapper.toModel(projectDto);
+        Project projectToBeCreated = projectMapper.toModel(projectDto);
         fillProject(projectToBeCreated, projectDto);
 
         Project saved = projectRepository.save(projectToBeCreated);
-        return mapper.toDto(saved);
+        return projectMapper.toDto(saved);
     }
 
     @Transactional
     public ProjectDto update(ProjectDto projectDto) {
-        validator.verifyCanBeUpdated(projectDto);
+        projectValidator.verifyCanBeUpdated(projectDto);
 
-        Project projectToBeUpdated = mapper.toModel(projectDto);
+        Project projectToBeUpdated = projectMapper.toModel(projectDto);
         manageFinishedProject(projectToBeUpdated);
         manageVisibilityChange(projectToBeUpdated);
 
         Project saved = projectRepository.save(projectToBeUpdated);
         fillProject(saved, projectDto);
-        return mapper.toDto(saved);
+        return projectMapper.toDto(saved);
     }
 
     public ProjectDto getById(Long id) {
-        return mapper.toDto(getProjectModel(id));
+        return projectMapper.toDto(getProjectModel(id));
     }
 
     public List<ProjectDto> getAll() {
         List<Project> projects = projectRepository.findAll();
 
-        return mapper.toDto(projects);
+        return projectMapper.toDto(projects);
     }
 
     public List<ProjectDto> search(ProjectFilterDto filter) {
@@ -85,7 +88,7 @@ public class ProjectService {
                 .filter(streamFilter -> streamFilter.isApplicable(filter))
                 .flatMap(streamFilter -> streamFilter.apply(projects.stream(), filter))
                 .distinct()
-                .map(mapper::toDto)
+                .map(projectMapper::toDto)
                 .toList();
     }
 

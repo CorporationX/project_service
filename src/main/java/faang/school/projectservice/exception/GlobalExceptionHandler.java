@@ -1,5 +1,6 @@
 package faang.school.projectservice.exception;
 
+import faang.school.projectservice.exception.aws.s3.S3Exception;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,22 +21,34 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
-
+    
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
         return ResponseEntity.internalServerError().body(ex.getMessage());
     }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException methodArgumentNotValidException) {
-        Map<String, String> exceptionMap = methodArgumentNotValidException.getBindingResult().getAllErrors().stream()
-                .collect(Collectors.toMap(
-                        error -> ((FieldError) error).getField(),
-                        error -> Objects.requireNonNullElse(error.getDefaultMessage(), "")
-                ));
-        return ResponseEntity.badRequest().body(exceptionMap);
+    
+    @ExceptionHandler(S3Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity handleS3Exceptions(RuntimeException ex) {
+        return ResponseEntity.internalServerError().body(ex.getMessage());
     }
-
+    
+    @ExceptionHandler(FileException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity handleFileExceptions(FileException ex) {
+        return ResponseEntity.internalServerError().body(ex.getMessage());
+    }
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = ex.getBindingResult()
+            .getAllErrors()
+            .stream()
+            .collect(Collectors.toMap(error -> ((FieldError) error).getField(), error -> error.getDefaultMessage()));
+        return ResponseEntity.badRequest().body(errors);
+    }
+    
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException constraintViolationException) {
         return ResponseEntity.badRequest().body(constraintViolationException.getMessage());

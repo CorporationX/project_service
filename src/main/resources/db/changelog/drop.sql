@@ -1,0 +1,12 @@
+DROP TABLE IF EXISTS team;
+DROP TABLE IF EXISTS team_member;
+DROP TABLE IF EXISTS task;
+DROP TABLE IF EXISTS resource;
+DROP TABLE IF EXISTS schedule;
+DROP TABLE IF EXISTS project;
+DROP TABLE IF EXISTS project_stage;
+DROP TABLE IF EXISTS project_stage_roles;
+DROP TABLE IF EXISTS campaign;
+DROP TABLE IF EXISTS donation;
+
+DELETE FROM databasechangelog;

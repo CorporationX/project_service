@@ -1,19 +1,20 @@
 package faang.school.projectservice.dto.project;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import lombok.Builder;
-import lombok.Data;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Builder;
+import lombok.Data;
 
 
 @Data
@@ -27,14 +28,14 @@ public class ProjectDto {
     @NotBlank(message = "Project description can't be blank")
     private String description;
 
-    @Positive(message = "Storage size can't be negative")
-    @Min(value = 1, message = "Storage size can't be less than 1")
-    @Max(value = 1000, message = "Storage size can't be greater than 1000")
+    @PositiveOrZero(message = "Storage size can't be negative")
+    @Min(value = 1, message = "Storage size minimum value is 1")
+    @NotNull(message = "Storage size can't be null")
     private BigInteger storageSize;
 
-    @Positive(message = "Storage max size can't be negative")
-    @Min(value = 1, message = "Storage max size can't be less than 1")
-    @Max(value = 1000, message = "Storage max size can't be greater than 1000")
+    @PositiveOrZero(message = "Storage max size can't be negative")
+    @Min(value = 1, message = "Storage max size minimum value is 1")
+    @NotNull(message = "Storage max size can't be null")
     private BigInteger maxStorageSize;
 
     @NotNull(message = "Project owner id")
@@ -52,7 +53,7 @@ public class ProjectDto {
 
     private ProjectStatus status;
 
-    @NotNull(message = "Visibility can't be null")
+    @NotNull(message = "Project visibility can't be empty")
     private ProjectVisibility visibility;
 
     @JsonIgnore

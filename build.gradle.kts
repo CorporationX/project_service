@@ -66,6 +66,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.26")
 
     /**
      * Tests
@@ -75,7 +76,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-inline:2.13.0")
     testImplementation("org.projectlombok:lombok:1.18.26")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.26")
+
+    /**
+     * Image Scaling
+     */
+    implementation("net.coobird:thumbnailator:0.4.20")
 }
 
 tasks.withType<Test> {
