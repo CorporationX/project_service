@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - 'phoenix-master-bc4'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Docker
+        uses: docker-practice/actions-setup-docker@master
+      - name: Run Docker
+        run: |
+          set -x
+          
+          sudo chmod 755 run.sh
+          sudo chmod 755 stop.sh
+          
+          ./run.sh
+
+      - name: Tests
+        run: ./gradlew test
+
+      - name: Stop Docker
+        run: ./stop.sh
