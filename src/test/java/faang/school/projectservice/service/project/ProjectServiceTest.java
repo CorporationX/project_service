@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-//TODO:закончить тесты
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
     @InjectMocks

@@ -45,7 +45,7 @@ class ResourceServiceTest {
     @Mock
     private ResourceMapper resourceMapper;
     @InjectMocks
-    private ResourceService resourceService;
+    private ResourceRestService resourceService;
 
     private final long userId = 1L;
     private final long resourceId = 2L;

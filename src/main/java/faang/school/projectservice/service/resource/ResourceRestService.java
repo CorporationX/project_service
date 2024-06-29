@@ -20,7 +20,7 @@ import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
-public class ResourceService {
+public class ResourceRestService {
     private final AmazonS3Service amazonS3Service;
     private final ResourceRepository resourceRepository;
     private final ProjectRepository projectRepository;

@@ -1,6 +1,9 @@
 package faang.school.projectservice.validator.project;
 
+import org.springframework.stereotype.Component;
+
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.project.ProjectAlreadyExistsException;
 import faang.school.projectservice.exception.project.ProjectStatusException;
@@ -10,14 +13,15 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.ALREADY_EXISTS;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.NOT_FOUND_BY_NAME_AND_OWNER_ID;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.STATUS_IMMUTABLE;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.STORAGE_SIZE_INVALID;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.SUBPROJECT_NOT_FINISHED_EXCEPTION;
-import static faang.school.projectservice.exception.project.ProjectRequestExceptions.SUBPROJECT_VISIBILITY_INVALID;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.ALREADY_EXISTS;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NOT_FOUND_BY_NAME_AND_OWNER_ID;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.NO_COVER;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STATUS_IMMUTABLE;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STORAGE_SIZE_INVALID;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.STORAGE_SIZE_MAX_EXCEED;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.SUBPROJECT_NOT_FINISHED_EXCEPTION;
+import static faang.school.projectservice.exception.project.ProjectExceptionMessage.SUBPROJECT_VISIBILITY_INVALID;
 
 @Component
 @RequiredArgsConstructor
@@ -68,7 +72,19 @@ public class ProjectValidator {
             throw new ProjectVisibilityException(SUBPROJECT_VISIBILITY_INVALID.getMessage());
         }
     }
-
+    
+    public void verifyStorageSizeNotExceeding(Project project, Long fileSize) {
+        if (project.isMaximumStorageSizeExceed(fileSize)) {
+            throw new DataValidationException(STORAGE_SIZE_MAX_EXCEED.getMessage());
+        }
+    }
+    
+    public void verifyNoCover(Project project) {
+        if (!project.hasCover()) {
+            throw new DataValidationException(NO_COVER.getMessage());
+        }
+    }
+    
     private boolean isProjectExists(ProjectDto projectDto) {
         Long ownerId = projectDto.getOwnerId();
         String projectName = projectDto.getName();
@@ -85,7 +101,7 @@ public class ProjectValidator {
         }
     }
 
-    private static void verifyStorageSizeLimitsCorrect(ProjectDto projectDto) {
+    private void verifyStorageSizeLimitsCorrect(ProjectDto projectDto) {
         if (projectDto.isStorageSizeGreaterThanMaxStorageSize()) {
             throw new ProjectStorageSizeInvalidException(STORAGE_SIZE_INVALID.getMessage());
         }

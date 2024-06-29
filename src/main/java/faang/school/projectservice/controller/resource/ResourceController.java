@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.resource;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.service.resource.ResourceService;
+import faang.school.projectservice.service.resource.ResourceRestService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/resources")
 public class ResourceController {
-    private final ResourceService resourceService;
+    private final ResourceRestService resourceService;
 
     @PostMapping(value = "/{teamMemberId}/files")
     @ResponseStatus(HttpStatus.CREATED)

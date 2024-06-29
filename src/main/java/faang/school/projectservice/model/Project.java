@@ -1,5 +1,14 @@
 package faang.school.projectservice.model;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -22,12 +31,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "project")
@@ -36,7 +39,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class Project {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -107,7 +109,28 @@ public class Project {
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
     
+    public void addResource(Resource resource) {
+        if (this.resources == null) {
+            this.resources = new ArrayList<>();
+        }
+        this.resources.add(resource);
+    }
+    
     public boolean isStatusFinished() {
         return this.status == ProjectStatus.CANCELLED || this.status == ProjectStatus.COMPLETED;
+    }
+    
+    public boolean isMaximumStorageSizeExceed(Long fileSize) {
+        BigInteger sizeAfterAddingFile = this.getStorageSize().add(BigInteger.valueOf(fileSize));
+        
+        return sizeAfterAddingFile.compareTo(this.getMaxStorageSize()) > 0;
+    }
+    
+    public BigInteger addStorageSize(BigInteger fileSize) {
+        return this.getStorageSize().add(fileSize);
+    }
+    
+    public boolean hasCover() {
+        return !StringUtils.isBlank(this.coverImageId);
     }
 }
