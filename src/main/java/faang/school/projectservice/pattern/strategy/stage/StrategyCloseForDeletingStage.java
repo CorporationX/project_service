@@ -14,7 +14,7 @@ public class StrategyCloseForDeletingStage implements StrategyForDeletingStage {
 
     @Override
     public void manageTasksOfStage(long stageId, Long stageToMigrateId) {
-        stageValidator.validateStageExistence(stageId);
+        stageValidator.validateExistence(stageId);
         taskRepository.updateStatusByStageId(stageId, TaskStatus.DONE);
     }
 }

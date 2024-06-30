@@ -2,6 +2,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V000__initial.sql
   - include:
+      file: db/changelog/changeset/project_V015_rename_resource.sql
+  - include:
       file: db/changelog/changeset/project_V001_create_stage.sql
   - include:
       file: db/changelog/changeset/project_V001_create_stage_invitation.sql

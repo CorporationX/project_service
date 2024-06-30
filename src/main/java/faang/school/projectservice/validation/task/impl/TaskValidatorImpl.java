@@ -1,6 +1,6 @@
 package faang.school.projectservice.validation.task.impl;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.validation.task.TaskValidator;
 import lombok.RequiredArgsConstructor;

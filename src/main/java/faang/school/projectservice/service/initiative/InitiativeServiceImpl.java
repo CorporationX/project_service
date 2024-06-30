@@ -7,7 +7,7 @@ import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.repository.InitiativeRepository;
 import faang.school.projectservice.service.moment.MomentService;
-import faang.school.projectservice.validation.InitiativeValidator;
+import faang.school.projectservice.validation.initiative.InitiativeValidatorImpl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,14 +19,13 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class InitiativeServiceImpl implements InitiativeService {
     private final InitiativeMapper mapper;
-    private final InitiativeValidator validator;
+    private final InitiativeValidatorImpl validator;
     private final InitiativeRepository initiativeRepository;
     private final InitiativeFilterService filterService;
     private final MomentService momentService;
 
     @Override
     public InitiativeDto create(InitiativeDto initiative) {
-        validator.validate(initiative);
         validator.validateCurator(initiative);
 
         Initiative entity = mapper.toEntity(initiative);
@@ -37,7 +36,6 @@ public class InitiativeServiceImpl implements InitiativeService {
 
     @Override
     public InitiativeDto update(InitiativeDto initiative) {
-        validator.validate(initiative);
         validator.validateCurator(initiative);
 
         Initiative entity = mapper.toEntity(initiative);

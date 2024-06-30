@@ -1,7 +1,7 @@
 package faang.school.projectservice.validation.stage;
 
 import faang.school.projectservice.dto.stage.NewStageDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
@@ -19,15 +19,16 @@ import java.util.Optional;
 public class StageValidatorImpl implements StageValidator {
 
     private final StageRepository stageRepository;
-    private final TeamMemberValidator teamMemberValidator;
     private final ProjectValidator projectValidator;
     private final TaskValidator taskValidator;
+    private final TeamMemberValidator teamMemberValidator;
 
     @Override
-    public void validateExistence(long id) {
+    public Stage validateExistence(long id) {
         if (!stageRepository.existsById(id)) {
             throw new NotFoundException("Stage with id=" + id + " does not exist");
         }
+        return null;
     }
 
     @Override

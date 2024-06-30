@@ -8,7 +8,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.validation.ProjectValidator;
+import faang.school.projectservice.validation.project.impl.ProjectValidatorImpl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    private final ProjectValidator projectValidator;
+    private final ProjectValidatorImpl projectValidator;
     private final UserContext userContext;
     private final ProjectFilterService projectFilterService;
 

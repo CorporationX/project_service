@@ -5,7 +5,7 @@ import faang.school.projectservice.model.stage.Stage;
 
 public interface StageValidator {
 
-    void validateExistence(long id);
+    Stage validateExistence(long id);
 
     Stage validateStageExistence(long id);
 

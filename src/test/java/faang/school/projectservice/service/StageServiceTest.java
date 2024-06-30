@@ -457,7 +457,7 @@ public class StageServiceTest {
             StageDto stageDto,
             List<NewStageRolesDto> newStageRolesDtoList,
             List<StageRoles> stageRolesEntities) {
-        when(stageValidator.validateStageExistence(stageId)).thenReturn(stageEntity);
+        when(stageValidator.validateExistence(stageId)).thenReturn(stageEntity);
         when(stageRolesMapper.toEntityList(newStageRolesDtoList)).thenReturn(stageRolesEntities);
         when(stageRolesRepository.saveAll(stageRolesEntities)).thenReturn(null);
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stageEntity));
@@ -466,7 +466,7 @@ public class StageServiceTest {
         var actual = stageService.updateStage(stageId, newStageRolesDtoList);
 
         verify(stageValidator, times(1))
-                .validateStageExistence(stageIdCaptor1.capture());
+                .validateExistence(stageIdCaptor1.capture());
         verify(stageRolesMapper, times(1))
                 .toEntityList(newStageRolesDtoListCaptor.capture());
         verify(stageRolesRepository, times(1))
@@ -498,13 +498,13 @@ public class StageServiceTest {
             Long stageId,
             Stage stageEntity,
             StageDto stageDto) {
-        when(stageValidator.validateStageExistence(stageId)).thenReturn(stageEntity);
+        when(stageValidator.validateExistence(stageId)).thenReturn(stageEntity);
         when(stageMapper.toDto(stageEntity)).thenReturn(stageDto);
 
         var actual = stageService.getStageById(stageId);
 
         verify(stageValidator, times(1))
-                .validateStageExistence(stageIdCaptor1.capture());
+                .validateExistence(stageIdCaptor1.capture());
         verify(stageMapper, times(1))
                 .toDto(stageArgumentCaptor1.capture());
 

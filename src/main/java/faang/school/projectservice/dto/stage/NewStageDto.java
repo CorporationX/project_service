@@ -16,19 +16,25 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class NewStageDto {
-    @NotBlank
+
+    @NotNull(message = "StageName should not be null")
+    @NotBlank(message = "StageName should not be blank")
     private String stageName;
 
+    @NotNull(message = "StageStatus should not be null")
     @EnumValidator(enumClass = StageStatus.class, message = "Invalid Stage Status")
     private String stageStatus;
 
-    @Positive
-    private long projectId;
+    @NotNull(message = "ProjectId should not be null")
+    @Positive(message = "ProjectId should be positive")
+    private Long projectId;
 
-    @NotNull
+    @NotNull(message = "StageRoles should not be null")
     private List<NewStageRolesDto> stageRoles;
 
+    @NotNull(message = "TasksIds should not be null")
     private List<Long> tasksIds;
 
+    @NotNull(message = "ExecutorsIds should not be null")
     private List<Long> executorsIds;
 }

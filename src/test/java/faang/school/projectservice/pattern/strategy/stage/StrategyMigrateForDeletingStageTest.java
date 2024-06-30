@@ -51,7 +51,7 @@ public class StrategyMigrateForDeletingStageTest {
         strategyMigrateForDeletingStage.manageTasksOfStage(stageId, stageToMigrateId);
 
         verify(stageValidator, times(1))
-                .validateStageExistence(stageIdCaptor.capture());
+                .validateExistence(stageIdCaptor.capture());
         verify(stageValidator, times(1))
                 .validateStageForToMigrateExistence(stageToMigrateIdCaptor.capture());
         verify(taskRepository, times(1))

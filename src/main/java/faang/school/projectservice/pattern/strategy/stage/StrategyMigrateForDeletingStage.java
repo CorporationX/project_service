@@ -13,7 +13,7 @@ public class StrategyMigrateForDeletingStage implements StrategyForDeletingStage
 
     @Override
     public void manageTasksOfStage(long stageId, Long stageToMigrateId) {
-        stageValidator.validateStageExistence(stageId);
+        stageValidator.validateExistence(stageId);
         stageValidator.validateStageForToMigrateExistence(stageToMigrateId);
         taskRepository.updateStageId(stageId, stageToMigrateId);
     }

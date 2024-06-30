@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.calendar;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exceptions.DataValidationException;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

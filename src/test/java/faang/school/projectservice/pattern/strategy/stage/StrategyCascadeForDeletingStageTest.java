@@ -36,7 +36,7 @@ public class StrategyCascadeForDeletingStageTest {
         strategyCascadeForDeletingStage.manageTasksOfStage(stageId, null);
 
         verify(stageValidator, times(1))
-                .validateStageExistence(stageIdCaptor.capture());
+                .validateExistence(stageIdCaptor.capture());
         verify(taskRepository, times(1))
                 .deleteAllByStageId(stageToMigrateIdCaptor.capture());
 

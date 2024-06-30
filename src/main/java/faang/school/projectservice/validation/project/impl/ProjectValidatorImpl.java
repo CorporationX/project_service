@@ -1,6 +1,7 @@
 package faang.school.projectservice.validation.project.impl;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validation.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProjectValidatorImpl implements ProjectValidator {
     private final ProjectRepository projectRepository;
+
+    @Override
+    public void validateProjectByOwnerIdAndNameOfProject(ProjectDto projectDto) {
+        if (projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+            throw new DataValidationException("The user with id: "+projectDto.getOwnerId()+ " already has a project with name "+projectDto.getName());
+        }
+    }
 
     @Override
     public void validateProjectExistence(long id) {

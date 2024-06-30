@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InternshipDto {
-
     private long projectId;
     private long mentorId;
     private List<Long> internsId;
