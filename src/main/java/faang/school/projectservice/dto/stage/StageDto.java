@@ -15,22 +15,11 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class StageDto {
-    @Positive
     private long stageId;
-
-    @NotBlank
     private String stageName;
-
-    @EnumValidator(enumClass = StageStatus.class, message = "Invalid Stage Status")
     private String stageStatus;
-
-    @Positive
     private long projectId;
-
-    @NotNull
     private List<Long> stageRolesIds;
-
     private List<Long> tasksIds;
-
     private List<Long> executorsIds;
 }
