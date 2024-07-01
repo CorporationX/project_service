@@ -1,6 +1,7 @@
 package faang.school.projectservice.validation.teammember;
 
 import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validation.team_member.TeamMemberValidatorImpl;
@@ -90,12 +91,12 @@ public class TeamMemberValidatorTest {
     public void testValidateExistenceShouldThrowException(long executorId, TeamMember executor) {
         when(teamMemberRepository.existsById(executorId))
                 .thenReturn(false);
-        DataValidationException actualException = assertThrows(DataValidationException.class,
+        NotFoundException actualException = assertThrows(NotFoundException.class,
                 () -> teamMemberValidator.validateExistence(executorId));
         verify(teamMemberRepository, times(1))
                 .existsById(idCaptor.capture());
 
-        var expectedMessage = String.format("a team member with %d does not exist", executorId);
+        var expectedMessage = String.format("TeamMember with id=%d does not exist", executorId);
         var actualMessage = actualException.getMessage();
 
         assertEquals(expectedMessage, actualMessage);
