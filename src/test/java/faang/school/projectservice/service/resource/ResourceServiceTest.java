@@ -1,13 +1,13 @@
 package faang.school.projectservice.service.resource;
 
-import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.s3.AmazonS3Service;
-import faang.school.projectservice.validator.resource.ResourceValidator;
+import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.s3.requests.S3RequestService;
+import faang.school.projectservice.validator.resource.TeamMemberResourceValidator;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,35 +24,32 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceServiceTest {
     @Mock
-    private AmazonS3Service amazonS3Service;
+    private S3Service s3Service;
+    @Mock
+    private S3RequestService s3RequestService;
     @Mock
     private ResourceRepository resourceRepository;
     @Mock
     private ProjectRepository projectRepository;
     @Mock
-    private TeamMemberJpaRepository teamMemberRepository;
+    private TeamMemberRepository teamMemberRepository;
     @Mock
-    private ResourceValidator resourceValidator;
-    @Mock
-    private ResourceMapper resourceMapper;
+    private TeamMemberResourceValidator resourceValidator;
     @InjectMocks
-    private ResourceRestService resourceService;
+    private ResourceService resourceService;
 
-    private final long userId = 1L;
-    private final long resourceId = 2L;
     private TeamMember teamMember;
     private Project project;
     private Resource resource;
-    private ResourceDto resourceDto;
     private MultipartFile file;
 
     @BeforeEach
@@ -61,70 +58,94 @@ class ResourceServiceTest {
         project = getProject();
         teamMember = getTeamMember();
         resource = getResource();
-        resourceDto = getResourceDto();
+
+        when(teamMemberRepository.findById(teamMember.getId())).thenReturn(teamMember);
+        when(resourceRepository.getReferenceById(resource.getId())).thenReturn(resource);
     }
 
     @Test
-    void testSaveFileSuccess() {
-        when(teamMemberRepository.findById(userId)).thenReturn(Optional.of(teamMember));
-        when(amazonS3Service.uploadFile(anyString(), any(MultipartFile.class))).thenReturn(resource);
-        when(resourceRepository.save(resource)).thenReturn(resource);
-        when(projectRepository.save(project)).thenReturn(project);
-        when(resourceMapper.toDto(resource)).thenReturn(resourceDto);
+    public void testGetFileSuccess() {
+        resourceService.getResources(teamMember.getId(), resource.getId());
 
-        ResourceDto actual = resourceService.saveFile(userId, file);
-        assertEquals(resourceDto, actual);
+        verify(teamMemberRepository, atLeastOnce()).findById(teamMember.getId());
+        verify(resourceRepository, atLeastOnce()).getReferenceById(resource.getId());
+        verify(resourceValidator, atLeastOnce()).validateDownloadFilePermission(teamMember, resource);
+        verify(s3Service).getFile(any());
     }
 
     @Test
-    void testGetFileSuccess() {
+    void testFillGetFileSuccess() {
         InputStreamResource expected = new InputStreamResource(InputStream.nullInputStream());
-        when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
-        when(teamMemberRepository.findById(userId)).thenReturn(Optional.of(teamMember));
-        when(amazonS3Service.downloadFile(resource.getKey())).thenReturn(expected);
+        when(s3Service.getFile(s3RequestService.createGetRequest(resource.getKey()))).thenReturn(expected);
 
-        InputStreamResource actual = resourceService.getFile(userId, resourceId);
+        InputStreamResource actual = resourceService.getResources(resource.getId(), teamMember.getId());
 
-        assertNotNull(actual);
-        assertEquals(expected, actual);
+        assertNotNull(expected);
+        Assertions.assertEquals(expected, actual);
+
+        verify(resourceValidator, atLeastOnce()).validateDownloadFilePermission(teamMember, resource);
     }
 
     @Test
     void testDeleteFileSuccess() {
-        when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
-        when(teamMemberRepository.findById(userId)).thenReturn(Optional.of(teamMember));
+        var expectedResources = project.getResources().remove(resource);
+        var expectedLength = project.getStorageSize().subtract(resource.getSize());
+        var deleteRequest = s3RequestService.createDeleteRequest(resource.getKey());
 
-        BigInteger expectedLength = project.getStorageSize().subtract(resource.getSize());
+        resourceService.deleteResource(teamMember.getId(), resource.getId());
 
-        resourceService.deleteFile(userId, resourceId);
+        assertEquals(expectedResources, project.getResources().contains(resource));
+        assertEquals(expectedLength, project.getStorageSize());
 
         assertNull(resource.getKey());
         assertNull(resource.getSize());
+        assertNull(resource.getAllowedRoles());
         assertEquals(ResourceStatus.DELETED, resource.getStatus());
         assertEquals(teamMember, resource.getUpdatedBy());
-        assertEquals(expectedLength, project.getStorageSize());
+
+        verify(resourceRepository, atLeastOnce()).save(resource);
+        verify(projectRepository, atLeastOnce()).save(project);
+        verify(s3Service, atLeastOnce()).deleteFile(deleteRequest);
+        verify(resourceValidator, atLeastOnce()).validateDeleteFilePermission(teamMember, resource);
     }
 
     private Project getProject() {
-        return Project.builder()
-                .id(3L)
-                .storageSize(new BigInteger("1", 32))
-                .resources(new ArrayList<>(List.of(new Resource())))
+        return project = Project.builder()
+                .id(1L)
+                .name("Project")
+                .storageSize(BigInteger.valueOf(10000))
+                .maxStorageSize(BigInteger.valueOf(100000))
+                .resources(new ArrayList<>(List.of(Resource.builder()
+                        .id(1L)
+                        .key("TestKeyName")
+                        .name(file.getName())
+                        .size(BigInteger.valueOf(file.getSize()))
+                        .allowedRoles(new HashSet<>(getTeamMember().getRoles()))
+                        .type(ResourceType.valueOf(file.getContentType()))
+                        .status(ResourceStatus.ACTIVE)
+                        .createdBy(getTeamMember())
+                        .updatedBy(getTeamMember())
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .project(project)
+                        .build())))
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
                 .build();
     }
 
     private TeamMember getTeamMember() {
         return TeamMember.builder()
-                .id(4L)
-                .userId(userId)
+                .id(1L)
+                .userId(1L)
                 .team(Team.builder().project(project).build())
-                .roles(new ArrayList<>(List.of(TeamRole.INTERN)))
+                .roles(new ArrayList<>(List.of(TeamRole.DEVELOPER)))
                 .build();
     }
 
     private Resource getResource() {
         return Resource.builder()
-                .id(resourceId)
+                .id(1L)
                 .key("TestKeyName")
                 .name(file.getName())
                 .size(BigInteger.valueOf(file.getSize()))
@@ -136,23 +157,6 @@ class ResourceServiceTest {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .project(project)
-                .build();
-    }
-
-    private ResourceDto getResourceDto() {
-        return ResourceDto.builder()
-                .id(resourceId)
-                .key("TestKeyName")
-                .name(file.getName())
-                .size(BigInteger.valueOf(file.getSize()))
-                .allowedRoles(new HashSet<>(teamMember.getRoles()))
-                .type(ResourceType.valueOf(file.getContentType()))
-                .status(ResourceStatus.ACTIVE)
-                .createdById(teamMember.getId())
-                .updatedById(teamMember.getId())
-                .createdAt(resource.getCreatedAt())
-                .updatedAt(resource.getUpdatedAt())
-                .projectId(project.getId())
                 .build();
     }
 }

@@ -4,8 +4,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.exception.aws.s3.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 
 import static faang.school.projectservice.exception.aws.s3.S3ExceptionMessages.BUCKET_NOT_FOUND_EXCEPTION;
@@ -27,10 +29,11 @@ public class S3Service {
         amazonS3Client.deleteObject(request);
     }
 
-    public void getFile(GetObjectRequest request) {
+    public InputStreamResource getFile(GetObjectRequest request) {
         verifyBucketExist(request.getBucketName());
-
-        amazonS3Client.getObject(request.getBucketName(), request.getKey());
+        S3ObjectInputStream s3ObjectInputStream = amazonS3Client.getObject(request.getBucketName(), request.getKey())
+                .getObjectContent();
+        return new InputStreamResource(s3ObjectInputStream);
     }
 
     private void verifyBucketExist(String bucketName) {
