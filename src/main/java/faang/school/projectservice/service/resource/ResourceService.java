@@ -72,7 +72,7 @@ public class ResourceService {
         s3Service.uploadFile(putRequest);
 
         Resource saved = resourceRepository.save(createResource(project, teamMember, putRequest, resourceDto));
-        project.addStorageSize(saved.getSize());
+        project.setStorageSize(saved.getSize());
         project.addResource(saved);
         return resourceMapper.toDto(saved);
     }
