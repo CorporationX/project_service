@@ -2,6 +2,7 @@ package faang.school.projectservice.validation.stage;
 
 import faang.school.projectservice.dto.stage.NewStageDto;
 import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
@@ -223,36 +224,6 @@ public class StageValidatorTest {
                 Arguments.of(newStageDtoWithId7)
         );
     }
-
-    @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateStageExistenceShouldReturn")
-    public void testValidateStageExistenceShouldReturn(long stageId, Stage stage) {
-        when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
-
-        stageValidator.validateExistence(stageId);
-        verify(stageRepository, times(1)).findById(idCaptor.capture());
-        var actualStageId = idCaptor.getValue();
-
-        assertEquals(stageId, actualStageId);
-
-        verifyNoMoreInteractions(stageRepository);
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateExistenceShouldThrowException")
-    public void testValidateExistenceShouldThrowException(long stageId, Stage stage) {
-        when(stageRepository.findById(stageId)).thenReturn(Optional.ofNullable(stage));
-        DataValidationException actualException = assertThrows(DataValidationException.class,
-                () -> stageValidator.validateExistence(stageId));
-        verify(stageRepository, times(1)).findById(idCaptor.capture());
-
-        var expectedMessage = String.format("a stage with %d does not exist", stageId);
-        var actualMessage = actualException.getMessage();
-
-        assertEquals(expectedMessage, actualMessage);
-        verifyNoMoreInteractions(stageRepository);
-    }
-
 
     @ParameterizedTest
     @MethodSource("provideArgumentsForTestValidateCreation")

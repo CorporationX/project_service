@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import faang.school.projectservice.model.calendar.CalendarToken;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -91,6 +92,9 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Team> teams;
+
+    @OneToOne(mappedBy = "project")
+    private CalendarToken calendarToken;
 
     @OneToOne(mappedBy = "project")
     private Schedule schedule;

@@ -3,7 +3,7 @@ package faang.school.projectservice.validation;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validation.project.ProjectValidatorImpl;
+import faang.school.projectservice.validation.project.impl.ProjectValidatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
