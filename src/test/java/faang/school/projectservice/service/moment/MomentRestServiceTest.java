@@ -8,6 +8,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.filter.MomentFilter;
 import faang.school.projectservice.validation.moment.MomentRestValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,10 @@ class MomentRestServiceTest {
     private MomentRestValidator momentValidator;
     @Mock
     private MomentRepository momentRepository;
+    @Mock
+    private ProjectRepository projectRepository;
+    @Mock
+    private List<MomentFilter> momentFilters;
     @InjectMocks
     private MomentRestService momentService;
 
@@ -80,22 +86,18 @@ class MomentRestServiceTest {
         assertThrows(EntityNotFoundException.class, () -> momentService.update(-1L, momentDto));
     }
 
-//    @Test
-//    public void testGetAllFilteredMomentsOfProject() {
-//        Project project = getProject();
-//        MomentFilterDto momentFilterDto = getMomentDto();
-//
-//        List<Moment> momentList = new ArrayList<>(List.of(1L, 2L));
-//
-//        when(momentRepository.findAllByProjectId(getProject().getId())).thenReturn(getProject());
-//        when(momentFilters.stream()).thenReturn(Stream.of(new MomentDataFilter()));
-//
-//        List<Moment> filteredMoments = momentService.getFilteredMomentsOfProject(PROJECT_ID, momentFilterDto);
-//
-//        assertIterableEquals(momentList, filteredMoments);
-//        verify(momentRepository, times(1)).findAllByProjectId(PROJECT_ID);
-//        verify(projectValidation, times(1)).checkProjectExists(PROJECT_ID);
-//    }
+    @Test
+    void testGetAllMomentsByFilters() {
+        MomentFilterDto filters = getMomentFilter();
+        List<Moment> moments = getMomentList();
+        Project project = getProject();
+        project.setMoments(moments);
+
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+
+        momentService.getAllMomentsByFilters(project.getId(), filters);
+        verify(projectRepository).getProjectById(project.getId());
+    }
 
 
     @Test
@@ -163,40 +165,47 @@ class MomentRestServiceTest {
                 .build();
     }
 
-    private static List<Moment> getMomentDateList() {
+
+    private static MomentFilterDto getMomentFilter() {
+        return MomentFilterDto.builder()
+                .startDate(LocalDateTime.of(2023, 6, 1, 12, 0))
+                .endDate(LocalDateTime.now())
+                .projects(List.of(1L, 2L))
+                .build();
+    }
+
+    private static List<Moment> getMomentList() {
         return List.of(Moment.builder()
                         .id(1L)
                         .name("Moment1")
                         .date(LocalDateTime.now().plusHours(1))
+                        .projects(new ArrayList<>(List.of(
+                                Project.builder().id(3L).build(),
+                                Project.builder().id(2L).build())))
                         .build(),
                 Moment.builder()
                         .id(2L)
                         .name("Moment2")
                         .date(LocalDateTime.of(2024, 6, 1, 12, 0))
+                        .projects(new ArrayList<>(List.of(
+                                Project.builder().id(1L).build(),
+                                Project.builder().id(2L).build())))
                         .build(),
                 Moment.builder()
                         .id(3L)
                         .name("Moment3")
                         .date(LocalDateTime.of(2024, 4, 1, 12, 0))
+                        .projects(new ArrayList<>(List.of(
+                                Project.builder().id(4L).build(),
+                                Project.builder().id(5L).build())))
                         .build(),
                 Moment.builder()
                         .id(4L)
                         .name("Moment4")
                         .date(LocalDateTime.of(2024, 6, 5, 15, 30))
-                        .build()
-        );
-    }
-
-    private static List<Moment> getExpectedDateList() {
-        return List.of(Moment.builder()
-                        .id(2L)
-                        .name("Moment2")
-                        .date(LocalDateTime.of(2024, 6, 1, 12, 0))
-                        .build(),
-                Moment.builder()
-                        .id(4L)
-                        .name("Moment4")
-                        .date(LocalDateTime.of(2024, 6, 5, 15, 30))
+                        .projects(new ArrayList<>(List.of(
+                                Project.builder().id(1L).build(),
+                                Project.builder().id(2L).build())))
                         .build()
         );
     }
