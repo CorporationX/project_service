@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,9 +34,8 @@ public class TeamMemberResourceController {
         return resourceService.uploadResource(projectId, teamMemberId, file, ProjectResourceType.PROJECT_RESOURCE);
     }
 
-    @GetMapping()
-    @ResponseStatus(HttpStatus.OK)
-    public InputStreamResource getResources(
+    @GetMapping(produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<InputStreamResource> getResources(
             @RequestParam
             @Positive(message = "TeamMemberId can't be negative")
             Long teamMemberId,

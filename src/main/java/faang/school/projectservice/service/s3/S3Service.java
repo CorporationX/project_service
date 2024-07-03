@@ -4,7 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.exception.aws.s3.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -31,9 +31,9 @@ public class S3Service {
 
     public InputStreamResource getFile(GetObjectRequest request) {
         verifyBucketExist(request.getBucketName());
-        S3ObjectInputStream s3ObjectInputStream = amazonS3Client.getObject(request.getBucketName(), request.getKey())
-                .getObjectContent();
-        return new InputStreamResource(s3ObjectInputStream);
+
+        S3Object s3Object = amazonS3Client.getObject(request);
+        return new InputStreamResource(s3Object.getObjectContent());
     }
 
     private void verifyBucketExist(String bucketName) {

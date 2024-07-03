@@ -1,32 +1,32 @@
 package faang.school.projectservice.service.resource;
 
-import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import faang.school.projectservice.model.*;
-import faang.school.projectservice.validator.resource.TeamMemberResourceValidator;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-
 import faang.school.projectservice.dto.resource.FileResourceDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.service.s3.requests.S3RequestService;
 import faang.school.projectservice.validator.project.ProjectValidator;
+import faang.school.projectservice.validator.resource.TeamMemberResourceValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Сервис обработки ресурсов проекта
@@ -72,7 +72,7 @@ public class ResourceService {
         s3Service.uploadFile(putRequest);
 
         Resource saved = resourceRepository.save(createResource(project, teamMember, putRequest, resourceDto));
-        project.setStorageSize(saved.getSize());
+        project.addStorageSize(saved.getSize());
         project.addResource(saved);
         return resourceMapper.toDto(saved);
     }
@@ -110,13 +110,16 @@ public class ResourceService {
      * Метод получения загруженного ресурса TeamMember'ом
      */
     @Transactional(readOnly = true)
-    public InputStreamResource getResources(Long teamMemberId, Long resourceId) {
+    public ResponseEntity<InputStreamResource> getResources(Long teamMemberId, Long resourceId) {
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
         Resource resource = resourceRepository.getReferenceById(resourceId);
 
         resourceValidator.validateDownloadFilePermission(teamMember, resource);
 
-        return s3Service.getFile(s3RequestService.createGetRequest(resource.getKey()));
+        InputStreamResource inputStreamResource = s3Service.getFile(s3RequestService.createGetRequest(resource.getKey()));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + resource.getName())
+                .body(inputStreamResource);
     }
 
     /**

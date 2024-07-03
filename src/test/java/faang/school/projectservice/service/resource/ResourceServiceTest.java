@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 
 import java.io.InputStream;
 
@@ -78,10 +79,10 @@ class ResourceServiceTest {
             InputStreamResource expected = new InputStreamResource(InputStream.nullInputStream());
             when(s3Service.getFile(s3RequestService.createGetRequest(resource.getKey()))).thenReturn(expected);
 
-            InputStreamResource actual = resourceService.getResources(resource.getId(), teamMember.getId());
+            ResponseEntity<InputStreamResource> actual = resourceService.getResources(resource.getId(), teamMember.getId());
 
             assertNotNull(expected);
-            Assertions.assertEquals(expected, actual);
+            Assertions.assertEquals(expected, actual.getBody());
 
             verify(teamMemberResourceValidator).validateDownloadFilePermission(teamMember, resource);
         }
