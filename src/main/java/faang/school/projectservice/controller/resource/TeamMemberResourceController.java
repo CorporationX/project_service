@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class TeamMemberResourceController {
     private final ResourceService resourceService;
 
-    @PostMapping()
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResourceDto uploadResource(
             @RequestParam
@@ -45,7 +45,7 @@ public class TeamMemberResourceController {
         return resourceService.getResources(teamMemberId, resourceId);
     }
 
-    @DeleteMapping()
+    @DeleteMapping
     public void deleteFile(
             @RequestParam
             @Positive(message = "ProjectId can't be negative")
