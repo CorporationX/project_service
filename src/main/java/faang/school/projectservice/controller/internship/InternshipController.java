@@ -6,15 +6,10 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.internship.InternshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,6 +17,7 @@ import static faang.school.projectservice.exception.InternshipValidationExceptio
 
 @RequestMapping("/internship")
 @RestController
+@Tag(name = "internship", description = "Контроллеры управления стажировками")
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
@@ -38,6 +34,7 @@ public class InternshipController {
 
         return internshipService.create(internshipDto);
     }
+
     @Operation(summary = "Обновление стажировки", tags = {"internship"})
     @ApiResponse(responseCode = "200", description = "Стажировка успешно обновлена")
     @ApiResponse(responseCode = "400", description = "Ошибка на стороне клиента")
@@ -51,6 +48,7 @@ public class InternshipController {
 
         return internshipService.update(internshipDto);
     }
+
     @Operation(summary = "Получение стажировок из проекта", tags = {"internship"})
     @ApiResponse(responseCode = "200", description = "Стажировка из проекта успешно получена")
     @ApiResponse(responseCode = "400", description = "Ошибка на стороне клиента")
