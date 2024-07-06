@@ -1,7 +1,11 @@
 package faang.school.projectservice.service.project;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +36,8 @@ public class ProjectService {
     private final ProjectValidator validator;
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
+    private final UserContext userContext;
     private final List<ProjectFilter> filters;
     
     public Project getProjectModel(Long projectId) {
@@ -68,6 +74,7 @@ public class ProjectService {
     }
 
     public ProjectDto getById(Long id) {
+        sendProjectEvent(id);
         return projectMapper.toDto(getProjectModel(id));
     }
 
@@ -144,5 +151,15 @@ public class ProjectService {
         if (children != null && !children.isEmpty()) {
             saved.setChildren(projectRepository.findAllByIds(children));
         }
+    }
+
+    private void sendProjectEvent(Long projectId) {
+        ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
+                .userId(userContext.getUserId())
+                .projectId(projectId)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        projectViewEventPublisher.convertAndSend(projectViewEvent);
     }
 }
