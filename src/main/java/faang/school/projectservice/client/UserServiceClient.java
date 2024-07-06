@@ -1,6 +1,6 @@
 package faang.school.projectservice.client;
 
-import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.dto.client.ProjectDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +13,8 @@ import java.util.List;
 public interface UserServiceClient {
 
     @GetMapping("/user/{userId}")
-    UserDto getUser(@PathVariable long userId);
+    ProjectDto getUser(@PathVariable long userId);
 
     @PostMapping("/users")
-    List<UserDto> getUsersByIds(@RequestBody List<Long> ids);
+    List<ProjectDto> getUsersByIds(@RequestBody List<Long> ids);
 }

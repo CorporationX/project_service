@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(DataProjectValidation.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleDataProjectValidatorException(DataProjectValidation e) {
         log.error("Data project validator exception occurred {}", e.getMessage());
