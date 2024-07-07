@@ -16,21 +16,21 @@ public class TeamMemberResourceValidator {
     }
 
     public void validateDeleteFilePermission(TeamMember teamMember, Resource resource) {
-        if (notUploader(teamMember, resource) && notManagerFromUploaderProject(teamMember, resource)
-                && notOwnerFromUploaderProject(teamMember, resource)) {
+        if (isNotUploader(teamMember, resource) && isNotManagerFromUploaderProject(teamMember, resource)
+                && isNotOwnerFromUploaderProject(teamMember, resource)) {
             throw new NoAccessException(NoAccessExceptionMessage.DELETE_PERMISSION_ERROR.getMessage());
         }
     }
 
-    private static boolean notUploader(TeamMember teamMember, Resource resource) {
+    private boolean isNotUploader(TeamMember teamMember, Resource resource) {
         return !resource.getCreatedBy().equals(teamMember);
     }
 
-    private static boolean notManagerFromUploaderProject(TeamMember teamMember, Resource resource) {
+    private boolean isNotManagerFromUploaderProject(TeamMember teamMember, Resource resource) {
         return !teamMember.getRoles().contains(TeamRole.MANAGER) || !teamMember.getTeam().getProject().equals(resource.getProject());
     }
 
-    private static boolean notOwnerFromUploaderProject(TeamMember teamMember, Resource resource) {
+    private boolean isNotOwnerFromUploaderProject(TeamMember teamMember, Resource resource) {
         return !teamMember.getRoles().contains(TeamRole.OWNER) || !teamMember.getTeam().getProject().equals(resource.getProject());
     }
 }
