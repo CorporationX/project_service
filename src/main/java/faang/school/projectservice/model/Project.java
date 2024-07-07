@@ -125,11 +125,11 @@ public class Project {
         
         return sizeAfterAddingFile.compareTo(this.getMaxStorageSize()) > 0;
     }
-    
-    public BigInteger addStorageSize(BigInteger fileSize) {
-        return this.getStorageSize().add(fileSize);
+
+    public void addStorageSize(BigInteger fileSize) {
+        this.setStorageSize(getStorageSize().add(fileSize));
     }
-    
+
     public boolean hasCover() {
         return !StringUtils.isBlank(this.coverImageId);
     }

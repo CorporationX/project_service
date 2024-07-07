@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
@@ -29,7 +30,11 @@ public class S3RequestService {
             createObjectMetadata(multipartFileResource)
         );
     }
-    
+
+    public GetObjectRequest createGetRequest(String key){
+        return new GetObjectRequest(properties.getBucketName(),key);
+    }
+
     public DeleteObjectRequest createDeleteRequest(String key) {
         return new DeleteObjectRequest(properties.getBucketName(), key);
     }

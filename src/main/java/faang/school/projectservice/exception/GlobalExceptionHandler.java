@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -52,5 +51,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException constraintViolationException) {
         return ResponseEntity.badRequest().body(constraintViolationException.getMessage());
+    }
+
+    @ExceptionHandler(NoAccessException.class)
+    public ResponseEntity<String> handleNoAccessException(NoAccessException ex){
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(ex.getMessage());
     }
 }

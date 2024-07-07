@@ -6,6 +6,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V002_create_stage_invitation.sql
   - include:
+      file: db/changelog/changeset/project_V004__alter_resource.sql
+  - include:
       file: db/changelog/changeset/project_V003__create_campaign.sql
   - include:
       file: db/changelog/changeset/project_V004__alter_resource.sql
@@ -21,3 +23,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V012_create_moment_users.sql
   - include:
       file: db/changelog/changeset/project_V013_create_project_calendar_token.sql
+  - include:
+      file: db/changelog/changeset/project_V014_alter_table_resource_allowed_roles.sql

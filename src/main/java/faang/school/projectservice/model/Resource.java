@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,11 +23,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "resource")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Resource {
@@ -40,13 +42,13 @@ public class Resource {
     private String key;
 
     private BigInteger size;
-    
-    //TODO: Нет миграций на таблицу resource_allowed_roles
+
     @ElementCollection(targetClass = TeamRole.class)
-    @CollectionTable(name = "resource_allowed_roles", joinColumns = @JoinColumn(name = "resource_id"))
-    @Column(name = "role_id")
+    @CollectionTable(name = "resource_allowed_roles",
+            joinColumns = @JoinColumn(name = "resource_id"))
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private List<TeamRole> allowedRoles;
+    private Set<TeamRole> allowedRoles;
 
     @Enumerated(EnumType.STRING)
     private ResourceType type;
