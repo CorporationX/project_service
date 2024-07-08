@@ -26,8 +26,8 @@ spring:
       port: 6379
       host: localhost
       channels:
-        calculations_channel:
-          name: calculations_channel
+        calculations: calculations_channel
+        project_view: profile_view_channel
 
   #Google API authentication
   OAuth2:
