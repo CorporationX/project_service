@@ -3,7 +3,7 @@ name: Test project service
 on:
   pull_request:
     branches:
-      - master
+      - pipeline-BC-BJS2-15587
 
 jobs:
   test:
