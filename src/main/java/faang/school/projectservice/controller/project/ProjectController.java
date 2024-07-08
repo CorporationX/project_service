@@ -21,13 +21,13 @@ public class ProjectController {
     private final ProjectValidator projectValidator;
 
     @PostMapping("/create")
-    public faang.school.projectservice.dto.project.ProjectDto create(@RequestBody faang.school.projectservice.dto.project.ProjectDto projectDto) {
+    public ProjectDto create(@RequestBody ProjectDto projectDto) {
         projectValidator.checkIsNull(projectDto);
         return projectService.create(projectDto);
     }
 
     @PutMapping("/update")
-    public faang.school.projectservice.dto.project.ProjectDto update(@RequestBody faang.school.projectservice.dto.project.ProjectDto projectDto) {
+    public ProjectDto update(@RequestBody ProjectDto projectDto) {
         projectValidator.checkIsNull(projectDto);
         return projectService.update(projectDto);
     }
