@@ -25,21 +25,14 @@ public class MomentService {
 
     public void createMoment(MomentDto momentDto) {
         momentServiceValidator.validateSaveMoment(momentDto);
-        List<Long> members = momentDto.getUserIDs();
-        List<Project> projects = momentDto.getProjectsIDs().stream().map(projectRepository::getProjectById).toList();
-
-        projects.stream()
-                .forEach(project -> project.getTeams()
-                        .forEach(team -> team.getTeamMembers()
-                                .forEach(teamMember -> members.add(teamMember.getId()))));
+        addMembersIDsToTheMoment(momentDto);
 
         momentRepository.save(momentMapper.toEntity(momentDto));
     }
 
-
     public void updateMoment(MomentDto momentDto) {
         momentServiceValidator.validateUpdateMoment(momentDto);
-
+        addMembersIDsToTheMoment(momentDto);
 
         momentRepository.save(momentMapper.toEntity(momentDto));
     }
@@ -47,9 +40,10 @@ public class MomentService {
     public List<MomentDto> getAllMoments(MomentFilterDto momentFilterDto) {
         List<Moment> moments = momentRepository.findAll();
 
-       return momentMapper.toDto(momentFilters.stream()
+        return momentMapper.toDto(momentFilters.stream()
                 .filter(filter -> filter.isApplicable(momentFilterDto))
-                .reduce(moments , (currentMoments, filter) -> filter.apply(currentMoments, momentFilterDto), (a, b) -> b));
+                .flatMap(filter -> filter.apply(moments, momentFilterDto))
+                .toList());
     }
 
     public List<MomentDto> getAllMoments() {
@@ -61,5 +55,19 @@ public class MomentService {
         momentServiceValidator.validateGetMomentById(moment);
 
         return momentMapper.toDto(moment);
+    }
+
+    private void addMembersIDsToTheMoment(MomentDto momentDto) {
+        List<Long> members = momentDto.getUserIDs();
+        List<Project> projects = momentDto.getProjectsIDs().stream().map(projectRepository::getProjectById).toList();
+
+        projects.stream()
+                .forEach(project -> project.getTeams()
+                        .forEach(team -> team.getTeamMembers()
+                                .forEach(teamMember -> {
+                                    if (!members.contains(teamMember.getId())) {
+                                        members.add(teamMember.getId());
+                                    }
+                                })));
     }
 }
