@@ -29,12 +29,4 @@ public class MomentDto {
 
     @NotNull
     private List<Long> userIDs;
-
-    public synchronized void setUserIDs(List<Long> userIDs) {
-        this.userIDs = userIDs;
-    }
-
-    public synchronized List<Long> getUserIDs() {
-        return userIDs;
-    }
 }

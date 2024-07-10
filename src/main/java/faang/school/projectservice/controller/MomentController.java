@@ -9,14 +9,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
-
 @Controller
 @RequiredArgsConstructor
 public class MomentController {
     private final MomentService momentService;
 
-    public void saveMoment(@Valid MomentDto momentDto) {
-        momentService.saveMoment(momentDto);
+    public void createMoment(@Valid MomentDto momentDto) {
+        momentService.createMoment(momentDto);
+    }
+
+    public void updateMoment(@NotNull MomentDto momentDto) {
+        momentService.updateMoment(momentDto);
     }
 
     public List<MomentDto> getAllMoments(@NotNull MomentFilterDto momentFilterDto) {

@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.MomentFilter;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
@@ -10,6 +11,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.MomentServiceValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,15 +19,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -42,7 +43,13 @@ public class MomentServiceTest {
     private MomentServiceValidator momentServiceValidator;
 
     @Mock
+    private List<MomentFilter> momentFilters;
+
+    @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
 
     @InjectMocks
     private MomentService momentService;
@@ -50,63 +57,106 @@ public class MomentServiceTest {
     private MomentDto momentDto;
     private Moment moment;
     private Project project;
+    private Team team;
+    private TeamMember teamMember;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        momentDto = MomentDto.builder()
+                .id(1L)
+                .projectsIDs(Arrays.asList(1L))
+                .userIDs(Arrays.asList(1L))
+                .build();
 
-        momentDto = new MomentDto();
-        momentDto.setProjectsIDs(List.of(1L));
+        teamMember = TeamMember.builder()
+                .id(1L)
+                .userId(1L)
+                .build();
 
-        moment = new Moment();
-        project = new Project();
-        Team team = new Team();
-        TeamMember teamMemberFirst = new TeamMember();
-        teamMemberFirst.setId(1L);
-        TeamMember teamMemberSecond = new TeamMember();
-        teamMemberSecond.setId(2L);
+        team = Team.builder()
+                .id(1L)
+                .teamMembers(List.of(teamMember))
+                .build();
 
-        team.setTeamMembers(List.of(teamMemberFirst, teamMemberSecond));
-        project.setTeams(List.of(team));
+        project = Project.builder()
+                .id(1L)
+                .teams(List.of(team))
+                .build();
+
+        moment = Moment.builder().id(1L)
+                .projects(List.of(project))
+                .userIds(List.of(1L, 2L, 3L))
+                .build();
     }
 
-    
+    @Test
+    public void testCreateMoment() {
+        doNothing().when(momentServiceValidator).validateCreateMoment(any(MomentDto.class));
+        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+        when(momentMapper.toEntity(any(MomentDto.class))).thenReturn(moment);
+
+        momentService.createMoment(momentDto);
+
+        verify(momentServiceValidator).validateCreateMoment(momentDto);
+        verify(projectRepository).getProjectById(1L);
+        verify(momentRepository).save(moment);
+    }
 
     @Test
-    @DisplayName("Test retrieval of all moments with filters")
-    public void testGetAllMomentsWithFilters() {
+    public void testUpdateMoment() {
+        when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.of(moment));
+        when(momentMapper.toEntity(momentDto)).thenReturn(moment);
+        momentService.updateMoment(momentDto);
+
+        verify(momentRepository).save(moment);
+    }
+
+    @Test
+    public void testUpdateMomentNotFoundMoment() {
+        when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.empty());
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> momentService.updateMoment(momentDto));
+        assertEquals("Moment not found", exception.getMessage());
+    }
+
+    @Test
+    public void getAllMomentsWithFilters() {
         MomentFilterDto momentFilterDto = new MomentFilterDto();
         when(momentRepository.findAll()).thenReturn(List.of(moment));
-        when(momentMapper.toDto(anyList())).thenReturn(List.of(momentDto));
+        when(momentFilters.stream()).thenReturn(Stream.of());
 
-        List<MomentDto> moments = momentService.getAllMoments(momentFilterDto);
+        List<MomentDto> result = momentService.getAllMoments(momentFilterDto);
 
-        assertEquals(1, moments.size());
-        verify(momentRepository).findAll();
+        verify(momentFilters, times(1)).stream();
+        assertEquals(0, result.size());
     }
 
     @Test
-    @DisplayName("Test retrieval of all moments without filters")
-    public void testGetAllMoments() {
+    public void getAllMomentsReturnAllMoments() {
         when(momentRepository.findAll()).thenReturn(List.of(moment));
         when(momentMapper.toDto(anyList())).thenReturn(List.of(momentDto));
 
-        List<MomentDto> moments = momentService.getAllMoments();
+        List<MomentDto> result = momentService.getAllMoments();
 
-        assertEquals(1, moments.size());
-        verify(momentRepository).findAll();
+        assertEquals(1, result.size());
+        verify(momentRepository, times(1)).findAll();
     }
 
     @Test
-    @DisplayName("Test retrieval of a moment by ID")
-    public void testGetMomentById() {
-        when(momentRepository.findById(anyLong())).thenReturn(Optional.of(moment));
-        doNothing().when(momentServiceValidator).validateGetMomentById(any(Moment.class));
+    public void getMomentByIdReturnMomentDto() {
+        when(momentRepository.findById(any(Long.class))).thenReturn(Optional.of(moment));
         when(momentMapper.toDto(any(Moment.class))).thenReturn(momentDto);
 
         MomentDto result = momentService.getMomentById(1L);
 
-        assertNotNull(result);
-        verify(momentRepository).findById(1L);
+        assertEquals(momentDto, result);
+        verify(momentRepository, times(1)).findById(any(Long.class));
+    }
+
+    @Test
+    public void getMomentById_invalidId_shouldThrowException() {
+        when(momentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(DataValidationException.class, () -> momentService.getMomentById(1L));
     }
 }
