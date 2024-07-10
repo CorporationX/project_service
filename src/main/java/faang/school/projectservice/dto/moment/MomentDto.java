@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MomentDto {
-    private Long id;
+    private long id;
 
     @NotBlank
     @Size(min = 2, max = 90)

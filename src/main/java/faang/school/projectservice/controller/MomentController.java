@@ -18,7 +18,7 @@ public class MomentController {
         momentService.createMoment(momentDto);
     }
 
-    public void updateMoment(@NotNull MomentDto momentDto) {
+    public void updateMoment(@Valid MomentDto momentDto) {
         momentService.updateMoment(momentDto);
     }
 
