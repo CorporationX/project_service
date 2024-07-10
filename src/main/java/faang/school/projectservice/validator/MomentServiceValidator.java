@@ -16,7 +16,7 @@ public class MomentServiceValidator {
     private final MomentRepository momentRepository;
     private final ProjectRepository projectRepository;
 
-    public void validateSaveMoment(MomentDto momentDto) {
+    public void validateCreateMoment(MomentDto momentDto) {
         if (momentRepository.existsById(momentDto.getId())) {
             throw new DataValidationException("Moment " + momentDto.getId() + " already exists");
         }
@@ -26,12 +26,6 @@ public class MomentServiceValidator {
         if (project.getStatus().equals(ProjectStatus.CANCELLED) ||
                 project.getStatus().equals(ProjectStatus.COMPLETED)) {
             throw new DataValidationException("Project " + project.getName() + " cancelled or completed");
-        }
-    }
-
-    public void validateUpdateMoment(MomentDto momentDto) {
-        if (!momentRepository.existsById(momentDto.getId())) {
-            throw new DataValidationException("Moment " + momentDto.getId() + " not exists");
         }
     }
 

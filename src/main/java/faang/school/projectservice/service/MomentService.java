@@ -12,7 +12,10 @@ import faang.school.projectservice.validator.MomentServiceValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -23,18 +26,11 @@ public class MomentService {
     private final List<MomentFilter> momentFilters;
     private final ProjectRepository projectRepository;
 
-    public void createMoment(MomentDto momentDto) {
-        momentServiceValidator.validateSaveMoment(momentDto);
-        addMembersIDsToTheMoment(momentDto);
+    public void saveMoment(MomentDto momentDto) {
+        momentServiceValidator.validateCreateMoment(momentDto);
+        CompletableFuture<Void> futureMoment = addMembersIDsToTheMoment(momentDto);
 
-        momentRepository.save(momentMapper.toEntity(momentDto));
-    }
-
-    public void updateMoment(MomentDto momentDto) {
-        momentServiceValidator.validateUpdateMoment(momentDto);
-        addMembersIDsToTheMoment(momentDto);
-
-        momentRepository.save(momentMapper.toEntity(momentDto));
+        futureMoment.thenRun(() -> momentRepository.save(momentMapper.toEntity(momentDto)));
     }
 
     public List<MomentDto> getAllMoments(MomentFilterDto momentFilterDto) {
@@ -57,17 +53,23 @@ public class MomentService {
         return momentMapper.toDto(moment);
     }
 
-    private void addMembersIDsToTheMoment(MomentDto momentDto) {
-        List<Long> members = momentDto.getUserIDs();
-        List<Project> projects = momentDto.getProjectsIDs().stream().map(projectRepository::getProjectById).toList();
+    public CompletableFuture<Void> addMembersIDsToTheMoment(MomentDto momentDto) {
+        CopyOnWriteArrayList<Long> members = new CopyOnWriteArrayList<>(momentDto.getUserIDs());
+        if (!members.isEmpty()) {
+            members.clear();
+        }
 
-        projects.stream()
-                .forEach(project -> project.getTeams()
-                        .forEach(team -> team.getTeamMembers()
-                                .forEach(teamMember -> {
-                                    if (!members.contains(teamMember.getId())) {
-                                        members.add(teamMember.getId());
-                                    }
-                                })));
+        List<Project> projects = momentDto.getProjectsIDs().stream()
+                .map(projectRepository::getProjectById)
+                .toList();
+
+        return CompletableFuture.runAsync(() -> {
+            List<Long> tempMembers = new ArrayList<>();
+            projects.stream()
+                    .forEach(project -> project.getTeams()
+                            .forEach(team -> team.getTeamMembers()
+                                    .forEach(teamMember -> tempMembers.add(teamMember.getId()))));
+            members.addAll(tempMembers);
+        }).thenRun(() -> momentDto.setUserIDs(members));
     }
 }

@@ -15,12 +15,8 @@ import java.util.List;
 public class MomentController {
     private final MomentService momentService;
 
-    public void createMoment(@Valid MomentDto momentDto) {
-        momentService.createMoment(momentDto);
-    }
-
-    public void updateMoment(@Valid MomentDto momentDto) {
-        momentService.updateMoment(momentDto);
+    public void saveMoment(@Valid MomentDto momentDto) {
+        momentService.saveMoment(momentDto);
     }
 
     public List<MomentDto> getAllMoments(@NotNull MomentFilterDto momentFilterDto) {

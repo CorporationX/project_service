@@ -17,11 +17,8 @@ public class MomentDto {
     private Long id;
 
     @NotBlank
-    @Size(min = 2, max = 50)
+    @Size(min = 2, max = 90)
     private String name;
-
-    @Size(min = 1, max = 4096)
-    private String description;
 
     @NotNull
     @Past
@@ -30,5 +27,14 @@ public class MomentDto {
     @NotEmpty
     private List<Long> projectsIDs;
 
+    @NotNull
     private List<Long> userIDs;
+
+    public synchronized void setUserIDs(List<Long> userIDs) {
+        this.userIDs = userIDs;
+    }
+
+    public synchronized List<Long> getUserIDs() {
+        return userIDs;
+    }
 }
