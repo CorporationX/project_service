@@ -49,7 +49,7 @@ public class MomentServiceTest {
     private ProjectRepository projectRepository;
 
     @Mock
-    private TeamMemberRepository teamMemberRepository;
+    private MomentFilter momentFilter;
 
     @InjectMocks
     private MomentService momentService;
@@ -90,6 +90,7 @@ public class MomentServiceTest {
     }
 
     @Test
+    @DisplayName("Test createMoment")
     public void testCreateMoment() {
         doNothing().when(momentServiceValidator).validateCreateMoment(any(MomentDto.class));
         when(projectRepository.getProjectById(anyLong())).thenReturn(project);
@@ -103,6 +104,7 @@ public class MomentServiceTest {
     }
 
     @Test
+    @DisplayName("Test updateMoment")
     public void testUpdateMoment() {
         when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.of(moment));
         when(momentMapper.toEntity(momentDto)).thenReturn(moment);
@@ -112,6 +114,7 @@ public class MomentServiceTest {
     }
 
     @Test
+    @DisplayName("Test updateMoment - Moment Not Found")
     public void testUpdateMomentNotFoundMoment() {
         when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.empty());
 
@@ -120,7 +123,8 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void getAllMomentsWithFilters() {
+    @DisplayName("Test getAllMomentsWithFilters - No Filters")
+    public void getAllMomentsWithNoFilters() {
         MomentFilterDto momentFilterDto = new MomentFilterDto();
         when(momentRepository.findAll()).thenReturn(List.of(moment));
         when(momentFilters.stream()).thenReturn(Stream.of());
@@ -129,6 +133,14 @@ public class MomentServiceTest {
 
         verify(momentFilters, times(1)).stream();
         assertEquals(0, result.size());
+    }
+
+    @Test
+    @DisplayName("Test getAllMoments with applicable filters")
+    public void testGetAllMomentsWithApplicableFilters() {
+        momentService.getAllMoments(new MomentFilterDto());
+
+        verify(momentRepository, times(1)).findAll();
     }
 
     @Test
