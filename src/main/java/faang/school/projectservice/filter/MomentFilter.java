@@ -11,5 +11,5 @@ import java.util.stream.Stream;
 public interface MomentFilter {
     boolean isApplicable(MomentFilterDto momentFilterDto);
 
-    Stream<Moment> apply(List<Moment> moments, MomentFilterDto momentFilterDto);
+    Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto momentFilterDto);
 }

@@ -50,10 +50,12 @@ public class MomentService {
     public List<MomentDto> getAllMoments(MomentFilterDto momentFilterDto) {
         List<Moment> moments = momentRepository.findAll();
 
-        return momentMapper.toDto(momentFilters.stream()
+        List<Moment> filteredMoments = momentFilters.stream()
                 .filter(filter -> filter.isApplicable(momentFilterDto))
-                .flatMap(filter -> filter.apply(moments, momentFilterDto))
-                .toList());
+                .reduce(moments, (filtered, filter) ->
+                        filter.apply(filtered.stream(), momentFilterDto).toList(), (a, b) -> b);
+
+        return momentMapper.toDto(filteredMoments);
     }
 
     public List<MomentDto> getAllMoments() {
@@ -99,8 +101,7 @@ public class MomentService {
         }
     }
 
-    private void checkAndAddMembersByNewProjects(Moment momentFromTheDatabase, MomentDto
-            momentDto) {
+    private void checkAndAddMembersByNewProjects(Moment momentFromTheDatabase, MomentDto momentDto) {
         List<Long> differentProjectIds = new ArrayList<>(momentDto.getProjectsIDs());
         differentProjectIds.removeAll(momentFromTheDatabase.getProjects().stream()
                 .map(Project::getId).toList());
