@@ -22,6 +22,7 @@ public class StageInvitationService {
     private final StageInvitationMapper stageInvitationMapper;
     private final TeamMemberRepository teamMemberRepository;
     private final List<StageInvitationFilter> stageInvitationFilters;
+    private final StageInvitationValidator stageInvitationValidator;
 
     public StageInvitationDto create(StageInvitationDto stageInvitationDto) {
         stageInvitationDtoValidator.validateAll(stageInvitationDto);
@@ -34,8 +35,9 @@ public class StageInvitationService {
 
     public StageInvitationDto acceptStageInvitation(Long id) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(id);
-
         TeamMember invited = stageInvitation.getInvited();
+        stageInvitationValidator.statusPendingCheck(stageInvitation);
+
         invited.getStages().add(stageInvitation.getStage());
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
 
@@ -44,8 +46,9 @@ public class StageInvitationService {
 
     public StageInvitationDto rejectStageInvitation(Long id) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(id);
-
         TeamMember invited = stageInvitation.getInvited();
+        stageInvitationValidator.statusPendingCheck(stageInvitation);
+
         invited.getStages().remove(stageInvitation.getStage());
         //тут должно быть сохранение причины отказа
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
