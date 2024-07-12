@@ -2,7 +2,9 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.UpdateVacancyDto;
 import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.client.VacancyFilterDto;
 import faang.school.projectservice.exceptions.EntityNotFoundException;
+import faang.school.projectservice.filters.filters.Filterable;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.CandidateRepository;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,24 @@ public class VacancyService {
     private final TeamMemberRepository teamMemberRepository;
     private final VacancyMapper vacancyMapper;
     private final CandidateRepository candidateRepository;
+    private final List<Filterable> vacancyFilters;
+
+    public VacancyDto getVacancy(Long vacancyId) {
+        Optional<Vacancy> vacancy = vacancyRepository.findById(vacancyId);
+        if(vacancy.isEmpty()) {
+            throw new EntityNotFoundException("Not found");
+        }
+        return vacancyMapper.toDto(vacancy.get());
+    }
+
+    public List<VacancyDto> getAll(final VacancyFilterDto filterDto) {
+        Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
+        List<Filterable> filters = vacancyFilters.stream().filter(el -> el.isValid(filterDto)).toList();
+        for (Filterable filter : filters) {
+            vacancies = filter.apply(vacancies, filterDto);
+        }
+        return vacancies.map(vacancyMapper::toDto).toList();
+    }
 
     public Map<String, String> create(VacancyDto vacancyDto) throws ValidationException {
         TeamMember memberInCharge = teamMemberRepository.findById(vacancyDto.getCreatedBy());
