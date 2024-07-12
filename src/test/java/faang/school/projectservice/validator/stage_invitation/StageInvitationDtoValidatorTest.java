@@ -1,9 +1,10 @@
-package faang.school.projectservice.service.stage;
+package faang.school.projectservice.validator.stage_invitation;
 
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -44,12 +45,14 @@ public class StageInvitationDtoValidatorTest {
     }
 
     @Test
+    @DisplayName("Test getting IllegalArgumentException when ids equals")
     public void testValidateEqualsId() {
         assertThrows(IllegalArgumentException.class,
                 () -> stageInvitationDtoValidator.validateEqualsId(authorId, authorId));
     }
 
     @Test
+    @DisplayName("Test that invited and author are in the one Team")
     public void testValidateInvitedMemberTeam() {
         authorTeam.setId(authorTeamId);
         invitedTeam.setId(invitedTeamId);

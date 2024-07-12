@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.stage;
+package faang.school.projectservice.validator.stage_invitation;
 
 import faang.school.projectservice.dto.client.StageInvitationDto;
 import faang.school.projectservice.repository.StageInvitationRepository;

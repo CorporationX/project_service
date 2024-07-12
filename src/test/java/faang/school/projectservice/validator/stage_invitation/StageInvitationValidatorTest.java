@@ -1,8 +1,9 @@
-package faang.school.projectservice.service.stage;
+package faang.school.projectservice.validator.stage_invitation;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -23,6 +24,7 @@ public class StageInvitationValidatorTest {
     }
 
     @Test
+    @DisplayName("Test getting RuntimeException when status is already ACCEPTED")
     public void testAcceptStageInvitationAccepted() {
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
 
@@ -31,6 +33,7 @@ public class StageInvitationValidatorTest {
     }
 
     @Test
+    @DisplayName("Test getting RuntimeException when status is already REJECTED")
     public void testAcceptStageInvitationRejected() {
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
 

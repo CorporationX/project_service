@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.stage;
+package faang.school.projectservice.validator.stage_invitation;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;

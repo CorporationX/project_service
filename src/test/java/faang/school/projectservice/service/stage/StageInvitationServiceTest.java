@@ -9,7 +9,10 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validator.stage_invitation.StageInvitationDtoValidator;
+import faang.school.projectservice.validator.stage_invitation.StageInvitationValidator;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -85,6 +88,7 @@ public class StageInvitationServiceTest {
     }
 
     @Test
+    @DisplayName("Testing that all mocks are called + return test")
     public void testCreate() {
         doNothing().when(stageInvitationDtoValidator).validateAll(stageInvitationDto);
         when(stageInvitationMapper.toEntity(stageInvitationDto, teamMemberRepository)).thenReturn(stageInvitation);
@@ -102,6 +106,7 @@ public class StageInvitationServiceTest {
     }
 
     @Test
+    @DisplayName("Testing that all mocks are called + return test")
     public void testAcceptStageInvitationCorrect() {
         invited.setStages(stages);
         stageInvitation.setInvited(invited);
@@ -118,6 +123,7 @@ public class StageInvitationServiceTest {
     }
 
     @Test
+    @DisplayName("Testing that all mocks are called + return test")
     public void testRejectStageInvitationCorrect() {
         invited.setStages(stages);
         stageInvitation.setInvited(invited);
@@ -134,6 +140,7 @@ public class StageInvitationServiceTest {
     }
 
     @Test
+    @DisplayName("Testing that all mocks are called + return test")
     public void testGetMemberStageInvitations() {
         invited.setId(id);
         stageInvitation.setInvited(invited);
