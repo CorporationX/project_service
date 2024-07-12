@@ -1,0 +1,29 @@
+package faang.school.projectservice.mapper;
+
+import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Vacancy;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface VacancyMapper {
+
+    Vacancy toEntity(VacancyDto vacancyDto);
+
+    @Mapping(source = "candidates",target = "candidateIds",qualifiedByName = "mapCandidate")
+    @Mapping(source = "project",target="projectId",qualifiedByName = "mapProject")
+    VacancyDto toDto(Vacancy vacancy);
+    @Named("mapCandidate")
+    default List<Long> mapCandidate(List<Candidate> candidates) {
+        return candidates.stream().map(Candidate::getId).toList();
+    }
+    @Named("mapProject")
+    default Long mapProject(Project project) {
+        return project.getId();
+    }
+}

@@ -15,15 +15,22 @@ import java.util.Map;
 
 @Component
 @RestController
-@RequestMapping("/api/vacancy")
+@RequestMapping("/vacancy")
 @RequiredArgsConstructor
 @Validated
 public class VacancyController {
     private final VacancyService vacancyService;
 
-    @PostMapping(value = "/create")
+    @PostMapping("/create")
     public ResponseEntity<Map<String,String>> create(@Valid @RequestBody VacancyDto vacancy) throws ValidationException {
-
         return new ResponseEntity<>(vacancyService.create(vacancy), HttpStatus.CREATED);
+    }
+    @PostMapping("/update/{id}")
+    public ResponseEntity<Map<String,String>> update(@PathVariable Long id, @Valid @RequestBody VacancyDto vacancy) throws ValidationException {
+        return  new ResponseEntity<>(vacancyService.update(id,vacancy),HttpStatus.OK);
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String,String>> delete(@PathVariable Long id) throws ValidationException {
+        return  new ResponseEntity<>(vacancyService.delete(id),HttpStatus.OK);
     }
 }

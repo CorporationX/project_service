@@ -17,4 +17,12 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
      Vacancy create(String name, String description,Long projectId,Long createdBy, Long updatedBy, String status,
                     Double salary, String workSchedule,
                     Integer count);
+
+//    @Query(nativeQuery = true,value = """
+//    SELECT * FROM vacancy
+//    WHERE id=:vacancyId
+//    SORT by created_at DESC
+//    LIMIT 1
+//    """)
+//    Vacancy findById(Long vacancyId);
 }
