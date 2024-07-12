@@ -44,13 +44,13 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
-    public StageInvitationDto rejectStageInvitation(Long id) {
+    public StageInvitationDto rejectStageInvitation(Long id, String rejectionReason) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(id);
         TeamMember invited = stageInvitation.getInvited();
         stageInvitationValidator.statusPendingCheck(stageInvitation);
 
         invited.getStages().remove(stageInvitation.getStage());
-        //тут должно быть сохранение причины отказа
+        stageInvitation.setRejectionReason(rejectionReason);
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
 
         return stageInvitationMapper.toDto(stageInvitation);
@@ -62,10 +62,10 @@ public class StageInvitationService {
         stageInvitations
                 .filter(stageInvitation -> stageInvitation.getInvited().getId().equals(id));
 
-        stageInvitationFilters.stream()
+        return stageInvitationFilters.stream()
                 .filter(stageInvitationFilter -> stageInvitationFilter.isApplicable(filter))
-                .forEach(stageInvitationFilter -> stageInvitationFilter.apply(stageInvitations, filter));
-
-        return stageInvitations.map(stageInvitationMapper::toDto).toList();
+                .flatMap(stageInvitationFilter -> stageInvitationFilter.apply(stageInvitations, filter))
+                .map(stageInvitationMapper::toDto)
+                .toList();
     }
 }

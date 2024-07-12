@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.client.StageInvitationDto;
+import faang.school.projectservice.dto.client.StageInvitationFilterDto;
 import faang.school.projectservice.mapper.stage.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -12,12 +13,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,25 +45,41 @@ public class StageInvitationServiceTest {
     @Mock
     StageInvitationValidator stageInvitationValidator;
 
+    @Mock
+    List<StageInvitationFilter> stageInvitationFiltersMock;
+
     private Long id;
+    private String rejectionReason;
     private StageInvitation stageInvitation;
     private StageInvitationDto stageInvitationDto;
     private StageInvitationDto stageInvitationDtoAfterMapping;
     private TeamMember invited;
     private Stage stage;
     private List<Stage> stages;
+    private List<StageInvitationFilter> stageInvitationFilters;
+    private StageInvitationFilter stageInvitationAuthorIdFilter;
+    private StageInvitationFilter stageInvitationStatusFilter;
+    private StageInvitationFilterDto filter;
 
     @BeforeEach
     public void setUp() {
         id = 1L;
+        rejectionReason = "test reason";
 
         stageInvitation = new StageInvitation();
         stageInvitationDto = new StageInvitationDto();
         stageInvitationDtoAfterMapping = new StageInvitationDto();
         invited = new TeamMember();
         stage = new Stage();
+        stageInvitationAuthorIdFilter = Mockito.mock(StageInvitationFilter.class);
+        stageInvitationStatusFilter = Mockito.mock(StageInvitationFilter.class);
+        filter = new StageInvitationFilterDto();
 
         stages = new ArrayList<>();
+        stageInvitationFilters = new ArrayList<>();
+
+        stageInvitationFilters.add(stageInvitationAuthorIdFilter);
+        stageInvitationFilters.add(stageInvitationStatusFilter);
 
         MockitoAnnotations.openMocks(this);
     }
@@ -107,9 +127,33 @@ public class StageInvitationServiceTest {
         doNothing().when(stageInvitationValidator).statusPendingCheck(stageInvitation);
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
 
-        stageInvitationService.rejectStageInvitation(id);
+        stageInvitationService.rejectStageInvitation(id, rejectionReason);
 
         verify(stageInvitationRepository).findById(id);
         verify(stageInvitationMapper).toDto(stageInvitation);
+    }
+
+    @Test
+    public void testGetMemberStageInvitations() {
+        invited.setId(id);
+        stageInvitation.setInvited(invited);
+        when(stageInvitationRepository.findAll()).thenReturn(List.of(stageInvitation));
+        when(stageInvitationFiltersMock.stream()).thenReturn(stageInvitationFilters.stream());
+        when(stageInvitationAuthorIdFilter.isApplicable(filter)).thenReturn(true);
+        when(stageInvitationStatusFilter.isApplicable(filter)).thenReturn(true);
+        when(stageInvitationAuthorIdFilter.apply(any(), any())).thenReturn(Stream.<StageInvitation>builder().add(stageInvitation).build());
+        when(stageInvitationStatusFilter.apply(any(), any())).thenReturn(Stream.<StageInvitation>builder().add(stageInvitation).build());
+        when(stageInvitationMapper.toDto(any())).thenReturn(stageInvitationDto);
+
+        List<StageInvitationDto> result = stageInvitationService.getMemberStageInvitations(id, filter);
+
+        verify(stageInvitationRepository).findAll();
+        verify(stageInvitationFiltersMock).stream();
+        verify(stageInvitationAuthorIdFilter).isApplicable(filter);
+        verify(stageInvitationStatusFilter).isApplicable(filter);
+        verify(stageInvitationAuthorIdFilter).apply(any(), any());
+        verify(stageInvitationStatusFilter).apply(any(), any());
+        verify(stageInvitationMapper, Mockito.times(2)).toDto(any());
+        assertEquals(List.of(stageInvitationDto, stageInvitationDto), result);
     }
 }
