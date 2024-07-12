@@ -38,6 +38,17 @@ public class TestProject {
             .ownerId(OWNER_ID)
             .status(ProjectStatus.CREATED)
             .build();
+
+    public static Project CANCELLED_PROJECT = Project.builder()
+            .id(PROJECT_ID)
+            .status(ProjectStatus.CANCELLED)
+            .build();
+
+    public static Project COMPLETED_PROJECT = Project.builder()
+            .id(PROJECT_ID)
+            .status(ProjectStatus.COMPLETED)
+            .build();
+
     public static List<Project> PROJECTS = List.of(PROJECT);
     public static List<ProjectDto> PROJECTS_DTOS = List.of(PROJECT_DTO);
 
