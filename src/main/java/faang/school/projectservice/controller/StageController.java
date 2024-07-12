@@ -2,13 +2,12 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,15 +33,33 @@ public class StageController {
 
     // Удалить этап.
     public void deleteStage(Long id) {
-        if (id.equals(null)) {
+        if (id == null) {
             throw new DataValidationException("Введите идентификатор этапа!");
         }
-//        stageService.
+        stageService.deleteStage(id);
     }
 
-// Обновить этап.
+    // Обновить этап.
+    public void updateStage(StageDto stageDto) {
+        if (stageDto == null) {
+            throw new DataValidationException("Введите данные этапа!");
+        }
+        stageService.updateStage(stageDto);
+    }
 
-// Получить все этапы проекта.
+    // Получить все этапы проекта.
+    public List<StageDto> getStagesOfProject(Long projectId) {
+        if (projectId == null) {
+            throw new DataValidationException("Введите идентификатор проекта!");
+        }
+        return stageService.getStagesOfProject(projectId);
+    }
 
-// Получить конкретный этап по Id.
+    // Получить конкретный этап по Id.
+    public StageDto getStageById(Long stageId) {
+        if (stageId == null) {
+            throw new DataValidationException("Введите идентификатор этапа!");
+        }
+        return stageService.getStageById(stageId);
+    }
 }
