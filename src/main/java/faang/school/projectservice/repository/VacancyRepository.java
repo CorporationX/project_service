@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
-    Vacancy getVacanciesById(Long id);
 }
