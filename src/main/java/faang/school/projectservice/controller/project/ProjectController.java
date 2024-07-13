@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,5 +26,10 @@ public class ProjectController {
     public ResponseEntity<ProjectDto> createProject(@RequestBody @Valid ProjectDto projectDto) {
         projectDto.setOwnerId(userContext.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(projectDto));
+    }
+
+    @PutMapping
+    public ResponseEntity<ProjectDto> updateProject(@RequestBody @Valid ProjectDto projectDto) {
+        return ResponseEntity.ok(projectService.updateProject(projectDto));
     }
 }

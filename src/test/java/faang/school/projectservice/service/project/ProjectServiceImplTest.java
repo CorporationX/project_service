@@ -9,12 +9,16 @@ import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +29,9 @@ class ProjectServiceImplTest {
 
     @Mock
     private ProjectMapper mapper;
+
+    @Captor
+    private ArgumentCaptor<Project> projectArgumentCaptor;
 
     @InjectMocks
     private ProjectServiceImpl projectService;
@@ -86,8 +93,9 @@ class ProjectServiceImplTest {
 
         ProjectDto createdProjectDto = projectService.createProject(projectDto);
 
+        verify(projectRepository, times(1)).save(projectArgumentCaptor.capture());
         assertEquals(projectDto, createdProjectDto);
-        assertEquals(ProjectStatus.CREATED, createdProjectDto.getStatus());
+        assertEquals(ProjectStatus.CREATED, projectArgumentCaptor.getValue().getStatus());
     }
 
     @Test
@@ -119,8 +127,9 @@ class ProjectServiceImplTest {
 
         ProjectDto createdProjectDto = projectService.createProject(projectDto);
 
+        verify(projectRepository, times(1)).save(projectArgumentCaptor.capture());
         assertEquals(projectDto, createdProjectDto);
-        assertEquals(ProjectStatus.CREATED, createdProjectDto.getStatus());
+        assertEquals(ProjectStatus.CREATED, projectArgumentCaptor.getValue().getStatus());
         assertEquals(parentProject.getId(), createdProjectDto.getParentProjectId());
     }
 

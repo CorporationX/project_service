@@ -28,7 +28,6 @@ public class ProjectServiceImpl implements ProjectService {
         if (isDuplicateProject) {
             throw new IllegalArgumentException(ExceptionMessages.PROJECT_ALREADY_EXISTS_FOR_OWNER_ID);
         }
-        projectDto.setStatus(ProjectStatus.CREATED);
         Project savedProject;
         try {
             var projectToBeSaved = mapper.toEntity(projectDto);
@@ -36,10 +35,16 @@ public class ProjectServiceImpl implements ProjectService {
                 var parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
                 projectToBeSaved.setParentProject(parentProject);
             }
+            projectToBeSaved.setStatus(ProjectStatus.CREATED);
             savedProject = projectRepository.save(projectToBeSaved);
         } catch (DataIntegrityViolationException e) {
             throw new PersistenceException(ExceptionMessages.PROJECT_FAILED_PERSISTENCE, e);
         }
         return mapper.toDto(savedProject);
+    }
+
+    @Override
+    public ProjectDto updateProject(ProjectDto projectDto) {
+        return null;
     }
 }
