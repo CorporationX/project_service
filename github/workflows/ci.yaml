@@ -1,5 +1,8 @@
 name: CI for project_service
 on:
+  pull:
+    branches:
+      - centaur-master-bc5
   pull_request:
     branches:
       - centaur-master-bc5
