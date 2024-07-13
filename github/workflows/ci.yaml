@@ -11,26 +11,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Cache Java
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.sdkman/candidates/java
-            ~/.java
-          key: ${{ runner.os }}-java-${{ hashFiles('**/build.gradle', '**/build.gradle.kts', '**/settings.gradle', '**/settings.gradle.kts') }}
-          restore-keys: |
-            ${{ runner.os }}-java-
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
 
@@ -59,35 +39,9 @@ jobs:
           POSTGRES_DB: postgres
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
-        options: >-
-          --health-cmd "pg_isready -U ${{ secrets.POSTGRES_USER }}" 
-          --health-interval 10s 
-          --health-timeout 5s 
-          --health-retries 5
-
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
-
-      - name: Cache Java
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.sdkman/candidates/java
-            ~/.java
-          key: ${{ runner.os }}-java-${{ hashFiles('**/build.gradle', '**/build.gradle.kts', '**/settings.gradle', '**/settings.gradle.kts') }}
-          restore-keys: |
-            ${{ runner.os }}-java-
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: Download build artifacts
         uses: actions/download-artifact@v3
