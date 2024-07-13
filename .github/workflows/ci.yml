@@ -28,7 +28,7 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '17'
-      - name: Build with Gradle
-        run: ./gradlew build
+#      - name: Build with Gradle
+#        run: ./gradlew build
       - name: Run test
         run: ./gradlew test --no-daemon
