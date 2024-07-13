@@ -4,7 +4,7 @@ on:
     branches:
       - centaur-master-bc5-BJS2-15964
 jobs:
-  postgres:
+  buildAndTest:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -15,9 +15,6 @@ jobs:
           POSTGRES_PASSWORD: password
         ports:
           - 5432:5432
-  buildAndTest:
-    runs-on: ubuntu-latest
-    needs: postgres
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
