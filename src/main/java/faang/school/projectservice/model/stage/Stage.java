@@ -1,7 +1,6 @@
 package faang.school.projectservice.model.stage;
 
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.StageStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.CascadeType;
@@ -46,10 +45,6 @@ public class Stage {
 
     @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
     private List<StageRoles> stageRoles;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private StageStatus status;
 
     @OneToMany(cascade = CascadeType.MERGE)
     @JoinColumn(name = "stage_id")
