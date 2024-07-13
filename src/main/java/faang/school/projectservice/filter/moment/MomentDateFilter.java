@@ -16,7 +16,7 @@ public class MomentDateFilter implements MomentFilter {
 
     @Override
     public Stream<Moment> apply(Supplier<Stream<Moment>> moments, MomentFilterDto filters) {
-        return moments.get().filter(moment -> filters.getStartDate().isAfter(moment.getDate()) &&
-                filters.getEndDate().isBefore(moment.getDate()));
+        return moments.get().filter(moment -> moment.getDate().isAfter(filters.getStartDate()) &&
+                moment.getDate().isBefore(filters.getEndDate()));
     }
 }
