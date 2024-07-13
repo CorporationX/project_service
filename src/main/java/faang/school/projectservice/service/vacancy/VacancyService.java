@@ -1,14 +1,20 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.dto.filter.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
-import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.model.WorkSchedule;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class VacancyService {
@@ -16,14 +22,19 @@ public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final VacancyMapper vacancyMapper;
     private final VacancyValidator vacancyValidator;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
+    private final List<VacancyFilter> vacancyFilters;
 
     @Autowired
-    public VacancyService(VacancyRepository vacancyRepository, VacancyMapper vacancyMapper, VacancyValidator vacancyValidator) {
+    public VacancyService(VacancyRepository vacancyRepository, VacancyMapper vacancyMapper, VacancyValidator vacancyValidator, TeamMemberJpaRepository teamMemberJpaRepository, List<VacancyFilter> vacancyFilters) {
         this.vacancyRepository = vacancyRepository;
         this.vacancyMapper = vacancyMapper;
         this.vacancyValidator = vacancyValidator;
+        this.teamMemberJpaRepository = teamMemberJpaRepository;
+        this.vacancyFilters = vacancyFilters;
     }
 
+    @Transactional
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         vacancyValidator.createVacancyValidator(vacancyDto);
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
@@ -31,12 +42,34 @@ public class VacancyService {
         return vacancyMapper.toDto(vacancy);
     }
 
+    @Transactional
     public VacancyDto updateVacancy(Long id, VacancyDto vacancyDto) {
-        vacancyValidator.updateVacancyValidator(id, vacancyDto);
-        Vacancy vacancy = vacancyRepository.getVacanciesById(id);
+        Vacancy vacancy = vacancyValidator.getVacancyValidator(id);
         updateVacancyFields(vacancy, vacancyDto);
         vacancy = vacancyRepository.save(vacancy);
         return vacancyMapper.toDto(vacancy);
+    }
+
+    @Transactional
+    public void deleteVacancy(Long vacancyId) {
+        Vacancy vacancy = vacancyValidator.getVacancyValidator(vacancyId);
+        deleteCandidateIfNotHaveStatus(vacancy);
+        vacancyRepository.deleteById(vacancyId);
+    }
+
+    @Transactional(readOnly = true)
+    public VacancyDto getVacancyById(Long vacancyId) {
+        return vacancyMapper.toDto(vacancyValidator.getVacancyValidator(vacancyId));
+    }
+
+    @Transactional(readOnly = true)
+    public List<VacancyDto> getAllVacanciesByFilter(VacancyFilterDto filters) {
+        Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
+        return vacancyFilters.stream()
+                .filter(vacancyFilter -> vacancyFilter.isApplicable(filters))
+                .flatMap(vacancyFilter -> vacancyFilter.apply(vacancies, filters))
+                .map(vacancyMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     private void updateVacancyFields(Vacancy vacancy, VacancyDto vacancyDto) {
@@ -57,6 +90,34 @@ public class VacancyService {
         }
         if (vacancyDto.getRequiredSkillIds() != null) {
             vacancy.setRequiredSkillIds(vacancyDto.getRequiredSkillIds());
+        }
+        if (vacancyDto.getCandidatesIds() != null) {
+            vacancyDto.setCandidatesIds(updateCandidates(vacancy, vacancyDto));
+            vacancy.setCandidates(vacancyMapper.toEntity(vacancyDto).getCandidates());
+        }
+    }
+
+    private List<Long> updateCandidates(Vacancy vacancy, VacancyDto vacancyDto) {
+        var simpleCandidate = vacancy.getCandidates().stream()
+                .map(Candidate::getId)
+                .collect(Collectors.toList());
+        var futureCandidate = vacancyDto.getCandidatesIds();
+        for (var candidate : futureCandidate) {
+            if (!simpleCandidate.contains(candidate)) {
+                simpleCandidate.add(candidate);
+            }
+        }
+        return simpleCandidate;
+    }
+
+    private void deleteCandidateIfNotHaveStatus(Vacancy vacancy) {
+        List<Long> candidatesForDelete = vacancy.getCandidates()
+                .stream()
+                .filter(candidate -> !candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
+                .map(Candidate::getId)
+                .collect(Collectors.toList());
+        if (!candidatesForDelete.isEmpty()) {
+            teamMemberJpaRepository.deleteAllById(candidatesForDelete);
         }
     }
 }

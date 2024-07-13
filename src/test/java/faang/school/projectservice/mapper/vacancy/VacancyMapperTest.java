@@ -89,7 +89,7 @@ public class VacancyMapperTest {
         assertEquals(vacancyDto.getName(), vacancy.getName());
         assertEquals(vacancyDto.getDescription(), vacancy.getDescription());
         assertEquals(vacancyDto.getProjectId(), vacancy.getProject().getId());
-        assertNull(vacancy.getCandidates());
+        assertEquals(2, vacancy.getCandidates().size());
         assertEquals(vacancyDto.getCreatedAt(), vacancy.getCreatedAt());
         assertEquals(vacancyDto.getUpdatedAt(), vacancy.getUpdatedAt());
         assertEquals(vacancyDto.getStatus(), vacancy.getStatus().name());

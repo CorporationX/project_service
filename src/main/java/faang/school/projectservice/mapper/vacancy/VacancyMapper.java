@@ -21,7 +21,7 @@ public interface VacancyMapper {
     VacancyDto toDto(Vacancy vacancy);
     @Mappings({
             @Mapping(source = "projectId", target = "project.id"),
-            @Mapping(target = "candidates", ignore = true),
+            @Mapping(source = "candidatesIds", target = "candidates", qualifiedByName = "mapCandidatesIdsToCandidates"),
             @Mapping(source = "status", target = "status", qualifiedByName = "mapVacancyStatus"),
             @Mapping(source = "workSchedule", target = "workSchedule", qualifiedByName = "mapScheduleStatus")
     })
@@ -31,6 +31,17 @@ public interface VacancyMapper {
     default List<Long> mapCandidatesToCandidatesIds(List<Candidate> candidates) {
         return candidates.stream()
                 .map(Candidate::getId)
+                .collect(Collectors.toList());
+    }
+
+    @Named("mapCandidatesIdsToCandidates")
+    default List<Candidate> mapCandidatesIdsToCandidates(List<Long> candidates) {
+        return candidates.stream()
+                .map(id -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setId(id);
+                    return candidate;
+                })
                 .collect(Collectors.toList());
     }
 
