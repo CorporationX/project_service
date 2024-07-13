@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -16,11 +17,13 @@ public interface ProjectMapper {
     @Mapping(source = "children", target = "childrenProjectIds", qualifiedByName = "mapChildren")
     ProjectDto toDto(Project project);
 
-    @Mapping(source = "parentProjectId", target = "parentProject.id")
     Project toEntity(ProjectDto projectDto);
 
     @Named("mapChildren")
     default List<Long> mapChildren(List<Project> childrenProjects) {
+        if (childrenProjects == null || childrenProjects.isEmpty()) {
+            return Collections.emptyList();
+        }
         return childrenProjects.stream().map(Project::getId).toList();
     }
 }

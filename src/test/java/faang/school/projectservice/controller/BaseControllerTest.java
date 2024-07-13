@@ -13,7 +13,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest
 @Import({UserHeaderFilter.class, UserContext.class})
-public class BaseIntegrationTest {
+public class BaseControllerTest {
 
     protected static final String USER_HEADER = "x-user-id";
     protected static final String DEFAULT_HEADER_VALUE = "1";

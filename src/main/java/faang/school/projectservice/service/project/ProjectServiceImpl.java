@@ -31,7 +31,12 @@ public class ProjectServiceImpl implements ProjectService {
         projectDto.setStatus(ProjectStatus.CREATED);
         Project savedProject;
         try {
-            savedProject = projectRepository.save(mapper.toEntity(projectDto));
+            var projectToBeSaved = mapper.toEntity(projectDto);
+            if (projectDto.getParentProjectId() != null) {
+                var parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
+                projectToBeSaved.setParentProject(parentProject);
+            }
+            savedProject = projectRepository.save(projectToBeSaved);
         } catch (DataIntegrityViolationException e) {
             throw new PersistenceException(ExceptionMessages.PROJECT_FAILED_PERSISTENCE, e);
         }

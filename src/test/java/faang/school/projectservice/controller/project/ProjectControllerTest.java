@@ -1,11 +1,12 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.controller.ApiPath;
-import faang.school.projectservice.controller.BaseIntegrationTest;
+import faang.school.projectservice.controller.BaseControllerTest;
 import faang.school.projectservice.dto.DtoValidationConstraints;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.ExceptionMessages;
 import faang.school.projectservice.service.project.ProjectService;
+import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProjectController.class)
-class ProjectControllerTest extends BaseIntegrationTest {
+class ProjectControllerTest extends BaseControllerTest {
 
     @MockBean
     private ProjectService projectService;
@@ -92,5 +93,24 @@ class ProjectControllerTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(ExceptionMessages.PROJECT_ALREADY_EXISTS_FOR_OWNER_ID));
+    }
+
+    @Test
+    void createProject_should_throw_exception_if_project_failed_to_be_persisted() throws Exception {
+        var dto = ProjectDto.builder()
+                .id(123L)
+                .ownerId(1L)
+                .name("Project Name")
+                .description("Project Description")
+                .build();
+
+        when(projectService.createProject(any(ProjectDto.class))).thenThrow(new PersistenceException(ExceptionMessages.PROJECT_FAILED_PERSISTENCE));
+
+        mockMvc.perform(post(ApiPath.PROJECTS_PATH)
+                        .header(USER_HEADER, DEFAULT_HEADER_VALUE)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(ExceptionMessages.PROJECT_FAILED_PERSISTENCE));
     }
 }
