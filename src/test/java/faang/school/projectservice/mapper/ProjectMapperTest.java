@@ -25,12 +25,14 @@ class ProjectMapperTest {
                 .name("Test Project")
                 .description("Test Project Description")
                 .children(List.of(Project.builder().id(2L).build()))
+                .parentProject(Project.builder().id(1L).build())
                 .build();
 
         projectDto = ProjectDto.builder()
                 .name("Test Project")
                 .description("Test Project Description")
                 .childrenProjectIds(List.of(2L))
+                .parentProjectId(1L)
                 .build();
     }
 
@@ -49,5 +51,23 @@ class ProjectMapperTest {
 
         assertEquals(projectDto.getName(), mappedEntity.getName());
         assertEquals(projectDto.getDescription(), mappedEntity.getDescription());
+    }
+
+    @Test
+    void toDto_should_return_empty_list_when_children_is_null() {
+        project.setChildren(null);
+
+        ProjectDto mappedDto = projectMapper.toDto(project);
+
+        assertTrue(mappedDto.getChildrenProjectIds().isEmpty());
+    }
+
+    @Test
+    void toEntity_should_keep_parent_null_when_parent_id_is_null() {
+        projectDto.setParentProjectId(null);
+
+        Project mappedEntity = projectMapper.toEntity(projectDto);
+
+        assertNull(mappedEntity.getParentProject());
     }
 }
