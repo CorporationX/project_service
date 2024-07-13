@@ -33,6 +33,7 @@
 
 name: CI for project_service
 on:
+  pull:
   pull_request:
     branches:
       - centaur-master-bc5
