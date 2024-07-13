@@ -1,11 +1,14 @@
 package faang.school.projectservice.repository;
 
+import faang.school.projectservice.exception.ErrorMessage;
+import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -23,8 +26,12 @@ public class ProjectRepository {
         return projectJpaRepository.findAll();
     }
 
-    public List<Project> findAllByIds(List<Long> ids) {
-        return projectJpaRepository.findAllById(ids);
+    public List<Project> findAllByIds(Collection<Long> ids) {
+        List<Project> projects = projectJpaRepository.findAllById(ids);
+        if (ids.size() != projects.size()) {
+            throw new NotFoundException(ErrorMessage.SOME_OF_PROJECTS_NOT_EXIST);
+        }
+        return projects;
     }
 
     public boolean existsByOwnerUserIdAndName(Long userId, String name) {
@@ -37,5 +44,9 @@ public class ProjectRepository {
 
     public boolean existsById(Long id){
         return projectJpaRepository.existsById(id);
+    }
+
+    public List<Project> findAllDistinctByTeamMemberIds(Collection<Long> teamMemberIds) {
+        return projectJpaRepository.findAllDistinctByTeamMemberIds(teamMemberIds);
     }
 }
