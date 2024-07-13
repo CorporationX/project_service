@@ -75,7 +75,7 @@ public class StageService {
         stageRepository.delete(stage);
     }
 
-    public void removeStagess(Long stageId, Long replaceStageId) {
+    public void removeStage(Long stageId, Long replaceStageId) {
         Stage stage = stageRepository.getById(stageId);
         Stage replaceStage = stageRepository.getById(replaceStageId);
 

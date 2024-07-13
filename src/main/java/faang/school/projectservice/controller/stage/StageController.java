@@ -21,37 +21,37 @@ import java.util.List;
 public class StageController {
     private final StageService stageService;
 
-    @PostMapping
+    @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
     public StageDto addStage(StageDto stageDto) {
         return stageService.create(stageDto);
     }
 
-    @GetMapping("/stages")
+    @GetMapping("/stages/{projectId}")
     @ResponseStatus(HttpStatus.OK)
     public List<StageDto> getStages(Long projectId, StageFilterDto filter) {
         return stageService.getStages(projectId, filter);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/remove/{stageId}/{action}")
     @ResponseStatus(HttpStatus.OK)
-    public void removeStagess(Long stageId, StagePreDestroyAction action) {
+    public void removeStage(Long stageId, StagePreDestroyAction action) {
         stageService.removeStage(stageId, action);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/remove/{stageId}/{replaceStageId}")
     @ResponseStatus(HttpStatus.OK)
-    public void removeStagess(Long stageId, Long replaceStageId) {
-        stageService.removeStagess(stageId, replaceStageId);
+    public void removeStage(Long stageId, Long replaceStageId) {
+        stageService.removeStage(stageId, replaceStageId);
     }
 
-    @PostMapping
+    @PostMapping("/update")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updateStage(Long stageId) {
         stageService.updateStage(stageId);
     }
 
-    @GetMapping("/stages")
+    @GetMapping("/stages/all/{projectId}")
     @ResponseStatus(HttpStatus.OK)
     public List<StageDto> getAllStages(Long projectId) {
         return stageService.getAllStages(projectId);
