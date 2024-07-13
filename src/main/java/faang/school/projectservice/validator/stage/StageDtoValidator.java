@@ -10,7 +10,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Component
-public class StageValidator {
+public class StageDtoValidator {
     private final ProjectRepository projectRepository;
 
     public void validateProjectId(Long id) {

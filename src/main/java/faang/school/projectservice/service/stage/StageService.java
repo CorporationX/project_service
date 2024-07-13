@@ -18,7 +18,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.validator.stage.StageDtoValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 @Service
 public class StageService {
     private final StageRepository stageRepository;
-    private final StageValidator stageValidator;
+    private final StageDtoValidator stageDtoValidator;
     private final ProjectRepository projectRepository;
     private final StageMapper stageMapper;
     private final List<StageFilter> stageFilters;
@@ -41,8 +41,8 @@ public class StageService {
     private final StageInvitationRepository stageInvitationRepository;
 
     public StageDto create(StageDto stageDto) {
-        stageValidator.validateProjectId(stageDto.getStageId());
-        stageValidator.validateStageRolesCount(stageDto.getStageRoles());
+        stageDtoValidator.validateProjectId(stageDto.getStageId());
+        stageDtoValidator.validateStageRolesCount(stageDto.getStageRoles());
         stageDto.setStatus(StageStatus.CREATED);
 
         Stage stage = stageMapper.toEntity(stageDto, projectRepository);
