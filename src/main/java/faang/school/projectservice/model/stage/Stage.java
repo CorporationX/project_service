@@ -1,9 +1,23 @@
 package faang.school.projectservice.model.stage;
 
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.StageStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +46,10 @@ public class Stage {
 
     @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
     private List<StageRoles> stageRoles;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StageStatus status;
 
     @OneToMany(cascade = CascadeType.MERGE)
     @JoinColumn(name = "stage_id")

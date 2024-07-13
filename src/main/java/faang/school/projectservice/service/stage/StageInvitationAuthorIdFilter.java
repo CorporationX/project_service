@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.dto.client.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stage.StageInvitationFilterDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 
 import java.util.stream.Stream;

@@ -1,6 +1,5 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto.stage;
 
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import lombok.Data;
 

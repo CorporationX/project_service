@@ -1,6 +1,6 @@
-package faang.school.projectservice.validator.stage_invitation;
+package faang.school.projectservice.validator.stage;
 
-import faang.school.projectservice.dto.client.StageInvitationDto;
+import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;

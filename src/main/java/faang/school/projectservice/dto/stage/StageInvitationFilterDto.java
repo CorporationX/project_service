@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto.stage;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import lombok.Data;

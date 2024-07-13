@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.stage_invitation;
+package faang.school.projectservice.validator.stage;
 
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
