@@ -159,8 +159,8 @@ public class StageInvitationServiceTest {
         when(stageInvitationFiltersMock.stream()).thenReturn(stageInvitationFilters.stream());
         when(stageInvitationAuthorIdFilter.isApplicable(filter)).thenReturn(true);
         when(stageInvitationStatusFilter.isApplicable(filter)).thenReturn(true);
-        when(stageInvitationAuthorIdFilter.apply(stageInvitationStream, filter)).thenReturn(stageInvitationStream);
-        when(stageInvitationStatusFilter.apply(stageInvitationStream, filter)).thenReturn(stageInvitationStream);
+        doNothing().when(stageInvitationAuthorIdFilter).apply(stageInvitationStream, filter);
+        doNothing().when(stageInvitationStatusFilter).apply(stageInvitationStream, filter);
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
 
         List<StageInvitationDto> result = stageInvitationService.getMemberStageInvitations(id, filter);

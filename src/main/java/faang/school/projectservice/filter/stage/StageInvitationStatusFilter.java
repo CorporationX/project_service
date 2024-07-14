@@ -12,8 +12,8 @@ public class StageInvitationStatusFilter implements StageInvitationFilter {
     }
 
     @Override
-    public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitations, StageInvitationFilterDto filter) {
-        return stageInvitations
+    public void apply(Stream<StageInvitation> stageInvitations, StageInvitationFilterDto filter) {
+        stageInvitations
                 .filter(stageInvitation -> stageInvitation.getStatus().equals(filter.getStatus()));
     }
 }
