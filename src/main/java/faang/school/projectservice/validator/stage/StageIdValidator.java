@@ -1,7 +1,9 @@
 package faang.school.projectservice.validator.stage;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Component
 public class StageIdValidator {
     public void validateReplaceId(Long stageId, Long replaceStageId) {

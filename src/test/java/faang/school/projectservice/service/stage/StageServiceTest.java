@@ -21,6 +21,7 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.stage.StageDtoValidator;
 import faang.school.projectservice.validator.stage.StageIdValidator;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,6 +30,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -68,30 +70,21 @@ public class StageServiceTest {
     @Mock
     private StageInvitationRepository stageInvitationRepository;
 
-    private Stage stage;
-    private Stage replaceStage;
-    private StageDto stageDto;
     private Long id;
     private Long replaceId;
-    private StageRoles stageRoles;
-    private TeamMember teamMember;
-    private TeamMember storTeamMember;
-    private List<TeamMember> executors;
-    private List<TeamMember> teamMembers;
-    private List<StageRoles> stageRolesList;
+    private Stage stage;
+    private Stage replaceStage;
+    private Project project;
+    private Task task;
+    private StageDto stageDto;
+    private StageFilterDto stageFilterDto;
+    private StageFilter stageStatusFilter;
+    private StageInvitation stageInvitation;
+
+    private Stream<Stage> stageStream;
+    private List<StageFilter> stageFilters;
     private List<Stage> stages;
     private List<StageDto> stageDtos;
-    private StageFilterDto stageFilterDto;
-    private Project project;
-    private List<StageFilter> stageFilters;
-    private StageFilter stageStatusFilter;
-    private StagePreDestroyAction stagePreDestroyAction;
-    private List<Task> tasks;
-    private List<Task> tasksReplaced;
-    private Task task;
-    private Team team;
-    private List<Team> teams;
-    private StageInvitation stageInvitation;
 
     @BeforeEach
     public void setUp() {
@@ -99,56 +92,65 @@ public class StageServiceTest {
         replaceId = 2L;
 
         stageInvitation = new StageInvitation();
-        stageDto = new StageDto();
-        stageRoles = StageRoles
+        stageFilterDto = new StageFilterDto();
+        stageStatusFilter = Mockito.mock(StageStatusFilter.class);
+        stage = new Stage();
+
+        stageFilters = new ArrayList<>(Collections.singletonList(stageStatusFilter));
+
+        stageDto = StageDto
+                .builder()
+                .stageId(id)
+                .build();
+
+        stageDtos = new ArrayList<>(Collections.singletonList(stageDto));
+
+        StageRoles stageRoles = StageRoles
                 .builder()
                 .count(2)
                 .teamRole(TeamRole.OWNER)
                 .build();
-        stageFilterDto = new StageFilterDto();
-        storTeamMember = TeamMember
+
+        TeamMember teamMember = TeamMember
                 .builder()
                 .roles(List.of(TeamRole.OWNER))
                 .build();
-        teamMembers = new ArrayList<>();
-        teamMembers.add(storTeamMember);
 
-        team = Team
+        List<TeamMember> executors = new ArrayList<>(Collections.singletonList(teamMember));
+        List<StageRoles> stageRolesList = new ArrayList<>(Collections.singletonList(stageRoles));
+
+        TeamMember storTeamMember = TeamMember
+                .builder()
+                .roles(List.of(TeamRole.OWNER))
+                .build();
+
+        List<TeamMember> teamMembers = new ArrayList<>(Collections.singletonList(storTeamMember));
+
+        Team team = Team
                 .builder()
                 .teamMembers(teamMembers)
                 .build();
 
-        teams = new ArrayList<>();
-        teams.add(team);
-        project = Project
-                .builder()
-                .teams(teams)
-                .build();
-        stageStatusFilter = Mockito.mock(StageStatusFilter.class);
+        List<Team> teams = new ArrayList<>(Collections.singletonList(team));
+
         task = Task
                 .builder()
                 .id(id)
                 .build();
 
-        teamMember = TeamMember
+        List<Task> tasks = new ArrayList<>(Collections.singletonList(task));
+        List<Task> tasksReplaced = new ArrayList<>(Collections.singletonList(task));
+
+        stages = new ArrayList<>(Collections.singletonList(stage));
+
+        stageStream = stages.stream();
+
+        project = Project
                 .builder()
-                .roles(List.of(TeamRole.OWNER))
+                .stages(stages)
+                .teams(teams)
                 .build();
 
-        executors = new ArrayList<>();
-        executors.add(teamMember);
-        stages = new ArrayList<>();
-        stageRolesList = new ArrayList<>();
-        stageRolesList.add(stageRoles);
-        stageFilters = new ArrayList<>();
-        stageDtos = new ArrayList<>();
-
-        tasks = new ArrayList<>();
-        tasksReplaced = new ArrayList<>();
-        tasks.add(task);
-        tasksReplaced.add(task);
-
-        stagePreDestroyAction = StagePreDestroyAction.REMOVE;
         stage = Stage
                 .builder()
                 .project(project)
@@ -156,6 +158,7 @@ public class StageServiceTest {
                 .stageRoles(stageRolesList)
                 .tasks(tasks)
                 .build();
+
         replaceStage = Stage
                 .builder()
                 .tasks(tasksReplaced)
@@ -165,9 +168,8 @@ public class StageServiceTest {
     }
 
     @Test
+    @DisplayName("testing that create() calls all his beans correctly + testing return value")
     public void testCreate() {
-        stageDto.setStageId(id);
-
         doNothing().when(stageDtoValidator).validateProjectId(id);
         doNothing().when(stageDtoValidator).validateStageRolesCount(any());
         when(stageMapper.toEntity(any(), any())).thenReturn(stage);
@@ -186,13 +188,8 @@ public class StageServiceTest {
     }
 
     @Test
+    @DisplayName("testing that getStages() calls all his beans correctly + testing return value")
     public void testGetStages() {
-        project.setStages(stages);
-        Stream<Stage> stageStream = stages.stream();
-        stages.add(stage);
-        stageDtos.add(stageDto);
-        stageFilters.add(stageStatusFilter);
-
         when(projectRepository.getProjectById(id)).thenReturn(project);
         when(stageFiltersMock.stream()).thenReturn(stageFilters.stream());
         when(stageStatusFilter.isApplicable(any())).thenReturn(true);
@@ -211,15 +208,13 @@ public class StageServiceTest {
     }
 
     @Test
+    @DisplayName("testing that removeStage() calls all his beans correctly when StagePreDestroyAction.REMOVE was given")
     public void testRemoveStageRemove() {
-//        stagePreDestroyAction = StagePreDestroyAction.REMOVE;
-//        stage.setTasks(tasks);
-
         when(stageRepository.getById(id)).thenReturn(stage);
         doNothing().when(taskRepository).deleteById(task.getId());
         doNothing().when(stageRepository).delete(stage);
 
-        stageService.removeStage(id, stagePreDestroyAction);
+        stageService.removeStage(id, StagePreDestroyAction.REMOVE);
 
         verify(stageRepository).getById(id);
         verify(taskRepository).deleteById(task.getId());
@@ -227,20 +222,20 @@ public class StageServiceTest {
     }
 
     @Test
+    @DisplayName("testing that removeStage() calls all his beans correctly when StagePreDestroyAction.DONE was given")
     public void testRemoveStageDone() {
-//        stagePreDestroyAction = StagePreDestroyAction.DONE;
-//        stage.setTasks(tasks);
-
         when(stageRepository.getById(id)).thenReturn(stage);
         doNothing().when(stageRepository).delete(stage);
 
-        stageService.removeStage(id, stagePreDestroyAction);
+        stageService.removeStage(id, StagePreDestroyAction.DONE);
 
         verify(stageRepository).getById(id);
+        verify(taskRepository, Mockito.times(0)).deleteById(task.getId());
         verify(stageRepository).delete(stage);
     }
 
     @Test
+    @DisplayName("testing that removeStage() calls all his beans correctly when replaceId was given")
     public void testRemoveStageReplace() {
         doNothing().when(stageIdValidator).validateReplaceId(anyLong(), anyLong());
         when(stageRepository.getById(id)).thenReturn(stage);
@@ -258,6 +253,7 @@ public class StageServiceTest {
     }
 
     @Test
+    @DisplayName("testing that removeStage() calls all his beans correctly")
     public void testUpdateStage() {
         when(stageRepository.getById(id)).thenReturn(stage);
         when(stageInvitationRepository.save(any(StageInvitation.class))).thenReturn(stageInvitation);
@@ -265,5 +261,34 @@ public class StageServiceTest {
         stageService.updateStage(id);
 
         verify(stageRepository).getById(id);
+        verify(stageInvitationRepository).save(any(StageInvitation.class));
+    }
+
+    @Test
+    @DisplayName("testing that getAllStages() calls all his beans correctly + testing return value")
+    public void testGetAllStages() {
+        when(projectRepository.getProjectById(id)).thenReturn(project);
+        when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
+
+        List<StageDto> result = stageService.getAllStages(id);
+
+        verify(projectRepository).getProjectById(id);
+        verify(stageMapper).toDto(any(Stage.class));
+
+        assertEquals(result, stageDtos);
+    }
+
+    @Test
+    @DisplayName("testing that getStage() calls all his beans correctly + testing return value")
+    public void testGetStage() {
+        when(stageRepository.getById(id)).thenReturn(stage);
+        when(stageMapper.toDto(stage)).thenReturn(stageDto);
+
+        StageDto result = stageService.getStage(id);
+
+        verify(stageRepository).getById(id);
+        verify(stageMapper).toDto(stage);
+
+        assertEquals(result, stageDto);
     }
 }

@@ -22,11 +22,11 @@ public class StageDtoValidator {
         }
     }
 
-    public void validateStageRolesCount(List<StageRoles> stageRoles) {
-        if (stageRoles.stream().anyMatch(stageRole -> stageRole.getCount().describeConstable().isEmpty())) {
+    public void validateStageRolesCount(List<StageRoles> stageRolesList) {
+        if (stageRolesList.stream().anyMatch(stageRoles -> stageRoles.getCount() == null)) {
             throw new IllegalArgumentException(
                     "You should set the number of all stage roles\n" +
-                            stageRoles);
+                            stageRolesList);
         }
     }
 }

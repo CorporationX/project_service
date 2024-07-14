@@ -21,6 +21,7 @@ import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.stage.StageDtoValidator;
 import faang.school.projectservice.validator.stage.StageIdValidator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,7 @@ public class StageService {
     private final StageInvitationRepository stageInvitationRepository;
     private final StageIdValidator stageIdValidator;
 
+    @Transactional
     public StageDto create(StageDto stageDto) {
         stageDtoValidator.validateProjectId(stageDto.getStageId());
         stageDtoValidator.validateStageRolesCount(stageDto.getStageRoles());
@@ -67,19 +69,21 @@ public class StageService {
                 .toList();
     }
 
+    @Transactional
     public void removeStage(Long stageId, StagePreDestroyAction action) {
         Stage stage = stageRepository.getById(stageId);
         List<Task> tasks = stage.getTasks();
 
-        if (action == StagePreDestroyAction.REMOVE) {
+        if (action.equals(StagePreDestroyAction.REMOVE)) {
             tasks.forEach(task -> taskRepository.deleteById(task.getId()));
-        } else if (action == StagePreDestroyAction.DONE) {
+        } else if (action.equals(StagePreDestroyAction.DONE)) {
             tasks.forEach(task -> task.setStatus(TaskStatus.DONE));
         }
 
         stageRepository.delete(stage);
     }
 
+    @Transactional
     public void removeStage(Long stageId, Long replaceStageId) {
         stageIdValidator.validateReplaceId(stageId, replaceStageId);
         Stage stage = stageRepository.getById(stageId);
@@ -91,6 +95,7 @@ public class StageService {
         stageRepository.delete(stage);
     }
 
+    @Transactional
     public void updateStage(Long stageId) {
         Stage stage = stageRepository.getById(stageId);
         Map<TeamRole, Integer> roles = new HashMap<>();
