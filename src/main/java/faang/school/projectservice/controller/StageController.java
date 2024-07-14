@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
@@ -51,12 +51,12 @@ public class StageController {
     }
 
     // Обновить этап.
-    public void updateStage(StageDto stageDto, TeamRole teamRole, int amount) {
+    public StageDto updateStage(StageDto stageDto, TeamRole teamRole) {
         if (stageDto == null
                 || teamRole == null) {
             throw new DataValidationException("Введите данные этапа!");
         }
-        stageService.updateStage(stageDto, teamRole, amount);
+        return stageService.updateStage(stageDto, teamRole);
     }
 
     // Получить все этапы проекта.

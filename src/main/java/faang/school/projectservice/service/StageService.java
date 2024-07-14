@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
@@ -10,6 +10,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -18,6 +19,7 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +31,6 @@ public class StageService {
     private final StageMapper stageMapper;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private int requiredMembersCount = 0;
 
 
     // Создание этапа.
@@ -63,14 +64,30 @@ public class StageService {
     }
 
     // Обновить этап.
-    public void updateStage(StageDto stageDto, TeamRole teamRole, int amount) {
+    public StageDto updateStage(StageDto stageDto, TeamRole teamRole) {
+        List<TeamMember> teamMembersToAdd;
+
         if (!stageRepository.isExistById(stageDto.getStageId())) {
             throw new DataValidationException("Такого этапа не существует!");
         }
-        Stage oldStage = stageRepository.getById(stageDto.getStageId());
-        if (!checkUsersWithCertainRole(teamRole, stageDto)) {
-            sendInvitations(stageDto.getProject(), teamRole, amount);
+
+        Stage currentStage = stageRepository.getById(stageDto.getStageId());
+        List<StageRoles> stageRoles = currentStage.getStageRoles();
+
+        if (checkUsersWithCertainRole(teamRole, stageDto)) {
+            // определяем требуемое количество участников с такой ролью
+            StageRoles resultStageRoles = stageRoles.stream()
+                    .filter(roles -> roles.getTeamRole().equals(teamRole))
+                    .toList().get(0);
+            int amount = resultStageRoles.getCount();
+
+            teamMembersToAdd = sendInvitations(stageDto.getProject(), teamRole, amount);
+        } else {
+            throw new DataValidationException("Участник с такой ролью на этапе уже есть!");
         }
+
+        currentStage.getExecutors().addAll(teamMembersToAdd);
+        return stageMapper.stageToDto(currentStage);
     }
 
     // Получить все этапы проекта.
@@ -94,6 +111,7 @@ public class StageService {
     }
 
     public boolean checkUsersWithCertainRole(TeamRole teamRole, StageDto stageDto) {
+        // проверяем, есть ли среди экзекуторов этапа необходимые на этапе роли
         List<TeamRole> resultList = stageDto.getExecutorIds().stream()
                 .map(teamMemberRepository::findById)
                 .toList()
@@ -104,11 +122,10 @@ public class StageService {
                 .flatMap(Collection::stream)
                 .filter(teamRoleForCompare -> teamRoleForCompare.equals(teamRole))
                 .toList();
-
-        return !resultList.isEmpty();
+        return resultList.isEmpty();
     }
 
-    private void sendInvitations(Project project, TeamRole teamRole, int amount) {
+    private List<TeamMember> sendInvitations(Project project, TeamRole teamRole, int amount) {
         // составляем список участников проекта
         List<TeamMember> projectTeam = project.getTeams()
                 .stream()
@@ -121,13 +138,16 @@ public class StageService {
                 .filter(teamMember -> teamMember.getRoles().contains(teamRole))
                 .toList();
         // создаём приглашение для каждого пользователя
+        List<TeamMember> resultListToInvite = new ArrayList<>();
         for (TeamMember member : membersForInviting) {
             if (amount > 0) {
                 StageInvitation invitation = new StageInvitation();
                 invitation.setInvited(member);
                 invitation.setStatus(StageInvitationStatus.PENDING);
+                resultListToInvite.add(member);
                 amount--;
             }
         }
+        return resultListToInvite;
     }
 }
