@@ -46,11 +46,14 @@ public class ProjectServiceTest {
 
     ProjectDto projectDto;
     Project project;
+    List<Project> projects;
+    List<ProjectDto> projectDtos;
+    ProjectFilterDto projectFilterDto;
 
     @BeforeEach
     void init() {
         List<ProjectFilter> projectFilters = List.of(projectFilter);
-        projectService = new ProjectService(projectRepository,projectMapper,userContext,projectValidator,projectFilters);
+        projectService = new ProjectService(projectRepository, projectMapper, userContext, projectValidator, projectFilters);
 
 
         Long id = 1L;
@@ -63,8 +66,8 @@ public class ProjectServiceTest {
         projectDto = ProjectDto.builder()
                 .id(id)
                 .name(name)
-                .createdAt(creationDate )
-                .updatedAt(creationDate )
+                .createdAt(creationDate)
+                .updatedAt(creationDate)
                 .ownerId(ownerId)
                 .status(created)
                 .visibility(visibility).build();
@@ -72,13 +75,19 @@ public class ProjectServiceTest {
         project = Project.builder()
                 .id(id)
                 .name(name)
-                .createdAt(creationDate )
-                .updatedAt(creationDate )
+                .createdAt(creationDate)
+                .updatedAt(creationDate)
                 .ownerId(ownerId)
                 .status(created)
                 .visibility(visibility).build();
-        when(projectFilters.get(0).isApplicable(new ProjectFilterDto())).thenReturn(true);
-        when(projectFilters.get(0).apply(any(),any())).thenReturn(List.of(project).stream());
+        projects = List.of(project);
+        projectDtos = List.of(projectDto);
+        projectFilterDto = ProjectFilterDto.builder()
+                .name("some name")
+                .projectStatus(ProjectStatus.CREATED).build();
+
+        when(projectFilters.get(0).isApplicable(projectFilterDto)).thenReturn(true);
+        when(projectFilters.get(0).apply(any(), any())).thenReturn(List.of(project).stream());
     }
 
     @Test
@@ -90,10 +99,9 @@ public class ProjectServiceTest {
         assertNotNull(result);
         assertEquals(projectDto, result);
     }
+
     @Test
     void findAllTest() {
-        List<Project> projects = List.of(project);
-        List<ProjectDto> projectDtos = List.of(projectDto);
         when(projectRepository.findAll()).thenReturn(projects);
         when(projectMapper.entitiesToDtos(projects)).thenReturn(projectDtos);
         List<ProjectDto> result = projectService.findAll();
@@ -121,10 +129,10 @@ public class ProjectServiceTest {
     }
 
     @Test
-    void existById(){
+    void existById() {
         when(projectRepository.existsById(1L)).thenReturn(true);
         projectService.existById(1L);
-        verify(projectRepository,times(2)).existsById(1L);
+        verify(projectRepository, times(2)).existsById(1L);
     }
 
     @Test
@@ -134,9 +142,10 @@ public class ProjectServiceTest {
     }
 
     @Test
-    void getAllProjectByFilters(){
-        when(projectRepository.findAll()).thenReturn(List.of(project));
-        ProjectFilterDto projectFilterDto = new ProjectFilterDto();
-        List<ProjectDto> projects = projectService.getAllProjectByFilters(any(ProjectFilterDto.class));
+    void getAllProjectByFilters() {
+        when(projectRepository.findAll()).thenReturn(projects);
+//        не могу понять как оттестить вызов фильтров
+        List<ProjectDto> result = projectService.getAllProjectByFilters(projectFilterDto);
+//        verify(projectFilter).apply(projects.stream(), projectFilterDto);
     }
 }
