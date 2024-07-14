@@ -20,6 +20,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.stage.StageDtoValidator;
+import faang.school.projectservice.validator.stage.StageIdValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,7 @@ public class StageService {
     private final List<StageFilter> stageFilters;
     private final TaskRepository taskRepository;
     private final StageInvitationRepository stageInvitationRepository;
+    private final StageIdValidator stageIdValidator;
 
     public StageDto create(StageDto stageDto) {
         stageDtoValidator.validateProjectId(stageDto.getStageId());
@@ -56,9 +58,11 @@ public class StageService {
         Project project = projectRepository.getProjectById(projectId);
         Stream<Stage> stageStream = project.getStages().stream();
 
-        return stageFilters.stream()
+        stageFilters.stream()
                 .filter(stageFilter -> stageFilter.isApplicable(filter))
-                .flatMap(stageFilter -> stageFilter.apply(filter, stageStream))
+                .forEach(stageFilter -> stageFilter.apply(filter, stageStream));
+
+        return stageStream
                 .map(stageMapper::toDto)
                 .toList();
     }
@@ -77,6 +81,7 @@ public class StageService {
     }
 
     public void removeStage(Long stageId, Long replaceStageId) {
+        stageIdValidator.validateReplaceId(stageId, replaceStageId);
         Stage stage = stageRepository.getById(stageId);
         Stage replaceStage = stageRepository.getById(replaceStageId);
 
@@ -95,7 +100,7 @@ public class StageService {
         }
 
         for (StageRoles stageRoles : stage.getStageRoles()) {
-            int rolesDeficit = roles.get(stageRoles.getTeamRole()) - stageRoles.getCount();
+            int rolesDeficit = stageRoles.getCount() - roles.get(stageRoles.getTeamRole());
             if(rolesDeficit > 0) {
                 searchAndSend(rolesDeficit, stage, stageRoles.getTeamRole());
             }
