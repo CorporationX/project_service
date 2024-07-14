@@ -6,6 +6,7 @@ import faang.school.projectservice.service.stage.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +38,7 @@ public class StageInvitationController {
         return stageInvitationService.rejectStageInvitation(id, rejectionReason);
     }
 
-    @PutMapping("/show/{id}")
+    @GetMapping("/show/{id}")
     @ResponseStatus(HttpStatus.OK)
     public List<StageInvitationDto> showMemberStageInvitations(Long id, StageInvitationFilterDto stageInvitationFilterDto) {
         return stageInvitationService.getMemberStageInvitations(id, stageInvitationFilterDto);

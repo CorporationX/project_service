@@ -15,10 +15,10 @@ import static org.junit.Assert.assertThrows;
 
 public class StageInvitationDtoValidatorTest {
     @InjectMocks
-    StageInvitationDtoValidator stageInvitationDtoValidator;
+    private StageInvitationDtoValidator stageInvitationDtoValidator;
 
     @Mock
-    TeamMemberRepository teamMemberRepository;
+    private TeamMemberRepository teamMemberRepository;
 
     private Long authorId;
     private Long invitedId;
@@ -26,8 +26,6 @@ public class StageInvitationDtoValidatorTest {
     private Long invitedTeamId;
     private TeamMember author;
     private TeamMember invited;
-    private Team authorTeam;
-    private Team invitedTeam;
 
     @BeforeEach
     public void setUp() {
@@ -36,10 +34,20 @@ public class StageInvitationDtoValidatorTest {
         authorTeamId = 3L;
         invitedTeamId = 4L;
 
-        author = new TeamMember();
-        invited = new TeamMember();
-        authorTeam = new Team();
-        invitedTeam = new Team();
+        invited = TeamMember
+                .builder()
+                .team(Team
+                        .builder()
+                        .id(invitedTeamId)
+                        .build())
+                .build();
+        author = TeamMember
+                .builder()
+                .team(Team
+                        .builder()
+                        .id(authorTeamId)
+                        .build())
+                .build();
 
         MockitoAnnotations.openMocks(this);
     }
@@ -54,10 +62,6 @@ public class StageInvitationDtoValidatorTest {
     @Test
     @DisplayName("Test that invited and author are in the one Team")
     public void testValidateInvitedMemberTeam() {
-        authorTeam.setId(authorTeamId);
-        invitedTeam.setId(invitedTeamId);
-        author.setTeam(authorTeam);
-        invited.setTeam(invitedTeam);
         Mockito.when(teamMemberRepository.findById(authorId)).thenReturn(author);
         Mockito.when(teamMemberRepository.findById(invitedId)).thenReturn(invited);
 
