@@ -17,13 +17,10 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
 
-    // todo check without ON
-    // ON t.project.id = p.id
-    // ON tm.team.id = t.id
     @Query("""
             SELECT DISTINCT p FROM Project p
-            JOIN Team t
-            JOIN TeamMember tm
+            JOIN Team t ON t.project.id = p.id
+            JOIN TeamMember tm ON tm.team.id = t.id
             WHERE tm.id IN (:teamMemberIds)
             """
     )

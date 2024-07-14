@@ -28,8 +28,8 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
 
     @Query("""
             SELECT tm.id FROM TeamMember tm
-            JOIN Team t
-            JOIN Project p
+            JOIN Team t ON tm.team.id = t.id
+            JOIN Project p ON t.project.id = p.id
             WHERE p.id IN (:projectIds)
                         """
     )

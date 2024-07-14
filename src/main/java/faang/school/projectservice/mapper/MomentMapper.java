@@ -4,8 +4,10 @@ import faang.school.projectservice.dto.client.moment.MomentRequestDto;
 import faang.school.projectservice.dto.client.moment.MomentResponseDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.List;
 
@@ -16,7 +18,17 @@ public interface MomentMapper {
     Moment toEntity(MomentRequestDto momentRequestDto, List<Project> projects);
 
 
-    @Mapping(source = "resource.id", target = "resourceIds")
-    @Mapping(source = "projects.id", target = "projectsIds")
+    @Mapping(source = "resource", target = "resourceIds", qualifiedByName = "resourceToId")
+    @Mapping(source = "projects", target = "projectIds", qualifiedByName = "projectToId")
     MomentResponseDto toResponseDto(Moment moment);
+
+    @Named("resourceToId")
+    default Long resourceToId(Resource resource) {
+        return resource.getId();
+    }
+
+    @Named("projectToId")
+    default Long projectToId(Project project) {
+        return project.getId();
+    }
 }

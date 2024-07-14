@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.client.moment.MomentResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.service.MomentService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +23,7 @@ public class MomentController {
     private final MomentService momentService;
 
     @PostMapping
-    public MomentResponseDto addNew(@RequestBody @Valid MomentRequestDto momentRequestDto,
+    public MomentResponseDto addNew(@RequestBody @Validated MomentRequestDto momentRequestDto,
                                     @Positive @RequestHeader("x-user-id") long creatorId) {
 
         validateProjectsAndMembers(momentRequestDto);

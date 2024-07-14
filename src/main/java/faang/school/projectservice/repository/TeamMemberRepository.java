@@ -22,7 +22,7 @@ public class TeamMemberRepository {
     }
 
     public void checkExistAll(Collection<Long> teamMemberIds) {
-        if (jpaRepository.countAllByIds(teamMemberIds) == teamMemberIds.size()) {
+        if (jpaRepository.countAllByIds(teamMemberIds) != teamMemberIds.size()) {
             throw new NotFoundException(ErrorMessage.SOME_OF_MEMBERS_NOT_EXIST);
         }
     }

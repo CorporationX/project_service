@@ -19,7 +19,7 @@ public class MomentResponseDto {
 
     private List<Long> projectIds;
 
-    private List<Long> teamMembersIds;
+    private List<Long> teamMemberIds;
 
     private String imageId;
 
