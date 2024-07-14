@@ -1,4 +1,4 @@
-name: CI for project_service
+name: CI for  project_service
 on:
   pull_request:
     branches:
