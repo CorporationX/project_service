@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -32,13 +33,13 @@ public class StageController {
 
     // Получить все этапы проекта с фильтром по статусу (в работе, выполнено и т.д).
     public List<StageDto> getAllStagesFilteredByProjectStatus(Long projectId,
-                                                           ProjectFilterDto filters) {
+                                                              ProjectFilterDto filters) {
         if (projectId == null
-        || filters == null) {
+                || filters == null) {
             throw new DataValidationException("Введите идентификатор проекта," +
                     " или данные фильтра!");
         }
-       return stageService.getAllStagesFilteredByProjectStatus(projectId, filters);
+        return stageService.getAllStagesFilteredByProjectStatus(projectId, filters);
     }
 
     // Удалить этап.
@@ -50,11 +51,12 @@ public class StageController {
     }
 
     // Обновить этап.
-    public void updateStage(StageDto stageDto) {
-        if (stageDto == null) {
+    public void updateStage(StageDto stageDto, TeamRole teamRole, int amount) {
+        if (stageDto == null
+                || teamRole == null) {
             throw new DataValidationException("Введите данные этапа!");
         }
-        stageService.updateStage(stageDto);
+        stageService.updateStage(stageDto, teamRole, amount);
     }
 
     // Получить все этапы проекта.

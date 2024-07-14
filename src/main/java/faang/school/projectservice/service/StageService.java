@@ -6,12 +6,19 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +28,8 @@ public class StageService {
     private final StageRepository stageRepository;
     private final StageMapper stageMapper;
     private final ProjectRepository projectRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private int requiredMembersCount = 0;
 
 
     // Создание этапа.
@@ -54,11 +63,14 @@ public class StageService {
     }
 
     // Обновить этап.
-    public void updateStage(StageDto stageDto) {
-        stageRepository.isExistById(stageDto.getStageId());
+    public void updateStage(StageDto stageDto, TeamRole teamRole, int amount) {
+        if (!stageRepository.isExistById(stageDto.getStageId())) {
+            throw new DataValidationException("Такого этапа не существует!");
+        }
         Stage oldStage = stageRepository.getById(stageDto.getStageId());
-//        stageMapper.stageToDto();
-//                stageRepository.e
+        if (!checkUsersWithCertainRole(teamRole, stageDto)) {
+            sendInvitations(stageDto.getProject(), teamRole, amount);
+        }
     }
 
     // Получить все этапы проекта.
@@ -79,5 +91,43 @@ public class StageService {
 
     public boolean validateProjectStatus(Project project, ProjectFilterDto filter) {
         return project.getStatus().toString().equals(filter.getProjectStatus());
+    }
+
+    public boolean checkUsersWithCertainRole(TeamRole teamRole, StageDto stageDto) {
+        List<TeamRole> resultList = stageDto.getExecutorIds().stream()
+                .map(teamMemberRepository::findById)
+                .toList()
+                .stream()
+                .map(TeamMember::getRoles)
+                .toList()
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(teamRoleForCompare -> teamRoleForCompare.equals(teamRole))
+                .toList();
+
+        return !resultList.isEmpty();
+    }
+
+    private void sendInvitations(Project project, TeamRole teamRole, int amount) {
+        // составляем список участников проекта
+        List<TeamMember> projectTeam = project.getTeams()
+                .stream()
+                .map(Team::getTeamMembers)
+                .flatMap(Collection::stream)
+                .toList();
+        // ищем пользователей с требуемыми ролями
+        List<TeamMember> membersForInviting = projectTeam
+                .stream()
+                .filter(teamMember -> teamMember.getRoles().contains(teamRole))
+                .toList();
+        // создаём приглашение для каждого пользователя
+        for (TeamMember member : membersForInviting) {
+            if (amount > 0) {
+                StageInvitation invitation = new StageInvitation();
+                invitation.setInvited(member);
+                invitation.setStatus(StageInvitationStatus.PENDING);
+                amount--;
+            }
+        }
     }
 }
