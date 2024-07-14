@@ -12,7 +12,7 @@ import static org.junit.Assert.assertThrows;
 
 public class StageInvitationValidatorTest {
     @InjectMocks
-    StageInvitationValidator stageInvitationValidator;
+    private StageInvitationValidator stageInvitationValidator;
 
     private StageInvitation stageInvitation;
 
