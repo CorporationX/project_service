@@ -2,6 +2,8 @@ package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.filter.stage.StageStatusFilter;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;

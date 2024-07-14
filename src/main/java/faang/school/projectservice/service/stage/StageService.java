@@ -2,6 +2,7 @@ package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
@@ -103,6 +104,7 @@ public class StageService {
 
     private void countRoles(Map<TeamRole, Integer> roles, List<TeamMember> executors, TeamRole teamRole) {
         int amount = 0;
+
         for (TeamMember executor : executors) {
             if (executor.getRoles().contains(teamRole)) {
                 amount++;
