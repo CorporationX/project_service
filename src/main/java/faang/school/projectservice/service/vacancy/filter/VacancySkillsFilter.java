@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.vacancy.filter;
 
 import faang.school.projectservice.dto.filter.VacancyFilterDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Vacancy;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +9,7 @@ import java.util.HashSet;
 import java.util.stream.Stream;
 
 @Component
-public class VacancySkillsFilter implements VacancyFilter{
+public class VacancySkillsFilter implements Filter<VacancyFilterDto, Vacancy> {
     @Override
     public boolean isApplicable(VacancyFilterDto filters) {
         return filters.getSkillIds() != null;

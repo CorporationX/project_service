@@ -2,10 +2,10 @@ package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.dto.filter.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +34,7 @@ public class VacancyServiceTest {
     private VacancyValidator vacancyValidator;
 
     @Mock
-    private List<VacancyFilter> vacancyFilters;
+    private List<Filter<VacancyFilterDto, Vacancy>> filter;
 
     @InjectMocks
     private VacancyService vacancyService;
@@ -55,7 +56,7 @@ public class VacancyServiceTest {
         VacancyDto result = vacancyService.createVacancy(vacancyDto);
 
         assertEquals(vacancyDto, result);
-        verify(vacancyValidator).createVacancyValidator(vacancyDto);
+        verify(vacancyValidator).validatorForCreateVacancyMethod(vacancyDto);
         verify(vacancyRepository).save(vacancy);
     }
 
@@ -65,14 +66,13 @@ public class VacancyServiceTest {
         VacancyDto vacancyDto = new VacancyDto();
         Vacancy vacancy = new Vacancy();
 
-        when(vacancyValidator.getVacancyValidator(id)).thenReturn(vacancy);
+        when(vacancyRepository.findById(any(Long.class))).thenReturn(Optional.of(vacancy));
         when(vacancyRepository.save(any(Vacancy.class))).thenReturn(vacancy);
         when(vacancyMapper.toDto(any(Vacancy.class))).thenReturn(vacancyDto);
 
         VacancyDto result = vacancyService.updateVacancy(id, vacancyDto);
 
         assertEquals(vacancyDto, result);
-        verify(vacancyValidator).getVacancyValidator(id);
         verify(vacancyRepository).save(vacancy);
     }
 
@@ -82,11 +82,10 @@ public class VacancyServiceTest {
         Vacancy vacancy = new Vacancy();
         vacancy.setCandidates(List.of());
 
-        when(vacancyValidator.getVacancyValidator(vacancyId)).thenReturn(vacancy);
+        when(vacancyRepository.findById(any(Long.class))).thenReturn(Optional.of(vacancy));
 
         vacancyService.deleteVacancy(vacancyId);
 
-        verify(vacancyValidator).getVacancyValidator(vacancyId);
         verify(vacancyRepository).deleteById(vacancyId);
     }
 
@@ -96,13 +95,12 @@ public class VacancyServiceTest {
         VacancyDto vacancyDto = new VacancyDto();
         Vacancy vacancy = new Vacancy();
 
-        when(vacancyValidator.getVacancyValidator(vacancyId)).thenReturn(vacancy);
+        when(vacancyRepository.findById(any(Long.class))).thenReturn(Optional.of(vacancy));
         when(vacancyMapper.toDto(any(Vacancy.class))).thenReturn(vacancyDto);
 
         VacancyDto result = vacancyService.getVacancyById(vacancyId);
 
         assertEquals(vacancyDto, result);
-        verify(vacancyValidator).getVacancyValidator(vacancyId);
     }
 
     @Test
@@ -110,13 +108,13 @@ public class VacancyServiceTest {
         VacancyFilterDto filters = new VacancyFilterDto();
         Vacancy vacancy = new Vacancy();
         VacancyDto vacancyDto = new VacancyDto();
-        VacancyFilter vacancyFilter = mock(VacancyFilter.class);
+        Filter<VacancyFilterDto, Vacancy> vacancyFilter = mock(Filter.class);
         List<Vacancy> vacancies = Collections.singletonList(vacancy);
 
         when(vacancyRepository.findAll()).thenReturn(vacancies);
         when(vacancyFilter.isApplicable(filters)).thenReturn(true);
         when(vacancyFilter.apply(any(Stream.class), eq(filters))).thenReturn(vacancies.stream());
-        when(vacancyFilters.stream()).thenReturn(Stream.of(vacancyFilter));
+        when(filter.stream()).thenReturn(Stream.of(vacancyFilter));
         when(vacancyMapper.toDto(any(Vacancy.class))).thenReturn(vacancyDto);
 
         List<VacancyDto> result = vacancyService.getAllVacanciesByFilter(filters);

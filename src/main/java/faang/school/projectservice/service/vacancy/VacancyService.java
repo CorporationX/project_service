@@ -2,17 +2,18 @@ package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.dto.filter.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,10 +24,10 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final VacancyValidator vacancyValidator;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
-    private final List<VacancyFilter> vacancyFilters;
+    private final List<Filter<VacancyFilterDto, Vacancy>> vacancyFilters;
 
     @Autowired
-    public VacancyService(VacancyRepository vacancyRepository, VacancyMapper vacancyMapper, VacancyValidator vacancyValidator, TeamMemberJpaRepository teamMemberJpaRepository, List<VacancyFilter> vacancyFilters) {
+    public VacancyService(VacancyRepository vacancyRepository, VacancyMapper vacancyMapper, VacancyValidator vacancyValidator, TeamMemberJpaRepository teamMemberJpaRepository, List<Filter<VacancyFilterDto, Vacancy>> vacancyFilters) {
         this.vacancyRepository = vacancyRepository;
         this.vacancyMapper = vacancyMapper;
         this.vacancyValidator = vacancyValidator;
@@ -36,7 +37,7 @@ public class VacancyService {
 
     @Transactional
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
-        vacancyValidator.createVacancyValidator(vacancyDto);
+        vacancyValidator.validatorForCreateVacancyMethod(vacancyDto);
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         vacancy = vacancyRepository.save(vacancy);
         return vacancyMapper.toDto(vacancy);
@@ -44,7 +45,7 @@ public class VacancyService {
 
     @Transactional
     public VacancyDto updateVacancy(Long id, VacancyDto vacancyDto) {
-        Vacancy vacancy = vacancyValidator.getVacancyValidator(id);
+        Vacancy vacancy = getValidVacancy(id);
         updateVacancyFields(vacancy, vacancyDto);
         vacancy = vacancyRepository.save(vacancy);
         return vacancyMapper.toDto(vacancy);
@@ -52,14 +53,14 @@ public class VacancyService {
 
     @Transactional
     public void deleteVacancy(Long vacancyId) {
-        Vacancy vacancy = vacancyValidator.getVacancyValidator(vacancyId);
+        Vacancy vacancy = getValidVacancy(vacancyId);
         deleteCandidateIfNotHaveStatus(vacancy);
         vacancyRepository.deleteById(vacancyId);
     }
 
     @Transactional(readOnly = true)
     public VacancyDto getVacancyById(Long vacancyId) {
-        return vacancyMapper.toDto(vacancyValidator.getVacancyValidator(vacancyId));
+        return vacancyMapper.toDto(getValidVacancy(vacancyId));
     }
 
     @Transactional(readOnly = true)
@@ -119,5 +120,13 @@ public class VacancyService {
         if (!candidatesForDelete.isEmpty()) {
             teamMemberJpaRepository.deleteAllById(candidatesForDelete);
         }
+    }
+
+    private Vacancy getValidVacancy(Long vacancyId) {
+        Optional<Vacancy> vacancy = vacancyRepository.findById(vacancyId);
+        if (vacancy.isEmpty()) {
+            throw new RuntimeException("Vacancy not found!");
+        }
+        return vacancy.get();
     }
 }
