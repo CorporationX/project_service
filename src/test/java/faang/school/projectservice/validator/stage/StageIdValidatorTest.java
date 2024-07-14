@@ -1,6 +1,5 @@
-package faang.school.projectservice.service.stage;
+package faang.school.projectservice.validator.stage;
 
-import faang.school.projectservice.validator.stage.StageIdValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
