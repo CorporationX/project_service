@@ -1,10 +1,12 @@
 package faang.school.projectservice.dto.client;
 
 import faang.school.projectservice.model.InternshipStatus;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Getter
 public class InternshipDto {
     private Long id;
     private Long projectId;
