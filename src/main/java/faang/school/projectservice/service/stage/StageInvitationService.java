@@ -28,6 +28,7 @@ public class StageInvitationService {
     private final List<StageInvitationFilter> stageInvitationFilters;
     private final StageInvitationValidator stageInvitationValidator;
 
+    @Transactional
     public StageInvitationDto create(StageInvitationDto stageInvitationDto) {
         stageInvitationDtoValidator.validateAll(stageInvitationDto);
 
