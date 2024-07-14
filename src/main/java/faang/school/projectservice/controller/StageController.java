@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,16 @@ public class StageController {
         return stageService.createStage(stageDto);
     }
 
-// Получить все этапы проекта с фильтром по статусу (в работе, выполнено и т.д).
+    // Получить все этапы проекта с фильтром по статусу (в работе, выполнено и т.д).
+    public List<StageDto> getAllStagesFilteredByProjectStatus(Long projectId,
+                                                           ProjectFilterDto filters) {
+        if (projectId == null
+        || filters == null) {
+            throw new DataValidationException("Введите идентификатор проекта," +
+                    " или данные фильтра!");
+        }
+       return stageService.getAllStagesFilteredByProjectStatus(projectId, filters);
+    }
 
     // Удалить этап.
     public void deleteStage(Long id) {
