@@ -83,7 +83,6 @@ public class StageServiceTest {
 
     private Stream<Stage> stageStream;
     private List<StageFilter> stageFilters;
-    private List<Stage> stages;
     private List<StageDto> stageDtos;
 
     @BeforeEach
@@ -141,7 +140,7 @@ public class StageServiceTest {
         List<Task> tasks = new ArrayList<>(Collections.singletonList(task));
         List<Task> tasksReplaced = new ArrayList<>(Collections.singletonList(task));
 
-        stages = new ArrayList<>(Collections.singletonList(stage));
+        List<Stage> stages = new ArrayList<>(Collections.singletonList(stage));
 
         stageStream = stages.stream();
 
