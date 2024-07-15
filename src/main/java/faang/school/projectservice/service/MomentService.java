@@ -36,7 +36,8 @@ public class MomentService {
     public MomentDto create(MomentDto momentDto) {
         momentValidator.validateMoment(momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
-        populateMomentProjectAndUser(moment, momentDto);
+        populateMomentProject(moment, momentDto);
+        populateMomentTeamMembers(moment);
         momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
@@ -46,7 +47,8 @@ public class MomentService {
         momentValidator.existsMoment(momentDto.getId());
         momentValidator.validateMoment(momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
-        populateMomentProjectAndUser(moment, momentDto);
+        populateMomentProject(moment, momentDto);
+        populateMomentTeamMembers(moment);
         momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
@@ -78,23 +80,27 @@ public class MomentService {
         momentRepository.deleteById(momentId);
     }
 
-    private void populateMomentProjectAndUser(Moment moment, MomentDto momentDto) {
+    private void populateMomentProject(Moment moment, MomentDto momentDto) {
         Set<Project> projects = new HashSet<>();
-        for (long projectId : momentDto.getProjectsId()) {
-            projects.add(projectRepository.getProjectById(projectId));
+        if (momentDto.getProjectsId() != null && !momentDto.getProjectsId().isEmpty()) {
+            for (long projectId : momentDto.getProjectsId()) {
+                projects.add(projectRepository.getProjectById(projectId));
+            }
         }
-        for (long teamMemberId : momentDto.getUsersId()) {
-            projects.addAll(projectRepository.findProjectByTeamMember(teamMemberId));
+        if (momentDto.getUsersId() != null && !momentDto.getUsersId().isEmpty()) {
+            for (long teamMemberId : momentDto.getUsersId()) {
+                projects.addAll(projectRepository.findProjectByTeamMember(teamMemberId));
+            }
         }
         moment.setProjects(projects.stream().toList());
+    }
 
+    private void populateMomentTeamMembers(Moment moment) {
         Set<Long> teamMemberIds = new HashSet<>();
-        List<Long> projectIds = projects.stream().map(Project::getId).toList();
+        List<Long> projectIds = moment.getProjects().stream().map(Project::getId).toList();
         for (long projectId : projectIds) {
-            var teamMembers = teamMemberRepository.findAllByProjectId(projectId);
-            teamMemberIds.addAll(teamMembers.stream()
-                    .map(TeamMember::getId)
-                    .toList());
+            teamMemberIds.addAll(teamMemberRepository.findAllByProjectId(projectId).stream()
+                    .map(TeamMember::getId).toList());
         }
         moment.setUserIds(teamMemberIds.stream().toList());
     }
