@@ -15,10 +15,7 @@ import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -86,8 +83,8 @@ public class ProjectServiceTest {
                 .name("some name")
                 .projectStatus(ProjectStatus.CREATED).build();
 
-        when(projectFilters.get(0).isApplicable(projectFilterDto)).thenReturn(true);
-        when(projectFilters.get(0).apply(any(), any())).thenReturn(List.of(project).stream());
+        Mockito.lenient().when(projectFilters.get(0).isApplicable(projectFilterDto)).thenReturn(true);
+        Mockito.lenient().when(projectFilters.get(0).apply(any(), any())).thenReturn(List.of(project).stream());
     }
 
     @Test
@@ -144,8 +141,7 @@ public class ProjectServiceTest {
     @Test
     void getAllProjectByFilters() {
         when(projectRepository.findAll()).thenReturn(projects);
-//        не могу понять как оттестить вызов фильтров
-        List<ProjectDto> result = projectService.getAllProjectByFilters(projectFilterDto);
-//        verify(projectFilter).apply(projects.stream(), projectFilterDto);
+        projectService.getAllProjectByFilters(projectFilterDto);
+        Mockito.verify(projectRepository, Mockito.times(1)).findAll();
     }
 }
