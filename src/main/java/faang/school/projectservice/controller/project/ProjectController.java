@@ -3,11 +3,13 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.controller.ApiPath;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,8 +30,8 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(projectDto));
     }
 
-    @PutMapping
-    public ResponseEntity<ProjectDto> updateProject(@RequestBody @Valid ProjectDto projectDto) {
-        return ResponseEntity.ok(projectService.updateProject(projectDto));
+    @PutMapping("/{id}")
+    public ResponseEntity<ProjectDto> updateProject(@PathVariable("id") long id, @RequestBody @Valid ProjectUpdateDto projectUpdateDto) {
+        return ResponseEntity.ok(projectService.updateProject(id, projectUpdateDto));
     }
 }

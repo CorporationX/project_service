@@ -1,7 +1,10 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -26,6 +29,8 @@ class ProjectMapperTest {
                 .description("Test Project Description")
                 .children(List.of(Project.builder().id(2L).build()))
                 .parentProject(Project.builder().id(1L).build())
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PUBLIC)
                 .build();
 
         projectDto = ProjectDto.builder()
@@ -69,5 +74,22 @@ class ProjectMapperTest {
         Project mappedEntity = projectMapper.toEntity(projectDto);
 
         assertNull(mappedEntity.getParentProject());
+    }
+
+    @Test
+    void update_should_remap_fields_that_differ() {
+        ProjectUpdateDto updatedDto = ProjectUpdateDto.builder()
+                .name("Updated Test Project")
+                .description("Updated Test Project Description")
+                .status(ProjectStatus.COMPLETED)
+                .visibility(ProjectVisibility.PRIVATE)
+                .build();
+
+        var updatedProject = projectMapper.update(updatedDto, project);
+
+        assertEquals(updatedDto.getName(), updatedProject.getName());
+        assertEquals(updatedDto.getDescription(), updatedProject.getDescription());
+        assertEquals(updatedDto.getStatus(), updatedProject.getStatus());
+        assertEquals(updatedDto.getVisibility(), updatedProject.getVisibility());
     }
 }

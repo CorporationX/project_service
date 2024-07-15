@@ -1,9 +1,11 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
@@ -18,6 +20,8 @@ public interface ProjectMapper {
     ProjectDto toDto(Project project);
 
     Project toEntity(ProjectDto projectDto);
+
+    Project update(ProjectUpdateDto projectUpdateDto, @MappingTarget Project project);
 
     @Named("mapChildren")
     default List<Long> mapChildren(List<Project> childrenProjects) {

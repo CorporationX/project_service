@@ -1,11 +1,14 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ExceptionMessages;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,13 +19,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceImplTest {
+
+    private static final int APPROX_AMOUNT_OF_SECONDS_TO_ENSURE_THE_CHANGE_WAS_MADE_RECENTLY = 30;
 
     @Mock
     private ProjectRepository projectRepository;
@@ -132,5 +141,60 @@ class ProjectServiceImplTest {
         assertEquals(ProjectStatus.CREATED, projectArgumentCaptor.getValue().getStatus());
         assertEquals(parentProject.getId(), createdProjectDto.getParentProjectId());
     }
+
+    @Test
+    void updateProject_updates_project_successfully() {
+        var projectUpdateDto = ProjectUpdateDto.builder()
+                .name("Updated Project")
+                .description("Updated Project Description")
+                .visibility(ProjectVisibility.PUBLIC)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        var project = Project.builder()
+                .id(1L)
+                .name("Test Project")
+                .description("Test Project Description")
+                .visibility(ProjectVisibility.PRIVATE)
+                .status(ProjectStatus.CREATED)
+                .build();
+
+        var updatedProject = Project.builder()
+                .id(1L)
+                .name("Updated Project")
+                .description("Updated Project Description")
+                .visibility(ProjectVisibility.PUBLIC)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(mapper.update(any(ProjectUpdateDto.class), any(Project.class))).thenReturn(updatedProject);
+
+        projectService.updateProject(1L, projectUpdateDto);
+
+        verify(mapper, times(1)).toDto(projectArgumentCaptor.capture());
+        verify(projectRepository, times(1)).save(updatedProject);
+        assertEquals(projectUpdateDto.getName(), projectArgumentCaptor.getValue().getName());
+        assertEquals(projectUpdateDto.getDescription(), projectArgumentCaptor.getValue().getDescription());
+        assertEquals(projectUpdateDto.getVisibility(), projectArgumentCaptor.getValue().getVisibility());
+        assertEquals(projectUpdateDto.getStatus(), projectArgumentCaptor.getValue().getStatus());
+        assertTrue(ChronoUnit.SECONDS.between(projectArgumentCaptor.getValue().getUpdatedAt(),
+                LocalDateTime.now()) < APPROX_AMOUNT_OF_SECONDS_TO_ENSURE_THE_CHANGE_WAS_MADE_RECENTLY);
+    }
+
+    @Test
+    void updateProject_should_throw_exception_when_project_not_found() {
+        var projectUpdateDto = ProjectUpdateDto.builder()
+                .name("Updated Project")
+                .description("Updated Project Description")
+                .visibility(ProjectVisibility.PUBLIC)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        when(projectRepository.getProjectById(1L)).thenThrow(EntityNotFoundException.class);
+
+        assertThrows(EntityNotFoundException.class, () -> projectService.updateProject(1L, projectUpdateDto));
+    }
+
 
 }

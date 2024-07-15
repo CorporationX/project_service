@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ExceptionMessages;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -44,7 +47,12 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDto updateProject(ProjectDto projectDto) {
-        return null;
+    @Transactional
+    public ProjectDto updateProject(long id, ProjectUpdateDto projectUpdateDto) {
+        var projectToUpdate = projectRepository.getProjectById(id);
+        var updatedProject = mapper.update(projectUpdateDto, projectToUpdate);
+        updatedProject.setUpdatedAt(LocalDateTime.now());
+        projectRepository.save(updatedProject);
+        return mapper.toDto(updatedProject);
     }
 }
