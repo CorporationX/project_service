@@ -33,7 +33,7 @@ public class VacancyService {
         return vacancyMapper.toDto(vacancyRepository.save(vacancy));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public VacancyDto getVacancyById(long vacancyId) {
         vacancyValidator.checkExistingOfVacancy(vacancyId);
         return vacancyMapper.toDto(vacancyRepository.getReferenceById(vacancyId));
@@ -42,11 +42,11 @@ public class VacancyService {
     @Transactional
     public void deleteVacancyById(long vacancyId) {
         vacancyValidator.checkExistingOfVacancy(vacancyId);
-        updateTeamMemberRepository(vacancyId);
+        deleteNonAcceptedCandidates(vacancyId);
         vacancyRepository.deleteById(vacancyId);
     }
 
-    private void updateTeamMemberRepository(long vacancyId) {
+    private void deleteNonAcceptedCandidates(long vacancyId) {
         Vacancy vacancy = vacancyRepository.getReferenceById(vacancyId);
         List<Candidate> candidateList = vacancy.getCandidates();
         List<Long> candidatesToDelete = candidateList.stream()
@@ -85,7 +85,7 @@ public class VacancyService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<VacancyDto> getAllByFilter(VacancyFilterDto filters) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
         return vacancyFilters.stream()
