@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiPath.PROJECTS_PATH)
@@ -39,6 +41,11 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ProjectDto getProject(@PathVariable("id") long id) {
         return projectService.retrieveProject(id);
+    }
+
+    @GetMapping
+    public List<ProjectDto> getProjects() {
+        return projectService.getAllProjects();
     }
 
 }

@@ -19,6 +19,8 @@ public interface ProjectMapper {
     @Mapping(source = "children", target = "childrenProjectIds", qualifiedByName = "mapChildren")
     ProjectDto toDto(Project project);
 
+    List<ProjectDto> toDto(List<Project> projects);
+
     Project toEntity(ProjectDto projectDto);
 
     Project update(ProjectUpdateDto projectUpdateDto, @MappingTarget Project project);

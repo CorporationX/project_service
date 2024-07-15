@@ -21,6 +21,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -233,4 +234,63 @@ class ProjectServiceImplTest {
         assertThrows(EntityNotFoundException.class, () -> projectService.retrieveProject(1L));
     }
 
+    @Test
+    void getAllProjects_retrieves_all_projects_successfully() {
+        var project1 = Project.builder()
+                .id(1L)
+                .name("Test Project 1")
+                .description("Test Project Description 1")
+                .visibility(ProjectVisibility.PRIVATE)
+                .status(ProjectStatus.CREATED)
+                .build();
+
+        var project2 = Project.builder()
+                .id(2L)
+                .name("Test Project 2")
+                .description("Test Project Description 2")
+                .visibility(ProjectVisibility.PUBLIC)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        var projectDto1 = ProjectDto.builder()
+                .id(1L)
+                .name("Test Project 1")
+                .description("Test Project Description 1")
+                .visibility(ProjectVisibility.PRIVATE)
+                .status(ProjectStatus.CREATED)
+                .build();
+
+        var projectDto2 = ProjectDto.builder()
+                .id(2L)
+                .name("Test Project 2")
+                .description("Test Project Description 2")
+                .visibility(ProjectVisibility.PUBLIC)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
+        when(mapper.toDto(List.of(project1, project2))).thenReturn(List.of(projectDto1, projectDto2));
+
+        var retrievedProjects = projectService.getAllProjects();
+
+        assertEquals(2, retrievedProjects.size());
+        assertEquals(projectDto1, retrievedProjects.get(0));
+        assertEquals(projectDto2, retrievedProjects.get(1));
+    }
+
+    @Test
+    void getAllProjects_returns_empty_list_when_no_projects_exist() {
+        when(projectRepository.findAll()).thenReturn(List.of());
+
+        var retrievedProjects = projectService.getAllProjects();
+
+        assertTrue(retrievedProjects.isEmpty());
+    }
+
+    @Test
+    void getAllProjects_should_throw_exception_when_some_database_error_occurs() {
+        when(projectRepository.findAll()).thenThrow(RuntimeException.class);
+
+        assertThrows(PersistenceException.class, () -> projectService.getAllProjects());
+    }
 }

@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -39,7 +40,7 @@ public class ProjectServiceImpl implements ProjectService {
             }
             savedProject = projectRepository.save(projectToBeSaved);
         } catch (DataIntegrityViolationException e) {
-            throw new PersistenceException(ExceptionMessages.PROJECT_FAILED_PERSISTENCE, e);
+            throw new PersistenceException(ExceptionMessages.FAILED_PERSISTENCE, e);
         }
         return mapper.toDto(savedProject);
     }
@@ -57,5 +58,17 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectDto retrieveProject(long id) {
         return mapper.toDto(projectRepository.getProjectById(id));
+    }
+
+    @Override
+    public List<ProjectDto> getAllProjects() {
+        List<Project> allProjects;
+        try {
+            allProjects = projectRepository.findAll();
+        } catch (Exception e) {
+            log.error("Error occurred while fetching all projects", e);
+            throw new PersistenceException(ExceptionMessages.FAILED_RETRIEVAL, e);
+        }
+        return mapper.toDto(allProjects);
     }
 }

@@ -15,8 +15,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -133,14 +135,14 @@ class ProjectControllerTest extends BaseControllerTest {
                 .description("Project Description")
                 .build();
 
-        when(projectService.createProject(any(ProjectDto.class))).thenThrow(new PersistenceException(ExceptionMessages.PROJECT_FAILED_PERSISTENCE));
+        when(projectService.createProject(any(ProjectDto.class))).thenThrow(new PersistenceException(ExceptionMessages.FAILED_PERSISTENCE));
 
         mockMvc.perform(post(ApiPath.PROJECTS_PATH)
                         .header(USER_HEADER, DEFAULT_HEADER_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(ExceptionMessages.PROJECT_FAILED_PERSISTENCE));
+                .andExpect(jsonPath("$.message").value(ExceptionMessages.FAILED_PERSISTENCE));
     }
 
     @Test
@@ -245,5 +247,42 @@ class ProjectControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Project Name"))
                 .andExpect(jsonPath("$.description").value("Project Description"));
+    }
+
+    @Test
+    void getProjects_should_return_empty_list_if_no_projects_exist() throws Exception {
+        when(projectService.getAllProjects()).thenReturn(List.of());
+
+        mockMvc.perform(get(ApiPath.PROJECTS_PATH)
+                        .header(USER_HEADER, DEFAULT_HEADER_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getProjects_should_return_list_of_projects_if_projects_exist() throws Exception {
+        var projects = List.of(
+                ProjectDto.builder().id(1L).name("Project Name").description("Project Description").build(),
+                ProjectDto.builder().id(2L).name("Project Name 2").description("Project Description 2").build(),
+                ProjectDto.builder().id(3L).name("Project Name 3").description("Project Description 3").build()
+        );
+
+        when(projectService.getAllProjects()).thenReturn(projects);
+
+        mockMvc.perform(get(ApiPath.PROJECTS_PATH)
+                        .header(USER_HEADER, DEFAULT_HEADER_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    void getProjects_should_return_bad_request_if_database_error_occurs() throws Exception {
+        when(projectService.getAllProjects()).thenThrow(new PersistenceException(ExceptionMessages.FAILED_RETRIEVAL));
+
+        mockMvc.perform(get(ApiPath.PROJECTS_PATH)
+                        .header(USER_HEADER, DEFAULT_HEADER_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(ExceptionMessages.FAILED_RETRIEVAL));
     }
 }

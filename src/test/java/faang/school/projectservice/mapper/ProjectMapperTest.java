@@ -94,4 +94,22 @@ class ProjectMapperTest {
         assertEquals(updatedDto.getStatus(), updatedProject.getStatus());
         assertEquals(updatedDto.getVisibility(), updatedProject.getVisibility());
     }
+
+    @Test
+    void toDto_should_map_list_to_list() {
+        List<Project> projects = List.of(project);
+
+        List<ProjectDto> mappedDtos = projectMapper.toDto(projects);
+
+        assertEquals(projects.size(), mappedDtos.size());
+    }
+
+    @Test
+    void testDto_should_map_empty_list_to_empty_list() {
+        List<Project> projects = List.of();
+
+        List<ProjectDto> mappedDtos = projectMapper.toDto(projects);
+
+        assertTrue(mappedDtos.isEmpty());
+    }
 }
