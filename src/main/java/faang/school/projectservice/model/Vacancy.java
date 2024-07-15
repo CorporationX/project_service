@@ -49,6 +49,7 @@ public class Vacancy {
 
     @ManyToOne
     @JoinColumn(name = "project_id")
+    @NotNull(message = "Project must be specified")
     private Project project;
 
     @OneToMany(mappedBy = "vacancy")

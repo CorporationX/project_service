@@ -15,4 +15,8 @@ public class TeamMemberRepository {
         return jpaRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
+
+    public void deleteTeamMember(long idMember) {
+        // логика удаления из БД TeamMember
+    }
 }
