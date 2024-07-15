@@ -1,6 +1,8 @@
 package faang.school.projectservice.dto.project;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import faang.school.projectservice.dto.DtoValidationConstraints;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -9,14 +11,17 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
+@JsonDeserialize(builder = ProjectDto.ProjectDtoBuilder.class)
 public class ProjectDto {
 
     private Long id;
@@ -39,8 +44,19 @@ public class ProjectDto {
     private LocalDateTime createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
-    private ProjectStatus status;
-    private ProjectVisibility visibility;
+    @Builder.Default
+    private ProjectStatus status = ProjectStatus.CREATED;
+    @Builder.Default
+    private ProjectVisibility visibility = ProjectVisibility.PUBLIC;
     private String coverImageId;
 
+    public static ProjectDtoBuilder builder() {
+        return new ProjectDtoBuilder()
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC);
+    }
+
+    @JsonPOJOBuilder(withPrefix = "")
+    public static class ProjectDtoBuilder {
+    }
 }

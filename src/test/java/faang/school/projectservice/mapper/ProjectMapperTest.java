@@ -38,6 +38,8 @@ class ProjectMapperTest {
                 .description("Test Project Description")
                 .childrenProjectIds(List.of(2L))
                 .parentProjectId(1L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PUBLIC)
                 .build();
     }
 

@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ExceptionMessages;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
@@ -38,7 +37,6 @@ public class ProjectServiceImpl implements ProjectService {
                 var parentProject = projectRepository.getProjectById(projectDto.getParentProjectId());
                 projectToBeSaved.setParentProject(parentProject);
             }
-            projectToBeSaved.setStatus(ProjectStatus.CREATED);
             savedProject = projectRepository.save(projectToBeSaved);
         } catch (DataIntegrityViolationException e) {
             throw new PersistenceException(ExceptionMessages.PROJECT_FAILED_PERSISTENCE, e);

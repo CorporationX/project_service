@@ -93,6 +93,8 @@ class ProjectServiceImplTest {
                 .name("Test Project")
                 .description("Test Project Description")
                 .ownerId(1L)
+                .visibility(ProjectVisibility.PUBLIC)
+                .status(ProjectStatus.CREATED)
                 .build();
 
         when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())).thenReturn(false);
@@ -126,6 +128,8 @@ class ProjectServiceImplTest {
                 .description("Test Project Description")
                 .ownerId(1L)
                 .parentProject(parentProject)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
                 .build();
 
         when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())).thenReturn(false);
