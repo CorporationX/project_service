@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageDtoForRequest;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.StageException;
@@ -36,7 +36,7 @@ public class StageService {
     private final StageMapper stageMapper;
     private final List<StageFilter> filters;
 
-    public StageDto createStage(StageDto stageDto) {
+    public StageDtoForRequest createStage(StageDtoForRequest stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
         Project project = projectRepository.getProjectById(stageDto.getProjectId());
         stage.setProject(project);
@@ -61,7 +61,7 @@ public class StageService {
         return stageMapper.toDto(saveStage);
     }
 
-    public List<StageDto> getFilteredStages(StageFilterDto filterDto) {
+    public List<StageDtoForRequest> getFilteredStages(StageFilterDto filterDto) {
         Stream<Stage> stages = stageRepository.findAll().stream();
         return filters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
@@ -70,19 +70,18 @@ public class StageService {
                 .toList();
     }
 
-    public void deleteStage(StageDto stageDto) {
+    public void deleteStage(StageDtoForRequest stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
         stageRepository.delete(stage);
     }
 
-    public StageDto updateStage(StageDto stageDto, TeamRole teamRole, int number) {
+    public StageDtoForRequest updateStage(StageDtoForRequest stageDto, TeamRole teamRole, int number) {
         Stage stage = stageMapper.toEntity(stageDto);
         //List<StageRoles> stageRolesList = stage.getStageRoles();
         stage.getStageRoles().forEach(
                 stageRoles -> getExecutorsForRole(stage, stageRoles));
         Stage updatedStage = stageRepository.save(stage);
-
-        return ;
+        return stageMapper.toDto(updatedStage);
     }
 
     private void getExecutorsForRole(Stage stage, StageRoles stageRoles) {
@@ -143,12 +142,12 @@ public class StageService {
         return stageInvitationToSend;
     }
 
-    public List<StageDto> getAllStages() {
+    public List<StageDtoForRequest> getAllStages() {
         List<Stage> stages = stageRepository.findAll();
         return stageMapper.toDto(stages);
     }
 
-    public StageDto getStage(Long id) {
+    public StageDtoForRequest getStage(Long id) {
         Stage stage = stageRepository.getById(id);
         return stageMapper.toDto(stage);
     }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageDtoForRequest;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
@@ -17,27 +17,27 @@ public class StageController {
 
     private final StageService stageService;
 
-    public StageDto createStage(@Valid StageDto stageDto) {
+    public StageDtoForRequest createStage(@Valid StageDtoForRequest stageDto) {
         return stageService.createStage(stageDto);
     }
 
-    public List<StageDto> getFilteredStages(StageFilterDto filterDto) {
+    public List<StageDtoForRequest> getFilteredStages(StageFilterDto filterDto) {
         return stageService.getFilteredStages(filterDto);
     }
 
-    public void deleteStage(StageDto stageDto) {
+    public void deleteStage(StageDtoForRequest stageDto) {
         stageService.deleteStage(stageDto);
     }
 
-    public StageDto updateStage(@Valid StageDto stageDto) {
+    public StageDtoForRequest updateStage(@Valid StageDtoForRequest stageDto) {
         return null;
     }
 
-    public List<StageDto> getAllStages() {
+    public List<StageDtoForRequest> getAllStages() {
         return stageService.getAllStages();
     }
 
-    public StageDto getStage(Long id) {
+    public StageDtoForRequest getStage(Long id) {
         return stageService.getStage(id);
     }
 }
