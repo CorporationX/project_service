@@ -4,21 +4,25 @@ import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.repository.VacancyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class VacancyValidator {
 
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final VacancyRepository vacancyRepository;
 
     @Autowired
-    public VacancyValidator(ProjectRepository projectRepository, TeamMemberRepository teamMemberRepository) {
+    public VacancyValidator(ProjectRepository projectRepository, TeamMemberRepository teamMemberRepository, VacancyRepository vacancyRepository) {
         this.projectRepository = projectRepository;
         this.teamMemberRepository = teamMemberRepository;
+        this.vacancyRepository = vacancyRepository;
     }
 
     public void validatorForCreateVacancyMethod(VacancyDto vacancyDto) {
@@ -28,6 +32,19 @@ public class VacancyValidator {
         checkCreatorInTeam(vacancyDto.getProjectId(), vacancyDto.getCreatedBy());
         checkCreatorRole(vacancyDto.getCreatedBy());
 
+    }
+
+    public void validVacancy(Long vacancyId) {
+        Optional<Vacancy> vacancy = vacancyRepository.findById(vacancyId);
+        if (vacancy.isEmpty()) {
+            throw new RuntimeException("Vacancy not found!");
+        }
+    }
+
+    public void validCandidates(Vacancy vacancy) {
+        if(vacancy.getCandidates() == null) {
+            throw new RuntimeException("Candidates is null!");
+        }
     }
 
     private void checkCreatorInTeam(Long projectId, Long creatorId) {

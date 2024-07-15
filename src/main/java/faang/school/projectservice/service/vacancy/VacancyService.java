@@ -99,6 +99,8 @@ public class VacancyService {
     }
 
     private List<Long> updateCandidates(Vacancy vacancy, VacancyDto vacancyDto) {
+        vacancyValidator.validCandidates(vacancy);
+        vacancyValidator.validCandidates(vacancyMapper.toEntity(vacancyDto));
         var simpleCandidate = vacancy.getCandidates().stream()
                 .map(Candidate::getId)
                 .collect(Collectors.toList());
@@ -112,6 +114,7 @@ public class VacancyService {
     }
 
     private void deleteCandidateIfNotHaveStatus(Vacancy vacancy) {
+        vacancyValidator.validCandidates(vacancy);
         List<Long> candidatesForDelete = vacancy.getCandidates()
                 .stream()
                 .filter(candidate -> !candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
@@ -123,10 +126,7 @@ public class VacancyService {
     }
 
     private Vacancy getValidVacancy(Long vacancyId) {
-        Optional<Vacancy> vacancy = vacancyRepository.findById(vacancyId);
-        if (vacancy.isEmpty()) {
-            throw new RuntimeException("Vacancy not found!");
-        }
-        return vacancy.get();
+        vacancyValidator.validVacancy(vacancyId);
+        return vacancyRepository.findById(vacancyId).get();
     }
 }
