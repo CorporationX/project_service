@@ -78,8 +78,9 @@ tasks.bootJar {
  */
 
 val jacocoInclude = listOf(
-    "**/service/**",
-    "**/validator/**"
+    "**/projectservice/service/**",
+    "**/projectservice/validator/**",
+    "**/projectservice/filter/**"
 )
 jacoco {
     toolVersion = "0.8.9"
@@ -93,7 +94,6 @@ tasks.jacocoTestReport {
     reports {
         xml.required.set(false)
         csv.required.set(false)
-        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
     }
 
     classDirectories.setFrom(
