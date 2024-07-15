@@ -8,4 +8,6 @@ public interface ProjectService {
     ProjectDto createProject(ProjectDto projectDto);
 
     ProjectDto updateProject(long id, ProjectUpdateDto projectDto);
+
+    ProjectDto retrieveProject(long id);
 }

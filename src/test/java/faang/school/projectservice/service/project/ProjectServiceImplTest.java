@@ -200,5 +200,37 @@ class ProjectServiceImplTest {
         assertThrows(EntityNotFoundException.class, () -> projectService.updateProject(1L, projectUpdateDto));
     }
 
+    @Test
+    void getProject_retrieves_project_successfully() {
+        var project = Project.builder()
+                .id(1L)
+                .name("Test Project")
+                .description("Test Project Description")
+                .visibility(ProjectVisibility.PRIVATE)
+                .status(ProjectStatus.CREATED)
+                .build();
+
+        var projectDto = ProjectDto.builder()
+                .id(1L)
+                .name("Test Project")
+                .description("Test Project Description")
+                .visibility(ProjectVisibility.PRIVATE)
+                .status(ProjectStatus.CREATED)
+                .build();
+
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(mapper.toDto(project)).thenReturn(projectDto);
+
+        ProjectDto retrievedProjectDto = projectService.retrieveProject(1L);
+
+        assertEquals(projectDto, retrievedProjectDto);
+    }
+
+    @Test
+    void getProject_should_throw_exception_when_project_not_found() {
+        when(projectRepository.getProjectById(1L)).thenThrow(EntityNotFoundException.class);
+
+        assertThrows(EntityNotFoundException.class, () -> projectService.retrieveProject(1L));
+    }
 
 }

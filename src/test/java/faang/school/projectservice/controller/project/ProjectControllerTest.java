@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -217,5 +218,32 @@ class ProjectControllerTest extends BaseControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(incomingDto)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getProject_should_return_not_found_status_if_project_does_not_exist() throws Exception {
+        when(projectService.retrieveProject(1L)).thenThrow(EntityNotFoundException.class);
+
+        mockMvc.perform(get(ApiPath.PROJECTS_PATH + "/1")
+                        .header(USER_HEADER, DEFAULT_HEADER_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getProject_should_return_project_if_project_exists() throws Exception {
+        var projectDto = ProjectDto.builder()
+                .id(1L)
+                .name("Project Name")
+                .description("Project Description")
+                .build();
+
+        when(projectService.retrieveProject(1L)).thenReturn(projectDto);
+
+        mockMvc.perform(get(ApiPath.PROJECTS_PATH + "/1")
+                        .header(USER_HEADER, DEFAULT_HEADER_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Project Name"))
+                .andExpect(jsonPath("$.description").value("Project Description"));
     }
 }
