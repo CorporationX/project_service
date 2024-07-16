@@ -99,6 +99,7 @@ public class StageService {
     public void updateStage(Long stageId) {
         Stage stage = stageRepository.getById(stageId);
         Map<TeamRole, Integer> roles = new HashMap<>();
+        Set<Long> gotStageInvitation = new HashSet<>();
 
         for (StageRoles stageRoles : stage.getStageRoles()) {
             countRoles(roles, stage.getExecutors(), stageRoles.getTeamRole());
@@ -107,7 +108,7 @@ public class StageService {
         for (StageRoles stageRoles : stage.getStageRoles()) {
             int rolesDeficit = stageRoles.getCount() - roles.get(stageRoles.getTeamRole());
             if(rolesDeficit > 0) {
-                searchAndSend(rolesDeficit, stage, stageRoles.getTeamRole());
+                searchAndSend(rolesDeficit, gotStageInvitation, stage, stageRoles.getTeamRole());
             }
         }
     }
@@ -123,8 +124,7 @@ public class StageService {
         roles.put(teamRole, amount);
     }
 
-    private void searchAndSend(int rolesDeficit, Stage stage, TeamRole teamRole) {
-        Set<Long> gotStageInvitation = new HashSet<>();
+    private void searchAndSend(int rolesDeficit, Set<Long> gotStageInvitation, Stage stage, TeamRole teamRole) {
         int sended = 0;
 
         while (sended < rolesDeficit) {
