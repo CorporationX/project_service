@@ -2,7 +2,7 @@ name: CI for project_service
 on:
   pull_request:
     branches:
-      - centaur-master-bc5
+      - centaur-master-bc5-BJS2-15964
 
 jobs:
   build:
