@@ -18,7 +18,7 @@ public interface MomentMapper {
     Moment toEntity(MomentRequestDto momentRequestDto, List<Project> projects);
 
 
-    @Mapping(source = "resource", target = "resourceIds", qualifiedByName = "resourceToId")
+    //@Mapping(source = "resource", target = "resourceIds", qualifiedByName = "resourceToId")
     @Mapping(source = "projects", target = "projectIds", qualifiedByName = "projectToId")
     MomentResponseDto toResponseDto(Moment moment);
 

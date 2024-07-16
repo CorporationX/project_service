@@ -33,9 +33,10 @@ public class MomentController {
     }
 
     @PatchMapping
-    public MomentResponseDto update(@RequestBody @Validated MomentUpdateDto momentUpdateDto) {
+    public MomentResponseDto update(@RequestBody @Validated MomentUpdateDto momentUpdateDto,
+                                    @Positive @RequestHeader("x-user-id") long userId) {
 
-        return momentService.update(momentUpdateDto);
+        return momentService.update(momentUpdateDto, userId);
     }
 
 

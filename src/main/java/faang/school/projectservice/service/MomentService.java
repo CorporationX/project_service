@@ -69,6 +69,7 @@ public class MomentService {
                                 momentRequestDto.getTeamMemberIds(), momentRequestDto.getProjectIds()
                         )
                 );
+                //todo: optimize - оба метода обращаются к БД за теми же данными (лишний запрос к БД)
             }
         }
 
@@ -80,12 +81,15 @@ public class MomentService {
         return momentMapper.toResponseDto(moment);
     }
 
-    public MomentResponseDto update(MomentUpdateDto momentUpdateDto) {
+    public MomentResponseDto update(MomentUpdateDto momentUpdateDto, long userId) {
         Moment moment = momentRepository.findById(momentUpdateDto.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
 
         checkAndFillDependentFields(momentUpdateDto, moment);
         checkAndFillSimpleFields(momentUpdateDto, moment);
+
+        moment.setUpdatedAt(LocalDateTime.now());
+        moment.setUpdatedBy(userId);
 
         momentRepository.save(moment);
         return momentMapper.toResponseDto(moment);
@@ -166,9 +170,8 @@ public class MomentService {
 
             validateProjectStatuses(newProjects);
             validateTeamMembersFitProjects(newTeamMemberIds, newProjectIds);
-            validateProjectsFitTeamMembers(newTeamMemberIds, newProjectIds);
+            validateProjectsFitTeamMembers(newProjectIds, newTeamMemberIds);
 
-            //todo: нужно ли затирать старые зависимости или хибернейт сделает это сам?
             moment.setTeamMemberIds(newTeamMemberIds);
             moment.setProjects(newProjects);
         }
@@ -186,6 +189,8 @@ public class MomentService {
             moment.getTeamMemberIds().addAll(
                     findMissingMemberIdsForProjects(moment.getTeamMemberIds(), newProjectIds)
             );
+
+            //todo: optimize - оба метода обращаются к БД за теми же данными (лишний запрос к БД)
         }
 
         // Явно меняем мемберов, проекты исходя из мемберов
@@ -196,10 +201,12 @@ public class MomentService {
             moment.getProjects().removeAll(
                     findExcessProjectsForMembers(moment.getProjects(), newTeamMemberIds)
             );
-            // 2) Мемберов стало больше, возможно недостает проекта, надо добавить
+            // 2) Мемберов стало больше, возможно недостает проекта, надо добавить и провалидировать
             List<Project> extraProjects = findMissingProjectsForMembers(moment.getProjects(), newTeamMemberIds);
             validateProjectStatuses(extraProjects);
             moment.getProjects().addAll(extraProjects);
+
+            //todo: optimize - оба метода обращаются к БД за теми же данными (лишний запрос к БД)
         }
 
 
