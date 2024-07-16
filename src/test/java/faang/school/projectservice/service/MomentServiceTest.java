@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.moment.MomentRequestDto;
 import faang.school.projectservice.dto.client.moment.MomentResponseDto;
+import faang.school.projectservice.dto.client.moment.MomentUpdateDto;
 import faang.school.projectservice.exception.ConflictException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
@@ -21,12 +22,15 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -323,5 +327,202 @@ class MomentServiceTest {
 
         verify(projectRepository, times(1)).findAllByIds(projectIds);
         verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+    }
+
+    @Test
+    void testUpdate_SimpleFields() {
+        long userId = 999L;
+        long momentId = 1L;
+        String newName = "new name";
+        String newDesc = "new desc";
+        LocalDateTime newDate = LocalDateTime.now();
+        String newImage = "new image";
+        MomentUpdateDto momentUpdateDto = MomentUpdateDto.builder()
+                .id(momentId)
+                .name(newName)
+                .description(newDesc)
+                .date(newDate)
+                .imageId(newImage)
+                .build();
+        Moment momentFromDb = Moment.builder()
+                .id(momentId)
+                .name("nameFromDb")
+                .description("descFromDb")
+                .date(LocalDateTime.now().minusDays(10))
+                .imageId("imageFromDb")
+                .build();
+
+        when(momentRepository.findById(momentId)).thenReturn(Optional.of(momentFromDb));
+
+        MomentResponseDto updated = momentService.update(momentUpdateDto, userId);
+
+        assertEquals(momentId, updated.getId());
+        assertEquals(newName, updated.getName());
+        assertEquals(newDesc, updated.getDescription());
+        assertEquals(newDate, updated.getDate());
+        assertEquals(newImage, updated.getImageId());
+        assertEquals(userId, updated.getUpdatedBy());
+        verify(momentRepository, times(1)).findById(momentId);
+        verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
+    }
+
+    @Test
+    void testUpdate_momentNotExist() {
+        long userId = 999L;
+        long momentId = 1L;
+        MomentUpdateDto momentUpdateDto = MomentUpdateDto.builder()
+                .id(momentId)
+                .build();
+
+        when(momentRepository.findById(momentId))
+                .thenThrow(new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> momentService.update(momentUpdateDto, userId));
+        assertEquals(ErrorMessage.MOMENT_NOT_EXIST.getMessage(), exception.getMessage());
+        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+    }
+
+    @Test
+    void testUpdate_dependentFields_bothNotNull() {
+        long userId = 1L;
+        List<Long> newProjectIds = List.of(1L, 2L);
+        List<Project> newProjects = List.of(
+                Project.builder()
+                        .id(1L)
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build(),
+                Project.builder()
+                        .id(2L)
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build()
+        );
+        List<Long> newTeamMemberIds = List.of(11L, 21L);
+
+        long momentId = 1L;
+        MomentUpdateDto momentUpdateDto = MomentUpdateDto.builder()
+                .id(momentId)
+                .projectIds(newProjectIds)
+                .teamMemberIds(newTeamMemberIds)
+                .build();
+
+        when(momentRepository.findById(momentId)).thenReturn(Optional.of(
+                Moment.builder()
+                        .id(momentId)
+                        .build()
+        ));
+        when(projectRepository.findAllByIds(newProjectIds)).thenReturn(newProjects);
+        when(teamMemberRepository.findIdsByProjectIds(newProjectIds)).thenReturn(newTeamMemberIds);
+        when(projectRepository.findAllDistinctByTeamMemberIds(newTeamMemberIds)).thenReturn(newProjects);
+
+        MomentResponseDto responseDto = momentService.update(momentUpdateDto, userId);
+
+        assertEquals(momentId, responseDto.getId());
+        assertEquals(newProjectIds, responseDto.getProjectIds());
+        assertEquals(newTeamMemberIds, responseDto.getTeamMemberIds());
+        assertEquals(userId, responseDto.getUpdatedBy());
+        verify(projectRepository, times(1)).findAllByIds(newProjectIds);
+        verify(teamMemberRepository, times(1)).findIdsByProjectIds(newProjectIds);
+        verify(projectRepository, times(1)).findAllDistinctByTeamMemberIds(newTeamMemberIds);
+        verify(momentRepository, times(1)).save(any(Moment.class));
+    }
+
+    @Test
+    void testUpdate_dependentFields_projectsNotNullMembersNull() {
+        long userId = 1L;
+        List<Long> newProjectIds = List.of(1L, 2L);
+        Project project1 = Project.builder()
+                .id(1L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        Project project2 = Project.builder()
+                .id(2L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        Project project3 = Project.builder()
+                .id(2L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        List<Project> newProjects = List.of(project1, project2);
+        List<Project> oldProjects = List.of(project1, project3);
+
+        List<Long> oldTeamMemberIds = new ArrayList<>(List.of(11L, 31L));
+        List<Long> teamMembersFromNewProjects = List.of(11L, 21L);
+
+        long momentId = 1L;
+        MomentUpdateDto momentUpdateDto = MomentUpdateDto.builder()
+                .id(momentId)
+                .projectIds(newProjectIds)
+                .teamMemberIds(null)
+                .build();
+
+        when(momentRepository.findById(momentId)).thenReturn(Optional.of(
+                Moment.builder()
+                        .id(momentId)
+                        .projects(oldProjects)
+                        .teamMemberIds(oldTeamMemberIds)
+                        .build()
+        ));
+        when(projectRepository.findAllByIds(newProjectIds)).thenReturn(newProjects);
+        when(teamMemberRepository.findIdsByProjectIds(newProjectIds)).thenReturn(teamMembersFromNewProjects);
+
+        MomentResponseDto responseDto = momentService.update(momentUpdateDto, userId);
+
+        assertEquals(momentId, responseDto.getId());
+        assertEquals(newProjectIds, responseDto.getProjectIds());
+        assertEquals(teamMembersFromNewProjects, responseDto.getTeamMemberIds());
+        assertEquals(userId, responseDto.getUpdatedBy());
+        verify(projectRepository, times(1)).findAllByIds(newProjectIds);
+        verify(teamMemberRepository, times(2)).findIdsByProjectIds(newProjectIds);
+        verify(momentRepository, times(1)).save(any(Moment.class));
+    }
+
+    @Test
+    void testUpdate_dependentFields_projectsNullMembersNotNull() {
+        long userId = 1L;
+        List<Long> newTeamMemberIds = List.of(11L, 21L);
+        List<Long> oldTeamMemberIds = List.of(11L, 31L);
+
+        Project project1 = Project.builder()
+                .id(1L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        Project project2 = Project.builder()
+                .id(2L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        Project project3 = Project.builder()
+                .id(2L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        List<Project> oldProjects = new ArrayList<>(List.of(project1, project3));
+        List<Project> projectsFromNewTeamMembers = List.of(project1, project2);
+        List<Long> projectIdsFromNewTeamMembers = List.of(1L, 2L);
+
+        long momentId = 1L;
+        MomentUpdateDto momentUpdateDto = MomentUpdateDto.builder()
+                .id(momentId)
+                .projectIds(null)
+                .teamMemberIds(newTeamMemberIds)
+                .build();
+
+        when(momentRepository.findById(momentId)).thenReturn(Optional.of(
+                Moment.builder()
+                        .id(momentId)
+                        .projects(oldProjects)
+                        .teamMemberIds(oldTeamMemberIds)
+                        .build()
+        ));
+        when(projectRepository.findAllDistinctByTeamMemberIds(newTeamMemberIds)).thenReturn(projectsFromNewTeamMembers);
+
+
+        MomentResponseDto responseDto = momentService.update(momentUpdateDto, userId);
+
+        assertEquals(momentId, responseDto.getId());
+        assertEquals(projectIdsFromNewTeamMembers, responseDto.getProjectIds());
+        assertEquals(newTeamMemberIds, responseDto.getTeamMemberIds());
+        assertEquals(userId, responseDto.getUpdatedBy());
+        verify(teamMemberRepository, times(1)).checkExistAll(newTeamMemberIds);
+        verify(projectRepository, times(2)).findAllDistinctByTeamMemberIds(newTeamMemberIds);
+        verify(momentRepository, times(1)).save(any(Moment.class));
     }
 }
