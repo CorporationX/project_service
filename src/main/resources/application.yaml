@@ -24,6 +24,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        project-view-channel:
+          name: project_view_channel
 
 server:
   port: 8082
