@@ -2,12 +2,12 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.exceptions.NotFoundElementInDataBase;
+import faang.school.projectservice.exceptions.NotFoundElementInDataBaseException;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filter.MomentFilter;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,38 +26,33 @@ public class MomentService {
     private final List<MomentFilter> momentFilters;
 
     @Transactional(readOnly = true)
-    public MomentDto getMomentById(Long momentId) {
-        String messageError = "Not found momentId id: " + momentId;
-        if (momentId != null || momentId < 0) {
-            log.error(messageError);
-            throw new NotFoundElementInDataBase(messageError);
-        }
+    public MomentDto getMomentById(@NotNull Long momentId) {
         var moment = momentRepository.findById(momentId)
                 .orElseThrow(() ->
-                        new NotFoundElementInDataBase(messageError));
+                        new NotFoundElementInDataBaseException("Not found moment for id: " + momentId));
         return momentMapper.toDto(moment);
     }
 
     @Transactional(readOnly = true)
-    public List<MomentDto> getListMomentForFilter(Long projectId, MomentFilterDto filters) {
+    public List<MomentDto> getListMomentForFilter(Long projectId, @NotNull MomentFilterDto filters) {
         validateProjectId(projectId);
         var listAllMoment = momentRepository.findAllByProjectId(projectId);
         return momentFilters.stream()
-                .filter(moment -> moment.isApplicable(filters))
-                .flatMap(moment -> moment.apply(listAllMoment, filters))
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(listAllMoment, filters))
                 .map(moment -> momentMapper.toDto(moment))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<MomentDto> getAllMomentProject(Long projectId) {
+    public List<MomentDto> getAllMomentProject(@NotNull Long projectId) {
         validateProjectId(projectId);
         var momentsForProject = projectRepository.getProjectById(projectId).getMoments();
         return momentsForProject.stream().map(moment -> momentMapper.toDto(moment)).toList();
     }
 
     @Transactional
-    public MomentDto createMoment(Long projectId, MomentDto momentDto) {
+    public MomentDto createMoment(Long projectId, @NotNull MomentDto momentDto) {
         validateProjectId(projectId);
         var projectsList = List.of(projectRepository.getProjectById(projectId));
         var moment = momentMapper.toEntity(momentDto);
@@ -68,7 +63,7 @@ public class MomentService {
     }
 
     @Transactional
-    public MomentDto updateMoment(Long projectId, MomentDto momentDto) {
+    public MomentDto updateMoment(@NotNull Long projectId, @NotNull MomentDto momentDto) {
         validateProjectId(projectId);
         var project = projectRepository.getProjectById(projectId);
         var moment = momentMapper.toEntity(momentDto);
@@ -80,15 +75,10 @@ public class MomentService {
 
     @Transactional(readOnly = true)
     private void validateProjectId(Long projectId) {
-        if (projectId == null || projectId < 0) {
-            String errorMessage = "projectId not be null or negative in MomentService class id: " + projectId;
-            log.error(errorMessage);
-            throw new DataValidationException(errorMessage);
-        }
-        if (projectRepository.existsById(projectId)) {
+        if (!projectRepository.existsById(projectId)) {
             String errorMessage = "Not found projectId in DataBase for id in MomentService class id: " + projectId;
             log.error(errorMessage);
-            throw new NotFoundElementInDataBase(errorMessage);
+            throw new NotFoundElementInDataBaseException(errorMessage);
         }
     }
 }
