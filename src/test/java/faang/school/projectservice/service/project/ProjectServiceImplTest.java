@@ -1,12 +1,21 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ExceptionMessages;
+import faang.school.projectservice.filter.ProjectNameFilter;
+import faang.school.projectservice.filter.ProjectOwnerFilter;
+import faang.school.projectservice.filter.ProjectStatusFilter;
+import faang.school.projectservice.filter.ProjectTeamMemberFilter;
+import faang.school.projectservice.filter.PublicProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceException;
@@ -16,8 +25,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -43,8 +54,14 @@ class ProjectServiceImplTest {
     @Captor
     private ArgumentCaptor<Project> projectArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<List<Project>> projectListArgumentCaptor;
+
+    @Mock
+    private UserContext userContext;
+
     @InjectMocks
-    private ProjectServiceImpl projectService;
+    private ProjectServiceImpl sut;
 
     @Test
     void createProject_throws_exception_if_project_already_exists() {
@@ -56,7 +73,7 @@ class ProjectServiceImplTest {
 
         when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())).thenReturn(true);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> projectService.createProject(projectDto));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> sut.createProject(projectDto));
 
         assertEquals(ExceptionMessages.PROJECT_ALREADY_EXISTS_FOR_OWNER_ID, exception.getMessage());
     }
@@ -79,7 +96,7 @@ class ProjectServiceImplTest {
         when(mapper.toEntity(projectDto)).thenReturn(project);
         when(projectRepository.save(project)).thenThrow(DataIntegrityViolationException.class);
 
-        assertThrows(PersistenceException.class, () -> projectService.createProject(projectDto));
+        assertThrows(PersistenceException.class, () -> sut.createProject(projectDto));
     }
 
     @Test
@@ -103,7 +120,7 @@ class ProjectServiceImplTest {
         when(mapper.toDto(project)).thenReturn(projectDto);
         when(projectRepository.save(project)).thenReturn(project);
 
-        ProjectDto createdProjectDto = projectService.createProject(projectDto);
+        ProjectDto createdProjectDto = sut.createProject(projectDto);
 
         verify(projectRepository, times(1)).save(projectArgumentCaptor.capture());
         assertEquals(projectDto, createdProjectDto);
@@ -139,7 +156,7 @@ class ProjectServiceImplTest {
         when(projectRepository.getProjectById(projectDto.getParentProjectId())).thenReturn(parentProject);
         when(projectRepository.save(project)).thenReturn(project);
 
-        ProjectDto createdProjectDto = projectService.createProject(projectDto);
+        ProjectDto createdProjectDto = sut.createProject(projectDto);
 
         verify(projectRepository, times(1)).save(projectArgumentCaptor.capture());
         assertEquals(projectDto, createdProjectDto);
@@ -175,7 +192,7 @@ class ProjectServiceImplTest {
         when(projectRepository.getProjectById(1L)).thenReturn(project);
         when(mapper.update(any(ProjectUpdateDto.class), any(Project.class))).thenReturn(updatedProject);
 
-        projectService.updateProject(1L, projectUpdateDto);
+        sut.updateProject(1L, projectUpdateDto);
 
         verify(mapper, times(1)).toDto(projectArgumentCaptor.capture());
         verify(projectRepository, times(1)).save(updatedProject);
@@ -198,7 +215,7 @@ class ProjectServiceImplTest {
 
         when(projectRepository.getProjectById(1L)).thenThrow(EntityNotFoundException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.updateProject(1L, projectUpdateDto));
+        assertThrows(EntityNotFoundException.class, () -> sut.updateProject(1L, projectUpdateDto));
     }
 
     @Test
@@ -222,7 +239,7 @@ class ProjectServiceImplTest {
         when(projectRepository.getProjectById(1L)).thenReturn(project);
         when(mapper.toDto(project)).thenReturn(projectDto);
 
-        ProjectDto retrievedProjectDto = projectService.retrieveProject(1L);
+        ProjectDto retrievedProjectDto = sut.retrieveProject(1L);
 
         assertEquals(projectDto, retrievedProjectDto);
     }
@@ -231,7 +248,7 @@ class ProjectServiceImplTest {
     void getProject_should_throw_exception_when_project_not_found() {
         when(projectRepository.getProjectById(1L)).thenThrow(EntityNotFoundException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.retrieveProject(1L));
+        assertThrows(EntityNotFoundException.class, () -> sut.retrieveProject(1L));
     }
 
     @Test
@@ -271,7 +288,7 @@ class ProjectServiceImplTest {
         when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
         when(mapper.toDto(List.of(project1, project2))).thenReturn(List.of(projectDto1, projectDto2));
 
-        var retrievedProjects = projectService.getAllProjects();
+        var retrievedProjects = sut.getAllProjects();
 
         assertEquals(2, retrievedProjects.size());
         assertEquals(projectDto1, retrievedProjects.get(0));
@@ -282,7 +299,7 @@ class ProjectServiceImplTest {
     void getAllProjects_returns_empty_list_when_no_projects_exist() {
         when(projectRepository.findAll()).thenReturn(List.of());
 
-        var retrievedProjects = projectService.getAllProjects();
+        var retrievedProjects = sut.getAllProjects();
 
         assertTrue(retrievedProjects.isEmpty());
     }
@@ -291,6 +308,56 @@ class ProjectServiceImplTest {
     void getAllProjects_should_throw_exception_when_some_database_error_occurs() {
         when(projectRepository.findAll()).thenThrow(RuntimeException.class);
 
-        assertThrows(PersistenceException.class, () -> projectService.getAllProjects());
+        assertThrows(PersistenceException.class, () -> sut.getAllProjects());
+    }
+
+    @Test
+    void filterProjects_should_throw_exception_when_some_database_error_occurs() {
+        when(projectRepository.findAll()).thenThrow(RuntimeException.class);
+
+        assertThrows(PersistenceException.class, () -> sut.filterProjects(null));
+    }
+
+    @Test
+    void filterProjects_with_filters_applied() {
+        var projectFilterDto = new ProjectFilterDto("proj", null);
+
+        when(userContext.getUserId()).thenReturn(1L);
+
+        var projectNameFilter = Mockito.spy(new ProjectNameFilter());
+        var projectStatusFilter = Mockito.spy(new ProjectStatusFilter());
+        var publicProjectFilter = Mockito.spy(new PublicProjectFilter());
+        var projectOwnerFilter = Mockito.spy(new ProjectOwnerFilter(userContext));
+        var projectTeamMemberFilter = Mockito.spy(new ProjectTeamMemberFilter(userContext));
+
+        ReflectionTestUtils.setField(sut, "defaultProjectFilters", List.of(publicProjectFilter, projectOwnerFilter, projectTeamMemberFilter));
+        ReflectionTestUtils.setField(sut, "userDefinedProjectFilters", List.of(projectNameFilter, projectStatusFilter));
+
+        var allProjects = List.of(
+                Project.builder().id(1L).name("new project").visibility(ProjectVisibility.PUBLIC).build(),
+                Project.builder().id(2L).name("the most awesome project").visibility(ProjectVisibility.PRIVATE).ownerId(1L).build(),
+                Project.builder().id(22L).name("the most awesome").visibility(ProjectVisibility.PRIVATE).ownerId(1L).build(),
+                Project.builder().id(3L).name("lol").visibility(ProjectVisibility.PRIVATE).teams(
+                        List.of(Team.builder().teamMembers(
+                                List.of(TeamMember.builder().userId(1L).build()))
+                                .build()))
+                        .build(),
+                Project.builder().id(33L).name("project extra").visibility(ProjectVisibility.PRIVATE).teams(
+                                List.of(Team.builder().teamMembers(
+                                                List.of(TeamMember.builder().userId(1L).build()))
+                                        .build()))
+                        .build(),
+                Project.builder().id(4L).name("null").visibility(ProjectVisibility.PRIVATE).build()
+        );
+
+        var expectedFilteredProjects = List.of(allProjects.get(0), allProjects.get(1), allProjects.get(4));
+
+        when(projectRepository.findAll()).thenReturn(allProjects);
+
+        sut.filterProjects(projectFilterDto);
+
+        verify(mapper, times(1)).toDto(projectListArgumentCaptor.capture());
+
+        assertEquals(expectedFilteredProjects, projectListArgumentCaptor.getValue());
     }
 }

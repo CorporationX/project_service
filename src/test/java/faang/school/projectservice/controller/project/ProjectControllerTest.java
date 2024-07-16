@@ -285,4 +285,47 @@ class ProjectControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(ExceptionMessages.FAILED_RETRIEVAL));
     }
+
+    @Test
+    void filterProjects_should_return_empty_list_if_no_projects_exist() throws Exception {
+        when(projectService.filterProjects(any())).thenReturn(List.of());
+
+        mockMvc.perform(post(ApiPath.PROJECTS_PATH + ApiPath.FILTER_FUNCTIONALITY)
+                        .header(USER_HEADER, DEFAULT_HEADER_VALUE)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void filterProjects_should_return_list_of_projects_if_projects_exist() throws Exception {
+        var projects = List.of(
+                ProjectDto.builder().id(1L).name("Project Name").description("Project Description").build(),
+                ProjectDto.builder().id(2L).name("Project Name 2").description("Project Description 2").build(),
+                ProjectDto.builder().id(3L).name("Project Name 3").description("Project Description 3").build()
+        );
+
+        when(projectService.filterProjects(any())).thenReturn(projects);
+
+        mockMvc.perform(post(ApiPath.PROJECTS_PATH + ApiPath.FILTER_FUNCTIONALITY)
+                        .header(USER_HEADER, DEFAULT_HEADER_VALUE)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    void filterProjects_should_return_bad_request_if_database_error_occurs() throws Exception {
+        when(projectService.filterProjects(any())).thenThrow(new PersistenceException(ExceptionMessages.FAILED_RETRIEVAL));
+
+        mockMvc.perform(post(ApiPath.PROJECTS_PATH + ApiPath.FILTER_FUNCTIONALITY)
+                        .header(USER_HEADER, DEFAULT_HEADER_VALUE)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(ExceptionMessages.FAILED_RETRIEVAL));
+    }
 }

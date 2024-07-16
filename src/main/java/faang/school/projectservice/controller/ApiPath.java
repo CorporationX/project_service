@@ -6,4 +6,5 @@ public final class ApiPath {
     }
 
     public static final String PROJECTS_PATH = "/projects";
+    public static final String FILTER_FUNCTIONALITY = "/filter";
 }

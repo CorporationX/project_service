@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.controller.ApiPath;
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.service.project.ProjectService;
@@ -31,6 +32,11 @@ public class ProjectController {
     public ResponseEntity<ProjectDto> createProject(@RequestBody @Valid ProjectDto projectDto) {
         projectDto.setOwnerId(userContext.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(projectDto));
+    }
+
+    @PostMapping(ApiPath.FILTER_FUNCTIONALITY)
+    public List<ProjectDto> filterProjects(@RequestBody ProjectFilterDto filters) {
+        return projectService.filterProjects(filters);
     }
 
     @PutMapping("/{id}")

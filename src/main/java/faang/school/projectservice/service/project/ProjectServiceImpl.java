@@ -1,8 +1,11 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ExceptionMessages;
+import faang.school.projectservice.filter.DefaultProjectFilter;
+import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -23,6 +26,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
+    private final List<ProjectFilter> userDefinedProjectFilters;
+    private final List<DefaultProjectFilter> defaultProjectFilters;
 
     @Override
     @Transactional
@@ -62,6 +67,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAllProjects() {
+        return mapper.toDto(retrieveProjects());
+    }
+
+    private List<Project> retrieveProjects() {
         List<Project> allProjects;
         try {
             allProjects = projectRepository.findAll();
@@ -69,6 +78,18 @@ public class ProjectServiceImpl implements ProjectService {
             log.error("Error occurred while fetching all projects", e);
             throw new PersistenceException(ExceptionMessages.FAILED_RETRIEVAL, e);
         }
-        return mapper.toDto(allProjects);
+        return allProjects;
+    }
+
+    @Override
+    public List<ProjectDto> filterProjects(ProjectFilterDto filters) {
+        var allProjects = retrieveProjects();
+        var primaryFiltersApplied = userDefinedProjectFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .reduce(allProjects.stream(), (projects, filter) -> filter.apply(projects, filters), (a, b) -> b);
+        var defaultFiltersApplied = defaultProjectFilters.stream()
+                .reduce(primaryFiltersApplied, (projects, filter) -> filter.apply(projects), (a, b) -> b)
+                .toList();
+        return mapper.toDto(defaultFiltersApplied);
     }
 }

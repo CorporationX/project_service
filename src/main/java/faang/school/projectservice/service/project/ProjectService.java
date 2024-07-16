@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 
@@ -14,4 +15,6 @@ public interface ProjectService {
     ProjectDto retrieveProject(long id);
 
     List<ProjectDto> getAllProjects();
+
+    List<ProjectDto> filterProjects(ProjectFilterDto filters);
 }
