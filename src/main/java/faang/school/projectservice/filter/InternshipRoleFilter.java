@@ -15,8 +15,8 @@ public class InternshipRoleFilter implements InternshipFilter{
     }
 
     @Override
-    public Stream<Internship> apply(List<Internship> internships, InternshipFiltersDto internshipFiltersDto) {
-        return internships.stream()
+    public Stream<Internship> apply(Stream<Internship> internships, InternshipFiltersDto internshipFiltersDto) {
+        return internships
                 .filter(internship -> internship.getInterns().stream()
                         .anyMatch(intern -> intern.getRoles().stream()
                                 .anyMatch(role -> role.equals(internshipFiltersDto.getRolePattern()))));

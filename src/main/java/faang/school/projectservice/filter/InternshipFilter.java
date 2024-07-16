@@ -9,5 +9,5 @@ import java.util.stream.Stream;
 public interface InternshipFilter {
     boolean isApplicable(InternshipFiltersDto filters);
 
-    Stream<Internship> apply(List<Internship> internships, InternshipFiltersDto internshipFiltersDto);
+    Stream<Internship> apply(Stream<Internship> internships, InternshipFiltersDto internshipFiltersDto);
 }

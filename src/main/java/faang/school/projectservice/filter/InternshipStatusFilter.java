@@ -16,8 +16,8 @@ public class InternshipStatusFilter implements InternshipFilter {
     }
 
     @Override
-    public Stream<Internship> apply(List<Internship> internships, InternshipFiltersDto filters) {
-        return internships.stream()
+    public Stream<Internship> apply(Stream<Internship> internships, InternshipFiltersDto filters) {
+        return internships
                 .filter(internship -> internship.getStatus().equals(filters.getStatusPattern()));
     }
 }

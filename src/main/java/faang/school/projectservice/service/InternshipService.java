@@ -6,13 +6,13 @@ import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
@@ -33,7 +33,6 @@ public class InternshipService {
     }
 
     public InternshipDto update(InternshipDto internshipDto) {
-
         Internship internshipToBeUpdated = getInternship(internshipDto.getId());
         if (internshipToBeUpdated.getStatus().equals(InternshipStatus.COMPLETED))
             throw new Exception("Cannot be updating");
@@ -43,14 +42,17 @@ public class InternshipService {
         internshipMapper.updateEntity(internshipDto, internshipToBeUpdated);
 
         if (internshipToBeUpdated.getStatus().equals(InternshipStatus.COMPLETED)) {
-            teamMemberService.changeRoleForInterns(internshipToBeUpdated);
+            teamMemberService.changeRoleForInternsAndDeleteFiredInterns(internshipToBeUpdated);
         }
-
         return internshipMapper.toDto(internshipRepository.save(internshipToBeUpdated));
     }
 
-    public List<InternshipDto> getAllInternshipByFilters(InternshipFiltersDto internshipFiltersDto) {
-        return null;
+    public List<Internship> getAllInternshipByFilters(Stream<Internship> internshipStream,
+                                                      InternshipFiltersDto internshipFiltersDto) {
+        return filters.stream()
+                .filter(filter -> filter.isApplicable(internshipFiltersDto))
+                .reduce(internshipStream, (acc, filter) -> filter.apply(acc, internshipFiltersDto), Stream::concat)
+                .toList();
     }
 
     public List<InternshipDto> getAllInternshipById() {
@@ -61,10 +63,8 @@ public class InternshipService {
         return internshipMapper.toDto(getInternship(id));
     }
 
-
     public Internship getInternship(Long id) {
         //todo: exception
         return internshipRepository.findById(id).orElseThrow();
     }
-
 }
