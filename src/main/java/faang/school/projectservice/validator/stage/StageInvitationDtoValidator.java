@@ -1,6 +1,5 @@
 package faang.school.projectservice.validator.stage;
 
-import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,16 +8,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 public class StageInvitationDtoValidator {
-    private final StageInvitationRepository stageInvitationRepository;
     private final TeamMemberRepository teamMemberRepository;
-
-    public void validateAll(StageInvitationDto stageInvitationDto) {
-        Long authorId = stageInvitationDto.getAuthorId();
-        Long invitedId = stageInvitationDto.getInvitedId();
-
-        validateEqualsId(authorId, invitedId);
-        validateInvitedMemberTeam(authorId, invitedId);
-    }
 
     public void validateEqualsId(Long authorId, Long invitedId) {
         if (authorId.equals(invitedId)) {

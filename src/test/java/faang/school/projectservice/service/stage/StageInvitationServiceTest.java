@@ -9,6 +9,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.stage.StageInvitationDtoValidator;
 import faang.school.projectservice.validator.stage.StageInvitationValidator;
@@ -26,6 +27,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -53,6 +55,9 @@ public class StageInvitationServiceTest {
     @Mock
     private List<StageInvitationFilter> stageInvitationFiltersMock;
 
+    @Mock
+    private StageRepository stageRepository;
+
     private Long id;
     private String rejectionReason;
     private StageInvitation stageInvitation;
@@ -72,7 +77,11 @@ public class StageInvitationServiceTest {
         rejectionReason = "test reason";
 
         stageInvitation = new StageInvitation();
-        stageInvitationDto = new StageInvitationDto();
+        stageInvitationDto = StageInvitationDto
+                .builder()
+                .authorId(1L)
+                .invitedId(2L)
+                .build();
         invited = new TeamMember();
         stage = new Stage();
         stageInvitationAuthorIdFilter = Mockito.mock(StageInvitationFilter.class);
@@ -105,15 +114,17 @@ public class StageInvitationServiceTest {
     @Test
     @DisplayName("Testing that all mocks are called + return test")
     public void testCreate() {
-        doNothing().when(stageInvitationDtoValidator).validateAll(stageInvitationDto);
-        when(stageInvitationMapper.toEntity(stageInvitationDto, teamMemberRepository)).thenReturn(stageInvitation);
+        doNothing().when(stageInvitationDtoValidator).validateEqualsId(anyLong(), anyLong());
+        doNothing().when(stageInvitationDtoValidator).validateInvitedMemberTeam(anyLong(), anyLong());
+        when(stageInvitationMapper.toEntity(stageInvitationDto, teamMemberRepository, stageRepository)).thenReturn(stageInvitation);
         when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
 
         StageInvitationDto result = stageInvitationService.create(stageInvitationDto);
 
-        verify(stageInvitationDtoValidator).validateAll(stageInvitationDto);
-        verify(stageInvitationMapper).toEntity(stageInvitationDto, teamMemberRepository);
+        verify(stageInvitationDtoValidator).validateEqualsId(anyLong(), anyLong());
+        verify(stageInvitationDtoValidator).validateInvitedMemberTeam(anyLong(), anyLong());
+        verify(stageInvitationMapper).toEntity(stageInvitationDto, teamMemberRepository, stageRepository);
         verify(stageInvitationRepository).save(stageInvitation);
         verify(stageInvitationMapper).toDto(stageInvitation);
 

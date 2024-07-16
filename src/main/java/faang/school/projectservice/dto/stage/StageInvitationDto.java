@@ -1,12 +1,14 @@
 package faang.school.projectservice.dto.stage;
 
-import faang.school.projectservice.model.stage.Stage;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class StageInvitationDto {
     private Long id;
-    private Stage stage;
+    private Long stageId;
+    private String description;
     private Long authorId;
     private Long invitedId;
 }
