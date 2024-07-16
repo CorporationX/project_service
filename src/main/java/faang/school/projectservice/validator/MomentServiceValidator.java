@@ -20,7 +20,7 @@ public class MomentServiceValidator {
             throw new DataValidationException("Moment " + momentDto.getId() + " already exists");
         }
 
-        Project project = projectRepository.getProjectById(momentDto.getProjectsIDs().get(0));
+        Project project = projectRepository.getProjectById(momentDto.getProjectsIds().get(0));
 
         if (project.getStatus().equals(ProjectStatus.CANCELLED) ||
                 project.getStatus().equals(ProjectStatus.COMPLETED)) {

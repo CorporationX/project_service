@@ -64,8 +64,8 @@ public class MomentServiceTest {
     public void setUp() {
         momentDto = MomentDto.builder()
                 .id(1L)
-                .projectsIDs(Arrays.asList(1L))
-                .userIDs(Arrays.asList(1L))
+                .projectsIds(Arrays.asList(1L))
+                .userIds(Arrays.asList(1L))
                 .build();
 
         teamMember = TeamMember.builder()
@@ -107,7 +107,7 @@ public class MomentServiceTest {
     @DisplayName("Test updateMoment")
     public void testUpdateMoment() {
         when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.of(moment));
-        when(momentMapper.toEntity(momentDto)).thenReturn(moment);
+        when(momentMapper.toDto(moment)).thenReturn(momentDto);
         momentService.updateMoment(momentDto);
 
         verify(momentRepository).save(moment);

@@ -12,7 +12,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MomentMapper {
-    @Mapping(source = "projects", target = "projectsIDs", qualifiedByName = "projectMapToId")
+    @Mapping(source = "projects", target = "projectsIds", qualifiedByName = "projectMapToId")
     MomentDto toDto(Moment moment);
 
     Moment toEntity(MomentDto userDto);

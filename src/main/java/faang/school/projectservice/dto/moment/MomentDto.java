@@ -25,8 +25,8 @@ public class MomentDto {
     private LocalDateTime date;
 
     @NotEmpty
-    private List<Long> projectsIDs;
+    private List<Long> projectsIds;
 
     @NotNull
-    private List<Long> userIDs;
+    private List<Long> userIds;
 }

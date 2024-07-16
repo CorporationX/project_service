@@ -28,23 +28,27 @@ public class MomentService {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-    public void createMoment(MomentDto momentDto) {
+    public MomentDto createMoment(MomentDto momentDto) {
         momentServiceValidator.validateCreateMoment(momentDto);
-        List<Project> projects = momentDto.getProjectsIDs().stream()
-                .map(projectRepository::getProjectById).toList();
-
+        List<Project> projects = momentDto.getProjectsIds().stream()
+                .map(projectRepository::getProjectById)
+                .toList();
         addMembersIDsToTheMoment(momentDto, projects);
+
+
         momentRepository.save(momentMapper.toEntity(momentDto));
+        return momentDto;
     }
 
-    public void updateMoment(MomentDto momentDto) {
-        Moment momentFromTheDatabase = momentRepository.findById(momentDto.getId())
+    public MomentDto updateMoment(MomentDto momentDto) {
+        Moment moment = momentRepository.findById(momentDto.getId())
                 .orElseThrow(() -> new DataValidationException("Moment not found"));
 
-        checkAndAddProjectsByNewMember(momentFromTheDatabase, momentDto);
-        checkAndAddMembersByNewProjects(momentFromTheDatabase, momentDto);
+        checkAndAddProjectsByNewMember(moment, momentDto);
+        checkAndAddMembersByNewProjects(moment, momentDto);
 
-        momentRepository.save(momentMapper.toEntity(momentDto));
+        momentRepository.save(moment);
+        return momentMapper.toDto(moment);
     }
 
     public List<MomentDto> getAllMoments(MomentFilterDto momentFilterDto) {
@@ -71,7 +75,7 @@ public class MomentService {
     }
 
     private void addMembersIDsToTheMoment(MomentDto momentDto, List<Project> projects) {
-        List<Long> members = momentDto.getUserIDs();
+        List<Long> members = momentDto.getUserIds();
 
         List<Long> tempMembers = new ArrayList<>();
         projects.stream()
@@ -85,30 +89,31 @@ public class MomentService {
         members.addAll(tempMembers);
     }
 
-    private void checkAndAddProjectsByNewMember(Moment momentFromTheDatabase, MomentDto momentDto) {
-        List<Long> differentElements = new ArrayList<>(momentDto.getUserIDs());
-        differentElements.removeAll(momentFromTheDatabase.getUserIds());
+    private void checkAndAddProjectsByNewMember(Moment moment, MomentDto momentDto) {
+        List<Long> differentElements = new ArrayList<>(momentDto.getUserIds());
+        differentElements.removeAll(moment.getUserIds());
 
         if (!differentElements.isEmpty()) {
             differentElements.forEach(userId -> {
                 List<TeamMember> teamMembers = teamMemberRepository.findByUserId(userId);
-                teamMembers.forEach(teamMember -> momentDto.getProjectsIDs()
-                        .add(teamMember
-                                .getTeam()
-                                .getProject()
-                                .getId()));
+                teamMembers.forEach(teamMember -> moment.getProjects()
+                        .add(teamMember.getTeam()
+                                .getProject()));
             });
         }
     }
 
-    private void checkAndAddMembersByNewProjects(Moment momentFromTheDatabase, MomentDto momentDto) {
-        List<Long> differentProjectIds = new ArrayList<>(momentDto.getProjectsIDs());
-        differentProjectIds.removeAll(momentFromTheDatabase.getProjects().stream()
-                .map(Project::getId).toList());
+    private void checkAndAddMembersByNewProjects(Moment moment, MomentDto momentDto) {
+        List<Long> differentProjectIds = new ArrayList<>(momentDto.getProjectsIds());
+        differentProjectIds.removeAll(moment.getProjects().stream()
+                .map(Project::getId)
+                .toList());
 
         if (!differentProjectIds.isEmpty()) {
             addMembersIDsToTheMoment(momentDto, differentProjectIds.stream()
-                    .map(projectRepository::getProjectById).toList());
+                    .map(projectRepository::getProjectById)
+                    .toList());
+            moment.setUserIds(momentDto.getUserIds());
         }
     }
 }

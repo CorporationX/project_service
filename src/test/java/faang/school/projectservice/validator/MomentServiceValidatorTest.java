@@ -38,7 +38,7 @@ public class MomentServiceValidatorTest {
     public void setUp() {
         momentDto = new MomentDto();
         momentDto.setId(1L);
-        momentDto.setProjectsIDs(List.of(1L));
+        momentDto.setProjectsIds(List.of(1L));
 
         project = new Project();
         project.setId(1L);
