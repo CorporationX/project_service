@@ -53,7 +53,7 @@ public class ProjectService {
         existById(updatedProjectDto.getId());
         Project project = projectRepository.getProjectById(updatedProjectDto.getId());
         projectMapper.updateDtoToEntity(updatedProjectDto, project);
-        return projectMapper.entityToDto(project);
+        return projectMapper.entityToDto(projectRepository.save(project));
     }
 
     @Transactional(readOnly = true)
