@@ -187,8 +187,6 @@ class MomentServiceTest {
 
         when(projectRepository.findAllByIds(projectIds)).thenReturn(projects);
         when(teamMemberRepository.findIdsByProjectIds(projectIds)).thenReturn(teamMemberIds);
-        when(projectRepository.findAllDistinctByTeamMemberIds(teamMemberIds)).thenReturn(projects);
-        when(teamMemberRepository.findIdsByProjectIds(List.of())).thenReturn(List.of());
         when(momentRepository.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
             Moment moment = invocationOnMock.getArgument(0, Moment.class);
             moment.setId(21L);
@@ -201,7 +199,8 @@ class MomentServiceTest {
         assertTrue(momentResponseDto.getTeamMemberIds().contains(teamMember1Id));
         assertEquals(creatorId, momentResponseDto.getCreatedBy());
         verify(projectRepository, times(1)).findAllByIds(projectIds);
-        verify(teamMemberRepository, times(1)).findIdsByProjectIds(projectIds);
+        verify(teamMemberRepository, times(2)).findIdsByProjectIds(projectIds);
+        //todo: optimize
         verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
         verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
     }
@@ -255,18 +254,15 @@ class MomentServiceTest {
                 .build();
         List<Long> projectIds = List.of(project1Id, project2Id);
         List<Project> projects = List.of(project1, project2);
-        List<Project> filledProjects = List.of(project1);
         MomentRequestDto momentRequestDto = MomentRequestDto.builder()
                 .projectIds(projectIds)
                 .teamMemberIds(teamMemberIds)
                 .build();
         Long missingTeamMember1Id = 2L;
-        List<Long> missingTeamMemberIds = List.of(missingTeamMember1Id);
+        List<Long> teamMembersByProjects = List.of(teamMember1Id, missingTeamMember1Id);
 
         when(projectRepository.findAllByIds(projectIds)).thenReturn(projects);
-        when(teamMemberRepository.findIdsByProjectIds(projectIds)).thenReturn(teamMemberIds);
-        when(projectRepository.findAllDistinctByTeamMemberIds(teamMemberIds)).thenReturn(filledProjects);
-        when(teamMemberRepository.findIdsByProjectIds(List.of(project2Id))).thenReturn(missingTeamMemberIds);
+        when(teamMemberRepository.findIdsByProjectIds(projectIds)).thenReturn(teamMembersByProjects);
         when(momentRepository.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
             Moment moment = invocationOnMock.getArgument(0, Moment.class);
             moment.setId(21L);
@@ -280,9 +276,8 @@ class MomentServiceTest {
         assertTrue(momentResponseDto.getTeamMemberIds().contains(missingTeamMember1Id));
         assertEquals(creatorId, momentResponseDto.getCreatedBy());
         verify(projectRepository, times(1)).findAllByIds(projectIds);
-        verify(teamMemberRepository, times(1)).findIdsByProjectIds(projectIds);
-        verify(projectRepository, times(1)).findAllDistinctByTeamMemberIds(teamMemberIds);
-        verify(teamMemberRepository, times(1)).findIdsByProjectIds(List.of(project2Id));
+        verify(teamMemberRepository, times(2)).findIdsByProjectIds(projectIds);
+        //todo: optimize
         verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
         verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
     }
