@@ -17,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -83,13 +84,27 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> filterProjects(ProjectFilterDto filters) {
-        var allProjects = retrieveProjects();
-        var primaryFiltersApplied = userDefinedProjectFilters.stream()
-                .filter(filter -> filter.isApplicable(filters))
-                .reduce(allProjects.stream(), (projects, filter) -> filter.apply(projects, filters), (a, b) -> b);
-        var defaultFiltersApplied = defaultProjectFilters.stream()
-                .reduce(primaryFiltersApplied, (projects, filter) -> filter.apply(projects), (a, b) -> b)
-                .toList();
+        List<Project> allProjects = retrieveProjects();
+        var userDefinedFiltersApplied = applyUserDefinedFilters(filters, allProjects);
+        var defaultFiltersApplied = applyDefaultFilters(userDefinedFiltersApplied);
         return mapper.toDto(defaultFiltersApplied);
+    }
+
+    private List<Project> applyUserDefinedFilters(ProjectFilterDto filters, List<Project> allProjects) {
+        var userDefinedFilteringStream = allProjects.stream();
+        for (ProjectFilter filter : userDefinedProjectFilters) {
+            if (filter.isApplicable(filters)) {
+                userDefinedFilteringStream = filter.apply(userDefinedFilteringStream, filters);
+            }
+        }
+        return userDefinedFilteringStream.toList();
+    }
+
+    private HashSet<Project> applyDefaultFilters(List<Project> userDefinedFiltersApplied) {
+        var defaultFiltersApplied = new HashSet<Project>();
+        for (DefaultProjectFilter filter : defaultProjectFilters) {
+            defaultFiltersApplied.addAll(filter.apply(userDefinedFiltersApplied.stream()).toList());
+        }
+        return defaultFiltersApplied;
     }
 }

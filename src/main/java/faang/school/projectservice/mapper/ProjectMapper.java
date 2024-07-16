@@ -11,6 +11,7 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
@@ -20,6 +21,8 @@ public interface ProjectMapper {
     ProjectDto toDto(Project project);
 
     List<ProjectDto> toDto(List<Project> projects);
+
+    List<ProjectDto> toDto(Set<Project> projects);
 
     Project toEntity(ProjectDto projectDto);
 

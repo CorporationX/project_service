@@ -33,6 +33,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,7 +56,7 @@ class ProjectServiceImplTest {
     private ArgumentCaptor<Project> projectArgumentCaptor;
 
     @Captor
-    private ArgumentCaptor<List<Project>> projectListArgumentCaptor;
+    private ArgumentCaptor<Set<Project>> projectSetArgumentCaptor;
 
     @Mock
     private UserContext userContext;
@@ -350,14 +351,14 @@ class ProjectServiceImplTest {
                 Project.builder().id(4L).name("null").visibility(ProjectVisibility.PRIVATE).build()
         );
 
-        var expectedFilteredProjects = List.of(allProjects.get(0), allProjects.get(1), allProjects.get(4));
+        var expectedFilteredProjects = Set.of(allProjects.get(0), allProjects.get(1), allProjects.get(4));
 
         when(projectRepository.findAll()).thenReturn(allProjects);
 
         sut.filterProjects(projectFilterDto);
 
-        verify(mapper, times(1)).toDto(projectListArgumentCaptor.capture());
+        verify(mapper, times(1)).toDto(projectSetArgumentCaptor.capture());
 
-        assertEquals(expectedFilteredProjects, projectListArgumentCaptor.getValue());
+        assertEquals(expectedFilteredProjects, projectSetArgumentCaptor.getValue());
     }
 }

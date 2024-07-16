@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -98,6 +99,15 @@ class ProjectMapperTest {
     @Test
     void toDto_should_map_list_to_list() {
         List<Project> projects = List.of(project);
+
+        List<ProjectDto> mappedDtos = projectMapper.toDto(projects);
+
+        assertEquals(projects.size(), mappedDtos.size());
+    }
+
+    @Test
+    void toDto_should_map_set_to_list() {
+        var projects = Set.of(project);
 
         List<ProjectDto> mappedDtos = projectMapper.toDto(projects);
 
