@@ -6,6 +6,7 @@ import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.validator.vacancy.VacancyDtoValidator;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,9 @@ public class VacancyServiceTest {
 
     @Mock
     private VacancyValidator vacancyValidator;
+
+    @Mock
+    private VacancyDtoValidator vacancyDtoValidator;
 
     @Mock
     private List<Filter<VacancyFilterDto, Vacancy>> filter;
