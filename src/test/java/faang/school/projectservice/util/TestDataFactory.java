@@ -1,4 +1,4 @@
-package faang.school.projectservice;
+package faang.school.projectservice.util;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.MomentFilterDto;
@@ -6,11 +6,11 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.service.moment.filter.MomentFilter;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.List.of;
@@ -41,7 +41,7 @@ public final class TestDataFactory {
         moment.setDate(LocalDateTime.now());
         moment.setProjects(new ArrayList<>());
         moment.setUserIds(new ArrayList<>(of(1L, 2L, 3L)));
-        moment.setCreatedAt(LocalDateTime.now());
+        moment.setCreatedAt(LocalDateTime.of(2019, 3, 28, 14, 33, 48, 640000));
         moment.setUpdatedAt(LocalDateTime.now());
         moment.setCreatedBy(1L);
         moment.setUpdatedBy(1L);
@@ -85,7 +85,8 @@ public final class TestDataFactory {
 
     public static MomentFilterDto createMomentFilterDto(){
         return MomentFilterDto.builder()
-                .id(1L)
+                .namePattern("First Moment")
+                .createdAt(LocalDateTime.of(2019, 3, 28, 14, 33, 48, 640000))
                 .build();
     }
 }

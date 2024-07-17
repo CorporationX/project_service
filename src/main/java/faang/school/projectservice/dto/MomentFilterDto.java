@@ -11,9 +11,8 @@ import java.util.List;
 @Setter
 @Builder
 public class MomentFilterDto {
-    private Long id;
-    private String name;
-    private List<ProjectDto> projects;
+    private String namePattern;
+    private List<Long> projectsPattern;
     private List<Long> userIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

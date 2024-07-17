@@ -1,10 +1,12 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.TestDataFactory;
+import faang.school.projectservice.dto.MomentFilterDto;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.filter.MomentFilter;
+import faang.school.projectservice.util.TestDataFactory;
 import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.mapper.MomentMapper;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
@@ -14,6 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 import static java.lang.Long.*;
 import static java.util.Optional.*;
@@ -27,46 +32,83 @@ class MomentServiceTest {
     private MomentService momentService;
     @Mock
     private MomentRepository momentRepository;
+    @Mock
+    private ProjectRepository projectRepository;
+    @Mock
+    private MomentMapper momentMapper;
 
     @Test
     void givenMomentWhenCreateMomentThenReturnMoment() {
         // given - precondition
         var momentDto = TestDataFactory.createMomentDto();
-        momentDto.getProjects().clear();
-        var projectDto = TestDataFactory.createProjectDto();
-        projectDto.getMoments().clear();
 
-        var savedMoment = MomentMapper.INSTANCE.toEntity(momentDto);
+        var projectId = TestDataFactory.createProjectDto().getId();
+
+        var moment = TestDataFactory.createMoment();
         var project = TestDataFactory.createProject();
 
-        savedMoment.getProjects().add(project);
+        moment.getProjects().add(project);
 
+        var savedMomentDto = TestDataFactory.createMomentDto();
+        savedMomentDto.getProjects().add(projectId);
+
+        given(projectRepository.getProjectById(projectId))
+                .willReturn(project);
+        given(momentMapper.toEntity(momentDto))
+                .willReturn(moment);
         given(momentRepository.save(any(Moment.class)))
-                .willReturn(savedMoment);
+                .willReturn(moment);
+        given(projectRepository.save(any(Project.class)))
+                .willReturn(project);
+        given(momentMapper.toDto(any(Moment.class)))
+                .willReturn(savedMomentDto);
 
         // when - action
-        var actualResult = momentService.createMoment(momentDto, projectDto);
+        var actualResult = momentService.createMoment(momentDto, projectId);
 
         // then - verify the output
         assertThat(actualResult).isNotNull();
-        assertThat(actualResult.getProjects().get(0)).isEqualTo(ProjectMapper.INSTANCE.toDto(project));
+        assertThat(actualResult.getProjects()).containsExactlyInAnyOrderElementsOf(savedMomentDto.getProjects());
         assertThat(actualResult.getUserIds()).containsExactlyInAnyOrderElementsOf(momentDto.getUserIds());
 
         verify(momentRepository, times(1)).save(any(Moment.class));
+        verify(projectRepository, times(1)).save(any(Project.class));
         verifyNoMoreInteractions(momentRepository);
+        verifyNoMoreInteractions(projectRepository);
     }
 
     @Test
     void givenMomentAndProjectInvalidStatusWhenCreateMomentThenThrowException() {
         // given - precondition
         var momentDto = TestDataFactory.createMomentDto();
-        var invalidProjectDto = TestDataFactory.createProjectDto();
-        invalidProjectDto.setStatus(ProjectStatus.COMPLETED);
+        var invalidProjectId = TestDataFactory.createProjectDto().getId();
+        var invalidProject = TestDataFactory.createProject();
+        invalidProject.setStatus(ProjectStatus.COMPLETED);
+
+        given(projectRepository.getProjectById(invalidProjectId))
+                .willReturn(invalidProject);
 
         // when - action and then - verify the output
-        assertThatThrownBy(() -> momentService.createMoment(momentDto, invalidProjectDto))
+        assertThatThrownBy(() -> momentService.createMoment(momentDto, invalidProjectId))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Cannot add a moment to a completed project.");
+
+        verifyNoInteractions(momentRepository);
+    }
+    @Test
+    void givenMomentAndProjectInvalidIdWhenCreateMomentThenThrowException() {
+        // given - precondition
+        var momentDto = TestDataFactory.createMomentDto();
+        var invalidProjectId = TestDataFactory.createProjectDto().getId();
+
+        // when - action and then - verify the output
+        given(projectRepository.getProjectById(invalidProjectId))
+                .willReturn(null);
+
+        // when - action and then - verify the output
+        assertThatThrownBy(() -> momentService.createMoment(momentDto, invalidProjectId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Project not found");
 
         verifyNoInteractions(momentRepository);
     }
@@ -75,21 +117,27 @@ class MomentServiceTest {
     void givenMomentWhenUpdateMomentThenReturnUpdateMoment() {
         // given - precondition
         var momentDto = TestDataFactory.createMomentDto();
-        var projectDto = TestDataFactory.createProjectDto();
-        projectDto.setId(12L);
-        projectDto.setName("Project Name 12");
-        projectDto.setDescription("Project Description 12");
+        var project = TestDataFactory.createProject();
+        project.setId(12L);
+        project.setName("Project Name 12");
+        project.setDescription("Project Description 12");
         momentDto.getUserIds().add(8L);
-        momentDto.getProjects().add(projectDto);
+        momentDto.getProjects().add(project.getId());
 
-        momentDto.getProjects().add(TestDataFactory.createProjectDto());
         var moment = TestDataFactory.createMoment();
-        var savedMoment = MomentMapper.INSTANCE.toEntity(momentDto);
+
+        var savedMoment = TestDataFactory.createMoment();
+        savedMoment.getUserIds().add(8L);
+        savedMoment.getProjects().add(project);
 
         given(momentRepository.findById(momentDto.getId()))
                 .willReturn(of(moment));
-        given(momentRepository.save(any(Moment.class)))
+        given(projectRepository.getProjectById(anyLong()))
+                .willReturn(project);
+        given(momentRepository.save(moment))
                 .willReturn(savedMoment);
+        given(momentMapper.toDto(savedMoment))
+                .willReturn(momentDto);
 
         // when - action
         var actualResult = momentService.updateMoment(momentDto);
@@ -98,10 +146,8 @@ class MomentServiceTest {
         assertThat(actualResult).isNotNull();
         assertThat(actualResult. getUserIds())
                 .containsExactlyInAnyOrderElementsOf(momentDto.getUserIds());
-        assertThat(actualResult.getProjects()).extracting(ProjectDto::getId)
-                .containsExactlyElementsOf(momentDto.getProjects().stream()
-                                                            .map(ProjectDto::getId)
-                                                            .toList());
+        assertThat(actualResult.getProjects())
+                .containsExactlyInAnyOrderElementsOf(momentDto.getProjects());
 
         verify(momentRepository, times(1)).findById(any(Long.class));
         verify(momentRepository, times(1)).save(moment);
@@ -132,7 +178,10 @@ class MomentServiceTest {
         var momentList = TestDataFactory.createMomentList();
         var expectedResult = TestDataFactory.createMomentDtoList();
 
-        given(momentRepository.findAll()).willReturn(momentList);
+        given(momentRepository.findAll())
+                .willReturn(momentList);
+        given(momentMapper.toDto(momentList.get(0)))
+                .willReturn(expectedResult.get(0));
 
         // when - action
         var actualResult = momentService.getAllMoments();
@@ -141,19 +190,30 @@ class MomentServiceTest {
         assertThat(actualResult).isNotNull();
         assertThat(actualResult.size()).isEqualTo(expectedResult.size());
         assertThat(actualResult).extracting(MomentDto::getId)
-                .containsExactlyElementsOf(expectedResult.stream()
-                                                            .map(MomentDto::getId)
-                                                            .toList());
+                .containsExactlyInAnyOrderElementsOf(expectedResult.stream()
+                        .map(MomentDto::getId)
+                        .toList());
     }
 
     @Test
     void givenFilterWhenGetAllMomentsThenReturnFilteredMoments() {
         // given - precondition
+        MomentFilter filterMock = mock(MomentFilter.class);
+        List<MomentFilter> momentFilters = List.of(filterMock);
+        momentService = new MomentService(momentRepository, projectRepository, momentMapper, momentFilters);
+
         var filter = TestDataFactory.createMomentFilterDto();
         var momentList = TestDataFactory.createMomentList();
         var expectedResult = TestDataFactory.createMomentDtoList();
 
-        given(momentRepository.findAll()).willReturn(momentList);
+        given(momentRepository.findAll())
+                .willReturn(momentList);
+        given(momentFilters.get(0).isApplicable(filter))
+                .willReturn(true);
+        given(momentFilters.get(0).getApplicableFilters(any(Stream.class), any(MomentFilterDto.class)))
+                .willReturn(momentList.stream());
+        given(momentMapper.toDto(momentList.get(0)))
+                .willReturn(expectedResult.get(0));
 
         // when - action
         var actualResult = momentService.getMoments(filter);
@@ -176,6 +236,8 @@ class MomentServiceTest {
 
         given(momentRepository.findById(momentDtoId))
                 .willReturn(of(moment));
+        given(momentMapper.toDto(moment))
+                .willReturn(momentDto);
 
         // when - action
         var actualResult = momentService.getMoment(momentDtoId);

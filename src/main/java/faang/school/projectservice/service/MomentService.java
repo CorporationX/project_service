@@ -2,42 +2,50 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.MomentFilterDto;
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.mapper.MomentMapper;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.filter.MomentFilter;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MomentService {
 
     private final MomentRepository momentRepository;
+    private final ProjectRepository projectRepository;
+    private final MomentMapper momentMapper;
+    private final List<MomentFilter> momentFilters;
 
-    public MomentDto createMoment(MomentDto momentDto, ProjectDto projectDto) {
-        if (projectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
+    @Transactional
+    public MomentDto createMoment(MomentDto momentDto, Long projectId) {
+        var project = projectRepository.getProjectById(projectId);
+
+        if (project == null) {
+            throw new EntityNotFoundException("Project not found");
+        }else if (project.getStatus().equals(ProjectStatus.COMPLETED)) {
             throw new IllegalStateException("Cannot add a moment to a completed project.");
         }
 
-        var projectDtoMoments = projectDto.getMoments();
-        projectDtoMoments.add(momentDto);
+        var moment = momentMapper.toEntity(momentDto);
 
-        var momentDtoProjects = momentDto.getProjects();
-        momentDtoProjects.add(projectDto);
-
-        var moment = MomentMapper.INSTANCE.toEntity(momentDto);
-
+        moment.getProjects().add(project);
         var savedMoment = momentRepository.save(moment);
 
-        return MomentMapper.INSTANCE.toDto(savedMoment);
+        project.getMoments().add(savedMoment);
+        projectRepository.save(project);
+
+            return momentMapper.toDto(savedMoment);
     }
 
+    @Transactional
     public MomentDto updateMoment(MomentDto momentDto) {
         var maybeMoment = momentRepository.findById(momentDto.getId())
                     .orElseThrow(() -> new IllegalStateException("Cannot find moment"));
@@ -46,7 +54,7 @@ public class MomentService {
         updateProject(maybeMoment, momentDto.getProjects());
 
         var savedMoment = momentRepository.save(maybeMoment);
-        return MomentMapper.INSTANCE.toDto(savedMoment);
+        return momentMapper.toDto(savedMoment);
     }
 
     private void updateUserIds(Moment moment, List<Long> newUserIds) {
@@ -58,9 +66,9 @@ public class MomentService {
         }
     }
 
-    private void updateProject(Moment moment, List<ProjectDto> newProjectDtos) {
-        var newProjects = newProjectDtos.stream()
-                .map(ProjectMapper.INSTANCE::toEntity)
+    private void updateProject(Moment moment, List<Long> newProjectsIds) {
+        var newProjects = newProjectsIds.stream()
+                .map(projectRepository::getProjectById)
                 .toList();
         var existingProjects = moment.getProjects();
         for (var project : newProjects) {
@@ -70,43 +78,25 @@ public class MomentService {
         }
     }
 
-
     public List<MomentDto> getAllMoments() {
         return momentRepository.findAll().stream()
-                .map(MomentMapper.INSTANCE::toDto)
+                .map(momentMapper::toDto)
                 .toList();
     }
 
+    public List<MomentDto> getMoments(MomentFilterDto filters) {
+        var moments = momentRepository.findAll().stream();
 
-    public List<MomentDto> getMoments(MomentFilterDto filter) {
-        return getAllMoments().stream()
-                .filter(momentDto -> matchesFilter(momentDto, filter))
+        return momentFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.getApplicableFilters(moments, filters))
+                .map(momentMapper::toDto)
                 .toList();
     }
-
 
     public MomentDto getMoment(long id) {
         return momentRepository.findById(id)
-                .map(MomentMapper.INSTANCE::toDto)
+                .map(momentMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Moment is not found"));
-    }
-
-    private boolean matchesFilter(MomentDto momentDto, MomentFilterDto filter) {
-        if (filter.getProjects() != null && !filter.getProjects().isEmpty()) {
-            if (momentDto.getProjects().stream().noneMatch(filter.getProjects()::contains)) {
-                return false;
-            }
-        }
-        if (filter.getUserIds() != null && !filter.getUserIds().isEmpty()) {
-            if (momentDto.getUserIds().stream().noneMatch(filter.getUserIds()::contains)) {
-                return false;
-            }
-        }
-        if (filter.getId() != null && !filter.getId().equals(momentDto.getId())) return false;
-        if (filter.getName() != null && !filter.getName().equals(momentDto.getName())) return false;
-        if (filter.getCreatedAt() != null && !filter.getCreatedAt().equals(momentDto.getCreatedAt())) return false;
-        if (filter.getUpdatedAt() != null && !filter.getUpdatedAt().equals(momentDto.getUpdatedAt())) return false;
-        if (filter.getCreatedBy() != null && !filter.getCreatedBy().equals(momentDto.getCreatedBy())) return false;
-        return filter.getUpdatedBy() == null || filter.getUpdatedBy().equals(momentDto.getUpdatedBy());
     }
 }

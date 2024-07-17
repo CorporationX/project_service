@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.TestDataFactory;
+import faang.school.projectservice.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -30,7 +30,7 @@ class ProjectMapperTest {
     void toEntity() {
         var projectDto = TestDataFactory.createProjectDto();
         var momentDto = TestDataFactory.createMomentDto();
-        projectDto.getMoments().add(momentDto);
+        projectDto.getMoments().add(momentDto.getId());
 
         var project = mapper.toEntity(projectDto);
 

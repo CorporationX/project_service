@@ -1,32 +1,40 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.Named;
 
-@Mapper
+import java.util.List;
+
+@Mapper(componentModel = "spring",unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface ProjectMapper {
 
-    ProjectMapper INSTANCE = Mappers.getMapper(ProjectMapper.class);
-
-    @Mapping(target = "moments", ignore = true)
+    @Mapping(source = "moments", target = "moments", qualifiedByName = "momentsToMomentsIds")
     ProjectDto toDto(Project project);
 
-    @Mapping(target = "storageSize", ignore = true)
-    @Mapping(target = "maxStorageSize", ignore = true)
-    @Mapping(target = "ownerId", ignore = true)
-    @Mapping(target = "parentProject", ignore = true)
-    @Mapping(target = "children", ignore = true)
-    @Mapping(target = "tasks", ignore = true)
-    @Mapping(target = "resources", ignore = true)
-    @Mapping(target = "visibility", ignore = true)
-    @Mapping(target = "coverImageId", ignore = true)
-    @Mapping(target = "teams", ignore = true)
-    @Mapping(target = "schedule", ignore = true)
-    @Mapping(target = "stages", ignore = true)
-    @Mapping(target = "vacancies", ignore = true)
-    @Mapping(target = "moments", ignore = true)
+    @Mapping(source = "moments", target = "moments", qualifiedByName = "momentsIdsToMoments")
     Project toEntity(ProjectDto projectDto);
+
+    @Named("momentsToMomentsIds")
+    default List<Long> momentsToMomentsIds(List<Moment> moments) {
+        if (moments == null) return null;
+        return moments.stream()
+                .map(Moment::getId)
+                .toList();
+    }
+
+    @Named("momentsIdsToMoments")
+    default List<Moment> momentsIdsToMoments(List<Long> momentsIds) {
+        if (momentsIds == null) return null;
+        return momentsIds.stream()
+                .map(id -> {
+                    Moment moment = new Moment();
+                    moment.setId(id);
+                    return moment;
+                })
+                .toList();
+    }
 }

@@ -16,8 +16,8 @@ public class MomentController {
 
     private final MomentService momentService;
 
-    public MomentDto createMoment(@Valid MomentDto momentDto, ProjectDto projectDto) {
-        return momentService.createMoment(momentDto, projectDto);
+    public MomentDto createMoment(@Valid MomentDto momentDto, Long projectId) {
+        return momentService.createMoment(momentDto, projectId);
     }
 
     public MomentDto updateMoment(MomentDto momentDto) {

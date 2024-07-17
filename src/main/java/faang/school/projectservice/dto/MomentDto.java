@@ -17,7 +17,7 @@ public class MomentDto {
     private String name;
     private String description;
     private LocalDateTime date;
-    private List<ProjectDto> projects;
+    private List<Long> projects;
     private List<Long> userIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

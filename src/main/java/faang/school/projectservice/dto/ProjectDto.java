@@ -18,5 +18,5 @@ public class ProjectDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private ProjectStatus status;
-    private List<MomentDto> moments;
+    private List<Long> moments;
 }

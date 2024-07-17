@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.TestDataFactory;
+import faang.school.projectservice.util.TestDataFactory;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -32,14 +32,9 @@ class MomentMapperTest {
 
         assertThat(momentDto.getProjects()).isNotEmpty();
         assertThat(momentDto.getProjects().size()).isEqualTo(moment.getProjects().size());
-        for (int i = 0; i < moment.getProjects().size(); i++) {
-            assertThat(momentDto.getProjects().get(i).getId()).isEqualTo(moment.getProjects().get(i).getId());
-        }
-        IntStream.range(0, moment.getProjects().size()).forEach(i -> {
-            assertThat(momentDto.getProjects().get(i).getId()).isEqualTo(moment.getProjects().get(i).getId());
-            assertThat(momentDto.getProjects().get(i).getName()).isEqualTo(moment.getProjects().get(i).getName());
-            assertThat(momentDto.getProjects().get(i).getDescription()).isEqualTo(moment.getProjects().get(i).getDescription());
-        });
+
+        assertThat(moment.getProjects()).extracting(Project::getId)
+                .containsExactlyInAnyOrderElementsOf(momentDto.getProjects());
 
         assertThat(momentDto.getUserIds()).isNotEmpty();
         assertThat(momentDto.getUserIds().size()).isEqualTo(moment.getUserIds().size());
@@ -51,7 +46,7 @@ class MomentMapperTest {
     void toEntity() {
         var momentDto = TestDataFactory.createMomentDto();
         var projectDto = TestDataFactory.createProjectDto();
-        momentDto.getProjects().add(projectDto);
+        momentDto.getProjects().add(projectDto.getId());
 
         var moment = mapper.toEntity(momentDto);
 
@@ -65,15 +60,8 @@ class MomentMapperTest {
         assertThat(moment.getUpdatedBy()).isEqualTo(momentDto.getUpdatedBy());
 
         assertThat(moment.getProjects()).isNotEmpty();
-        assertThat(moment.getProjects().size()).isEqualTo(momentDto.getProjects().size());
-        for (int i = 0; i < momentDto.getProjects().size(); i++) {
-            assertThat(moment.getProjects().get(i).getId()).isEqualTo(momentDto.getProjects().get(i).getId());
-        }
-        IntStream.range(0, momentDto.getProjects().size()).forEach(i -> {
-            assertThat(moment.getProjects().get(i).getId()).isEqualTo(momentDto.getProjects().get(i).getId());
-            assertThat(moment.getProjects().get(i).getName()).isEqualTo(momentDto.getProjects().get(i).getName());
-            assertThat(moment.getProjects().get(i).getDescription()).isEqualTo(momentDto.getProjects().get(i).getDescription());
-        });
+        assertThat(moment.getProjects()).extracting(Project::getId)
+                .containsExactlyInAnyOrderElementsOf(momentDto.getProjects());
 
         assertThat(moment.getUserIds()).isNotEmpty();
         assertThat(moment.getUserIds().size()).isEqualTo(momentDto.getUserIds().size());
