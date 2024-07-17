@@ -2,10 +2,12 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.exceptions.MomentValidationExceptions;
 import faang.school.projectservice.exceptions.NotFoundElementInDataBaseException;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filter.MomentFilter;
@@ -68,7 +70,6 @@ public class MomentServiceTest {
         Long momentId = 1L;
         Moment moment = new Moment();
         MomentDto momentDto = new MomentDto();
-
         when(momentRepository.findById(momentId)).thenReturn(Optional.of(moment));
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
 
@@ -76,7 +77,6 @@ public class MomentServiceTest {
 
         assertNotNull(result);
         assertEquals(momentDto, result);
-
         verify(momentRepository).findById(momentId);
         verify(momentMapper).toDto(moment);
     }
@@ -101,7 +101,6 @@ public class MomentServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(momentDto, result.get(0));
-
         verify(momentRepository).findAllByProjectId(projectId);
         verify(filters.get(0)).apply(moments, filter);
         verify(momentMapper).toDto(moment);
@@ -123,7 +122,6 @@ public class MomentServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-
         verify(projectRepository).getProjectById(projectId);
         verify(momentMapper).toDto(moment);
     }
@@ -145,11 +143,24 @@ public class MomentServiceTest {
 
         assertNotNull(result);
         assertEquals(momentDto, result);
-
         verify(projectRepository).getProjectById(projectId);
         verify(momentMapper).toEntity(momentDto);
         verify(momentRepository).save(moment);
         verify(momentMapper).toDto(moment);
+    }
+
+    @Test
+    void testCreateMoment_ShouldReturnException() {
+        Long projectId = 1L;
+        MomentDto momentDto = new MomentDto();
+        Project project = new Project();
+        project.setStatus(ProjectStatus.CANCELLED);
+        when(projectRepository.existsById(projectId)).thenReturn(true);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        assertThrows(MomentValidationExceptions.class, () ->
+                momentService.createMoment(projectId, momentDto));
+        verify(projectRepository).getProjectById(projectId);
     }
 
     @Test
@@ -176,7 +187,6 @@ public class MomentServiceTest {
 
         assertNotNull(result);
         assertEquals(momentDto, result);
-
         verify(projectRepository).getProjectById(projectId);
         verify(momentMapper).toEntity(momentDto);
         verify(momentRepository).save(moment);

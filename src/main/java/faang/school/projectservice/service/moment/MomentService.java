@@ -2,8 +2,10 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.exceptions.MomentValidationExceptions;
 import faang.school.projectservice.exceptions.NotFoundElementInDataBaseException;
 import faang.school.projectservice.mapper.moment.MomentMapper;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filter.MomentFilter;
@@ -45,7 +47,7 @@ public class MomentService {
     }
 
     @Transactional(readOnly = true)
-    public List<MomentDto> getAllMomentProject(@NotNull Long projectId) {
+    public List<MomentDto> getAllMomentProject(Long projectId) {
         validateProjectId(projectId);
         var momentsForProject = projectRepository.getProjectById(projectId).getMoments();
         return momentsForProject.stream().map(moment -> momentMapper.toDto(moment)).toList();
@@ -54,7 +56,13 @@ public class MomentService {
     @Transactional
     public MomentDto createMoment(Long projectId, @NotNull MomentDto momentDto) {
         validateProjectId(projectId);
-        var projectsList = List.of(projectRepository.getProjectById(projectId));
+        var project = projectRepository.getProjectById(projectId);
+        if (project.getStatus() == ProjectStatus.CANCELLED) {
+            String errorMessage = "Сan't create moment for a closed project in MomentService class id: " + projectId;
+            log.error(errorMessage);
+            throw new MomentValidationExceptions(errorMessage);
+        }
+        var projectsList = List.of(project);
         var moment = momentMapper.toEntity(momentDto);
         moment.setProjects(projectsList);
         moment.setDate(LocalDateTime.now());
@@ -63,18 +71,16 @@ public class MomentService {
     }
 
     @Transactional
-    public MomentDto updateMoment(@NotNull Long projectId, @NotNull MomentDto momentDto) {
+    public MomentDto updateMoment(Long projectId, @NotNull MomentDto momentDto) {
         validateProjectId(projectId);
         var project = projectRepository.getProjectById(projectId);
         var moment = momentMapper.toEntity(momentDto);
         moment.getProjects().add(project);
-        moment.setUpdatedAt(LocalDateTime.now());
         var returnMoment = momentRepository.save(moment);
         return momentMapper.toDto(returnMoment);
     }
 
-    @Transactional(readOnly = true)
-    private void validateProjectId(Long projectId) {
+    private void validateProjectId(@NotNull Long projectId) {
         if (!projectRepository.existsById(projectId)) {
             String errorMessage = "Not found projectId in DataBase for id in MomentService class id: " + projectId;
             log.error(errorMessage);
