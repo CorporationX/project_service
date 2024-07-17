@@ -37,6 +37,14 @@ public class MomentService {
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
 
+    @Transactional(readOnly = true)
+    public MomentResponseDto getById(long id) {
+        Moment moment = momentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
+
+        return momentMapper.toResponseDto(moment);
+    }
+
     public MomentResponseDto addNew(MomentRequestDto momentRequestDto, long creatorId) {
         List<Project> projects;
         //если проекты пришли == null - заполняем их проектами пришедших мемберов

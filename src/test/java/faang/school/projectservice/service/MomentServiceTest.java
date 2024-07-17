@@ -52,6 +52,59 @@ class MomentServiceTest {
     @InjectMocks
     MomentService momentService;
 
+    @Test
+    void testGetById() {
+        long momentId = 1L;
+        Moment momentFromDB = Moment.builder()
+                .id(momentId)
+                .name("nameFromDb")
+                .description("descFromDb")
+                .date(LocalDateTime.now())
+                .projects(List.of(
+                        Project.builder().id(1L).build(),
+                        Project.builder().id(2L).build()
+                ))
+                .teamMemberIds(List.of(11L, 21L))
+                .imageId("imageFromDb")
+                .createdAt(LocalDateTime.now())
+                .createdBy(111L)
+                .updatedAt(LocalDateTime.now())
+                .updatedBy(111L)
+                .build();
+
+        when(momentRepository.findById(momentId)).thenReturn(Optional.of(momentFromDB));
+
+        MomentResponseDto responseDto = momentService.getById(momentId);
+
+        assertEquals(momentFromDB.getId(), responseDto.getId());
+        assertEquals(momentFromDB.getName(), responseDto.getName());
+        assertEquals(momentFromDB.getDescription(), responseDto.getDescription());
+        assertEquals(momentFromDB.getDate(), responseDto.getDate());
+        assertEquals(
+                momentFromDB.getProjects().stream().map(Project::getId).toList(),
+                responseDto.getProjectIds()
+        );
+        assertEquals(momentFromDB.getTeamMemberIds(), responseDto.getTeamMemberIds());
+        assertEquals(momentFromDB.getImageId(), responseDto.getImageId());
+        assertEquals(momentFromDB.getCreatedAt(), responseDto.getCreatedAt());
+        assertEquals(momentFromDB.getCreatedBy(), responseDto.getCreatedBy());
+        assertEquals(momentFromDB.getUpdatedAt(), responseDto.getUpdatedAt());
+        assertEquals(momentFromDB.getUpdatedBy(), responseDto.getUpdatedBy());
+        verify(momentRepository, times(1)).findById(momentId);
+    }
+
+    @Test
+    void testGetById_NotExists() {
+        long momentId = 1L;
+
+        when(momentRepository.findById(momentId)).thenThrow(new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> momentService.getById(momentId));
+        assertEquals(ErrorMessage.MOMENT_NOT_EXIST.getMessage(), exception.getMessage());
+
+        verify(momentRepository, times(1)).findById(momentId);
+    }
+
 
     @Test
     void testAddNew_projectsNullMembersNotNull() {
