@@ -68,7 +68,6 @@ public class UpdateSubProjectStatus implements UpdateSubProjectParam {
             moment.setProjects(new ArrayList<>(List.of(mapper.toEntity(projectDto))));
             moment.setCreatedAt(LocalDateTime.now());
             moment.setUpdatedAt(LocalDateTime.now());
-            // не понятно чем заполнять createdBy и updatedBy
             return momentRepository.save(moment);
         } else {
             return moment;

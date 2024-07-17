@@ -52,7 +52,7 @@ public class UpdateSubProjectStatusTest {
     private UpdateSubProjectDto paramDto;
     private ProjectDto projectDto;
     @Captor
-    ArgumentCaptor<Moment> momentCaptor;
+    private ArgumentCaptor<Moment> momentCaptor;
 
     @BeforeEach
     public void setup() {
@@ -81,11 +81,11 @@ public class UpdateSubProjectStatusTest {
 
     @Test
     public void testExecute_NotEqualChildrenStatus() {
-        ProjectDto child1 = new ProjectDto();
-        child1.setStatus(ProjectStatus.CREATED);
+        ProjectDto childOne = new ProjectDto();
+        childOne.setStatus(ProjectStatus.CREATED);
         ProjectDto child2 = new ProjectDto();
         child2.setStatus(ProjectStatus.COMPLETED);
-        projectDto.setChildren(new ArrayList<>(List.of(child1, child2)));
+        projectDto.setChildren(new ArrayList<>(List.of(childOne, child2)));
         paramDto.setStatus(ProjectStatus.COMPLETED);
 
         Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -96,11 +96,11 @@ public class UpdateSubProjectStatusTest {
 
     @Test
     public void testExecute_MomentNotExist() {
-        ProjectDto child1 = new ProjectDto();
-        child1.setStatus(ProjectStatus.COMPLETED);
+        ProjectDto childOne = new ProjectDto();
+        childOne.setStatus(ProjectStatus.COMPLETED);
         ProjectDto child2 = new ProjectDto();
         child2.setStatus(ProjectStatus.COMPLETED);
-        projectDto.setChildren(new ArrayList<>(List.of(child1, child2)));
+        projectDto.setChildren(new ArrayList<>(List.of(childOne, child2)));
         paramDto.setStatus(ProjectStatus.COMPLETED);
         projectDto.setResourceIds(new ArrayList<>(List.of(1L, 2L, 3L)));
         projectDto.setMomentIds(new ArrayList<>());
@@ -132,7 +132,7 @@ public class UpdateSubProjectStatusTest {
         ));
         Project project = new Project();
         Project childPrj1 = new Project();
-        child1.setStatus(ProjectStatus.COMPLETED);
+        childOne.setStatus(ProjectStatus.COMPLETED);
         Project childPrj2 = new Project();
         child2.setStatus(ProjectStatus.COMPLETED);
         project.setChildren(new ArrayList<>(List.of(childPrj1, childPrj2)));

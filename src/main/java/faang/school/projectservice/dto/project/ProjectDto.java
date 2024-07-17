@@ -34,7 +34,6 @@ public class ProjectDto {
     private Long ownerId;
     private ProjectDto parentProject;
     private List<ProjectDto> children;
-    //private List<Task> tasks;
     private List<Long> resourceIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -42,8 +41,5 @@ public class ProjectDto {
     private ProjectVisibility visibility;
     private String coverImageId;
     private List<TeamDto> teams;
-    //private Schedule schedule;
-    //private List<Stage> stages;
-    //private List<Vacancy> vacancies;
     private List<Long> momentIds;
 }
