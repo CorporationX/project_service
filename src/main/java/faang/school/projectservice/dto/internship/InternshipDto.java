@@ -18,6 +18,7 @@ public class InternshipDto {
     private List<TeamMember> interns;
     private InternshipStatus status;
     private LocalDateTime startDate;
+    private LocalDateTime endDate;
 
     public static Internship dtoTo(InternshipDto internshipDto) {
         Internship internship = new Internship();
@@ -27,6 +28,7 @@ public class InternshipDto {
         internship.setInterns(internshipDto.getInterns());
         internship.setStatus(internshipDto.getStatus());
         internship.setStartDate(internshipDto.getStartDate());
+        internship.setEndDate(internshipDto.getEndDate());
         return internship;
     }
 
