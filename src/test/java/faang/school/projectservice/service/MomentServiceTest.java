@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.moment.MomentRequestDto;
-import faang.school.projectservice.dto.client.moment.MomentResponseDto;
-import faang.school.projectservice.dto.client.moment.MomentUpdateDto;
+import faang.school.projectservice.dto.moment.MomentRequestDto;
+import faang.school.projectservice.dto.moment.MomentResponseDto;
+import faang.school.projectservice.dto.moment.MomentUpdateDto;
 import faang.school.projectservice.exception.ConflictException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;

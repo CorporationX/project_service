@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client.moment;
+package faang.school.projectservice.dto.moment;
 
 import lombok.Data;
 
