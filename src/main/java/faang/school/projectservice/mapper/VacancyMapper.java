@@ -16,7 +16,7 @@ public interface VacancyMapper {
     Vacancy toEntity(VacancyDto vacancyDto);
 
     @Mapping(source = "candidates",target = "candidateIds",qualifiedByName = "mapCandidate")
-    @Mapping(source = "project",target="projectId",qualifiedByName = "mapProject")
+    @Mapping(source = "project.id",target="projectId")
     VacancyDto toDto(Vacancy vacancy);
     @Named("mapCandidate")
     default List<Long> mapCandidate(List<Candidate> candidates) {

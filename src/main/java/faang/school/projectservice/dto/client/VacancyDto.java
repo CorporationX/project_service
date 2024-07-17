@@ -14,10 +14,10 @@ import java.util.List;
 @Data
 public class VacancyDto {
     private Long id;
-    @NotBlank(message = "Title cannot be empty")
+    @NotEmpty(message = "Title cannot be empty")
     private String name;
 
-    @NotBlank(message = "Description cannot be empty")
+    @NotEmpty(message = "Description cannot be empty")
     private String description;
 
     @NotNull(message = "Vacancy must have a project")

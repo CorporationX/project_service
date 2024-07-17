@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@Component
 @RestController
 @RequestMapping("/vacancy")
 @RequiredArgsConstructor
@@ -26,23 +25,23 @@ public class VacancyController {
 
     @GetMapping("/{id}")
     public ResponseEntity<VacancyDto> getVacancy(@PathVariable Long id) {
-        return new ResponseEntity<>(vacancyService.getVacancy(id), HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(vacancyService.getVacancy(id));
     }
 
     @PostMapping("/all")
     public ResponseEntity<List<VacancyDto>> getAll(@RequestBody VacancyFilterDto filterDto) {
-        return new ResponseEntity<>(vacancyService.getAll(filterDto), HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(vacancyService.getAll(filterDto));
     }
     @PostMapping("/create")
     public ResponseEntity<Map<String,String>> create(@Valid @RequestBody VacancyDto vacancy) throws ValidationException {
-        return new ResponseEntity<>(vacancyService.create(vacancy), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vacancyService.create(vacancy));
     }
     @PostMapping("/update/{id}")
     public ResponseEntity<Map<String,String>> update(@PathVariable Long id, @Valid @RequestBody VacancyDto vacancy) throws ValidationException {
-        return  new ResponseEntity<>(vacancyService.update(id,vacancy),HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(vacancyService.update(id,vacancy));
     }
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Map<String,String>> delete(@PathVariable Long id) throws ValidationException {
-        return  new ResponseEntity<>(vacancyService.delete(id),HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(vacancyService.delete(id));
     }
 }
