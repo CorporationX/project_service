@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class StageDtoForRequest {
+public class StageDto {
     private Long stageId;
 
     @NotBlank
@@ -25,7 +25,7 @@ public class StageDtoForRequest {
     @NotNull
     private List<StageRoles> stageRoles;
 
-    private List<Long> taskIds;
+    //private List<Long> taskIds;
 
     private List<Long> executorIds;
 }

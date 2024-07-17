@@ -1,15 +1,18 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.stage.StageDtoForRequest;
+import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.StageException;
 import faang.school.projectservice.filter.StageFilter;
+import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.stage.FateOfTasksAfterDelete;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -33,12 +36,16 @@ public class StageService {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final StageInvitationRepository stageInvitationRepository;
+    private final TaskRepository taskRepository;
     private final StageMapper stageMapper;
     private final List<StageFilter> filters;
 
-    public StageDtoForRequest createStage(StageDtoForRequest stageDto) {
-        Stage stage = stageMapper.toEntity(stageDto);
+    public StageDto createStage(StageDto stageDto) {
         Project project = projectRepository.getProjectById(stageDto.getProjectId());
+        ProjectStatus currentStatus = project.getStatus();
+        validatedProjectStatus(currentStatus);
+
+        Stage stage = stageMapper.toEntity(stageDto);
         stage.setProject(project);
         List<TeamMember> executors = stageDto.getExecutorIds()
                 .stream()
@@ -46,13 +53,7 @@ public class StageService {
                 .toList();
         stage.setExecutors(executors);
 
-        if (stage.getProject().getStatus().equals(ProjectStatus.CANCELLED)) {
-            throw new StageException(ErrorMessage.PROJECT_CANCELED);
-        }
-        if (stage.getProject().getStatus().equals(ProjectStatus.COMPLETED)) {
-            throw new StageException(ErrorMessage.PROJECT_COMPLETED);
-        }
-        stage.getExecutors().forEach(teamMember -> {
+        executors.forEach(teamMember -> {
             if (teamMember.getRoles().isEmpty()) {
                 throw new StageException("Team member with id: " + teamMember.getId() + "has no role");
             }
@@ -61,23 +62,63 @@ public class StageService {
         return stageMapper.toDto(saveStage);
     }
 
-    public List<StageDtoForRequest> getFilteredStages(StageFilterDto filterDto) {
+    private static void validatedProjectStatus(ProjectStatus currentStatus) {
+        if (currentStatus.equals(ProjectStatus.CANCELLED)) {
+            throw new StageException(ErrorMessage.PROJECT_CANCELED);
+        }
+        if (currentStatus.equals(ProjectStatus.COMPLETED)) {
+            throw new StageException(ErrorMessage.PROJECT_COMPLETED);
+        }
+    }
+
+    public List<StageDto> getFilteredStages(StageFilterDto filterDto) {
         Stream<Stage> stages = stageRepository.findAll().stream();
         return filters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .flatMap(filter -> filter.apply(stages, filterDto))
+                .reduce(stages,
+                        (stages1, filter) -> filter.apply(stages1, filterDto),
+                        Stream::concat)
                 .map(stageMapper::toDto)
                 .toList();
     }
 
-    public void deleteStage(StageDtoForRequest stageDto) {
-        Stage stage = stageMapper.toEntity(stageDto);
-        stageRepository.delete(stage);
+    public void deleteStage(Long deletedStageId, FateOfTasksAfterDelete tasksAfterDelete, Long receivingStageId) {
+        switch (tasksAfterDelete) {
+            case CLOTHING -> closeTasksAfterDeleteStage(deletedStageId);
+
+            case CASCADE_DELETE -> deleteTasksAfterDeleteStage(deletedStageId);
+
+            case TRANSFER_TO_ANOTHER_STAGE -> transferTasksAfterDeleteStage(deletedStageId, receivingStageId);
+        }
+    }
+    private void closeTasksAfterDeleteStage(Long id) {
+        Stage deletedStage = stageRepository.getById(id);
+        deletedStage.getTasks()
+                .forEach(task -> task.setStatus(TaskStatus.CANCELLED));
+        stageRepository.delete(deletedStage);
     }
 
-    public StageDtoForRequest updateStage(StageDtoForRequest stageDto, TeamRole teamRole, int number) {
+    private void deleteTasksAfterDeleteStage(Long id) {
+        Stage deletedStage = stageRepository.getById(id);
+        List<Task> deletedTasks = deletedStage.getTasks();
+        deletedTasks.forEach(task -> taskRepository.deleteById(task.getId()));
+        deletedTasks.clear();
+        stageRepository.delete(deletedStage);
+    }
+
+    private void transferTasksAfterDeleteStage(Long deletedStageId, Long receivingStageId) {
+        if(receivingStageId == null){
+            throw new StageException(ErrorMessage.NULL_ID);
+        }
+        Stage deletedStage = stageRepository.getById(deletedStageId);
+        List<Task> transferedTasks = deletedStage.getTasks();
+        stageRepository.getById(receivingStageId).setTasks(transferedTasks);
+        transferedTasks.clear();
+        stageRepository.delete(deletedStage);
+    }
+
+    public StageDto updateStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
-        //List<StageRoles> stageRolesList = stage.getStageRoles();
         stage.getStageRoles().forEach(
                 stageRoles -> getExecutorsForRole(stage, stageRoles));
         Stage updatedStage = stageRepository.save(stage);
@@ -101,6 +142,8 @@ public class StageService {
                             projectMembersWithTheSameRole.addAll(
                                     team.getTeamMembers()
                                             .stream()
+                                            .filter(teamMember ->
+                                                    !teamMember.getStages().contains(stage))
                                             .filter(teamMember ->
                                                     teamMember.getRoles()
                                                             .contains(stageRoles.getTeamRole()))
@@ -133,7 +176,7 @@ public class StageService {
 
     private StageInvitation getStageInvitation(TeamMember invited, Stage stage, StageRoles stageRoles) {
         StageInvitation stageInvitationToSend = new StageInvitation();
-        String INVITATIONS_MESSAGE = String.format("%s, invite you to participate in the development stage %s " +
+        String INVITATIONS_MESSAGE = String.format("Invite you to participate in the development stage %s " +
                 "of the project %s for the role %s", stage.getStageName(), stage.getProject().getName(), stageRoles);
         stageInvitationToSend.setDescription(INVITATIONS_MESSAGE);
         stageInvitationToSend.setStatus(StageInvitationStatus.PENDING);
@@ -142,12 +185,12 @@ public class StageService {
         return stageInvitationToSend;
     }
 
-    public List<StageDtoForRequest> getAllStages() {
+    public List<StageDto> getAllStages() {
         List<Stage> stages = stageRepository.findAll();
         return stageMapper.toDto(stages);
     }
 
-    public StageDtoForRequest getStage(Long id) {
+    public StageDto getStage(Long id) {
         Stage stage = stageRepository.getById(id);
         return stageMapper.toDto(stage);
     }

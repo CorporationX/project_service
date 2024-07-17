@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorMessage {
 
     PROJECT_CANCELED("Project canceled. You can't create stage in canceled project."),
-    PROJECT_COMPLETED("Project completed. You can't create stage in completed project.");
-    //TEAM_MEMBER_WITHOUT_ROLE("There is a team member without role in the list of stage executors.");
+    PROJECT_COMPLETED("Project completed. You can't create stage in completed project."),
+    NULL_ID("Receiving ID is NULL. Enter correct ID.");
 
     private final String message;
 }
