@@ -1,8 +1,9 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.moment.MomentRequestDto;
-import faang.school.projectservice.dto.client.moment.MomentResponseDto;
-import faang.school.projectservice.dto.client.moment.MomentUpdateDto;
+import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.dto.moment.MomentRequestDto;
+import faang.school.projectservice.dto.moment.MomentResponseDto;
+import faang.school.projectservice.dto.moment.MomentUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.service.MomentService;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/moments")
 @RequiredArgsConstructor
@@ -29,6 +32,18 @@ public class MomentController {
     @GetMapping("/{id}")
     public MomentResponseDto getById(@Positive @PathVariable long id) {
         return momentService.getById(id);
+    }
+
+    @GetMapping
+    public List<MomentResponseDto> getAll() {
+        return momentService.getAll();
+    }
+
+    @GetMapping("/project/{projectId}")
+    public List<MomentResponseDto> getAllFilteredByProjectId(@PathVariable @Positive Long projectId,
+                                          @RequestBody(required = false) @Validated MomentFilterDto momentFilterDto) {
+
+        return momentService.getAllFilteredByProjectId(projectId, momentFilterDto);
     }
 
     @PostMapping

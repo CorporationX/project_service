@@ -11,7 +11,7 @@ import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.moment.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,9 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.moment.MomentRequestDto;
-import faang.school.projectservice.dto.client.moment.MomentResponseDto;
-import faang.school.projectservice.dto.client.moment.MomentUpdateDto;
+import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.dto.moment.MomentRequestDto;
+import faang.school.projectservice.dto.moment.MomentResponseDto;
+import faang.school.projectservice.dto.moment.MomentUpdateDto;
 import faang.school.projectservice.exception.ConflictException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
@@ -11,7 +12,7 @@ import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.moment.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.util.CollectionsUtil;
@@ -43,6 +44,29 @@ public class MomentService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
 
         return momentMapper.toResponseDto(moment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MomentResponseDto> getAll() {
+        List<Moment> moments = momentRepository.findAll();
+        return momentMapper.toResponseDtoList(moments);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MomentResponseDto> getAllFilteredByProjectId(Long projectId, MomentFilterDto filter) {
+        List<Moment> moments;
+        if (filter == null) {
+            moments = momentRepository.findAllByProjectId(projectId);
+        } else {
+            moments = momentRepository.findAllByProjectIdAndDateFiltered(
+                    projectId, filter.getStart(), filter.getEndExclusive());
+
+            if (filter.getPartnerProjectIds() != null) {
+                moments = filterByProjects(moments, filter.getPartnerProjectIds());
+            }
+        }
+
+        return momentMapper.toResponseDtoList(moments);
     }
 
     public MomentResponseDto addNew(MomentRequestDto momentRequestDto, long creatorId) {
@@ -77,7 +101,6 @@ public class MomentService {
                                 momentRequestDto.getTeamMemberIds(), momentRequestDto.getProjectIds()
                         )
                 );
-                //todo: optimize - оба метода обращаются к БД за теми же данными (лишний запрос к БД)
             }
         }
 
@@ -101,6 +124,16 @@ public class MomentService {
 
         momentRepository.save(moment);
         return momentMapper.toResponseDto(moment);
+    }
+
+    private List<Moment> filterByProjects(List<Moment> moments, List<Long> projectIds) {
+        Set<Long> projectIdsSet = new HashSet<>(projectIds);
+
+        return moments.stream()
+                .filter(moment -> moment.getProjects().stream()
+                        .anyMatch(project ->
+                                projectIdsSet.contains(project.getId())))
+                .toList();
     }
 
     private void validateProjectStatuses(Collection<Project> projects) {
@@ -197,8 +230,6 @@ public class MomentService {
             moment.getTeamMemberIds().addAll(
                     findMissingMemberIdsForProjects(moment.getTeamMemberIds(), newProjectIds)
             );
-
-            //todo: optimize - оба метода обращаются к БД за теми же данными (лишний запрос к БД)
         }
 
         // Явно меняем мемберов, проекты исходя из мемберов
@@ -213,8 +244,6 @@ public class MomentService {
             List<Project> extraProjects = findMissingProjectsForMembers(moment.getProjects(), newTeamMemberIds);
             validateProjectStatuses(extraProjects);
             moment.getProjects().addAll(extraProjects);
-
-            //todo: optimize - оба метода обращаются к БД за теми же данными (лишний запрос к БД)
         }
 
 
