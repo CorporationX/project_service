@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.dto.moment.MomentUpdateDto;
@@ -11,9 +12,9 @@ import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.moment.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.repository.moment.MomentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -91,6 +92,137 @@ class MomentServiceTest {
         assertEquals(momentFromDB.getUpdatedAt(), responseDto.getUpdatedAt());
         assertEquals(momentFromDB.getUpdatedBy(), responseDto.getUpdatedBy());
         verify(momentRepository, times(1)).findById(momentId);
+    }
+
+    @Test
+    void testGetAll() {
+        List<Moment> moments = List.of(
+                Moment.builder()
+                        .id(1L)
+                        .build(),
+                Moment.builder()
+                        .id(2L)
+                        .build()
+        );
+
+        when(momentRepository.findAll()).thenReturn(moments);
+
+        List<MomentResponseDto> responseDtos = momentService.getAll();
+
+        assertEquals(moments.size(), responseDtos.size());
+        assertEquals(moments.get(0).getId(), responseDtos.get(0).getId());
+        assertEquals(moments.get(1).getId(), responseDtos.get(1).getId());
+        verify(momentRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testGetAllFilteredByProjectId_filterNotNull() {
+        long projectId = 1L;
+        MomentFilterDto filterDto = MomentFilterDto.builder()
+                .partnerProjectIds(List.of(2L, 3L))
+                .build();
+
+        List<Moment> moments = List.of(
+                Moment.builder()
+                        .id(1L)
+                        .projects(
+                                List.of(
+                                        Project.builder()
+                                                .id(projectId)
+                                                .build(),
+                                        Project.builder()
+                                                .id(2L)
+                                                .build()))
+                        .build(),
+                Moment.builder()
+                        .id(2L)
+                        .projects(
+                                List.of(
+                                        Project.builder()
+                                                .id(projectId)
+                                                .build(),
+                                        Project.builder()
+                                                .id(3L)
+                                                .build()))
+                        .build(),
+                Moment.builder()
+                        .id(3L)
+                        .projects(
+                                List.of(
+                                        Project.builder()
+                                                .id(projectId)
+                                                .build(),
+                                        Project.builder()
+                                                .id(4L)
+                                                .build()))
+                        .build()
+        );
+
+        when(momentRepository.findAllByProjectIdAndDateFiltered(
+                projectId, filterDto.getStart(), filterDto.getEndExclusive()))
+                .thenReturn(moments);
+
+        List<MomentResponseDto> responseDtos = momentService.getAllFilteredByProjectId(projectId, filterDto);
+
+        assertEquals(2, responseDtos.size());
+        assertTrue(responseDtos.get(0).getProjectIds().contains(projectId));
+        assertTrue(responseDtos.get(0).getProjectIds().contains(2L));
+        assertTrue(responseDtos.get(1).getProjectIds().contains(projectId));
+        assertTrue(responseDtos.get(1).getProjectIds().contains(3L));
+        verify(momentRepository, times(1))
+                .findAllByProjectIdAndDateFiltered(projectId, filterDto.getStart(), filterDto.getEndExclusive());
+    }
+
+    @Test
+    void testGetAllFilteredByProjectId_filterNull() {
+        long projectId = 1L;
+
+        List<Moment> moments = List.of(
+                Moment.builder()
+                        .id(1L)
+                        .projects(
+                                List.of(
+                                        Project.builder()
+                                                .id(projectId)
+                                                .build(),
+                                        Project.builder()
+                                                .id(2L)
+                                                .build()))
+                        .build(),
+                Moment.builder()
+                        .id(2L)
+                        .projects(
+                                List.of(
+                                        Project.builder()
+                                                .id(projectId)
+                                                .build(),
+                                        Project.builder()
+                                                .id(3L)
+                                                .build()))
+                        .build(),
+                Moment.builder()
+                        .id(3L)
+                        .projects(
+                                List.of(
+                                        Project.builder()
+                                                .id(projectId)
+                                                .build(),
+                                        Project.builder()
+                                                .id(4L)
+                                                .build()))
+                        .build()
+        );
+
+        when(momentRepository.findAllByProjectId(projectId)).thenReturn(moments);
+
+        List<MomentResponseDto> responseDtos = momentService.getAllFilteredByProjectId(projectId, null);
+
+        assertEquals(3, responseDtos.size());
+        assertTrue(responseDtos.get(0).getProjectIds().contains(projectId));
+        assertTrue(responseDtos.get(1).getProjectIds().contains(projectId));
+        assertTrue(responseDtos.get(2).getProjectIds().contains(projectId));
+        verify(momentRepository, times(1))
+                .findAllByProjectId(projectId);
     }
 
     @Test
@@ -257,7 +389,6 @@ class MomentServiceTest {
         assertEquals(creatorId, momentResponseDto.getCreatedBy());
         verify(projectRepository, times(1)).findAllByIds(projectIds);
         verify(teamMemberRepository, times(2)).findIdsByProjectIds(projectIds);
-        //todo: optimize
         verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
         verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
     }
@@ -334,7 +465,6 @@ class MomentServiceTest {
         assertEquals(creatorId, momentResponseDto.getCreatedBy());
         verify(projectRepository, times(1)).findAllByIds(projectIds);
         verify(teamMemberRepository, times(2)).findIdsByProjectIds(projectIds);
-        //todo: optimize
         verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
         verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
     }
