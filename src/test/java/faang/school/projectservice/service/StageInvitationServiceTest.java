@@ -11,7 +11,6 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -22,9 +21,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,19 +43,29 @@ public class StageInvitationServiceTest {
     private StageInvitation stageInvitationSecond;
     private TeamMember teamMember;
     private List<StageInvitation> stageInvitationList;
+    @Mock
     private StageInvitationFilter stageInvitationStatusFilter;
+    @Mock
+    private StageInvitationFilter stageInvitationTeamMemberFilter;
+    @Mock
     private StageInvitationFilterDto stageInvitationFilterDto;
+    @Mock
+    private List<StageInvitationFilter> stageInvitationsFilter;
 
     @BeforeEach
-    public void setUp() {
+    public void init() {
         TeamMember author = new TeamMember();
+        author.setId(1L);
+        author.setUserId(1L);
         TeamMember invited = new TeamMember();
+        invited.setId(1L);
+        invited.setUserId(1L);
         Stage stage = new Stage();
 
-        stageInvitation = new StageInvitation(1L,"desc", StageInvitationStatus.PENDING, stage, author, invited);
-        stageInvitationSecond = new StageInvitation(2L,"desc2", StageInvitationStatus.REJECTED, stage, author, invited);
+        stageInvitation = new StageInvitation(1L, "desc", StageInvitationStatus.PENDING, stage, author, invited);
+        stageInvitationSecond = new StageInvitation(2L, "desc2", StageInvitationStatus.REJECTED, stage, author, invited);
 
-        stageInvitationDto = new StageInvitationDto(1L,"desc", StageInvitationStatus.PENDING, 1L, 1L);
+        stageInvitationDto = new StageInvitationDto(1L, "desc", StageInvitationStatus.PENDING, 1L, 1L);
 
         teamMember = new TeamMember();
         teamMember.setId(1L);
@@ -67,19 +73,19 @@ public class StageInvitationServiceTest {
         stageInvitationList = List.of(stageInvitation, stageInvitationSecond);
         stageInvitationStatusFilter = new StageInvitationStatusFilter();
         stageInvitationFilterDto = new StageInvitationFilterDto();
+
+        stageInvitationStatusFilter = Mockito.mock(StageInvitationFilter.class);
+        stageInvitationTeamMemberFilter = Mockito.mock(StageInvitationFilter.class);
     }
 
     @Test
     @DisplayName("testEndAnInvitation")
     public void sendAnInvitation() {
-        //before подготовка
         when(stageInvitationMapper.toEntity(any(StageInvitationDto.class))).thenReturn(stageInvitation);
         when(stageInvitationRepository.save(any(StageInvitation.class))).thenReturn(stageInvitation);
 
-        //when вызов метода
         stageInvitationService.sendAnInvitation(stageInvitationDto);
 
-        //then проверка
         verify(stageInvitationMapper, times(1)).toDto(any(StageInvitation.class));
         assertEquals(StageInvitationStatus.PENDING, stageInvitation.getStatus());
     }
@@ -130,8 +136,8 @@ public class StageInvitationServiceTest {
     @DisplayName("testGetStageInvitationForUser")
     public void getStageInvitationForUser() {
         when(stageInvitationRepository.findAll()).thenReturn(stageInvitationList);
-        when(stageInvitationStatusFilter.isApplicable(any())).thenReturn(true);
-        when(stageInvitationStatusFilter.apply(any(), any())).thenReturn(Stream.of(stageInvitation));
+//        when(stageInvitationStatusFilter.isApplicable(any())).thenReturn(true);
+//        when(stageInvitationStatusFilter.apply(any(), any())).thenReturn(Stream.of(stageInvitation));
         when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
 
         List<StageInvitationDto> stageInvitationDtoResult = stageInvitationService.getStageInvitationForUser(stageInvitationFilterDto, 1L);
