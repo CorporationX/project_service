@@ -6,72 +6,83 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/stage")
 @RequiredArgsConstructor
 public class StageController {
     private final StageService stageService;
 
     // Создание этапа.
-    public StageDto createStage(StageDto stageDto) {
-        if (stageDto == null
-                || StringUtils.isBlank(stageDto.getStageName())
-                || stageDto.getProject() == null
-                || stageDto.getStageRoles().isEmpty()
-                || !stageDto.getStageRoles().stream()
-                .filter(stageRoles -> stageRoles.getCount() == 0)
-                .toList()
-                .isEmpty()) {
-            throw new DataValidationException("Недостаточно данных для создания этапа!");
+    @PostMapping("")
+    public ResponseEntity<StageDto> createStage(@RequestBody StageDto stageDto) {
+        if (stageDto == null) {
+            throw new DataValidationException("Не переданы данные этапа!");
         }
-        return stageService.createStage(stageDto);
+        return ResponseEntity.ok(stageService.createStage(stageDto));
     }
 
     // Получить все этапы проекта с фильтром по статусу (в работе, выполнено и т.д).
-    public List<StageDto> getAllStagesFilteredByProjectStatus(Long projectId,
-                                                              ProjectFilterDto filters) {
+    @PostMapping("/project/{id}")
+    public ResponseEntity<List<StageDto>> getAllStagesFilteredByProjectStatus(
+            @PathVariable("id") Long projectId,
+            @RequestBody ProjectFilterDto filters) {
         if (projectId == null
                 || filters == null) {
             throw new DataValidationException("Введите идентификатор проекта," +
                     " или данные фильтра!");
         }
-        return stageService.getAllStagesFilteredByProjectStatus(projectId, filters);
+        return ResponseEntity.ok(stageService
+                .getAllStagesFilteredByProjectStatus(projectId, filters));
     }
 
     // Удалить этап.
-    public void deleteStage(Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteStage(@PathVariable("id") Long id) {
         if (id == null) {
             throw new DataValidationException("Введите идентификатор этапа!");
         }
         stageService.deleteStage(id);
+        return ResponseEntity.ok().build();
     }
 
     // Обновить этап.
-    public StageDto updateStage(StageDto stageDto, TeamRole teamRole) {
-        if (stageDto == null
-                || teamRole == null) {
+    @PutMapping("")
+    public ResponseEntity<StageDto> updateStage(@RequestBody StageDto stageDto,
+                                                @RequestParam("role") TeamRole teamRole) {
+        if (stageDto == null || teamRole == null) {
             throw new DataValidationException("Введите данные этапа!");
         }
-        return stageService.updateStage(stageDto, teamRole);
+        return ResponseEntity.ok(stageService.updateStage(stageDto, teamRole));
     }
 
     // Получить все этапы проекта.
-    public List<StageDto> getStagesOfProject(Long projectId) {
+    @GetMapping("/project/{id}")
+    public ResponseEntity<List<StageDto>> getStagesOfProject(@PathVariable("id") Long projectId) {
         if (projectId == null) {
             throw new DataValidationException("Введите идентификатор проекта!");
         }
-        return stageService.getStagesOfProject(projectId);
+        return ResponseEntity.ok(stageService.getStagesOfProject(projectId));
     }
 
     // Получить конкретный этап по Id.
-    public StageDto getStageById(Long stageId) {
+    @GetMapping("/{id}")
+    public ResponseEntity<StageDto> getStageById(@PathVariable("id") Long stageId) {
         if (stageId == null) {
             throw new DataValidationException("Введите идентификатор этапа!");
         }
-        return stageService.getStageById(stageId);
+        return ResponseEntity.ok(stageService.getStageById(stageId));
     }
 }

@@ -31,10 +31,14 @@ public class StageService {
     private final StageMapper stageMapper;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final Validator validator;
 
 
     // Создание этапа.
     public StageDto createStage(StageDto stageDto) {
+        if (validator.validateInputStageData(stageDto)) {
+            throw new DataValidationException("Недостаточно данных для создания этапа!");
+        }
         if (!stageDto.getProject().getStatus().equals(ProjectStatus.IN_PROGRESS)) {
             throw new DataValidationException("Проект закрыт или отменён!");
         }

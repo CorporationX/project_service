@@ -6,9 +6,12 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +32,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-//@RequiredArgsConstructor
 @ExtendWith(MockitoExtension.class)
 class StageServiceTest {
 
@@ -43,22 +45,42 @@ class StageServiceTest {
     private StageRepository stageRepository;
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
 
-    private final StageDto stageDto = new StageDto();
-    private final Stage stage = new Stage();
-    private final Project project = new Project();
-    private final ProjectFilterDto projectFilterDto = new ProjectFilterDto();
-    private final Stage stage1 = new Stage();
-    private final Stage stage2 = new Stage();
-    private final Stage stage3 = new Stage();
-    private final StageDto stageDto1 = new StageDto();
-    private final StageDto stageDto2 = new StageDto();
-    private final StageDto stageDto3 = new StageDto();
-    private final List<StageDto> stageDtos = List.of(stageDto1, stageDto2, stageDto3);
+    private StageDto stageDto;
+    private Stage stage;
+    private Project project;
+    private ProjectFilterDto projectFilterDto;
+    private Stage stage1;
+    private Stage stage2;
+    private Stage stage3;
+    private StageDto stageDto1;
+    private StageDto stageDto2;
+    private StageDto stageDto3;
+    private List<StageDto> stageDtos;
+    private TeamRole teamRole;
+    private TeamMember teamMember1;
+    private TeamMember teamMember2;
+    private TeamMember teamMember3;
 
     @BeforeEach
     void init() {
-
+        stageDto = new StageDto();
+        stage = new Stage();
+        project = new Project();
+        projectFilterDto = new ProjectFilterDto();
+        stage1 = new Stage();
+        stage2 = new Stage();
+        stage3 = new Stage();
+        stageDto1 = new StageDto();
+        stageDto2 = new StageDto();
+        stageDto3 = new StageDto();
+        stageDtos = List.of(stageDto1, stageDto2, stageDto3);
+        teamRole = TeamRole.ANALYST;
+        teamMember1 = new TeamMember();
+        teamMember2 = new TeamMember();
+        teamMember3 = new TeamMember();
     }
 
     @Test
@@ -152,7 +174,32 @@ class StageServiceTest {
     }
 
     @Test
-    void updateStage() {
+    void shouldReturnDataValidationExceptionWhenUpdateStageTest() {
+
+        when(stageRepository.isExistById(anyLong()))
+                .thenThrow(new DataValidationException("Такого этапа не существует!"));
+
+        assertThrows(DataValidationException.class,
+                () -> stageService.updateStage(stageDto, teamRole));
+    }
+
+    @Test
+    void shouldReturnDataValidationExceptionWhileCheckUserWhenUpdateStageTest() {
+        stageDto.setExecutorIds(List.of(1L, 2L, 3L));
+//        teamMember1.setId(1L);
+//        teamMember2.setId(2L);
+//        teamMember3.setId(3L);
+        teamMember1.setRoles(List.of(TeamRole.OWNER, TeamRole.DESIGNER));
+        teamMember2.setRoles(List.of(TeamRole.INTERN, TeamRole.DESIGNER));
+        teamMember3.setRoles(List.of(TeamRole.MANAGER, TeamRole.DESIGNER));
+
+        when(stageRepository.getById(stageDto.getStageId())).thenReturn(stage);
+        when(teamMemberRepository.findById(1L)).thenReturn(teamMember1);
+        when(teamMemberRepository.findById(2L)).thenReturn(teamMember2);
+        when(teamMemberRepository.findById(3L)).thenReturn(teamMember3);
+
+        assertThrows(DataValidationException.class,
+                () -> stageService.updateStage(stageDto, teamRole));
     }
 
     @Test
@@ -226,5 +273,17 @@ class StageServiceTest {
         projectFilterDto.setProjectStatus(ProjectStatus.IN_PROGRESS.toString());
 
         assertFalse(stageService.validateProjectStatus(project, projectFilterDto));
+    }
+
+    @Test
+    void shouldReturnFalseWhenCheckUsersWithCertainRoleTest() {
+        stageDto.setExecutorIds(List.of(1L, 2L, 3L));
+
+//        when(teamMemberRepository.findById(1L)).thenReturn(teamMember1);
+//        when(teamMemberRepository.findById(2L)).thenReturn(teamMember2);
+//        when(teamMemberRepository.findById(3L)).thenReturn(teamMember3);
+
+        assertThrows(DataValidationException.class,
+                () -> stageService.updateStage(stageDto, teamRole));
     }
 }
