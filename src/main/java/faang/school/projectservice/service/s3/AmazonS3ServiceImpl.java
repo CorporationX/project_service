@@ -7,10 +7,12 @@ import faang.school.projectservice.exceptions.S3Exception;
 import faang.school.projectservice.property.AmazonS3Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -42,6 +44,21 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
         } catch (IOException e) {
             throw new S3Exception(e.getMessage());
         }
+
+        return key;
+    }
+
+    @Override
+    public String uploadFile(String path, Pair<InputStream, ObjectMetadata> file) {
+
+        String key = path + "/" + generateKey();
+
+        amazonS3.putObject(
+                amazonS3Properties.getBucketName(),
+                key,
+                file.getFirst(),
+                file.getSecond()
+        );
 
         return key;
     }

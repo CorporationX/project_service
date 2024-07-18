@@ -15,7 +15,7 @@ public class ProjectValidatorImpl implements ProjectValidator {
     @Override
     public void validateProjectByOwnerIdAndNameOfProject(ProjectDto projectDto) {
         if (projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new DataValidationException("The user with id: "+projectDto.getOwnerId()+ " already has a project with name "+projectDto.getName());
+            throw new DataValidationException("The user with id: " + projectDto.getOwnerId() + " already has a project with name " + projectDto.getName());
         }
     }
 
@@ -27,5 +27,16 @@ public class ProjectValidatorImpl implements ProjectValidator {
 
             throw new DataValidationException(message);
         }
+    }
+
+    @Override
+    public void validateProjectIdAndCurrentUserId(long projectId, long currentUserId) {
+        if (!projectRepository.checkUserIsProjectOwner(projectId, currentUserId)) {
+            String message = String.format("a user with id %d does not owe a project with id %d", currentUserId, projectId);
+
+
+            throw new DataValidationException(message);
+        }
+
     }
 }

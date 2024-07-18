@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.filter.ProjectNameFilter;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.service.project.ProjectFilterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

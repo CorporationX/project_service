@@ -12,10 +12,18 @@ import java.util.Optional;
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     @Query(
             "SELECT tm FROM TeamMember tm JOIN tm.team t " +
-            "WHERE tm.userId = :userId " +
-            "AND t.project.id = :projectId"
+                    "WHERE tm.userId = :userId " +
+                    "AND t.project.id = :projectId"
     )
     Optional<TeamMember> findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
+
+    @Query("""
+                    SELECT CASE WHEN COUNT(tm) > 0 THEN TRUE ELSE FALSE END
+                    FROM TeamMember tm JOIN tm.team t
+                    WHERE tm.userId = :userId
+                    AND t.project.id = :projectId
+            """)
+    boolean existsByUserIdAndProjectId(long userId, long projectId);
 }
