@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -26,10 +25,9 @@ public class StageInvitationService {
     private final List<StageInvitationFilter> stageInvitationsFilter;
 
     public StageInvitationDto sendAnInvitation(StageInvitationDto stageInvitationDto) {
-        stageInvitationDto.setStatus(StageInvitationStatus.PENDING);
-
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
-        stageInvitationRepository.save(stageInvitation);
+        stageInvitation.setStatus(StageInvitationStatus.PENDING);
+        stageInvitation = stageInvitationRepository.save(stageInvitation);
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
@@ -60,12 +58,14 @@ public class StageInvitationService {
                 .stream()
                 .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(userId))
                 .findAny().stream();
-        
+
         return stageInvitationsFilter.stream()
                 .filter(stageInvitationFilter -> stageInvitationFilter.isApplicable(stageInvitationFilterDto))
                 .reduce(stageInvitations, (cumulativeStream, stageInvitationsFilter) ->
                         stageInvitationsFilter.apply(cumulativeStream, stageInvitationFilterDto), Stream::concat)
                 .map(stageInvitationMapper::toDto)
                 .toList();
+
+
     }
 }

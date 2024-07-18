@@ -1,9 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.service.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +46,16 @@ public class StageInvitationController {
     }
 
     public List<StageInvitationDto> getStageInvitationForUser(StageInvitationFilterDto stageInvitationFilterDto,
-                                                       long userId) {
+                                                              long userId) {
+        if (stageInvitationFilterDto == null) {
+            log.error("stageInvitationFilterDto is null");
+            throw new IllegalArgumentException("stageInvitationFilterDto is null");
+        }
+
+        if (userId < 0) {
+            log.error("userId < 0");
+            throw new IllegalArgumentException("userId < 0");
+        }
         return stageInvitationService.getStageInvitationForUser(stageInvitationFilterDto, userId);
     }
 }
