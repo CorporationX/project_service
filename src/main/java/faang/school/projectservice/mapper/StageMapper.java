@@ -13,7 +13,6 @@ import java.util.List;
 public interface StageMapper {
 
     @Mapping(source = "projectId", target = "project.id")
-
     @Mapping(target = "stageRoles", ignore = true)
     Stage toEntity(StageDto dto);
 

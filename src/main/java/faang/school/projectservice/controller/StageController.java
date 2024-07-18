@@ -44,7 +44,7 @@ public class StageController {
     @ResponseStatus(HttpStatus.OK)
     public void updateStage(@PathVariable Long stageId,
                             @RequestBody TeamRoleDto teamRoleDto) {
-        stageService.updateStage(stageId, teamRoleDto);
+        stageService.updateStageWithTeamMembers(stageId, teamRoleDto);
     }
 
     @PostMapping(value = "/delete/stage/{stageToDeleteId}/{newStageId}")

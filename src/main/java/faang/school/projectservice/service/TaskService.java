@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.stage.Stage;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

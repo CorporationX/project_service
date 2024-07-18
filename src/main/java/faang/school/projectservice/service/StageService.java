@@ -49,7 +49,7 @@ public class StageService {
 
     @Transactional
     public void createStage(StageDto stageDto) {
-        getValidationProjectById(stageDto.getProjectId());
+        validationProjectById(stageDto.getProjectId());
         Stage stage = stageMapper.toEntity(stageDto);
         List<StageRoles> rolesList = stageRolesMapper.toEntities(stageDto.getStageRolesDtosList());
         rolesList.forEach(role -> role.setStage(stage));
@@ -59,7 +59,7 @@ public class StageService {
 
     @Transactional(readOnly = true)
     public List<StageDto> filterStages(Long projectId, StageFilterDto stageFilterDto) {
-        getValidationProjectById(projectId);
+        validationProjectById(projectId);
         List<Stage> stages = getValidationStagesIsEmpty(projectId);
         return stageFilters.stream()
                 .filter(filter -> filter.isApplicable(stageFilterDto))
@@ -129,7 +129,7 @@ public class StageService {
     }
 
     @Transactional
-    public void updateStage(Long stageId, TeamRoleDto teamRoleDto) {
+    public void updateStageWithTeamMembers(Long stageId, TeamRoleDto teamRoleDto) {
         StageRoles role = getStageRoles(stageId, teamRoleDto);
         List<TeamMember> team = getTeamMembers(stageId, teamRoleDto);
         if (role.getCount() > team.size()) {
@@ -175,7 +175,7 @@ public class StageService {
                 .forEach(teamMember -> System.out.println("Glad to see you in our team dude!"));
     }
 
-    private void getValidationProjectById(Long projectId){
+    private void validationProjectById(Long projectId){
         Project project = projectService.getProjectById(projectId);
         if (project == null) {
             log.info("Method getValidationProjectById return Null");
