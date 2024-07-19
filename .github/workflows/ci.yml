@@ -1,0 +1,17 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - feature/pipline-BC-tasknumber
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    name: jdk
+    steps:
+      - uses: action/setur-java@4
+        with:
+          distribution: '<distribution>'
+          java-version: 21
