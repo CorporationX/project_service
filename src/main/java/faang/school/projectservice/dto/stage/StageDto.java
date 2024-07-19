@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.stage;
 
-import faang.school.projectservice.model.stage.StageRoles;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
