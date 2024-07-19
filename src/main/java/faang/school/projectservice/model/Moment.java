@@ -2,14 +2,25 @@ package faang.school.projectservice.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Data
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"projects"})
 @Table(name = "moment")
 public class Moment {
     @Id
@@ -30,18 +41,20 @@ public class Moment {
     )
     private List<Resource> resource;
 
+    @Builder.Default
     @ManyToMany
     @JoinTable(
             name = "moment_project",
             joinColumns = @JoinColumn(name = "moment_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    private List<Project> projects;
+    private List<Project> projects = new ArrayList<>();
 
+    @Builder.Default
     @ElementCollection
     @CollectionTable(name = "moment_user", joinColumns = @JoinColumn(name = "moment_id"))
     @Column(name = "team_member_id")
-    private List<Long> userIds;
+    private List<Long> userIds = new ArrayList<>();
 
     @Column(name = "image_id")
     private String imageId;
@@ -61,4 +74,13 @@ public class Moment {
 
     @Column(name = "updated_by")
     private Long updatedBy;
+
+    public void addProject(Project project) {
+        projects.add(project);
+        project.getMoments().add(this);
+    }
+
+    public void addTeamMember(TeamMember teamMember) {
+        userIds.add(teamMember.getId());
+    }
 }
