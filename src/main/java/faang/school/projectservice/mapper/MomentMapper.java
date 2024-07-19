@@ -9,20 +9,17 @@ import org.mapstruct.Named;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
-//@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface MomentMapper {
 
     @Mapping(source = "projects", target = "projects", qualifiedByName = "projectsToProjectIds")
     MomentDto toDto(Moment moment);
 
-//    @Mapping(target = "resource", ignore = true)
-//    @Mapping(target = "imageId", ignore = true)
     @Mapping(source = "projects", target = "projects", qualifiedByName = "projectsIdsToProjects")
     Moment toEntity(MomentDto momentDto);
 
     @Named("projectsToProjectIds")
-    default List<Long> projectsToProjectIds(List<Project> projects){
+    default List<Long> projectsToProjectIds(List<Project> projects) {
         if (projects == null) return null;
         return projects.stream()
                 .map(Project::getId)
@@ -30,7 +27,7 @@ public interface MomentMapper {
     }
 
     @Named("projectsIdsToProjects")
-    default List<Project> projectsIdsToProjects(List<Long> projectsIds){
+    default List<Project> projectsIdsToProjects(List<Long> projectsIds) {
         if (projectsIds == null) return null;
         return projectsIds.stream()
                 .map(projectId -> {
