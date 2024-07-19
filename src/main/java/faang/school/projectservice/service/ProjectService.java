@@ -11,8 +11,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +19,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
-    private static final Logger log = LoggerFactory.getLogger(ProjectService.class);
     private final SubProjectValidator subProjectValidator;
     private final SubProjectMapper subProjectMapper;
     private final ProjectRepository projectRepository;
@@ -52,28 +51,29 @@ public class ProjectService {
             subProject.setMoments(List.of(new Moment()));
         }
     }
-
+    @Transactional
     public List<SubProjectDto> getAllFilteredSubprojectsOfAProject(SubProjectFilterDto subProjectFilterDto,
                                                                    Long projectId) {
-        Project parentProject = projectRepository.getProjectById(projectId);
+        Project parentProject = getProjectById(projectId);
         Stream<Project> projects = parentProject.getChildren().stream()
-                .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC));
+                .filter(project -> project.getVisibility().equals(parentProject.getVisibility()));
         return subProjectFilters.stream()
                 .filter(filter -> filter.isApplicable(subProjectFilterDto))
                 .reduce(projects, (stream, filter) -> filter.apply(stream, subProjectFilterDto), Stream::concat)
                 .map(subProjectMapper::toDto)
                 .toList();
     }
-
-    private void checkAllValidationsForCreateSubProject(SubProjectDto subProjectDto) {
+    @Transactional
+    protected void checkAllValidationsForCreateSubProject(SubProjectDto subProjectDto) {
         Long parentProjectId = subProjectDto.getParentProjectId();
-        subProjectValidator.validateTheExistenceOfTheParenProject(parentProjectId);
-        subProjectValidator.validateRootProjectHasNotParentProject(parentProjectId);
-        subProjectValidator.validateSubProjectHasParentProject(parentProjectId);
-        subProjectValidator.checkThePublicityOfTheProject(subProjectDto.getVisibility(), parentProjectId);
+        Project project = getProjectById(subProjectDto.getId());
+        subProjectValidator.validateTheExistenceOfTheParenProject(parentProjectId, project);
+        subProjectValidator.validateRootProjectHasNotParentProject(parentProjectId, project);
+        subProjectValidator.validateVisibilityOfParentProjectAndSubproject(subProjectDto.getVisibility(), parentProjectId, project);
     }
 
-    private Project getProjectById(Long projectId) {
+    @Transactional
+    protected Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);
     }
 }

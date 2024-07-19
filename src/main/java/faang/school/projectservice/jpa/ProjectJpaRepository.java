@@ -52,3 +52,4 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
     void makeSubprojectsPrivate(Long projectId);
 }
 
+

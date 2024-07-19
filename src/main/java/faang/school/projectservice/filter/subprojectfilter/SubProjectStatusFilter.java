@@ -2,9 +2,11 @@ package faang.school.projectservice.filter.subprojectfilter;
 
 import faang.school.projectservice.dto.SubProjectFilterDto;
 import faang.school.projectservice.model.Project;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
+@Component
 public class SubProjectStatusFilter implements SubProjectFilter{
     @Override
     public boolean isApplicable(SubProjectFilterDto filter) {

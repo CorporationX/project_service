@@ -2,8 +2,12 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.SubProjectDto;
 import faang.school.projectservice.dto.SubProjectFilterDto;
+import faang.school.projectservice.dto.validate.New;
+import faang.school.projectservice.dto.validate.UpdateName;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,21 +20,21 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("projects")
+@RequestMapping("api/v1")
 public class SubProjectController {
     private final ProjectService ProjectService;
 
-    @PostMapping("/create/subproject")
-    public SubProjectDto createSubProject(@RequestBody SubProjectDto subProjectDto) {
+    @PostMapping("/subprojects/")
+    public SubProjectDto createSubProject(@Validated(New.class) @RequestBody SubProjectDto subProjectDto) {
         return ProjectService.createSubProject(subProjectDto);
     }
 
-    @PutMapping("/update/subproject/status")
-    public void updateSubProject(@RequestBody SubProjectDto subProjectDto) {
+    @PutMapping("/subprojects")
+    public void updateSubProject(@Validated(UpdateName.class) @RequestBody SubProjectDto subProjectDto) {
         ProjectService.updateSubProject(subProjectDto);
     }
 
-    @GetMapping("/find/all/by/{parentProjectId}")
+    @GetMapping("/subprojects/{parentProjectId}")
     public List<SubProjectDto> getAllFilteredSubprojectsOfAProject(@RequestBody SubProjectFilterDto subProjectFilterDto,
                                                                    @PathVariable Long parentProjectId) {
         return ProjectService.getAllFilteredSubprojectsOfAProject(subProjectFilterDto, parentProjectId);
