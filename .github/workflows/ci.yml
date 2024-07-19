@@ -1,17 +1,26 @@
 name: CI
 
 on:
+  push:
+    branches:
+    - feature/pipline-BC-tasknumber
   pull_request:
     branches:
       - feature/pipline-BC-tasknumber
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     name: jdk
     steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
       - uses: action/setur-java@4
         with:
           distribution: '<distribution>'
-          java-version: 21
+          java-version: '17'
+
+      - run: java test
+      - run: java run build
