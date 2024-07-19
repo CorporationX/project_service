@@ -7,11 +7,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class ProjectRepository {
     private final ProjectJpaRepository projectJpaRepository;
+
+    public Optional<Project> findById(Long projectId) {
+        return projectJpaRepository.findById(projectId);
+    }
 
     public Project getProjectById(Long projectId) {
         return projectJpaRepository.findById(projectId).orElseThrow(
