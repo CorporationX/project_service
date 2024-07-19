@@ -21,6 +21,7 @@ jobs:
         with:
           distribution: '<distribution>'
           java-version: '17'
-
-      - run: java test
-      - run: java run build
+      - name: tests
+        run: java test
+      - name: build
+        run: java run build
