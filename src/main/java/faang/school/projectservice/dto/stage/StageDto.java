@@ -25,7 +25,5 @@ public class StageDto {
     @NotNull
     private List<StageRoles> stageRoles;
 
-    //private List<Long> taskIds;
-
     private List<Long> executorIds;
 }

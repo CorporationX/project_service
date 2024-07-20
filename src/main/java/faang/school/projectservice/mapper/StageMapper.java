@@ -6,6 +6,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -18,11 +19,9 @@ public interface StageMapper {
     @Mapping(source = "executors", target = "executorIds", qualifiedByName = "mapExecutor")
     StageDto toDto(Stage stage);
 
-    List<StageDto> toDto(List<Stage> stages);
+    List<StageDto> toDtoList(List<Stage> stages);
 
-    Stream<StageDto> toDto(Stream<Stage> stages);
-
-    @Mapping(source = "project", target = "project.id")
+    @Mapping(source = "projectId", target = "project.id")
     //@Mapping(target = "tasks", ignore = true)
     @Mapping(target = "executors", ignore = true)
     Stage toEntity(StageDto stageDto);
@@ -31,6 +30,7 @@ public interface StageMapper {
 //        return tasks.stream().map(Task::getId).toList();
 //    }
 
+    @Named("mapExecutor")
     default List<Long> mapExecutor(List<TeamMember> teamMembers) {
         return teamMembers.stream().map(TeamMember::getId).toList();
     }

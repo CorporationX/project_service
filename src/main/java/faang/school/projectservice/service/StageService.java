@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.StageException;
-import faang.school.projectservice.filter.StageFilter;
+import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
@@ -54,7 +54,7 @@ public class StageService {
         stage.setExecutors(executors);
 
         executors.forEach(teamMember -> {
-            if (teamMember.getRoles().isEmpty()) {
+            if (teamMember.getRoles() == null) {
                 throw new StageException("Team member with id: " + teamMember.getId() + "has no role");
             }
         });
@@ -101,8 +101,7 @@ public class StageService {
     private void deleteTasksAfterDeleteStage(Long id) {
         Stage deletedStage = stageRepository.getById(id);
         List<Task> deletedTasks = deletedStage.getTasks();
-        deletedTasks.forEach(task -> taskRepository.deleteById(task.getId()));
-        deletedTasks.clear();
+        taskRepository.deleteAll(deletedTasks);
         stageRepository.delete(deletedStage);
     }
 
@@ -111,9 +110,8 @@ public class StageService {
             throw new StageException(ErrorMessage.NULL_ID);
         }
         Stage deletedStage = stageRepository.getById(deletedStageId);
-        List<Task> transferedTasks = deletedStage.getTasks();
-        stageRepository.getById(receivingStageId).setTasks(transferedTasks);
-        transferedTasks.clear();
+        List<Task> transferredTasks = deletedStage.getTasks();
+        stageRepository.getById(receivingStageId).setTasks(transferredTasks);
         stageRepository.delete(deletedStage);
     }
 
@@ -161,9 +159,9 @@ public class StageService {
             int numberOfMissingTeamMembers = requiredNumberOfInvitation - projectMembersWithTheSameRole.size();
 
             throw new StageException("To work at the project stage, " + stageRoles.getCount() +
-                    " participants with a role " + stageRoles + " are required. But there are only " +
-                    projectMembersWithTheSameRole.size() + " participants on the project with this role. " +
-                    " There is a need for two more participants." + numberOfMissingTeamMembers);
+                    " executors with a role " + stageRoles + " are required. But there are only " +
+                    projectMembersWithTheSameRole.size() + " executors on the project with this role. " +
+                    " There is a need for " + numberOfMissingTeamMembers + " more participants.");
         }
 
         projectMembersWithTheSameRole.stream()
@@ -187,7 +185,7 @@ public class StageService {
 
     public List<StageDto> getAllStages() {
         List<Stage> stages = stageRepository.findAll();
-        return stageMapper.toDto(stages);
+        return stageMapper.toDtoList(stages);
     }
 
     public StageDto getStage(Long id) {
