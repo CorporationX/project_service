@@ -48,9 +48,6 @@ public class MomentServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
-    @Mock
-    private MomentFilter momentFilter;
-
     @InjectMocks
     private MomentService momentService;
 
@@ -66,6 +63,7 @@ public class MomentServiceTest {
                 .id(1L)
                 .projectsIds(Arrays.asList(1L))
                 .userIds(Arrays.asList(1L))
+                .description("description")
                 .build();
 
         teamMember = TeamMember.builder()
@@ -86,6 +84,7 @@ public class MomentServiceTest {
         moment = Moment.builder().id(1L)
                 .projects(List.of(project))
                 .userIds(List.of(1L, 2L, 3L))
+                .description("description")
                 .build();
     }
 

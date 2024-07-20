@@ -37,7 +37,6 @@ public class MomentService {
                 .toList();
         momentDto.setUserIds(getNewMemberIds(projects));
 
-
         momentRepository.save(momentMapper.toEntity(momentDto));
         return momentDto;
     }
@@ -46,18 +45,11 @@ public class MomentService {
         Moment moment = momentRepository.findById(momentDto.getId())
                 .orElseThrow(() -> new DataValidationException("Moment not found"));
 
-        List<Project> differentProjects = findDifferentProjects(moment.getProjects(),
-                new ArrayList<>(momentDto.getProjectsIds()));
-        if (!differentProjects.isEmpty()) {
-            moment.getUserIds().addAll(getNewMemberIds(differentProjects));
+        updateProjectsInMoment(moment, momentDto);
+        updateUserIdsInMoment(moment, momentDto);
+        if (!moment.getDescription().equals(momentDto.getDescription())) {
+            moment.setDescription(momentDto.getDescription());
         }
-
-        List<Long> differentMemberIds = findDifferentMemberIds(moment.getUserIds(),
-                new ArrayList<>(momentDto.getUserIds()));
-        if (!differentMemberIds.isEmpty()) {
-            moment.getProjects().addAll(getNewProjects(differentMemberIds));
-        }
-
         momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
@@ -83,6 +75,22 @@ public class MomentService {
 
 
         return momentMapper.toDto(moment);
+    }
+
+    private void updateProjectsInMoment(Moment moment, MomentDto momentDto) {
+        List<Project> differentProjects = findDifferentProjects(moment.getProjects(),
+                new ArrayList<>(momentDto.getProjectsIds()));
+        if (!differentProjects.isEmpty()) {
+            moment.getUserIds().addAll(getNewMemberIds(differentProjects));
+        }
+    }
+
+    private void updateUserIdsInMoment(Moment moment, MomentDto momentDto) {
+        List<Long> differentMemberIds = findDifferentMemberIds(moment.getUserIds(),
+                new ArrayList<>(momentDto.getUserIds()));
+        if (!differentMemberIds.isEmpty()) {
+            moment.getProjects().addAll(getNewProjects(differentMemberIds));
+        }
     }
 
     private List<Project> findDifferentProjects(List<Project> projectsFromDataBase, List<Long> newProjectIds) {

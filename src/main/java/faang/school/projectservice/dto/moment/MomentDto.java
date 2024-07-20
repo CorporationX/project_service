@@ -29,4 +29,7 @@ public class MomentDto {
 
     @NotNull
     private List<Long> userIds;
+
+    @Size(min = 1, max = 2000)
+    private String description;
 }
