@@ -4,8 +4,10 @@ import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +23,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/moment")
+@Validated
 public class MomentController {
 
     private final MomentService momentService;
@@ -48,7 +51,7 @@ public class MomentController {
     }
 
     @GetMapping("/{momentId}")
-    public MomentDto getMoment(@PathVariable long momentId) {
+    public MomentDto getMoment(@PathVariable @Min(1) long momentId) {
         return momentService.getMoment(momentId);
     }
 

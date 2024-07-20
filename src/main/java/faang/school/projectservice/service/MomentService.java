@@ -11,7 +11,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.MomentValidator;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,28 +33,17 @@ public class MomentService {
 
     @Transactional
     public MomentDto create(MomentDto momentDto) {
-        momentValidator.validateMoment(momentDto);
-        Moment moment = momentMapper.toEntity(momentDto);
-        populateMomentProject(moment, momentDto);
-        populateMomentTeamMembers(moment);
-        momentRepository.save(moment);
-        return momentMapper.toDto(moment);
+        return getMomentDto(momentDto);
     }
 
     @Transactional
     public MomentDto update(MomentDto momentDto) {
         momentValidator.existsMoment(momentDto.getId());
-        momentValidator.validateMoment(momentDto);
-        Moment moment = momentMapper.toEntity(momentDto);
-        populateMomentProject(moment, momentDto);
-        populateMomentTeamMembers(moment);
-        momentRepository.save(moment);
-        return momentMapper.toDto(moment);
+        return getMomentDto(momentDto);
     }
 
     @Transactional(readOnly = true)
     public List<MomentDto> getFilteredMomentsOfProject(MomentFilterDto filters) {
-
         Supplier<Stream<Moment>> streamSupplier = () -> momentRepository.findAll().stream();
         return momentMapper.toDtoList(momentFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
@@ -69,7 +57,7 @@ public class MomentService {
     }
 
     @Transactional(readOnly = true)
-    public MomentDto getMoment(@Min(1) long momentId) {
+    public MomentDto getMoment(long momentId) {
         momentValidator.existsMoment(momentId);
         return momentMapper.toDto(momentRepository.getReferenceById(momentId));
     }
@@ -80,13 +68,22 @@ public class MomentService {
         momentRepository.deleteById(momentId);
     }
 
+    private MomentDto getMomentDto(MomentDto momentDto) {
+        List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectsId());
+        momentValidator.validateMoment(momentDto, projects);
+        Moment moment = momentMapper.toEntity(momentDto);
+        populateMomentProject(moment, momentDto);
+        populateMomentTeamMembers(moment);
+        momentRepository.save(moment);
+        return momentMapper.toDto(moment);
+    }
+
     private void populateMomentProject(Moment moment, MomentDto momentDto) {
         Set<Project> projects = new HashSet<>();
-        if (momentDto.getProjectsId() != null && !momentDto.getProjectsId().isEmpty()) {
-            for (long projectId : momentDto.getProjectsId()) {
-                projects.add(projectRepository.getProjectById(projectId));
-            }
+        for (long projectId : momentDto.getProjectsId()) {
+            projects.add(projectRepository.getProjectById(projectId));
         }
+
         if (momentDto.getUsersId() != null && !momentDto.getUsersId().isEmpty()) {
             for (long teamMemberId : momentDto.getUsersId()) {
                 projects.addAll(projectRepository.findProjectByTeamMember(teamMemberId));

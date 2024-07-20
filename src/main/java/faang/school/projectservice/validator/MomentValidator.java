@@ -26,9 +26,8 @@ public class MomentValidator {
         }
     }
 
-    public void validateMoment(MomentDto momentDto) {
+    public void validateMoment(MomentDto momentDto, List<Project> projects) {
         if (Objects.nonNull(momentDto.getProjectsId()) && !momentDto.getProjectsId().isEmpty()) {
-            List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectsId());
             if (projects.size() != momentDto.getProjectsId().size()) {
                 throw new DataValidationException("Project does not exist.");
             }

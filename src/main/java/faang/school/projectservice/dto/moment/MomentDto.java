@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.moment;
 
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 public class MomentDto {
     private Long id;
-    @NotEmpty
+    @NotBlank
     private String name;
     private String description;
     @NotNull
