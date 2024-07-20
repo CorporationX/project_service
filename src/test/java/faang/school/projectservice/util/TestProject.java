@@ -69,4 +69,8 @@ public class TestProject {
             PROJECT_ID_3, PROJECT_ID_4);
 
     public static List<Long> PROJECTS_ID = List.of(PROJECT_ID_1, PROJECT_ID_2);
+
+    public static List<Project> COMPLETED_PROJECTS = List.of(COMPLETED_PROJECT);
+
+    public static List<Project> CANCELLED_PROJECTS = List.of(CANCELLED_PROJECT);
 }

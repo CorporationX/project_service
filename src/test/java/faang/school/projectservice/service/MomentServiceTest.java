@@ -23,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static faang.school.projectservice.util.TestMoment.MOMENT_1;
 import static faang.school.projectservice.util.TestMoment.NOW;
 import static faang.school.projectservice.util.TestProject.EXPECTED_PROJECT_IDS;
 import static faang.school.projectservice.util.TestProject.PROJECTS_ID;
@@ -73,7 +72,7 @@ class MomentServiceTest {
                 .usersId(USERS_ID)
                 .build();
 
-        doNothing().when(momentValidator).validateMoment(any());
+        doNothing().when(momentValidator).validateMoment(any(), any());
 
         for (Long projectId : EXPECTED_PROJECT_IDS) {
             when(teamMemberRepository.findAllByProjectId(projectId))
@@ -90,7 +89,7 @@ class MomentServiceTest {
 
         momentService.create(momentDto);
 
-        verify(momentValidator, times(1)).validateMoment(momentDto);
+        verify(momentValidator, times(1)).validateMoment(any(), any());
 
         ArgumentCaptor<Moment> captor = ArgumentCaptor.forClass(Moment.class);
         verify(momentRepository, times(1)).save(captor.capture());
@@ -126,7 +125,7 @@ class MomentServiceTest {
                 .build();
 
         doNothing().when(momentValidator).existsMoment(anyLong());
-        doNothing().when(momentValidator).validateMoment(any());
+        doNothing().when(momentValidator).validateMoment(any(), any());
 
         for (Long projectId : EXPECTED_PROJECT_IDS) {
             when(teamMemberRepository.findAllByProjectId(projectId))
@@ -143,7 +142,7 @@ class MomentServiceTest {
 
         momentService.update(momentDto);
 
-        verify(momentValidator, times(1)).validateMoment(momentDto);
+        verify(momentValidator, times(1)).validateMoment(any(), any());
 
         ArgumentCaptor<Moment> captor = ArgumentCaptor.forClass(Moment.class);
         verify(momentRepository, times(1)).save(captor.capture());

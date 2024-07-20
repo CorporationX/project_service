@@ -10,19 +10,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 
 import static faang.school.projectservice.util.TestMoment.MOMENT_ID_1;
 import static faang.school.projectservice.util.TestMomentDto.MOMENT_DTO;
 import static faang.school.projectservice.util.TestMomentDto.MOMENT_DTO_EMPTY_PROJECT;
 import static faang.school.projectservice.util.TestMomentDto.MOMENT_DTO_MANY_PROJECT;
-import static faang.school.projectservice.util.TestProject.CANCELLED_PROJECT;
-import static faang.school.projectservice.util.TestProject.COMPLETED_PROJECT;
+import static faang.school.projectservice.util.TestProject.CANCELLED_PROJECTS;
+import static faang.school.projectservice.util.TestProject.COMPLETED_PROJECTS;
 import static faang.school.projectservice.util.TestProject.PROJECT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,28 +49,28 @@ class MomentValidatorTest {
     public void testMomentValidateIsProjectsEmpty() {
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
-                () -> momentValidator.validateMoment(MOMENT_DTO_EMPTY_PROJECT)
+                () -> momentValidator.validateMoment(MOMENT_DTO_EMPTY_PROJECT, Collections.emptyList())
         );
         assertEquals("Projects empty.", dataValidationException.getMessage());
     }
 
     @Test
     public void testMomentValidateIsProjectsSizeAndMomenDtoGetProjectsIdSizeNotEquals() {
-        when(projectRepository.findAllByIds(anyList()))
+        lenient().when(projectRepository.findAllByIds(anyList()))
                 .thenReturn(List.of(PROJECT));
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
-                () -> momentValidator.validateMoment(MOMENT_DTO_MANY_PROJECT)
+                () -> momentValidator.validateMoment(MOMENT_DTO_MANY_PROJECT, Collections.emptyList())
         );
         assertEquals("Project does not exist.", dataValidationException.getMessage());
     }
 
     @Test
     public void testMomentValidateIsProjectStatusCompleted() {
-        when(projectRepository.findAllByIds(anyList())).thenReturn(List.of(COMPLETED_PROJECT));
+        lenient().when(projectRepository.findAllByIds(anyList())).thenReturn(COMPLETED_PROJECTS);
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
-                () -> momentValidator.validateMoment(MOMENT_DTO)
+                () -> momentValidator.validateMoment(MOMENT_DTO, COMPLETED_PROJECTS)
         );
         assertEquals("Project can`t be completed or canceled.",
                 dataValidationException.getMessage());
@@ -76,10 +78,10 @@ class MomentValidatorTest {
 
     @Test
     public void testMomentValidateIsProjectStatusCancelled() {
-        when(projectRepository.findAllByIds(anyList())).thenReturn(List.of(CANCELLED_PROJECT));
+        lenient().when(projectRepository.findAllByIds(anyList())).thenReturn(CANCELLED_PROJECTS);
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
-                () -> momentValidator.validateMoment(MOMENT_DTO)
+                () -> momentValidator.validateMoment(MOMENT_DTO, CANCELLED_PROJECTS)
         );
         assertEquals("Project can`t be completed or canceled.",
                 dataValidationException.getMessage());
