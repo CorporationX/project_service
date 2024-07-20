@@ -11,19 +11,18 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.validation.ProjectServiceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
 
-    private static final Logger log = LoggerFactory.getLogger(ProjectService.class);
     private final ProjectServiceValidator projectServiceValidator;
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
@@ -40,14 +39,14 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto update(ProjectDto projectDto) {
-        projectServiceValidator.validateUpdating(projectDto.getId());
+        projectServiceValidator.validateUpdating(projectDto);
         Project project = projectMapper.toEntity(projectDto);
         entityUpdatePreparation(project);
         project = projectRepository.save(project);
         return projectMapper.toDto(project);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ProjectDto> findProjectsWithFilter(Long userId, ProjectFilterDto projectFilterDto) {
         List<ProjectFilter> applicableFilters = getApplicableProjectFilters(projectFilterDto);
         List<Project> filteredProjects = projectRepository.findAllAvailableProjectsByUserId(userId).toList();
@@ -57,14 +56,14 @@ public class ProjectService {
         return projectMapper.toDtos(filteredProjects);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ProjectDto> findAllProjects(Long userId) {
         return projectMapper.toDtos(projectRepository
                 .findAllAvailableProjectsByUserId(userId)
                 .toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ProjectDto findById(Long userId, ProjectFilterDto projectFilterDto) {
         return projectMapper.toDto(projectRepository
                 .findAvailableByUserIdAndProjectId(userId, projectFilterDto.getIdPattern())
@@ -77,7 +76,9 @@ public class ProjectService {
     private void entityCreatePreparation(Long userId, Project project) {
         project.setOwnerId(userId);
         project.setStatus(ProjectStatus.CREATED);
-        project.setVisibility(ProjectVisibility.PUBLIC);
+        if (project.getVisibility() == null) {
+            project.setVisibility(ProjectVisibility.PUBLIC);
+        }
     }
 
     private void entityUpdatePreparation(Project project) {

@@ -25,29 +25,29 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping("{userId}/projects/create")
+    @PostMapping("{userId}/create")
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto create(@Valid @PathVariable Long userId, @Valid @RequestBody ProjectDto projectDto) {
         return projectService.create(userId, projectDto);
     }
 
-    @PutMapping("/projects")
+    @PutMapping("/update")
     public ProjectDto update(@Valid @RequestBody ProjectDto projectDto) {
         return projectService.update(projectDto);
     }
 
-    @PostMapping("/projects/{userId}/filtered")
+    @PostMapping("/{userId}/accessible/filtered")
     public List<ProjectDto> findProjectsWithFilter(@Valid @PathVariable Long userId,
                                                    @Valid @NotNull @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.findProjectsWithFilter(userId, projectFilterDto);
     }
 
-    @GetMapping("/projects/{userId}/projects")
+    @GetMapping("/{userId}/accessible/projects")
     public List<ProjectDto> findAllProjects(@Valid @PathVariable Long userId) {
         return projectService.findAllProjects(userId);
     }
 
-    @PostMapping("/projects/{userId}/project")
+    @PostMapping("/{userId}/accessible/project")
     public  ProjectDto findById(@Valid @PathVariable Long userId,
                                 @Valid @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.findById(userId, projectFilterDto);

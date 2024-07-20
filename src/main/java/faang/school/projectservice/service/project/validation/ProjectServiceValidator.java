@@ -24,10 +24,15 @@ public class ProjectServiceValidator {
         }
     }
 
-    public void validateUpdating(Long projectId) {
-        if (!projectRepository.existsById(projectId)) {
-            log.info("Project with id {} does not exist.", projectId);
-            throw new EntityNotFoundException("Project with id " + projectId + " does not exist.");
+    public void validateUpdating(ProjectDto projectDto) {
+        if (projectDto.getId() != null) {
+            if (!projectRepository.existsById(projectDto.getId())) {
+                log.info("Project with id {} does not exist.", projectDto.getId());
+                throw new EntityNotFoundException("Project with id " + projectDto.getId() + " does not exist.");
+            }
+        } else {
+            log.info("Field id is null");
+            throw new ValidationException("Field id is null");
         }
     }
 }
