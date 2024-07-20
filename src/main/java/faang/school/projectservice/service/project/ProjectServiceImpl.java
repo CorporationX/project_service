@@ -4,8 +4,8 @@ import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ExceptionMessages;
-import faang.school.projectservice.filter.DefaultProjectFilter;
-import faang.school.projectservice.filter.ProjectFilter;
+import faang.school.projectservice.filter.project.DefaultProjectFilter;
+import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -68,7 +68,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAllProjects() {
-        return mapper.toDto(retrieveProjects());
+        return mapper.toDtoList(retrieveProjects());
     }
 
     private List<Project> retrieveProjects() {
@@ -87,7 +87,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> allProjects = retrieveProjects();
         var userDefinedFiltersApplied = applyUserDefinedFilters(filters, allProjects);
         var defaultFiltersApplied = applyDefaultFilters(userDefinedFiltersApplied);
-        return mapper.toDto(defaultFiltersApplied);
+        return mapper.toDtoList(defaultFiltersApplied);
     }
 
     private List<Project> applyUserDefinedFilters(ProjectFilterDto filters, List<Project> allProjects) {

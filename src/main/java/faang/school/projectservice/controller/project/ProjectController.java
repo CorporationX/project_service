@@ -39,12 +39,12 @@ public class ProjectController {
         return projectService.filterProjects(filters);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(ApiPath.GENERAL_ID_PLACEHOLDER)
     public ProjectDto updateProject(@PathVariable("id") long id, @RequestBody @Valid ProjectUpdateDto projectUpdateDto) {
         return projectService.updateProject(id, projectUpdateDto);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(ApiPath.GENERAL_ID_PLACEHOLDER)
     public ProjectDto getProject(@PathVariable("id") long id) {
         return projectService.retrieveProject(id);
     }

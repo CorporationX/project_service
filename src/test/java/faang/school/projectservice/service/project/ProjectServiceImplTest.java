@@ -5,11 +5,11 @@ import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ExceptionMessages;
-import faang.school.projectservice.filter.ProjectNameFilter;
-import faang.school.projectservice.filter.ProjectOwnerFilter;
-import faang.school.projectservice.filter.ProjectStatusFilter;
-import faang.school.projectservice.filter.ProjectTeamMemberFilter;
-import faang.school.projectservice.filter.PublicProjectFilter;
+import faang.school.projectservice.filter.project.ProjectNameFilter;
+import faang.school.projectservice.filter.project.ProjectOwnerFilter;
+import faang.school.projectservice.filter.project.ProjectStatusFilter;
+import faang.school.projectservice.filter.project.ProjectTeamMemberFilter;
+import faang.school.projectservice.filter.project.PublicProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -65,7 +65,7 @@ class ProjectServiceImplTest {
     private ProjectServiceImpl sut;
 
     @Test
-    void createProject_throws_exception_if_project_already_exists() {
+    void createProjectThrowsExceptionIfProjectAlreadyExists() {
         var projectDto = ProjectDto.builder()
                 .name("Test Project")
                 .description("Test Project Description")
@@ -80,7 +80,7 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void createProject_throws_exception_if_database_constraints_fail() {
+    void createProjectThrowsExceptionIfDatabaseConstraintsFail() {
         var projectDto = ProjectDto.builder()
                 .name("Test Project")
                 .description("Test Project Description")
@@ -101,7 +101,7 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void createProject_persists_project_successfully_with_no_parent_project() {
+    void createProjectPersistsProjectSuccessfullyWithNoParentProject() {
         var projectDto = ProjectDto.builder()
                 .name("Test Project")
                 .description("Test Project Description")
@@ -129,7 +129,7 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void createProject_persists_project_successfully_with_parent_project() {
+    void createProjectPersistsProjectSuccessfullyWithParentProject() {
         var projectDto = ProjectDto.builder()
                 .name("Test Project")
                 .description("Test Project Description")
@@ -166,7 +166,7 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void updateProject_updates_project_successfully() {
+    void updateProjectUpdatesProjectSuccessfully() {
         var projectUpdateDto = ProjectUpdateDto.builder()
                 .name("Updated Project")
                 .description("Updated Project Description")
@@ -206,7 +206,7 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void updateProject_should_throw_exception_when_project_not_found() {
+    void updateProjectShouldThrowExceptionWhenProjectNotFound() {
         var projectUpdateDto = ProjectUpdateDto.builder()
                 .name("Updated Project")
                 .description("Updated Project Description")
@@ -220,7 +220,7 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void getProject_retrieves_project_successfully() {
+    void getProjectRetrievesProjectSuccessfully() {
         var project = Project.builder()
                 .id(1L)
                 .name("Test Project")
@@ -246,14 +246,14 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void getProject_should_throw_exception_when_project_not_found() {
+    void getProjectShouldThrowExceptionWhenProjectNotFound() {
         when(projectRepository.getProjectById(1L)).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class, () -> sut.retrieveProject(1L));
     }
 
     @Test
-    void getAllProjects_retrieves_all_projects_successfully() {
+    void getAllProjectsRetrievesAllProjectsSuccessfully() {
         var project1 = Project.builder()
                 .id(1L)
                 .name("Test Project 1")
@@ -287,7 +287,7 @@ class ProjectServiceImplTest {
                 .build();
 
         when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
-        when(mapper.toDto(List.of(project1, project2))).thenReturn(List.of(projectDto1, projectDto2));
+        when(mapper.toDtoList(List.of(project1, project2))).thenReturn(List.of(projectDto1, projectDto2));
 
         var retrievedProjects = sut.getAllProjects();
 
@@ -297,7 +297,7 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void getAllProjects_returns_empty_list_when_no_projects_exist() {
+    void getAllProjectsReturnsEmptyListWhenNoProjectsExist() {
         when(projectRepository.findAll()).thenReturn(List.of());
 
         var retrievedProjects = sut.getAllProjects();
@@ -306,21 +306,21 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void getAllProjects_should_throw_exception_when_some_database_error_occurs() {
+    void getAllProjectsShouldThrowExceptionWhenSomeDatabaseErrorOccurs() {
         when(projectRepository.findAll()).thenThrow(RuntimeException.class);
 
         assertThrows(PersistenceException.class, () -> sut.getAllProjects());
     }
 
     @Test
-    void filterProjects_should_throw_exception_when_some_database_error_occurs() {
+    void filterProjectsShouldThrowExceptionWhenSomeDatabaseErrorOccurs() {
         when(projectRepository.findAll()).thenThrow(RuntimeException.class);
 
         assertThrows(PersistenceException.class, () -> sut.filterProjects(null));
     }
 
     @Test
-    void filterProjects_with_filters_applied() {
+    void filterProjectsWithFiltersApplied() {
         var projectFilterDto = new ProjectFilterDto("proj", null);
 
         when(userContext.getUserId()).thenReturn(1L);
@@ -357,7 +357,7 @@ class ProjectServiceImplTest {
 
         sut.filterProjects(projectFilterDto);
 
-        verify(mapper, times(1)).toDto(projectSetArgumentCaptor.capture());
+        verify(mapper, times(1)).toDtoList(projectSetArgumentCaptor.capture());
 
         assertEquals(expectedFilteredProjects, projectSetArgumentCaptor.getValue());
     }

@@ -1,6 +1,7 @@
 package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ class ProjectStatusFilterTest {
     private ProjectStatusFilter projectStatusFilter;
 
     @Test
-    void isApplicable_should_return_true_when_statusPattern_is_not_null() {
+    void isApplicableShouldReturnTrueWhenStatusPatternIsNotNull() {
         var filters = new ProjectFilterDto(null, "statusPattern");
 
         var result = projectStatusFilter.isApplicable(filters);
@@ -28,7 +29,7 @@ class ProjectStatusFilterTest {
     }
 
     @Test
-    void isApplicable_should_return_false_when_statusPattern_is_null() {
+    void isApplicableShouldReturnFalseWhenStatusPatternIsNull() {
         var filters = new ProjectFilterDto(null, null);
 
         var result = projectStatusFilter.isApplicable(filters);
@@ -37,7 +38,7 @@ class ProjectStatusFilterTest {
     }
 
     @Test
-    void apply_should_return_projects_with_matching_status() {
+    void applyShouldReturnProjectsWithMatchingStatus() {
         var filters = new ProjectFilterDto(null, "completed");
         var projects = Stream.of(
                 Project.builder().name("name").status(ProjectStatus.COMPLETED).build(),

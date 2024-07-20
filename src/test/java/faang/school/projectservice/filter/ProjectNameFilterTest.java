@@ -1,6 +1,7 @@
 package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.filter.project.ProjectNameFilter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ class ProjectNameFilterTest {
     private ProjectNameFilter projectNameFilter;
 
     @Test
-    void isApplicable_returns_true_when_namePattern_is_not_null() {
+    void isApplicableReturnsTrueWhenNamePatternIsNotNull() {
         var filters = new ProjectFilterDto("namePattern", null);
 
         var result = projectNameFilter.isApplicable(filters);
@@ -28,7 +29,7 @@ class ProjectNameFilterTest {
     }
 
     @Test
-    void isApplicable_returns_false_when_namePattern_is_null() {
+    void isApplicableReturnsFalseWhenNamePatternIsNull() {
         var filters = new ProjectFilterDto(null, null);
 
         var result = projectNameFilter.isApplicable(filters);
@@ -37,7 +38,7 @@ class ProjectNameFilterTest {
     }
 
     @Test
-    void apply_returns_projects_with_matching_name() {
+    void applyReturnsProjectsWithMatchingName() {
         var filters = new ProjectFilterDto("name", null);
         var projects = Stream.of(
                 Project.builder().name("name one thing you love").status(ProjectStatus.COMPLETED).build(),

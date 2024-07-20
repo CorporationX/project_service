@@ -1,6 +1,7 @@
 package faang.school.projectservice.filter;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.filter.project.ProjectOwnerFilter;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +24,7 @@ class ProjectOwnerFilterTest {
     private ProjectOwnerFilter projectOwnerFilter;
 
     @Test
-    void apply_should_return_projects_owned_by_user() {
+    void applyShouldReturnProjectsOwnedByUser() {
         var project1 = new Project();
         project1.setOwnerId(1L);
         var project2 = new Project();

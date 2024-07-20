@@ -45,7 +45,7 @@ class ProjectMapperTest {
     }
 
     @Test
-    void toDto_should_return_mapped_entity() {
+    void toDtoShouldReturnMappedEntity() {
         ProjectDto mappedDto = projectMapper.toDto(project);
 
         assertEquals(project.getName(), mappedDto.getName());
@@ -54,7 +54,7 @@ class ProjectMapperTest {
     }
 
     @Test
-    void toEntity_should_return_mapped_dto() {
+    void toEntityShouldReturnMappedDto() {
         Project mappedEntity = projectMapper.toEntity(projectDto);
 
         assertEquals(projectDto.getName(), mappedEntity.getName());
@@ -62,7 +62,7 @@ class ProjectMapperTest {
     }
 
     @Test
-    void toDto_should_return_empty_list_when_children_is_null() {
+    void toDtoShouldReturnEmptyWhenChildrenIsNull() {
         project.setChildren(null);
 
         ProjectDto mappedDto = projectMapper.toDto(project);
@@ -71,7 +71,7 @@ class ProjectMapperTest {
     }
 
     @Test
-    void toEntity_should_keep_parent_null_when_parent_id_is_null() {
+    void toEntityShouldKeepParentNullWhenParentIdIsNull() {
         projectDto.setParentProjectId(null);
 
         Project mappedEntity = projectMapper.toEntity(projectDto);
@@ -80,7 +80,7 @@ class ProjectMapperTest {
     }
 
     @Test
-    void update_should_remap_fields_that_differ() {
+    void updateShouldRemapFieldsThatDiffer() {
         ProjectUpdateDto updatedDto = ProjectUpdateDto.builder()
                 .name("Updated Test Project")
                 .description("Updated Test Project Description")
@@ -97,28 +97,28 @@ class ProjectMapperTest {
     }
 
     @Test
-    void toDto_should_map_list_to_list() {
+    void toDtoShouldMapProjectListToProjectDtoList() {
         List<Project> projects = List.of(project);
 
-        List<ProjectDto> mappedDtos = projectMapper.toDto(projects);
+        List<ProjectDto> mappedDtos = projectMapper.toDtoList(projects);
 
         assertEquals(projects.size(), mappedDtos.size());
     }
 
     @Test
-    void toDto_should_map_set_to_list() {
+    void toDtoShouldMapProjectSetToProjectList() {
         var projects = Set.of(project);
 
-        List<ProjectDto> mappedDtos = projectMapper.toDto(projects);
+        List<ProjectDto> mappedDtos = projectMapper.toDtoList(projects);
 
         assertEquals(projects.size(), mappedDtos.size());
     }
 
     @Test
-    void testDto_should_map_empty_list_to_empty_list() {
+    void testDtoShouldMapEmptyListToEmptyList() {
         List<Project> projects = List.of();
 
-        List<ProjectDto> mappedDtos = projectMapper.toDto(projects);
+        List<ProjectDto> mappedDtos = projectMapper.toDtoList(projects);
 
         assertTrue(mappedDtos.isEmpty());
     }

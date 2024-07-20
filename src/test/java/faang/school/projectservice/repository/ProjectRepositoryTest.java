@@ -19,7 +19,7 @@ class ProjectRepositoryTest {
     private ProjectRepository projectRepository;
 
     @Test
-    void saveProject_should_persist_data_with_all_required_properties() {
+    void saveProjectShouldPersistDataWithAllRequiredProperties() {
         Project project = new Project();
         project.setName("Test Project");
         project.setStatus(ProjectStatus.CREATED);
@@ -35,7 +35,7 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    void saveProject_should_throw_exception_when_name_is_null() {
+    void saveProjectShouldThrowExceptionWhenNameIsNull() {
         Project project = new Project();
         project.setStatus(ProjectStatus.CREATED);
         project.setVisibility(ProjectVisibility.PUBLIC);
@@ -44,7 +44,7 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    void saveProject_should_throw_exception_when_status_is_null() {
+    void saveProjectShouldThrowExceptionWhenStatusIsNull() {
         Project project = new Project();
         project.setName("Test Project");
         project.setVisibility(ProjectVisibility.PUBLIC);
@@ -53,7 +53,7 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    void saveProject_should_throw_exception_when_visiblity_is_null() {
+    void saveProjectShouldThrowExceptionWhenVisiblityIsNull() {
         Project project = new Project();
         project.setName("Test Project");
         project.setStatus(ProjectStatus.CREATED);

@@ -1,8 +1,6 @@
 package faang.school.projectservice.dto.project;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import faang.school.projectservice.dto.DtoValidationConstraints;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -10,8 +8,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigInteger;
@@ -20,8 +20,9 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-@JsonDeserialize(builder = ProjectDto.ProjectDtoBuilder.class)
 public class ProjectDto {
 
     private Long id;
@@ -49,14 +50,4 @@ public class ProjectDto {
     @Builder.Default
     private ProjectVisibility visibility = ProjectVisibility.PUBLIC;
     private String coverImageId;
-
-    public static ProjectDtoBuilder builder() {
-        return new ProjectDtoBuilder()
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC);
-    }
-
-    @JsonPOJOBuilder(withPrefix = "")
-    public static class ProjectDtoBuilder {
-    }
 }

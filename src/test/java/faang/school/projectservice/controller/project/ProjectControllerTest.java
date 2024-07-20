@@ -34,7 +34,7 @@ class ProjectControllerTest extends BaseControllerTest {
     private ProjectService projectService;
 
     @Test
-    void createProject_should_return_bad_request_if_request_body_is_empty() throws Exception {
+    void createProjectShouldReturnBadRequestIfRequestBodyIsEmpty() throws Exception {
         String invalidRequestBody = "{\"name\": \"\"}";
 
         mockMvc.perform(post(ApiPath.PROJECTS_PATH)
@@ -48,7 +48,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void createProject_should_return_bad_request_if_request_body_parameters_fail_constraints() throws Exception {
+    void createProjectShouldReturnBadRequestIfRequestBodyParametersFailConstraints() throws Exception {
         var dto = ProjectDto.builder()
                 .name("ab")
                 .description("a".repeat(5000))
@@ -69,7 +69,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void createProject_should_return_bad_request_if_numeric_parameters_are_too_high() throws Exception {
+    void createProjectShouldReturnBadRequestIfNumericParametersAreTooHigh() throws Exception {
         var dto = ProjectDto.builder()
                 .name("aasfasgagb")
                 .description("asdghkjwnegjnosdnousdogeg")
@@ -88,7 +88,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void createProject_should_return_status_created_if_request_body_is_valid() throws Exception {
+    void createProjectShouldReturnStatusCreatedIfRequestBodyIsValid() throws Exception {
         var dto = ProjectDto.builder()
                 .id(123L)
                 .ownerId(1L)
@@ -108,7 +108,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void createProject_should_throw_exception_if_project_already_exists() throws Exception {
+    void createProjectShouldThrowExceptionIfProjectAlreadyExists() throws Exception {
         var dto = ProjectDto.builder()
                 .id(123L)
                 .ownerId(1L)
@@ -127,7 +127,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void createProject_should_throw_exception_if_project_failed_to_be_persisted() throws Exception {
+    void createProjectShouldThrowExceptionIfProjectFailedToBePersisted() throws Exception {
         var dto = ProjectDto.builder()
                 .id(123L)
                 .ownerId(1L)
@@ -146,7 +146,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void updateProject_should_return_bad_request_if_request_body_is_empty() throws Exception {
+    void updateProjectShouldReturnBadRequestIfRequestBodyIsEmpty() throws Exception {
         var updateDto = ProjectUpdateDto.builder()
                 .name("12")
                 .description("1252")
@@ -163,7 +163,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void updateProject_should_return_bad_request_if_numeric_values_are_not_valid() throws Exception {
+    void updateProjectShouldReturnBadRequestIfNumericValuesAreNotValid() throws Exception {
         var updateDto = ProjectUpdateDto.builder()
                 .name("Project Name")
                 .description("Project Description")
@@ -182,7 +182,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void updateProject_should_return_ok_status_if_request_body_is_valid() throws Exception {
+    void updateProjectShouldReturnOkStatusIfRequestBodyIsValid() throws Exception {
         var incomingDto = ProjectUpdateDto.builder()
                 .name("Project Name")
                 .description("Project Description")
@@ -207,7 +207,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void updateProject_should_return_not_found_status_if_project_does_not_exist() throws Exception {
+    void updateProjectShouldReturnNotFoundStatusIfProjectDoesNotExist() throws Exception {
         var incomingDto = ProjectUpdateDto.builder()
                 .name("Project Name")
                 .description("Project Description")
@@ -223,7 +223,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void getProject_should_return_not_found_status_if_project_does_not_exist() throws Exception {
+    void getProjectShouldReturnNotFoundStatusIfProjectDoesNotExist() throws Exception {
         when(projectService.retrieveProject(1L)).thenThrow(EntityNotFoundException.class);
 
         mockMvc.perform(get(ApiPath.PROJECTS_PATH + "/1")
@@ -232,7 +232,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void getProject_should_return_project_if_project_exists() throws Exception {
+    void getProjectShouldReturnProjectIfProjectExists() throws Exception {
         var projectDto = ProjectDto.builder()
                 .id(1L)
                 .name("Project Name")
@@ -250,7 +250,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void getProjects_should_return_empty_list_if_no_projects_exist() throws Exception {
+    void getProjectsShouldReturnEmptyListIfNoProjectsExist() throws Exception {
         when(projectService.getAllProjects()).thenReturn(List.of());
 
         mockMvc.perform(get(ApiPath.PROJECTS_PATH)
@@ -260,7 +260,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void getProjects_should_return_list_of_projects_if_projects_exist() throws Exception {
+    void getProjectsShouldReturnListOfProjectsIfProjectsExist() throws Exception {
         var projects = List.of(
                 ProjectDto.builder().id(1L).name("Project Name").description("Project Description").build(),
                 ProjectDto.builder().id(2L).name("Project Name 2").description("Project Description 2").build(),
@@ -277,7 +277,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void getProjects_should_return_bad_request_if_database_error_occurs() throws Exception {
+    void getProjectsShouldReturnBadRequestIfDatabaseErrorOccurs() throws Exception {
         when(projectService.getAllProjects()).thenThrow(new PersistenceException(ExceptionMessages.FAILED_RETRIEVAL));
 
         mockMvc.perform(get(ApiPath.PROJECTS_PATH)
@@ -287,7 +287,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void filterProjects_should_return_empty_list_if_no_projects_exist() throws Exception {
+    void filterProjectsShouldReturnEmptyListIfNoProjectsExist() throws Exception {
         when(projectService.filterProjects(any())).thenReturn(List.of());
 
         mockMvc.perform(post(ApiPath.PROJECTS_PATH + ApiPath.FILTER_FUNCTIONALITY)
@@ -299,7 +299,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void filterProjects_should_return_list_of_projects_if_projects_exist() throws Exception {
+    void filterProjectsShouldReturnListOfProjectsIfProjectsExist() throws Exception {
         var projects = List.of(
                 ProjectDto.builder().id(1L).name("Project Name").description("Project Description").build(),
                 ProjectDto.builder().id(2L).name("Project Name 2").description("Project Description 2").build(),
@@ -318,7 +318,7 @@ class ProjectControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void filterProjects_should_return_bad_request_if_database_error_occurs() throws Exception {
+    void filterProjectsShouldReturnBadRequestIfDatabaseErrorOccurs() throws Exception {
         when(projectService.filterProjects(any())).thenThrow(new PersistenceException(ExceptionMessages.FAILED_RETRIEVAL));
 
         mockMvc.perform(post(ApiPath.PROJECTS_PATH + ApiPath.FILTER_FUNCTIONALITY)

@@ -1,6 +1,7 @@
 package faang.school.projectservice.filter;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.filter.project.ProjectTeamMemberFilter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -26,7 +27,7 @@ class ProjectTeamMemberFilterTest {
     private ProjectTeamMemberFilter projectTeamMemberFilter;
 
     @Test
-    void apply_should_return_projects_where_user_is_team_member() {
+    void applyShouldReturnProjectsWhereUserIsTeamMember() {
         var project1 = new Project();
         var team1 = new Team();
         var member1 = new TeamMember();
@@ -56,7 +57,7 @@ class ProjectTeamMemberFilterTest {
     }
 
     @Test
-    void apply_should_return_empty_stream_when_no_teams() {
+    void applyShouldReturnEmptyStreamWhenNoTeams() {
         var project1 = new Project();
         var project2 = new Project();
         var project3 = new Project();
@@ -67,7 +68,7 @@ class ProjectTeamMemberFilterTest {
     }
 
     @Test
-    void apply_should_return_empty_stream_when_no_team_members() {
+    void applyShouldReturnEmptyStreamWhenNoTeamMembers() {
         var project1 = new Project();
         var team1 = new Team();
         project1.setTeams(List.of(team1));
@@ -86,7 +87,7 @@ class ProjectTeamMemberFilterTest {
     }
 
     @Test
-    void apply_should_return_empty_stream_when_no_mappings_for_member_exist() {
+    void applyShouldReturnEmptyStreamWhenNoMappingsForMemberExist() {
         var project1 = new Project();
         var team1 = new Team();
         var member1 = new TeamMember();

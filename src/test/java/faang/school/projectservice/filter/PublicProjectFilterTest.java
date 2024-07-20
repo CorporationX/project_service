@@ -1,5 +1,6 @@
 package faang.school.projectservice.filter;
 
+import faang.school.projectservice.filter.project.PublicProjectFilter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ class PublicProjectFilterTest {
     private PublicProjectFilter publicProjectFilter;
 
     @Test
-    void apply_should_return_public_projects() {
+    void applyShouldReturnPublicProjects() {
         var project1 = new Project();
         project1.setVisibility(ProjectVisibility.PUBLIC);
         var project2 = new Project();

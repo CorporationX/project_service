@@ -20,9 +20,9 @@ public interface ProjectMapper {
     @Mapping(source = "children", target = "childrenProjectIds", qualifiedByName = "mapChildren")
     ProjectDto toDto(Project project);
 
-    List<ProjectDto> toDto(List<Project> projects);
+    List<ProjectDto> toDtoList(List<Project> projects);
 
-    List<ProjectDto> toDto(Set<Project> projects);
+    List<ProjectDto> toDtoList(Set<Project> projects);
 
     Project toEntity(ProjectDto projectDto);
 
