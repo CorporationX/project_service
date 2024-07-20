@@ -21,4 +21,8 @@ public class TeamMemberRepository {
     public List<TeamMember> findByUserId(Long id) {
         return jpaRepository.findByUserId(id);
     }
+
+    public List<TeamMember> findByTeamId(Long teamId) {
+        return jpaRepository.findByTeamId(teamId);
+    }
 }

@@ -16,10 +16,17 @@ public class MomentServiceValidator {
     private final ProjectRepository projectRepository;
 
     public void validateCreateMoment(MomentDto momentDto) {
+        validateMomentDoesExist(momentDto);
+        validateProjectNotClosed(momentDto);
+    }
+
+    public void validateMomentDoesExist(MomentDto momentDto) {
         if (momentRepository.existsById(momentDto.getId())) {
             throw new DataValidationException("Moment " + momentDto.getId() + " already exists");
         }
+    }
 
+    public void validateProjectNotClosed(MomentDto momentDto) {
         Project project = projectRepository.getProjectById(momentDto.getProjectsIds().get(0));
 
         if (project.getStatus().equals(ProjectStatus.CANCELLED) ||
