@@ -3,7 +3,7 @@ name: Java CI
 on:
   pull_request:
     branches:
-      - 'griffon-master-bc5-feature/pipeline-BC-BJS2-16341'
+      - 'griffon-master-bc5'
 
 jobs:
   test:
