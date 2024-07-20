@@ -51,6 +51,7 @@ public class StageInvitationServiceTest {
     private StageInvitationFilterDto stageInvitationFilterDto;
     @Mock
     private List<StageInvitationFilter> stageInvitationsFilter;
+    private List<StageInvitation> stageInvintationFiltered;
 
     @BeforeEach
     public void init() {
@@ -71,8 +72,10 @@ public class StageInvitationServiceTest {
         teamMember.setId(1L);
 
         stageInvitationList = List.of(stageInvitation, stageInvitationSecond);
+        stageInvintationFiltered = List.of(stageInvitation);
         stageInvitationStatusFilter = new StageInvitationStatusFilter();
         stageInvitationFilterDto = new StageInvitationFilterDto();
+        stageInvitationFilterDto.setStatus(StageInvitationStatus.PENDING);
 
         stageInvitationStatusFilter = Mockito.mock(StageInvitationFilter.class);
         stageInvitationTeamMemberFilter = Mockito.mock(StageInvitationFilter.class);
@@ -136,14 +139,15 @@ public class StageInvitationServiceTest {
     @DisplayName("testGetStageInvitationForUser")
     public void getStageInvitationForUser() {
         when(stageInvitationRepository.findAll()).thenReturn(stageInvitationList);
-//        when(stageInvitationStatusFilter.isApplicable(any())).thenReturn(true);
-//        when(stageInvitationStatusFilter.apply(any(), any())).thenReturn(Stream.of(stageInvitation));
-        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
+        when(stageInvitationStatusFilter.isApplicable(any())).thenReturn(true);
+        when(stageInvitationStatusFilter.apply(stageInvitationList.stream(), stageInvitationFilterDto)).thenReturn(stageInvintationFiltered.stream());
+//        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
 
         List<StageInvitationDto> stageInvitationDtoResult = stageInvitationService.getStageInvitationForUser(stageInvitationFilterDto, 1L);
 
         verify(stageInvitationMapper, times(1)).toDto(any(StageInvitation.class));
 
         assertEquals(1, stageInvitationDtoResult.size());
+        assertTrue(stageInvitationDtoResult.size() > 0);
     }
 }
