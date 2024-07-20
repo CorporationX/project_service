@@ -19,6 +19,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -28,6 +30,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 @Data
 @Entity
 @Table(name = "internship")
+@Builder
 public class Internship {
 
     @Id
