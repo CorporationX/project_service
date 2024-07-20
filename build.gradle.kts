@@ -80,8 +80,9 @@ tasks.bootJar {
 val jacocoInclude = listOf(
     "**/projectservice/service/**",
     "**/projectservice/validator/**",
-    "**/projectservice/filter/**"
-)
+    "**/projectservice/filter/**",
+    "**/projectservice/controller/**"
+    )
 jacoco {
     toolVersion = "0.8.9"
     reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
@@ -113,7 +114,7 @@ tasks.jacocoTestCoverageVerification {
             )
             enabled = true
             limit {
-                minimum = BigDecimal(0.7).setScale(2, BigDecimal.ROUND_HALF_UP) // Задаем минимальный уровень покрытия
+                minimum = BigDecimal(0.7).setScale(2, BigDecimal.ROUND_HALF_UP)
             }
         }
     }
