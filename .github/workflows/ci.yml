@@ -1,27 +1,32 @@
 name: CI
 
 on:
-  push:
-    branches:
-    - feature/pipline-BC-tasknumber
   pull_request:
     branches:
-      - feature/pipline-BC-tasknumber
+      - feature/pipline-BC-BJS2-16908
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
-    name: jdk
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
-      - uses: action/setur-java@4
+        uses: actions/setup-java@4
         with:
-          distribution: '<distribution>'
+          distribution: 'temurin'
           java-version: '17'
-      - name: tests
-        run: java test
+
       - name: build
-        run: java run build
+        run: ./gradlew build
+
+      - name: jar
+        run: ./gradlew bootJar
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: tests
+        run: ./gradlew test
