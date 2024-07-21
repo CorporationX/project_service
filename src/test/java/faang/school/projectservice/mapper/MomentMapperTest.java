@@ -3,6 +3,7 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
 import org.apache.catalina.mapper.Mapper;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -26,9 +27,12 @@ public class MomentMapperTest {
     private List<Long> projectIds;
     private List<Long> userIds;
     private List<Project> projects;
+    private TeamMember member;
+    private List<TeamMember> members;
 
     @BeforeEach
     public void setUp() {
+        member = TeamMember.builder().id(3L).build();
         projectIds = new ArrayList<>();
         projectIds.add(1L);
         userIds = new ArrayList<>();
@@ -40,6 +44,7 @@ public class MomentMapperTest {
                 .name("test")
                 .date(LocalDateTime.of(2021, 1, 1, 0, 0))
                 .id(1L)
+                .memberIds(List.of(3L))
                 .projectIds(projectIds)
                 .userIds(userIds)
                 .build();
@@ -48,6 +53,7 @@ public class MomentMapperTest {
                 .date(LocalDateTime.of(2021, 1, 1, 0, 0))
                 .id(1L)
                 .projects(projects)
+                .members(List.of(member))
                 .userIds(userIds)
                 .build();
     }
