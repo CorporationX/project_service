@@ -40,22 +40,22 @@ public class ProjectController {
         return projectService.update(id,status,description);
     }
 
-    public List<ProjectDto> getProjectsWithFilters(long userId, String name){
-        if (name == null || name.isEmpty()) {
-            throw new RuntimeException("Invalid name " + name);
-        }
-        return projectService.getProjectsWithFilters(userId,name);
-    }
-
-    public List<ProjectDto> getProjectsWithFilters(long userId, ProjectStatus status){
-
-        return projectService.getProjectsWithFilters(userId,status);
-    }
-
-    public List<ProjectDto> getProjectsWithFilters(long userId, String name, ProjectStatus status){
-
-        return projectService.getProjectsWithFilters(userId,name,status);
-    }
+//    public List<ProjectDto> getProjectsWithFilters(long userId, String name){
+//        if (name == null || name.isEmpty()) {
+//            throw new RuntimeException("Invalid name " + name);
+//        }
+//        return projectService.getProjectsWithFilters(userId,name);
+//    }
+//
+//    public List<ProjectDto> getProjectsWithFilters(long userId, ProjectStatus status){
+//
+//        return projectService.getProjectsWithFilters(userId,status);
+//    }
+//
+//    public List<ProjectDto> getProjectsWithFilters(long userId, String name, ProjectStatus status){
+//
+//        return projectService.getProjectsWithFilters(userId,name,status);
+//    }
 
     public List<ProjectDto> getAllProjects(){
         return projectService.getAllProjects();

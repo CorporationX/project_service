@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.filter;
 
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.AllArgsConstructor;
@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class ProjectDto {
-    private Long id;
+public class ProjectFilterDto {
     private String name;
-    private String description;
-    private Long ownerId;
+    private ProjectStatus status;
 }

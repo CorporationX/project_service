@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.updater;
 
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.AllArgsConstructor;
@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class ProjectDto {
+public class ProjectUpdaterDto {
     private Long id;
     private String name;
     private String description;
     private Long ownerId;
+    private ProjectStatus status;
 }

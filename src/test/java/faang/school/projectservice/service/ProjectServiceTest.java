@@ -60,22 +60,37 @@ public class ProjectServiceTest {
         Assertions.assertThrows(RuntimeException.class,() ->projectService.update(id,status));
         Assertions.assertThrows(RuntimeException.class,() ->projectService.update(id,status,description));
     }
-
+@Test
     public void update(){
         long ownerId = 1L;
-        long id = 0L;
+        long projectId = 0L;
         String name = "Name";
         String sourceDescription = "";
-        String resultDescription = "";
+        String newDescription = "new";
         ProjectStatus status = ProjectStatus.CREATED;
         Project project = Project.builder()
+                .id(projectId)
                 .ownerId(ownerId)
                 .name(name)
                 .description(sourceDescription)
-                .status(ProjectStatus.CREATED)
+                .status(status)
                 .build();
-        Mockito.when(projectRepository.getProjectById(id)).thenReturn(project);
-        projectService.update(id,resultDescription)
+        ProjectDto projectDto = ProjectDto.builder()
+                .ownerId(ownerId)
+                .name(name)
+                .description(sourceDescription)
+                .build();
+        Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        Mockito.when(projectRepository.save(project)).thenReturn(project);
+        Mockito.when(projectMapper.toDto(project)).thenReturn(projectDto);
+        ProjectDto result = projectService.update(projectId,newDescription);
 
+Assertions.assertEquals(project.getDescription(),newDescription);
+Assertions.assertEquals(projectDto, result);
+
+
+        Mockito.verify(projectRepository).getProjectById(projectId);
+        Mockito.verify(projectRepository).save(project);
+        Mockito.verify(projectMapper).toDto(project);
     }
 }
