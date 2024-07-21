@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
@@ -85,6 +85,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional(readOnly = true)
     public boolean isUserProjectOwner(long projectId, long userId) {
         log.info("Received GET request on project {} and user {}", projectId, userId);
-        return projectRepository.checkUserIsProjectOwner(projectId,userId);
+        return projectRepository.checkUserIsProjectOwner(projectId, userId);
     }
 }

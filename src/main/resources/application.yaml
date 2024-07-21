@@ -33,8 +33,15 @@ spring:
   profiles:
     active: none
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 server:
   port: 8082
+  servlet:
+    context-path: /api/v1
 
 logging:
   level:
@@ -51,15 +58,13 @@ services:
     bucketName: projectbucket
     isMocked: false
     maxFreeStorageSizeBytes: 2147483648
+    maxProjectCoverSizeBytes: 5242880
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
-
-api:
-  version: v1
 
 internship:
   duration:
@@ -78,3 +83,8 @@ google:
 calendar:
   event:
     count_to_return: 10
+
+project:
+  maxWidth: 1080
+  imageExtension: jpeg
+  contentType: image/jpeg

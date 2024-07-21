@@ -38,7 +38,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ProjectResourceServiceImplTest {
+class  ProjectResourceServiceImplTest {
 
     @Mock
     private AmazonS3Service amazonS3Service;

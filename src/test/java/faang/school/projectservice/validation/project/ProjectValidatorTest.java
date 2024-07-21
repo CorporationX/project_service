@@ -2,13 +2,13 @@ package faang.school.projectservice.validation.project;
 
 
 import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validation.project.impl.ProjectValidatorImpl;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -26,63 +26,52 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectValidatorTest {
-
     private static final long projectId1 = 1;
     private static final long projectId2 = 2;
     private static final long projectId3 = 3;
-    private static final long projectId4 = 4;
-    private static final long projectId5 = 5;
-    private static final long projectId6 = 6;
-    private static final long projectId7 = 7;
-    private static final Project projectWithId1 = Project.builder().id(projectId1).build();
-    private static final Project projectWithId2 = Project.builder().id(projectId2).build();
-    private static final Project projectWithId3 = Project.builder().id(projectId3).build();
-    private static final Project projectWithId4 = Project.builder().id(projectId4).build();
-    private static final Project projectWithId5 = Project.builder().id(projectId5).build();
-    private static final Project projectWithId6 = Project.builder().id(projectId6).build();
-    private static final Project projectWithId7 = Project.builder().id(projectId7).build();
-    @Mock
-    private ProjectRepository projectRepository;
+    private static final long projectId4 = 100_000_000;
+    private static final long projectId5 = 200_000_000;
+    private static final long projectId6 = 3_000_000_000L;
+    private static final long projectId7 = Long.MAX_VALUE;
+    private static final long userId1 = 1;
+    private static final long userId2 = 2;
+    private static final long userId3 = 3;
+    private static final long userId4 = 100_000_000;
+    private static final long userId5 = 200_000_000;
+    private static final long userId6 = 3_000_000_000L;
+    private static final long userId7 = Long.MAX_VALUE;
+
     @InjectMocks
     private ProjectValidatorImpl projectValidator;
+    @Mock
+    private ProjectRepository projectRepository;
     @Captor
-    private ArgumentCaptor<Long> idCaptor;
+    private ArgumentCaptor<Long> projectIdCaptor;
+    @Captor
+    private ArgumentCaptor<Long> userIdCaptor;
 
-    private static Stream<Arguments> provideArgumentsForTestValidateProjectExistence() {
+    private static Stream<Arguments> provideArgumentsForTestValidateProjectIdAndCurrentUserId() {
         return Stream.of(
-                Arguments.of(projectId1, projectWithId1),
-                Arguments.of(projectId2, projectWithId2),
-                Arguments.of(projectId3, projectWithId3),
-                Arguments.of(projectId4, projectWithId4),
-                Arguments.of(projectId5, projectWithId5),
-                Arguments.of(projectId6, projectWithId6),
-                Arguments.of(projectId7, projectWithId7)
+                Arguments.of(projectId1, userId1),
+                Arguments.of(projectId2, userId2),
+                Arguments.of(projectId3, userId3),
+                Arguments.of(projectId4, userId4),
+                Arguments.of(projectId5, userId5),
+                Arguments.of(projectId6, userId6),
+                Arguments.of(projectId7, userId7)
         );
     }
-
-    private static Stream<Arguments> provideArgumentsForTestValidateProjectExistenceShouldThrowException() {
-        return Stream.of(
-                Arguments.of(projectId1, null),
-                Arguments.of(projectId2, null),
-                Arguments.of(projectId3, null),
-                Arguments.of(projectId4, null),
-                Arguments.of(projectId5, null),
-                Arguments.of(projectId6, null),
-                Arguments.of(projectId7, null)
-        );
-    }
-
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateProjectExistence")
-    public void testValidateProjectExistence(long projectId, Project project) {
+    @ValueSource(longs = {projectId1, projectId2, projectId3, projectId4, projectId5, projectId6, projectId7})
+    public void testValidateProjectExistence(long projectId) {
         when(projectRepository.existsById(projectId))
                 .thenReturn(true);
 
         projectValidator.validateProjectExistence(projectId);
         verify(projectRepository, times(1))
-                .existsById(idCaptor.capture());
-        var actualProjectId = idCaptor.getValue();
+                .existsById(projectIdCaptor.capture());
+        long actualProjectId = projectIdCaptor.getValue();
 
         assertEquals(projectId, actualProjectId);
 
@@ -90,19 +79,62 @@ public class ProjectValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsForTestValidateProjectExistenceShouldThrowException")
-    public void testValidateProjectExistenceShouldThrowException(long projectId, Project project) {
+    @ValueSource(longs = {projectId1, projectId2, projectId3, projectId4, projectId5, projectId6, projectId7})
+    public void testValidateProjectExistenceShouldThrowException(long projectId) {
         when(projectRepository.existsById(projectId))
                 .thenReturn(false);
         DataValidationException actualException = assertThrows(DataValidationException.class,
                 () -> projectValidator.validateProjectExistence(projectId));
         verify(projectRepository, times(1))
-                .existsById(idCaptor.capture());
+                .existsById(projectIdCaptor.capture());
 
-        var expectedMessage = String.format("a project with id %d does not exist", projectId);
-        var actualMessage = actualException.getMessage();
+        String expectedMessage = String.format("a project with id %d does not exist", projectId);
+        String actualMessage = actualException.getMessage();
 
         assertEquals(expectedMessage, actualMessage);
         verifyNoMoreInteractions(projectRepository);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideArgumentsForTestValidateProjectIdAndCurrentUserId")
+    public void testValidateProjectIdAndCurrentUserId(long projectId, long currentUserId) {
+        when(projectRepository.checkUserIsProjectOwner(projectId, currentUserId))
+                .thenReturn(true);
+
+        projectValidator.validateProjectIdAndCurrentUserId(projectId, currentUserId);
+
+        verify(projectRepository, times(1))
+                .checkUserIsProjectOwner(projectIdCaptor.capture(), userIdCaptor.capture());
+        long actualProjectId = projectIdCaptor.getValue();
+        long actualUserId = userIdCaptor.getValue();
+
+        verifyNoMoreInteractions(projectRepository);
+        assertEquals(projectId, actualProjectId);
+        assertEquals(currentUserId, actualUserId);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideArgumentsForTestValidateProjectIdAndCurrentUserId")
+    public void testValidateProjectIdAndCurrentUserIdShouldThrowException(long projectId, long currentUserId) {
+        when(projectRepository.checkUserIsProjectOwner(projectId, currentUserId))
+                .thenReturn(false);
+
+        DataValidationException actualException = assertThrows(DataValidationException.class,
+                () -> projectValidator.validateProjectIdAndCurrentUserId(projectId, currentUserId));
+
+        String expectedExceptionMessage = String.format("a user with id %d does not owe a project with id %d",
+                currentUserId, projectId);
+        String actualExceptionMessage = actualException.getMessage();
+
+        verify(projectRepository, times(1))
+                .checkUserIsProjectOwner(projectIdCaptor.capture(), userIdCaptor.capture());
+
+        long actualProjectId = projectIdCaptor.getValue();
+        long actualUserId = userIdCaptor.getValue();
+
+        verifyNoMoreInteractions(projectRepository);
+        assertEquals(expectedExceptionMessage, actualExceptionMessage);
+        assertEquals(projectId, actualProjectId);
+        assertEquals(currentUserId, actualUserId);
     }
 }

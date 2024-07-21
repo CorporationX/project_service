@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.exceptions.NotFoundException;
 import faang.school.projectservice.exceptions.ErrorResponse;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -43,6 +44,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleNotFoundException(NotFoundException e, HttpServletRequest request) {
         log.error("Not found: {}", e.getMessage());
         return buildErrorResponse(e, request, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+    public ErrorResponse handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e, HttpServletRequest request) {
+        log.error("Max upload size exceeded: {}", e.getMessage());
+        return buildErrorResponse(e, request, HttpStatus.PAYLOAD_TOO_LARGE);
     }
 
     @ExceptionHandler(RuntimeException.class)
