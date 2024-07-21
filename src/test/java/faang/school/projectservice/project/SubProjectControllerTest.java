@@ -1,6 +1,7 @@
 package faang.school.projectservice.project;
 
 import faang.school.projectservice.controller.SubProjectController;
+import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.service.project.ProjectService;
@@ -34,6 +35,17 @@ public class SubProjectControllerTest {
     public void testValidateProjectName(){
         ProjectDto dto = ProjectDto.builder()
                 .name("").build();
+        CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder()
+                .name("").build();
+        assertThrows(DataValidationException.class, () -> controller.createSubProject(1L,subProjectDto));
         assertThrows(DataValidationException.class, () -> controller.createProject(dto));
+    }
+
+    @Test
+    public void testCreateSubProject(){
+        CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder()
+                .name("Test").build();
+        controller.createSubProject(1L,subProjectDto);
+        verify(projectService,times(1)).createSubProject(1L,subProjectDto);
     }
 }
