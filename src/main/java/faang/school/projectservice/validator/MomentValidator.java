@@ -4,9 +4,12 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class MomentValidator {
     public void validateMoment(Moment moment) {
         if (moment.getName().isBlank()) {

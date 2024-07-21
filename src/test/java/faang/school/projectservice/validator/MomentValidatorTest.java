@@ -51,7 +51,9 @@ public class MomentValidatorTest {
     @Test
     public void validateIfNotAssignedToAnyProjectTest() {
         moment.setProjects(Collections.emptyList());
-        Assert.assertThrows(DataValidationException.class, () -> {momentValidator.validateMoment(moment);});
+        Assert.assertThrows(DataValidationException.class, () -> {
+            momentValidator.validateMoment(moment);
+        });
     }
 
     @Test
@@ -59,21 +61,23 @@ public class MomentValidatorTest {
         project.setName("test");
         project.setStatus(ProjectStatus.IN_PROGRESS);
         moment.setProjects(Collections.singletonList(project));
-        Assertions.assertDoesNotThrow(()->momentValidator.validateMoment(moment));
+        Assertions.assertDoesNotThrow(() -> momentValidator.validateMoment(moment));
     }
 
     @Test
     public void validateIfProjectsAreCancelledTest() {
         project.setStatus(ProjectStatus.CANCELLED);
         moment.setProjects(Collections.singletonList(project));
-        Assert.assertThrows(DataValidationException.class, () -> {momentValidator.validateMoment(moment);});
+        Assert.assertThrows(DataValidationException.class, () -> {
+            momentValidator.validateMoment(moment);
+        });
     }
 
     @Test
     public void validateIfProjectsArCompletedTest() {
         project.setStatus(ProjectStatus.COMPLETED);
         moment.setProjects(Collections.singletonList(project));
-        Assertions.assertThrows(DataValidationException.class, ()->momentValidator.validateMoment(moment));
+        Assertions.assertThrows(DataValidationException.class, () -> momentValidator.validateMoment(moment));
     }
 
     @Test
@@ -83,8 +87,7 @@ public class MomentValidatorTest {
         Project newProject = Project.builder().name("newProject").status(ProjectStatus.CREATED).build();
         projects.add(newProject);
         moment.setProjects(projects);
-        Assertions.assertDoesNotThrow(()->momentValidator.validateMoment(moment));
+        Assertions.assertDoesNotThrow(() -> momentValidator.validateMoment(moment));
     }
-
 
 }
