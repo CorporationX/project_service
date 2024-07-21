@@ -7,5 +7,6 @@ import java.util.stream.Stream;
 
 public interface ProjectFilter {
     boolean isApplicable(ProjectFilterDto filters);
+
     Stream<Project> apply(Stream<Project> projects, ProjectFilterDto filters);
 }
