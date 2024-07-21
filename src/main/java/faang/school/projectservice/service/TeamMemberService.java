@@ -1,5 +1,7 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -11,10 +13,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static faang.school.projectservice.exception.InternshipError.ABSENT_INTERN_ROLE_EXCEPTION;
+
 @Service
 @RequiredArgsConstructor
 public class TeamMemberService {
-    private final TeamMemberRepository teamMemberRepository;
+    private final TeamMemberJpaRepository  teamMemberJpaRepository;
 
     public void changeRoleForInternsAndDeleteFiredInterns(Internship internship) {
         List<TeamMember> interns = internship.getInterns();
@@ -38,14 +42,12 @@ public class TeamMemberService {
     private void changeRole(List<TeamMember> internships) {
         internships.forEach(intern -> {
             List<TeamRole> roles = intern.getRoles();
-            //todo:exception
             if (!roles.contains(TeamRole.INTERN))
-                throw new Exception();
+                throw new DataValidationException(ABSENT_INTERN_ROLE_EXCEPTION);
             if (roles.size() == 1)
                 intern.getRoles().add(TeamRole.DEVELOPER);
 
-            teamMemberRepository.save(intern);
-
+            teamMemberJpaRepository.save(intern);
         });
     }
 }
