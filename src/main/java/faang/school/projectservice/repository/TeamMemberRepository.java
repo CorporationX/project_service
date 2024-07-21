@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class TeamMemberRepository {
@@ -22,5 +24,9 @@ public class TeamMemberRepository {
             throw new EntityNotFoundException(String.format("Team member doesn't exist by User ID: %s and Project ID: %s", userId, projectId));
         }
         return teamMember;
+    }
+
+    public List<TeamMember> findAllByProjectId(Long projectId) {
+        return jpaRepository.findAllByProjectId(projectId);
     }
 }

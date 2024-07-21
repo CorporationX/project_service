@@ -17,7 +17,7 @@ import static faang.school.projectservice.util.TestProject.PROJECT;
 import static faang.school.projectservice.util.TestProject.PROJECTS;
 import static faang.school.projectservice.util.TestProject.PROJECTS_DTOS;
 import static faang.school.projectservice.util.TestProject.PROJECT_DTO;
-import static faang.school.projectservice.util.TestProject.PROJECT_ID;
+import static faang.school.projectservice.util.TestProject.PROJECT_ID_1;
 import static faang.school.projectservice.util.TestProject.SAVED_PROJECT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -64,11 +64,11 @@ class ProjectServiceTest {
 
     @Test
     public void testFindProjectById() {
-        when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(PROJECT);
+        when(projectRepository.getProjectById(PROJECT_ID_1)).thenReturn(PROJECT);
         when(projectMapper.toDto(PROJECT)).thenReturn(PROJECT_DTO);
-        var project = projectRepository.getProjectById(PROJECT_ID);
+        var project = projectRepository.getProjectById(PROJECT_ID_1);
         var dto = projectMapper.toDto(PROJECT);
-        verify(projectRepository, times(1)).getProjectById(PROJECT_ID);
+        verify(projectRepository, times(1)).getProjectById(PROJECT_ID_1);
         verify(projectMapper, times(1)).toDto(PROJECT);
         assertEquals(project.getId(), dto.getId());
         assertEquals(project.getName(), dto.getName());

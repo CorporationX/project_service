@@ -10,9 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static faang.school.projectservice.util.TestProject.PROJECT;
-import static faang.school.projectservice.util.TestProject.PROJECT_ID;
+import static faang.school.projectservice.util.TestProject.PROJECT_ID_1;
 import static faang.school.projectservice.util.TestProject.PROJECT_NAME;
-import static faang.school.projectservice.util.TestUser.USER_ID;
+import static faang.school.projectservice.util.TestUser.USER_ID_1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -28,18 +28,18 @@ class ProjectValidatorTest {
 
     @Test
     public void testIsProjectExists() {
-        when(projectRepository.existsById(PROJECT_ID)).thenReturn(false);
+        when(projectRepository.existsById(PROJECT_ID_1)).thenReturn(false);
         EntityNotFoundException entityNotFoundException = assertThrows(
                 EntityNotFoundException.class,
-                () -> projectValidator.exists(PROJECT_ID)
+                () -> projectValidator.exists(PROJECT_ID_1)
         );
-        assertEquals("Entity project with projectId=" + PROJECT_ID + " not found.",
+        assertEquals("Entity project with projectId=" + PROJECT_ID_1 + " not found.",
                 entityNotFoundException.getMessage());
     }
 
     @Test
     public void testIsUniqOwnerAndName() {
-        when(projectRepository.existsByOwnerUserIdAndName(USER_ID, PROJECT_NAME))
+        when(projectRepository.existsByOwnerUserIdAndName(USER_ID_1, PROJECT_NAME))
                 .thenReturn(true);
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,

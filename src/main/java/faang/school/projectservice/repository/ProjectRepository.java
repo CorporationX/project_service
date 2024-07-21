@@ -42,4 +42,8 @@ public class ProjectRepository {
     public void delete(long id) {
         projectJpaRepository.deleteById(id);
     }
+
+    public List<Project> findProjectByTeamMember(long teamMemberId) {
+        return projectJpaRepository.findProjectByTeamMember(teamMemberId);
+    }
 }
