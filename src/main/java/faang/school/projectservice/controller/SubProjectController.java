@@ -38,7 +38,7 @@ public class SubProjectController {
         }
     }
 
-    @PutMapping("/project/{projectId")
+    @PutMapping("/project/{projectId}")
     public CreateSubProjectDto updateProject(@PathVariable @Positive @Valid long projectId, @RequestBody CreateSubProjectDto dto) {
         return projectService.updateProject(projectId,dto);
     }
