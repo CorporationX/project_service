@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.project;
+package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectDto {
+public class CreateSubProjectDto {
     private Long id;
     private String name;
     private String description;
