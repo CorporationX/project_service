@@ -17,6 +17,7 @@ import faang.school.projectservice.model.stage.FateOfTasksAfterDelete;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
@@ -273,25 +274,13 @@ public class StageServiceTest {
         Stage stage = prepareStage();
         List<StageRoles> stageRoles = prepareStageRoles();
         stage.setStageRoles(stageRoles);
-        StageInvitation stageInvitationToSend = new StageInvitation();
+        StageInvitation stageInvitation = new StageInvitation();
         when(mapperMock.toEntity(dto)).thenReturn(stage);
-        when(stageInvitationRepository.save(stageInvitationToSend)).thenReturn(stageInvitationToSend);
 
         stageService.updateStage(dto);
 
-//        //assertEquals();
-//
+        verify(stageInvitationRepository, times(1)).save(stageInvitation);
     }
-
-//    private StageInvitation getStageInvitation(TeamMember invited, Stage stage, StageRoles stageRoles) {
-//        StageInvitation stageInvitationToSend = new StageInvitation();
-//        String INVITATIONS_MESSAGE = String.format("Invite you to participate in the development stage %s " +
-//                "of the project %s for the role %s", stage.getStageName(), stage.getProject().getName(), stageRoles);
-//        stageInvitationToSend.setDescription(INVITATIONS_MESSAGE);
-//        stageInvitationToSend.setStatus(StageInvitationStatus.PENDING);
-//        stageInvitationToSend.setStage(stage);
-//        stageInvitationToSend.setInvited(invited);
-//        return stageInvitationToSend;
 
     @Test
     void testGetAllStages() {

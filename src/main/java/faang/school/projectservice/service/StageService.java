@@ -123,63 +123,83 @@ public class StageService {
         return stageMapper.toDto(updatedStage);
     }
 
+    //Возникает ошибка при тестировании данного метода
     private void getExecutorsForRole(Stage stage, StageRoles stageRoles) {
-        List<TeamMember> executorsWithTheRole = new ArrayList<>();
-        stage.getExecutors().forEach(executor -> {
-            if (executor.getRoles()
-                    .contains(stageRoles.getTeamRole())) {
-                executorsWithTheRole.add(executor);
-            }
-        });
+        List<TeamMember> executorsWithTheRole = getTeamMembersWithTheRole(stage, stageRoles);
 
-        List<TeamMember> projectMembersWithTheSameRole = new ArrayList<>();
-        if (executorsWithTheRole.size() < stageRoles.getCount()) {
-            stage.getProject()
-                    .getTeams()
-                    .forEach(team ->
-                            projectMembersWithTheSameRole.addAll(
-                                    team.getTeamMembers()
-                                            .stream()
-                                            .filter(teamMember ->
-                                                    !teamMember.getStages().contains(stage))
-                                            .filter(teamMember ->
-                                                    teamMember.getRoles()
-                                                            .contains(stageRoles.getTeamRole()))
-                                            .toList()));
-        }
-
+        //Разница между необходимым количеством участников для данной роли
+        //и тем количеством участников, которые уже работают на этом этапе проекта.
+        //Если она больше 0, ищу среди всего проекта (а не только одного этапа) участников с такой же ролью,
+        //чтобы затем отправить им приглашение участвовать в данном этапе проекта
         int requiredNumberOfInvitation = stageRoles.getCount() - executorsWithTheRole.size();
 
-        if (projectMembersWithTheSameRole.size() < requiredNumberOfInvitation) {
-            projectMembersWithTheSameRole.forEach(teamMember -> {
-                StageInvitation stageInvitationToSend = getStageInvitation(teamMember, stage, stageRoles);
-                stageInvitationRepository.save(stageInvitationToSend);
+        List<TeamMember> projectMembersWithTheSameRole = new ArrayList<>();
+        if (requiredNumberOfInvitation > 0) {
+            getProjectMembersWithTheSameRole(stage, stageRoles, projectMembersWithTheSameRole);
+        }
+
+        if (projectMembersWithTheSameRole.size() < requiredNumberOfInvitation) {  //Если число учасников проекта с нужной ролью
+            projectMembersWithTheSameRole.forEach(teamMember -> {                 //меньше, чем количество учасников,
+                StageInvitation stageInvitationToSend =                           //которое нужно пригласить,
+                        getStageInvitation(teamMember, stage, stageRoles);        //отправляю приглашения тому количеству учасников,
+                stageInvitationRepository.save(stageInvitationToSend);            //которые есть в списке
             });
 
             int numberOfMissingTeamMembers = requiredNumberOfInvitation - projectMembersWithTheSameRole.size();
 
+            //И выводится сообщение о том, сколько еще участников с нужной ролью нужно найти для работы на данном этапе проекта
             throw new StageException("To work at the project stage, " + stageRoles.getCount() +
-                    " executors with a role " + stageRoles + " are required. But there are only " +
+                    " executors with a role " + stageRoles.getTeamRole().name() + " are required. But there are only " +
                     projectMembersWithTheSameRole.size() + " executors on the project with this role. " +
                     " There is a need for " + numberOfMissingTeamMembers + " more participants.");
         }
 
-        projectMembersWithTheSameRole.stream()
-                .limit(requiredNumberOfInvitation)
-                .forEach(teamMember -> {
-                    StageInvitation stageInvitationToSend = getStageInvitation(teamMember, stage, stageRoles);
+        projectMembersWithTheSameRole.stream()              //Если же число учасников в списке больше либо равно искомому
+                .limit(requiredNumberOfInvitation)          //числу учасников с нужной ролью, отправляю столько приглашений,
+                .forEach(teamMember -> {                    //сколько требуется
+                    StageInvitation stageInvitationToSend =
+                            getStageInvitation(teamMember, stage, stageRoles);
                     stageInvitationRepository.save(stageInvitationToSend);
                 });
+    }
+
+    private List<TeamMember> getTeamMembersWithTheRole(Stage stage, StageRoles stageRoles) {
+        List<TeamMember> executorsWithTheRole = new ArrayList<>();
+        stage.getExecutors().forEach(executor -> {                //Определяю роль каждого участника
+            if (executor.getRoles()                               //данного этапа проекта.
+                    .contains(stageRoles.getTeamRole())) {        //Если она совпадает с ролью, к которой применяется этот метод,
+                executorsWithTheRole.add(executor);               //добавляю ее с список.
+            }                                                     //Получаю список участников этапа с данной ролью
+        });
+        return executorsWithTheRole;
+    }
+
+    private void getProjectMembersWithTheSameRole(Stage stage,
+                                                         StageRoles stageRoles,
+                                                         List<TeamMember> projectMembersWithTheSameRole) {
+        stage.getProject()
+                .getTeams()                                           //Получаю все команды проекта, к которому относится этап.
+                .forEach(team ->                                      //Из каждой команды получаю участников
+                        projectMembersWithTheSameRole.addAll(
+                                team.getTeamMembers()
+                                        .stream()
+                                        .filter(teamMember ->                             //Проверяю, не работает ли данный участник
+                                                !teamMember.getStages().contains(stage))  //уже над данным этапом
+                                        .filter(teamMember ->
+                                                teamMember.getRoles()                          //Отбираю участников
+                                                        .contains(stageRoles.getTeamRole()))   //с нужной ролью
+                                        .toList()));                                           //и добавляю их в отдельный список
     }
 
     private StageInvitation getStageInvitation(TeamMember invited, Stage stage, StageRoles stageRoles) {
         StageInvitation stageInvitationToSend = new StageInvitation();
         String INVITATIONS_MESSAGE = String.format("Invite you to participate in the development stage %s " +
-                "of the project %s for the role %s", stage.getStageName(), stage.getProject().getName(), stageRoles);
+                "of the project %s for the role %s",
+                stage.getStageName(), stage.getProject().getName(), stageRoles.getTeamRole());
         stageInvitationToSend.setDescription(INVITATIONS_MESSAGE);
         stageInvitationToSend.setStatus(StageInvitationStatus.PENDING);
-        stageInvitationToSend.setStage(stage);
         stageInvitationToSend.setInvited(invited);
+        stageInvitationToSend.setStage(stage);
         return stageInvitationToSend;
     }
 
