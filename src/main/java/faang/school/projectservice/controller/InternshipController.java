@@ -25,7 +25,7 @@ public class InternshipController {
         return internshipService.create(userId, internshipDto);
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public InternshipDto update(@RequestBody @Valid InternshipToUpdateDto internshipDto) {
         long userId = userContext.getUserId();
         return internshipService.update(userId, internshipDto);
