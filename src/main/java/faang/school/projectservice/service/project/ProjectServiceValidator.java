@@ -19,8 +19,7 @@ public class ProjectServiceValidator {
         }
     }
 
-    public void validateSubProjectVisibility(CreateSubProjectDto subProjectDto) {
-        Project parentProject = projectRepository.getProjectById(subProjectDto.getParentProjectId());
+    public void validateSubProjectVisibility(CreateSubProjectDto subProjectDto, Project parentProject) {
         if (parentProject.getVisibility() != subProjectDto.getVisibility()) {
             throw new DataValidationException("Visibility of parent project and subproject should be equals");
         } else if (projectRepository.existsById(subProjectDto.getId())) {

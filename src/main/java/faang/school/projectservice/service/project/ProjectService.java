@@ -24,7 +24,7 @@ public class ProjectService {
 
     public ProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
         Project parentProject = getProjectById(subProjectDto.getParentProjectId());
-        validator.validateSubProjectVisibility(subProjectDto);
+        validator.validateSubProjectVisibility(subProjectDto, parentProject);
 
         Project subProject = subProjectMapper.toEntity(subProjectDto, parentProject);
         return projectMapper.toDto(projectRepository.save(subProject));
