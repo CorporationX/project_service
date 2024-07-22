@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
-import faang.school.projectservice.dto.updater.ProjectUpdaterDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -24,25 +24,24 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
     private final List<ProjectUpdater> projectUpdaters;
+    private final UserContext userContext;
 
-    public ProjectDto create(long ownerId, String name, String description) {
-        if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
-            throw new RuntimeException("Project " + name + " already created by " + ownerId);
+    public ProjectDto create(ProjectDto projectDto) {
+        if (projectDto.getOwnerId() == null) {
+            projectDto.setOwnerId(userContext.getUserId());
         }
-        Project project = Project.builder()
-                .ownerId(ownerId)
-                .name(name)
-                .description(description)
-                .status(ProjectStatus.CREATED)
-                .build();
-        return projectMapper.toDto(projectRepository.save(project));
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+            throw new RuntimeException("Project " + projectDto.getName() + " already created by " + projectDto.getOwnerId());
+        }
+        projectDto.setStatus(ProjectStatus.CREATED);
+        return projectMapper.toDto(projectRepository.save(projectMapper.toEntity(projectDto)));
     }
 
-    public ProjectDto update(long id, ProjectUpdaterDto updater) {
+    public ProjectDto update(ProjectDto projectDto) {
         try {
-            Project project = projectRepository.getProjectById(id);
-            projectUpdaters.stream().filter(filter -> filter.isApplicable(updater))
-                    .forEach(filter -> filter.apply(project, updater));
+            Project project = projectRepository.getProjectById(projectDto.getId());
+            projectUpdaters.stream().filter(filter -> filter.isApplicable(projectDto))
+                    .forEach(filter -> filter.apply(project, projectDto));
             return projectMapper.toDto(projectRepository.save(project));
         } catch (EntityNotFoundException e) {
             throw new RuntimeException(e.getMessage());
@@ -50,7 +49,9 @@ public class ProjectService {
 
     }
 
-    public List<ProjectDto> getProjectsWithFilters(long userId, ProjectFilterDto filters) {
+    public List<ProjectDto> getProjectsWithFilters(ProjectDto projectDto) {
+        ProjectFilterDto filters = projectMapper.toFilter(projectDto);
+        long userId = userContext.getUserId();
         Stream<Project> publicProjects = projectRepository.findAll().stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC);
         Stream<Project> privateProjects = projectRepository.findAll().stream()
@@ -72,9 +73,9 @@ public class ProjectService {
                 .toList();
     }
 
-    public ProjectDto getProjectById(long id) {
+    public ProjectDto getProjectById(ProjectDto projectDto) {
         try {
-            return projectMapper.toDto(projectRepository.getProjectById(id));
+            return projectMapper.toDto(projectRepository.getProjectById(projectDto.getId()));
         } catch (EntityNotFoundException e) {
             throw new RuntimeException(e.getMessage());
         }
