@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
-
     public TeamMember findById(Long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId);
     }

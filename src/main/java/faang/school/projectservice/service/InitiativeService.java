@@ -122,11 +122,10 @@ public class InitiativeService {
 
     private boolean checkProjectActiveInitiative(Long projectId) {
         List<Initiative> initiatives = initiativeRepository.findAll();
-        return initiatives
-                .stream()
-                .filter(initiative -> !initiative.getStatus().equals(InitiativeStatus.CLOSED))
-                .filter(initiative -> !initiative.getStatus().equals(InitiativeStatus.DONE))
-                .anyMatch(initiative -> initiative.getProject().getId().equals(projectId));
+        return initiatives.stream()
+                .filter(initiative -> initiative.getProject().getId().equals(projectId))
+                .anyMatch(initiative -> initiative.getStatus() != InitiativeStatus.CLOSED
+                        && initiative.getStatus() != InitiativeStatus.DONE);
     }
 
     private boolean checkCuratorRole(Long curatorId) {

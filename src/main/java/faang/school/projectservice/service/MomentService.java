@@ -18,7 +18,6 @@ public class MomentService {
         Moment moment = Moment.builder()
                 .name(initiative.getName())
                 .description(initiative.getDescription())
-                .date(LocalDateTime.now())
                 .projects(initiative.getSharingProjects())
                 .createdAt(LocalDateTime.now())
                 .userIds(List.of(initiative.getCurator().getId()))
