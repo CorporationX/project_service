@@ -20,9 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -58,8 +57,11 @@ public class ProjectService {
         return subProjectMapper.toDto(projectJpaRepository.save(childProject));
     }
 
-    public CreateSubProjectDto updateProject(long id, CreateSubProjectDto dto) {
+    public CreateSubProjectDto updateProject(long id, CreateSubProjectDto dto,long userId) {
         Project project = projectJpaRepository.getReferenceById(id);
+        List<Project> children = projectJpaRepository.getAllSubprojectsFor(id);
+        List<Moment> moments = new ArrayList<>();
+//        List<Project> children = projectJpaRepository.findAllById(childrenIds);
         if (dto.getId() != null) {
             project.setId(dto.getId());
         }
@@ -76,8 +78,19 @@ public class ProjectService {
         }
         if (dto.getStatus() != project.getStatus()) {
             if (dto.getStatus().equals(ProjectStatus.COMPLETED)) {
-                if (project.getMoments() != null || dto.getMomentsIds() != null) {
+                List<Project> completedChildProjects = getCompletedChildProjects(children);
+                if (!completedChildProjects.isEmpty() && completedChildProjects.size() == children.size()) {
                     project.setStatus(dto.getStatus());
+                    moments = children.stream().
+                            map(Project::getMoments).
+                            flatMap(Collection::stream).
+                            toList();
+                    addMomentToList(id,moments,userId);
+                    project.setMoments(moments);
+                } else if (completedChildProjects.isEmpty()) {
+                    project.setStatus(dto.getStatus());
+                    addMomentToList(id,moments,userId);
+                    project.setMoments(moments);
                 } else {
                     throw new DataValidationException("current project has unfinished subprojects");
                 }
@@ -85,15 +98,38 @@ public class ProjectService {
                 project.setStatus(dto.getStatus());
             }
         }
-        // if set private, then you should set up private visibility for each child project
-        if (dto.getVisibility()!=project.getVisibility()){
-            project.setVisibility(dto.getVisibility());
+        if (dto.getVisibility() != project.getVisibility()) {
+            if (dto.getVisibility() == ProjectVisibility.PRIVATE) {
+//                List<Long> childrenIds = projectJpaRepository.getAllSubprojectsIdsFor(id);
+//                List<Project> children = projectJpaRepository.findAllById(childrenIds);
+                project.setVisibility(dto.getVisibility());
+                children.forEach(p -> p.setVisibility(dto.getVisibility()));
+                projectJpaRepository.saveAll(children);
+            } else {
+                project.setVisibility(dto.getVisibility());
+            }
         }
-        checkDtoForNullFields(dto,project);
-        TreeSet<Project> childrenSet = new TreeSet<>();
+        checkDtoForNullFields(dto, project);
 
 
         return null;
+    }
+
+    private void addMomentToList(long id, List<Moment> moments, long userId){
+        moments.add(Moment.builder()
+                .name("project " + id + " has been completed")
+                .updatedBy(userId)
+                .createdBy(userId)
+                .build());
+    }
+
+    private List<Project> getCompletedChildProjects(List<Project> childProjects) {
+        if (!childProjects.isEmpty()) {
+            return childProjects.stream().
+                    filter(p -> p.getStatus().equals(ProjectStatus.COMPLETED)).
+                    toList();
+        }
+        return List.of();
     }
 
     private void checkDtoForNullFields(ProjectValidator dto, Project project) {

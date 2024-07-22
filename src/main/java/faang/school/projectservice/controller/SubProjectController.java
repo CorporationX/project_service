@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class SubProjectController {
     private final ProjectService projectService;
+    private final UserContext userContext;
 
     @PostMapping("/project")
     public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
@@ -40,7 +42,8 @@ public class SubProjectController {
 
     @PutMapping("/project/{projectId}")
     public CreateSubProjectDto updateProject(@PathVariable @Positive @Valid long projectId, @RequestBody CreateSubProjectDto dto) {
-        return projectService.updateProject(projectId,dto);
+        long userId = userContext.getUserId();
+        return projectService.updateProject(projectId,dto,userId);
     }
 
     private boolean validateProjectName(String name) {
