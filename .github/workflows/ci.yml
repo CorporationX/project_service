@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
     branches:
-      - cyclop-master-bc5
+      - feature/pipline-BC-BJS2-16908
 
 jobs:
   build:
