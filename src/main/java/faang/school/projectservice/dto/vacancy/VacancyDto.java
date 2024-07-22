@@ -14,5 +14,6 @@ public class VacancyDto {
     private List<Long> candidatesId;
     private VacancyStatus status;
     private Double salary;
+    private Integer count;
     private List<Long> requiredSkillIds;
 }
