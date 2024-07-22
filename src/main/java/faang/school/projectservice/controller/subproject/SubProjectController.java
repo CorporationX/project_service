@@ -4,16 +4,23 @@ import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
+@RequestMapping("/subProjects")
 @RequiredArgsConstructor
 public class SubProjectController {
     private final ProjectService projectService;
-    private final SubProjectDtoValidator validator;
 
-    public ProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
-        validator.validate(subProjectDto);
-        return projectService.createSubProject(subProjectDto);
+    @PostMapping("/create")
+    public ResponseEntity<ProjectDto> createSubProject(@Validated @RequestBody CreateSubProjectDto subProjectDto) {
+        ProjectDto createdProject = projectService.createSubProject(subProjectDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
     }
 }
