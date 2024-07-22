@@ -4,6 +4,8 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,9 +15,12 @@ import java.util.List;
 public class InternshipDto {
 
     private long id;
+    @NotNull(message = "Project must not be null")
+    @Valid
     private Project project;
     private TeamMember mentorId;
     private List<TeamMember> interns;
+    @NotNull(message = "Status must not be null")
     private InternshipStatus status;
     private LocalDateTime startDate;
     private LocalDateTime endDate;

@@ -15,6 +15,7 @@ public class MomentDto {
     private Long id;
     @NotBlank(message = "Name should not be empty.")
     private String name;
+    @NotBlank(message = "Name should not be empty.")
     private String description;
     private LocalDateTime date;
     private List<Long> projects;
