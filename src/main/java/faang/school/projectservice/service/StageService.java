@@ -7,14 +7,15 @@ import faang.school.projectservice.dto.client.TeamRoleDto;
 import faang.school.projectservice.filter.stagefilter.StageFilter;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.validation.StageValidator;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class StageService {
     private final StageRepository stageRepository;
     private final StageMapper stageMapper;
@@ -31,25 +33,12 @@ public class StageService {
     private final TaskService taskService;
     private final List<StageFilter> stageFilters;
     private final StageRolesMapper stageRolesMapper;
+    private final StageValidator stageValidator;
 
-    @Autowired
-    public StageService(StageRepository stageRepository,
-                        StageMapper stageMapper,
-                        ProjectService projectService,
-                        TaskService taskService,
-                        List<StageFilter> stageFilters,
-                        StageRolesMapper stageRolesMapper) {
-        this.stageRepository = stageRepository;
-        this.stageMapper = stageMapper;
-        this.projectService = projectService;
-        this.taskService = taskService;
-        this.stageFilters = stageFilters;
-        this.stageRolesMapper = stageRolesMapper;
-    }
 
     @Transactional
     public void createStage(StageDto stageDto) {
-        validationProjectById(stageDto.getProjectId());
+        stageValidator.validationProjectById(stageDto.getProjectId());
         Stage stage = stageMapper.toEntity(stageDto);
         List<StageRoles> rolesList = stageRolesMapper.toEntities(stageDto.getStageRolesDtosList());
         rolesList.forEach(role -> role.setStage(stage));
@@ -59,8 +48,8 @@ public class StageService {
 
     @Transactional(readOnly = true)
     public List<StageDto> filterStages(Long projectId, StageFilterDto stageFilterDto) {
-        validationProjectById(projectId);
-        List<Stage> stages = getValidationStagesIsEmpty(projectId);
+        stageValidator.validationProjectById(projectId);
+        List<Stage> stages = stageValidator.getStages(projectId);
         return stageFilters.stream()
                 .filter(filter -> filter.isApplicable(stageFilterDto))
                 .reduce(stages.stream(), (stream,
@@ -93,11 +82,7 @@ public class StageService {
 
     private StageDeleteTaskStrategyDto moveTasks(Long stageToDeleteId,
                                                  StageDeleteTaskStrategyDto strategyDto,
-                                                 Long newStageId) {
-        if (newStageId == null) {
-            log.info("NewStage in method moveTask is null");
-            throw new IllegalArgumentException("newStageId must be provided for MOVE_TASKS strategy");
-        }
+                                                 @NotNull Long newStageId) {
         stageRepository.getById(newStageId).getTasks().addAll(stageRepository.getById(stageToDeleteId).getTasks());
         stageRepository.delete(stageRepository.getById(stageToDeleteId));
         return strategyDto;
@@ -133,7 +118,7 @@ public class StageService {
         StageRoles role = getStageRoles(stageId, teamRoleDto);
         List<TeamMember> team = getTeamMembers(stageId, teamRoleDto);
         if (role.getCount() > team.size()) {
-            sentInvitation(stageId, teamRoleDto,role.getCount(), team.size());
+            sendInvitation(stageId, teamRoleDto, role.getCount(), team.size());
         }
     }
 
@@ -158,8 +143,7 @@ public class StageService {
                 });
     }
 
-
-    private void sentInvitation(Long stageId, TeamRoleDto teamRoleDto, int roleCount, Integer teamSize) {
+    private void sendInvitation(Long stageId, TeamRoleDto teamRoleDto, int roleCount, Integer teamSize) {
         projectService.getProjectById(stageRepository.getById(stageId)
                         .getProject().getId()).getTeams()
                 .stream()
@@ -174,24 +158,4 @@ public class StageService {
                 .limit(roleCount - teamSize)
                 .forEach(teamMember -> System.out.println("Glad to see you in our team dude!"));
     }
-
-    private void validationProjectById(Long projectId){
-        Project project = projectService.getProjectById(projectId);
-        if (project == null) {
-            log.info("Method getValidationProjectById return Null");
-            throw new RuntimeException("Project is null");
-        }
-    }
-
-
-    private List<Stage> getValidationStagesIsEmpty(Long projectId){
-        List<Stage> stages = projectService.getProjectById(projectId).getStages();
-        if (stages.isEmpty()){
-            log.info("Method getValidationStageIsEmpty return empty List<Stage>");
-            throw new RuntimeException("List is empty");
-        } else {
-            return stages;
-        }
-    }
-
 }
