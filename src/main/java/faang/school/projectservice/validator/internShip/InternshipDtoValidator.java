@@ -15,7 +15,6 @@ import java.util.Objects;
 
 @Component
 @NoArgsConstructor
-//@RequiredArgsConstructor
 public class InternshipDtoValidator {
 
     private final String MSG_INVALID_PROJECT = "The internship does not have a project.";

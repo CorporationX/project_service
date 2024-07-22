@@ -20,6 +20,7 @@ import faang.school.projectservice.service.internShip.InternshipService;
 import faang.school.projectservice.validator.internShip.InternshipDtoValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -136,11 +137,11 @@ public class InternshipServiceTest {
         Assertions.assertThrows(InternshipDtoValidateException.class, () -> internshipService.create(dto));
     }
 
-    /*
-  Метод для теста создания стажировки. Обрабатывает два сценария.
-  1. Ментор - не член команды проекта
-  2. Ментор - член команды
-  */
+    @DisplayName("""
+            Метод для теста создания стажировки. Обрабатывает два сценария.
+            1. Ментор - не член команды проекта
+            2. Ментор - член команды
+            """)
     private void prepareForCreate(boolean isMember) {
         Long mentorId = dto.getMentorId();
         TeamMember mentor = entity.getMentorId(); // В Internship mentor назван как mentorId
@@ -167,7 +168,7 @@ public class InternshipServiceTest {
         }
     }
 
-    // Тест на изменения ментора, который не член проекта
+    @DisplayName("Тест на изменения ментора, который не член проекта")
     @Test
     void testUpdateWithChangeInvalidMentor() {
         when(internshipRepository.findById(dto.getId())).thenReturn(Optional.of(entity));
@@ -183,7 +184,7 @@ public class InternshipServiceTest {
         Assertions.assertThrows(InternshipDtoValidateException.class, () -> internshipService.update(dto));
     }
 
-    // Тест на изменения полей, которые менять нельзя
+    @DisplayName("Тест на изменения полей, которые менять нельзя")
     @Test
     void testUpdateWithInvalidChanges() {
         when(internshipRepository.findById(dto.getId())).thenReturn(Optional.of(entity));
