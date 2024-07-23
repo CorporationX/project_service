@@ -8,8 +8,8 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SubProjectMapper {
-    @Mapping(source = "parentProjectId", target = "parentProject.id")
+    @Mapping(target = "parentProject", ignore = true)
     Project toEntity(SubProjectDto subProjectDto);
-
+    @Mapping(source = "parentProject.id", target ="parentProjectId" )
     SubProjectDto toDto(Project project);
 }
