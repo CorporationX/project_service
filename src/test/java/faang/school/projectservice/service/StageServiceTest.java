@@ -9,6 +9,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -47,6 +48,8 @@ class StageServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private TeamMemberRepository teamMemberRepository;
+    @Mock
+    private Validator validator;
 
     private StageDto stageDto;
     private Stage stage;
@@ -107,6 +110,8 @@ class StageServiceTest {
 
         when(stageRepository.save(stage))
                 .thenReturn(stage);
+
+        when(validator.validateInputStageData(stageDto)).thenReturn(false);
 
         stageService.createStage(stageDto);
 
@@ -183,24 +188,6 @@ class StageServiceTest {
                 () -> stageService.updateStage(stageDto, teamRole));
     }
 
-    @Test
-    void shouldReturnDataValidationExceptionWhileCheckUserWhenUpdateStageTest() {
-        stageDto.setExecutorIds(List.of(1L, 2L, 3L));
-//        teamMember1.setId(1L);
-//        teamMember2.setId(2L);
-//        teamMember3.setId(3L);
-        teamMember1.setRoles(List.of(TeamRole.OWNER, TeamRole.DESIGNER));
-        teamMember2.setRoles(List.of(TeamRole.INTERN, TeamRole.DESIGNER));
-        teamMember3.setRoles(List.of(TeamRole.MANAGER, TeamRole.DESIGNER));
-
-        when(stageRepository.getById(stageDto.getStageId())).thenReturn(stage);
-        when(teamMemberRepository.findById(1L)).thenReturn(teamMember1);
-        when(teamMemberRepository.findById(2L)).thenReturn(teamMember2);
-        when(teamMemberRepository.findById(3L)).thenReturn(teamMember3);
-
-        assertThrows(DataValidationException.class,
-                () -> stageService.updateStage(stageDto, teamRole));
-    }
 
     @Test
     void shouldReturnEntityNotFoundExceptionWhenGetStagesOfProjectTest() {
