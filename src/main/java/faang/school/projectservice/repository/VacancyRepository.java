@@ -9,20 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
-    @Query(nativeQuery = true,value = """
-    INSERT INTO vacancy (name,description,project_id,created_at,updated_at, created_by,updated_by, status ,salary, work_schedule, count)
-    VALUES (?1,?2,?3,NOW(),NOW(),?4,?5,?6,?7,?8,?9 )
-    RETURNING *;
-    """)
-     Vacancy create(String name, String description,Long projectId,Long createdBy, Long updatedBy, String status,
-                    Double salary, String workSchedule,
-                    Integer count);
 
-//    @Query(nativeQuery = true,value = """
-//    SELECT * FROM vacancy
-//    WHERE id=:vacancyId
-//    SORT by created_at DESC
-//    LIMIT 1
-//    """)
-//    Vacancy findById(Long vacancyId);
+
 }

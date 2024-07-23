@@ -1,7 +1,7 @@
 package school.faang.user_service.exceptions;
 
-import faang.school.projectservice.exceptions.EntityNotFoundException;
-import faang.school.projectservice.exceptions.ValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.DataValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,8 +20,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Map<String,String>> handleValidationException(ValidationException ex) {
+    @ExceptionHandler(DataValidationException.class)
+    public ResponseEntity<Map<String,String>> handleValidationException(DataValidationException ex) {
         return new ResponseEntity<>(Map.of("message",ex.getMessage(),"status",HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(EntityNotFoundException.class)

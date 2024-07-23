@@ -15,15 +15,11 @@ public interface VacancyMapper {
 
     Vacancy toEntity(VacancyDto vacancyDto);
 
-    @Mapping(source = "candidates",target = "candidateIds",qualifiedByName = "mapCandidate")
+    @Mapping(source = "candidates",target = "candidateIds",qualifiedByName = "toCandidates")
     @Mapping(source = "project.id",target="projectId")
     VacancyDto toDto(Vacancy vacancy);
-    @Named("mapCandidate")
+    @Named("toCandidates")
     default List<Long> mapCandidate(List<Candidate> candidates) {
         return candidates.stream().map(Candidate::getId).toList();
-    }
-    @Named("mapProject")
-    default Long mapProject(Project project) {
-        return project.getId();
     }
 }
