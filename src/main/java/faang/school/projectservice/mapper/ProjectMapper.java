@@ -21,22 +21,9 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
 uses = TeamMapper.class)
 public interface ProjectMapper {
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "name", target = "name")
-    @Mapping(source = "description", target = "description")
-    @Mapping(source = "storageSize", target = "storageSize")
-    @Mapping(source = "maxStorageSize", target = "maxStorageSize")
-    @Mapping(source = "ownerId", target = "ownerId")
-    @Mapping(source = "parentProject", target = "parentProject")
-    @Mapping(source = "children", target = "children")
-    @Mapping(source = "createdAt", target = "createdAt")
-    @Mapping(source = "updatedAt", target = "updatedAt")
-    @Mapping(source = "status", target = "status")
-    @Mapping(source = "visibility", target = "visibility")
-    @Mapping(source = "coverImageId", target = "coverImageId")
+
     @Mapping(source = "resourceIds", target = "resources", qualifiedByName = "mapToResources")
     @Mapping(source = "momentIds", target = "moments", qualifiedByName = "mapToMoments")
-    @Mapping(source = "teams", target = "teams")
     Project toEntity(ProjectDto projectDto);
 
     List<Project> toEntity(List<ProjectDto> projects);
@@ -71,23 +58,8 @@ public interface ProjectMapper {
                 .toList();
     }
 
-
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "name", target = "name")
-    @Mapping(source = "description", target = "description")
-    @Mapping(source = "storageSize", target = "storageSize")
-    @Mapping(source = "maxStorageSize", target = "maxStorageSize")
-    @Mapping(source = "ownerId", target = "ownerId")
-    @Mapping(source = "parentProject", target = "parentProject")
-    @Mapping(source = "children", target = "children")
-    @Mapping(source = "createdAt", target = "createdAt")
-    @Mapping(source = "updatedAt", target = "updatedAt")
-    @Mapping(source = "status", target = "status")
-    @Mapping(source = "visibility", target = "visibility")
-    @Mapping(source = "coverImageId", target = "coverImageId")
     @Mapping(source = "resources", target = "resourceIds", qualifiedByName = "mapToResourceIds")
     @Mapping(source = "moments", target = "momentIds", qualifiedByName = "mapToMomentIds")
-    @Mapping(source = "teams", target = "teams")
     ProjectDto toDto(Project project);
 
     List<ProjectDto> toDto(List<Project> projects);
@@ -112,4 +84,5 @@ public interface ProjectMapper {
                 .map(Moment::getId)
                 .toList();
     }
+
 }
