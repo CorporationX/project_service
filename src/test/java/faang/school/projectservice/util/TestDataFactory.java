@@ -2,7 +2,7 @@ package faang.school.projectservice.util;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.MomentFilterDto;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -78,7 +78,7 @@ public final class TestDataFactory {
         projectDto.setCreatedAt(LocalDateTime.now());
         projectDto.setUpdatedAt(LocalDateTime.now());
         projectDto.setStatus(ProjectStatus.IN_PROGRESS);
-        projectDto.setMoments(new ArrayList<>());
+        projectDto.setMomentIds(new ArrayList<>());
 
         return projectDto;
     }

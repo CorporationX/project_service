@@ -2,7 +2,6 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.MomentFilterDto;
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
