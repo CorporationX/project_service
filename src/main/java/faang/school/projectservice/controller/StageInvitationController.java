@@ -3,20 +3,27 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.service.StageInvitationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
+@RequestMapping(value = "/stageInvitation")
 public class StageInvitationController {
 
-    private StageInvitationService stageInvitationService;
+    private final StageInvitationService stageInvitationService;
 
-    public StageInvitationDto sendAnInvitation(StageInvitationDto stageInvitationDto) {
+    @PostMapping("/send")
+    public StageInvitationDto sendAnInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
         if (stageInvitationDto == null) {
             log.error("stageInvitationDto is null");
             throw new IllegalArgumentException("stageInvitationDto is null");
@@ -24,7 +31,9 @@ public class StageInvitationController {
         return stageInvitationService.sendAnInvitation(stageInvitationDto);
     }
 
-    public StageInvitationDto acceptInvitation(StageInvitationDto stageInvitationDto, long userId) {
+    @PostMapping("/accept/{userId}")
+    public StageInvitationDto acceptInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto,
+                                               @PathVariable long userId) {
         if (stageInvitationDto == null) {
             log.error("stageInvitationDto is null");
             throw new IllegalArgumentException("stageInvitationDto is null");
@@ -32,7 +41,8 @@ public class StageInvitationController {
         return stageInvitationService.acceptInvatation(stageInvitationDto, userId);
     }
 
-    public StageInvitationDto declineTheInvitation(StageInvitationDto stageInvitationDto) {
+    @PostMapping("/decline")
+    public StageInvitationDto declineTheInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
         if (stageInvitationDto == null) {
             log.error("stageInvitationDto is null");
             throw new IllegalArgumentException("stageInvitationDto is null");
@@ -45,8 +55,9 @@ public class StageInvitationController {
         return stageInvitationService.declineTheInvitation(stageInvitationDto);
     }
 
-    public List<StageInvitationDto> getStageInvitationForUser(StageInvitationFilterDto stageInvitationFilterDto,
-                                                              long userId) {
+    @PostMapping("/stageUser/{userId}")
+    public List<StageInvitationDto> getStageInvitationForUser(@Valid @RequestBody StageInvitationFilterDto stageInvitationFilterDto,
+                                                              @PathVariable long userId) {
         if (stageInvitationFilterDto == null) {
             log.error("stageInvitationFilterDto is null");
             throw new IllegalArgumentException("stageInvitationFilterDto is null");

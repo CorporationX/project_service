@@ -28,6 +28,6 @@ class StageInvitationMapperTest {
         StageInvitationDto stageInvitationDto = stageInvitationMapper.toDto(stageInvitation);
 
         assertThat(stageInvitationDto).isNotNull();
-        assertThat(Mockito.any(StageInvitationDto.class)).isEqualTo(stageInvitationDto);
+        assertThat(stageInvitationDto.getDescription()).isEqualTo(stageInvitation.getDescription());
     }
 }

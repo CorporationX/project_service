@@ -66,7 +66,7 @@ public class StageInvitationServiceTest {
         stageInvitation = new StageInvitation(1L, "desc", StageInvitationStatus.PENDING, stage, author, invited);
         stageInvitationSecond = new StageInvitation(2L, "desc2", StageInvitationStatus.REJECTED, stage, author, invited);
 
-        stageInvitationDto = new StageInvitationDto(1L, "desc", StageInvitationStatus.PENDING, 1L, 1L);
+        stageInvitationDto = new StageInvitationDto(1L, "desc", StageInvitationStatus.PENDING, 1L, 1L, 1L);
 
         teamMember = new TeamMember();
         teamMember.setId(1L);
