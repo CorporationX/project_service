@@ -9,8 +9,7 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
     @Mapping(target = "parentProjectId", expression =
-            "java(project.getParentProject() != null ? project.getParentProject().getId() : null")
+            "java(project.getParentProject() != null ? project.getParentProject().getId() : null)")
     ProjectDto toDto(Project project);
     Project toEntity(ProjectDto projectDto);
-    Project toEntity(ProjectDto projectDto, Project parentProject);
 }

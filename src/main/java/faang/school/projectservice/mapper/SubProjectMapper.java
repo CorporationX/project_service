@@ -13,6 +13,5 @@ import org.mapstruct.ReportingPolicy;
         uses = ProjectService.class,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SubProjectMapper {
-    @Mapping(target = "parentProject", expression = "java(parentProject)")
-    Project toEntity(CreateSubProjectDto createSubprojectDto, Project parentProject);
+    Project toEntity(CreateSubProjectDto createSubprojectDto);
 }
