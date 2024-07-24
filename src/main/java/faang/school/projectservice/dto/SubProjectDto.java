@@ -3,6 +3,7 @@ package faang.school.projectservice.dto;
 import faang.school.projectservice.dto.validate.New;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
@@ -17,7 +18,7 @@ public class SubProjectDto {
     @Null(groups = {New.class})
     private Long id;
 
-    @NotNull(message = "specify the project name", groups = {New.class, Update.class})
+    @NotBlank(message = "specify the project name", groups = {New.class, Update.class})
     private String name;
 
     private String description;
