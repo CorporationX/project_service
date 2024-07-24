@@ -41,6 +41,7 @@ public class VacancyValidator {
     }
 
     public void validateCandidatesCount(List<Candidate> candidates, VacancyDto vacancyDto) {
+        log.info("Validate candidates count");
         if (candidates.size() < vacancyDto.getCount()) {
             throw new IllegalStateException("Cannot close vacancy, not enough candidates found");
         }

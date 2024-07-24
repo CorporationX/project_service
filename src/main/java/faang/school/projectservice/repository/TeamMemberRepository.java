@@ -21,8 +21,8 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s and projectId: %s", userId, projectId)));
     }
 
-    public void save(TeamMember teamMember) {
-        jpaRepository.save(teamMember);
+    public TeamMember save(TeamMember teamMember) {
+        return jpaRepository.save(teamMember);
     }
 
     public void deleteById(Long id) {
