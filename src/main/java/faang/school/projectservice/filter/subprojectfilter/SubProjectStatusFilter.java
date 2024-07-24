@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.subprojectfilter;
 
-import faang.school.projectservice.dto.SubProjectFilterDto;
+import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 

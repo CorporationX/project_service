@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.subprojectdto;
 
 import faang.school.projectservice.dto.validate.New;
 import faang.school.projectservice.model.ProjectStatus;

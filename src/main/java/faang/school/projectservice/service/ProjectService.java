@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.SubProjectDto;
-import faang.school.projectservice.dto.SubProjectFilterDto;
+import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
+import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Moment;

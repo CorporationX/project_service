@@ -1,12 +1,11 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.SubProjectDto;
-import faang.school.projectservice.dto.SubProjectFilterDto;
+import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
+import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.dto.validate.New;
 import faang.school.projectservice.dto.validate.UpdateName;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
