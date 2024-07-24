@@ -1,7 +1,5 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.exception.ErrorMessage;
-import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,10 +19,8 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
-    public void checkExistAll(Collection<Long> teamMemberIds) {
-        if (jpaRepository.countAllByIds(teamMemberIds) != teamMemberIds.size()) {
-            throw new NotFoundException(ErrorMessage.SOME_OF_MEMBERS_NOT_EXIST);
-        }
+    public boolean existAllByIds(Collection<Long> teamMemberIds) {
+        return jpaRepository.countAllByIds(teamMemberIds) == teamMemberIds.size();
     }
 
     public List<Long> findIdsByProjectIds(Collection<Long> projectIds) {

@@ -1,7 +1,5 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.exception.ErrorMessage;
-import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,11 +25,7 @@ public class ProjectRepository {
     }
 
     public List<Project> findAllByIds(Collection<Long> ids) {
-        List<Project> projects = projectJpaRepository.findAllById(ids);
-        if (ids.size() != projects.size()) {
-            throw new NotFoundException(ErrorMessage.SOME_OF_PROJECTS_NOT_EXIST);
-        }
-        return projects;
+        return projectJpaRepository.findAllById(ids);
     }
 
     public boolean existsByOwnerUserIdAndName(Long userId, String name) {
