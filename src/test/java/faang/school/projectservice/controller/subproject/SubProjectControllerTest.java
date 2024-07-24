@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -30,12 +32,15 @@ public class SubProjectControllerTest {
     @MockBean
     private ProjectService projectService;
     private CreateSubProjectDto subProjectDto = new CreateSubProjectDto();
+
     {
         subProjectDto.setParentProjectId(1L);
         subProjectDto.setName("SubProject name");
         subProjectDto.setDescription("SubProject description");
     }
+
     private HttpHeaders headers = new HttpHeaders();
+
     {
         headers.add("x-user-id", "12345");
     }
@@ -49,14 +54,20 @@ public class SubProjectControllerTest {
                 "http://localhost:" + port + "/subProjects/create",
                 HttpMethod.POST,
                 requestBad,
-                new ParameterizedTypeReference<Map<String, String>>() {}
+                new ParameterizedTypeReference<Map<String, String>>() {
+                }
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).containsKeys("name", "description", "parentProjectId");
-        assertThat(response.getBody().get("name")).asString().contains("Project name can't be null or empty");
-        assertThat(response.getBody().get("description")).asString().contains("Project description can't be null or empty");
-        assertThat(response.getBody().get("parentProjectId")).asString().contains("Parent Project ID can't be null");
+        assertThat(response.getBody().get("name"))
+                .asString().contains("Project name can't be null or empty");
+        assertThat(response.getBody().get("description"))
+                .asString().contains("Project description can't be null or empty");
+        assertThat(response.getBody().get("parentProjectId"))
+                .asString().contains("Parent Project ID can't be null");
+
+        verify(projectService, times(0)).createSubProject(subProjectDto);
     }
 
     @Test

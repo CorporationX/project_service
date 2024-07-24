@@ -5,8 +5,6 @@ import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ProjectMapperTest {
@@ -22,12 +20,14 @@ public class ProjectMapperTest {
             .ownerId(ownerId)
             .build();
     private ProjectDto projectDto = new ProjectDto();
+
     {
         projectDto.setId(id);
         projectDto.setName(name);
         projectDto.setDescription(description);
         projectDto.setOwnerId(ownerId);
     }
+
     @Test
     void testToDto() {
         ProjectDto result = projectMapper.toDto(project);

@@ -20,10 +20,19 @@ public class ProjectService {
 
     public ProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
         Project parentProject = validator.getParentAfterValidateSubProject(subProjectDto);
-        Project subProject = projectRepository.save(subProjectMapper.toEntity(subProjectDto));
+        Project subProject = subProjectMapper.toEntity(subProjectDto);
         subProject.setParentProject(parentProject);
         subProject.setStatus(ProjectStatus.CREATED);
+        projectRepository.save(subProject);
+
+        addSubProjectAsChild(subProject, parentProject);
+
         return projectMapper.toDto(subProject);
+    }
+
+    private void addSubProjectAsChild(Project subProject, Project parentProject) {
+        parentProject.getChildren().add(subProject);
+        projectRepository.save(parentProject);
     }
 
 }
