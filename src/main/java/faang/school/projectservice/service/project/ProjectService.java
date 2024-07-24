@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectUpdateDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -35,4 +36,7 @@ public class ProjectService {
         projectRepository.save(parentProject);
     }
 
+    public ProjectDto updateSubProject(SubProjectUpdateDto subProjectUpdateDto) {
+        return new ProjectDto();
+    }
 }
