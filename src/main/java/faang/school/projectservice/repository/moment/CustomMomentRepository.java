@@ -6,5 +6,5 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CustomMomentRepository {
-    List<Moment> findAllByProjectIdAndDateFiltered(Long projectId, LocalDateTime start, LocalDateTime endExclusive);
+    List<Moment> findAllByProjectIdAndDateBetween(Long projectId, LocalDateTime start, LocalDateTime endExclusive);
 }

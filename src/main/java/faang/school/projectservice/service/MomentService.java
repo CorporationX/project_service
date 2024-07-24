@@ -4,12 +4,10 @@ import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.dto.moment.MomentUpdateDto;
-import faang.school.projectservice.exception.ErrorMessage;
-import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.moment.MomentRepository;
+import faang.school.projectservice.service.utilservice.MomentUtilService;
 import faang.school.projectservice.service.utilservice.ProjectUtilService;
 import faang.school.projectservice.service.utilservice.TeamMemberUtilService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +26,7 @@ import java.util.Set;
 @Transactional
 public class MomentService {
 
-    private final MomentRepository momentRepository;
+    private final MomentUtilService momentUtilService;
     private final MomentMapper momentMapper;
 
     private final TeamMemberUtilService teamMemberUtilService;
@@ -36,25 +34,24 @@ public class MomentService {
 
     @Transactional(readOnly = true)
     public MomentResponseDto getById(long id) {
-        Moment moment = momentRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
+        Moment moment = momentUtilService.getById(id);
 
         return momentMapper.toResponseDto(moment);
     }
 
     @Transactional(readOnly = true)
     public List<MomentResponseDto> getAll() {
-        List<Moment> moments = momentRepository.findAll();
+        List<Moment> moments = momentUtilService.getAll();
         return momentMapper.toResponseDtoList(moments);
     }
 
     @Transactional(readOnly = true)
-    public List<MomentResponseDto> getAllFilteredByProjectId(Long projectId, MomentFilterDto filter) {
+    public List<MomentResponseDto> getAllFilteredByProjectId(long projectId, MomentFilterDto filter) {
         List<Moment> moments;
         if (filter == null) {
-            moments = momentRepository.findAllByProjectId(projectId);
+            moments = momentUtilService.findAllByProjectId(projectId);
         } else {
-            moments = momentRepository.findAllByProjectIdAndDateFiltered(
+            moments = momentUtilService.findAllByProjectIdAndDateBetween(
                     projectId, filter.getStart(), filter.getEndExclusive());
 
             if (filter.getPartnerProjectIds() != null) {
@@ -104,13 +101,12 @@ public class MomentService {
         moment.setCreatedAt(LocalDateTime.now());
         moment.setCreatedBy(creatorId);
 
-        moment = momentRepository.save(moment);
+        moment = momentUtilService.save(moment);
         return momentMapper.toResponseDto(moment);
     }
 
     public MomentResponseDto update(MomentUpdateDto momentUpdateDto, long userId) {
-        Moment moment = momentRepository.findById(momentUpdateDto.getId())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
+        Moment moment = momentUtilService.getById(momentUpdateDto.getId());
 
         checkAndFillDependentFields(momentUpdateDto, moment);
         checkAndFillSimpleFields(momentUpdateDto, moment);
@@ -118,7 +114,7 @@ public class MomentService {
         moment.setUpdatedAt(LocalDateTime.now());
         moment.setUpdatedBy(userId);
 
-        momentRepository.save(moment);
+        momentUtilService.save(moment);
         return momentMapper.toResponseDto(moment);
     }
 

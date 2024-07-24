@@ -23,7 +23,7 @@ public class CustomMomentRepositoryImpl implements CustomMomentRepository {
     private final EntityManager em;
 
     @Override
-    public List<Moment> findAllByProjectIdAndDateFiltered(
+    public List<Moment> findAllByProjectIdAndDateBetween(
             Long projectId, LocalDateTime start, LocalDateTime endExclusive) {
 
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
