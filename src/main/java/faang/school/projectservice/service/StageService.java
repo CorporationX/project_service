@@ -7,6 +7,7 @@ import faang.school.projectservice.exception.StageException;
 import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
@@ -38,6 +39,7 @@ public class StageService {
     private final StageInvitationRepository stageInvitationRepository;
     private final TaskRepository taskRepository;
     private final StageMapper stageMapper;
+    private final StageRolesMapper stageRolesMapper;
     private final List<StageFilter> filters;
 
     public StageDto createStage(StageDto stageDto) {
@@ -55,9 +57,13 @@ public class StageService {
 
         executors.forEach(teamMember -> {
             if (teamMember.getRoles() == null) {
-                throw new StageException("Team member with id: " + teamMember.getId() + "has no role");
+                throw new StageException("Team member with id: " + teamMember.getId() + " has no role");
             }
         });
+
+        List<StageRoles> stageRolesList = stageRolesMapper.toEntityList(stageDto.getStageRoles());
+        stageRolesList.forEach(stageRoles -> stageRoles.setStage(stage));
+        stage.setStageRoles(stageRolesList);
         Stage saveStage = stageRepository.save(stage);
         return stageMapper.toDto(saveStage);
     }
@@ -149,9 +155,9 @@ public class StageService {
 
             //И выводится сообщение о том, сколько еще участников с нужной ролью нужно найти для работы на данном этапе проекта
             throw new StageException("To work at the project stage, " + stageRoles.getCount() +
-                    " executors with a role " + stageRoles.getTeamRole().name() + " are required. But there are only " +
-                    projectMembersWithTheSameRole.size() + " executors on the project with this role. " +
-                    " There is a need for " + numberOfMissingTeamMembers + " more participants.");
+                    " executor(s) with a role " + stageRoles.getTeamRole().name() + " are required. But there is(are) only " +
+                    projectMembersWithTheSameRole.size() + " executor(s) on the project with this role. " +
+                    " There is a need for " + numberOfMissingTeamMembers + " more executor(s).");
         }
 
         projectMembersWithTheSameRole.stream()              //Если же число учасников в списке больше либо равно искомому
@@ -210,6 +216,7 @@ public class StageService {
 
     public StageDto getStage(Long id) {
         Stage stage = stageRepository.getById(id);
+
         return stageMapper.toDto(stage);
     }
 }

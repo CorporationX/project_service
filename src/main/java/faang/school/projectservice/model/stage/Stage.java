@@ -42,4 +42,52 @@ public class Stage {
             joinColumns = @JoinColumn(name = "stage_id"),
             inverseJoinColumns = @JoinColumn(name = "executor_id"))
     private List<TeamMember> executors;
+
+//    @Override
+//    public String toString() {
+//        return "Stage{" +
+//                "stageId=" + stageId +
+//                ", stageName='" + stageName + '\'' +
+//                ", project=" + project +
+//                ", stageRoles=" + stageRoles +
+//                ", tasks=" + tasks +
+//                ", executors=" + executors +
+//                '}';
+//    }
+
+    @Override
+    public String toString() {
+        String projectId;
+        if (project == null) {
+            projectId = "";
+        } else {
+            projectId = String.valueOf(project.getId());
+        }
+        String stageRolesId;
+        if (stageRoles == null) {
+            stageRolesId = "";
+        } else {
+            stageRolesId = stageRoles.stream().map(StageRoles::getId).toList().toString();
+        }
+        String tasksId;
+        if (tasks == null) {
+            tasksId = "";
+        } else {
+            tasksId = tasks.stream().map(Task::getId).toList().toString();
+        }
+        String executorsId;
+        if (executors == null) {
+            executorsId = "";
+        } else {
+            executorsId = executors.stream().map(TeamMember::getId).toList().toString();
+        }
+        return "Stage{" +
+                "stageId=" + stageId +
+                ", stageName='" + stageName + '\'' +
+                ", project=" + projectId +
+                ", stageRoles=" + stageRolesId +
+                ", tasks=" + tasksId +
+                ", executors=" + executorsId +
+                '}';
+    }
 }

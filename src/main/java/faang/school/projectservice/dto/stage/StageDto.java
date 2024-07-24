@@ -23,7 +23,7 @@ public class StageDto {
     private Long projectId;
 
     @NotNull
-    private List<StageRoles> stageRoles;
+    private List<StageRolesDto> stageRoles;
 
     private List<Long> executorIds;
 }

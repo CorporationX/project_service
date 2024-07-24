@@ -12,7 +12,8 @@ import org.mapstruct.ReportingPolicy;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
     @Mapping(source = "project.id", target = "projectId")
     //@Mapping(source = "tasks", target = "tasksIds", qualifiedByName = "mapTask")
@@ -24,6 +25,7 @@ public interface StageMapper {
     @Mapping(source = "projectId", target = "project.id")
     //@Mapping(target = "tasks", ignore = true)
     @Mapping(target = "executors", ignore = true)
+    @Mapping(target = "stageRoles", ignore = true)
     Stage toEntity(StageDto stageDto);
 
 //    default List<Long> mapTask(List<Task> tasks) {
