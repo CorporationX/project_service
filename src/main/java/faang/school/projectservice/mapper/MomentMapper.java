@@ -6,6 +6,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
@@ -22,6 +23,8 @@ public interface MomentMapper {
     @Mapping(target = "projectIds", source = "projects", qualifiedByName = "fromProjectsToProjectIds")
     @Mapping(target = "memberIds", source = "members", qualifiedByName = "fromMembersToMemberIds")
     MomentDto toDto(Moment moment);
+
+    void update (MomentDto momentDto, @MappingTarget Moment moment);
 
     @Named("fromProjectIdsToProjects")
     default List<Project> toProjects(List<Long> projectIds) {

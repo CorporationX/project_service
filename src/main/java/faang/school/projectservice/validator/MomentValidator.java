@@ -20,9 +20,17 @@ public class MomentValidator {
         }
         List<Project> projects = moment.getProjects();
         for (Project project : projects) {
-            if (project.getStatus().equals(ProjectStatus.CANCELLED) || project.getStatus().equals(ProjectStatus.COMPLETED)) {
-                throw new DataValidationException("The moment is assigned to a project that either cancelled or completed");
-            }
+            validateProject(project);
         }
     }
+
+    public void validateProject(Project project) {
+        if (project.getName().isBlank()) {
+            throw new DataValidationException("Project" + project.getId() + "has blank name");
+        }
+        if (project.getStatus().equals(ProjectStatus.CANCELLED) || project.getStatus().equals(ProjectStatus.COMPLETED)) {
+            throw new DataValidationException("Project " + project.getId() + "has been completed or cancelled");
+        }
+    }
+
 }

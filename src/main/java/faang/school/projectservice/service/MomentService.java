@@ -8,12 +8,16 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validator.MomentValidator;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -21,41 +25,67 @@ public class MomentService {
     private final MomentRepository momentRepository;
     private final MomentMapper mapper = Mappers.getMapper(MomentMapper.class);
     private final TeamMemberRepository teamMemberRepository;
+    private final MomentValidator momentValidator;
 
     public MomentDto createMoment(MomentDto momentDto) {
-        momentDto.setDate(LocalDateTime.now());
         Moment moment = mapper.toEntity(momentDto);
         moment.setCreatedAt(LocalDateTime.now());
+        deleteDuplicateProjects(moment);
         momentRepository.save(moment);
         return mapper.toDto(moment);
     }
 
-    public MomentDto updateMoment(MomentDto momentDto, Long momentId) {
-        Moment oldMoment = getMomentById(momentId);
-        Moment newMoment = mapper.toEntity(momentDto);
-        List<Project> oldProjects = oldMoment.getProjects();
-        List<Project> newProjects = newMoment.getProjects();
-
-
-
+    public MomentDto updateMoment(MomentDto momentDto) {
+        Moment momentToUpdate = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new DataValidationException("No such moment"));
+        mapper.update(momentDto, momentToUpdate);
+        momentToUpdate.setUpdatedAt(LocalDateTime.now());
+        addProjectsAndUserIdsToMoment(momentToUpdate);
+        addProjectsAndMembersToMoment(momentToUpdate);
+        deleteDuplicateProjects(momentToUpdate);
+        momentRepository.save(momentToUpdate);
+        return mapper.toDto(momentToUpdate);
     }
 
-    private Moment getMomentById(Long momentId) {
-        return momentRepository.findById(momentId).orElseThrow(() -> new DataValidationException("the moment with id " + momentId + " does not exist"));
+    private void deleteDuplicateProjects(Moment moment) {
+        Set<Project> uniqueProjects = new HashSet<>(moment.getProjects());
+        List<Project> cleanedProjects = new ArrayList<>(uniqueProjects);
+        moment.setProjects(cleanedProjects);
     }
 
-    private void addMemberAndProjectToMomentDto(TeamMember member, MomentDto momentDto) {
+    private void addMemberAndProjectToMoment(TeamMember member, Moment moment) {
         Long userId = member.getUserId();
-        if (!momentDto.getUserIds().contains(userId)) {momentDto.getUserIds().add(userId);}
-        Long newProjectId = member.getTeam().getProject().getId();
-        if (momentDto.getProjectIds().contains(newProjectId)) {momentDto.getProjectIds().add(newProjectId);}
+        if (!moment.getUserIds().contains(userId)) {
+            moment.getUserIds().add(userId);
+        }
+        momentValidator.validateProject(member.getTeam().getProject());
+        Project newProject = member.getTeam().getProject();
+        if (moment.getProjects().contains(newProject)) {
+            moment.getProjects().add(newProject);
+        }
     }
 
-    private void addUserIdAndProjectToMomentDto(Long userId, MomentDto momentDto) {
+    private void addProjectsAndMembersToMoment(Moment moment) {
+        for (TeamMember member : moment.getMembers()) {
+            addMemberAndProjectToMoment(member, moment);
+        }
+    }
+
+    private void addUserIdAndProjectToMoment(Long userId, Moment moment) {
         TeamMember newMember = teamMemberRepository.findById(userId);
-        if (!momentDto.getUserIds().contains(newMember.getUserId())) {momentDto.getUserIds().add(newMember.getUserId());}
-        Long newProjectId = newMember.getTeam().getProject().getId();
-        if (momentDto.getProjectIds().contains(newProjectId)) {momentDto.getProjectIds().add(newProjectId);}
+        if (!moment.getUserIds().contains(newMember.getUserId())) {
+            moment.getUserIds().add(newMember.getUserId());
+        }
+        momentValidator.validateProject(newMember.getTeam().getProject());
+        Project newProject = newMember.getTeam().getProject();
+        if (moment.getProjects().contains(newProject)) {
+            moment.getProjects().add(newProject);
+        }
+    }
+
+    private void addProjectsAndUserIdsToMoment(Moment moment) {
+        for (Long userId : moment.getUserIds()) {
+            addUserIdAndProjectToMoment(userId, moment);
+        }
     }
 
 }

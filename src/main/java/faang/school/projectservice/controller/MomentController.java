@@ -9,9 +9,11 @@ import faang.school.projectservice.validator.MomentValidator;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RestController;
+
 
 @RequiredArgsConstructor
-@Component
+@RestController
 public class MomentController {
     private final MomentService momentService;
     private final MomentValidator momentValidator;
@@ -23,9 +25,9 @@ public class MomentController {
         return momentService.createMoment(momentDto);
     }
 
-    public MomentDto updateMoment(MomentDto momentDto, Long momentId) {
+    public MomentDto updateMoment(MomentDto momentDto) {
         Moment moment = mapper.toEntity(momentDto);
         momentValidator.validateMoment(moment);
-        return momentService.updateMoment(momentDto, momentId);
+        return momentService.updateMoment(momentDto);
     }
 }
