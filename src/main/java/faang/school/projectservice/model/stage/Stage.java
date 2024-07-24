@@ -18,6 +18,7 @@ import java.util.List;
 @Builder
 @Data
 public class Stage {
+
     @Id
     @Column(name = "project_stage_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,14 +2,17 @@ package faang.school.projectservice.model;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,6 +22,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString(exclude = "initiatives")
 public class Project {
 
     @Id
@@ -44,11 +48,14 @@ public class Project {
     @JoinColumn(name="parent_project_id")
     private Project parentProject;
 
-    @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private List<Project> children;
 
     @OneToMany(mappedBy = "project")
     private List<Task> tasks;
+
+    @OneToMany(mappedBy = "project")
+    private List<Initiative> initiatives;
 
     @OneToMany(mappedBy = "project")
     private List<Resource> resources;
@@ -82,9 +89,10 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private List<Stage> stages;
 
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project", orphanRemoval = true)
     private List<Vacancy> vacancies;
 
+    @Builder.Default
     @ManyToMany(mappedBy = "projects")
-    private List<Moment> moments;
+    private List<Moment> moments = new ArrayList<>();
 }
