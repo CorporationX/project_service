@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MomentRepository extends JpaRepository<Moment, Long>, MomentRepositoryCustom {
+public interface MomentRepository extends JpaRepository<Moment, Long>, CustomMomentRepository {
 
     @Query(nativeQuery = true, value = """
     select m.* from moment m

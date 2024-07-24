@@ -5,6 +5,6 @@ import faang.school.projectservice.model.Moment;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface MomentRepositoryCustom {
+public interface CustomMomentRepository {
     List<Moment> findAllByProjectIdAndDateFiltered(Long projectId, LocalDateTime start, LocalDateTime endExclusive);
 }

@@ -15,8 +15,6 @@ public class MomentResponseDto {
 
     private LocalDateTime date;
 
-    private List<Long> resourceIds;
-
     private List<Long> projectIds;
 
     private List<Long> teamMemberIds;

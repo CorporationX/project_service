@@ -12,11 +12,11 @@ import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.moment.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.util.CollectionsUtil;
+import faang.school.projectservice.repository.moment.MomentRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -174,7 +174,7 @@ public class MomentService {
         // Находим таких мемберов, которые отсутствуют в переданном списке, но относятся к переданным проектам
 
         List<Long> memberIdsFromProjects = teamMemberRepository.findIdsByProjectIds(projectIds);
-        return CollectionsUtil.leftOuterJoin(memberIdsFromProjects, teamMemberIds);
+        return (List<Long>) CollectionUtils.subtract(memberIdsFromProjects, teamMemberIds);
     }
 
     private List<Long> findExcessMemberIdsForProjects(Collection<Long> teamMemberIds,
@@ -182,7 +182,7 @@ public class MomentService {
         // Находим таких мемберов из переданного списка, которые не относятся к переданным проектам
 
         List<Long> memberIdsFromProjects = teamMemberRepository.findIdsByProjectIds(projectIds);
-        return CollectionsUtil.leftOuterJoin(teamMemberIds, memberIdsFromProjects);
+        return (List<Long>) CollectionUtils.subtract(teamMemberIds, memberIdsFromProjects);
     }
 
     private List<Project> findMissingProjectsForMembers(Collection<Project> projects,
@@ -190,7 +190,7 @@ public class MomentService {
         // Находим такие проекты, которые отсутствуют в переданном списке, но относятся к переданным мемберам
 
         List<Project> memberProjects = projectRepository.findAllDistinctByTeamMemberIds(teamMemberIds);
-        return CollectionsUtil.leftOuterJoin(memberProjects, projects);
+        return (List<Project>) CollectionUtils.subtract(memberProjects, projects);
     }
 
     private List<Project> findExcessProjectsForMembers(Collection<Project> projects,
@@ -198,15 +198,15 @@ public class MomentService {
         // Находим такие проекты из переданного списка, которые не относятся к переданным мемберам
 
         List<Project> memberProjects = projectRepository.findAllDistinctByTeamMemberIds(teamMemberIds);
-        return CollectionsUtil.leftOuterJoin(projects, memberProjects);
+        return (List<Project>) CollectionUtils.subtract(projects, memberProjects);
     }
 
     private void checkAndFillDependentFields(MomentUpdateDto momentUpdateDto, Moment moment) {
         List<Long> newProjectIds = momentUpdateDto.getProjectIds();
         List<Long> newTeamMemberIds = momentUpdateDto.getTeamMemberIds();
 
-        // Явно меняем и проекты и мемберов
         if (newProjectIds != null && newTeamMemberIds != null) {
+            // Явно меняем и проекты и мемберов=
             List<Project> newProjects = projectRepository.findAllByIds(newProjectIds);
 
             validateProjectStatuses(newProjects);
@@ -215,13 +215,12 @@ public class MomentService {
 
             moment.setTeamMemberIds(newTeamMemberIds);
             moment.setProjects(newProjects);
-        }
-
-        // Явно меняем проекты, мемберов исходя из проектов
-        if (newProjectIds != null && newTeamMemberIds == null) {
+        } else if (newProjectIds != null) {
+            // Явно меняем проекты, мемберов исходя из проектов
             List<Project> newProjects = projectRepository.findAllByIds(newProjectIds);
             validateProjectStatuses(newProjects);
             moment.setProjects(newProjects);
+
             // 1) проектов стало меньше (привязаны лишние пользователи, надо удалить)
             moment.getTeamMemberIds().removeAll(
                     findExcessMemberIdsForProjects(moment.getTeamMemberIds(), newProjectIds)
@@ -230,12 +229,11 @@ public class MomentService {
             moment.getTeamMemberIds().addAll(
                     findMissingMemberIdsForProjects(moment.getTeamMemberIds(), newProjectIds)
             );
-        }
-
-        // Явно меняем мемберов, проекты исходя из мемберов
-        if (newProjectIds == null && newTeamMemberIds != null) {
+        } else if (newTeamMemberIds != null) {
+            // Явно меняем мемберов, проекты исходя из мемберов
             teamMemberRepository.checkExistAll(newTeamMemberIds);
             moment.setTeamMemberIds(newTeamMemberIds);
+
             // 1) Мемберов стало меньше, возможно появился лишний проект, надо удалить
             moment.getProjects().removeAll(
                     findExcessProjectsForMembers(moment.getProjects(), newTeamMemberIds)
@@ -245,8 +243,6 @@ public class MomentService {
             validateProjectStatuses(extraProjects);
             moment.getProjects().addAll(extraProjects);
         }
-
-
     }
 
     private void checkAndFillSimpleFields(MomentUpdateDto momentUpdateDto, Moment moment) {
