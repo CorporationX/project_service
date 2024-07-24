@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,39 +56,83 @@ public class ProjectService {
         return subProjectMapper.toDto(projectJpaRepository.save(childProject));
     }
 
-    public CreateSubProjectDto updateProject(long id, CreateSubProjectDto dto,long userId) {
+    public CreateSubProjectDto updateProject(long id, CreateSubProjectDto dto, long userId) {
         Project project = projectJpaRepository.getReferenceById(id);
         List<Project> children = projectJpaRepository.getAllSubprojectsFor(id);
         List<Moment> moments = new ArrayList<>();
-//        List<Project> children = projectJpaRepository.findAllById(childrenIds);
-        if (dto.getId() != null) {
+        validateSetGeneralFields(project, dto);
+        updateStatus(project, dto, children, moments, userId);
+        updateVisibility(project, dto, children);
+        checkDtoForNullFields(dto, project);
+        return subProjectMapper.toDto(projectJpaRepository.save(project));
+    }
+
+    private void validateSetGeneralFields(Project project, CreateSubProjectDto dto) {
+        if (dto.getId() != null || !dto.getId().equals(project.getId())) {
             project.setId(dto.getId());
         }
-        if (!dto.getName().isEmpty() || !dto.getName().isBlank()) {
+        if (dto.getName()==null || dto.getName().isEmpty()){
+            dto.setName(project.getName());
+        }
+        if (!dto.getName().isEmpty() ||  !dto.getName().isBlank() && !dto.getName().matches(project.getName())) {
             project.setName(dto.getName());
+        } else {
+            dto.setName(project.getName());
         }
-        if (dto.getParentProjectId() != null) {
-            Optional<Project> parentProject = projectJpaRepository.findById(dto.getParentProjectId());
-            parentProject.ifPresent(project::setParentProject);
+        if (dto.getParentProjectId() != null && !dto.getParentProjectId().equals(project.getId())) {
+            Project recentParentProject = project.getParentProject();
+            Optional<Project> supposedParentProject = projectJpaRepository.findById(dto.getParentProjectId());
+
+            supposedParentProject.ifPresentOrElse(p -> {
+                        List<Project> supposedList = new ArrayList<>();
+                        if (supposedParentProject.get().getChildren() == null) {
+                            supposedList.add(project);
+                            p.setChildren(supposedList);
+                        } else {
+                            supposedList.addAll(p.getChildren());
+                            supposedList.add(project);
+                            p.setChildren(supposedList);
+                        }
+                        if (recentParentProject != null) {
+                            List<Project> recentList = new ArrayList<>(recentParentProject.getChildren());
+                            recentList.remove(project);
+                            recentParentProject.setChildren(recentList);
+                        }
+                    }
+                    , () -> supposedParentProject.orElseThrow(() -> new DataValidationException("No such project in DB")));
         }
-        if (dto.getChildrenIds() != null) {
-            Optional<List<Project>> childProject = Optional.of(projectJpaRepository.findAllById(dto.getChildrenIds()));
-            childProject.ifPresent(project::setChildren);
+    }
+
+    private void updateVisibility(Project project, CreateSubProjectDto dto, List<Project> children) {
+        if (dto.getVisibility() != project.getVisibility()) {
+            if (dto.getVisibility() == ProjectVisibility.PRIVATE) {
+                project.setVisibility(dto.getVisibility());
+                List<Project> completedChildProjects = getCompletedChildProjects(children);
+                if (!completedChildProjects.isEmpty() && completedChildProjects.size() == children.size()) {
+                    children.forEach(p -> p.setVisibility(dto.getVisibility()));
+                    projectJpaRepository.saveAll(children);
+                }
+            } else {
+                project.setVisibility(dto.getVisibility());
+            }
         }
+    }
+
+    private void updateStatus(Project project, CreateSubProjectDto dto, List<Project> children, List<Moment> moments, Long userId) {
         if (dto.getStatus() != project.getStatus()) {
             if (dto.getStatus().equals(ProjectStatus.COMPLETED)) {
                 List<Project> completedChildProjects = getCompletedChildProjects(children);
                 if (!completedChildProjects.isEmpty() && completedChildProjects.size() == children.size()) {
                     project.setStatus(dto.getStatus());
-                    moments = children.stream().
-                            map(Project::getMoments).
-                            flatMap(Collection::stream).
-                            toList();
-                    addMomentToList(id,moments,userId);
+                    List<Moment> childrenMoments = children.stream().
+                            map(Project::getMoments)
+                            .flatMap(Collection::stream)
+                            .toList();
+                    moments = addMomentToList(project.getId(), childrenMoments, userId);
                     project.setMoments(moments);
                 } else if (completedChildProjects.isEmpty()) {
                     project.setStatus(dto.getStatus());
-                    addMomentToList(id,moments,userId);
+                    moments = addMomentToList(project.getId(), moments, userId);
                     project.setMoments(moments);
                 } else {
                     throw new DataValidationException("current project has unfinished subprojects");
@@ -98,29 +141,18 @@ public class ProjectService {
                 project.setStatus(dto.getStatus());
             }
         }
-        if (dto.getVisibility() != project.getVisibility()) {
-            if (dto.getVisibility() == ProjectVisibility.PRIVATE) {
-//                List<Long> childrenIds = projectJpaRepository.getAllSubprojectsIdsFor(id);
-//                List<Project> children = projectJpaRepository.findAllById(childrenIds);
-                project.setVisibility(dto.getVisibility());
-                children.forEach(p -> p.setVisibility(dto.getVisibility()));
-                projectJpaRepository.saveAll(children);
-            } else {
-                project.setVisibility(dto.getVisibility());
-            }
-        }
-        checkDtoForNullFields(dto, project);
-
-
-        return null;
     }
 
-    private void addMomentToList(long id, List<Moment> moments, long userId){
-        moments.add(Moment.builder()
+    private List<Moment> addMomentToList(long id, List<Moment> moments, long userId) {
+        Moment moment = Moment.builder()
                 .name("project " + id + " has been completed")
                 .updatedBy(userId)
                 .createdBy(userId)
-                .build());
+                .build();
+        List<Moment> list = new ArrayList<>(moments);
+        list.add(moment);
+        return list;
+//        moments.add(moment);
     }
 
     private List<Project> getCompletedChildProjects(List<Project> childProjects) {
