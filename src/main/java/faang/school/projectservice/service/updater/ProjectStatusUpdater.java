@@ -2,7 +2,9 @@ package faang.school.projectservice.service.updater;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.model.Project;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ProjectStatusUpdater implements ProjectUpdater {
     @Override
     public boolean isApplicable(ProjectDto updates) {
