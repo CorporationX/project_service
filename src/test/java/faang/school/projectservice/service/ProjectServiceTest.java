@@ -8,6 +8,8 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.ProjectFilter;
+import faang.school.projectservice.service.filter.ProjectNameFilter;
+import faang.school.projectservice.service.filter.ProjectStatusFilter;
 import faang.school.projectservice.service.updater.ProjectDescriptionUpdater;
 import faang.school.projectservice.service.updater.ProjectStatusUpdater;
 import faang.school.projectservice.service.updater.ProjectUpdater;
@@ -45,9 +47,8 @@ public class ProjectServiceTest {
         projectMapper = Mockito.spy(ProjectMapperImpl.class);
         projectFilter = Mockito.spy(ProjectFilter.class);
         userContext = Mockito.mock(UserContext.class);
-
-        ProjectFilter filter1 = Mockito.mock(ProjectFilter.class);
-        ProjectFilter filter2 = Mockito.mock(ProjectFilter.class);
+        ProjectNameFilter filter1 = Mockito.spy(ProjectNameFilter.class);
+        ProjectStatusFilter filter2 = Mockito.spy(ProjectStatusFilter.class);
         filters = List.of(filter1, filter2);
 
         ProjectDescriptionUpdater updater1 = new ProjectDescriptionUpdater();
@@ -83,9 +84,7 @@ public class ProjectServiceTest {
     public void testCreateWithoutOwnerId() {
         projectDto.setOwnerId(null);
         Mockito.when(userContext.getUserId()).thenReturn(ownerId);
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)).thenReturn(false);
         Mockito.when(projectRepository.save(project)).thenReturn(project);
-        Mockito.when(projectMapper.toDto(project)).thenReturn(projectDto);
 
         Assertions.assertEquals(projectService.create(projectDto), projectDto);
         Mockito.verify(projectRepository).save(project);
@@ -95,7 +94,6 @@ public class ProjectServiceTest {
     public void testCreate() {
         Mockito.when(projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)).thenReturn(false);
         Mockito.when(projectRepository.save(project)).thenReturn(project);
-        Mockito.when(projectMapper.toDto(project)).thenReturn(projectDto);
 
         Assertions.assertEquals(projectService.create(projectDto), projectDto);
         Mockito.verify(projectRepository).save(project);
@@ -111,13 +109,18 @@ public class ProjectServiceTest {
     @Test
     public void testUpdate() {
         String newDescription = "new";
-        ProjectDto updater = ProjectDto.builder().id(projectId).description(newDescription).build();
+        ProjectDto updater = ProjectDto.builder()
+                .id(projectId)
+                .description(newDescription)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
 
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
         Mockito.when(projectRepository.save(project)).thenReturn(project);
 
         ProjectDto result = projectService.update(updater);
         projectDto.setDescription(newDescription);
+        projectDto.setStatus(ProjectStatus.IN_PROGRESS);
         Assertions.assertEquals(project.getDescription(), newDescription);
         Assertions.assertEquals(projectDto, result);
 
@@ -130,15 +133,17 @@ public class ProjectServiceTest {
     public void testGetProjectsWithFilters() {
         Project publicProject = new Project();
         publicProject.setId(1L);
+        publicProject.setName(projectName);
         publicProject.setVisibility(ProjectVisibility.PUBLIC);
-        ProjectDto publicProjectDto = new ProjectDto();
-        publicProjectDto.setId(1L);
+        publicProject.setStatus(status);
+        ProjectDto publicProjectDto = projectMapper.toDto(publicProject);
 
         Project privateProject = new Project();
         privateProject.setId(2L);
+        privateProject.setName(projectName);
+        privateProject.setStatus(status);
         privateProject.setVisibility(ProjectVisibility.PRIVATE);
-        ProjectDto privateProjectDto = new ProjectDto();
-        privateProjectDto.setId(2L);
+        ProjectDto privateProjectDto = projectMapper.toDto(privateProject);
 
         Team team = new Team();
         TeamMember member = new TeamMember();
@@ -146,14 +151,9 @@ public class ProjectServiceTest {
         team.setTeamMembers(List.of(member));
         privateProject.setTeams(List.of(team));
 
-        ProjectFilterDto filter = new ProjectFilterDto();
-        Mockito.when(projectMapper.toFilter(projectDto)).thenReturn(filter);
+        ProjectFilterDto filter = projectMapper.toFilter(projectDto);
         Mockito.when(userContext.getUserId()).thenReturn(1L);
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(publicProject, privateProject));
-        Mockito.when(filters.get(0).isApplicable(filter)).thenReturn(true);
-        Mockito.when(filters.get(1).isApplicable(filter)).thenReturn(false);
-        Mockito.when(filters.get(0).apply(Mockito.any(), Mockito.eq(filter)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
 
         List<ProjectDto> result = projectService.getProjectsWithFilters(projectDto);
 
@@ -166,9 +166,9 @@ public class ProjectServiceTest {
         Mockito.verify(filters.get(0), Mockito.times(1)).isApplicable(filter);
         Mockito.verify(filters.get(0), Mockito.times(1)).apply(Mockito.any(), Mockito.eq(filter));
         Mockito.verify(filters.get(1), Mockito.times(1)).isApplicable(filter);
-        Mockito.verify(filters.get(1), Mockito.times(0)).apply(Mockito.any(), Mockito.eq(filter));
-        Mockito.verify(projectMapper, Mockito.times(1)).toDto(publicProject);
-        Mockito.verify(projectMapper, Mockito.times(1)).toDto(privateProject);
+        Mockito.verify(filters.get(1), Mockito.times(1)).apply(Mockito.any(), Mockito.eq(filter));
+        Mockito.verify(projectMapper, Mockito.times(2)).toDto(publicProject);
+        Mockito.verify(projectMapper, Mockito.times(2)).toDto(privateProject);
     }
 
     @Test

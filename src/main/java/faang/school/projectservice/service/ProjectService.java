@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -52,19 +53,21 @@ public class ProjectService {
     public List<ProjectDto> getProjectsWithFilters(ProjectDto projectDto) {
         ProjectFilterDto filters = projectMapper.toFilter(projectDto);
         long userId = userContext.getUserId();
-        Stream<Project> publicProjects = projectRepository.findAll().stream()
-                .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC);
-        Stream<Project> privateProjects = projectRepository.findAll().stream()
+        List<Project> publicProjects = projectRepository.findAll().stream()
+                .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC).toList();
+        List<Project> privateProjects = projectRepository.findAll().stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PRIVATE)
                 .filter(project -> project.getTeams().stream()
                         .anyMatch(team -> team.getTeamMembers().stream()
-                                .anyMatch(member -> member.getId().equals(userId))));
-        Stream<Project> resultStream = Stream.concat(publicProjects, privateProjects);
+                                .anyMatch(member -> member.getId().equals(userId)))).toList();
+
+        List<Project> resultProjects = Stream.concat(publicProjects.stream(), privateProjects.stream()).toList();
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(resultStream, filters))
+                .flatMap(filter -> filter.apply(resultProjects.stream(), filters))
+                .distinct()
                 .map(projectMapper::toDto)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<ProjectDto> getAllProjects() {

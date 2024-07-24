@@ -32,30 +32,25 @@ public class ProjectControllerTest {
 
     @Test
     public void testCreateInvalidArguments() {
-        String empty = "";
-        projectDto = ProjectDto.builder().id(projectId).name(name).description(empty).ownerId(ownerId).build();
+        String blank = "  ";
+        RuntimeException e;
 
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
+        projectDto.setDescription(blank);
+        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
+        Assertions.assertEquals(e.getMessage(), "Invalid description " + projectDto.getDescription());
 
-        projectDto = ProjectDto.builder().id(projectId).name(name).description(null).ownerId(ownerId).build();
+        projectDto.setDescription(null);
+        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
+        Assertions.assertEquals(e.getMessage(), "Invalid description " + projectDto.getDescription());
 
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
+        projectDto.setDescription(description);
+        projectDto.setName(blank);
+        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
+        Assertions.assertEquals(e.getMessage(), "Invalid name " + projectDto.getName());
 
-        projectDto = ProjectDto.builder().id(projectId).name(empty).description(description).ownerId(ownerId).build();
-
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
-
-        projectDto = ProjectDto.builder().id(projectId).name(null).description(description).ownerId(ownerId).build();
-
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
-
-        projectDto = ProjectDto.builder().id(projectId).name(empty).description(empty).ownerId(ownerId).build();
-
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
-
-        projectDto = ProjectDto.builder().id(projectId).name(null).description(null).ownerId(ownerId).build();
-
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
+        projectDto.setName(null);
+        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.create(projectDto));
+        Assertions.assertEquals(e.getMessage(), "Invalid name " + projectDto.getName());
     }
 
     @Test

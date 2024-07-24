@@ -13,10 +13,10 @@ public class ProjectController {
     private final ProjectService projectService;
 
     public ProjectDto create(ProjectDto projectDto) {
-        if (projectDto.getName() == null || projectDto.getName().isEmpty()) {
+        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new RuntimeException("Invalid name " + projectDto.getName());
         }
-        if (projectDto.getDescription() == null || projectDto.getDescription().isEmpty()) {
+        if (projectDto.getDescription() == null || projectDto.getDescription().isBlank()) {
             throw new RuntimeException("Invalid description " + projectDto.getDescription());
         }
         return projectService.create(projectDto);
