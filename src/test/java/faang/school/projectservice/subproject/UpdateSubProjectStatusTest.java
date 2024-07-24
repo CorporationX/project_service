@@ -109,12 +109,16 @@ public class UpdateSubProjectStatusTest {
         team1.setProject(projectDto);
         team2.setProject(projectDto);
         team1.setTeamMembers(new ArrayList<>(List.of(
-                new TeamMemberDto(1L, 1L, team1),
-                new TeamMemberDto(2L, 2L, team1)
+                new TeamMemberDto(1L, 1L),
+                // new TeamMemberDto(1L, 1L, team1),
+                new TeamMemberDto(2L, 2L)
+                // new TeamMemberDto(2L, 2L, team1)
         )));
         team2.setTeamMembers(new ArrayList<>(List.of(
-                new TeamMemberDto(3L, 3L, team2),
-                new TeamMemberDto(4L, 4L, team2)
+                new TeamMemberDto(3L, 3L),
+                // new TeamMemberDto(3L, 3L, team2),
+                new TeamMemberDto(4L, 4L)
+                // new TeamMemberDto(4L, 4L, team2)
         )));
         projectDto.setTeams(new ArrayList<>(List.of(team1, team2)));
         Moment moment = new Moment();

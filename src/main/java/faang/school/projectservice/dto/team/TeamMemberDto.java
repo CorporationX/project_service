@@ -11,5 +11,5 @@ public class TeamMemberDto {
 
     private Long id;
     private Long userId;
-    private TeamDto team;
+    // private TeamDto team;
 }
