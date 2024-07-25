@@ -1,2 +1,9 @@
 calculations_messages_processing:
   enabled: false
+
+services:
+  s3:
+    endpoint: https://s3.test-region.amazonaws.com
+    accessKey: user
+    secretKey: password
+    bucketName: test-bucket
