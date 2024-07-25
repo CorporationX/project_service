@@ -16,21 +16,15 @@ import java.util.stream.Stream;
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
     @Mapping(source = "project.id", target = "projectId")
-    //@Mapping(source = "tasks", target = "tasksIds", qualifiedByName = "mapTask")
     @Mapping(source = "executors", target = "executorIds", qualifiedByName = "mapExecutor")
     StageDto toDto(Stage stage);
 
     List<StageDto> toDtoList(List<Stage> stages);
 
     @Mapping(source = "projectId", target = "project.id")
-    //@Mapping(target = "tasks", ignore = true)
     @Mapping(target = "executors", ignore = true)
     @Mapping(target = "stageRoles", ignore = true)
     Stage toEntity(StageDto stageDto);
-
-//    default List<Long> mapTask(List<Task> tasks) {
-//        return tasks.stream().map(Task::getId).toList();
-//    }
 
     @Named("mapExecutor")
     default List<Long> mapExecutor(List<TeamMember> teamMembers) {

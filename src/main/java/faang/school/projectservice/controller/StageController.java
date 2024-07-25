@@ -37,7 +37,7 @@ public class StageController {
     }
 
     @DeleteMapping("/stage/{deletedStageId}")
-    public void deleteStage(@PathVariable Long deletedStageId,
+    public void deleteStage(@Positive @PathVariable Long deletedStageId,
                             @RequestParam FateOfTasksAfterDelete tasksAfterDelete,
                             @RequestParam Long receivingStageId) {
 

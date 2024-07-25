@@ -100,10 +100,12 @@ public class StageServiceTest {
         firstExecutor.setId(1L);
         firstExecutor.setRoles(List.of(TeamRole.DEVELOPER));
         firstExecutor.setStages(List.of(stage));
+        //firstExecutor.setStages(List.of(prepareStage()));
         TeamMember secondExecutor = new TeamMember();
         secondExecutor.setId(2L);
         secondExecutor.setRoles(List.of(TeamRole.TESTER));
         secondExecutor.setStages(List.of(stage));
+        //secondExecutor.setStages(List.of(prepareStage()));
         TeamMember thirdExecutor = new TeamMember();
         thirdExecutor.setId(3L);
         thirdExecutor.setRoles(List.of(TeamRole.ANALYST, TeamRole.MANAGER));
@@ -303,6 +305,8 @@ public class StageServiceTest {
         verify(stageInvitationRepository, times(1)).save(stageInvitation);
     }
 
+    //В этом тесте используется prepareStage, в нем есть prepareProject, в котором есть prepareTeams. Если я установлю
+    //первому и второму участнику первой команды ссылку на текущий этап, то опять возникает StackOverflow.
     @Test
     void testGetExecutorsForRoleIfNotEnoughExecutorsFound() {
         StageDto dto = prepareStageDto();
