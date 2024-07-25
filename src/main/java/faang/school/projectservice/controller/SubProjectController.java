@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.dto.validate.New;
-import faang.school.projectservice.dto.validate.UpdateName;
+import faang.school.projectservice.dto.validate.Update;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -19,23 +19,23 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/subprojects")
 public class SubProjectController {
-    private final ProjectService ProjectService;
+    private final ProjectService projectService;
 
-    @PostMapping("/subprojects/")
+    @PostMapping()
     public SubProjectDto createSubProject(@Validated(New.class) @RequestBody SubProjectDto subProjectDto) {
-        return ProjectService.createSubProject(subProjectDto);
+        return projectService.createSubProject(subProjectDto);
     }
 
-    @PutMapping("/subprojects")
-    public void updateSubProject(@Validated(UpdateName.class) @RequestBody SubProjectDto subProjectDto) {
-        ProjectService.updateSubProject(subProjectDto);
+    @PutMapping()
+    public void updateSubProject(@Validated(Update.class) @RequestBody SubProjectDto subProjectDto) {
+        projectService.updateSubProject(subProjectDto);
     }
 
-    @GetMapping("/subprojects/{parentProjectId}")
+    @GetMapping("/{parentProjectId}")
     public List<SubProjectDto> getAllFilteredSubprojectsOfAProject(@RequestBody SubProjectFilterDto subProjectFilterDto,
                                                                    @PathVariable Long parentProjectId) {
-        return ProjectService.getAllFilteredSubprojectsOfAProject(subProjectFilterDto, parentProjectId);
+        return projectService.getAllFilteredSubprojectsOfAProject(subProjectFilterDto, parentProjectId);
     }
 }

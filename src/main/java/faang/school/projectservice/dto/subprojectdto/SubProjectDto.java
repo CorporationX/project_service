@@ -23,7 +23,7 @@ public class SubProjectDto {
 
     private String description;
 
-    @NotNull(message = "sspecify the parent of the subproject", groups = {New.class, Update.class})
+    @NotNull(message = "specify the parent of the subproject", groups = {New.class, Update.class})
     private Long parentProjectId;
 
     private LocalDateTime createdAt;
