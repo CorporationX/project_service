@@ -6,6 +6,7 @@ import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.initiative.Initiative;
+import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -13,6 +14,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Slf4j
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {WriteStageDtoToStageMapper.class})
 public abstract class WriteInitiativeDtoToInitiativeMapper {
 
@@ -36,11 +38,16 @@ public abstract class WriteInitiativeDtoToInitiativeMapper {
     public abstract Initiative map(WriteInitiativeDto writeInitiativeDto, @MappingTarget Initiative initiative);
 
     protected Project findProjectById(Long id) {
-        return projectJpaRepository.findById(id).orElse(null);
+        return projectJpaRepository.findById(id).orElseThrow(() -> {
+            log.error("WriteInitiativeDtoToInitiativeMapper.findProjectById: Project with id {} not found", id);
+            return new IllegalArgumentException("Project with id " + id + " not found");
+        });
     }
 
     protected TeamMember findTeamMemberById(Long id) {
-        return teamMemberJpaRepository.findById(id).orElse(null);
+        return teamMemberJpaRepository.findById(id).orElseThrow(() -> {
+            log.error("WriteInitiativeDtoToInitiativeMapper.findTeamMemberById: TeamMember with id {} not found", id);
+            return new IllegalArgumentException("TeamMember with id " + id + " not found");
+        });
     }
-
 }

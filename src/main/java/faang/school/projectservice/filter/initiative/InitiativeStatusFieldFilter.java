@@ -1,9 +1,11 @@
 package faang.school.projectservice.filter.initiative;
 
 import faang.school.projectservice.model.initiative.Initiative;
+import org.springframework.stereotype.Component;
 
-import java.util.stream.Stream;
+import java.util.function.Predicate;
 
+@Component
 public class InitiativeStatusFieldFilter implements InitiativeFieldFilter {
 
     @Override
@@ -12,7 +14,7 @@ public class InitiativeStatusFieldFilter implements InitiativeFieldFilter {
     }
 
     @Override
-    public Stream<Initiative> apply(Stream<Initiative> initiativeStream, InitiativeFilterDto initiativeFilterDto) {
-        return initiativeStream.filter(initiative -> initiative.getStatus().equals(initiativeFilterDto.getStatus()));
+    public Predicate<Initiative> apply(InitiativeFilterDto initiativeFilterDto) {
+        return initiative -> initiative.getStatus().equals(initiativeFilterDto.getStatus());
     }
 }

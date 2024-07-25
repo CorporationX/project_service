@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.client.initiative.ReadInitiativeDto;
 import faang.school.projectservice.dto.client.initiative.WriteInitiativeDto;
 import faang.school.projectservice.filter.initiative.InitiativeFieldFilter;
 import faang.school.projectservice.filter.initiative.InitiativeFilterDto;
+import faang.school.projectservice.handler.initiative.InitiativeHandler;
 import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.mapper.InitiativeToReadInitiativeDtoMapper;
 import faang.school.projectservice.mapper.WriteInitiativeDtoToInitiativeMapper;
@@ -12,12 +13,14 @@ import faang.school.projectservice.repository.InitiativeRepository;
 import faang.school.projectservice.valitator.initiative.WriteInitiativeDtoValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.function.Predicate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -52,14 +55,18 @@ public class InitiativeService {
                 .map(entity -> writeInitiativeDtoToInitiativeMapper.map(writeInitiativeDto, entity))
                 .map(initiativeRepository::saveAndFlush)
                 .map(initiativeToReadInitiativeDtoMapper::map)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Initiative with id %s not found", id)));
+                .orElseThrow(() -> {
+                    log.error("InitiativeService.update: event with id {} not found", id);
+                    return new EntityNotFoundException(String.format("Initiative with id %s not found", id));
+                });
     }
 
-    public List<ReadInitiativeDto> findAllBy(InitiativeFilterDto initiativeFilterDto) {
-        Stream<Initiative> initiativeStream = initiativeRepository.findAll().stream();
-        return initiativeFieldFilters.stream()
-                .filter(fieldFilter -> fieldFilter.isApplicable(initiativeFilterDto))
-                .flatMap(fieldFilter -> fieldFilter.apply(initiativeStream, initiativeFilterDto))
+    public List<ReadInitiativeDto> findAllByFilter(InitiativeFilterDto initiativeFilterDto) {
+        return initiativeRepository.findAll().stream()
+                .filter(initiativeFieldFilters.stream()
+                        .filter(fieldFilter -> fieldFilter.isApplicable(initiativeFilterDto))
+                        .map(fieldFilter -> fieldFilter.apply(initiativeFilterDto))
+                        .reduce(initiative -> true, Predicate::and))
                 .map(initiativeToReadInitiativeDtoMapper::map)
                 .toList();
     }
@@ -73,6 +80,9 @@ public class InitiativeService {
     public ReadInitiativeDto findById(Long initiativeId) {
         return initiativeRepository.findById(initiativeId)
                 .map(initiativeToReadInitiativeDtoMapper::map)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Initiative with id %s not found", initiativeId)));
+                .orElseThrow(() -> {
+                    log.error("InitiativeService.findById: event with id {} not found", initiativeId);
+                    return new EntityNotFoundException(String.format("Initiative with id %s not found", initiativeId));
+                });
     }
 }

@@ -45,7 +45,7 @@ public class Initiative {
     @Column(name = "description", nullable = false, length = 4096)
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "curator_id",  nullable = false)
     private TeamMember curator;
 

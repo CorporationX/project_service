@@ -1,6 +1,8 @@
 package faang.school.projectservice.dto.client.initiative;
 
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.dto.client.project.ReadProjectDto;
+import faang.school.projectservice.dto.client.teammember.ReadTeamMemberDto;
+import faang.school.projectservice.model.initiative.InitiativeStatus;
 import lombok.Value;
 
 
@@ -8,7 +10,9 @@ import lombok.Value;
 public class ReadInitiativeDto {
 
     Integer id;
-    Project project;
+    ReadProjectDto project;
+    ReadTeamMemberDto curator;
+    InitiativeStatus status;
     String name;
     String description;
 }

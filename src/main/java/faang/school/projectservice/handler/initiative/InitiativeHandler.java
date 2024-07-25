@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.handler.initiative;
 
 import faang.school.projectservice.dto.client.initiative.WriteInitiativeDto;
 import faang.school.projectservice.model.initiative.Initiative;

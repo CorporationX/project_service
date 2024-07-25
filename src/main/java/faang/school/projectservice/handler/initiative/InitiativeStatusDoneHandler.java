@@ -5,9 +5,9 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.repository.MomentRepository;
-import faang.school.projectservice.service.InitiativeHandler;
 import faang.school.projectservice.valitator.initiative.InitiativeStatusDoneValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class InitiativeStatusDoneHandler implements InitiativeHandler {
 
     private final InitiativeStatusDoneValidator initiaiveStatusDoneValidator;
