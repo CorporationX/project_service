@@ -2,6 +2,8 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.MomentDto;
 
+import faang.school.projectservice.dto.client.MomentFilterDto;
+import faang.school.projectservice.mapper.MomentFilterMapper;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.service.MomentService;
@@ -11,6 +13,8 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -18,6 +22,7 @@ public class MomentController {
     private final MomentService momentService;
     private final MomentValidator momentValidator;
     private final MomentMapper mapper = Mappers.getMapper(MomentMapper.class);
+    private final MomentFilterMapper filterMapper = Mappers.getMapper(MomentFilterMapper.class);
 
     public MomentDto createMoment(MomentDto momentDto) {
         Moment moment = mapper.toEntity(momentDto);
@@ -30,4 +35,10 @@ public class MomentController {
         momentValidator.validateMoment(moment);
         return momentService.updateMoment(momentDto);
     }
+
+    public List<MomentDto> getMomentsFilteredByDateFromProjects(Long ProjectId, MomentFilterDto filter) {
+        momentValidator.validateMoment(mapper.toEntity(filterMapper.toMomentDto(filter)));
+        return momentService.getMomentsFilteredByDateFromProjects(ProjectId, filter);
+    }
+
 }
