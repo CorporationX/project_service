@@ -49,7 +49,9 @@ public class MomentService {
 
     public List<MomentDto> getMomentsFilteredByDateFromProjects(Long ProjectId, MomentFilterDto filters) {
         List<Moment> moments = momentRepository.findAllByProjectId(ProjectId);
-        if (moments.isEmpty()) {throw new DataValidationException("zero moments with such id");}
+        if (moments.isEmpty()) {
+            throw new DataValidationException("zero moments with such id");
+        }
         return momentFilters.stream().filter(filter -> filter.isApplicable(filters))
                 .flatMap(filter -> filter.apply(moments, filters))
                 .map(mapper::toDto).toList();
@@ -57,8 +59,15 @@ public class MomentService {
 
     public List<MomentDto> getAllMoments(Long projectId) {
         List<Moment> moments = momentRepository.findAllByProjectId(projectId);
-        if (moments.isEmpty()) {throw new DataValidationException("zero moments with such id");}
+        if (moments.isEmpty()) {
+            throw new DataValidationException("zero moments with such id");
+        }
         return moments.stream().map(mapper::toDto).toList();
+    }
+
+    public MomentDto getMomentById(Long momentId) {
+        Moment moment = momentRepository.findById(momentId).orElseThrow(() -> new DataValidationException("No moment with such id" + momentId));
+        return mapper.toDto(moment);
     }
 
     private void deleteDuplicateProjects(Moment moment) {

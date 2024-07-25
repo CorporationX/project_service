@@ -44,4 +44,8 @@ public class MomentController {
     public List<MomentDto> getAllMoments(Long projectId) {
         return momentService.getAllMoments(projectId);
     }
+
+    public MomentDto getMomentById(Long momentId) {
+        return momentService.getMomentById(momentId);
+    }
 }
