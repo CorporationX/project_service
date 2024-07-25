@@ -18,6 +18,7 @@ public interface VacancyMapper {
     @Mapping(source = "candidates",target = "candidateIds",qualifiedByName = "toCandidates")
     @Mapping(source = "project.id",target="projectId")
     VacancyDto toDto(Vacancy vacancy);
+
     @Named("toCandidates")
     default List<Long> mapCandidate(List<Candidate> candidates) {
         return candidates.stream().map(Candidate::getId).toList();

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 
 @Component
-public class VacancyStatusFilter implements VacancyFilterable {
+public class VacancyStatusFilter implements VacancyFilter {
 
 
     @Override
