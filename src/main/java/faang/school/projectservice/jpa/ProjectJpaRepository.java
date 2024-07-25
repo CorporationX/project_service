@@ -3,6 +3,7 @@ package faang.school.projectservice.jpa;
 import faang.school.projectservice.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
             value = "WITH RECURSIVE search(id) AS (" +
                     "    SELECT  p.id" +
                     "    FROM project p" +
-                    "    WHERE p.parent_project_id = :id" +
+                    "    WHERE p.parent_project_id = :projectId" +
                     "    UNION ALL" +
                     "    SELECT p.id" +
                     "    FROM project p" +
@@ -29,6 +30,6 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
                     "SELECT DISTINCT project.id, name, description, parent_project_id, storage_size, max_storage_size, owner_id, created_at, updated_at, status, visibility, cover_image_id\n" +
                     "FROM project inner join search on search.id = project.id", nativeQuery = true
     )
-    List<Project> getAllSubprojectsFor(Long id);
+    List<Project> getAllSubprojectsFor(@Param("projectId") Long projectId);
 }
 

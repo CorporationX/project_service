@@ -2,6 +2,7 @@ package faang.school.projectservice.project;
 
 import faang.school.projectservice.controller.SubProjectController;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.FilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.service.project.ProjectService;
@@ -14,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+
 
 @ExtendWith(MockitoExtension.class)
 public class SubProjectControllerTest {
@@ -47,5 +49,12 @@ public class SubProjectControllerTest {
                 .name("Test").build();
         controller.createSubProject(1L,subProjectDto);
         verify(projectService,times(1)).createSubProject(1L,subProjectDto);
+    }
+
+    @Test
+    public void testGetProjectsByFilters(){
+        FilterDto filterDto = new FilterDto();
+        projectService.getProjectByFilters(filterDto,1L);
+        verify(projectService,times(1)).getProjectByFilters(filterDto,1L);
     }
 }
