@@ -76,9 +76,9 @@ public class ProjectService {
                 .toList();
     }
 
-    public ProjectDto getProjectById(ProjectDto projectDto) {
+    public ProjectDto getProjectById(Long projectId) {
         try {
-            return projectMapper.toDto(projectRepository.getProjectById(projectDto.getId()));
+            return projectMapper.toDto(projectRepository.getProjectById(projectId));
         } catch (EntityNotFoundException e) {
             throw new RuntimeException(e.getMessage());
         }

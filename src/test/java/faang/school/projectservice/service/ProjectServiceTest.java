@@ -186,13 +186,13 @@ public class ProjectServiceTest {
     @Test
     public void testGetProjectByIdNotExist() {
         Mockito.when(projectRepository.getProjectById(projectId)).thenThrow(new EntityNotFoundException());
-        Assertions.assertThrows(RuntimeException.class, () -> projectService.getProjectById(projectDto));
+        Assertions.assertThrows(RuntimeException.class, () -> projectService.getProjectById(projectId));
     }
 
     @Test
     public void testGetProjectById() {
         Mockito.when(projectRepository.getProjectById(projectId)).thenReturn(project);
-        Assertions.assertEquals(projectDto, projectService.getProjectById(projectDto));
+        Assertions.assertEquals(projectDto, projectService.getProjectById(projectId));
         Mockito.verify(projectRepository).getProjectById(projectId);
     }
 }

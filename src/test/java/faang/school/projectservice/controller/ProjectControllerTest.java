@@ -86,18 +86,15 @@ public class ProjectControllerTest {
 
     @Test
     public void testGetProjectByIdWithWrongId() {
-        long id = 0L;
-        projectDto.setId(id);
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.getProjectById(projectDto));
-
-        projectDto.setId(null);
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.getProjectById(projectDto));
+        Long idZero = 0L;
+        Assertions.assertThrows(RuntimeException.class, () -> projectController.getProjectById(idZero));
+        Assertions.assertThrows(RuntimeException.class, () -> projectController.getProjectById(null));
     }
 
     @Test
     public void testGetProjectById() {
-        Mockito.when(projectService.getProjectById(projectDto)).thenReturn(projectDto);
-        projectController.getProjectById(projectDto);
-        Mockito.verify(projectService).getProjectById(projectDto);
+        Mockito.when(projectService.getProjectById(projectId)).thenReturn(projectDto);
+        projectController.getProjectById(projectId);
+        Mockito.verify(projectService).getProjectById(projectId);
     }
 }

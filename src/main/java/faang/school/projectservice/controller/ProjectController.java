@@ -4,10 +4,12 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
@@ -36,12 +38,12 @@ public class ProjectController {
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProjects();
     }
-
-    public ProjectDto getProjectById(ProjectDto projectDto) {
-        if (projectDto.getId() == null || projectDto.getId().equals(0L)) {
-            throw new RuntimeException("Invalid id " + projectDto.getId());
+@GetMapping("project/{projectId}")
+    public ProjectDto getProjectById(@PathVariable Long projectId) {
+        if (projectId == null || projectId.equals(0L)) {
+            throw new RuntimeException("Invalid id " + projectId);
         }
-        return projectService.getProjectById(projectDto);
+        return projectService.getProjectById(projectId);
     }
 
 }
