@@ -15,8 +15,7 @@ public class Validator {
                 .toList()
                 .isEmpty()) {
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 }

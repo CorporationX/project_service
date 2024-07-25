@@ -81,7 +81,7 @@ public class StageService {
         if (checkUsersWithCertainRole(teamRole, stageDto)) {
             // определяем требуемое количество участников с такой ролью
             StageRoles resultStageRoles = stageRoles.stream()
-                    .filter(roles -> roles.getTeamRole().equals(teamRole))
+                    .filter(roles -> teamRole.equals(roles.getTeamRole()))
                     .toList().get(0);
             int amount = resultStageRoles.getCount();
 
