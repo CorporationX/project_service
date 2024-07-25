@@ -1,12 +1,12 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.StageDeleteTaskStrategyDto;
-import faang.school.projectservice.dto.client.StageDto;
-import faang.school.projectservice.dto.client.StageFilterDto;
-import faang.school.projectservice.dto.client.TeamRoleDto;
+import faang.school.projectservice.dto.stage.StageDeleteTaskStrategyDto;
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.teamrole.TeamRoleDto;
 import faang.school.projectservice.filter.stagefilter.StageFilter;
-import faang.school.projectservice.mapper.StageMapper;
-import faang.school.projectservice.mapper.StageRolesMapper;
+import faang.school.projectservice.jpa.StageRolesRepository;
+import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -32,18 +32,19 @@ public class StageService {
     private final ProjectService projectService;
     private final TaskService taskService;
     private final List<StageFilter> stageFilters;
-    private final StageRolesMapper stageRolesMapper;
     private final StageValidator stageValidator;
-
+    private final StageRolesRepository stageRolesRepository;
 
     @Transactional
     public void createStage(StageDto stageDto) {
         stageValidator.validationProjectById(stageDto.getProjectId());
         Stage stage = stageMapper.toEntity(stageDto);
-        List<StageRoles> rolesList = stageRolesMapper.toEntities(stageDto.getStageRolesDtosList());
-        rolesList.forEach(role -> role.setStage(stage));
-        stage.setStageRoles(rolesList);
-        stageRepository.save(stage);
+        List<StageRoles> stageRoles = stage.getStageRoles();
+        stage.setStageRoles(null);
+
+        Stage savedStage = stageRepository.save(stage);
+        stageRoles.forEach(role -> role.setStage(savedStage));
+        stageRolesRepository.saveAll(stageRoles);
     }
 
     @Transactional(readOnly = true)
@@ -60,47 +61,36 @@ public class StageService {
     }
 
     @Transactional
-    public StageDeleteTaskStrategyDto deleteStage(Long stageToDeleteId,
-                                                  StageDeleteTaskStrategyDto strategyDto,
-                                                  Long newStageId) {
+    public void deleteStage(Long stageToDeleteId,
+                            @NotNull StageDeleteTaskStrategyDto strategyDto,
+                            Long newStageId) {
         switch (strategyDto.getStrategy()) {
-            case CASCADE_DELETE -> {
-                return cascadeDelete(stageToDeleteId, strategyDto);
-            }
-            case CLOSE_TASKS -> {
-                return closeTasks(stageToDeleteId, strategyDto);
-            }
-            case MOVE_TASKS -> {
-                return moveTasks(stageToDeleteId, strategyDto, newStageId);
-            }
-            default -> {
-                log.info("Unknown strategy in method deleteStage");
-                throw new IllegalArgumentException("Unknown strategy: " + strategyDto.getStrategy());
-            }
+            case CASCADE_DELETE -> cascadeDelete(stageToDeleteId);
+            case CLOSE_TASKS -> closeTasks(stageToDeleteId);
+            case MOVE_TASKS -> moveTasks(stageToDeleteId, newStageId);
         }
     }
 
-    private StageDeleteTaskStrategyDto moveTasks(Long stageToDeleteId,
-                                                 StageDeleteTaskStrategyDto strategyDto,
-                                                 @NotNull Long newStageId) {
-        stageRepository.getById(newStageId).getTasks().addAll(stageRepository.getById(stageToDeleteId).getTasks());
-        stageRepository.delete(stageRepository.getById(stageToDeleteId));
-        return strategyDto;
+    private void moveTasks(Long stageToDeleteId,
+                           @NotNull Long newStageId) {
+        Stage stageNew = stageRepository.getById(newStageId);
+        Stage stageOld = stageRepository.getById(stageToDeleteId);
+        stageNew.getTasks().addAll(stageOld.getTasks());
+        stageRepository.delete(stageOld);
+
     }
 
-    private StageDeleteTaskStrategyDto closeTasks(Long stageToDeleteId,
-                                                  StageDeleteTaskStrategyDto strategyDto) {
-        stageRepository.getById(stageToDeleteId).getTasks().forEach(task -> task.setStatus(TaskStatus.CANCELLED));
-        stageRepository.delete(stageRepository.getById(stageToDeleteId));
-        return strategyDto;
+    private void closeTasks(Long stageToDeleteId) {
+        Stage stage = stageRepository.getById(stageToDeleteId);
+        stage.getTasks().forEach(task -> task.setStatus(TaskStatus.CANCELLED));
+        stageRepository.delete(stage);
     }
 
-    private StageDeleteTaskStrategyDto cascadeDelete(Long stageToDeleteId,
-                                                     StageDeleteTaskStrategyDto strategyDto) {
-        stageRepository.getById(stageToDeleteId).getTasks().clear();
-        taskService.findAllByStage(stageRepository.getById(stageToDeleteId)).clear();
-        stageRepository.delete(stageRepository.getById(stageToDeleteId));
-        return strategyDto;
+    private void cascadeDelete(Long stageToDeleteId) {
+        Stage stage = stageRepository.getById(stageToDeleteId);
+        stage.getTasks().clear();
+        taskService.findAllByStage(stage).clear();
+        stageRepository.delete(stage);
     }
 
     @Transactional(readOnly = true)

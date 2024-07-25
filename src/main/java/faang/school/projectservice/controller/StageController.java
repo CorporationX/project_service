@@ -1,9 +1,9 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.StageDeleteTaskStrategyDto;
-import faang.school.projectservice.dto.client.StageDto;
-import faang.school.projectservice.dto.client.StageFilterDto;
-import faang.school.projectservice.dto.client.TeamRoleDto;
+import faang.school.projectservice.dto.stage.StageDeleteTaskStrategyDto;
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.teamrole.TeamRoleDto;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class StageController {
 
     @PostMapping(value = "/")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createStage(@RequestBody StageDto stageDto) {
+    public void createStage(@RequestBody @Valid StageDto stageDto) {
         stageService.createStage(stageDto);
     }
 
@@ -46,10 +46,11 @@ public class StageController {
     }
 
     @DeleteMapping(value = "/{stageToDeleteId}/{newStageId}")
-    public StageDeleteTaskStrategyDto deleteStage(@PathVariable Long stageToDeleteId,
-                                                  @RequestBody @Valid StageDeleteTaskStrategyDto strategyDto,
-                                                  @PathVariable(required = false) Long newStageId) {
-        return stageService.deleteStage(stageToDeleteId, strategyDto, newStageId);
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteStage(@PathVariable Long stageToDeleteId,
+                            @RequestBody @Valid StageDeleteTaskStrategyDto strategyDto,
+                            @PathVariable(required = false) Long newStageId) {
+        stageService.deleteStage(stageToDeleteId, strategyDto, newStageId);
     }
 
     @GetMapping(value = "all/{projectId}")
