@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.dto.DtoValidationConstraints;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -23,8 +24,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "Сущность проекта")
 public class ProjectDto {
 
+    @Schema(description = "Идентификатор")
     private Long id;
     @NotBlank(message = DtoValidationConstraints.PROJECT_NAME_REQUIRED)
     @Pattern(regexp = DtoValidationConstraints.PROJECT_NAME_PATTERN, message = DtoValidationConstraints.PROJECT_NAME_CONSTRAINT)
