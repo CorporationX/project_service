@@ -41,4 +41,7 @@ public class MomentController {
         return momentService.getMomentsFilteredByDateFromProjects(ProjectId, filter);
     }
 
+    public List<MomentDto> getAllMoments(Long projectId) {
+        return momentService.getAllMoments(projectId);
+    }
 }
