@@ -73,7 +73,7 @@ public class MomentService {
         }
         // проекты не null
         else {
-            projects = projectUtilService.findAllByIdsStrictly(momentRequestDto.getProjectIds());
+            projects = projectUtilService.getAllByIdsStrictly(momentRequestDto.getProjectIds());
             projectUtilService.checkProjectsNotClosed(projects);
             // если проекты не null, мемберы null - вытягиваем мемберов из проектов
             if (momentRequestDto.getTeamMemberIds() == null) {
@@ -166,7 +166,7 @@ public class MomentService {
 
         if (newProjectIds != null && newTeamMemberIds != null) {
             // Явно меняем и проекты и мемберов=
-            List<Project> newProjects = projectUtilService.findAllByIdsStrictly(newProjectIds);
+            List<Project> newProjects = projectUtilService.getAllByIdsStrictly(newProjectIds);
 
             projectUtilService.checkProjectsNotClosed(newProjects);
             projectUtilService.checkProjectsFitTeamMembers(newProjectIds, newTeamMemberIds);
@@ -176,7 +176,7 @@ public class MomentService {
             moment.setProjects(newProjects);
         } else if (newProjectIds != null) {
             // Явно меняем проекты, мемберов исходя из проектов
-            List<Project> newProjects = projectUtilService.findAllByIdsStrictly(newProjectIds);
+            List<Project> newProjects = projectUtilService.getAllByIdsStrictly(newProjectIds);
             projectUtilService.checkProjectsNotClosed(newProjects);
             moment.setProjects(newProjects);
 

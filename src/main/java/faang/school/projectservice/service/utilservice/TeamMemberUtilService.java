@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.utilservice;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.ConflictException;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -37,7 +37,7 @@ public class TeamMemberUtilService {
                 new HashSet<>(findIdsByProjectIds(projectIds));
         boolean isValid = memberIdsInProjects.containsAll(teamMemberIds);
         if (!isValid) {
-            throw new DataValidationException(ErrorMessage.MEMBERS_UNFIT_PROJECTS);
+            throw new ConflictException(ErrorMessage.MEMBERS_UNFIT_PROJECTS);
         }
     }
 }

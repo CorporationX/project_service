@@ -5,16 +5,15 @@ import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.dto.moment.MomentUpdateDto;
 import faang.school.projectservice.exception.ConflictException;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.moment.MomentRepository;
+import faang.school.projectservice.service.utilservice.MomentUtilService;
+import faang.school.projectservice.service.utilservice.ProjectUtilService;
+import faang.school.projectservice.service.utilservice.TeamMemberUtilService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,11 +40,11 @@ import static org.mockito.Mockito.when;
 class MomentServiceTest {
 
     @Mock
-    TeamMemberRepository teamMemberRepository;
+    TeamMemberUtilService teamMemberUtilService;
     @Mock
-    ProjectRepository projectRepository;
+    ProjectUtilService projectUtilService;
     @Mock
-    MomentRepository momentRepository;
+    MomentUtilService momentUtilService;
     @Spy
     MomentMapperImpl momentMapper;
 
@@ -73,7 +71,7 @@ class MomentServiceTest {
                 .updatedBy(111L)
                 .build();
 
-        when(momentRepository.findById(momentId)).thenReturn(Optional.of(momentFromDB));
+        when(momentUtilService.getById(momentId)).thenReturn(momentFromDB);
 
         MomentResponseDto responseDto = momentService.getById(momentId);
 
@@ -91,7 +89,7 @@ class MomentServiceTest {
         assertEquals(momentFromDB.getCreatedBy(), responseDto.getCreatedBy());
         assertEquals(momentFromDB.getUpdatedAt(), responseDto.getUpdatedAt());
         assertEquals(momentFromDB.getUpdatedBy(), responseDto.getUpdatedBy());
-        verify(momentRepository, times(1)).findById(momentId);
+        verify(momentUtilService, times(1)).getById(momentId);
     }
 
     @Test
@@ -105,14 +103,14 @@ class MomentServiceTest {
                         .build()
         );
 
-        when(momentRepository.findAll()).thenReturn(moments);
+        when(momentUtilService.getAll()).thenReturn(moments);
 
         List<MomentResponseDto> responseDtos = momentService.getAll();
 
         assertEquals(moments.size(), responseDtos.size());
         assertEquals(moments.get(0).getId(), responseDtos.get(0).getId());
         assertEquals(moments.get(1).getId(), responseDtos.get(1).getId());
-        verify(momentRepository, times(1)).findAll();
+        verify(momentUtilService, times(1)).getAll();
     }
 
     @Test
@@ -158,7 +156,7 @@ class MomentServiceTest {
                         .build()
         );
 
-        when(momentRepository.findAllByProjectIdAndDateFiltered(
+        when(momentUtilService.findAllByProjectIdAndDateBetween(
                 projectId, filterDto.getStart(), filterDto.getEndExclusive()))
                 .thenReturn(moments);
 
@@ -169,8 +167,8 @@ class MomentServiceTest {
         assertTrue(responseDtos.get(0).getProjectIds().contains(2L));
         assertTrue(responseDtos.get(1).getProjectIds().contains(projectId));
         assertTrue(responseDtos.get(1).getProjectIds().contains(3L));
-        verify(momentRepository, times(1))
-                .findAllByProjectIdAndDateFiltered(projectId, filterDto.getStart(), filterDto.getEndExclusive());
+        verify(momentUtilService, times(1))
+                .findAllByProjectIdAndDateBetween(projectId, filterDto.getStart(), filterDto.getEndExclusive());
     }
 
     @Test
@@ -213,7 +211,7 @@ class MomentServiceTest {
                         .build()
         );
 
-        when(momentRepository.findAllByProjectId(projectId)).thenReturn(moments);
+        when(momentUtilService.findAllByProjectId(projectId)).thenReturn(moments);
 
         List<MomentResponseDto> responseDtos = momentService.getAllFilteredByProjectId(projectId, null);
 
@@ -221,7 +219,7 @@ class MomentServiceTest {
         assertTrue(responseDtos.get(0).getProjectIds().contains(projectId));
         assertTrue(responseDtos.get(1).getProjectIds().contains(projectId));
         assertTrue(responseDtos.get(2).getProjectIds().contains(projectId));
-        verify(momentRepository, times(1))
+        verify(momentUtilService, times(1))
                 .findAllByProjectId(projectId);
     }
 
@@ -229,12 +227,12 @@ class MomentServiceTest {
     void testGetById_NotExists() {
         long momentId = 1L;
 
-        when(momentRepository.findById(momentId)).thenThrow(new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
+        when(momentUtilService.getById(momentId)).thenThrow(new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> momentService.getById(momentId));
         assertEquals(ErrorMessage.MOMENT_NOT_EXIST.getMessage(), exception.getMessage());
 
-        verify(momentRepository, times(1)).findById(momentId);
+        verify(momentUtilService, times(1)).getById(momentId);
     }
 
 
@@ -247,14 +245,15 @@ class MomentServiceTest {
                 .id(teamMember1ProjectId)
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
+        List<Project> projectsFromTeamMembers = List.of(teamMember1Project);
         MomentRequestDto momentRequestDto = MomentRequestDto.builder()
                 .projectIds(null)
                 .teamMemberIds(List.of(teamMember1Id))
                 .build();
 
-        when(projectRepository.findAllDistinctByTeamMemberIds(momentRequestDto.getTeamMemberIds()))
-                .thenReturn(List.of(teamMember1Project));
-        when(momentRepository.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
+        when(projectUtilService.findAllDistinctByTeamMemberIds(momentRequestDto.getTeamMemberIds()))
+                .thenReturn(projectsFromTeamMembers);
+        when(momentUtilService.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
             Moment moment = invocationOnMock.getArgument(0, Moment.class);
             moment.setId(21L);
             return moment;
@@ -265,12 +264,13 @@ class MomentServiceTest {
         assertTrue(momentResponseDto.getTeamMemberIds().contains(teamMember1Id));
         assertTrue(momentResponseDto.getProjectIds().contains(teamMember1ProjectId));
         assertEquals(creatorId, momentResponseDto.getCreatedBy());
-        verify(teamMemberRepository, times(1))
-                .checkExistAll(momentRequestDto.getTeamMemberIds());
-        verify(projectRepository, times(1))
+        verify(teamMemberUtilService, times(1))
+                .checkExistAllByIds(momentRequestDto.getTeamMemberIds());
+        verify(projectUtilService, times(1))
                 .findAllDistinctByTeamMemberIds(momentRequestDto.getTeamMemberIds());
-        verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verify(projectUtilService, times(1)).checkProjectsNotClosed(projectsFromTeamMembers);
+        verify(momentUtilService, times(1)).save(Mockito.any(Moment.class));
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -283,14 +283,14 @@ class MomentServiceTest {
                 .build();
 
         doThrow(new NotFoundException(ErrorMessage.SOME_OF_MEMBERS_NOT_EXIST))
-                .when(teamMemberRepository).checkExistAll(momentRequestDto.getTeamMemberIds());
+                .when(teamMemberUtilService).checkExistAllByIds(momentRequestDto.getTeamMemberIds());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> momentService.addNew(momentRequestDto, creatorId));
         assertEquals(ErrorMessage.SOME_OF_MEMBERS_NOT_EXIST.getMessage(), exception.getMessage());
 
-        verify(teamMemberRepository, times(1))
-                .checkExistAll(momentRequestDto.getTeamMemberIds());
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verify(teamMemberUtilService, times(1))
+                .checkExistAllByIds(momentRequestDto.getTeamMemberIds());
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -302,23 +302,26 @@ class MomentServiceTest {
                 .id(teamMember1ProjectId)
                 .status(ProjectStatus.COMPLETED)
                 .build();
+        List<Project> projectsFromTeamMembers = List.of(teamMember1Project);
         MomentRequestDto momentRequestDto = MomentRequestDto.builder()
                 .projectIds(null)
                 .teamMemberIds(List.of(teamMember1Id))
                 .build();
 
 
-        when(projectRepository.findAllDistinctByTeamMemberIds(momentRequestDto.getTeamMemberIds()))
-                .thenReturn(List.of(teamMember1Project));
+        when(projectUtilService.findAllDistinctByTeamMemberIds(momentRequestDto.getTeamMemberIds()))
+                .thenReturn(projectsFromTeamMembers);
+        doThrow(new ConflictException(ErrorMessage.PROJECT_STATUS_INVALID))
+                .when(projectUtilService).checkProjectsNotClosed(projectsFromTeamMembers);
 
         ConflictException exception = assertThrows(ConflictException.class, () -> momentService.addNew(momentRequestDto, creatorId));
         assertEquals(ErrorMessage.PROJECT_STATUS_INVALID.getMessage(), exception.getMessage());
 
-        verify(teamMemberRepository, times(1))
-                .checkExistAll(momentRequestDto.getTeamMemberIds());
-        verify(projectRepository, times(1))
+        verify(teamMemberUtilService, times(1))
+                .checkExistAllByIds(momentRequestDto.getTeamMemberIds());
+        verify(projectUtilService, times(1))
                 .findAllDistinctByTeamMemberIds(momentRequestDto.getTeamMemberIds());
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -338,9 +341,9 @@ class MomentServiceTest {
         Long project1TeamMember1Id = 11L;
         List<Long> project1TeamMemberIds = List.of(project1TeamMember1Id);
 
-        when(projectRepository.findAllByIds(projectIds)).thenReturn(projects);
-        when(teamMemberRepository.findIdsByProjectIds(projectIds)).thenReturn(project1TeamMemberIds);
-        when(momentRepository.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
+        when(projectUtilService.getAllByIdsStrictly(projectIds)).thenReturn(projects);
+        when(teamMemberUtilService.findIdsByProjectIds(projectIds)).thenReturn(project1TeamMemberIds);
+        when(momentUtilService.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
             Moment moment = invocationOnMock.getArgument(0, Moment.class);
             moment.setId(21L);
             return moment;
@@ -351,10 +354,11 @@ class MomentServiceTest {
         assertTrue(momentResponseDto.getProjectIds().contains(project1Id));
         assertTrue(momentResponseDto.getTeamMemberIds().contains(project1TeamMember1Id));
         assertEquals(creatorId, momentResponseDto.getCreatedBy());
-        verify(projectRepository, times(1)).findAllByIds(projectIds);
-        verify(teamMemberRepository, times(1)).findIdsByProjectIds(projectIds);
-        verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verify(projectUtilService, times(1)).getAllByIdsStrictly(projectIds);
+        verify(projectUtilService, times(1)).checkProjectsNotClosed(projects);
+        verify(teamMemberUtilService, times(1)).findIdsByProjectIds(projectIds);
+        verify(momentUtilService, times(1)).save(Mockito.any(Moment.class));
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -374,9 +378,9 @@ class MomentServiceTest {
                 .teamMemberIds(teamMemberIds)
                 .build();
 
-        when(projectRepository.findAllByIds(projectIds)).thenReturn(projects);
-        when(teamMemberRepository.findIdsByProjectIds(projectIds)).thenReturn(teamMemberIds);
-        when(momentRepository.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
+        when(projectUtilService.getAllByIdsStrictly(projectIds)).thenReturn(projects);
+        when(teamMemberUtilService.findIdsByProjectIds(projectIds)).thenReturn(teamMemberIds);
+        when(momentUtilService.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
             Moment moment = invocationOnMock.getArgument(0, Moment.class);
             moment.setId(21L);
             return moment;
@@ -387,10 +391,12 @@ class MomentServiceTest {
         assertTrue(momentResponseDto.getProjectIds().contains(project1Id));
         assertTrue(momentResponseDto.getTeamMemberIds().contains(teamMember1Id));
         assertEquals(creatorId, momentResponseDto.getCreatedBy());
-        verify(projectRepository, times(1)).findAllByIds(projectIds);
-        verify(teamMemberRepository, times(2)).findIdsByProjectIds(projectIds);
-        verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verify(projectUtilService, times(1)).getAllByIdsStrictly(projectIds);
+        verify(projectUtilService, times(1)).checkProjectsNotClosed(projects);
+        verify(teamMemberUtilService, times(1)).checkTeamMembersFitProjects(teamMemberIds, projectIds);
+        verify(teamMemberUtilService, times(1)).findIdsByProjectIds(projectIds);
+        verify(momentUtilService, times(1)).save(Mockito.any(Moment.class));
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -398,7 +404,6 @@ class MomentServiceTest {
         long creatorId = 999L;
         Long teamMember1Id = 1L;
         List<Long> teamMemberIds = new ArrayList<>(List.of(teamMember1Id));
-        List<Long> anotherTeamMemberIds = List.of(2L);
         Long project1Id = 1L;
         Project project1 = Project.builder()
                 .id(project1Id)
@@ -411,18 +416,20 @@ class MomentServiceTest {
                 .teamMemberIds(teamMemberIds)
                 .build();
 
-        when(projectRepository.findAllByIds(projectIds)).thenReturn(projects);
-        when(teamMemberRepository.findIdsByProjectIds(projectIds)).thenReturn(anotherTeamMemberIds);
+        when(projectUtilService.getAllByIdsStrictly(projectIds)).thenReturn(projects);
+        doThrow(new ConflictException(ErrorMessage.MEMBERS_UNFIT_PROJECTS))
+                .when(teamMemberUtilService).checkTeamMembersFitProjects(teamMemberIds, projectIds);
 
-        DataValidationException exception = assertThrows(
-                DataValidationException.class,
+        ConflictException exception = assertThrows(
+                ConflictException.class,
                 () -> momentService.addNew(momentRequestDto, creatorId)
         );
         assertEquals(ErrorMessage.MEMBERS_UNFIT_PROJECTS.getMessage(), exception.getMessage());
 
-        verify(projectRepository, times(1)).findAllByIds(projectIds);
-        verify(teamMemberRepository, times(1)).findIdsByProjectIds(projectIds);
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verify(projectUtilService, times(1)).getAllByIdsStrictly(projectIds);
+        verify(projectUtilService, times(1)).checkProjectsNotClosed(projects);
+        verify(teamMemberUtilService, times(1)).checkTeamMembersFitProjects(teamMemberIds, projectIds);
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -449,9 +456,9 @@ class MomentServiceTest {
         Long missingTeamMember1Id = 2L;
         List<Long> teamMembersByProjects = List.of(teamMember1Id, missingTeamMember1Id);
 
-        when(projectRepository.findAllByIds(projectIds)).thenReturn(projects);
-        when(teamMemberRepository.findIdsByProjectIds(projectIds)).thenReturn(teamMembersByProjects);
-        when(momentRepository.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
+        when(projectUtilService.getAllByIdsStrictly(projectIds)).thenReturn(projects);
+        when(teamMemberUtilService.findIdsByProjectIds(projectIds)).thenReturn(teamMembersByProjects);
+        when(momentUtilService.save(Mockito.any(Moment.class))).thenAnswer(invocationOnMock -> {
             Moment moment = invocationOnMock.getArgument(0, Moment.class);
             moment.setId(21L);
             return moment;
@@ -463,10 +470,12 @@ class MomentServiceTest {
         assertTrue(momentResponseDto.getTeamMemberIds().contains(teamMember1Id));
         assertTrue(momentResponseDto.getTeamMemberIds().contains(missingTeamMember1Id));
         assertEquals(creatorId, momentResponseDto.getCreatedBy());
-        verify(projectRepository, times(1)).findAllByIds(projectIds);
-        verify(teamMemberRepository, times(2)).findIdsByProjectIds(projectIds);
-        verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verify(projectUtilService, times(1)).getAllByIdsStrictly(projectIds);
+        verify(projectUtilService, times(1)).checkProjectsNotClosed(projects);
+        verify(teamMemberUtilService, times(1)).checkTeamMembersFitProjects(teamMemberIds, projectIds);
+        verify(teamMemberUtilService, times(1)).findIdsByProjectIds(projectIds);
+        verify(momentUtilService, times(1)).save(Mockito.any(Moment.class));
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -479,13 +488,13 @@ class MomentServiceTest {
                 .teamMemberIds(null)
                 .build();
 
-        when(projectRepository.findAllByIds(projectIds)).thenThrow(new NotFoundException(ErrorMessage.SOME_OF_PROJECTS_NOT_EXIST));
+        when(projectUtilService.getAllByIdsStrictly(projectIds)).thenThrow(new NotFoundException(ErrorMessage.SOME_OF_PROJECTS_NOT_EXIST));
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> momentService.addNew(momentRequestDto, creatorId));
         assertEquals(ErrorMessage.SOME_OF_PROJECTS_NOT_EXIST.getMessage(), exception.getMessage());
 
-        verify(projectRepository, times(1)).findAllByIds(projectIds);
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verify(projectUtilService, times(1)).getAllByIdsStrictly(projectIds);
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -503,13 +512,16 @@ class MomentServiceTest {
                 .teamMemberIds(null)
                 .build();
 
-        when(projectRepository.findAllByIds(projectIds)).thenReturn(projects);
+        when(projectUtilService.getAllByIdsStrictly(projectIds)).thenReturn(projects);
+        doThrow(new ConflictException(ErrorMessage.PROJECT_STATUS_INVALID))
+                .when(projectUtilService).checkProjectsNotClosed(projects);
 
         ConflictException exception = assertThrows(ConflictException.class, () -> momentService.addNew(momentRequestDto, creatorId));
         assertEquals(ErrorMessage.PROJECT_STATUS_INVALID.getMessage(), exception.getMessage());
 
-        verify(projectRepository, times(1)).findAllByIds(projectIds);
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verify(projectUtilService, times(1)).getAllByIdsStrictly(projectIds);
+        verify(projectUtilService, times(1)).checkProjectsNotClosed(projects);
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -535,7 +547,7 @@ class MomentServiceTest {
                 .imageId("imageFromDb")
                 .build();
 
-        when(momentRepository.findById(momentId)).thenReturn(Optional.of(momentFromDb));
+        when(momentUtilService.getById(momentId)).thenReturn(momentFromDb);
 
         MomentResponseDto updated = momentService.update(momentUpdateDto, userId);
 
@@ -545,8 +557,8 @@ class MomentServiceTest {
         assertEquals(newDate, updated.getDate());
         assertEquals(newImage, updated.getImageId());
         assertEquals(userId, updated.getUpdatedBy());
-        verify(momentRepository, times(1)).findById(momentId);
-        verify(momentRepository, times(1)).save(Mockito.any(Moment.class));
+        verify(momentUtilService, times(1)).getById(momentId);
+        verify(momentUtilService, times(1)).save(Mockito.any(Moment.class));
     }
 
     @Test
@@ -557,12 +569,12 @@ class MomentServiceTest {
                 .id(momentId)
                 .build();
 
-        when(momentRepository.findById(momentId))
+        when(momentUtilService.getById(momentId))
                 .thenThrow(new NotFoundException(ErrorMessage.MOMENT_NOT_EXIST));
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> momentService.update(momentUpdateDto, userId));
         assertEquals(ErrorMessage.MOMENT_NOT_EXIST.getMessage(), exception.getMessage());
-        verifyNoMoreInteractions(momentRepository, teamMemberRepository, projectRepository);
+        verifyNoMoreInteractions(momentUtilService, teamMemberUtilService, projectUtilService);
     }
 
     @Test
@@ -588,14 +600,12 @@ class MomentServiceTest {
                 .teamMemberIds(newTeamMemberIds)
                 .build();
 
-        when(momentRepository.findById(momentId)).thenReturn(Optional.of(
+        when(momentUtilService.getById(momentId)).thenReturn(
                 Moment.builder()
                         .id(momentId)
                         .build()
-        ));
-        when(projectRepository.findAllByIds(newProjectIds)).thenReturn(newProjects);
-        when(teamMemberRepository.findIdsByProjectIds(newProjectIds)).thenReturn(newTeamMemberIds);
-        when(projectRepository.findAllDistinctByTeamMemberIds(newTeamMemberIds)).thenReturn(newProjects);
+        );
+        when(projectUtilService.getAllByIdsStrictly(newProjectIds)).thenReturn(newProjects);
 
         MomentResponseDto responseDto = momentService.update(momentUpdateDto, userId);
 
@@ -603,10 +613,12 @@ class MomentServiceTest {
         assertEquals(newProjectIds, responseDto.getProjectIds());
         assertEquals(newTeamMemberIds, responseDto.getTeamMemberIds());
         assertEquals(userId, responseDto.getUpdatedBy());
-        verify(projectRepository, times(1)).findAllByIds(newProjectIds);
-        verify(teamMemberRepository, times(1)).findIdsByProjectIds(newProjectIds);
-        verify(projectRepository, times(1)).findAllDistinctByTeamMemberIds(newTeamMemberIds);
-        verify(momentRepository, times(1)).save(any(Moment.class));
+        verify(momentUtilService, times(1)).getById(momentId);
+        verify(projectUtilService, times(1)).getAllByIdsStrictly(newProjectIds);
+        verify(projectUtilService, times(1)).checkProjectsNotClosed(newProjects);
+        verify(projectUtilService, times(1)).checkProjectsFitTeamMembers(newProjectIds, newTeamMemberIds);
+        verify(teamMemberUtilService, times(1)).checkTeamMembersFitProjects(newTeamMemberIds, newProjectIds);
+        verify(momentUtilService, times(1)).save(any(Moment.class));
     }
 
     @Test
@@ -638,15 +650,15 @@ class MomentServiceTest {
                 .teamMemberIds(null)
                 .build();
 
-        when(momentRepository.findById(momentId)).thenReturn(Optional.of(
+        when(momentUtilService.getById(momentId)).thenReturn(
                 Moment.builder()
                         .id(momentId)
                         .projects(oldProjects)
                         .teamMemberIds(oldTeamMemberIds)
                         .build()
-        ));
-        when(projectRepository.findAllByIds(newProjectIds)).thenReturn(newProjects);
-        when(teamMemberRepository.findIdsByProjectIds(newProjectIds)).thenReturn(teamMembersFromNewProjects);
+        );
+        when(projectUtilService.getAllByIdsStrictly(newProjectIds)).thenReturn(newProjects);
+        when(teamMemberUtilService.findIdsByProjectIds(newProjectIds)).thenReturn(teamMembersFromNewProjects);
 
         MomentResponseDto responseDto = momentService.update(momentUpdateDto, userId);
 
@@ -654,9 +666,9 @@ class MomentServiceTest {
         assertEquals(newProjectIds, responseDto.getProjectIds());
         assertEquals(teamMembersFromNewProjects, responseDto.getTeamMemberIds());
         assertEquals(userId, responseDto.getUpdatedBy());
-        verify(projectRepository, times(1)).findAllByIds(newProjectIds);
-        verify(teamMemberRepository, times(2)).findIdsByProjectIds(newProjectIds);
-        verify(momentRepository, times(1)).save(any(Moment.class));
+        verify(projectUtilService, times(1)).getAllByIdsStrictly(newProjectIds);
+        verify(teamMemberUtilService, times(2)).findIdsByProjectIds(newProjectIds);
+        verify(momentUtilService, times(1)).save(any(Moment.class));
     }
 
     @Test
@@ -688,14 +700,14 @@ class MomentServiceTest {
                 .teamMemberIds(newTeamMemberIds)
                 .build();
 
-        when(momentRepository.findById(momentId)).thenReturn(Optional.of(
+        when(momentUtilService.getById(momentId)).thenReturn(
                 Moment.builder()
                         .id(momentId)
                         .projects(oldProjects)
                         .teamMemberIds(oldTeamMemberIds)
                         .build()
-        ));
-        when(projectRepository.findAllDistinctByTeamMemberIds(newTeamMemberIds)).thenReturn(projectsFromNewTeamMembers);
+        );
+        when(projectUtilService.findAllDistinctByTeamMemberIds(newTeamMemberIds)).thenReturn(projectsFromNewTeamMembers);
 
 
         MomentResponseDto responseDto = momentService.update(momentUpdateDto, userId);
@@ -704,8 +716,8 @@ class MomentServiceTest {
         assertEquals(projectIdsFromNewTeamMembers, responseDto.getProjectIds());
         assertEquals(newTeamMemberIds, responseDto.getTeamMemberIds());
         assertEquals(userId, responseDto.getUpdatedBy());
-        verify(teamMemberRepository, times(1)).checkExistAll(newTeamMemberIds);
-        verify(projectRepository, times(2)).findAllDistinctByTeamMemberIds(newTeamMemberIds);
-        verify(momentRepository, times(1)).save(any(Moment.class));
+        verify(teamMemberUtilService, times(1)).checkExistAllByIds(newTeamMemberIds);
+        verify(projectUtilService, times(2)).findAllDistinctByTeamMemberIds(newTeamMemberIds);
+        verify(momentUtilService, times(1)).save(any(Moment.class));
     }
 }

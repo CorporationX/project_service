@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.utilservice;
 
 import faang.school.projectservice.exception.ConflictException;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.model.Project;
@@ -21,7 +20,7 @@ public class ProjectUtilService {
 
     private final ProjectRepository projectRepository;
 
-    public List<Project> findAllByIdsStrictly(Collection<Long> ids) {
+    public List<Project> getAllByIdsStrictly(Collection<Long> ids) {
         List<Project> projects = projectRepository.findAllByIds(ids);
         if (ids.size() != projects.size()) {
             throw new NotFoundException(ErrorMessage.SOME_OF_PROJECTS_NOT_EXIST);
@@ -50,7 +49,7 @@ public class ProjectUtilService {
                         .collect(Collectors.toSet());
         boolean isValid = projectIdsFromMembers.containsAll(projectIds);
         if (!isValid) {
-            throw new DataValidationException(ErrorMessage.PROJECTS_UNFIT_MEMBERS);
+            throw new ConflictException(ErrorMessage.PROJECTS_UNFIT_MEMBERS);
         }
     }
 
