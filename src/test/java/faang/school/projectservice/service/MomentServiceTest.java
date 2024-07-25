@@ -92,13 +92,10 @@ public class MomentServiceTest {
     @DisplayName("Test createMoment")
     public void testCreateMoment() {
         doNothing().when(momentServiceValidator).validateCreateMoment(any(MomentDto.class));
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
         when(momentMapper.toEntity(any(MomentDto.class))).thenReturn(moment);
-
         momentService.createMoment(momentDto);
 
         verify(momentServiceValidator).validateCreateMoment(momentDto);
-        verify(projectRepository).getProjectById(1L);
         verify(momentRepository).save(moment);
     }
 
@@ -128,7 +125,7 @@ public class MomentServiceTest {
         when(momentRepository.findAll()).thenReturn(List.of(moment));
         when(momentFilters.stream()).thenReturn(Stream.of());
 
-        List<MomentDto> result = momentService.getAllMoments(momentFilterDto);
+        List<MomentDto> result = momentService.getFilteredMoments(momentFilterDto);
 
         verify(momentFilters, times(1)).stream();
         assertEquals(0, result.size());
@@ -137,7 +134,7 @@ public class MomentServiceTest {
     @Test
     @DisplayName("Test getAllMoments with applicable filters")
     public void testGetAllMomentsWithApplicableFilters() {
-        momentService.getAllMoments(new MomentFilterDto());
+        momentService.getFilteredMoments(new MomentFilterDto());
 
         verify(momentRepository, times(1)).findAll();
     }

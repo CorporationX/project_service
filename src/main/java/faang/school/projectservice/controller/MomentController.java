@@ -28,7 +28,7 @@ public class MomentController {
 
     @GetMapping("/filters")
     public List<MomentDto> getAllMoments(@RequestBody @NotNull MomentFilterDto momentFilterDto) {
-        return momentService.getAllMoments(momentFilterDto);
+        return momentService.getFilteredMoments(momentFilterDto);
     }
 
     @GetMapping
