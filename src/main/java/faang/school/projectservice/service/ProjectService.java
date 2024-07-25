@@ -51,6 +51,7 @@ public class ProjectService {
             subProject.setMoments(List.of(new Moment()));
         }
     }
+
     @Transactional
     public List<SubProjectDto> getAllFilteredSubprojectsOfAProject(SubProjectFilterDto subProjectFilterDto,
                                                                    Long projectId) {
@@ -63,8 +64,8 @@ public class ProjectService {
                 .map(subProjectMapper::toDto)
                 .toList();
     }
-    @Transactional
-    protected void checkAllValidationsForCreateSubProject(SubProjectDto subProjectDto) {
+
+    private void checkAllValidationsForCreateSubProject(SubProjectDto subProjectDto) {
         Long parentProjectId = subProjectDto.getParentProjectId();
         Project project = getProjectById(subProjectDto.getId());
         subProjectValidator.validateTheExistenceOfTheParenProject(parentProjectId, project);
@@ -72,8 +73,7 @@ public class ProjectService {
         subProjectValidator.validateVisibilityOfParentProjectAndSubproject(subProjectDto.getVisibility(), parentProjectId, project);
     }
 
-    @Transactional
-    protected Project getProjectById(Long projectId) {
+    private Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);
     }
 }
