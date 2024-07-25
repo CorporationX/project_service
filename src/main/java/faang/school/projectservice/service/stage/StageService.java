@@ -63,7 +63,7 @@ public class StageService {
     public StageDto deleteStageWithClosingTasks(Long stageId) {
         Stage stage = stageRepository.getById(stageId);
         List<Task> tasksToClose = stage.getTasks();
-        tasksToClose.forEach(task -> task.setStatus(TaskStatus.DONE));
+        tasksToClose.forEach(task -> task.setStatus(TaskStatus.CANCELLED));
         taskRepository.saveAll(tasksToClose);
         stageRepository.delete(stage);
 
@@ -76,7 +76,7 @@ public class StageService {
 
         List<TeamMember> currentExecutors = currentStage.getExecutors();
 
-        for (StageRolesDto stageRoles : stageDto.getStageRoles()) {
+        stageDto.getStageRoles().forEach(stageRoles -> {
             List<TeamMember> teamMembers = currentExecutors.stream()
                     .filter(teamMember -> teamMember.equals(stageRoles.getTeamRole()))
                     .toList();
@@ -86,7 +86,7 @@ public class StageService {
                         (project, stageRoles.getTeamRole(), stageRoles.getCount(), currentStage);
                 availableMembersWithRole.forEach(teamMember -> sendInvitation(StageInvitation.builder().build()));
             }
-        }
+        });
 
         return stageMapper.toStageDto(stageRepository.save(stageMapper.toStageEntity(stageDto)));
     }

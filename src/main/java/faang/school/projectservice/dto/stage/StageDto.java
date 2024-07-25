@@ -17,14 +17,13 @@ import java.util.List;
 @Data
 @Builder
 public class StageDto {
-    @Positive
+    @Positive(message = "Stage id should be positive")
     private Long stageId;
 
-    @NotNull
     @NotBlank(message = "Stage name required")
     private String stageName;
 
-    @Positive
+    @Positive(message = "Project id should be positive")
     private Long projectId;
 
     @NotNull

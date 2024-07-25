@@ -5,6 +5,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
