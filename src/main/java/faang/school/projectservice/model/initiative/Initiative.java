@@ -13,12 +13,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,27 +38,30 @@ public class Initiative {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false, length = 64)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "description", nullable = false, length = 4096)
     private String description;
 
-    @NotNull
-    @OneToOne
-    @JoinColumn(name = "userId")
+    @ManyToOne
+    @JoinColumn(name = "curator_id",  nullable = false)
     private TeamMember curator;
 
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private InitiativeStatus status;
 
-    @OneToMany(mappedBy = "stageId")
+    @ManyToMany
+    @JoinTable(
+            name = "initiative_project_stages",
+            joinColumns = @JoinColumn(name = "initiative_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_stage_id")
+    )
     private List<Stage> stages;
 
-    @NotNull
-    @OneToOne
-    @JoinColumn(name = "id")
+    @ManyToOne
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
     @ManyToMany
@@ -70,9 +71,6 @@ public class Initiative {
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
     private List<Project> sharingProjects;
-
-    @Column(name = "cover_image_id")
-    private String coverImageId;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
