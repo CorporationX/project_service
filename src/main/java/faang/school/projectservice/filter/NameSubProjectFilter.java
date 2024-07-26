@@ -13,6 +13,6 @@ public class NameSubProjectFilter implements SubProjectFilter{
 
     @Override
     public Stream<Project> apply(Stream<Project> goal, SubProjectDtoFilter filters) {
-        return goal.filter(x->x.getName().matches(filters.getProjectName()));
+        return goal.filter(x->x.getName().contains(filters.getProjectName()));
     }
 }

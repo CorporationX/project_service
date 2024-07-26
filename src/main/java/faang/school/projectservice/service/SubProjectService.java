@@ -11,6 +11,6 @@ import java.util.List;
 public interface SubProjectService {
     ProjectDto createSubProject(CreateSubProjectDto createSubProjectDto);
     ProjectDto updateProject(UpdateSubProjectDto createSubProjectDto);
-    List<ProjectDto> getProjects(SubProjectDtoFilter filter);
+    List<ProjectDto> getProjects(SubProjectDtoFilter filter, Long id);
 
 }

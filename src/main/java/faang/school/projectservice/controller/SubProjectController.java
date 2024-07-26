@@ -18,15 +18,15 @@ public class SubProjectController {
     private final SubProjectService subProjectService;
 
     @PostMapping
-    public ProjectDto createSubProject(@Valid CreateSubProjectDto subProjectDto) {
+    public ProjectDto createSubProject(@Valid @RequestBody CreateSubProjectDto subProjectDto) {
         return subProjectService.createSubProject(subProjectDto);
     }
     @PutMapping
-    public ProjectDto updateSubProject(UpdateSubProjectDto subProjectDto) {
+    public ProjectDto updateSubProject(@RequestBody UpdateSubProjectDto subProjectDto) {
         return subProjectService.updateProject(subProjectDto);
     }
-    @GetMapping
-    public List<ProjectDto> getSubProjects(SubProjectDtoFilter filter) {
-        return subProjectService.getProjects(filter);
+    @GetMapping("/{id}")
+    public List<ProjectDto> getSubProjects(@RequestBody SubProjectDtoFilter filter, @PathVariable Long id) {
+        return subProjectService.getProjects(filter, id);
     }
 }

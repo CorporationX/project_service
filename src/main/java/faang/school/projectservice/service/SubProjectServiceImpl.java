@@ -52,8 +52,8 @@ public class SubProjectServiceImpl implements SubProjectService{
     }
 
     @Override
-    public List<ProjectDto> getProjects(SubProjectDtoFilter filters) {
-        Stream<Project> projects = projectRepository.findAll().stream();
+    public List<ProjectDto> getProjects(SubProjectDtoFilter filters, Long id) {
+        Stream<Project> projects = projectRepository.getProjectById(id).getChildren().stream();
 
         return subProjectFilters.stream().filter(filter -> filter.isAcceptable(filters))
                 .flatMap(filter -> filter.apply(projects, filters)).map(projectMapper::toDTO)

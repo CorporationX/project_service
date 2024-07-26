@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.project;
 
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +17,6 @@ import java.math.BigInteger;
 public class CreateSubProjectDto {
     @Positive
     private long parentId;
-    @NotNull
     @NotBlank
     private String name;
     private String description;
