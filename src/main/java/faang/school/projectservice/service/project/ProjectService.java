@@ -15,7 +15,6 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
@@ -181,7 +180,6 @@ public class ProjectService {
         List<Moment> list = new ArrayList<>(moments);
         list.add(moment);
         return list;
-//        moments.add(moment);
     }
 
     private List<Project> getCompletedChildProjects(List<Project> childProjects) {

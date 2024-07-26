@@ -18,9 +18,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Builder
 @Entity
 @Table(name = "moment")
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class Moment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

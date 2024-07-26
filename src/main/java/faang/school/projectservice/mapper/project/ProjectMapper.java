@@ -15,13 +15,12 @@ import java.util.List;
 @Qualifier
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
-    //    @Mapping(source = "parentProjectId", target = "parentProject.id")
+
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "stages", ignore = true)
     @Mapping(target = "teams", ignore = true)
     Project toEntity(ProjectDto dto);
 
-    //    @Mapping(source = "parentProject.id", target = "parentProjectId")
     @Mapping(source = "children", target = "childrenIds", qualifiedByName = "childrenProjectsIds")
     @Mapping(source = "stages", target = "stagesIds", qualifiedByName = "stagesIds")
     @Mapping(source = "teams", target = "teamsIds", qualifiedByName = "teamsIds")
