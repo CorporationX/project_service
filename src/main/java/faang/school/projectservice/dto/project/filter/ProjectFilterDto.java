@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.filter;
+package faang.school.projectservice.dto.project.filter;
 
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.AllArgsConstructor;

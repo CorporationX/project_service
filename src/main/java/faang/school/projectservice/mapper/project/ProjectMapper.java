@@ -1,7 +1,7 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.project;
 
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 

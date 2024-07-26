@@ -1,8 +1,8 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.project;
 
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.filter.ProjectFilterDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
+import faang.school.projectservice.service.project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class ProjectController {
         return projectService.create(projectDto);
     }
 
-    @Operation(summary = "Update ", description = "Update status and/or description")
+    @Operation(summary = "Update project", description = "Update status and/or description")
     @PutMapping("/update")
     public ProjectDto update(@RequestBody ProjectDto projectDto) {
 
@@ -39,17 +39,20 @@ public class ProjectController {
         }
         return projectService.update(projectDto);
     }
+
     @Operation(summary = "Get projects by filter")
     @PostMapping("/getByFilters")
     public List<ProjectDto> getProjectsWithFilters(@RequestHeader(value = "x-user-id") String userid,
                                                    @RequestBody ProjectFilterDto filters) {
         return projectService.getProjectsWithFilters(filters);
     }
+
     @Operation(summary = "Get all projects")
     @GetMapping("/getAll")
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProjects();
     }
+
     @Operation(summary = "Get projects by id")
     @GetMapping("/{projectId}")
     public ProjectDto getProjectById(@PathVariable Long projectId) {

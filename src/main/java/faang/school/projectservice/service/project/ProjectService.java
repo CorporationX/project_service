@@ -1,15 +1,15 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.filter.ProjectFilterDto;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.filter.ProjectFilter;
-import faang.school.projectservice.service.updater.ProjectUpdater;
+import faang.school.projectservice.service.project.filter.ProjectFilter;
+import faang.school.projectservice.service.project.updater.ProjectUpdater;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

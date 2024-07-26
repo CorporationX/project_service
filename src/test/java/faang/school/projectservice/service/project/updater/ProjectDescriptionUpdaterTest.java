@@ -1,6 +1,6 @@
-package faang.school.projectservice.service.updater;
+package faang.school.projectservice.service.project.updater;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

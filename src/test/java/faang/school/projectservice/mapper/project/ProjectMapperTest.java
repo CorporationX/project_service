@@ -1,6 +1,6 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.project;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.Assertions;
