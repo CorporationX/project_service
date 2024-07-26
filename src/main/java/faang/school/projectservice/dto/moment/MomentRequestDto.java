@@ -25,7 +25,9 @@ public class MomentRequestDto {
     @NullableNotBlank
     private String description;
 
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Builder.Default
     private LocalDateTime date = LocalDateTime.now();
 
     @Size(min = 1)
