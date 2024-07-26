@@ -1,20 +1,26 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@RestController
+
+@RestController()
 @RequiredArgsConstructor
+@RequestMapping("/project")
+@Tag(name = "Projects", description = "Project handler")
 public class ProjectController {
     private final ProjectService projectService;
 
-    public ProjectDto create(ProjectDto projectDto) {
+    @Operation(summary = "Create new project")
+    @PostMapping("/create")
+    public ProjectDto create(@RequestHeader(value = "x-user-id") String userid,
+                             @RequestBody ProjectDto projectDto) {
         if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new RuntimeException("Invalid name " + projectDto.getName());
         }
@@ -24,21 +30,28 @@ public class ProjectController {
         return projectService.create(projectDto);
     }
 
-    public ProjectDto update(ProjectDto projectDto) {
+    @Operation(summary = "Update ", description = "Update status and/or description")
+    @PutMapping("/update")
+    public ProjectDto update(@RequestBody ProjectDto projectDto) {
+
         if (projectDto.getId() == null || projectDto.getId().equals(0L)) {
             throw new RuntimeException("Invalid id " + projectDto.getId());
         }
         return projectService.update(projectDto);
     }
-
-    public List<ProjectDto> getProjectsWithFilters(ProjectDto projectDto) {
-        return projectService.getProjectsWithFilters(projectDto);
+    @Operation(summary = "Get projects by filter")
+    @PostMapping("/getByFilters")
+    public List<ProjectDto> getProjectsWithFilters(@RequestHeader(value = "x-user-id") String userid,
+                                                   @RequestBody ProjectFilterDto filters) {
+        return projectService.getProjectsWithFilters(filters);
     }
-
+    @Operation(summary = "Get all projects")
+    @GetMapping("/getAll")
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProjects();
     }
-@GetMapping("project/{projectId}")
+    @Operation(summary = "Get projects by id")
+    @GetMapping("/{projectId}")
     public ProjectDto getProjectById(@PathVariable Long projectId) {
         if (projectId == null || projectId.equals(0L)) {
             throw new RuntimeException("Invalid id " + projectId);

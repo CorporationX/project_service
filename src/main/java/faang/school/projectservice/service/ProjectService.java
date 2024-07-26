@@ -26,6 +26,7 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
     private final List<ProjectUpdater> projectUpdaters;
     private final UserContext userContext;
+    private ProjectDto projectDto;
 
     public ProjectDto create(ProjectDto projectDto) {
         if (projectDto.getOwnerId() == null) {
@@ -50,8 +51,7 @@ public class ProjectService {
 
     }
 
-    public List<ProjectDto> getProjectsWithFilters(ProjectDto projectDto) {
-        ProjectFilterDto filters = projectMapper.toFilter(projectDto);
+    public List<ProjectDto> getProjectsWithFilters(ProjectFilterDto filters) {
         long userId = userContext.getUserId();
         List<Project> publicProjects = projectRepository.findAll().stream()
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC).toList();

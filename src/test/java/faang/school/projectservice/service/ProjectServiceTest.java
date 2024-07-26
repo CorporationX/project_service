@@ -155,7 +155,7 @@ public class ProjectServiceTest {
         Mockito.when(userContext.getUserId()).thenReturn(1L);
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(publicProject, privateProject));
 
-        List<ProjectDto> result = projectService.getProjectsWithFilters(projectDto);
+        List<ProjectDto> result = projectService.getProjectsWithFilters(filter);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(2, result.size());
