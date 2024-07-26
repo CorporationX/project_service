@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.initiative;
 
 import faang.school.projectservice.dto.client.InitiativeFilterDto;
 import faang.school.projectservice.model.initiative.Initiative;
@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class CuratorFilter implements InitiativeFilter {
+public class StatusFilter implements InitiativeFilter {
     @Override
     public boolean isApplicable(InitiativeFilterDto initiativeFilterDto) {
-        return initiativeFilterDto.getCuratorPattern() != null;
+        return initiativeFilterDto.getStatusPattern() != null;
     }
 
     @Override
@@ -18,8 +18,7 @@ public class CuratorFilter implements InitiativeFilter {
                                     InitiativeFilterDto initiativeFilterDto) {
         return initiativeStream
                 .filter(filter -> filter
-                        .getCurator()
-                        .getId()
-                        .equals(initiativeFilterDto.getCuratorPattern()));
+                        .getStatus()
+                        .equals(initiativeFilterDto.getStatusPattern()));
     }
 }

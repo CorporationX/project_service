@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.initiative;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;

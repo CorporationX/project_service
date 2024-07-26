@@ -3,15 +3,13 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.InitiativeDto;
 import faang.school.projectservice.dto.client.InitiativeFilterDto;
 import faang.school.projectservice.dto.client.InitiativeStatusDto;
-import faang.school.projectservice.filter.InitiativeFilter;
-import faang.school.projectservice.mapper.InitiativeMapper;
+import faang.school.projectservice.filter.initiative.InitiativeFilter;
+import faang.school.projectservice.mapper.initiative.InitiativeMapper;
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.repository.InitiativeRepository;
+import faang.school.projectservice.validation.InitiativeValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +26,13 @@ public class InitiativeService {
     private final InitiativeRepository initiativeRepository;
     private final List<InitiativeFilter> initiativeFilters;
     private final InitiativeMapper initiativeMapper;
-    private final TeamMemberService teamMemberService;
     private final MomentService momentService;
+    private final InitiativeValidator initiativeValidator;
 
     @Transactional
     public void createInitiative(InitiativeDto initiativeDto) {
-        if (!checkProjectActiveInitiative(initiativeDto.getProjectId())) {
-            if (checkCuratorRole(initiativeDto.getCuratorId())) {
+        if (!initiativeValidator.checkProjectActiveInitiative(initiativeDto.getProjectId())) {
+            if (initiativeValidator.checkCuratorRole(initiativeDto.getCuratorId())) {
                 Initiative initiative = initiativeMapper.toEntity(initiativeDto);
                 initiativeRepository.save(initiative);
             } else {
@@ -73,15 +71,11 @@ public class InitiativeService {
                 initiative.setStatus(InitiativeStatus.IN_PROGRESS);
                 initiativeRepository.save(initiative);
             }
-            default -> {
-                log.info("Incorrect status selected Method: updateInitiative");
-                throw new RuntimeException("Incorrect status selected");
-            }
         }
     }
 
     private void statusDone(Initiative initiative) {
-        if (checkStagesStatusInitiative(initiative)) {
+        if (initiativeValidator.checkStagesStatusInitiative(initiative)) {
             Moment moment = momentService.createMoment(initiative);
             initiative.getProject().getMoments().add(moment);
             initiative.getSharingProjects()
@@ -120,25 +114,4 @@ public class InitiativeService {
                 }));
     }
 
-    private boolean checkProjectActiveInitiative(Long projectId) {
-        List<Initiative> initiatives = initiativeRepository.findAll();
-        return initiatives.stream()
-                .filter(initiative -> initiative.getProject().getId().equals(projectId))
-                .anyMatch(initiative -> initiative.getStatus() != InitiativeStatus.CLOSED
-                        && initiative.getStatus() != InitiativeStatus.DONE);
-    }
-
-    private boolean checkCuratorRole(Long curatorId) {
-        TeamMember member = teamMemberService.findById(curatorId);
-        return member.getRoles().contains(TeamRole.ANALYST)
-                || member.getRoles().contains(TeamRole.MANAGER);
-    }
-
-    private boolean checkStagesStatusInitiative(Initiative initiative) {
-        return initiative
-                .getStages()
-                .stream()
-                .flatMap(stage -> stage.getTasks().stream())
-                .allMatch(task -> task.getStatus().equals(TaskStatus.DONE));
-    }
 }

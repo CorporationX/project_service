@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.initiative;
 
 import faang.school.projectservice.dto.client.InitiativeDto;
 import faang.school.projectservice.model.initiative.Initiative;

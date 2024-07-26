@@ -6,7 +6,6 @@ import faang.school.projectservice.repository.MomentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -19,10 +18,8 @@ public class MomentService {
                 .name(initiative.getName())
                 .description(initiative.getDescription())
                 .projects(initiative.getSharingProjects())
-                .createdAt(LocalDateTime.now())
                 .userIds(List.of(initiative.getCurator().getId()))
                 .build();
-        momentRepository.save(moment);
-        return moment;
+        return momentRepository.save(moment);
     }
 }
