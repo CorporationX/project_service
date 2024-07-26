@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import java.util.Collection;
+
+
 @Repository
 public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
     @Query(
@@ -31,5 +34,14 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
                     "FROM project inner join search on search.id = project.id", nativeQuery = true
     )
     List<Project> getAllSubprojectsFor(@Param("projectId") Long projectId);
+
+    @Query("""
+            SELECT DISTINCT p FROM Project p
+            JOIN Team t ON t.project.id = p.id
+            JOIN TeamMember tm ON tm.team.id = t.id
+            WHERE tm.id IN (:teamMemberIds)
+            """
+    )
+    List<Project> findAllDistinctByTeamMemberIds(Collection<Long> teamMemberIds);
 }
 
