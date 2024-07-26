@@ -21,7 +21,7 @@ import java.util.List;
 public class InitiativeController {
     private final InitiativeService initiativeService;
 
-    @PostMapping("/create")
+    @PostMapping
     public InitiativeDto createInitiative(@RequestBody InitiativeDto initiativeDto) {
         if (initiativeDto.getName() == null || initiativeDto.getName().isEmpty() || initiativeDto.getName().isBlank()) {
             throw new IllegalArgumentException("Initiative name cannot be empty");
@@ -29,7 +29,7 @@ public class InitiativeController {
         return initiativeService.createInitiative(initiativeDto);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public InitiativeDto updateInitiative(@PathVariable("id") Long id, @RequestBody InitiativeDto initiativeDto) {
         if (initiativeDto.getName() == null || initiativeDto.getName().isEmpty() || initiativeDto.getName().isBlank()) {
             throw new IllegalArgumentException("Initiative name cannot be empty");
