@@ -30,7 +30,7 @@ class ProjectMapperTest {
     void toEntity() {
         var projectDto = TestDataFactory.createProjectDto();
         var momentDto = TestDataFactory.createMomentDto();
-        projectDto.getMoments().add(momentDto.getId());
+        projectDto.getMomentIds().add(momentDto.getId());
 
         var project = mapper.toEntity(projectDto);
 
