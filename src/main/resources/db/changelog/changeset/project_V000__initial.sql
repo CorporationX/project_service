@@ -1,17 +1,17 @@
 CREATE TABLE IF NOT EXISTS project
 (
-    id               BIGSERIAL PRIMARY KEY,
-    name             VARCHAR(128) NOT NULL,
-    description      VARCHAR(4096),
-    parent_project_id        BIGINT,
-    storage_size     BIGINT,
-    max_storage_size BIGINT,
-    owner_id         BIGINT,
-    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status           VARCHAR(255) NOT NULL,
-    visibility       VARCHAR(255) NOT NULL,
-    cover_image_id   VARCHAR(255),
+    id                BIGSERIAL PRIMARY KEY,
+    name              VARCHAR(128) NOT NULL,
+    description       VARCHAR(4096),
+    parent_project_id BIGINT,
+    storage_size      BIGINT,
+    max_storage_size  BIGINT,
+    owner_id          BIGINT,
+    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status            VARCHAR(255) NOT NULL,
+    visibility        VARCHAR(255) NOT NULL,
+    cover_image_id    VARCHAR(255),
     CONSTRAINT fk_project_parent FOREIGN KEY (parent_project_id) REFERENCES project (id)
 );
 
@@ -45,39 +45,52 @@ CREATE TABLE IF NOT EXISTS project_resource
     type       VARCHAR(255),
     status     VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    created_by BIGINT,
+    updated_by BIGINT,
     project_id BIGINT,
     size       BIGINT,
+    CONSTRAINT fk_project
+        FOREIGN KEY (project_id) REFERENCES project (id),
+    FOREIGN KEY (created_by) REFERENCES team_member (id),
+    FOREIGN KEY (updated_by) REFERENCES team_member (id)
+);
+
+CREATE TABLE IF NOT EXISTS resource_allowed_roles
+(
+    resource_id BIGINT,
+    role        varchar(20) NOT NULL,
+    CONSTRAINT fk_resource_allowed_roles_resource_id FOREIGN KEY (resource_id) REFERENCES project_resource (id)
+);
+
+CREATE TABLE IF NOT EXISTS task
+(
+    id                BIGSERIAL PRIMARY KEY,
+    name              VARCHAR(255) NOT NULL,
+    description       TEXT,
+    status            VARCHAR(255),
+    performer_user_id BIGINT       NOT NULL,
+    reporter_user_id  BIGINT       NOT NULL,
+    minutes_tracked   INT,
+    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    parent_task_id    BIGINT,
+    project_id        BIGINT,
+    stage_id          BIGINT,
+    CONSTRAINT fk_parent_task
+        FOREIGN KEY (parent_task_id) REFERENCES task (id),
     CONSTRAINT fk_project
         FOREIGN KEY (project_id) REFERENCES project (id)
 );
 
-CREATE TABLE IF NOT EXISTS task (
-                                    id BIGSERIAL PRIMARY KEY,
-                                    name VARCHAR(255) NOT NULL,
-                                    description TEXT,
-                                    status VARCHAR(255),
-                                    performer_user_id BIGINT NOT NULL,
-                                    reporter_user_id BIGINT NOT NULL,
-                                    minutes_tracked INT,
-                                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                    parent_task_id BIGINT,
-                                    project_id BIGINT,
-                                    stage_id BIGINT,
-                                    CONSTRAINT fk_parent_task
-                                        FOREIGN KEY (parent_task_id) REFERENCES task(id),
-                                    CONSTRAINT fk_project
-                                        FOREIGN KEY (project_id) REFERENCES project(id)
-);
-
-CREATE TABLE IF NOT EXISTS schedule (
-                                        id BIGSERIAL PRIMARY KEY,
-                                        name VARCHAR(255) NOT NULL,
-                                        description VARCHAR(255),
-                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                        project_id BIGINT,
-                                        CONSTRAINT fk_project
-                                            FOREIGN KEY (project_id) REFERENCES project(id)
+CREATE TABLE IF NOT EXISTS schedule
+(
+    id          BIGSERIAL PRIMARY KEY,
+    name        VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    project_id  BIGINT,
+    CONSTRAINT fk_project
+        FOREIGN KEY (project_id) REFERENCES project (id)
 );

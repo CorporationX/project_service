@@ -44,7 +44,7 @@ public class Resource {
     @ElementCollection(targetClass = TeamRole.class)
     @CollectionTable(name = "resource_allowed_roles",
             joinColumns = @JoinColumn(name = "resource_id"))
-    @Column(name = "role_id")
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private List<TeamRole> allowedRoles;
 
