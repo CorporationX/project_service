@@ -7,6 +7,8 @@ import faang.school.projectservice.mapper.MomentFilterMapper;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.service.MomentService;
+import faang.school.projectservice.validator.MomentDtoValidator;
+import faang.school.projectservice.validator.MomentFilterDtoValidator;
 import faang.school.projectservice.validator.MomentValidator;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
@@ -21,23 +23,23 @@ import java.util.List;
 public class MomentController {
     private final MomentService momentService;
     private final MomentValidator momentValidator;
+    private final MomentDtoValidator momentDtoValidator;
+    private final MomentFilterDtoValidator momentFilterDtoValidator;
     private final MomentMapper mapper = Mappers.getMapper(MomentMapper.class);
     private final MomentFilterMapper filterMapper = Mappers.getMapper(MomentFilterMapper.class);
 
     public MomentDto createMoment(MomentDto momentDto) {
-        Moment moment = mapper.toEntity(momentDto);
-        momentValidator.validateMoment(moment);
+        momentDtoValidator.validateMomentDo(momentDto);
         return momentService.createMoment(momentDto);
     }
 
     public MomentDto updateMoment(MomentDto momentDto) {
-        Moment moment = mapper.toEntity(momentDto);
-        momentValidator.validateMoment(moment);
+        momentDtoValidator.validateMomentDo(momentDto);
         return momentService.updateMoment(momentDto);
     }
 
     public List<MomentDto> getMomentsFilteredByDateFromProjects(Long ProjectId, MomentFilterDto filter) {
-        momentValidator.validateMoment(mapper.toEntity(filterMapper.toMomentDto(filter)));
+        momentFilterDtoValidator.validateMomentFilterDto(filter);
         return momentService.getMomentsFilteredByDateFromProjects(ProjectId, filter);
     }
 

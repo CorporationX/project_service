@@ -28,7 +28,6 @@ public class MomentMapperTest {
     private List<Long> userIds;
     private List<Project> projects;
     private TeamMember member;
-    private List<TeamMember> members;
 
     @BeforeEach
     public void setUp() {
