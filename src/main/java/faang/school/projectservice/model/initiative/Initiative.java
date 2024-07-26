@@ -48,6 +48,10 @@ public class Initiative {
     @JoinColumn(name = "curator_id",  nullable = false)
     private TeamMember curator;
 
+    public Long getCuratorId() {
+        return curator != null ? curator.getId() : null;
+    }
+
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private InitiativeStatus status;
