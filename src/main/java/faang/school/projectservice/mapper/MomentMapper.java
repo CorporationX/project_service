@@ -51,7 +51,7 @@ public interface MomentMapper {
 
     @Named("fromMemberIdsToMembers")
     default List<TeamMember> toMembers(List<Long> memberIds) {
-        if (memberIds.isEmpty()) {
+        if (memberIds == null) {
             return Collections.emptyList();
         } else {
             return memberIds.stream().map(id -> {
@@ -64,7 +64,7 @@ public interface MomentMapper {
 
     @Named("fromMembersToMemberIds")
     default List<Long> toMemberIds(List<TeamMember> members) {
-        if (members.isEmpty()) {
+        if (members == null) {
             return Collections.emptyList();
         } else {
             return members.stream().map(TeamMember::getId).collect(Collectors.toList());
