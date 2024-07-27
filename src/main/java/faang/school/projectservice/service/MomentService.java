@@ -11,6 +11,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.MomentValidator;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,6 @@ public class MomentService {
 
     public MomentDto createMoment(MomentDto momentDto) {
         Moment moment = mapper.toEntity(momentDto);
-        moment.setCreatedAt(LocalDateTime.now());
         processMoment(moment);
         momentRepository.save(moment);
         return mapper.toDto(moment);
@@ -41,7 +41,6 @@ public class MomentService {
     public MomentDto updateMoment(MomentDto momentDto) {
         Moment momentToUpdate = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new DataValidationException("No such moment"));
         mapper.update(momentDto, momentToUpdate);
-        momentToUpdate.setUpdatedAt(LocalDateTime.now());
         processMoment(momentToUpdate);
         momentRepository.save(momentToUpdate);
         return mapper.toDto(momentToUpdate);
