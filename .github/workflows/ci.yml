@@ -6,7 +6,7 @@ on:
       - cyclop-master-bc5
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
@@ -18,15 +18,25 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: 8.5
+
+      - name: Check gradle version
+        run: ./gradlew --version
+
+      - name: tests
+        run: ./gradlew test
+
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
       - name: build
         run: ./gradlew build
 
       - name: jar
         run: ./gradlew bootJar
 
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: tests
-        run: ./gradlew test
