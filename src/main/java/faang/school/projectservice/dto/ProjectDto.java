@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto;
 
+import faang.school.projectservice.model.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -11,17 +12,14 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class MomentDto {
+public class ProjectDto {
     private Long id;
     @NotBlank(message = "Name should not be empty.")
     private String name;
-    @NotBlank(message = "Name should not be empty.")
+    @NotBlank(message = "Description should not be empty.")
     private String description;
-    private LocalDateTime date;
-    private List<Long> projects;
-    private List<Long> userIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long createdBy;
-    private Long updatedBy;
+    private ProjectStatus status;
+    private List<Long> moments;
 }
