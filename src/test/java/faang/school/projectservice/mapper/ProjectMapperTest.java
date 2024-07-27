@@ -19,32 +19,24 @@ public class ProjectMapperTest {
             .description(description)
             .ownerId(ownerId)
             .build();
-    private ProjectDto projectDto = new ProjectDto();
-
-    {
-        projectDto.setId(id);
-        projectDto.setName(name);
-        projectDto.setDescription(description);
-        projectDto.setOwnerId(ownerId);
-    }
+    private ProjectDto projectDto = ProjectDto.builder()
+            .id(id)
+            .name(name)
+            .description(description)
+            .ownerId(ownerId)
+            .build();
 
     @Test
     void testToDto() {
         ProjectDto result = projectMapper.toDto(project);
 
-        assertEquals(id, result.getId());
-        assertEquals(name, result.getName());
-        assertEquals(description, result.getDescription());
-        assertEquals(ownerId, result.getOwnerId());
+        assertEquals(projectDto, result);
     }
 
     @Test
     void testToEntity() {
         Project result = projectMapper.toEntity(projectDto);
 
-        assertEquals(id, result.getId());
-        assertEquals(name, result.getName());
-        assertEquals(description, result.getDescription());
-        assertEquals(ownerId, result.getOwnerId());
+        assertEquals(project, result);
     }
 }

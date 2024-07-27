@@ -43,19 +43,23 @@ public class ProjectServiceTest {
     private ProjectRepository projectRepository;
     private Long parentProjectId = 1L;
     private Long ownerId = 100L;
+    private String name = "SubProject name";
+    private String description = "SubProject description";
+
     private Project parentProject = Project.builder()
             .id(parentProjectId)
-            .visibility(ProjectVisibility.PUBLIC)
-            .children(new ArrayList<>())
             .build();
-    private CreateSubProjectDto subProjectDto = new CreateSubProjectDto();
-
-    {
-        subProjectDto.setParentProjectId(parentProjectId);
-        subProjectDto.setName("SubProject name");
-        subProjectDto.setDescription("SubProject description");
-        subProjectDto.setVisibility(ProjectVisibility.PUBLIC);
-    }
+    private CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder()
+            .parentProjectId(parentProjectId)
+            .name(name)
+            .description(description)
+            .build();
+    private ProjectDto projectDto = ProjectDto.builder()
+            .parentProjectId(parentProjectId)
+            .name(name)
+            .description(description)
+            .status(ProjectStatus.CREATED)
+            .build();
 
     @BeforeEach
     void setUp() {
@@ -66,17 +70,7 @@ public class ProjectServiceTest {
     public void testCreateSubProject() {
         ProjectDto result = projectService.createSubProject(subProjectDto);
 
-        ProjectDto expected = new ProjectDto();
-        expected.setParentProjectId(parentProjectId);
-        expected.setName("SubProject name");
-        expected.setDescription("SubProject description");
-        expected.setVisibility(ProjectVisibility.PUBLIC);
-        expected.setStatus(ProjectStatus.CREATED);
-
-        assertEquals(expected, result);
-        verify(projectRepository, times(2)).save(any());
-
-        assertEquals(parentProject.getChildren().size(), 1);
-        assertEquals(parentProject.getChildren().get(0).getName(), subProjectDto.getName());
+        assertEquals(projectDto, result);
+        verify(projectRepository).save(any());
     }
 }

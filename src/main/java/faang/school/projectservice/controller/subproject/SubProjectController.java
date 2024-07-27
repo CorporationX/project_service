@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -19,14 +21,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<ProjectDto> createSubProject(@Validated @RequestBody CreateSubProjectDto subProjectDto) {
         ProjectDto createdProject = projectService.createSubProject(subProjectDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<ProjectDto> updateSubProject(@Validated @RequestBody SubProjectUpdateDto subProjectUpdateDto) {
+    @PutMapping("/{subProjectId}")
+    public ResponseEntity<ProjectDto> updateSubProject(
+            @PathVariable Long subProjectId,
+            @Validated @RequestBody SubProjectUpdateDto subProjectUpdateDto) {
         ProjectDto updatedProject = projectService.updateSubProject(subProjectUpdateDto);
         return ResponseEntity.ok(updatedProject);
     }

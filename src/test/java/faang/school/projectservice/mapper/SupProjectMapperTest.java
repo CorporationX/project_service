@@ -14,18 +14,14 @@ public class SupProjectMapperTest {
     private String name = "SubProject name";
     private String description = "SubProject description";
     private Project project = Project.builder()
-            .id(projectId)
             .name(name)
             .description(description)
             .build();
-    private CreateSubProjectDto subProjectDto = new CreateSubProjectDto();
-
-    {
-        subProjectDto.setId(projectId);
-        subProjectDto.setParentProjectId(parentProjectId);
-        subProjectDto.setName(name);
-        subProjectDto.setDescription(description);
-    }
+    private CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder()
+            .parentProjectId(parentProjectId)
+            .name(name)
+            .description(description)
+            .build();
 
     @Test
     public void toEntity() {

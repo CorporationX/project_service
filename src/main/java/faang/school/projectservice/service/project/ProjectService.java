@@ -26,14 +26,7 @@ public class ProjectService {
         subProject.setStatus(ProjectStatus.CREATED);
         projectRepository.save(subProject);
 
-        addSubProjectAsChild(subProject, parentProject);
-
         return projectMapper.toDto(subProject);
-    }
-
-    private void addSubProjectAsChild(Project subProject, Project parentProject) {
-        parentProject.getChildren().add(subProject);
-        projectRepository.save(parentProject);
     }
 
     public ProjectDto updateSubProject(SubProjectUpdateDto subProjectUpdateDto) {

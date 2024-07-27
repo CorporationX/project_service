@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.subproject;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.service.project.ProjectService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,17 +35,16 @@ public class SubProjectControllerTest {
     private TestRestTemplate restTemplate;
     @MockBean
     private ProjectService projectService;
-    private CreateSubProjectDto subProjectDto = new CreateSubProjectDto();
-
-    {
-        subProjectDto.setParentProjectId(1L);
-        subProjectDto.setName("SubProject name");
-        subProjectDto.setDescription("SubProject description");
-    }
+    private CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder()
+            .parentProjectId(1L)
+            .name("SubProject name")
+            .description("SubProject description")
+            .build();
 
     private HttpHeaders headers = new HttpHeaders();
 
-    {
+    @BeforeEach
+    void setUp() {
         headers.add("x-user-id", "12345");
     }
 
@@ -54,7 +54,7 @@ public class SubProjectControllerTest {
         HttpEntity<CreateSubProjectDto> requestBad = new HttpEntity<>(subProjectDtoBad, headers);
 
         ResponseEntity<Map<String, String>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/subProjects/create",
+                "http://localhost:" + port + "/subProjects",
                 HttpMethod.POST,
                 requestBad,
                 new ParameterizedTypeReference<Map<String, String>>() {
@@ -81,7 +81,7 @@ public class SubProjectControllerTest {
         when(projectService.createSubProject(subProjectDto)).thenReturn(expectedProject);
 
         ResponseEntity<ProjectDto> response = restTemplate.exchange(
-                "http://localhost:" + port + "/subProjects/create",
+                "http://localhost:" + port + "/subProjects",
                 HttpMethod.POST,
                 request,
                 ProjectDto.class
@@ -97,7 +97,7 @@ public class SubProjectControllerTest {
         HttpEntity<CreateSubProjectDto> requestBad = new HttpEntity<>(null, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:" + port + "/subProjects/create",
+                "http://localhost:" + port + "/subProjects",
                 HttpMethod.POST,
                 requestBad,
                 String.class

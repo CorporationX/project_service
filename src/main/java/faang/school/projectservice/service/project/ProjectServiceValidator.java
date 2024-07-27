@@ -18,9 +18,8 @@ public class ProjectServiceValidator {
 
     public Project getParentAfterValidateSubProject(CreateSubProjectDto subProjectDto) {
         Long parentId = subProjectDto.getParentProjectId();
-        Project parentProject = validateParentProject(parentId, subProjectDto);
         validateSubProject(subProjectDto);
-        return parentProject;
+        return validateParentProject(parentId, subProjectDto);
     }
 
     private void validateSubProject(CreateSubProjectDto subProjectDto) {

@@ -33,14 +33,11 @@ public class ProjectServiceValidatorTest {
             .id(parentProjectId)
             .visibility(ProjectVisibility.PUBLIC)
             .build();
-    private CreateSubProjectDto subProjectDto = new CreateSubProjectDto();
-
-    {
-        subProjectDto.setParentProjectId(parentProjectId);
-        subProjectDto.setName("SubProject name");
-        subProjectDto.setDescription("SubProject description");
-        subProjectDto.setVisibility(null);
-    }
+    private CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder()
+            .parentProjectId(parentProjectId)
+            .name("SubProject name")
+            .description("SubProject description")
+            .build();
 
     @BeforeEach
     void setUp() {
