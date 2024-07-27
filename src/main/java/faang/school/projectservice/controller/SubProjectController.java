@@ -19,25 +19,25 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/subproject")
+@RequestMapping("/api/v1/subproject")
 @RequiredArgsConstructor
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/create")
+    @PostMapping("/new")
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto createSubProject(@RequestBody @Valid CreateSubProjectDto createSubProjectDto) {
         return projectService.createSubProject(createSubProjectDto);
     }
 
-    @PutMapping("/update/{projectId}")
+    @PutMapping("/{projectId}")
     @ResponseStatus(HttpStatus.OK)
     public ProjectDto updateProject(@PathVariable @NotNull Long projectId,
                                     @RequestBody ProjectDto projectDto) {
         return projectService.updateProject(projectId, projectDto);
     }
 
-    @PostMapping("/get/{projectId}")
+    @PostMapping("/{projectId}")
     public List<ProjectDto> getSubProjects(@PathVariable @NotNull Long projectId,
                                            @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getSubProjects(projectId, projectFilterDto);

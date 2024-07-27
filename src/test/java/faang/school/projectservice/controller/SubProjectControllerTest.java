@@ -74,7 +74,7 @@ class SubProjectControllerTest {
     @Test
     @DisplayName("testing createSubProject")
     public void testCreateSubProject() throws Exception {
-        mockMvc.perform(post("/subproject/create")
+        mockMvc.perform(post("/api/v1/subproject/new")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createSubProjectDtoJson))
                 .andExpect(status().isCreated());
@@ -84,7 +84,7 @@ class SubProjectControllerTest {
     @Test
     @DisplayName("testing updateSubProjectStatus")
     public void testUpdateSubProject() throws Exception {
-        mockMvc.perform(put("/subproject/update/{projectId}", projectId)
+        mockMvc.perform(put("/api/v1/subproject/{projectId}", projectId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(projectDtoJson))
                 .andExpect(status().isOk());
@@ -94,7 +94,7 @@ class SubProjectControllerTest {
     @Test
     @DisplayName("testing getSubProjects")
     public void testGetSubProjects() throws Exception {
-        mockMvc.perform(post("/subproject/get/{projectId}", projectId)
+        mockMvc.perform(post("/api/v1/subproject/{projectId}", projectId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(projectFilterDtoJson))
                 .andExpect(status().isOk());

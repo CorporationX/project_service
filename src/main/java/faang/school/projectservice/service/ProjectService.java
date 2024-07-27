@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -43,8 +42,7 @@ public class ProjectService {
     @Transactional
     public ProjectDto updateProject(long projectId, ProjectDto projectDto) {
         Project project = projectRepository.getProjectById(projectId);
-        List<Project> allSubProjects = new ArrayList<>();
-        collectAllSubProjects(project, allSubProjects);
+        List<Project> allSubProjects = projectRepository.getAllSubProjectsFor(projectId);
         changeProjectStatus(project, allSubProjects, projectDto);
         changeProjectVisibility(project, allSubProjects, projectDto);
         return projectMapper.toDto(project);
@@ -59,13 +57,6 @@ public class ProjectService {
             allMatchedSubProjects = projectFilter.filter(allMatchedSubProjects, projectFilterDto);
         }
         return projectMapper.toDtoList(allMatchedSubProjects.toList());
-    }
-
-    private void collectAllSubProjects(Project project, List<Project> projectsAccumulator) {
-        for (Project childProject : project.getChildren()) {
-            collectAllSubProjects(childProject, projectsAccumulator);
-            projectsAccumulator.add(childProject);
-        }
     }
 
     private void changeProjectStatus(Project project, List<Project> allSubProjects, ProjectDto projectDto) {

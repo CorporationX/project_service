@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -111,6 +112,7 @@ class ProjectServiceTest {
     public void testUpdateSubProjectWithNonAppropriateStatus() {
         ProjectDto projectDto = ProjectDto.builder()
                 .status(ProjectStatus.COMPLETED).build();
+        when(projectRepository.getAllSubProjectsFor(parentProject.getId())).thenReturn(parentProject.getChildren());
         assertThrows(IllegalSubProjectsStatusException.class,
                 () -> projectService.updateProject(parentProject.getId(), projectDto));
     }
@@ -121,6 +123,7 @@ class ProjectServiceTest {
         ProjectDto projectDto = ProjectDto.builder()
                 .visibility(ProjectVisibility.PRIVATE)
                 .status(ProjectStatus.COMPLETED).build();
+        when(projectRepository.getAllSubProjectsFor(parentProject.getId())).thenReturn(parentProject.getChildren());
         parentProject.setVisibility(ProjectVisibility.PUBLIC);
         parentProject.getChildren().forEach(project -> {
             project.setVisibility(ProjectVisibility.PUBLIC);
