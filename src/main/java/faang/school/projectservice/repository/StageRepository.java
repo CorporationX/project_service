@@ -1,5 +1,6 @@
 package faang.school.projectservice.repository;
 
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.EntityNotFoundException;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,13 +23,19 @@ public class StageRepository {
         jpaRepository.delete(stage);
     }
 
+
     public Stage getById(Long stageId) {
         return jpaRepository.findById(stageId).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Stage not found by id: %s", stageId))
+                () -> new EntityNotFoundException(String
+                        .format("Stage not found by id: %s", stageId))
         );
     }
 
     public List<Stage> findAll() {
         return jpaRepository.findAll();
+    }
+
+    public boolean isExistById(Long id) {
+        return jpaRepository.existsById(id);
     }
 }
