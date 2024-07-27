@@ -25,3 +25,6 @@ values (1, 'testProject1Name', 0, 2147483648, 'IN_PROGRESS', 'PUBLIC');
 insert into team (id, project_id) VALUES (1, 1);
 
 insert into team_member (id, user_id, team_id) VALUES (1, 1, 1);
+
+insert into team_member_roles (team_member_id, role) VALUES (1, 'DEVELOPER');
+insert into team_member_roles (team_member_id, role) VALUES (1, 'TESTER');

@@ -2,14 +2,12 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ResourceResponseDto;
 import faang.school.projectservice.exception.ConflictException;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.service.utilservice.ProjectUtilService;
 import faang.school.projectservice.service.utilservice.ResourceUtilService;
@@ -20,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +46,7 @@ public class ResourceService {
                 .name(multipartFile.getName())
                 .key(key)
                 .size(BigInteger.valueOf(multipartFile.getSize()))
-                .allowedRoles(creator.getRoles())
+                .allowedRoles(creator.getRoles().stream().toList())
                 .type(ResourceType.getResourceType(multipartFile.getContentType()))
                 .status(ResourceStatus.ACTIVE)
                 .createdBy(creator)
@@ -66,7 +63,8 @@ public class ResourceService {
 
     private void checkStorageSizeExceeded(BigInteger newStorageSize, BigInteger maxStorageSize) {
         if (newStorageSize.compareTo(maxStorageSize) > 0) {
-            throw new ConflictException("");
+            throw new ConflictException(String.format(
+                    "Storage size was exceeded (%d/%d)", newStorageSize, maxStorageSize));
         }
     }
 }
