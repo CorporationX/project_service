@@ -45,15 +45,17 @@ CREATE TABLE IF NOT EXISTS project_resource
     type       VARCHAR(255),
     status     VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by BIGINT,
     updated_by BIGINT,
     project_id BIGINT,
     size       BIGINT,
     CONSTRAINT fk_project
         FOREIGN KEY (project_id) REFERENCES project (id),
-    FOREIGN KEY (created_by) REFERENCES team_member (id),
-    FOREIGN KEY (updated_by) REFERENCES team_member (id)
+    CONSTRAINT fk_team_member_creator
+        FOREIGN KEY (created_by) REFERENCES team_member (id),
+    CONSTRAINT fk_team_member_updater
+        FOREIGN KEY (updated_by) REFERENCES team_member (id)
 );
 
 CREATE TABLE IF NOT EXISTS resource_allowed_roles

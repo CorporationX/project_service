@@ -18,3 +18,10 @@ VALUES (1,
         null,
         null,
         null);
+
+insert into project(id, name, storage_size, max_storage_size, status, visibility)
+values (1, 'testProject1Name', 0, 2147483648, 'IN_PROGRESS', 'PUBLIC');
+
+insert into team (id, project_id) VALUES (1, 1);
+
+insert into team_member (id, user_id, team_id) VALUES (1, 1, 1);
