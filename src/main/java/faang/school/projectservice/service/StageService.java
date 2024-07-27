@@ -2,9 +2,11 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.StageException;
 import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
@@ -38,6 +40,7 @@ public class StageService {
     private final TeamMemberRepository teamMemberRepository;
     private final StageInvitationRepository stageInvitationRepository;
     private final TaskRepository taskRepository;
+    private final StageRolesRepository stageRolesRepository;
     private final StageMapper stageMapper;
     private final StageRolesMapper stageRolesMapper;
     private final List<StageFilter> filters;
@@ -62,10 +65,17 @@ public class StageService {
         });
 
         List<StageRoles> stageRolesList = stageRolesMapper.toEntityList(stageDto.getStageRoles());
-        stageRolesList.forEach(stageRoles -> stageRoles.setStage(stage));
+        stageRolesList.forEach(stageRoles -> {
+            stageRoles.setStage(stage);
+
+        });
         stage.setStageRoles(stageRolesList);
         Stage saveStage = stageRepository.save(stage);
-        return stageMapper.toDto(saveStage);
+        stageRolesRepository.saveAll(stageRolesList);
+        List<StageRolesDto> stageRolesDtoList = stageRolesMapper.toDtoList(stageRolesList);
+        StageDto saveStageDto = stageMapper.toDto(saveStage);
+        saveStageDto.setStageRoles(stageRolesDtoList);
+        return saveStageDto;
     }
 
     private static void validatedProjectStatus(ProjectStatus currentStatus) {
@@ -122,11 +132,27 @@ public class StageService {
     }
 
     public StageDto updateStage(StageDto stageDto) {
+        Project project = projectRepository.getProjectById(stageDto.getProjectId());
         Stage stage = stageMapper.toEntity(stageDto);
-        stage.getStageRoles().forEach(
+        stage.setProject(project);
+        List<TeamMember> executors = stageDto.getExecutorIds()
+                .stream()
+                .map(teamMemberRepository::findById)
+                .toList();
+        stage.setExecutors(executors);
+
+        List<StageRoles> stageRolesList = stageRolesMapper.toEntityList(stageDto.getStageRoles());
+        stage.setStageRoles(stageRolesList);
+        stageRolesList.forEach(
                 stageRoles -> getExecutorsForRole(stage, stageRoles));
+
+        stage.setStageRoles(stageRolesList);
         Stage updatedStage = stageRepository.save(stage);
-        return stageMapper.toDto(updatedStage);
+        stageRolesRepository.saveAll(stageRolesList);
+        List<StageRolesDto> stageRolesDtoList = stageRolesMapper.toDtoList(stageRolesList);
+        StageDto updetedStageDto = stageMapper.toDto(updatedStage);
+        updetedStageDto.setStageRoles(stageRolesDtoList);
+        return updetedStageDto;
     }
 
     //Возникает ошибка при тестировании данного метода
@@ -204,6 +230,7 @@ public class StageService {
                 stage.getStageName(), stage.getProject().getName(), stageRoles.getTeamRole());
         stageInvitationToSend.setDescription(INVITATIONS_MESSAGE);
         stageInvitationToSend.setStatus(StageInvitationStatus.PENDING);
+        stageInvitationToSend.setAuthor(stage.getExecutors().get(0));
         stageInvitationToSend.setInvited(invited);
         stageInvitationToSend.setStage(stage);
         return stageInvitationToSend;
@@ -216,7 +243,6 @@ public class StageService {
 
     public StageDto getStage(Long id) {
         Stage stage = stageRepository.getById(id);
-
         return stageMapper.toDto(stage);
     }
 }

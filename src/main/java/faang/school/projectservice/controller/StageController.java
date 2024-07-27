@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,11 +23,12 @@ import java.util.List;
 @Validated
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/v1/stages")
 public class StageController {
 
     private final StageService stageService;
 
-    @PostMapping("/stage")
+    @PostMapping()
     public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.createStage(stageDto);
     }
@@ -36,7 +38,7 @@ public class StageController {
         return stageService.getFilteredStages(filterDto);
     }
 
-    @DeleteMapping("/stage/{deletedStageId}")
+    @DeleteMapping("/{deletedStageId}")
     public void deleteStage(@Positive @PathVariable Long deletedStageId,
                             @RequestParam FateOfTasksAfterDelete tasksAfterDelete,
                             @RequestParam Long receivingStageId) {
@@ -44,17 +46,17 @@ public class StageController {
         stageService.deleteStage(deletedStageId, tasksAfterDelete, receivingStageId);
     }
 
-    @PutMapping("/stage")
+    @PutMapping()
     public StageDto updateStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.updateStage(stageDto);
     }
 
-    @GetMapping("/stages")
+    @GetMapping("")
     public List<StageDto> getAllStages() {
         return stageService.getAllStages();
     }
 
-    @GetMapping("/stage/{id}")
+    @GetMapping("/{id}")
     public StageDto getStage(@Positive @PathVariable Long id) {
         return stageService.getStage(id);
     }

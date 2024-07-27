@@ -12,9 +12,13 @@ import java.util.List;
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageRolesMapper {
 
-//    @Mapping(source = "stage.stageId", target = "stageId")
-//    StageRolesDto toDto(StageRoles stageRoles);
+    @Mapping(source = "stage.stageId", target = "stageId")
+    StageRolesDto toDto(StageRoles stageRoles);
 
-    @Mapping(target = "stage", ignore = true)
+    List<StageRolesDto> toDtoList(List<StageRoles> stageRolesList);
+
+    @Mapping(source = "stageId", target = "stage.stageId")
+    StageRoles toEntity(StageRolesDto stageRolesDto);
+
     List<StageRoles> toEntityList(List<StageRolesDto> stageRolesDtoList);
 }

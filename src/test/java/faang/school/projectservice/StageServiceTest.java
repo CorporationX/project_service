@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.StageException;
 import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
@@ -40,7 +41,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
 public class StageServiceTest {
     StageRepository stageRepository = Mockito.mock(StageRepository.class);
@@ -48,6 +48,7 @@ public class StageServiceTest {
     TeamMemberRepository teamMemberRepository = Mockito.mock(TeamMemberRepository.class);
     StageInvitationRepository stageInvitationRepository = Mockito.mock(StageInvitationRepository.class);
     TaskRepository taskRepository = Mockito.mock(TaskRepository.class);
+    StageRolesRepository stageRolesRepository = Mockito.mock(StageRolesRepository.class);
     StageMapper stageMapperMock = Mockito.mock(StageMapper.class);
     StageRolesMapper stageRolesMapperMock = Mockito.mock(StageRolesMapper.class);
     StageFilter filterMock = Mockito.mock(StageFilter.class);
@@ -59,6 +60,7 @@ public class StageServiceTest {
             teamMemberRepository,
             stageInvitationRepository,
             taskRepository,
+            stageRolesRepository,
             stageMapperMock,
             stageRolesMapperMock,
             filters);
@@ -72,7 +74,6 @@ public class StageServiceTest {
     StageDto prepareStageDto() {
         dto.setStageId(10L);
         dto.setProjectId(5L);
-        dto.setStageRoles(prepareStageRolesDto());
         dto.setExecutorIds(List.of(1L, 2L));
         return dto;
     }
@@ -100,11 +101,13 @@ public class StageServiceTest {
         firstExecutor.setId(1L);
         firstExecutor.setRoles(List.of(TeamRole.DEVELOPER));
         firstExecutor.setStages(List.of(stage));
+        //ToDo Если устанавливаю принадлежность этого исполнителя к текущему этапу проекта, тогда выходит StackOverflow
         //firstExecutor.setStages(List.of(prepareStage()));
         TeamMember secondExecutor = new TeamMember();
         secondExecutor.setId(2L);
         secondExecutor.setRoles(List.of(TeamRole.TESTER));
         secondExecutor.setStages(List.of(stage));
+        //ToDo Если устанавливаю принадлежность этого исполнителя к текущему этапу проекта, тогда выходит StackOverflow
         //secondExecutor.setStages(List.of(prepareStage()));
         TeamMember thirdExecutor = new TeamMember();
         thirdExecutor.setId(3L);
@@ -208,18 +211,29 @@ public class StageServiceTest {
     void testCreateStageIsSuccessful() {
         StageDto dto = prepareStageDto();
         Stage stage = prepareStage();
+        StageDto saveDto = prepareStageDto();
+        Stage saveStage = prepareStage();
         Project project = prepareProject();
+        List<StageRolesDto> stageRolesDtoList = prepareStageRolesDto();
+        dto.setStageRoles(stageRolesDtoList);
+        List<StageRoles> stageRolesList = prepareStageRoles();
+        stage.setStageRoles(stageRolesList);
         project.setStatus(ProjectStatus.IN_PROGRESS);
         TeamMember firstExecutor = prepareExecutorList().get(0);
         TeamMember secondExecutor = prepareExecutorList().get(1);
         when(projectRepository.getProjectById(dto.getProjectId())).thenReturn(project);
-        when(stageMapperMock.toEntity(dto)).thenReturn(stage);
         when(teamMemberRepository.findById(firstExecutor.getId())).thenReturn(firstExecutor);
         when(teamMemberRepository.findById(secondExecutor.getId())).thenReturn(secondExecutor);
+        when(stageRepository.save(stage)).thenReturn(stage);
+        when(stageRolesRepository.saveAll(stageRolesList)).thenReturn(stageRolesList);
+        when(stageMapperMock.toEntity(dto)).thenReturn(stage);
+        when(stageMapperMock.toDto(saveStage)).thenReturn(saveDto);
+        when(stageRolesMapperMock.toEntityList(stageRolesDtoList)).thenReturn(stageRolesList);
+        when(stageRolesMapperMock.toDtoList(stageRolesList)).thenReturn(stageRolesDtoList);
 
-        stageService.createStage(dto);
+        StageDto resultStageDto = stageService.createStage(dto);
 
-        verify(stageRepository, times(1)).save(stage);
+        assertEquals(resultStageDto.getStageRoles(), stageRolesDtoList);
     }
 
     @Test
@@ -293,33 +307,63 @@ public class StageServiceTest {
     void testGetExecutorsForRoleIfSendStageInvitation() {
         StageDto dto = prepareStageDto();
         Stage stage = prepareStage();
-        List<StageRolesDto> stageRolesDto = prepareStageRolesDto();
-        List<StageRoles> stageRoles = prepareStageRoles();
-        stage.setStageRoles(stageRoles);
+        Project project = prepareProject();
+        List<TeamMember> executors = prepareExecutorList();
+        stage.setExecutors(executors);
+        List<StageRolesDto> stageRolesDtoList = prepareStageRolesDto();
+        dto.setStageRoles(stageRolesDtoList);
+        List<StageRoles> stageRolesList = prepareStageRoles();
+        stage.setStageRoles(stageRolesList);
+        TeamMember firstExecutor = prepareExecutorList().get(0);
+        TeamMember secondExecutor = prepareExecutorList().get(1);
         StageInvitation stageInvitation = prepareInvitation(stage);
+        when(projectRepository.getProjectById(dto.getProjectId())).thenReturn(project);
+        when(stageRepository.save(stage)).thenReturn(stage);
+        when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
+        when(teamMemberRepository.findById(firstExecutor.getId())).thenReturn(firstExecutor);
+        when(teamMemberRepository.findById(secondExecutor.getId())).thenReturn(secondExecutor);
         when(stageMapperMock.toEntity(dto)).thenReturn(stage);
-        when(stageRolesMapperMock.toEntityList(stageRolesDto)).thenReturn(stageRoles);
+        when(stageMapperMock.toDto(stage)).thenReturn(dto);
+        when(stageRolesMapperMock.toEntityList(stageRolesDtoList)).thenReturn(stageRolesList);
+        when(stageRolesMapperMock.toDtoList(stageRolesList)).thenReturn(stageRolesDtoList);
 
-        stageService.updateStage(dto);
 
-        verify(stageInvitationRepository, times(1)).save(stageInvitation);
+        StageDto updatedStageDto = stageService.updateStage(dto);
+
+        assertEquals(updatedStageDto.getStageRoles(), stageRolesDtoList);
     }
 
-    //В этом тесте используется prepareStage, в нем есть prepareProject, в котором есть prepareTeams. Если я установлю
-    //первому и второму участнику первой команды ссылку на текущий этап, то опять возникает StackOverflow.
+    //ToDo  В этом тесте используется prepareStage, в нем есть prepareProject, в котором есть prepareTeams.
+    //ToDo  Если я установлю участнику команды ссылку на текущий этап, то опять возникает StackOverflow
     @Test
     void testGetExecutorsForRoleIfNotEnoughExecutorsFound() {
         StageDto dto = prepareStageDto();
         Stage stage = prepareStage();
-        List<StageRolesDto> stageRolesDto = prepareStageRolesDto();
-        stageRolesDto.get(2).setCount(2);
-        List<StageRoles> stageRoles = prepareStageRoles();
-        stageRoles.get(2).setCount(2);
-        stage.setStageRoles(stageRoles);
+        StageDto updatedDto = prepareStageDto();
+        Stage updatedStage = prepareStage();
+        Project project = prepareProject();
+        StageRolesDto firstStageRolesDto = new StageRolesDto(1L, TeamRole.DEVELOPER, 1, 10L);
+        StageRolesDto secondStageRolesDto = new StageRolesDto(2L, TeamRole.TESTER, 1, 10L);
+        StageRolesDto thirdStageRolesDto = new StageRolesDto(3L, TeamRole.ANALYST, 2, 10L);
+        List<StageRolesDto> stageRolesDtoList = List.of(firstStageRolesDto, secondStageRolesDto, thirdStageRolesDto);
+        dto.setStageRoles(stageRolesDtoList);
+        StageRoles firstStageRoles = new StageRoles(1L, TeamRole.DEVELOPER, 1, prepareStage());
+        StageRoles secondStageRoles = new StageRoles(2L, TeamRole.TESTER, 1, prepareStage());
+        StageRoles thirdStageRoles = new StageRoles(3L, TeamRole.ANALYST, 2, prepareStage());
+        List<StageRoles> stageRolesList = List.of(firstStageRoles, secondStageRoles, thirdStageRoles);
+        stage.setStageRoles(stageRolesList);
+        TeamMember firstExecutor = prepareExecutorList().get(0);
+        TeamMember secondExecutor = prepareExecutorList().get(1);
         StageInvitation stageInvitation = prepareInvitation(stage);
-        when(stageMapperMock.toEntity(dto)).thenReturn(stage);
-        when(stageRolesMapperMock.toEntityList(stageRolesDto)).thenReturn(stageRoles);
+        when(projectRepository.getProjectById(dto.getProjectId())).thenReturn(project);
+        when(stageRepository.save(updatedStage)).thenReturn(updatedStage);
         when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
+        when(teamMemberRepository.findById(firstExecutor.getId())).thenReturn(firstExecutor);
+        when(teamMemberRepository.findById(secondExecutor.getId())).thenReturn(secondExecutor);
+        when(stageMapperMock.toEntity(dto)).thenReturn(stage);
+        when(stageMapperMock.toDto(updatedStage)).thenReturn(updatedDto);
+        when(stageRolesMapperMock.toEntityList(stageRolesDtoList)).thenReturn(stageRolesList);
+        when(stageRolesMapperMock.toDtoList(stageRolesList)).thenReturn(stageRolesDtoList);
 
         assertThrows(StageException.class, () -> stageService.updateStage(dto));
     }

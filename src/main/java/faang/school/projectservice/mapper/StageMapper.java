@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 public interface StageMapper {
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "executors", target = "executorIds", qualifiedByName = "mapExecutor")
+    //@Mapping(source = "stageRoles.stage.id", target = "stageRoles.stageId")
     StageDto toDto(Stage stage);
 
     List<StageDto> toDtoList(List<Stage> stages);
