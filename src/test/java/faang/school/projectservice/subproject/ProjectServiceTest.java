@@ -64,6 +64,8 @@ public class ProjectServiceTest {
     @Mock
     private UpdateSubProjectVisibility updateSubProjectVisibility;
 
+    private final LocalDateTime now = LocalDateTime.now();
+
     @BeforeEach
     public void setup() {
         mapper = new ProjectMapperImpl();
@@ -164,8 +166,8 @@ public class ProjectServiceTest {
         dto.setParentProject(parentProject);
         dto.setVisibility(ProjectVisibility.PUBLIC);
         dto.setDescription("Описание1");
-        dto.setCreatedAt(LocalDateTime.now());
-        dto.setUpdatedAt(LocalDateTime.now());
+        dto.setCreatedAt(now);
+        dto.setUpdatedAt(now);
         dto.setOwnerId(10L);
 
         ProjectDto expectedDto = new ProjectDto();
@@ -178,8 +180,8 @@ public class ProjectServiceTest {
         expectedDto.setParentProject(expectedParentProject);
         expectedDto.setVisibility(ProjectVisibility.PUBLIC);
         expectedDto.setDescription("Описание1");
-        expectedDto.setCreatedAt(LocalDateTime.now());
-        expectedDto.setUpdatedAt(LocalDateTime.now());
+        expectedDto.setCreatedAt(now);
+        expectedDto.setUpdatedAt(now);
         expectedDto.setOwnerId(10L);
 
         ProjectDto returnDto = service.updateSubProject(dto, updateSubProjectDto);
@@ -203,8 +205,8 @@ public class ProjectServiceTest {
         dto.setParentProject(parentProject);
         dto.setVisibility(ProjectVisibility.PUBLIC);
         dto.setDescription("Описание1");
-        dto.setCreatedAt(LocalDateTime.now());
-        dto.setUpdatedAt(LocalDateTime.now());
+        dto.setCreatedAt(now);
+        dto.setUpdatedAt(now);
         dto.setOwnerId(10L);
 
         ProjectDto expectedDto = new ProjectDto();
@@ -217,8 +219,8 @@ public class ProjectServiceTest {
         expectedDto.setParentProject(expectedParentProject);
         expectedDto.setVisibility(ProjectVisibility.PRIVATE);
         expectedDto.setDescription("Описание1");
-        expectedDto.setCreatedAt(LocalDateTime.now());
-        expectedDto.setUpdatedAt(LocalDateTime.now());
+        expectedDto.setCreatedAt(now);
+        expectedDto.setUpdatedAt(now);
         expectedDto.setOwnerId(10L);
         Project expectedProject = mapper.toEntity(expectedDto);
 
