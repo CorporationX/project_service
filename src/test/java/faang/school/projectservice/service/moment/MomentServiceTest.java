@@ -7,13 +7,11 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,14 +22,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest
-@ExtendWith(MockitoExtension.class)
 public class MomentServiceTest {
-    @Spy
+    @SpyBean
     private MomentRepository momentRepository;
-    @Mock
+    @MockBean
     private ProjectMapper projectMapper;
-    @Spy
-    @InjectMocks
+
+    @SpyBean
     private MomentService momentService;
 
 
@@ -45,18 +42,30 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testAddMomentByName() {
+    public void testAddMomentByNameWithExistingMoment() {
         momentService.addMomentByName(project, momentName);
         verify(momentService, times(1)).updateMoment(any(), any());
         verify(momentService, times(0)).createMoment(any(), any());
     }
 
     @Test
+    public void testAddMomentByNameWithoutExistingMoment() {
+        momentName = "something not existing";
+        momentService.addMomentByName(project, momentName);
+        verify(momentService, times(0)).updateMoment(any(), any());
+        verify(momentService, times(1)).createMoment(any(), any());
+    }
+
+    @Test
     public void testFindMomentByName() {
+        if (momentService.findMomentByName(momentName).isEmpty()) {
+            Moment moment = new Moment();
+            moment.setName(momentName);
+            moment.setDate(LocalDateTime.now());
+            momentRepository.save(moment);
+        }
+        Optional<Moment> result = momentService.findMomentByName(momentName);
 
-        Optional<Moment> result = momentRepository.findById(1L);
-
-//        Optional<Moment> result = momentService.findMomentByName(momentName);
         assertTrue(result.isPresent());
         assertEquals(momentName, result.get().getName());
     }

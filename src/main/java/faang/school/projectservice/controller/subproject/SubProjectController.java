@@ -1,8 +1,11 @@
 package faang.school.projectservice.controller.subproject;
 
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
+import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,11 +18,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.time.LocalDateTime;
+
 @Controller
 @RequestMapping("/subProjects")
 @RequiredArgsConstructor
 public class SubProjectController {
     private final ProjectService projectService;
+    private final MomentRepository momentRepository;
 
     @PostMapping
     public ResponseEntity<ProjectDto> createSubProject(@Validated @RequestBody CreateSubProjectDto subProjectDto) {

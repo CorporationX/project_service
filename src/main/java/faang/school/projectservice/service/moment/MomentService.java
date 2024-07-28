@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -20,6 +20,7 @@ public class MomentService {
     private final MomentRepository momentRepository;
     private final ProjectMapper projectMapper;
 
+    @Transactional
     public void addMomentByName(Project project, String momentName) {
         Optional<Moment> moment = findMomentByName(momentName);
         ProjectDto projectDto = projectMapper.toDto(project);
@@ -48,13 +49,5 @@ public class MomentService {
                 .withIgnoreCase("name");
         Example<Moment> momentExample = Example.of(moment, matcher);
         return momentRepository.findOne(momentExample);
-    }
-
-    public void createMomentTest() {
-        Moment newMoment = new Moment();
-        newMoment.setName("name");
-        newMoment.setDescription("description");
-        newMoment.setDate(LocalDateTime.now());
-        momentRepository.save(newMoment);
     }
 }
