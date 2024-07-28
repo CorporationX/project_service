@@ -4,10 +4,8 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.dto.client.MomentFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.MomentDataFilter;
 import faang.school.projectservice.filter.MomentFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -28,11 +26,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 public class MomentServiceTest {
@@ -117,10 +113,11 @@ public class MomentServiceTest {
         Mockito.when(filters.get(0).isApplicable(momentFilterDto)).thenReturn(true);
         Mockito.when(filters.get(0).apply(momentsToFilter, momentFilterDto)).thenReturn(momentsToFilter.stream());
 
-        momentService.getMomentsFilteredByDateFromProjects(1L, momentFilterDto);
+        List<MomentDto> actualMomentsDto = momentService.getMomentsFilteredByDateFromProjects(1L, momentFilterDto);
         Mockito.verify(momentRepository).findAllByProjectId(1L);
         Mockito.verify(filterMock).isApplicable(momentFilterDto);
         Mockito.verify(filterMock).apply(momentsToFilter, momentFilterDto);
+        Assert.assertEquals(momentsToFilter.stream().map(moment -> momentMapper.toDto(moment)).toList(), actualMomentsDto);
     }
 
     @Test
