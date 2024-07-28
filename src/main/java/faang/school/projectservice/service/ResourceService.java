@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -38,11 +39,20 @@ public class ResourceService {
 
     @Transactional(readOnly = true)
     public ResourceResponseDto getByIdAndProjectId(long resourceId, long projectId) {
+
         Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
         return resourceMapper.toResponseDto(resource);
     }
 
+    @Transactional(readOnly = true)
+    public List<ResourceResponseDto> getAllByProjectId(long projectId) {
+
+        List<Resource> resources = resourceUtilService.getAllByProjectId(projectId);
+        return resourceMapper.toResponseDtoList(resources);
+    }
+
     public ResourceResponseDto uploadNew(MultipartFile multipartFile, long projectId, long userId) {
+
         Project project = projectUtilService.getById(projectId);
         TeamMember creator = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
 
@@ -72,6 +82,7 @@ public class ResourceService {
     }
 
     public ResourceResponseDto delete(long resourceId, long projectId, long userId) {
+
         Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
         if (resource.getStatus().equals(ResourceStatus.DELETED)) {
             throw new ConflictException(String.format("Resource id=%d is already deleted", resourceId));
@@ -105,6 +116,7 @@ public class ResourceService {
     }
 
     private void checkStorageSizeExceeded(BigInteger newStorageSize, BigInteger maxStorageSize) {
+
         if (newStorageSize.compareTo(maxStorageSize) > 0) {
             throw new ConflictException(String.format(
                     "Storage size was exceeded (%d/%d)", newStorageSize, maxStorageSize));

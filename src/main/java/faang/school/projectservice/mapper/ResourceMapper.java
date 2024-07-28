@@ -6,6 +6,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.Collection;
+import java.util.List;
+
 @Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE)
 public interface ResourceMapper {
 
@@ -13,4 +16,6 @@ public interface ResourceMapper {
     @Mapping(source = "updatedBy.id", target = "updaterId")
     @Mapping(source = "project.id", target = "projectId")
     ResourceResponseDto toResponseDto(Resource resource);
+
+    List<ResourceResponseDto> toResponseDtoList(Collection<Resource> resources);
 }

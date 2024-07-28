@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/projects/{projectId}/resources")
 @RequiredArgsConstructor
@@ -48,8 +50,15 @@ public class ResourceController {
     public ResourceResponseDto getMetadataById(@PathVariable @Positive Long projectId,
                                        @PathVariable @Positive Long resourceId) {
 
-        log.info("Received request [GET]ResourceController.getById -- projectId={}, resourceId={}",
+        log.info("Received request [GET]ResourceController.getMetadataById -- projectId={}, resourceId={}",
                 projectId, resourceId);
         return resourceService.getByIdAndProjectId(resourceId, projectId);
+    }
+
+    @GetMapping
+    public List<ResourceResponseDto> getAllMetadataByProjectId(@PathVariable @Positive Long projectId) {
+        log.info("Received request [GET]ResourceController.getAllMetadataByProjectId -- projectId={}",
+                projectId);
+        return resourceService.getAllByProjectId(projectId);
     }
 }
