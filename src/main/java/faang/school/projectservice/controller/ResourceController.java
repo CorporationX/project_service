@@ -6,7 +6,12 @@ import faang.school.projectservice.dto.resource.ResourceUpdateDto;
 import faang.school.projectservice.service.ResourceService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,6 +78,20 @@ public class ResourceController {
         log.info("Received request [GET]ResourceController.download -- projectId={}, resourceId={}",
                 projectId, resourceId);
         return resourceService.download(resourceId, projectId, userContext.getUserId());
+    }
+
+    @SneakyThrows
+    @GetMapping("/{resourceId}/downloadPng")
+    public ResponseEntity<byte[]> downloadPng(@PathVariable @Positive Long projectId,
+                                           @PathVariable @Positive Long resourceId) {
+
+        log.info("Received request [GET]ResourceController.download -- projectId={}, resourceId={}",
+                projectId, resourceId);
+        byte[] imageBytes = resourceService.download(resourceId, projectId, userContext.getUserId()).readAllBytes();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.IMAGE_PNG);
+
+        return new ResponseEntity<>(imageBytes, httpHeaders, HttpStatus.OK);
     }
 
     @PatchMapping("/{resourceId}")
