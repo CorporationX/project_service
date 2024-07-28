@@ -39,9 +39,6 @@ public class MomentServiceTest {
     @Spy
     private MomentMapperImpl momentMapper;
     @Mock
-    private List<MomentFilter> momentFilters;
-    private MomentDataFilter momentDataFilter;
-    @Mock
     private MomentRepository momentRepository;
     @Mock
     private MomentValidator momentValidator;
@@ -49,6 +46,8 @@ public class MomentServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private TeamMemberJpaRepository teamMemberRepository;
+    private MomentFilter filterMock;
+    private List<MomentFilter> filters;
 
     @InjectMocks
     private MomentService momentService;
@@ -61,13 +60,16 @@ public class MomentServiceTest {
 
     @BeforeEach
     void setUp() {
+
         project = Project.builder().id(1L).name("projectName").build();
         teamMember = TeamMember.builder().id(2L).build();
         moment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).members(List.of(teamMember)).build();
         momentDto = MomentDto.builder().id(1L).name("momentName").memberIds(Collections.emptyList())
                 .projectIds(List.of(1L)).build();
         team = Team.builder().id(3L).teamMembers(List.of(teamMember)).build();
-        momentDataFilter = new MomentDataFilter();
+        filterMock = Mockito.mock(MomentFilter.class);
+        filters = List.of(filterMock);
+        momentService = new MomentService(momentRepository, teamMemberRepository, projectRepository, momentValidator, filters);
     }
 
     @Test
@@ -80,7 +82,7 @@ public class MomentServiceTest {
     @Test
     public void testUpdateMoment() {
         Moment updatedMoment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).
-                userIds(List.of(1L,2L)).members(List.of(teamMember)).build();
+                userIds(List.of(1L, 2L)).members(List.of(teamMember)).build();
 
         momentDto.setUserIds(List.of(1L, 2L));
         project.setTeams(List.of(team));
@@ -103,23 +105,22 @@ public class MomentServiceTest {
 
     @Test
     public void testGetMomentsFilteredByDateFromProjects() {
-        MomentFilterDto momentFilterDto = new MomentFilterDto(1L,"name",
-                LocalDateTime.of(2000,10,1,1,1));
+        MomentFilterDto momentFilterDto = new MomentFilterDto(1L, "name",
+                LocalDateTime.of(2000, 10, 1, 1, 1));
         Moment anotherMoment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).
-                userIds(List.of(1L,2L)).members(List.of(teamMember)).
-                date(LocalDateTime.of(2000,10,10,0,0)).build();
-        moment.setDate(LocalDateTime.of(2000,10,10,0,0));
+                userIds(List.of(1L, 2L)).members(List.of(teamMember)).
+                date(LocalDateTime.of(2000, 10, 10, 0, 0)).build();
+        moment.setDate(LocalDateTime.of(2000, 10, 10, 0, 0));
         List<Moment> momentsToFilter = List.of(anotherMoment, moment);
 
         Mockito.when(momentRepository.findAllByProjectId(1L)).thenReturn(momentsToFilter);
-        Mockito.when(momentFilters.get(0)).thenReturn(momentDataFilter);
-        Mockito.when(momentFilters.get(0).isApplicable(momentFilterDto)).thenReturn(true);
-        Mockito.when(momentFilters.get(0).apply(momentsToFilter, momentFilterDto)).thenReturn(momentsToFilter.stream());
+        Mockito.when(filters.get(0).isApplicable(momentFilterDto)).thenReturn(true);
+        Mockito.when(filters.get(0).apply(momentsToFilter, momentFilterDto)).thenReturn(momentsToFilter.stream());
 
         momentService.getMomentsFilteredByDateFromProjects(1L, momentFilterDto);
         Mockito.verify(momentRepository).findAllByProjectId(1L);
-        Mockito.verify(momentDataFilter).isApplicable(momentFilterDto);
-        Mockito.verify(momentDataFilter).apply(momentsToFilter, momentFilterDto);
+        Mockito.verify(filterMock).isApplicable(momentFilterDto);
+        Mockito.verify(filterMock).apply(momentsToFilter, momentFilterDto);
     }
 
     @Test
