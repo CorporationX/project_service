@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,5 +42,14 @@ public class ResourceController {
         log.info("Received request [DELETE]ResourceController.delete -- projectId={}, resourceId={}",
                 projectId, resourceId);
         return resourceService.delete(resourceId, projectId, userContext.getUserId());
+    }
+
+    @GetMapping("/{resourceId}")
+    public ResourceResponseDto getMetadataById(@PathVariable @Positive Long projectId,
+                                       @PathVariable @Positive Long resourceId) {
+
+        log.info("Received request [GET]ResourceController.getById -- projectId={}, resourceId={}",
+                projectId, resourceId);
+        return resourceService.getByIdAndProjectId(resourceId, projectId);
     }
 }

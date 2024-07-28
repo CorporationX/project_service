@@ -36,6 +36,12 @@ public class ResourceService {
 
     private final S3Service s3Service;
 
+    @Transactional(readOnly = true)
+    public ResourceResponseDto getByIdAndProjectId(long resourceId, long projectId) {
+        Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
+        return resourceMapper.toResponseDto(resource);
+    }
+
     public ResourceResponseDto uploadNew(MultipartFile multipartFile, long projectId, long userId) {
         Project project = projectUtilService.getById(projectId);
         TeamMember creator = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
