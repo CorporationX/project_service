@@ -18,12 +18,11 @@ public class VacancyValidator {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-    public Project validate(VacancyDto vacancyDto) {
+    public void validate(VacancyDto vacancyDto, Project  project) {
         log.info("Validation");
-        Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
+        validateVacancyStatus(vacancyDto);
         checkProjectStatus(project);
         checkRolesOfVacancyUpdater(vacancyDto, project);
-        return project;
     }
 
     public void validateId(Long id) {
@@ -33,7 +32,7 @@ public class VacancyValidator {
         }
     }
 
-    public void validateVacancyStatus(VacancyDto vacancyDto) {
+    private void validateVacancyStatus(VacancyDto vacancyDto) {
         log.info("Validate vacancy status");
         if (!vacancyDto.getStatus().equals(VacancyStatus.OPEN)) {
             throw new DataValidationException("Vacancy must be with status OPEN");

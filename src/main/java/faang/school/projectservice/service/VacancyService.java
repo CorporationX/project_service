@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.vacancy.filter.VacancyFilterDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.CandidateRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.filter.VacancyFilter;
@@ -30,10 +31,12 @@ public class VacancyService {
     private final VacancyValidator vacancyValidator;
     private final VacancyMapper vacancyMapper;
     private final List<VacancyFilter> vacancyFilters;
+    private final ProjectRepository projectRepository;
 
     @Transactional
     public VacancyDto create(VacancyDto vacancyDto) {
-        Project project = vacancyValidator.validate(vacancyDto);
+        Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
+        vacancyValidator.validate(vacancyDto, project);
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         vacancy.setStatus(VacancyStatus.OPEN);
         vacancy.setProject(project);
@@ -44,8 +47,7 @@ public class VacancyService {
     @Transactional
     public VacancyDto update(VacancyDto vacancyDto) {
         Vacancy vacancy = findVacancyById(vacancyDto.getId());
-        vacancyValidator.validateVacancyStatus(vacancyDto);
-        vacancyValidator.validate(vacancyDto);
+        vacancyValidator.validate(vacancyDto, vacancy.getProject());
         List<Candidate> candidates = getCandidatesById(vacancyDto);
         vacancyValidator.validateCandidatesCount(candidates, vacancyDto);
         for (Candidate candidate : candidates) {

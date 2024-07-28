@@ -2,16 +2,15 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.filter.VacancyFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.CandidateRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.filter.VacancyFilter;
 import faang.school.projectservice.validator.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,11 +37,12 @@ public class VacancyServiceTest {
     private static final Integer CANDIDATE_COUNT = 5;
     private static final Long CURATOR_ID = 1L;
     public static final Long VACANCY_ID = 1L;
-    public static final Long SECOND_VACANCY_ID = 2L;
     public static final Long TEAM_MEMBER_ID = 1L;
 
     @Mock
     private VacancyRepository vacancyRepository;
+    @Mock
+    private ProjectRepository projectRepository;
     @Mock
     private CandidateRepository candidateRepository;
     @Mock
@@ -61,7 +61,6 @@ public class VacancyServiceTest {
 
     private VacancyDto vacancyDto;
     private Vacancy vacancy;
-    private Vacancy secondVacancy;
     private Project project;
     private Candidate candidate;
     private TeamMember teamMember;
@@ -97,16 +96,6 @@ public class VacancyServiceTest {
                 .status(VacancyStatus.OPEN)
                 .count(CANDIDATE_COUNT)
                 .build();
-        secondVacancy = Vacancy.builder()
-                .id(SECOND_VACANCY_ID)
-                .name(VACANCY_NAME)
-                .description(VACANCY_DESCRIPTION)
-                .project(project)
-                .candidates(List.of(candidate))
-                .createdBy(CURATOR_ID)
-                .status(VacancyStatus.OPEN)
-                .count(CANDIDATE_COUNT)
-                .build();
         teamMember = TeamMember.builder()
                 .id(TEAM_MEMBER_ID)
                 .userId(CANDIDATE_ID)
@@ -124,49 +113,51 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Create a vacancy when everything is fine")
     void testCreateSuccess() {
-        when(vacancyValidator.validate(vacancyDto)).thenReturn(project);
+        when(projectRepository.getProjectById(vacancyDto.getProjectId())).thenReturn(project);
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
 
-        VacancyDto result = vacancyService.create(vacancyDto);
+        VacancyDto actual = vacancyService.create(vacancyDto);
 
-        assertThat(result).isEqualTo(vacancyDto);
-        assertThat(result.getStatus()).isEqualTo(VacancyStatus.OPEN);
-        assertThat(result.getProjectId()).isEqualTo(PROJECT_ID);
-
-        verify(vacancyValidator).validate(vacancyDto);
+        verify(projectRepository).getProjectById(vacancyDto.getProjectId());
         verify(vacancyMapper).toEntity(vacancyDto);
         verify(vacancyRepository).save(vacancy);
         verify(vacancyMapper).toDto(vacancy);
+
+        assertThat(actual).isEqualTo(vacancyDto);
+        assertThat(actual.getStatus()).isEqualTo(VacancyStatus.OPEN);
+        assertThat(actual.getProjectId()).isEqualTo(PROJECT_ID);
     }
 
     @Test
-    @DisplayName("Create a vacancy when validation error")
-    void testCreateWithValidationException() {
-        when(vacancyValidator.validate(vacancyDto)).thenThrow(new DataValidationException("Validation failed"));
-
-        assertThatThrownBy(() -> vacancyService.create(vacancyDto)).isInstanceOf(DataValidationException.class)
-                .hasMessage("Validation failed");
-
-        verify(vacancyValidator).validate(vacancyDto);
-        verify(vacancyMapper, never()).toEntity(any());
-        verify(vacancyRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("Create a vacancy when repository error")
-    void testCreateWithRepositoryException() {
-        when(vacancyValidator.validate(vacancyDto)).thenReturn(project);
+    @DisplayName("Create a vacancy when vacancy repository error")
+    void testCreateWithVacancyRepositoryException() {
+        when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(vacancyRepository.save(vacancy)).thenThrow(new RuntimeException("Repository error"));
 
         assertThatThrownBy(() -> vacancyService.create(vacancyDto)).isInstanceOf(RuntimeException.class)
                 .hasMessage("Repository error");
 
-        verify(vacancyValidator).validate(vacancyDto);
+        verify(projectRepository).getProjectById(PROJECT_ID);
+        verify(vacancyValidator).validate(vacancyDto, project);
         verify(vacancyMapper).toEntity(vacancyDto);
         verify(vacancyRepository).save(vacancy);
+    }
+
+    @Test
+    @DisplayName("Create a vacancy when project repository error")
+    void testCreateWithProjectRepositoryException() {
+        when(projectRepository.getProjectById(PROJECT_ID)).thenThrow(new RuntimeException("Repository error"));
+
+        assertThatThrownBy(() -> vacancyService.create(vacancyDto)).isInstanceOf(RuntimeException.class)
+                .hasMessage("Repository error");
+
+        verify(projectRepository).getProjectById(PROJECT_ID);
+        verify(vacancyValidator, never()).validate(vacancyDto, project);
+        verify(vacancyMapper, never()).toEntity(vacancyDto);
+        verify(vacancyRepository, never()).save(vacancy);
     }
 
     @Test
@@ -184,8 +175,7 @@ public class VacancyServiceTest {
         assertThat(result).isEqualTo(vacancyDto);
         assertThat(vacancy.getStatus()).isEqualTo(VacancyStatus.CLOSED);
 
-        verify(vacancyValidator).validateVacancyStatus(vacancyDto);
-        verify(vacancyValidator).validate(vacancyDto);
+        verify(vacancyValidator).validate(vacancyDto, project);
         verify(vacancyValidator).validateCandidatesCount(any(), eq(vacancyDto));
         verify(teamMemberRepository, times(1)).save(any(TeamMember.class));
         verify(teamMemberRepository, times(1)).findByUserIdAndProjectId(any(), any());
@@ -240,23 +230,6 @@ public class VacancyServiceTest {
         verify(teamMemberRepository, times(1)).findByUserIdAndProjectId(CANDIDATE_ID, PROJECT_ID);
         verifyNoMoreInteractions(vacancyRepository);
         verifyNoMoreInteractions(candidateRepository);
-        verifyNoInteractions(vacancyMapper);
-    }
-
-    @Test
-    @DisplayName("Update a vacancy when validation fails")
-    void testUpdateValidationFails() {
-        when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(vacancy));
-        doThrow(new ValidationException("Validation failed")).when(vacancyValidator).validate(any(VacancyDto.class));
-
-        assertThatThrownBy(() -> vacancyService.update(vacancyDto)).isInstanceOf(ValidationException.class)
-                .hasMessage("Validation failed");
-
-        verify(vacancyRepository, times(1)).findById(VACANCY_ID);
-        verify(vacancyValidator, times(1)).validate(vacancyDto);
-        verifyNoMoreInteractions(vacancyRepository);
-        verifyNoMoreInteractions(candidateRepository);
-        verifyNoMoreInteractions(teamMemberRepository);
         verifyNoInteractions(vacancyMapper);
     }
 

@@ -17,7 +17,7 @@ public class VacancyDto {
     private String name;
     @NotEmpty(message = "Description cant be empty or null")
     private String description;
-    @NotNull
+    @NotNull(message = "Project cant be null")
     private Long projectId;
     private List<Long> candidateIds;
     private Long createdBy;
