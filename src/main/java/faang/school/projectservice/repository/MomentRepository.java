@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MomentRepository extends JpaRepository<Moment, Long> {
@@ -16,4 +17,6 @@ public interface MomentRepository extends JpaRepository<Moment, Long> {
     (select moment_id from moment_project where project_id = :projectId)
     """)
     List<Moment> findAllByProjectId(long projectId);
+
+    Optional<Moment> findByNameIgnoreCase(String name);
 }

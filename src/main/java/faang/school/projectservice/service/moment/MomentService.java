@@ -1,10 +1,14 @@
 package faang.school.projectservice.service.moment;
 
+import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -13,26 +17,36 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MomentService {
     private final MomentRepository momentRepository;
+    private final ProjectMapper projectMapper;
 
     public void addMomentByName(Project project, String momentName) {
         Optional<Moment> moment = findMomentByName(momentName);
+        ProjectDto projectDto = projectMapper.toDto(project);
         if (moment.isEmpty()) {
-            createMoment(project, momentName);
+            MomentDto momentDto = MomentDto.builder()
+                    .name(momentName)
+                    .build();
+            createMoment(projectDto, momentDto);
         } else {
-            updateMoment(moment, project);
+            updateMoment(moment.get(), projectDto);
         }
     }
 
-    private void updateMoment(Optional<Moment> moment, Project subProject) {
+    public void updateMoment(Moment moment, ProjectDto projectDto) {
     }
 
-    private void createMoment(Project subProject, String momentName) {
+    public void createMoment(ProjectDto projectDto, MomentDto momentDto) {
     }
 
-    private Optional<Moment> findMomentByName(String name) {
-        Moment moment = new Moment();
-        moment.setName(name);
-        Example<Moment> momentExample = Example.of(moment);
-        return momentRepository.findOne(momentExample);
+    public Optional<Moment> findMomentByName(String name) {
+//        Moment moment = new Moment();
+//        moment.setName(name);
+//        ExampleMatcher matcher = ExampleMatcher.matching()
+//                .withIgnorePaths("id", "description", "date")
+//                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
+//                .withIgnoreCase("name");
+//        Example<Moment> momentExample = Example.of(moment, matcher);
+//        return momentRepository.findOne(momentExample);
+        return momentRepository.findByNameIgnoreCase(name);
     }
 }

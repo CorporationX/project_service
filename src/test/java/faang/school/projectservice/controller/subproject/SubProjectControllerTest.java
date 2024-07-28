@@ -2,6 +2,8 @@ package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +56,7 @@ public class SubProjectControllerTest {
         HttpEntity<CreateSubProjectDto> requestBad = new HttpEntity<>(subProjectDtoBad, headers);
 
         ResponseEntity<Map<String, String>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/subProjects",
+                "http://localhost:" + port + "/api/v1/subProjects",
                 HttpMethod.POST,
                 requestBad,
                 new ParameterizedTypeReference<Map<String, String>>() {
@@ -81,7 +83,7 @@ public class SubProjectControllerTest {
         when(projectService.createSubProject(subProjectDto)).thenReturn(expectedProject);
 
         ResponseEntity<ProjectDto> response = restTemplate.exchange(
-                "http://localhost:" + port + "/subProjects",
+                "http://localhost:" + port + "/api/v1/subProjects",
                 HttpMethod.POST,
                 request,
                 ProjectDto.class
@@ -97,7 +99,7 @@ public class SubProjectControllerTest {
         HttpEntity<CreateSubProjectDto> requestBad = new HttpEntity<>(null, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:" + port + "/subProjects",
+                "http://localhost:" + port + "/api/v1/subProjects",
                 HttpMethod.POST,
                 requestBad,
                 String.class
@@ -105,5 +107,26 @@ public class SubProjectControllerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         verify(projectService, times(0)).createSubProject(any());
+    }
+
+    @Test
+    public void testUpdateSubProject() {
+        UpdateSubProjectDto updateDto = UpdateSubProjectDto.builder()
+                .status(ProjectStatus.COMPLETED)
+                .build();
+
+        HttpEntity<UpdateSubProjectDto> request = new HttpEntity<>(updateDto, headers);
+        ProjectDto expectedProject = new ProjectDto();
+
+        when(projectService.updateSubProject(1L, updateDto)).thenReturn(expectedProject);
+
+        ProjectDto response = restTemplate.exchange(
+                "http://localhost:" + port + "/api/v1/subProjects/1",
+                HttpMethod.PUT,
+                request,
+                ProjectDto.class
+        ).getBody();
+
+        assertThat(response).isEqualTo(expectedProject);
     }
 }

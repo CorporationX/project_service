@@ -2,7 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
-import faang.school.projectservice.dto.subproject.SubProjectUpdateDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -54,14 +54,14 @@ public class ProjectServiceValidator {
         return parentProject;
     }
 
-    public Project validateSubProjectForUpdate(Long subProjectId, SubProjectUpdateDto updateDto) {
+    public Project validateSubProjectForUpdate(Long subProjectId, UpdateSubProjectDto updateDto) {
         if (!projectRepository.existsById(subProjectId)) {
             throw new DataValidationException("project with this ID: " + subProjectId + " doesn't exist");
         }
         Project subProject = projectRepository.getProjectById(subProjectId);
 
         if (updateDto.getStatus() == subProject.getStatus()) {
-            throw new DataValidationException("Project " + subProject + " already has status " + updateDto.getStatus());
+            throw new DataValidationException("Project " + subProject.getId() + " already has status " + updateDto.getStatus());
         } else if (updateDto.getVisibility() == ProjectVisibility.PRIVATE) {
             subProject.getChildren().forEach(project -> project.setVisibility(ProjectVisibility.PRIVATE));
         }
@@ -70,7 +70,7 @@ public class ProjectServiceValidator {
 
     public boolean readyToNewMoment(Project subProject, ProjectStatus newStatus) {
         if (newStatus == ProjectStatus.COMPLETED || newStatus == ProjectStatus.CANCELLED) {
-            if (areAllSubprojectsClosed(subProject, newStatus)) {
+            if (!areAllSubprojectsClosed(subProject)) {
                 throw new DataValidationException("Children projects status should be COMPLETED or CANCELLED");
             }
             return true;
@@ -78,8 +78,10 @@ public class ProjectServiceValidator {
         return false;
     }
 
-    private boolean areAllSubprojectsClosed(Project subProject, ProjectStatus newStatus) {
-        return !subProject.getChildren().stream()
-                .allMatch(children -> children.getStatus() == newStatus);
+    private boolean areAllSubprojectsClosed(Project subProject) {
+        return subProject.getChildren().stream()
+                .allMatch(children ->
+                        children.getStatus() == ProjectStatus.COMPLETED
+                        || children.getStatus() == ProjectStatus.CANCELLED);
     }
 }

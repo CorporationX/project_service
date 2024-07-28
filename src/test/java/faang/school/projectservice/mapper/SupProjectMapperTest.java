@@ -1,7 +1,10 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -28,5 +31,19 @@ public class SupProjectMapperTest {
         Project result = subProjectMapper.toEntity(subProjectDto);
 
         assertEquals(project, result);
+    }
+
+    @Test
+    public void updateEntity() {
+        project.setStatus(ProjectStatus.IN_PROGRESS);
+        project.setVisibility(ProjectVisibility.PRIVATE);
+        UpdateSubProjectDto updateDto = UpdateSubProjectDto.builder()
+                .status(ProjectStatus.COMPLETED)
+                .build();
+
+        subProjectMapper.updateEntity(updateDto, project);
+
+        assertEquals(ProjectStatus.COMPLETED, project.getStatus());
+        assertEquals(ProjectVisibility.PRIVATE, project.getVisibility());
     }
 }
