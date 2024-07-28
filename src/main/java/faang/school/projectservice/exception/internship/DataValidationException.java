@@ -1,4 +1,4 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.exception.internship;
 
 public class DataValidationException extends RuntimeException{
 

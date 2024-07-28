@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.internship;
 
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;

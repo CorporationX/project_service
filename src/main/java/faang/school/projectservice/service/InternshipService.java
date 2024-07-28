@@ -4,9 +4,9 @@ import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.dto.client.InternshipFiltersDto;
 import faang.school.projectservice.dto.client.InternshipToCreateDto;
 import faang.school.projectservice.dto.client.InternshipToUpdateDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.internship.DataValidationException;
 import faang.school.projectservice.filter.InternshipFilter;
-import faang.school.projectservice.mapper.InternshipMapper;
+import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -18,11 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static faang.school.projectservice.exception.InternshipError.*;
+import static faang.school.projectservice.exception.internship.InternshipError.*;
 
 @Service
 @RequiredArgsConstructor
@@ -52,10 +51,8 @@ public class InternshipService {
         if (internshipToBeUpdated.getStatus().equals(InternshipStatus.COMPLETED))
             throw new DataValidationException(CANNOT_UPDATING_EXCEPTION);
 
-
         validator.validateForUpdate(userId, internshipDto, internshipToBeUpdated);
         internshipMapper.updateEntity(internshipDto, internshipToBeUpdated);
-
         internshipToBeUpdated.setUpdatedBy(userId);
 
         if (internshipToBeUpdated.getStatus().equals(InternshipStatus.COMPLETED)) {

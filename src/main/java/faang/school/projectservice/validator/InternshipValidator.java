@@ -2,8 +2,8 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.client.InternshipToCreateDto;
 import faang.school.projectservice.dto.client.InternshipToUpdateDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.mapper.InternshipMapper;
+import faang.school.projectservice.exception.internship.DataValidationException;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
@@ -14,8 +14,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static faang.school.projectservice.exception.InternshipError.*;
+import static faang.school.projectservice.exception.internship.InternshipError.*;
 
 @Component
 @RequiredArgsConstructor
@@ -23,9 +25,8 @@ public class InternshipValidator {
     private final InternshipRepository internshipRepository;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final InternshipMapper internshipMapper;
     private final UserValidator userValidator;
-
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final static int MONTH_AMOUNT = 3;
 
     public void validateForCreation(long userId, InternshipToCreateDto internshipDto) {
@@ -34,7 +35,6 @@ public class InternshipValidator {
         validateMentorExists(internshipDto.getMentorId());
         validateProjectExists(internshipDto.getProjectId());
     }
-
 
     public void validateForUpdate(long userId, InternshipToUpdateDto internshipDto, Internship internship) {
         userValidator.validateUserExistence(userId);
@@ -51,7 +51,16 @@ public class InternshipValidator {
     }
 
     public void validateInternsExists(List<Long> interns) {
-        interns.forEach(teamMemberRepository::findById);
+        List<TeamMember> membersInRepository = teamMemberJpaRepository.findAllById(interns);
+        Set<Long> membersId = membersInRepository.stream()
+                .map(TeamMember::getId)
+                .collect(Collectors.toSet());
+        interns.forEach(intern ->
+        {
+            if (!membersId.contains(intern)) {
+                throw new DataValidationException(ENTITY_NOT_FOUND);
+            }
+        });
     }
 
     public void validateMentorExists(Long mentorId) {

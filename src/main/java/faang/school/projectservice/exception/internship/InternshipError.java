@@ -1,4 +1,4 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.exception.internship;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,8 @@ public enum InternshipError
     ABSENT_INTERN_ROLE_EXCEPTION("Intern must have role INTERN."),
     NON_EXISTING_PROJECT_EXCEPTION("This project is not found"),
     NON_EXISTING_INTERNSHIP_EXCEPTION("Cannot find internship in database"),
-    NOT_FOUND_USER("User not found"),;
+    NOT_FOUND_USER("User not found"),
+    ENTITY_NOT_FOUND("This team member not found");
 
     private final String message;
 }
