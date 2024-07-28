@@ -66,6 +66,15 @@ public class ResourceController {
         return resourceService.getAllByProjectId(projectId);
     }
 
+    @GetMapping("/{resourceId}/download")
+    public InputStream download(@PathVariable @Positive Long projectId,
+                                @PathVariable @Positive Long resourceId) {
+
+        log.info("Received request [GET]ResourceController.download -- projectId={}, resourceId={}",
+                projectId, resourceId);
+        return resourceService.download(resourceId, projectId, userContext.getUserId());
+    }
+
     @PatchMapping("/{resourceId}")
     public ResourceResponseDto updateMetadata(@PathVariable @Positive Long projectId,
                                               @PathVariable @Positive Long resourceId,

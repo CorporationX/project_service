@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +42,9 @@ public class S3Service {
     public void deleteFile(String key) {
         amazonS3.deleteObject(bucketName, key);
         log.info("File {} was deleted", key);
+    }
+
+    public InputStream download(String key) {
+        return amazonS3.getObject(bucketName, key).getObjectContent();
     }
 }

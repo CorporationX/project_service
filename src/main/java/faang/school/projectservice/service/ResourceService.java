@@ -16,14 +16,15 @@ import faang.school.projectservice.service.utilservice.ProjectUtilService;
 import faang.school.projectservice.service.utilservice.ResourceUtilService;
 import faang.school.projectservice.service.utilservice.TeamMemberUtilService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -55,9 +56,7 @@ public class ResourceService {
     public ResourceResponseDto updateMetadata(long resourceId, long projectId, long userId, ResourceUpdateDto updateDto) {
 
         Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
-        if (resource.getStatus().equals(ResourceStatus.DELETED)) {
-            throw new ConflictException(String.format("Unable to update deleted resource id=%d", resourceId));
-        }
+        checkIfDeleted(resource);
         TeamMember updater = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
         checkAbilityToUpdate(resource, updater);
 
@@ -96,12 +95,20 @@ public class ResourceService {
         return resourceMapper.toResponseDto(resource);
     }
 
+    public InputStream download(long resourceId, long projectId, long userId) {
+
+        Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
+        checkIfDeleted(resource);
+        TeamMember teamMember = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
+        checkAbilityToDownload(resource, teamMember);
+
+        return s3Service.download(resource.getKey());
+    }
+
     public ResourceResponseDto delete(long resourceId, long projectId, long userId) {
 
         Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
-        if (resource.getStatus().equals(ResourceStatus.DELETED)) {
-            throw new ConflictException(String.format("Resource id=%d is already deleted", resourceId));
-        }
+        checkIfDeleted(resource);
         TeamMember updater = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
         checkAbilityToUpdate(resource, updater);
 
@@ -134,11 +141,27 @@ public class ResourceService {
 
     private void checkAbilityToUpdate(Resource resource, TeamMember updater) {
         if (!resource.getCreatedBy().getId().equals(updater.getId())) {
-            Set<TeamRole> requesterRoles = Set.copyOf(updater.getRoles());
-            if (!requesterRoles.contains(TeamRole.MANAGER)) {
+            if (!updater.getRoles().contains(TeamRole.MANAGER)) {
                 throw new AccessDeniedException(String.format(
-                        "Current user id=%d dont have rights to update resource", updater.getUserId()));
+                        "Current user id=%d dont have rights to proceed this operation to resource",
+                        updater.getUserId()));
             }
+        }
+    }
+
+    private void checkAbilityToDownload(Resource resource, TeamMember updater) {
+        checkAbilityToUpdate(resource, updater);
+        if (!CollectionUtils.containsAny(updater.getRoles(), resource.getAllowedRoles())) {
+            throw new AccessDeniedException(String.format(
+                    "Current user id=%d dont have rights to proceed this operation to resource",
+                    updater.getUserId()));
+        }
+    }
+
+    private void checkIfDeleted(Resource resource) {
+        if (resource.getStatus().equals(ResourceStatus.DELETED)) {
+            throw new ConflictException(String.format("Unable to proceed operation to deleted resource id=%d",
+                    resource.getId()));
         }
     }
 
