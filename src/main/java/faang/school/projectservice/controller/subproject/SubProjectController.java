@@ -28,10 +28,9 @@ public class SubProjectController {
     }
 
     @PutMapping("/{subProjectId}")
-    public ResponseEntity<ProjectDto> updateSubProject(
+    public ProjectDto updateSubProject(
             @PathVariable Long subProjectId,
             @Validated @RequestBody SubProjectUpdateDto subProjectUpdateDto) {
-        ProjectDto updatedProject = projectService.updateSubProject(subProjectUpdateDto);
-        return ResponseEntity.ok(updatedProject);
+        return projectService.updateSubProject(subProjectId, subProjectUpdateDto);
     }
 }
