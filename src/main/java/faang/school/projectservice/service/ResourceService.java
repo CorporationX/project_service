@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ResourceResponseDto;
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.ConflictException;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
@@ -8,6 +9,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.service.utilservice.ProjectUtilService;
 import faang.school.projectservice.service.utilservice.ResourceUtilService;
@@ -18,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +36,7 @@ public class ResourceService {
 
     private final S3Service s3Service;
 
-    public ResourceResponseDto uploadNew(long userId, long projectId, MultipartFile multipartFile) {
+    public ResourceResponseDto uploadNew(MultipartFile multipartFile, long projectId, long userId) {
         Project project = projectUtilService.getById(projectId);
         TeamMember creator = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
 
@@ -56,6 +60,39 @@ public class ResourceService {
         resource = resourceUtilService.save(resource);
 
         project.setStorageSize(newStorageSize);
+        projectUtilService.save(project);
+
+        return resourceMapper.toResponseDto(resource);
+    }
+
+    public ResourceResponseDto delete(long resourceId, long projectId, long userId) {
+        Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
+        if (resource.getStatus().equals(ResourceStatus.DELETED)) {
+            throw new ConflictException(String.format("Resource id=%d is already deleted", resourceId));
+        }
+        TeamMember updater = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
+        if (resource.getCreatedBy().getId() != userId) {
+            Set<TeamRole> requesterRoles = Set.copyOf(updater.getRoles());
+            if (!requesterRoles.contains(TeamRole.MANAGER)) {
+                throw new AccessDeniedException(String.format(
+                        "Current user id=%d dont have rights to delete resource", userId));
+            }
+        }
+
+        BigInteger oldSize = resource.getSize();
+
+        s3Service.deleteFile(resource.getKey());
+
+        resource.setKey(null);
+        resource.setSize(BigInteger.ZERO);
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedAt(LocalDateTime.now());
+        resource.setUpdatedBy(updater);
+
+        resource = resourceUtilService.save(resource);
+
+        Project project = resource.getProject();
+        project.setStorageSize(project.getStorageSize().subtract(oldSize));
         projectUtilService.save(project);
 
         return resourceMapper.toResponseDto(resource);

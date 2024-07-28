@@ -37,4 +37,9 @@ public class S3Service {
         log.info("File {} was saved to {}/{}", file.getOriginalFilename(), bucketName, folder);
         return key;
     }
+
+    public void deleteFile(String key) {
+        amazonS3.deleteObject(bucketName, key);
+        log.info("File {} was deleted", key);
+    }
 }

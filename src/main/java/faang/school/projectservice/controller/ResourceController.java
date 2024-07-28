@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,8 +29,17 @@ public class ResourceController {
     public ResourceResponseDto uploadNew(@PathVariable @Positive Long projectId,
                                          @RequestParam MultipartFile file) {
 
-        log.info("Received request to ResourceController.uploadNew -- projectId={}, fileName={}, content-type={}",
+        log.info("Received request [POST]ResourceController.uploadNew -- projectId={}, fileName={}, content-type={}",
                 projectId, file.getOriginalFilename(), file.getContentType());
-        return resourceService.uploadNew(userContext.getUserId(), projectId, file);
+        return resourceService.uploadNew(file, projectId, userContext.getUserId());
+    }
+
+    @DeleteMapping("/{resourceId}") //Patch/Put? Сама ведь сущность не удаляется
+    public ResourceResponseDto delete(@PathVariable @Positive Long projectId,
+                                      @PathVariable @Positive Long resourceId) {
+
+        log.info("Received request [DELETE]ResourceController.delete -- projectId={}, resourceId={}",
+                projectId, resourceId);
+        return resourceService.delete(resourceId, projectId, userContext.getUserId());
     }
 }
