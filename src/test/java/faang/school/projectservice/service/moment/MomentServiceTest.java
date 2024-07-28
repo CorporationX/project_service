@@ -12,17 +12,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 public class MomentServiceTest {
     @Spy
@@ -40,7 +41,7 @@ public class MomentServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
+        lenient().when(projectMapper.toDto(project)).thenReturn(projectDto);
     }
 
     @Test
@@ -52,13 +53,8 @@ public class MomentServiceTest {
 
     @Test
     public void testFindMomentByName() {
-        Moment newMoment = new Moment();
-        newMoment.setId(2L);
-        newMoment.setName("name");
-        newMoment.setDescription("description");
-        newMoment.setDate(LocalDateTime.now());
-        momentRepository.save(newMoment);
-        Optional<Moment> result = momentRepository.findById(2L);
+
+        Optional<Moment> result = momentRepository.findById(1L);
 
 //        Optional<Moment> result = momentService.findMomentByName(momentName);
         assertTrue(result.isPresent());

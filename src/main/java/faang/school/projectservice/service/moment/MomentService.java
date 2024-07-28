@@ -11,6 +11,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -39,14 +40,21 @@ public class MomentService {
     }
 
     public Optional<Moment> findMomentByName(String name) {
-//        Moment moment = new Moment();
-//        moment.setName(name);
-//        ExampleMatcher matcher = ExampleMatcher.matching()
-//                .withIgnorePaths("id", "description", "date")
-//                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
-//                .withIgnoreCase("name");
-//        Example<Moment> momentExample = Example.of(moment, matcher);
-//        return momentRepository.findOne(momentExample);
-        return momentRepository.findByNameIgnoreCase(name);
+        Moment moment = new Moment();
+        moment.setName(name);
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnorePaths("id", "description", "date")
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
+                .withIgnoreCase("name");
+        Example<Moment> momentExample = Example.of(moment, matcher);
+        return momentRepository.findOne(momentExample);
+    }
+
+    public void createMomentTest() {
+        Moment newMoment = new Moment();
+        newMoment.setName("name");
+        newMoment.setDescription("description");
+        newMoment.setDate(LocalDateTime.now());
+        momentRepository.save(newMoment);
     }
 }
