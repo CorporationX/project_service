@@ -2,8 +2,8 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
-import faang.school.projectservice.filter.StageInvitationFilter;
-import faang.school.projectservice.filter.StageInvitationStatusFilter;
+import faang.school.projectservice.filter.stageInvitation.StageInvitationFilter;
+import faang.school.projectservice.filter.stageInvitation.StageInvitationStatusFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -11,6 +11,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.stageInvitation.StageInvitationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -96,12 +97,13 @@ public class StageInvitationServiceTest {
     @Test
     @DisplayName("testAcceptInvitation")
     public void acceptInvitation() {
+        Long stageInvitationId = 1L;
         when(stageInvitationRepository.findById(stageInvitationDto.getId())).thenReturn(stageInvitation);
         when(teamMemberRepository.findById(stageInvitation.getInvited().getId())).thenReturn(teamMember);
         when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
         when(stageInvitationRepository.save(any(StageInvitation.class))).thenReturn(stageInvitation);
 
-        stageInvitationService.acceptInvatation(stageInvitationDto, 1L);
+        stageInvitationService.acceptInvatation(stageInvitationId, 1L);
 
         verify(stageInvitationMapper, times(1)).toDto(any(StageInvitation.class));
         assertEquals(StageInvitationStatus.ACCEPTED, stageInvitation.getStatus());

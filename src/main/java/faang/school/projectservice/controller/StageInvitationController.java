@@ -1,8 +1,9 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
-import faang.school.projectservice.service.StageInvitationService;
+import faang.school.projectservice.service.stageInvitation.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.List;
 public class StageInvitationController {
 
     private final StageInvitationService stageInvitationService;
+    private final UserContext userContext;
 
     @PostMapping("/send")
     public StageInvitationDto sendAnInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
@@ -31,14 +33,13 @@ public class StageInvitationController {
         return stageInvitationService.sendAnInvitation(stageInvitationDto);
     }
 
-    @PostMapping("/accept/{userId}")
-    public StageInvitationDto acceptInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto,
-                                               @PathVariable long userId) {
-        if (stageInvitationDto == null) {
+    @PostMapping("/accept")
+    public StageInvitationDto acceptInvitation(@Valid @RequestBody Long stageInvitationId) {
+        if (stageInvitationId == null) {
             log.error("stageInvitationDto is null");
             throw new IllegalArgumentException("stageInvitationDto is null");
         }
-        return stageInvitationService.acceptInvatation(stageInvitationDto, userId);
+        return stageInvitationService.acceptInvatation(stageInvitationId, userContext.getUserId());
     }
 
     @PostMapping("/decline")
@@ -46,11 +47,6 @@ public class StageInvitationController {
         if (stageInvitationDto == null) {
             log.error("stageInvitationDto is null");
             throw new IllegalArgumentException("stageInvitationDto is null");
-        }
-
-        if (stageInvitationDto.getDescription() == null || stageInvitationDto.getDescription().isEmpty()) {
-            log.error("description of stageInvitation is null");
-            throw new NullPointerException("description of stageInvitation is null");
         }
         return stageInvitationService.declineTheInvitation(stageInvitationDto);
     }
@@ -64,7 +60,7 @@ public class StageInvitationController {
         }
 
         if (userId < 0) {
-            log.error("userId < 0");
+            log.error("userId must be greater than zero ");
             throw new IllegalArgumentException("userId < 0");
         }
         return stageInvitationService.getStageInvitationForUser(stageInvitationFilterDto, userId);

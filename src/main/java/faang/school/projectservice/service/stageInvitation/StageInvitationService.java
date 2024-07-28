@@ -1,8 +1,8 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.stageInvitation;
 
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
-import faang.school.projectservice.filter.StageInvitationFilter;
+import faang.school.projectservice.filter.stageInvitation.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
@@ -31,8 +31,8 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
-    public StageInvitationDto acceptInvatation(StageInvitationDto stageInvitationDto, long userId) {
-        StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
+    public StageInvitationDto acceptInvatation(Long stageInvitationId, long userId) {
+        StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationId);
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
         teamMemberRepository.findById(stageInvitation.getInvited().getId()).setUserId(userId);
         stageInvitationRepository.save(stageInvitation);
@@ -54,10 +54,7 @@ public class StageInvitationService {
             throw new IllegalArgumentException("filter is null");
         }
 
-        Stream<StageInvitation> stageInvitations = stageInvitationRepository.findAll()
-                .stream()
-                .filter(stageInvitation -> stageInvitation.getInvited().getUserId().equals(userId))
-                .findAny().stream();
+        Stream<StageInvitation> stageInvitations = stageInvitationRepository.findByIdAllInvited(userId).stream();
 
         return stageInvitationsFilter.stream()
                 .filter(stageInvitationFilter -> stageInvitationFilter.isApplicable(stageInvitationFilterDto))
@@ -65,7 +62,5 @@ public class StageInvitationService {
                         stageInvitationsFilter.apply(cumulativeStream, stageInvitationFilterDto), Stream::concat)
                 .map(stageInvitationMapper::toDto)
                 .toList();
-
-
     }
 }

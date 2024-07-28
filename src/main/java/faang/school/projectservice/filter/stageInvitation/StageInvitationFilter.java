@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.stageInvitation;
 
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
