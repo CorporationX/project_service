@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.ResourceResponseDto;
+import faang.school.projectservice.dto.resource.ResourceResponseDto;
 import faang.school.projectservice.model.Resource;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.ResourceResponseDto;
+import faang.school.projectservice.dto.resource.ResourceResponseDto;
+import faang.school.projectservice.dto.resource.ResourceUpdateDto;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.ConflictException;
 import faang.school.projectservice.mapper.ResourceMapper;
@@ -51,6 +52,20 @@ public class ResourceService {
         return resourceMapper.toResponseDtoList(resources);
     }
 
+    public ResourceResponseDto updateMetadata(long resourceId, long projectId, long userId, ResourceUpdateDto updateDto) {
+
+        Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
+        if (resource.getStatus().equals(ResourceStatus.DELETED)) {
+            throw new ConflictException(String.format("Unable to update deleted resource id=%d", resourceId));
+        }
+        TeamMember updater = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
+        checkAbilityToUpdate(resource, updater);
+
+        updateFields(resource, updateDto);
+        resource = resourceUtilService.save(resource);
+        return resourceMapper.toResponseDto(resource);
+    }
+
     public ResourceResponseDto uploadNew(MultipartFile multipartFile, long projectId, long userId) {
 
         Project project = projectUtilService.getById(projectId);
@@ -63,7 +78,7 @@ public class ResourceService {
         String key = s3Service.uploadFile(multipartFile, folder);
 
         Resource resource = Resource.builder()
-                .name(multipartFile.getName())
+                .name(multipartFile.getOriginalFilename())
                 .key(key)
                 .size(BigInteger.valueOf(multipartFile.getSize()))
                 .allowedRoles(creator.getRoles().stream().toList())
@@ -88,13 +103,7 @@ public class ResourceService {
             throw new ConflictException(String.format("Resource id=%d is already deleted", resourceId));
         }
         TeamMember updater = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
-        if (resource.getCreatedBy().getId() != userId) {
-            Set<TeamRole> requesterRoles = Set.copyOf(updater.getRoles());
-            if (!requesterRoles.contains(TeamRole.MANAGER)) {
-                throw new AccessDeniedException(String.format(
-                        "Current user id=%d dont have rights to delete resource", userId));
-            }
-        }
+        checkAbilityToUpdate(resource, updater);
 
         BigInteger oldSize = resource.getSize();
 
@@ -120,6 +129,33 @@ public class ResourceService {
         if (newStorageSize.compareTo(maxStorageSize) > 0) {
             throw new ConflictException(String.format(
                     "Storage size was exceeded (%d/%d)", newStorageSize, maxStorageSize));
+        }
+    }
+
+    private void checkAbilityToUpdate(Resource resource, TeamMember updater) {
+        if (!resource.getCreatedBy().getId().equals(updater.getId())) {
+            Set<TeamRole> requesterRoles = Set.copyOf(updater.getRoles());
+            if (!requesterRoles.contains(TeamRole.MANAGER)) {
+                throw new AccessDeniedException(String.format(
+                        "Current user id=%d dont have rights to update resource", updater.getUserId()));
+            }
+        }
+    }
+
+    private void updateFields(Resource resource, ResourceUpdateDto updateDto) {
+
+        if (updateDto.getName() != null) {
+            resource.setName(updateDto.getName());
+        }
+        if (updateDto.getIsActive() != null) {
+            if (updateDto.getIsActive()) {
+                resource.setStatus(ResourceStatus.ACTIVE);
+            } else {
+                resource.setStatus(ResourceStatus.INACTIVE);
+            }
+        }
+        if (updateDto.getNewRoles() != null) {
+            resource.setAllowedRoles(updateDto.getNewRoles());
         }
     }
 }
