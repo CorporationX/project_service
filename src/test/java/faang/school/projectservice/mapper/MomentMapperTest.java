@@ -69,4 +69,19 @@ public class MomentMapperTest {
         Assertions.assertEquals(actualMomentDto, ExpectedMomentDto);
     }
 
+    @Test
+    public void testUpdate() {
+        MomentDto newDto = MomentDto.builder()
+                .name("NewTest")
+                .date(LocalDateTime.of(2021, 1, 1, 0, 0))
+                .id(1L)
+                .memberIds(List.of(3L, 2L))
+                .projectIds(projectIds)
+                .userIds(userIds)
+                .build();
+        mapper.update(newDto, ExpectedMoment);
+        Assertions.assertEquals(newDto.getName(), "NewTest");
+        Assertions.assertEquals(newDto.getMemberIds(), List.of(3L, 2L));
+    }
+
 }

@@ -1,7 +1,6 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.client.MomentDto;
-import faang.school.projectservice.dto.client.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
@@ -11,7 +10,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,8 +28,8 @@ public interface MomentMapper {
 
     @Named("fromProjectIdsToProjects")
     default List<Project> toProjects(List<Long> projectIds) {
-        if (projectIds.isEmpty()) {
-            return Collections.emptyList();
+        if (projectIds == null || projectIds.isEmpty()) {
+            return new ArrayList<>();
         } else {
             return projectIds.stream().map(id -> {
                 Project project = new Project();
@@ -42,8 +41,8 @@ public interface MomentMapper {
 
     @Named("fromProjectsToProjectIds")
     default List<Long> toProjectIds(List<Project> projects) {
-        if (projects.isEmpty()) {
-            return Collections.emptyList();
+        if (projects == null || projects.isEmpty()) {
+            return new ArrayList<>();
         } else {
             return projects.stream().map(Project::getId).collect(Collectors.toList());
         }
@@ -51,8 +50,8 @@ public interface MomentMapper {
 
     @Named("fromMemberIdsToMembers")
     default List<TeamMember> toMembers(List<Long> memberIds) {
-        if (memberIds == null) {
-            return Collections.emptyList();
+        if (memberIds == null || memberIds.isEmpty()) {
+            return new ArrayList<>();
         } else {
             return memberIds.stream().map(id -> {
                 TeamMember teamMember = new TeamMember();
@@ -64,8 +63,8 @@ public interface MomentMapper {
 
     @Named("fromMembersToMemberIds")
     default List<Long> toMemberIds(List<TeamMember> members) {
-        if (members == null) {
-            return Collections.emptyList();
+        if (members == null || members.isEmpty()) {
+            return new ArrayList<>();
         } else {
             return members.stream().map(TeamMember::getId).collect(Collectors.toList());
         }

@@ -2,11 +2,13 @@ package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.client.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Stream;
 
+@NoArgsConstructor
 @Component
 public class MomentDataFilter implements MomentFilter {
 
