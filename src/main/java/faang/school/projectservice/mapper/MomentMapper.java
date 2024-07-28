@@ -18,10 +18,12 @@ import java.util.stream.Collectors;
 public interface MomentMapper {
     @Mapping(target = "projects", source = "projectIds", qualifiedByName = "fromProjectIdsToProjects")
     @Mapping(target = "members", source = "memberIds", qualifiedByName = "fromMemberIdsToMembers")
+    @Mapping(target = "userIds", source = "userIds", qualifiedByName = "toUserIds")
     Moment toEntity(MomentDto momentDto);
 
     @Mapping(target = "projectIds", source = "projects", qualifiedByName = "fromProjectsToProjectIds")
     @Mapping(target = "memberIds", source = "members", qualifiedByName = "fromMembersToMemberIds")
+    @Mapping(target = "userIds", source = "userIds", qualifiedByName = "toUserIds")
     MomentDto toDto(Moment moment);
 
     void update (MomentDto momentDto, @MappingTarget Moment moment);
@@ -68,5 +70,12 @@ public interface MomentMapper {
         } else {
             return members.stream().map(TeamMember::getId).collect(Collectors.toList());
         }
+    }
+
+    @Named("toUserIds")
+    default List<Long> toUserIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return new ArrayList<>();
+        } else {return userIds;}
     }
 }

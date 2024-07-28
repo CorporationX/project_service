@@ -2,6 +2,8 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,11 @@ public class MomentDtoValidator {
         for (Long projectId : momentDto.getProjectIds()) {
             if (!projectRepository.existsById(projectId)) {
                 throw new DataValidationException("project id " + projectId + " does not exist");
+            } else {
+                Project project = projectRepository.getProjectById(projectId);
+                if (project.getStatus() == ProjectStatus.CANCELLED || project.getStatus() == ProjectStatus.COMPLETED) {
+                    throw new DataValidationException("project id " + projectId + " is either cancelled or completed");
+                }
             }
         }
     }
