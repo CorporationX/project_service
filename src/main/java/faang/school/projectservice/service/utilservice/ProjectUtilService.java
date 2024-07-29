@@ -1,16 +1,15 @@
 package faang.school.projectservice.service.utilservice;
 
-import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
-
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProjectUtilService {
 
     private final ProjectJpaRepository projectJpaRepository;

@@ -5,11 +5,13 @@ import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ResourceUtilService {
 
     private final ResourceRepository resourceRepository;
@@ -18,6 +20,7 @@ public class ResourceUtilService {
         return resourceRepository.save(resource);
     }
 
+    @Transactional(readOnly = true)
     public Resource getByIdAndProjectId(long id, long projectId) {
         return resourceRepository.findByIdAndProjectId(id, projectId)
                 .orElseThrow(() -> new NotFoundException(String.format(
@@ -26,6 +29,7 @@ public class ResourceUtilService {
                 )));
     }
 
+    @Transactional(readOnly = true)
     public List<Resource> getAllByProjectId(long projectId) {
         return resourceRepository.findAllByProjectId(projectId);
     }

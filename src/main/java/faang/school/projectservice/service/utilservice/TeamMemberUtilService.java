@@ -14,6 +14,7 @@ public class TeamMemberUtilService {
 
     private final TeamMemberJpaRepository teamMemberJpaRepository;
 
+    @Transactional(readOnly = true)
     public TeamMember getByUserIdAndProjectId(long userId, long projectId) {
         return teamMemberJpaRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotFoundException(String.format(

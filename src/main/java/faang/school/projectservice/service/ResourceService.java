@@ -61,6 +61,8 @@ public class ResourceService {
         checkAbilityToUpdate(resource, updater);
 
         updateFields(resource, updateDto);
+        resource.setUpdatedBy(updater);
+
         resource = resourceUtilService.save(resource);
         return resourceMapper.toResponseDto(resource);
     }
