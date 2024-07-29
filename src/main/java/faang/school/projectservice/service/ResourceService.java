@@ -150,11 +150,8 @@ public class ResourceService {
     }
 
     private void checkAbilityToDownload(Resource resource, TeamMember updater) {
-        checkAbilityToUpdate(resource, updater);
         if (!CollectionUtils.containsAny(updater.getRoles(), resource.getAllowedRoles())) {
-            throw new AccessDeniedException(String.format(
-                    "Current user id=%d dont have rights to proceed this operation to resource",
-                    updater.getUserId()));
+            checkAbilityToUpdate(resource, updater);
         }
     }
 
