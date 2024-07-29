@@ -40,7 +40,7 @@ public class ProjectService {
     @Transactional
     public ProjectDto createProject(ProjectDto projectDto) {
         if (projectDto.getOwnerId() == 0) {
-            projectDto.setId(userContext.getUserId());
+            projectDto.setOwnerId(userContext.getUserId());
         }
         projectValidator.validateProjectByOwnerWithNameOfProject(projectDto);
         projectDto.setStatus(ProjectStatus.CREATED);
@@ -52,7 +52,10 @@ public class ProjectService {
     public ProjectDto updateProject(ProjectDto updatedProjectDto) {
         existById(updatedProjectDto.getId());
         Project project = projectRepository.getProjectById(updatedProjectDto.getId());
-        projectMapper.updateDtoToEntity(updatedProjectDto, project);
+        project.setName(updatedProjectDto.getName());
+        project.setDescription(project.getDescription());
+        project.setStatus(updatedProjectDto.getStatus());
+        project.setVisibility(updatedProjectDto.getVisibility());
         return projectMapper.entityToDto(projectRepository.save(project));
     }
 

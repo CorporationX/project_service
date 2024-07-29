@@ -21,7 +21,7 @@ public class ProjectDto {
     @Size(max = 128, message = "Name must be less than 128 characters")
     private String name;
     @NotEmpty
-    @Size(max = 4096, message = "Name must be less than 4096 characters")
+    @Size(max = 4096, message = "Description must be less than 4096 characters")
     private String description;
     @Min(value = 1, message = "Owner id should not be less than 1")
     private long ownerId;
@@ -31,5 +31,4 @@ public class ProjectDto {
     private ProjectStatus status;
     @NotNull
     private ProjectVisibility visibility;
-
 }

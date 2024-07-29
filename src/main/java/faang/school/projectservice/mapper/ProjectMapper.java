@@ -17,7 +17,4 @@ public interface ProjectMapper {
     Project dtoToEntity(ProjectDto dto);
 
     List<ProjectDto> entitiesToDtos(List<Project> projectList);
-
-    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
-    void updateDtoToEntity(ProjectDto dto, @MappingTarget Project project);
 }

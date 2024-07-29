@@ -18,18 +18,15 @@ import java.util.List;
 @RequestMapping("/api/v1/projects")
 public class ProjectController {
     private final ProjectService projectService;
-    private final UserContext userContext;
 
     @GetMapping
     public List<ProjectDto> getAllProjects() {
         return projectService.findAll();
     }
 
-
     @PostMapping
     public ProjectDto createProject(@Valid @RequestBody ProjectDto projectDto) {
         return projectService.createProject(projectDto);
-
     }
 
     @PutMapping
