@@ -3,7 +3,6 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +37,7 @@ public class ProjectController {
 
     @PostMapping("/{userId}/accessible/filtered")
     public List<ProjectDto> findProjectsWithFilter(@PathVariable Long userId,
-                                                   @Validated @NotNull @RequestBody ProjectFilterDto projectFilterDto) {
+                                                   @Validated @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.findProjectsWithFilter(userId, projectFilterDto);
     }
 
