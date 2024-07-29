@@ -26,4 +26,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             WHERE project.id = ?2 AND (project.visibility = 'PUBLIC' OR team_member.id = ?1 OR project.owner_id = ?1)
             """)
     Optional<Project> findAvailableByUserIdAndProjectId(Long userId, Long projectId);
+
+    Project getProjectById(Long projectId);
 }

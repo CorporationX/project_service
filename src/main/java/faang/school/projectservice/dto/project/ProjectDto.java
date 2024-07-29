@@ -16,15 +16,15 @@ import java.util.List;
 public class ProjectDto {
 
     private Long id;
-    @NotBlank
+    @NotBlank(message = "name should not be blank")
     private String name;
-    @NotBlank
+    @NotBlank(message = "description should not be blank")
     private String description;
     private Long ownerId;
     private List<Long> childrenId;
-    private List<Long> tasksId;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
+    private List<Long> taskIds;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private ProjectStatus status;
     private ProjectVisibility visibility;
 }

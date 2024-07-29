@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
 
-    @Mapping(target = "tasksId", ignore = true)
+    @Mapping(target = "taskIds", ignore = true)
     ProjectDto toDto(Project project);
 
     List<ProjectDto> toDtos(List<Project> projects);

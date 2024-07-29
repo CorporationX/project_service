@@ -1,7 +1,9 @@
-package faang.school.projectservice.service.project.validation;
+package faang.school.projectservice.validation;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.ValidationException;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ProjectServiceValidator {
+public class ProjectValidator {
 
     private final ProjectRepository projectRepository;
 
@@ -26,9 +28,13 @@ public class ProjectServiceValidator {
 
     public void validateUpdating(ProjectDto projectDto) {
         if (projectDto.getId() != null) {
-            if (!projectRepository.existsById(projectDto.getId())) {
+            Project project = projectRepository.findById(projectDto.getId()).orElseThrow(() -> {
                 log.info("Project with id {} does not exist.", projectDto.getId());
-                throw new EntityNotFoundException("Project with id " + projectDto.getId() + " does not exist.");
+                return new EntityNotFoundException("Project with id " + projectDto.getId() + " does not exist.");
+            });
+            if (project.getStatus() == ProjectStatus.COMPLETED || project.getStatus() == ProjectStatus.CANCELLED) {
+                log.info("Project with id {} completed or cancelled", projectDto.getId());
+                throw new ValidationException("Project with id " + projectDto.getId() + " completed or cancelled.");
             }
         } else {
             log.info("Field id is null");
