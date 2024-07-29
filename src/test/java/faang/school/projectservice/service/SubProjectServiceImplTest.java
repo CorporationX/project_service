@@ -109,7 +109,7 @@ class SubProjectServiceImplTest {
 
         Project project = new Project();
         project.setId(1L);
-
+        project.setChildren(new ArrayList<>(List.of(new Project())));
         ProjectDto projectDto = new ProjectDto();
         projectDto.setId(1L);
 
@@ -119,8 +119,8 @@ class SubProjectServiceImplTest {
         when(projectRepository.findAll()).thenReturn(Collections.singletonList(project));
         when(filter.apply(any(), eq(filters))).thenReturn(Stream.of(project));
         when(projectMapper.toDTO(project)).thenReturn(projectDto);
-
-        List<ProjectDto> result = subProjectService.getProjects(filters);
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        List<ProjectDto> result = subProjectService.getProjects(filters,1L);
 
         assertEquals(1, result.size());
         assertEquals(projectDto, result.get(0));
