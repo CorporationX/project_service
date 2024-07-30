@@ -41,10 +41,13 @@ services:
     accessKey: user
     secretKey: password
     bucketName: projectbucket
-    isMocked: false
+    personalArea: http://127.0.0.1:9000/
+
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+default-cover-pic: src/main/resources/default_cover_pic/default_Image.jpeg
