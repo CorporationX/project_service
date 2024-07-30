@@ -1,18 +1,18 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.InternshipService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class InternshipController {
 
@@ -22,7 +22,7 @@ public class InternshipController {
         internshipService.create(internship);
     }
 
-    public void update(InternshipDto internship, Map<Long, TeamRole> newRoles) throws DataFormatException {
+    public void update(@Valid InternshipDto internship, Map<Long, TeamRole> newRoles) throws DataFormatException {
         internshipService.update(internship, newRoles);
     }
 
