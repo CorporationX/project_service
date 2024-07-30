@@ -145,8 +145,6 @@ public class StageInvitationServiceTest {
         when(stageInvitationStatusFilter.apply(stageInvitationList.stream(), stageInvitationFilterDto)).thenReturn(stageInvintationFiltered.stream());
         when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
 
-        //        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
-
         List<StageInvitationDto> stageInvitationDtoResult = stageInvitationService.getStageInvitationForUser(stageInvitationFilterDto, 1L);
 
         verify(stageInvitationMapper, times(1)).toDto(any(StageInvitation.class));
