@@ -19,14 +19,14 @@ public class MomentController {
         return momentService.createMoment(momentDto, projectId);
     }
 
-    public MomentDto updateMoment(MomentDto momentDto) {
+    public MomentDto updateMoment(@Valid MomentDto momentDto) {
         return momentService.updateMoment(momentDto);
     }
 
     public List<MomentDto> getAllMoments() {
         return momentService.getAllMoments();
     }
-    public List<MomentDto> getAllMoments(MomentFilterDto filter) {
+    public List<MomentDto> getAllMoments(@Valid MomentFilterDto filter) {
         return momentService.getMoments(filter);
     }
 

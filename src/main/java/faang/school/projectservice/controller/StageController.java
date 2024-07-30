@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +28,7 @@ public class StageController {
 
     // Создание этапа.
     @PostMapping("")
-    public ResponseEntity<StageDto> createStage(@RequestBody StageDto stageDto) {
+    public ResponseEntity<StageDto> createStage(@RequestBody @Valid StageDto stageDto) {
         if (stageDto == null) {
             throw new DataValidationException("Не переданы данные этапа!");
         }
@@ -38,7 +39,7 @@ public class StageController {
     @PostMapping("/project/{id}")
     public ResponseEntity<List<StageDto>> getAllStagesFilteredByProjectStatus(
             @PathVariable("id") Long projectId,
-            @RequestBody ProjectFilterDto filters) {
+            @RequestBody @Valid ProjectFilterDto filters) {
         if (projectId == null
                 || filters == null) {
             throw new DataValidationException("Введите идентификатор проекта," +
@@ -60,7 +61,7 @@ public class StageController {
 
     // Обновить этап.
     @PutMapping("")
-    public ResponseEntity<StageDto> updateStage(@RequestBody StageDto stageDto,
+    public ResponseEntity<StageDto> updateStage(@RequestBody @Valid StageDto stageDto,
                                                 @RequestParam("role") TeamRole teamRole) {
         if (stageDto == null || teamRole == null) {
             throw new DataValidationException("Введите данные этапа!");
