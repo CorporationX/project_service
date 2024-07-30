@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.InitiativeDto;
-import faang.school.projectservice.dto.client.InitiativeFilterDto;
-import faang.school.projectservice.dto.client.InitiativeStatusDto;
+import faang.school.projectservice.dto.initiative.InitiativeDto;
+import faang.school.projectservice.dto.initiative.InitiativeFilterDto;
+import faang.school.projectservice.dto.initiative.InitiativeStatusDto;
 import faang.school.projectservice.service.InitiativeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,16 +24,16 @@ public class InitiativeController {
     private final InitiativeService initiativeService;
 
     @PostMapping("/")
-    @ResponseStatus(HttpStatus.OK)
-    public void createInitiative(@Valid @RequestBody InitiativeDto initiativeDto) {
-        initiativeService.createInitiative(initiativeDto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public InitiativeDto createInitiative(@Valid @RequestBody InitiativeDto initiativeDto) {
+        return initiativeService.createInitiative(initiativeDto);
     }
 
     @PostMapping("/{initiativeId}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateInitiative(@PathVariable Long initiativeId,
+    public InitiativeDto updateInitiative(@PathVariable Long initiativeId,
                                  @RequestBody InitiativeStatusDto initiativeStatusDto) {
-        initiativeService.updateInitiative(initiativeId, initiativeStatusDto);
+        return initiativeService.updateInitiative(initiativeId, initiativeStatusDto);
     }
 
     @GetMapping("/all/filters")

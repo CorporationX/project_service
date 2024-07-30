@@ -1,5 +1,6 @@
 package faang.school.projectservice.validation;
 
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -11,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -21,26 +20,36 @@ public class InitiativeValidator {
     private final InitiativeRepository initiativeRepository;
     private final TeamMemberService teamMemberService;
 
-    public boolean checkProjectActiveInitiative(Long projectId) {
-        List<Initiative> initiatives = initiativeRepository.findAll();
-        return initiatives.stream()
-                .filter(initiative -> initiative.getProject().getId().equals(projectId))
-                .anyMatch(initiative -> initiative.getStatus() != InitiativeStatus.CLOSED
-                        && initiative.getStatus() != InitiativeStatus.DONE);
+    public void projectHasNotActiveInitiative(Long projectId) {
+        boolean hasActiveInitiatives = initiativeRepository.findAllByProjectId(projectId).stream()
+                .anyMatch(initiative -> initiative.getStatus() == InitiativeStatus.OPEN ||
+                        initiative.getStatus() == InitiativeStatus.IN_PROGRESS);
+        if (hasActiveInitiatives) {
+            log.info("Project already has an active initiative. Method: checkProjectActiveInitiative");
+            throw new DataValidationException("Project already has an active initiative");
+        }
     }
 
-    public boolean checkCuratorRole(Long curatorId) {
+    public void curatorRoleValid(Long curatorId) {
         TeamMember member = teamMemberService.findById(curatorId);
-        return member.getRoles().contains(TeamRole.ANALYST)
-                || member.getRoles().contains(TeamRole.MANAGER);
+        boolean hasValidRole = member.getRoles().stream()
+                .anyMatch(role -> role == TeamRole.ANALYST ||
+                        role == TeamRole.MANAGER ||
+                        role == TeamRole.OWNER);
+        if (!hasValidRole) {
+            log.info("The curator does not have the required specialization. Method: checkCuratorRole");
+            throw new DataValidationException("The curator does not have the required specialization");
+        }
     }
 
-    public boolean checkStagesStatusInitiative(Initiative initiative) {
-        return initiative
-                .getStages()
-                .stream()
+    public void checkAllTasksDone(Initiative initiative) {
+        boolean allTasksDone = initiative.getStages().stream()
                 .flatMap(stage -> stage.getTasks().stream())
                 .allMatch(task -> task.getStatus().equals(TaskStatus.DONE));
+        if (!allTasksDone) {
+            log.info("An attempt to change the status while the stage is active. Method: checkStagesStatusInitiative");
+            throw new DataValidationException("You cannot change the status because not all stages have been completed yet");
+        }
     }
 
 }

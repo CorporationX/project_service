@@ -5,54 +5,50 @@ import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.initiative.InitiativeStatus;
 import org.jetbrains.annotations.NotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.stream.Stream;
 
-class StatusFilterTest {
+public class MixInitiativeFilterTest {
     private InitiativeFilterDto initiativeFilterDto;
-    private StatusFilter statusFilter;
     private List<Initiative> initiatives;
+    List<InitiativeFilter> filters;
 
     @BeforeEach
     void setup() {
         InitiativeFilterHelper filterHelper = new InitiativeFilterHelper();
-        initiativeFilterDto = filterHelper.initiativeFilterDto();
-        statusFilter = new StatusFilter();
         initiatives = filterHelper.initiatives();
+        StatusFilter statusFilter = new StatusFilter();
+        CuratorFilter curatorFilter = new CuratorFilter();
+        filters = List.of(curatorFilter, statusFilter);
+        initiativeFilterDto = filterHelper.initiativeFilterDto();
     }
 
     @Test
-    void testIsApplicableWhenStatusPatternIsNotNull() {
-        assertTrue(statusFilter.isApplicable(initiativeFilterDto));
-    }
-
-    @Test
-    void testIsApplicableWhenStatusPatternIsNull() {
-        initiativeFilterDto.setStatusPattern(null);
-        assertFalse(statusFilter.isApplicable(initiativeFilterDto));
-    }
-
-    @Test
-    void testApplyWhenInitiativesMatchStatusPattern() {
-        List<Initiative> filteredInitiatives = getInitiatives();
-        assertEquals(2, initiatives.size());
+    void testApplyWhenInitiativesMatchMixFilers() {
+        List<Initiative> filteredInitiatives = getFilteredInitiatives();
+        assertEquals(2, filteredInitiatives.size());
         assertTrue(filteredInitiatives.containsAll(initiatives));
     }
 
     @Test
-    void testApplyWhenNoInitiativesMatchStatusPattern() {
+    void testApplyWhenNoInitiativesMatchMixFilers() {
+        Long curatorIdNegative = 2L;
+        initiativeFilterDto.setCuratorPattern(curatorIdNegative);
         initiativeFilterDto.setStatusPattern(InitiativeStatus.CLOSED);
-        List<Initiative> filteredInitiatives = getInitiatives();
+        List<Initiative> filteredInitiatives = getFilteredInitiatives();
         assertEquals(0, filteredInitiatives.size());
         assertTrue(filteredInitiatives.isEmpty());
     }
-    private @NotNull List<Initiative> getInitiatives() {
-        return statusFilter.apply(initiatives
-                        .stream(), initiativeFilterDto)
+
+    private @NotNull List<Initiative> getFilteredInitiatives() {
+        return filters.stream()
+                .reduce(initiatives.stream(),
+                        (stream, filter) -> filter.apply(stream, initiativeFilterDto),
+                        Stream::concat)
                 .toList();
     }
 }

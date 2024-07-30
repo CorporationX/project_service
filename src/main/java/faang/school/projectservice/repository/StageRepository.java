@@ -27,6 +27,10 @@ public class StageRepository {
         );
     }
 
+    public List<Stage> getByIds(List<Long> stageIds) {
+        return jpaRepository.findAllById(stageIds);
+    }
+
     public List<Stage> findAll() {
         return jpaRepository.findAll();
     }

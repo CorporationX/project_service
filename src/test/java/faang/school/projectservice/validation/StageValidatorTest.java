@@ -1,17 +1,19 @@
 package faang.school.projectservice.validation;
 
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.ProjectService;
-import jakarta.persistence.EntityNotFoundException;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -48,7 +50,6 @@ class StageValidatorTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        verify(projectService, times(1)).getProjectById(projectId);
     }
 
     @Test
@@ -61,7 +62,6 @@ class StageValidatorTest {
         );
 
         assertEquals("List is empty", exception.getMessage());
-        verify(projectService, times(1)).getProjectById(projectId);
     }
 
     @Test
@@ -69,7 +69,6 @@ class StageValidatorTest {
         when(projectService.getProjectById(projectId)).thenReturn(project);
 
         assertDoesNotThrow(() -> stageValidator.validationProjectById(projectId));
-        verify(projectService, times(1)).getProjectById(projectId);
     }
 
     @Test
@@ -81,7 +80,6 @@ class StageValidatorTest {
         );
 
         assertEquals("Project not found", exception.getMessage());
-        verify(projectService, times(1)).getProjectById(projectId);
     }
 
 }

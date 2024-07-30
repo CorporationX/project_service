@@ -1,6 +1,7 @@
 package faang.school.projectservice.filter.initiative;
 
-import faang.school.projectservice.dto.client.InitiativeFilterDto;
+
+import faang.school.projectservice.dto.initiative.InitiativeFilterDto;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.initiative.InitiativeStatus;

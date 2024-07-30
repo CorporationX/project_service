@@ -1,15 +1,18 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.InitiativeDto;
-import faang.school.projectservice.dto.client.InitiativeFilterDto;
-import faang.school.projectservice.dto.client.InitiativeStatusDto;
+import faang.school.projectservice.dto.initiative.InitiativeDto;
+import faang.school.projectservice.dto.initiative.InitiativeFilterDto;
+import faang.school.projectservice.dto.initiative.InitiativeStatusDto;
+import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.initiative.InitiativeFilter;
 import faang.school.projectservice.mapper.initiative.InitiativeMapper;
 import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.initiative.InitiativeStatus;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InitiativeRepository;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.validation.InitiativeValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,64 +31,46 @@ public class InitiativeService {
     private final InitiativeMapper initiativeMapper;
     private final MomentService momentService;
     private final InitiativeValidator initiativeValidator;
+    private final StageService stageService;
+
 
     @Transactional
-    public void createInitiative(InitiativeDto initiativeDto) {
-        if (!initiativeValidator.checkProjectActiveInitiative(initiativeDto.getProjectId())) {
-            if (initiativeValidator.checkCuratorRole(initiativeDto.getCuratorId())) {
-                Initiative initiative = initiativeMapper.toEntity(initiativeDto);
-                initiativeRepository.save(initiative);
-            } else {
-                log.info("The curator does not have the required specialization Method: checkCuratorRole");
-                throw new RuntimeException("The curator does not have the required specialization");
-            }
-        } else {
-            log.info("Project already have active initiative Method: checkProjectActiveInitiative");
-            throw new RuntimeException("Project already have active initiative");
-        }
+    public Initiative createInitiativeEntity(InitiativeDto initiativeDto) {
+        initiativeValidator.projectHasNotActiveInitiative(initiativeDto.getProjectId());
+        initiativeValidator.curatorRoleValid(initiativeDto.getCuratorId());
+        Initiative initiative = initiativeMapper.toEntity(initiativeDto);
+        List<Stage> stages = initiativeDto.
+                getStageDtoList().
+                stream().
+                map(stageService::createStageEntity).
+                toList();
+        initiative.setStages(stages);
+        return initiativeRepository.save(initiative);
     }
 
     @Transactional
-    public void updateInitiative(Long initiativeId,
-                                 InitiativeStatusDto initiativeStatusDto) {
-        Initiative initiative = initiativeRepository.findById(initiativeId)
-                .orElseThrow(() -> {
-                    log.info("Initiative not found Method: updateInitiative");
-                    return new EntityNotFoundException("Initiative not found");
-                });
+    public InitiativeDto createInitiative(InitiativeDto initiativeDto) {
+        return initiativeMapper.toDto(createInitiativeEntity(initiativeDto));
+    }
+
+    @Transactional
+    public InitiativeDto updateInitiative(Long initiativeId,
+                                          InitiativeStatusDto initiativeStatusDto){
+        return initiativeMapper.toDto(updateInitiativeEntity(initiativeId, initiativeStatusDto));
+    } // не забыть протестировать
+
+    @Transactional
+    public Initiative updateInitiativeEntity(Long initiativeId,
+                                       InitiativeStatusDto initiativeStatusDto) {
+        Initiative initiative = getInitiative(initiativeId);
         switch (initiativeStatusDto.getStatus()) {
-            case DONE -> statusDone(initiative);
-            case CLOSED -> {
-                initiative.setStatus(InitiativeStatus.CLOSED);
-                initiativeRepository.save(initiative);
-            }
-            case OPEN -> {
-                initiative.setStatus(InitiativeStatus.OPEN);
-                initiativeRepository.save(initiative);
-            }
-            case ACCEPTED -> {
-                initiative.setStatus(InitiativeStatus.ACCEPTED);
-                initiativeRepository.save(initiative);
-            }
-            case IN_PROGRESS -> {
-                initiative.setStatus(InitiativeStatus.IN_PROGRESS);
-                initiativeRepository.save(initiative);
-            }
+            case DONE -> {return finalizeInitiative(initiative);}
+            case CLOSED -> {return changeInitiativeStatus(initiative, InitiativeStatus.CLOSED);}
+            case OPEN -> {return changeInitiativeStatus(initiative, InitiativeStatus.OPEN);}
+            case ACCEPTED -> {return changeInitiativeStatus(initiative, InitiativeStatus.ACCEPTED);}
+            case IN_PROGRESS -> {return changeInitiativeStatus(initiative, InitiativeStatus.IN_PROGRESS);}
         }
-    }
-
-    private void statusDone(Initiative initiative) {
-        if (initiativeValidator.checkStagesStatusInitiative(initiative)) {
-            Moment moment = momentService.createMoment(initiative);
-            initiative.getProject().getMoments().add(moment);
-            initiative.getSharingProjects()
-                    .forEach(project -> project.getMoments().add(moment));
-            initiativeRepository.delete(initiative);
-        } else {
-            log.info("An attempt to change the status while the stage is active Method: checkStagesStatusInitiative");
-            throw new RuntimeException("You cannot change the status because not all stages have been completed yet");
-        }
-
+        return initiative;
     }
 
     @Transactional(readOnly = true)
@@ -106,12 +91,42 @@ public class InitiativeService {
 
     @Transactional(readOnly = true)
     public InitiativeDto findById(Long initiativeId) {
-        return initiativeMapper.toDto(initiativeRepository
-                .findById(initiativeId)
+        return initiativeMapper.toDto(getInitiative(initiativeId));
+    }
+
+    private Initiative getInitiative(Long initiativeId) {
+        return initiativeRepository.findById(initiativeId)
                 .orElseThrow(() -> {
-                    log.info("Initiative not found, Method: findById");
+                    log.info("Initiative not found Method: updateInitiative");
                     return new EntityNotFoundException("Initiative not found");
-                }));
+                });
+    }
+
+    private Initiative changeInitiativeStatus(Initiative initiative, InitiativeStatus closed) {
+        initiative.setStatus(closed);
+        return initiativeRepository.save(initiative);
+    }
+
+    private Initiative finalizeInitiative(Initiative initiative) {
+        initiativeValidator.checkAllTasksDone(initiative);
+        Moment moment = momentService.createMoment(initiativeToMomentDto(initiative));
+        initiative.getProject().getMoments().add(moment);
+        initiative.getSharingProjects()
+                .forEach(project -> project.getMoments().add(moment));
+        return initiative;
+    }
+
+    private MomentDto initiativeToMomentDto(Initiative initiative) {
+        List<Long> projectsIds = initiative.getSharingProjects()
+                .stream()
+                .map(Project::getId)
+                .toList();
+        return MomentDto.builder()
+                .name(initiative.getName())
+                .description(initiative.getDescription())
+                .projectIds(projectsIds)
+                .userIds(List.of(initiative.getCurator().getId()))
+                .build();
     }
 
 }

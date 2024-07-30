@@ -1,73 +1,59 @@
 package faang.school.projectservice.filter.stagefilter;
 
 import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
-import static org.junit.jupiter.api.Assertions.*;
+import org.jetbrains.annotations.NotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 
 class TaskStatusFilterTest {
-    private Stage stageFirst;
-    private Stage stageSecond;
     private TaskStatusFilter taskStatusFilter;
     private StageFilterDto stageFilterDto;
+    private List<Stage> stages;
 
     @BeforeEach
-    void setup(){
-        stageFirst = new Stage();
-        stageSecond = new Stage();
-        Task task = new Task();
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(task);
-        stageFirst.setTasks(tasks);
-        stageSecond.setTasks(tasks);
+    void setup() {
+        StageFilterHelper filterHelper = new StageFilterHelper();
+        stageFilterDto = filterHelper.stageFilterDto();
+        stages = filterHelper.stages();
         taskStatusFilter = new TaskStatusFilter();
-        stageFilterDto = new StageFilterDto();
-        stageFilterDto = mock(StageFilterDto.class);
     }
 
     @Test
-    void testIsApplicableWhenTaskStatusPatternIsNotNull(){
-        when(stageFilterDto.getTaskStatusPattern()).thenReturn(TaskStatus.TODO);
+    void testIsApplicableWhenTaskStatusPatternIsNotNull() {
         assertTrue(taskStatusFilter.isApplicable(stageFilterDto));
     }
 
     @Test
-    void testIsApplicableWhenTaskStatusPatternIsNull(){
-        when(stageFilterDto.getTaskStatusPattern()).thenReturn(null);
+    void testIsApplicableWhenTaskStatusPatternIsNull() {
+        stageFilterDto.setTaskStatusPattern(null);
         assertFalse(taskStatusFilter.isApplicable(stageFilterDto));
     }
 
     @Test
-    void testApplyWhenStagesMatchTaskStatusPattern(){
-        List<Stage> filteredStages = getStageList();
-        when(stageFilterDto.getTaskStatusPattern()).thenReturn(TaskStatus.TODO);
-        filteredStages = taskStatusFilter.apply(filteredStages.stream(),stageFilterDto).toList();
+    void testApplyWhenStagesMatchTaskStatusPattern() {
+        List<Stage> filteredStages = getStages();
         assertEquals(2, filteredStages.size());
-        assertTrue(filteredStages.contains(filteredStages.get(0)));
-        assertTrue(filteredStages.contains(filteredStages.get(1)));
+        assertTrue(filteredStages.containsAll(stages));
     }
 
     @Test
-    void testApplyWhenNoStagesMatchTaskStatusPattern(){
-        List<Stage> filteredStages = getStageList();
-        when(stageFilterDto.getTaskStatusPattern()).thenReturn(TaskStatus.CANCELLED);
-        filteredStages = taskStatusFilter.apply(filteredStages.stream(),stageFilterDto).toList();
+    void testApplyWhenNoStagesMatchTaskStatusPattern() {
+        stageFilterDto.setTaskStatusPattern(TaskStatus.IN_PROGRESS);
+        List<Stage> filteredStages = getStages();
         assertEquals(0, filteredStages.size());
         assertTrue(filteredStages.isEmpty());
     }
 
-    List<Stage> getStageList(){
-        stageFirst.getTasks().get(0).setStatus(TaskStatus.TODO);
-        stageSecond.getTasks().get(0).setStatus(TaskStatus.TODO);
-        return List.of(stageFirst,stageSecond);
+    private @NotNull List<Stage> getStages() {
+        return taskStatusFilter.apply(stages
+                        .stream(), stageFilterDto)
+                .toList();
     }
-
 }

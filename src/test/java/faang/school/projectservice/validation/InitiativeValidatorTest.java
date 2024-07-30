@@ -1,6 +1,6 @@
 package faang.school.projectservice.validation;
 
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -10,17 +10,18 @@ import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InitiativeRepository;
 import faang.school.projectservice.service.TeamMemberService;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class InitiativeValidatorTest {
@@ -35,52 +36,87 @@ class InitiativeValidatorTest {
 
     private Long projectId;
     private Long curatorId;
+    private TeamMember teamMember;
+    private Initiative initiative;
 
     @BeforeEach
-    void setup() {
-        curatorId = 1L;
+    void setup(){
         projectId = 1L;
+        curatorId = 1L;
+        teamMember = new TeamMember();
+        initiative = new Initiative();
+    }
+
+
+    @Test
+    void testProjectHasNotActiveInitiativePositive() {
+        Initiative inactiveInitiative = new Initiative();
+        inactiveInitiative.setStatus(InitiativeStatus.DONE);
+
+        when(initiativeRepository.findAllByProjectId(projectId)).thenReturn(List.of(inactiveInitiative));
+
+        initiativeValidator.projectHasNotActiveInitiative(projectId);
+
+        verify(initiativeRepository).findAllByProjectId(projectId);
     }
 
     @Test
-    void testCheckProjectActiveInitiative() {
+    void testProjectHasNotActiveInitiativeNegative() {
         Initiative activeInitiative = new Initiative();
-        activeInitiative.setStatus(InitiativeStatus.ACCEPTED);
-        Project project = new Project();
-        project.setId(projectId);
-        activeInitiative.setProject(project);
-        Initiative closedInitiative = new Initiative();
-        closedInitiative.setStatus(InitiativeStatus.CLOSED);
-        closedInitiative.setProject(project);
-        List<Initiative> initiatives = Arrays.asList(activeInitiative, closedInitiative);
-        when(initiativeRepository.findAll()).thenReturn(initiatives);
-        boolean result = initiativeValidator.checkProjectActiveInitiative(projectId);
-        assertTrue(result);
+        activeInitiative.setStatus(InitiativeStatus.IN_PROGRESS);
+
+        when(initiativeRepository.findAllByProjectId(projectId)).thenReturn(List.of(activeInitiative));
+
+        assertThrows(DataValidationException.class, () -> initiativeValidator.projectHasNotActiveInitiative(projectId));
     }
 
     @Test
-    void testCheckCuratorRole() {
-        TeamMember member = new TeamMember();
-        member.setRoles(Arrays.asList(TeamRole.ANALYST, TeamRole.DEVELOPER));
-        when(teamMemberService.findById(curatorId)).thenReturn(member);
-        boolean result = initiativeValidator.checkCuratorRole(curatorId);
-        assertTrue(result);
+    void testCuratorRoleValidPositive() {
+        teamMember.setRoles(List.of(TeamRole.ANALYST));
+
+        when(teamMemberService.findById(curatorId)).thenReturn(teamMember);
+
+        initiativeValidator.curatorRoleValid(curatorId);
     }
 
     @Test
-    void testCheckStagesStatusInitiative() {
-        Initiative initiative = new Initiative();
-        Stage stageFirst = new Stage();
-        Task taskFirst = new Task();
-        taskFirst.setStatus(TaskStatus.DONE);
-        stageFirst.setTasks(List.of(taskFirst));
-        Stage stageSecond = new Stage();
-        Task taskSecond = new Task();
-        taskSecond.setStatus(TaskStatus.DONE);
-        stageSecond.setTasks(List.of(taskSecond));
-        initiative.setStages(Arrays.asList(stageFirst, stageSecond));
-        boolean result = initiativeValidator.checkStagesStatusInitiative(initiative);
-        assertTrue(result);
+    void testCuratorRoleValidNegative() {
+        teamMember.setRoles(List.of(TeamRole.DEVELOPER));
+
+        when(teamMemberService.findById(curatorId)).thenReturn(teamMember);
+
+        assertThrows(DataValidationException.class, () -> initiativeValidator.curatorRoleValid(curatorId));
     }
 
+    @Test
+    void testCheckAllTasksDonePositive() {
+        initiative.setStages(List.of(
+                createStageWithTasks(TaskStatus.DONE, TaskStatus.DONE),
+                createStageWithTasks(TaskStatus.DONE)
+        ));
+
+        initiativeValidator.checkAllTasksDone(initiative);
+    }
+
+    @Test
+    void testCheckAllTasksDoneNegative() {
+        initiative.setStages(List.of(
+                createStageWithTasks(TaskStatus.DONE, TaskStatus.IN_PROGRESS),
+                createStageWithTasks(TaskStatus.DONE)
+        ));
+
+        assertThrows(RuntimeException.class, () -> initiativeValidator.checkAllTasksDone(initiative));
+    }
+
+    private Stage createStageWithTasks(TaskStatus... statuses) {
+        Stage stage = new Stage();
+        List<Task> tasks = Stream.of(statuses).map(status -> {
+            Task task = new Task();
+            task.setStatus(status);
+            return task;
+        }).toList();
+        stage.setTasks(tasks);
+        return stage;
+    }
 }
+
