@@ -50,6 +50,16 @@ public class SubProjectController {
         return projectService.getProjectByFilters(filterDto, projectId);
     }
 
+    @GetMapping("/project/{projectId}")
+    public ProjectDto getProject(@PathVariable @Positive long projectId){
+        return projectService.getProjectById(projectId);
+    }
+
+    @PostMapping("/projects")
+    public List<ProjectDto> getProjectsByIds(@RequestBody @Positive List<Long> ids){
+        return projectService.getProjectsByIds(ids);
+    }
+
     private boolean validateProjectName(String name) {
         return name != null && !name.isEmpty();
     }

@@ -203,4 +203,19 @@ public class ProjectService {
             project.setTeams(teamList);
         }
     }
+
+    public ProjectDto getProjectById(long projectId) {
+        Optional<Project> project = projectJpaRepository.findById(projectId);
+        if (project.isPresent()){
+            return projectMapper.toDto(project.get());
+        } else {
+            log.warn("project with id {} has not been found in database", projectId);
+        }
+        return new ProjectDto();
+    }
+
+    public List<ProjectDto> getProjectsByIds(List<Long> ids) {
+        List<Project> projects = projectJpaRepository.findAllById(ids);
+        return projects.stream().map(projectMapper::toDto).toList();
+    }
 }
