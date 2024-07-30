@@ -13,6 +13,7 @@ import faang.school.projectservice.service.project.filter.ProjectStatusFilter;
 import faang.school.projectservice.service.project.updater.ProjectDescriptionUpdater;
 import faang.school.projectservice.service.project.updater.ProjectStatusUpdater;
 import faang.school.projectservice.service.project.updater.ProjectUpdater;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +39,9 @@ public class ProjectServiceTest {
     private UserContext userContext;
     private Project project;
     private ProjectDto projectDto;
-    List<ProjectFilter> filters;
-    List<ProjectUpdater> updaters;
+    private List<ProjectFilter> filters;
+    private List<ProjectUpdater> updaters;
+    private ProjectValidator validator;
 
     @BeforeEach
     public void init() {
@@ -47,6 +49,7 @@ public class ProjectServiceTest {
         projectMapper = Mockito.spy(ProjectMapperImpl.class);
         projectFilter = Mockito.spy(ProjectFilter.class);
         userContext = Mockito.mock(UserContext.class);
+        validator = Mockito.mock(ProjectValidator.class);
         ProjectNameFilter filter1 = Mockito.spy(ProjectNameFilter.class);
         ProjectStatusFilter filter2 = Mockito.spy(ProjectStatusFilter.class);
         filters = List.of(filter1, filter2);
@@ -55,7 +58,7 @@ public class ProjectServiceTest {
         ProjectStatusUpdater updater2 = new ProjectStatusUpdater();
         updaters = List.of(updater1, updater2);
 
-        projectService = new ProjectService(projectRepository, projectMapper, filters, updaters, userContext);
+        projectService = new ProjectService(projectRepository, projectMapper, filters, updaters, userContext,validator);
 
         project = Project.builder()
                 .id(projectId)
@@ -74,28 +77,26 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void testCreateAlreadyExists() {
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)).thenReturn(true);
+    public void testAddAlreadyExists() {
+        Mockito.when(validator.existsByOwnerUserIdAndName(projectDto)).thenThrow(RuntimeException.class);
 
-        Assertions.assertThrows(RuntimeException.class, () -> projectService.create(projectDto));
+        Assertions.assertThrows(RuntimeException.class, () -> projectService.add(projectDto));
     }
 
     @Test
-    public void testCreateWithoutOwnerId() {
+    public void testAddWithoutOwnerId() {
         projectDto.setOwnerId(null);
         Mockito.when(userContext.getUserId()).thenReturn(ownerId);
         Mockito.when(projectRepository.save(project)).thenReturn(project);
-
-        Assertions.assertEquals(projectService.create(projectDto), projectDto);
+        Assertions.assertEquals(projectService.add(projectDto), projectDto);
         Mockito.verify(projectRepository).save(project);
     }
 
     @Test
-    public void testCreate() {
-        Mockito.when(projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)).thenReturn(false);
+    public void testAdd() {
         Mockito.when(projectRepository.save(project)).thenReturn(project);
 
-        Assertions.assertEquals(projectService.create(projectDto), projectDto);
+        Assertions.assertEquals(projectService.add(projectDto), projectDto);
         Mockito.verify(projectRepository).save(project);
     }
 
@@ -151,7 +152,11 @@ public class ProjectServiceTest {
         team.setTeamMembers(List.of(member));
         privateProject.setTeams(List.of(team));
 
-        ProjectFilterDto filter = projectMapper.toFilter(projectDto);
+        ProjectFilterDto filter = ProjectFilterDto.builder()
+                .name(projectDto.getName())
+                .status(projectDto.getStatus())
+                .build();
+
         Mockito.when(userContext.getUserId()).thenReturn(1L);
         Mockito.when(projectRepository.findAll()).thenReturn(List.of(publicProject, privateProject));
 

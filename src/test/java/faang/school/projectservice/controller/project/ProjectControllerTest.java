@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,6 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProjectControllerTest {
     @Mock
     private ProjectService projectService;
+    @Spy
+    private ProjectValidator projectValidator;
     @InjectMocks
     private ProjectController projectController;
     private final long ownerId = 1L;
@@ -54,41 +58,46 @@ public class ProjectControllerTest {
     }
 
     @Test
-    public void testCreateInvalidArguments() {
+    public void testAddInvalidName() {
         String blank = "  ";
         RuntimeException e;
 
-        projectDto.setDescription(blank);
-        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.create(userId, projectDto));
-        Assertions.assertEquals(e.getMessage(), "Invalid description " + projectDto.getDescription());
-
-        projectDto.setDescription(null);
-        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.create(userId, projectDto));
-        Assertions.assertEquals(e.getMessage(), "Invalid description " + projectDto.getDescription());
-
-        projectDto.setDescription(description);
         projectDto.setName(blank);
-        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.create(userId, projectDto));
+        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.add(userId, projectDto));
         Assertions.assertEquals(e.getMessage(), "Invalid name " + projectDto.getName());
 
         projectDto.setName(null);
-        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.create(userId, projectDto));
+        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.add(userId, projectDto));
         Assertions.assertEquals(e.getMessage(), "Invalid name " + projectDto.getName());
     }
 
     @Test
-    public void testCreate() throws Exception {
-        String jsonRequest = new ObjectMapper().writeValueAsString(projectDto);
-        Mockito.when(projectService.create(projectDto)).thenReturn(projectDto);
+    public void testAddInvalidDescription() {
+        String blank = "  ";
+        RuntimeException e;
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/project/create")
+        projectDto.setDescription(blank);
+        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.add(userId, projectDto));
+        Assertions.assertEquals(e.getMessage(), "Invalid description " + projectDto.getDescription());
+
+        projectDto.setDescription(null);
+        e = Assertions.assertThrows(RuntimeException.class, () -> projectController.add(userId, projectDto));
+        Assertions.assertEquals(e.getMessage(), "Invalid description " + projectDto.getDescription());
+    }
+
+    @Test
+    public void testAdd() throws Exception {
+        String jsonRequest = new ObjectMapper().writeValueAsString(projectDto);
+        Mockito.when(projectService.add(projectDto)).thenReturn(projectDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/add")
                         .header("x-user-id", "3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(projectDto.getName()));
 
-        Mockito.verify(projectService).create(projectDto);
+        Mockito.verify(projectService).add(projectDto);
     }
 
     @Test
@@ -106,7 +115,7 @@ public class ProjectControllerTest {
         String jsonRequest = new ObjectMapper().writeValueAsString(projectDto);
         Mockito.when(projectService.update(projectDto)).thenReturn(projectDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/project/update")
+        mockMvc.perform(MockMvcRequestBuilders.put("/project")
                         .header("x-user-id", "3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
@@ -143,8 +152,8 @@ public class ProjectControllerTest {
     @Test
     public void testGetProjectByIdWithWrongId() {
         Long idZero = 0L;
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.getProjectById(idZero));
-        Assertions.assertThrows(RuntimeException.class, () -> projectController.getProjectById(null));
+        Assertions.assertThrows(RuntimeException.class, () -> projectController.getProjectById("3", idZero));
+        Assertions.assertThrows(RuntimeException.class, () -> projectController.getProjectById("3", null));
     }
 
     @Test

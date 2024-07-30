@@ -10,8 +10,10 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.project.updater.ProjectUpdater;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,23 +22,28 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
     private final List<ProjectUpdater> projectUpdaters;
     private final UserContext userContext;
-    private ProjectDto projectDto;
+    private final ProjectValidator validator;
 
-    public ProjectDto create(ProjectDto projectDto) {
+    public ProjectDto add(ProjectDto projectDto) {
         if (projectDto.getOwnerId() == null) {
             projectDto.setOwnerId(userContext.getUserId());
         }
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
-            throw new RuntimeException("Project " + projectDto.getName() + " already created by " + projectDto.getOwnerId());
-        }
+        validator.existsByOwnerUserIdAndName(projectDto);
         projectDto.setStatus(ProjectStatus.CREATED);
-        return projectMapper.toDto(projectRepository.save(projectMapper.toEntity(projectDto)));
+        log.info("Save project to database {}", projectDto);
+        log.debug("Mapping dto to entity {}", projectDto);
+        Project project = projectMapper.toEntity(projectDto);
+        log.debug("Saving project to database {}", project);
+        project = projectRepository.save(project);
+        log.info("Project saved to database successfully {}", project);
+        return projectMapper.toDto(project);
     }
 
     public ProjectDto update(ProjectDto projectDto) {
@@ -77,11 +84,21 @@ public class ProjectService {
     }
 
     public ProjectDto getProjectById(Long projectId) {
+        long userId = userContext.getUserId();
+        Project project;
         try {
-            return projectMapper.toDto(projectRepository.getProjectById(projectId));
+            project = projectRepository.getProjectById(projectId);
         } catch (EntityNotFoundException e) {
             throw new RuntimeException(e.getMessage());
         }
+        if (project.getVisibility() == ProjectVisibility.PRIVATE) {
+            boolean hasAccess = project.getTeams().stream().anyMatch(team -> team.getTeamMembers().stream()
+                    .anyMatch(teamMember -> teamMember.getId().equals(userId)));
+            if (!hasAccess) {
+                throw new RuntimeException("User " + userId + " cannot get private project");
+            }
+        }
+        return projectMapper.toDto(project);
     }
 
 }

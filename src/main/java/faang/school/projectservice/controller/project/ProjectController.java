@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -16,27 +17,22 @@ import java.util.List;
 @Tag(name = "Projects", description = "Project handler")
 public class ProjectController {
     private final ProjectService projectService;
+    private final ProjectValidator projectValidator;
 
     @Operation(summary = "Create new project")
-    @PostMapping("/create")
-    public ProjectDto create(@RequestHeader(value = "x-user-id") String userid,
+    @PostMapping("/add")
+    public ProjectDto add(@RequestHeader(value = "x-user-id") String userid,
                              @RequestBody ProjectDto projectDto) {
-        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
-            throw new RuntimeException("Invalid name " + projectDto.getName());
-        }
-        if (projectDto.getDescription() == null || projectDto.getDescription().isBlank()) {
-            throw new RuntimeException("Invalid description " + projectDto.getDescription());
-        }
-        return projectService.create(projectDto);
+        projectValidator.name(projectDto);
+        projectValidator.description(projectDto);
+        return projectService.add(projectDto);
     }
 
     @Operation(summary = "Update project", description = "Update status and/or description")
-    @PutMapping("/update")
+    @PutMapping
     public ProjectDto update(@RequestBody ProjectDto projectDto) {
 
-        if (projectDto.getId() == null || projectDto.getId().equals(0L)) {
-            throw new RuntimeException("Invalid id " + projectDto.getId());
-        }
+        projectValidator.id(projectDto);
         return projectService.update(projectDto);
     }
 
@@ -55,10 +51,9 @@ public class ProjectController {
 
     @Operation(summary = "Get projects by id")
     @GetMapping("/{projectId}")
-    public ProjectDto getProjectById(@PathVariable Long projectId) {
-        if (projectId == null || projectId.equals(0L)) {
-            throw new RuntimeException("Invalid id " + projectId);
-        }
+    public ProjectDto getProjectById(@RequestHeader(value = "x-user-id") String userid,
+                                     @PathVariable Long projectId) {
+        projectValidator.id(projectId);
         return projectService.getProjectById(projectId);
     }
 

@@ -1,7 +1,6 @@
 package faang.school.projectservice.mapper.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 
@@ -11,5 +10,4 @@ public interface ProjectMapper {
 
     Project toEntity(ProjectDto projectDto);
 
-    ProjectFilterDto toFilter(ProjectDto projectDto);
 }
