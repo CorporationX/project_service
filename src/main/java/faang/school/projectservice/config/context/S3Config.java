@@ -15,6 +15,7 @@ public class S3Config {
     private String secretKey;
     @Value("${services.s3.accessKey}")
     private String accessKey;
+
     @Bean
     public AmazonS3 amazonS3() {
         String awsAccessKey = accessKey;

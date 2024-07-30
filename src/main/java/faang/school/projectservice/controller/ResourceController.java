@@ -20,8 +20,8 @@ public class ResourceController {
     }
 
     @DeleteMapping
-    public String deleteResource(@RequestParam Long id,@RequestParam Long currentMemberId) {
-        resourceService.deleteResource(id,currentMemberId);
+    public String deleteResource(@RequestParam Long id, @RequestParam Long currentMemberId) {
+        resourceService.deleteResource(id, currentMemberId);
         return "Resource deleted successfully";
     }
 

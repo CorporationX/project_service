@@ -1,8 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.ResourceDto;
-import faang.school.projectservice.exception.FileException;
+import faang.school.projectservice.exception.ResourceException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
@@ -20,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
-import java.nio.file.AccessDeniedException;
 import java.security.InvalidParameterException;
-import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
 @Service
@@ -35,6 +32,7 @@ public class ResourceServiceImpl implements ResourceService {
     private final S3Service s3Service;
     private final ResourceMapper resourceMapper;
     private final TeamMemberRepository teamMemberRepository;
+
     @Override
     @Transactional
     public ResourceDto addResource(MultipartFile file, Long projectId, Long currentMemberId) {
@@ -42,11 +40,10 @@ public class ResourceServiceImpl implements ResourceService {
         BigInteger newStorageSize = BigInteger.valueOf(file.getSize()).add(project.getStorageSize());
         checkSize(newStorageSize, project.getMaxStorageSize());
 
-        String folder = project.getName()+project.getId();
+        String folder = project.getName() + project.getId();
 
-
-        Resource resource = s3Service.upload(file,folder);
-        TeamMember teamMember =teamMemberRepository.findById(currentMemberId);
+        Resource resource = s3Service.upload(file, folder);
+        TeamMember teamMember = teamMemberRepository.findById(currentMemberId);
         resource.setUpdatedBy(teamMember);
         resource.setAllowedRoles(teamMember.getRoles());
         resource.setProject(project);
@@ -59,11 +56,11 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     @Transactional
-    public void deleteResource(Long id,Long currentMemberId) {
-        Resource resource=resourceRepository.findById(id).orElseThrow(()->new NoSuchElementException("Resource not found"));
-        TeamMember teamMember=teamMemberRepository.findById(currentMemberId);
-        validateOnDelete(resource,teamMember);
-        s3Service.delete(resource.getKey());
+    public void deleteResource(Long id, Long currentMemberId) {
+        Resource resource = resourceRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Resource not found"));
+        TeamMember teamMember = teamMemberRepository.findById(currentMemberId);
+        String key = resource.getKey();
+        validateOnDelete(resource, teamMember);
         resource.setKey(null);
         updateProjectStorageSize(resource.getProject(), resource.getSize());
         resource.setSize(BigInteger.valueOf(0L));
@@ -71,20 +68,24 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setUpdatedBy(teamMember);
 
         resourceRepository.save(resource);
-        log.error("resource with id - {}, deleted",resource.getId());
+        s3Service.delete(key);
+
+        log.info("resource with id - {}, deleted", resource.getId());
 
     }
 
-    private void checkSize(BigInteger newProjectSize,BigInteger maxProjectSize) {
-        if(newProjectSize.compareTo(maxProjectSize) > 0) {
-            throw new InvalidParameterException(String.format("Project size must be greater than or equal to max project(%d)",maxProjectSize.intValue()));
+    private void checkSize(BigInteger newProjectSize, BigInteger maxProjectSize) {
+        if (newProjectSize.compareTo(maxProjectSize) > 0) {
+            throw new InvalidParameterException(String.format("Project size must be greater than or equal to max project(%d)", maxProjectSize.intValue()));
         }
 
     }
+
     private void updateProjectStorageSize(Project project, BigInteger sizeChange) {
         project.setStorageSize(project.getStorageSize().subtract(sizeChange));
         projectRepository.save(project);
     }
+
     private void validateOnDelete(Resource resource, TeamMember teamMember) {
         Long resourceCreatorId = resource.getCreatedBy().getId();
         Long projectOwnerId = resource.getProject().getOwnerId();
@@ -95,6 +96,6 @@ public class ResourceServiceImpl implements ResourceService {
         }
 
         log.error("Resource not allowed to be deleted. Resource - {}, TeamMember - {}", resource, teamMember);
-        throw new FileException("You are not allowed to delete this resource");
+        throw new ResourceException("You are not allowed to delete this resource");
     }
 }
