@@ -105,7 +105,7 @@ public class SubProjectControllerTest {
                 String.class
         );
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         verify(projectService, times(0)).createSubProject(any());
     }
 

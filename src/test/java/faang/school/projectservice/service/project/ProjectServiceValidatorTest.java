@@ -8,7 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.ProjectServiceValidator;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +48,7 @@ public class ProjectServiceValidatorTest {
             .description("SubProject description")
             .build();
 
-    private  UpdateSubProjectDto updateDto = UpdateSubProjectDto.builder()
+    private UpdateSubProjectDto updateDto = UpdateSubProjectDto.builder()
             .status(ProjectStatus.IN_PROGRESS)
             .visibility(ProjectVisibility.PRIVATE)
             .build();
@@ -61,20 +61,11 @@ public class ProjectServiceValidatorTest {
     }
 
     @Test
-    public void testValidateSubProjectWithIncorrectParent() {
-        when(repository.existsById(parentProjectId)).thenReturn(false);
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> validator.getParentAfterValidateSubProject(subProjectDto));
-        String expectedMessage = "project with this ID: 1 doesn't exist";
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
-    @Test
     public void testValidateSubProjectWithIncorrectVisibility() {
         subProjectDto.setVisibility(ProjectVisibility.PRIVATE);
 
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> validator.getParentAfterValidateSubProject(subProjectDto));
+                () -> validator.validateParentProjectForCreateSubProject(parentProject, subProjectDto));
         String expectedMessage = "Visibility of parent project and subproject should be equals";
         assertEquals(expectedMessage, exception.getMessage());
     }
@@ -84,7 +75,7 @@ public class ProjectServiceValidatorTest {
         when(repository.existsByOwnerUserIdAndName(ownerId, subProjectDto.getName())).thenReturn(true);
 
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> validator.getParentAfterValidateSubProject(subProjectDto));
+                () -> validator.validateSubProjectForCreate(subProjectDto));
 
         String exceptedMessage = "User with ID " + ownerId
                 + " already has project with name " + subProjectDto.getName();
@@ -93,16 +84,16 @@ public class ProjectServiceValidatorTest {
     }
 
     @Test
-    public void testValidateSubProject() {
-        Project result = validator.getParentAfterValidateSubProject(subProjectDto);
+    public void testGetProjectAfterValidate() {
+        Project result = validator.getProjectAfterValidateId(parentProjectId);
 
         assertEquals(parentProject, result);
     }
 
     @Test
-    public void testValidateSubProjectForUpdateInvalidId() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> validator.validateSubProjectForUpdate(0l, updateDto));
+    public void testGetProjectAfterValidateIncorrectId() {
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> validator.getProjectAfterValidateId(0l));
         assertEquals("project with this ID: " + 0 + " doesn't exist", exception.getMessage());
     }
 
@@ -110,7 +101,7 @@ public class ProjectServiceValidatorTest {
     public void testValidateSubProjectForUpdateInvalidStatus() {
         parentProject.setStatus(ProjectStatus.IN_PROGRESS);
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> validator.validateSubProjectForUpdate(parentProjectId, updateDto));
+                () -> validator.validateSubProjectForUpdate(parentProject, updateDto));
         assertEquals("Project " + parentProject.getId() + " already has status " + updateDto.getStatus(),
                 exception.getMessage());
     }
@@ -120,7 +111,7 @@ public class ProjectServiceValidatorTest {
         parentProject.setVisibility(ProjectVisibility.PRIVATE);
         parentProject.setStatus(ProjectStatus.CREATED);
 
-        validator.validateSubProjectForUpdate(parentProjectId, updateDto);
+        validator.validateSubProjectForUpdate(parentProject, updateDto);
 
         assertEquals(ProjectVisibility.PRIVATE, childrenProject.getVisibility());
     }

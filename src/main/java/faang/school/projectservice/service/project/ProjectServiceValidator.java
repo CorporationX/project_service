@@ -8,6 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,13 +20,7 @@ public class ProjectServiceValidator {
     private final ProjectRepository projectRepository;
     private final UserContext userContext;
 
-    public Project getParentAfterValidateSubProject(CreateSubProjectDto subProjectDto) {
-        Long parentId = subProjectDto.getParentProjectId();
-        validateSubProject(subProjectDto);
-        return validateParentProject(parentId, subProjectDto);
-    }
-
-    private void validateSubProject(CreateSubProjectDto subProjectDto) {
+    public void validateSubProjectForCreate(CreateSubProjectDto subProjectDto) {
         if (subProjectDto.getOwnerId() == null) {
             subProjectDto.setOwnerId(userContext.getUserId());
         }
@@ -36,36 +31,20 @@ public class ProjectServiceValidator {
         }
     }
 
-    private Project validateParentProject(Long parentId, CreateSubProjectDto subProjectDto) {
-        if (!projectRepository.existsById(parentId)) {
-            throw new DataValidationException("project with this ID: " + parentId + " doesn't exist");
-        }
-
-        Project parentProject = projectRepository.getProjectById(parentId);
-
+    public void validateParentProjectForCreateSubProject(Project parentProject, CreateSubProjectDto subProjectDto) {
         if (subProjectDto.getVisibility() == null) {
             subProjectDto.setVisibility(parentProject.getVisibility());
         } else if (parentProject.getVisibility() != subProjectDto.getVisibility()) {
             throw new DataValidationException("Visibility of parent project and subproject should be equals");
-        } else if ((parentProject.getChildren() == null)) {
-            parentProject.setChildren(new ArrayList<>());
         }
-
-        return parentProject;
     }
 
-    public Project validateSubProjectForUpdate(Long subProjectId, UpdateSubProjectDto updateDto) {
-        if (!projectRepository.existsById(subProjectId)) {
-            throw new DataValidationException("project with this ID: " + subProjectId + " doesn't exist");
-        }
-        Project subProject = projectRepository.getProjectById(subProjectId);
-
+    public void validateSubProjectForUpdate(Project subProject, UpdateSubProjectDto updateDto) {
         if (updateDto.getStatus() == subProject.getStatus()) {
             throw new DataValidationException("Project " + subProject.getId() + " already has status " + updateDto.getStatus());
         } else if (updateDto.getVisibility() == ProjectVisibility.PRIVATE) {
             subProject.getChildren().forEach(project -> project.setVisibility(ProjectVisibility.PRIVATE));
         }
-        return subProject;
     }
 
     public boolean readyToNewMoment(Project subProject, ProjectStatus newStatus) {
@@ -83,5 +62,12 @@ public class ProjectServiceValidator {
                 .allMatch(children ->
                         children.getStatus() == ProjectStatus.COMPLETED
                         || children.getStatus() == ProjectStatus.CANCELLED);
+    }
+
+    public Project getProjectAfterValidateId(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new EntityNotFoundException("project with this ID: " + projectId + " doesn't exist");
+        }
+        return projectRepository.getProjectById(projectId);
     }
 }

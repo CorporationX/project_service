@@ -59,7 +59,7 @@ public class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(validator.getParentAfterValidateSubProject(subProjectDto)).thenReturn(parentProject);
+        lenient().when(validator.getProjectAfterValidateId(parentProjectId)).thenReturn(parentProject);
     }
 
     @Test
@@ -76,7 +76,7 @@ public class ProjectServiceTest {
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
 
-        when(validator.validateSubProjectForUpdate(parentProjectId, updateDto)).thenReturn(parentProject);
+        when(validator.getProjectAfterValidateId(parentProjectId)).thenReturn(parentProject);
         when(projectRepository.save(any())).thenReturn(parentProject);
         ProjectDto result = projectService.updateSubProject(parentProjectId, updateDto);
 
