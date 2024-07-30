@@ -1,11 +1,11 @@
 package faang.school.projectservice.service.utilservice;
 
 import faang.school.projectservice.exception.ConflictException;
+import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 public class ProjectUtilService {
 
     private final ProjectJpaRepository projectJpaRepository;
-    private final ProjectRepository projectRepository;
 
     @Transactional(readOnly = true)
     public Project getById(long id) {
@@ -36,7 +35,7 @@ public class ProjectUtilService {
     }
 
     public List<Project> getAllByIdsStrictly(Collection<Long> ids) {
-        List<Project> projects = projectRepository.findAllByIds(ids);
+        List<Project> projects = projectJpaRepository.findAllById(ids);
         if (ids.size() != projects.size()) {
             throw new NotFoundException(ErrorMessage.SOME_OF_PROJECTS_NOT_EXIST);
         }
@@ -44,7 +43,7 @@ public class ProjectUtilService {
     }
 
     public List<Project> findAllDistinctByTeamMemberIds(Collection<Long> teamMemberIds) {
-        return projectRepository.findAllDistinctByTeamMemberIds(teamMemberIds);
+        return projectJpaRepository.findAllDistinctByTeamMemberIds(teamMemberIds);
     }
 
     public void checkProjectsNotClosed(Collection<Project> projects) {
