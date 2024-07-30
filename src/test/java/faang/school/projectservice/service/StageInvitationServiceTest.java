@@ -143,12 +143,13 @@ public class StageInvitationServiceTest {
         when(stageInvitationRepository.findAll()).thenReturn(stageInvitationList);
         when(stageInvitationStatusFilter.isApplicable(any())).thenReturn(true);
         when(stageInvitationStatusFilter.apply(stageInvitationList.stream(), stageInvitationFilterDto)).thenReturn(stageInvintationFiltered.stream());
-//        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
+        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
+
+        //        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
 
         List<StageInvitationDto> stageInvitationDtoResult = stageInvitationService.getStageInvitationForUser(stageInvitationFilterDto, 1L);
 
         verify(stageInvitationMapper, times(1)).toDto(any(StageInvitation.class));
-
         assertEquals(1, stageInvitationDtoResult.size());
         assertTrue(stageInvitationDtoResult.size() > 0);
     }
