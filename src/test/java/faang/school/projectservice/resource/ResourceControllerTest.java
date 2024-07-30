@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigInteger;
 
@@ -64,6 +66,16 @@ class ResourceControllerTest {
         mockMvc.perform(get("/resources/1").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", is(resourceUrl)));
+    }
+
+    @Test
+    public void testGetResourceNotFound() throws Exception {
+        // Arrange
+        when(service.getResource(resourceId)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found"));
+
+        // Act & Assert
+        mockMvc.perform(get("/resources/1"))
+                .andExpect(status().isNotFound());
     }
 
     @Test

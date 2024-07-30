@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -60,7 +61,12 @@ public class ResourceService {
             throw new IllegalArgumentException("The size of the new file exceeds the total size of the storage");
         }
 
-        String key = s3Service.uploadFile(file);
+        String key = null;
+        try {
+            key = s3Service.uploadFile(file);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
 
         LocalDateTime now = LocalDateTime.now();
         Resource resource = Resource.builder()
@@ -104,7 +110,13 @@ public class ResourceService {
         }
 
         s3Service.deleteFile(resource.getKey());
-        String key = s3Service.uploadFile(file);
+
+        String key = null;
+        try {
+            key = s3Service.uploadFile(file);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
 
         LocalDateTime now = LocalDateTime.now();
         resource.setKey(key);

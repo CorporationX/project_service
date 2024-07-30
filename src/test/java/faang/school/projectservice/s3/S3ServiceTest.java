@@ -15,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -45,7 +47,7 @@ class S3ServiceTest {
     }
 
     @Test
-    void uploadFile() {
+    void uploadFile() throws IOException {
         // Arrange
         MockMultipartFile file = ResourceMock.generateMultipartFile();
 
@@ -55,6 +57,16 @@ class S3ServiceTest {
         // Assert
         assertNotNull(key);
         verify(s3Client, times(1)).putObject(any(PutObjectRequest.class));
+    }
+
+    @Test
+    void uploadFileError() {
+        // Arrange
+        MockMultipartFile file = ResourceMock.generateMultipartFile();
+        doThrow(new RuntimeException("S3 upload failed")).when(s3Client).putObject(any(PutObjectRequest.class));
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> s3Service.uploadFile(file));
     }
 
     @Test

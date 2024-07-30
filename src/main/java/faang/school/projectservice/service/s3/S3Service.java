@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @Slf4j
@@ -25,7 +26,7 @@ public class S3Service {
     @Value("${services.s3.endpoint}")
     private String endpointUrl;
 
-    public String uploadFile(MultipartFile file) {
+    public String uploadFile(MultipartFile file) throws IOException {
         String fileName = file.getOriginalFilename();
         String key = String.format("%s-%s", UUID.randomUUID(), fileName);
 
@@ -38,8 +39,9 @@ public class S3Service {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, file.getInputStream(), objectMetadata);
             s3Client.putObject(putObjectRequest);
         } catch (Exception exception) {
-            log.error(exception.getMessage());
-            throw new RuntimeException(exception);
+            log.error("Failed to upload file to S3. File name: {}, Key: {}, Size: {}, ContentType: {}. Error: {}",
+                    fileName, key, fileSize, file.getContentType(), exception.getMessage(), exception);
+            throw exception;
         }
 
         return key;
