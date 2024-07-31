@@ -74,8 +74,8 @@ class StageMapperTest {
     }
 
     @Test
-    void testToStageEntity() {
-        Stage stageMapped = stageMapper.toStageEntity(stageDto);
+    void testToEntity() {
+        Stage stageMapped = stageMapper.toEntity(stageDto);
 
         assertEquals(stage.getStageId(), stageMapped.getStageId());
         assertEquals(stage.getStageName(), stageMapped.getStageName());
@@ -84,8 +84,8 @@ class StageMapperTest {
     }
 
     @Test
-    void testToStageDto() {
-        StageDto stageDtoMapped = stageMapper.toStageDto(stage);
+    void testToDto() {
+        StageDto stageDtoMapped = stageMapper.toDto(stage);
 
         assertEquals(stageDto.getStageId(), stageDtoMapped.getStageId());
         assertEquals(stageDto.getStageName(), stageDtoMapped.getStageName());

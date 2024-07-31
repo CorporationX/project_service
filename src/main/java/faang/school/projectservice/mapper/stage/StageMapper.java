@@ -10,8 +10,8 @@ import org.mapstruct.ReportingPolicy;
 public interface StageMapper {
 
     @Mapping(target = "project.id", source = "projectId")
-    Stage toStageEntity(StageDto stageDto);
+    Stage toEntity(StageDto stageDto);
 
     @Mapping(target = "projectId", source = "project.id")
-    StageDto toStageDto(Stage stage);
+    StageDto toDto(Stage stage);
 }

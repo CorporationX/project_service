@@ -73,7 +73,7 @@ class StageServiceTest {
                         .build()))
                 .build();
 
-        stage = stageMapper.toStageEntity(stageDto);
+        stage = stageMapper.toEntity(stageDto);
     }
 
     @Test
@@ -112,7 +112,7 @@ class StageServiceTest {
     void testGetByStatus() {
         List<Stage> stages = List.of(stage);
         List<StageDto> expectedStagesDto = stages.stream()
-                .map(stageMapper::toStageDto)
+                .map(stageMapper::toDto)
                 .toList();
 
         when(stageRepository.findByStatus(ProjectStatus.IN_PROGRESS)).thenReturn(stages);
@@ -127,7 +127,7 @@ class StageServiceTest {
     void testDeleteStageById() {
         stage.setTasks(List.of(Task.builder().build()));
         List<Task> tasks = stage.getTasks();
-        StageDto expectedStageDto = stageMapper.toStageDto(stage);
+        StageDto expectedStageDto = stageMapper.toDto(stage);
 
         when(stageRepository.getById(stageId)).thenReturn(stage);
         doNothing().when(taskRepository).deleteAll(tasks);
@@ -145,7 +145,7 @@ class StageServiceTest {
     void deleteStageWithClosingTasks() {
         stage.setTasks(List.of(Task.builder().build()));
         List<Task> tasks = stage.getTasks();
-        StageDto expectedStageDto = stageMapper.toStageDto(stage);
+        StageDto expectedStageDto = stageMapper.toDto(stage);
 
         when(stageRepository.getById(stageId)).thenReturn(stage);
         when(taskRepository.saveAll(tasks)).thenReturn(tasks);

@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.ProjectStatusException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
@@ -15,6 +14,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.validate.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,25 +28,19 @@ public class StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final ProjectValidator projectValidator;
 
     public StageDto create(StageDto stageDto) {
-        Project project = projectRepository.getProjectById(stageDto.getProjectId());
+        projectValidator.validateProjectNotCancelled(stageDto.getProjectId());
+        projectValidator.validateProjectNotCompleted(stageDto.getProjectId());
 
-        if (project.getStatus() == ProjectStatus.CANCELLED) {
-            throw new ProjectStatusException("You can't create stage for cancelled project");
-        }
-
-        if (project.getStatus() == ProjectStatus.COMPLETED) {
-            throw new ProjectStatusException("You can't create stage for completed project");
-        }
-
-        Stage stage = stageMapper.toStageEntity(stageDto);
-        return stageMapper.toStageDto(stageRepository.save(stage));
+        Stage stage = stageMapper.toEntity(stageDto);
+        return stageMapper.toDto(stageRepository.save(stage));
     }
 
     public List<StageDto> getByStatus(ProjectStatus status) {
         return stageRepository.findByStatus(status).stream()
-                .map(stageMapper::toStageDto)
+                .map(stageMapper::toDto)
                 .toList();
     }
 
@@ -57,7 +51,7 @@ public class StageService {
         taskRepository.deleteAll(tasksToDelete);
         stageRepository.delete(stage);
 
-        return stageMapper.toStageDto(stage);
+        return stageMapper.toDto(stage);
     }
 
     public StageDto deleteStageWithClosingTasks(Long stageId) {
@@ -67,7 +61,7 @@ public class StageService {
         taskRepository.saveAll(tasksToClose);
         stageRepository.delete(stage);
 
-        return stageMapper.toStageDto(stage);
+        return stageMapper.toDto(stage);
     }
 
     public StageDto update(Long stageId, StageDto stageDto) {
@@ -88,7 +82,7 @@ public class StageService {
             }
         });
 
-        return stageMapper.toStageDto(stageRepository.save(stageMapper.toStageEntity(stageDto)));
+        return stageMapper.toDto(stageRepository.save(stageMapper.toEntity(stageDto)));
     }
 
 
@@ -111,11 +105,11 @@ public class StageService {
 
     public List<StageDto> getAll() {
         return stageRepository.findAll().stream()
-                .map(stageMapper::toStageDto)
+                .map(stageMapper::toDto)
                 .toList();
     }
 
     public StageDto getById(long stageId) {
-        return stageMapper.toStageDto(stageRepository.getById(stageId));
+        return stageMapper.toDto(stageRepository.getById(stageId));
     }
 }
