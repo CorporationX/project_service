@@ -3,7 +3,7 @@ package faang.school.projectservice.validation;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.ProjectService;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

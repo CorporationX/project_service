@@ -4,7 +4,7 @@ import java.util.List;
 
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
