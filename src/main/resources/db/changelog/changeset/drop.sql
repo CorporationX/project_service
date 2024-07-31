@@ -1,7 +1,8 @@
-DROP TABLE team;
 DROP TABLE team_member;
+DROP TABLE team;
 DROP TABLE task;
-DROP TABLE project_resource;
+DROP TABLE IF EXISTS project_resource;
+DROP TABLE IF EXISTS resource;
 DROP TABLE schedule;
 DROP TABLE project;
 DROP TABLE project_stage;
