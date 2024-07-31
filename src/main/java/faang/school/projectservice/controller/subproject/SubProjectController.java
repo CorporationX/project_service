@@ -37,7 +37,7 @@ public class SubProjectController {
         return ResponseEntity.ok(projectService.updateSubProject(subProjectId, updateSubProjectDto));
     }
 
-    @PostMapping("/{projectId}/subProjects")
+    @PostMapping("/projects/{projectId}/subProjects")
     public ResponseEntity<List<ProjectDto>> getFilteredSubProjects(
             @PathVariable Long projectId,
             @Validated @RequestBody FilterSubProjectDto filterDto) {

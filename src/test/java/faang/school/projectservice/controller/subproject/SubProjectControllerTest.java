@@ -146,7 +146,7 @@ public class SubProjectControllerTest {
         when(projectService.getFilteredSubProjects(parentProjectId, filterDto)).thenReturn(expected);
 
         ResponseEntity<List<ProjectDto>> response = restTemplate.exchange(
-                webApiUrl + "/" + parentProjectId + "/subProjects",
+                webApiUrl + "/projects/" + parentProjectId + "/subProjects",
                 HttpMethod.POST,
                 request,
                 new ParameterizedTypeReference<List<ProjectDto>>() {}
