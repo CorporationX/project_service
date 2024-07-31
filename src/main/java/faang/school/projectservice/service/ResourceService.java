@@ -55,8 +55,7 @@ public class ResourceService {
 
     public ResourceResponseDto updateMetadata(long resourceId, long projectId, long userId, ResourceUpdateDto updateDto) {
 
-        Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
-        checkIfDeleted(resource);
+        Resource resource = resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED);
         TeamMember updater = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
         checkAbilityToUpdate(resource, updater);
 
@@ -99,8 +98,8 @@ public class ResourceService {
 
     public InputStream download(long resourceId, long projectId, long userId) {
 
-        Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
-        checkIfDeleted(resource);
+        Resource resource = resourceUtilService.getByIdAndProjectIdAndStatusNot(
+                resourceId, projectId, ResourceStatus.DELETED);
         TeamMember teamMember = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
         checkAbilityToDownload(resource, teamMember);
 
@@ -109,8 +108,8 @@ public class ResourceService {
 
     public ResourceResponseDto delete(long resourceId, long projectId, long userId) {
 
-        Resource resource = resourceUtilService.getByIdAndProjectId(resourceId, projectId);
-        checkIfDeleted(resource);
+        Resource resource = resourceUtilService.getByIdAndProjectIdAndStatusNot(
+                resourceId, projectId, ResourceStatus.DELETED);
         TeamMember updater = teamMemberUtilService.getByUserIdAndProjectId(userId, projectId);
         checkAbilityToUpdate(resource, updater);
 
@@ -142,25 +141,17 @@ public class ResourceService {
     }
 
     private void checkAbilityToUpdate(Resource resource, TeamMember updater) {
-        if (!resource.getCreatedBy().getId().equals(updater.getId())) {
-            if (!updater.getRoles().contains(TeamRole.MANAGER)) {
-                throw new AccessDeniedException(String.format(
-                        "Current user id=%d dont have rights to proceed this operation to resource",
-                        updater.getUserId()));
-            }
+        if (!resource.getCreatedBy().getId().equals(updater.getId())
+                && !updater.getRoles().contains(TeamRole.MANAGER)) {
+            throw new AccessDeniedException(String.format(
+                    "Current user id=%d dont have rights to proceed this operation to resource",
+                    updater.getUserId()));
         }
     }
 
     private void checkAbilityToDownload(Resource resource, TeamMember updater) {
         if (!CollectionUtils.containsAny(updater.getRoles(), resource.getAllowedRoles())) {
             checkAbilityToUpdate(resource, updater);
-        }
-    }
-
-    private void checkIfDeleted(Resource resource) {
-        if (resource.getStatus().equals(ResourceStatus.DELETED)) {
-            throw new ConflictException(String.format("Unable to proceed operation to deleted resource id=%d",
-                    resource.getId()));
         }
     }
 

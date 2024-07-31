@@ -44,7 +44,7 @@ public class ResourceController {
         return resourceService.uploadNew(file, projectId, userContext.getUserId());
     }
 
-    @DeleteMapping("/{resourceId}") //Patch/Put? Сама ведь сущность не удаляется
+    @DeleteMapping("/{resourceId}")
     public ResourceResponseDto delete(@PathVariable @Positive Long projectId,
                                       @PathVariable @Positive Long resourceId) {
 
