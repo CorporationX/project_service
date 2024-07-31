@@ -82,4 +82,16 @@ public class ProjectService {
             throw new IllegalArgumentException("Нельзя создать публичный подпроект для приватного проекта");
         }
     }
+
+    public ProjectDto getProject(long projectId) {
+        Project project = repository.getProjectById(projectId);
+
+        return mapper.toDto(project);
+    }
+
+    public List<ProjectDto> getProjectsByIds(List<Long> ids) {
+        List<Project> projects = repository.findAllByIds(ids);
+
+        return projects.stream().map(mapper::toDto).toList();
+    }
 }
