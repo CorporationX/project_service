@@ -124,7 +124,7 @@ public class SubProjectControllerTest {
         HttpEntity<UpdateSubProjectDto> request = new HttpEntity<>(updateDto, headers);
         ProjectDto expectedProject = new ProjectDto();
 
-        when(projectService.updateSubProject(xUserId, parentProjectId, updateDto)).thenReturn(expectedProject);
+        when(projectService.updateSubProject(parentProjectId, updateDto)).thenReturn(expectedProject);
 
         ProjectDto response = restTemplate.exchange(
                 webApiUrl + "/subProjects/1",
@@ -143,7 +143,7 @@ public class SubProjectControllerTest {
 
         List<ProjectDto> expected = List.of(new ProjectDto());
 
-        when(projectService.getFilteredSubProjects(xUserId, parentProjectId, filterDto)).thenReturn(expected);
+        when(projectService.getFilteredSubProjects(parentProjectId, filterDto)).thenReturn(expected);
 
         ResponseEntity<List<ProjectDto>> response = restTemplate.exchange(
                 webApiUrl + "/" + parentProjectId + "/subProjects",

@@ -13,10 +13,6 @@ import java.time.LocalDateTime;
 public class ErrorResponse {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
-
-    private String url;
-    private int status;
-    private String error;
     private String message;
 
     public ErrorResponse(String message) {

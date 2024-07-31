@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
@@ -43,6 +44,8 @@ public class ProjectServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private MomentService momentService;
+    @Mock
+    private UserContext userContext;
     @Spy
     private SubProjectNameFilter nameFilter = new SubProjectNameFilter();
     @Spy
@@ -72,8 +75,9 @@ public class ProjectServiceTest {
     @BeforeEach
     void setUp() {
         projectService = new ProjectService(
-                projectRepository, validator, subProjectMapper, projectMapper, momentService, filters);
+                projectRepository, validator, subProjectMapper, projectMapper, momentService, filters, userContext);
         lenient().when(validator.getProjectAfterValidateId(parentProjectId)).thenReturn(parentProject);
+        lenient().when(userContext.getUserId()).thenReturn(ownerId);
     }
 
     @Test
@@ -92,7 +96,7 @@ public class ProjectServiceTest {
 
         when(validator.getProjectAfterValidateId(parentProjectId)).thenReturn(parentProject);
         when(projectRepository.save(any())).thenReturn(parentProject);
-        ProjectDto result = projectService.updateSubProject(ownerId, parentProjectId, updateDto);
+        ProjectDto result = projectService.updateSubProject(parentProjectId, updateDto);
 
         assertEquals(ProjectStatus.IN_PROGRESS, result.getStatus());
     }
@@ -112,7 +116,7 @@ public class ProjectServiceTest {
                 .statusPattern("CREATED")
                 .build();
 
-        List<ProjectDto> result = projectService.getFilteredSubProjects(ownerId, parentProjectId, filterDto);
+        List<ProjectDto> result = projectService.getFilteredSubProjects(parentProjectId, filterDto);
 
         assertEquals(1, result.size());
         assertEquals(goodName, result.get(0).getName());

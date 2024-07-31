@@ -72,9 +72,10 @@ public class ProjectServiceValidator {
         return projectRepository.getProjectById(projectId);
     }
 
-    public void validateOwnerId(Long userId, Project subProject) {
-        if (!subProject.getOwnerId().equals(userId)) {
-            throw new DataValidationException("UserID " + userId + " isn't owner of Project " + subProject.getId());
+    public void validateOwnerId(Project subProject) {
+        if (!subProject.getOwnerId().equals(userContext.getUserId())) {
+            throw new DataValidationException("UserID " + userContext.getUserId()
+                    + " isn't owner of Project " + subProject.getId());
         }
     }
 

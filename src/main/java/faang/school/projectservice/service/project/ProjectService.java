@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
@@ -29,6 +30,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final MomentService momentService;
     private final List<SubProjectFilter> filters;
+    private final UserContext userContext;
 
     public ProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
         validator.validateSubProjectForCreate(subProjectDto);
@@ -47,9 +49,9 @@ public class ProjectService {
         return projectMapper.toDto(subProject);
     }
 
-    public ProjectDto updateSubProject(Long userId, Long subProjectId, UpdateSubProjectDto updateDto) {
+    public ProjectDto updateSubProject(Long subProjectId, UpdateSubProjectDto updateDto) {
         Project subProject = validator.getProjectAfterValidateId(subProjectId);
-        validator.validateOwnerId(userId, subProject);
+        validator.validateOwnerId(subProject);
         validator.validateSubProjectForUpdate(subProject, updateDto);
         if (validator.readyToNewMoment(subProject, updateDto.getStatus())) {
             momentService.addMomentByName(subProject, "All subprojects finished");
@@ -64,9 +66,9 @@ public class ProjectService {
         return projectMapper.toDto(updatedProject);
     }
 
-    public List<ProjectDto> getFilteredSubProjects(Long userId, Long projectId, FilterSubProjectDto filterDto) {
+    public List<ProjectDto> getFilteredSubProjects(Long projectId, FilterSubProjectDto filterDto) {
         Project project = validator.getProjectAfterValidateId(projectId);
-
+        Long userId = userContext.getUserId();
         Stream<Project> projects = project.getChildren().stream();
 
         return filters.stream()

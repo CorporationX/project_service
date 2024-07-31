@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller.subproject;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
@@ -24,7 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubProjectController {
     private final ProjectService projectService;
-    private final UserContext userContext;
 
     @PostMapping("/subProjects")
     public ResponseEntity<ProjectDto> createSubProject(@Validated @RequestBody CreateSubProjectDto subProjectDto) {
@@ -36,13 +34,13 @@ public class SubProjectController {
     public ResponseEntity<ProjectDto> updateSubProject(
             @PathVariable Long subProjectId,
             @Validated @RequestBody UpdateSubProjectDto updateSubProjectDto) {
-        return ResponseEntity.ok(projectService.updateSubProject(userContext.getUserId(), subProjectId, updateSubProjectDto));
+        return ResponseEntity.ok(projectService.updateSubProject(subProjectId, updateSubProjectDto));
     }
 
     @PostMapping("/{projectId}/subProjects")
     public ResponseEntity<List<ProjectDto>> getFilteredSubProjects(
             @PathVariable Long projectId,
             @Validated @RequestBody FilterSubProjectDto filterDto) {
-        return ResponseEntity.ok(projectService.getFilteredSubProjects(userContext.getUserId(), projectId, filterDto));
+        return ResponseEntity.ok(projectService.getFilteredSubProjects(projectId, filterDto));
     }
 }

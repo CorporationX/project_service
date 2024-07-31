@@ -145,12 +145,12 @@ public class ProjectServiceValidatorTest {
 
     @Test
     public void testValidateOwnerId() {
-        Long incorrectOwnerId = 200L;
-        parentProject.setOwnerId(ownerId);
+        parentProject.setOwnerId(1L);
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> validator.validateOwnerId(incorrectOwnerId, parentProject));
+                () -> validator.validateOwnerId(parentProject));
 
-        assertEquals("UserID " + incorrectOwnerId + " isn't owner of Project " + parentProject.getId(),
+        assertEquals("UserID " + userContext.getUserId()
+                        + " isn't owner of Project " + parentProject.getId(),
                 exception.getMessage());
     }
 

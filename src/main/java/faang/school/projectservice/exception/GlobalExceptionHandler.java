@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -31,20 +32,20 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorResponse handleDataValidationException(DataValidationException e) {
         log.error("DataValidationException", e);
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), e.getMessage());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     ErrorResponse handleEntityNotFoundException(EntityNotFoundException e) {
         log.error("EntityNotFoundException", e);
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), e.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ErrorResponse handleRuntimeException(RuntimeException e) {
         log.error("RuntimeException", e);
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), e.getMessage());
     }
 }
