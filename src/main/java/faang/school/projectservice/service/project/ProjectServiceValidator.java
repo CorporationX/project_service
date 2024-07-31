@@ -12,7 +12,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -69,5 +70,22 @@ public class ProjectServiceValidator {
             throw new EntityNotFoundException("project with this ID: " + projectId + " doesn't exist");
         }
         return projectRepository.getProjectById(projectId);
+    }
+
+    public void validateOwnerId(Long userId, Project subProject) {
+        if (!subProject.getOwnerId().equals(userId)) {
+            throw new DataValidationException("UserID " + userId + " isn't owner of Project " + subProject.getId());
+        }
+    }
+
+    public boolean userHasAccessToProject(Long userId, Project project) {
+        if (project.getVisibility() == ProjectVisibility.PRIVATE) {
+            return Optional.ofNullable(project.getTeams()).stream()
+                    .flatMap(Collection::stream)
+                    .flatMap(team -> Optional.ofNullable(team.getTeamMembers()).stream()
+                            .flatMap(Collection::stream))
+                            .anyMatch(member -> member.getUserId().equals(userId));
+        }
+        return true;
     }
 }

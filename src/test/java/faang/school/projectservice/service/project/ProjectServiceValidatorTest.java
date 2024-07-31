@@ -7,6 +7,8 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +21,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -137,5 +141,42 @@ public class ProjectServiceValidatorTest {
         boolean result = validator.readyToNewMoment(parentProject, ProjectStatus.IN_PROGRESS);
 
         assertEquals(false, result);
+    }
+
+    @Test
+    public void testValidateOwnerId() {
+        Long incorrectOwnerId = 200L;
+        parentProject.setOwnerId(ownerId);
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> validator.validateOwnerId(incorrectOwnerId, parentProject));
+
+        assertEquals("UserID " + incorrectOwnerId + " isn't owner of Project " + parentProject.getId(),
+                exception.getMessage());
+    }
+
+    @Test
+    public void testUserHasAccessToPublicProject() {
+        assertTrue(validator.userHasAccessToProject(ownerId, parentProject));
+    }
+
+    @Test
+    public void testUserHasAccessToPrivateProject() {
+        TeamMember teamMember = TeamMember.builder()
+                .userId(ownerId)
+                .build();
+        Team team = Team.builder()
+                .teamMembers(List.of(teamMember))
+                .build();
+        parentProject.setTeams(List.of(team));
+        parentProject.setVisibility(ProjectVisibility.PRIVATE);
+
+        assertTrue(validator.userHasAccessToProject(ownerId, parentProject));
+    }
+
+    @Test
+    public void testUserHasNotAccessToPrivateProject() {
+        parentProject.setVisibility(ProjectVisibility.PRIVATE);
+
+        assertFalse(validator.userHasAccessToProject(ownerId, parentProject));
     }
 }

@@ -1,14 +1,18 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.mapper.SubProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
+import faang.school.projectservice.service.subproject.filter.SubProjectNameFilter;
+import faang.school.projectservice.service.subproject.filter.SubProjectStatusFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +20,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,9 +40,15 @@ public class ProjectServiceTest {
     @Spy
     private ProjectMapperImpl projectMapper;
     @Mock
-    private UserContext userContext;
-    @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private MomentService momentService;
+    @Spy
+    private SubProjectNameFilter nameFilter = new SubProjectNameFilter();
+    @Spy
+    private SubProjectStatusFilter statusFilter = new SubProjectStatusFilter();
+    private List<SubProjectFilter> filters = List.of(nameFilter, statusFilter);
+
     private Long parentProjectId = 1L;
     private Long ownerId = 100L;
     private String name = "SubProject name";
@@ -59,6 +71,8 @@ public class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
+        projectService = new ProjectService(
+                projectRepository, validator, subProjectMapper, projectMapper, momentService, filters);
         lenient().when(validator.getProjectAfterValidateId(parentProjectId)).thenReturn(parentProject);
     }
 
@@ -78,8 +92,55 @@ public class ProjectServiceTest {
 
         when(validator.getProjectAfterValidateId(parentProjectId)).thenReturn(parentProject);
         when(projectRepository.save(any())).thenReturn(parentProject);
-        ProjectDto result = projectService.updateSubProject(parentProjectId, updateDto);
+        ProjectDto result = projectService.updateSubProject(ownerId, parentProjectId, updateDto);
 
         assertEquals(ProjectStatus.IN_PROGRESS, result.getStatus());
+    }
+
+    @Test
+    public void testGetFilteredSubProjects() {
+        String goodName = "Project of team Minotaur";
+        String badName = "Project of team Manticora";
+        ProjectStatus goodStatus = ProjectStatus.CREATED;
+        ProjectStatus badStatus = ProjectStatus.CANCELLED;
+
+        prepareChildrenProjectsToFilterTest(parentProject, goodName, badName, goodStatus, badStatus);
+        when(validator.userHasAccessToProject(any(), any())).thenReturn(true);
+
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder()
+                .namePattern("Minotaur")
+                .statusPattern("CREATED")
+                .build();
+
+        List<ProjectDto> result = projectService.getFilteredSubProjects(ownerId, parentProjectId, filterDto);
+
+        assertEquals(1, result.size());
+        assertEquals(goodName, result.get(0).getName());
+        assertEquals(goodStatus, result.get(0).getStatus());
+    }
+
+    private void prepareChildrenProjectsToFilterTest(
+            Project parentProject, String goodName, String badName, ProjectStatus goodStatus, ProjectStatus badStatus) {
+        Project goodProject = Project.builder()
+                .name(goodName)
+                .status(goodStatus)
+                .build();
+
+        Project goodNameProject = Project.builder()
+                .name(goodName)
+                .status(badStatus)
+                .build();
+
+        Project goodStatusProject = Project.builder()
+                .name(badName)
+                .status(goodStatus)
+                .build();
+
+        Project badProject = Project.builder()
+                .name(badName)
+                .status(badStatus)
+                .build();
+
+        parentProject.setChildren(List.of(goodProject, goodNameProject, goodStatusProject, badProject));
     }
 }

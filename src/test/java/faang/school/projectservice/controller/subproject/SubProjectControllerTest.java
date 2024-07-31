@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project.ProjectService;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,17 +39,21 @@ public class SubProjectControllerTest {
     private TestRestTemplate restTemplate;
     @MockBean
     private ProjectService projectService;
+    private Long parentProjectId = 1L;
     private CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder()
-            .parentProjectId(1L)
+            .parentProjectId(parentProjectId)
             .name("SubProject name")
             .description("SubProject description")
             .build();
 
     private HttpHeaders headers = new HttpHeaders();
+    private Long xUserId = 12345L;
+    private String webApiUrl;
 
     @BeforeEach
     void setUp() {
-        headers.add("x-user-id", "12345");
+        headers.add("x-user-id", xUserId.toString());
+        webApiUrl = "http://localhost:" + port + "/api/v1";
     }
 
     @Test
@@ -56,7 +62,7 @@ public class SubProjectControllerTest {
         HttpEntity<CreateSubProjectDto> requestBad = new HttpEntity<>(subProjectDtoBad, headers);
 
         ResponseEntity<Map<String, String>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/v1/subProjects",
+                webApiUrl + "/subProjects",
                 HttpMethod.POST,
                 requestBad,
                 new ParameterizedTypeReference<Map<String, String>>() {
@@ -83,7 +89,7 @@ public class SubProjectControllerTest {
         when(projectService.createSubProject(subProjectDto)).thenReturn(expectedProject);
 
         ResponseEntity<ProjectDto> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/v1/subProjects",
+                webApiUrl + "/subProjects",
                 HttpMethod.POST,
                 request,
                 ProjectDto.class
@@ -99,7 +105,7 @@ public class SubProjectControllerTest {
         HttpEntity<CreateSubProjectDto> requestBad = new HttpEntity<>(null, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/v1/subProjects",
+                webApiUrl + "/subProjects",
                 HttpMethod.POST,
                 requestBad,
                 String.class
@@ -118,15 +124,35 @@ public class SubProjectControllerTest {
         HttpEntity<UpdateSubProjectDto> request = new HttpEntity<>(updateDto, headers);
         ProjectDto expectedProject = new ProjectDto();
 
-        when(projectService.updateSubProject(1L, updateDto)).thenReturn(expectedProject);
+        when(projectService.updateSubProject(xUserId, parentProjectId, updateDto)).thenReturn(expectedProject);
 
         ProjectDto response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/v1/subProjects/1",
+                webApiUrl + "/subProjects/1",
                 HttpMethod.PUT,
                 request,
                 ProjectDto.class
         ).getBody();
 
         assertThat(response).isEqualTo(expectedProject);
+    }
+
+    @Test
+    public void testGetFilteredSubProjects() {
+        FilterSubProjectDto filterDto = new FilterSubProjectDto();
+        HttpEntity<FilterSubProjectDto> request = new HttpEntity<>(filterDto, headers);
+
+        List<ProjectDto> expected = List.of(new ProjectDto());
+
+        when(projectService.getFilteredSubProjects(xUserId, parentProjectId, filterDto)).thenReturn(expected);
+
+        ResponseEntity<List<ProjectDto>> response = restTemplate.exchange(
+                webApiUrl + "/" + parentProjectId + "/subProjects",
+                HttpMethod.POST,
+                request,
+                new ParameterizedTypeReference<List<ProjectDto>>() {}
+        );
+
+        assertThat(response.getBody()).isEqualTo(expected);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }

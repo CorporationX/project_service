@@ -28,7 +28,7 @@ public class ProjectService {
     private final SubProjectMapper subProjectMapper;
     private final ProjectMapper projectMapper;
     private final MomentService momentService;
-    private final List<SubProjectFilter> subProjectFilters;
+    private final List<SubProjectFilter> filters;
 
     public ProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
         validator.validateSubProjectForCreate(subProjectDto);
@@ -47,12 +47,14 @@ public class ProjectService {
         return projectMapper.toDto(subProject);
     }
 
-    public ProjectDto updateSubProject(Long subProjectId, UpdateSubProjectDto updateDto) {
+    public ProjectDto updateSubProject(Long userId, Long subProjectId, UpdateSubProjectDto updateDto) {
         Project subProject = validator.getProjectAfterValidateId(subProjectId);
+        validator.validateOwnerId(userId, subProject);
         validator.validateSubProjectForUpdate(subProject, updateDto);
         if (validator.readyToNewMoment(subProject, updateDto.getStatus())) {
             momentService.addMomentByName(subProject, "All subprojects finished");
         }
+
         subProjectMapper.updateEntity(updateDto, subProject);
         subProject.setUpdatedAt(LocalDateTime.now());
         Project updatedProject = projectRepository.save(subProject);
@@ -62,17 +64,18 @@ public class ProjectService {
         return projectMapper.toDto(updatedProject);
     }
 
-    public List<ProjectDto> getFilteredSubProjects(Long projectId, FilterSubProjectDto filters) {
+    public List<ProjectDto> getFilteredSubProjects(Long userId, Long projectId, FilterSubProjectDto filterDto) {
         Project project = validator.getProjectAfterValidateId(projectId);
 
         Stream<Project> projects = project.getChildren().stream();
 
-        return subProjectFilters.stream()
-                .filter(subProjectFilter -> subProjectFilter.isApplicable(filters))
+        return filters.stream()
+                .filter(subProjectFilter -> subProjectFilter.isApplicable(filterDto))
                 .reduce(projects,
-                        ((projectStream, filter) -> filter.apply(projectStream, filters)),
+                        ((projectStream, filter) -> filter.apply(projectStream, filterDto)),
                         ((projectStream, projectStream2) -> projectStream2)
                 )
+                .filter(filteredProject -> validator.userHasAccessToProject(userId, filteredProject))
                 .map(projectMapper::toDto)
                 .toList();
     }

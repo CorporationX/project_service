@@ -27,10 +27,8 @@ public class MomentServiceTest {
     private MomentRepository momentRepository;
     @MockBean
     private ProjectMapper projectMapper;
-
     @SpyBean
     private MomentService momentService;
-
 
     private Project project = new Project();
     private ProjectDto projectDto = new ProjectDto();

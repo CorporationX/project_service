@@ -1,8 +1,5 @@
 package faang.school.projectservice.dto.subproject;
 
-import faang.school.projectservice.model.ProjectStatus;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
