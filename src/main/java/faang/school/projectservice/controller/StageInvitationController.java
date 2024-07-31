@@ -33,8 +33,8 @@ public class StageInvitationController {
         return stageInvitationService.sendAnInvitation(stageInvitationDto);
     }
 
-    @PostMapping("/accept")
-    public StageInvitationDto acceptInvitation(@Valid @RequestBody Long stageInvitationId) {
+    @PostMapping("/accept/{stageInvitationId}")
+    public StageInvitationDto acceptInvitation(@PathVariable Long stageInvitationId) {
         if (stageInvitationId == null) {
             log.error("stageInvitationDto is null");
             throw new IllegalArgumentException("stageInvitationDto is null");
