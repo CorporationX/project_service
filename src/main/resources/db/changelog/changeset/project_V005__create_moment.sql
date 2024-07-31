@@ -15,7 +15,7 @@ CREATE TABLE moment_resource (
   resource_id BIGINT,
   CONSTRAINT moment_resource_pk PRIMARY KEY (moment_id, resource_id),
   CONSTRAINT moment_resource_moment_fk FOREIGN KEY (moment_id) REFERENCES moment (id) ON DELETE CASCADE,
-  CONSTRAINT moment_resource_resource_fk FOREIGN KEY (resource_id) REFERENCES project_resource (id) ON DELETE CASCADE
+  CONSTRAINT moment_resource_resource_fk FOREIGN KEY (resource_id) REFERENCES resource (id) ON DELETE CASCADE
 );
 
 CREATE TABLE moment_project (
