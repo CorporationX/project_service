@@ -48,3 +48,9 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+coverImage:
+  maxsize: 5000000
+  maxHorizontalWidth: 1080
+  maxHorizontalHeight: 566
+  maxSquareSize: 1080
