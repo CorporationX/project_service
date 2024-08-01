@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.resource.ResourceResponseDto;
 import faang.school.projectservice.dto.resource.ResourceUpdateDto;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.ConflictException;
+import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.mapper.ResourceMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
@@ -132,7 +133,7 @@ class ResourceServiceTest {
                 .createdBy(updater)
                 .build();
 
-        when(resourceUtilService.getByIdAndProjectId(resourceId, projectId))
+        when(resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED))
                 .thenReturn(resource);
         when(teamMemberUtilService.getByUserIdAndProjectId(updaterId, projectId))
                 .thenReturn(updater);
@@ -173,7 +174,7 @@ class ResourceServiceTest {
                 .createdBy(TeamMember.builder().id(creatorId).build())
                 .build();
 
-        when(resourceUtilService.getByIdAndProjectId(resourceId, projectId))
+        when(resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED))
                 .thenReturn(resource);
         when(teamMemberUtilService.getByUserIdAndProjectId(updaterId, projectId))
                 .thenReturn(updater);
@@ -196,15 +197,11 @@ class ResourceServiceTest {
         long projectId = 11L;
         long updaterId = 21L;
         ResourceUpdateDto updateDto = ResourceUpdateDto.builder().build();
-        Resource resource = Resource.builder()
-                .id(resourceId)
-                .status(ResourceStatus.DELETED)
-                .build();
 
-        when(resourceUtilService.getByIdAndProjectId(resourceId, projectId))
-                .thenReturn(resource);
+        when(resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED))
+                .thenThrow(new NotFoundException(""));
 
-        assertThrows(ConflictException.class, () ->
+        assertThrows(NotFoundException.class, () ->
                 resourceService.updateMetadata(resourceId, projectId, updaterId, updateDto)
         );
     }
@@ -226,7 +223,8 @@ class ResourceServiceTest {
                 .createdBy(TeamMember.builder().id(creatorId).build())
                 .build();
 
-        when(resourceUtilService.getByIdAndProjectId(resourceId, projectId)).thenReturn(resource);
+        when(resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED))
+                .thenReturn(resource);
         when(teamMemberUtilService.getByUserIdAndProjectId(updaterId, projectId)).thenReturn(updater);
 
         assertThrows(AccessDeniedException.class, () ->
@@ -311,12 +309,13 @@ class ResourceServiceTest {
                 .allowedRoles(List.of(TeamRole.TESTER))
                 .build();
 
-        when(resourceUtilService.getByIdAndProjectId(resourceId, projectId)).thenReturn(resource);
+        when(resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED))
+                .thenReturn(resource);
         when(teamMemberUtilService.getByUserIdAndProjectId(userId, projectId)).thenReturn(teamMember);
 
         resourceService.download(resourceId, projectId, userId);
 
-        verify(resourceUtilService, times(1)).getByIdAndProjectId(resourceId, projectId);
+        verify(resourceUtilService, times(1)).getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED);
         verify(teamMemberUtilService, times(1)).getByUserIdAndProjectId(userId, projectId);
         verify(s3Service, times(1)).download("key");
     }
@@ -339,12 +338,13 @@ class ResourceServiceTest {
                 .allowedRoles(List.of(TeamRole.TESTER))
                 .build();
 
-        when(resourceUtilService.getByIdAndProjectId(resourceId, projectId)).thenReturn(resource);
+        when(resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED))
+                .thenReturn(resource);
         when(teamMemberUtilService.getByUserIdAndProjectId(userId, projectId)).thenReturn(teamMember);
 
         resourceService.download(resourceId, projectId, userId);
 
-        verify(resourceUtilService, times(1)).getByIdAndProjectId(resourceId, projectId);
+        verify(resourceUtilService, times(1)).getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED);
         verify(teamMemberUtilService, times(1)).getByUserIdAndProjectId(userId, projectId);
         verify(s3Service, times(1)).download("key");
     }
@@ -367,12 +367,13 @@ class ResourceServiceTest {
                 .allowedRoles(List.of(TeamRole.TESTER))
                 .build();
 
-        when(resourceUtilService.getByIdAndProjectId(resourceId, projectId)).thenReturn(resource);
+        when(resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED))
+                .thenReturn(resource);
         when(teamMemberUtilService.getByUserIdAndProjectId(userId, projectId)).thenReturn(teamMember);
 
         resourceService.download(resourceId, projectId, userId);
 
-        verify(resourceUtilService, times(1)).getByIdAndProjectId(resourceId, projectId);
+        verify(resourceUtilService, times(1)).getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED);
         verify(teamMemberUtilService, times(1)).getByUserIdAndProjectId(userId, projectId);
         verify(s3Service, times(1)).download("key");
     }
@@ -395,7 +396,8 @@ class ResourceServiceTest {
                 .allowedRoles(List.of(TeamRole.TESTER))
                 .build();
 
-        when(resourceUtilService.getByIdAndProjectId(resourceId, projectId)).thenReturn(resource);
+        when(resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED))
+                .thenReturn(resource);
         when(teamMemberUtilService.getByUserIdAndProjectId(userId, projectId)).thenReturn(teamMember);
 
         assertThrows(AccessDeniedException.class, () -> resourceService.download(resourceId, projectId, userId));
@@ -406,17 +408,10 @@ class ResourceServiceTest {
         long resourceId = 1L;
         long projectId = 11L;
         long userId = 21L;
-        TeamMember creator = TeamMember.builder().id(22L).build();
-        Resource resource = Resource.builder()
-                .id(resourceId)
-                .key("key")
-                .status(ResourceStatus.DELETED)
-                .createdBy(creator)
-                .allowedRoles(List.of(TeamRole.TESTER))
-                .build();
 
-        when(resourceUtilService.getByIdAndProjectId(resourceId, projectId)).thenReturn(resource);
+        when(resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, ResourceStatus.DELETED))
+                .thenThrow(new NotFoundException(""));
 
-        assertThrows(ConflictException.class, () -> resourceService.download(resourceId, projectId, userId));
+        assertThrows(NotFoundException.class, () -> resourceService.download(resourceId, projectId, userId));
     }
 }

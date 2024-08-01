@@ -4,6 +4,7 @@ import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -64,6 +65,39 @@ class ResourceUtilServiceTest {
 
         assertThrows(NotFoundException.class, () -> resourceUtilService.getByIdAndProjectId(resourceId, projectId));
         verify(resourceRepository, times(1)).findByIdAndProjectId(resourceId, projectId);
+    }
+
+    @Test
+    void testGetByIdAndProjectIdAndStatusNot() {
+        long resourceId = 1L;
+        long projectId = 11L;
+        ResourceStatus statusNot = ResourceStatus.DELETED;
+        Resource resource = Resource.builder()
+                .id(resourceId)
+                .status(ResourceStatus.ACTIVE)
+                .build();
+
+        when(resourceRepository.findResourceByIdAndProjectIdAndStatusNot(resourceId, projectId, statusNot))
+                .thenReturn(Optional.of(resource));
+
+        Resource result = resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, statusNot);
+        assertEquals(resource, result);
+        verify(resourceRepository, times(1)).findResourceByIdAndProjectIdAndStatusNot(resourceId, projectId, statusNot);
+    }
+
+    @Test
+    void testGetByIdAndProjectIdAndStatusNot_notExists_throws() {
+        long resourceId = 1L;
+        long projectId = 11L;
+        ResourceStatus statusNot = ResourceStatus.DELETED;
+
+        when(resourceRepository.findResourceByIdAndProjectIdAndStatusNot(resourceId, projectId, statusNot))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () ->
+                resourceUtilService.getByIdAndProjectIdAndStatusNot(resourceId, projectId, statusNot));
+        verify(resourceRepository, times(1)).findResourceByIdAndProjectIdAndStatusNot(resourceId, projectId, statusNot);
     }
 
     @Test
