@@ -13,6 +13,7 @@ import faang.school.projectservice.mapper.MeetMapperImpl;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.meet.Meet;
+import faang.school.projectservice.model.meet.MeetStatus;
 import faang.school.projectservice.validator.TeamValidator;
 import faang.school.projectservice.validator.meet.MeetValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,12 +103,14 @@ class MeetServiceTest {
         meet = Meet.builder()
                 .title("title")
                 .team(team)
+                .status(MeetStatus.SCHEDULED)
                 .createdBy(userId)
                 .build();
         meetDto = MeetDto.builder()
                 .id(meetId)
                 .title("title")
-                .team(team)
+                .teamId(teamId)
+                .status(MeetStatus.SCHEDULED)
                 .createdBy(userId)
                 .build();
         updateMeetDto = MeetDto.builder()
@@ -145,7 +148,7 @@ class MeetServiceTest {
         when(userContext.getUserId()).thenReturn(userId);
         when(teamValidator.verifyTeamExistence(teamId)).thenReturn(team);
         when(meetJpaRepository.save(meet)).thenReturn(meet);
-        meetService.createMeet(teamId, meetDto);
+        meetService.createMeet(meetDto);
         verify(userContext, times(1)).getUserId();
         verify(teamValidator, times(1)).verifyTeamExistence(teamId);
         verify(teamValidator, times(1)).verifyUserExistenceInTeam(userId, team);

@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,13 +63,13 @@ class MeetControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(meetDtoJson))
                 .andExpect(status().isCreated());
-        verify(meetService, times(1)).createMeet(teamId, meetDto);
+        verify(meetService, times(1)).createMeet(meetDto);
     }
 
     @Test
     @DisplayName("testing updateMeet method")
     public void testUpdateMethod() throws Exception {
-        mockMvc.perform(post("/api/v1/meet/{meetId}", meetId)
+        mockMvc.perform(put("/api/v1/meet/{meetId}", meetId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(meetDtoJson))
                 .andExpect(status().isOk());
@@ -86,8 +87,7 @@ class MeetControllerTest {
     @Test
     @DisplayName("testing getFilteredMeetsOfTeam method")
     public void testGetFilteredMeetsOfTeam() throws Exception {
-        mockMvc.perform(post("/api/v1/meet/filtered")
-                        .param("teamId", String.valueOf(teamId))
+        mockMvc.perform(post("/api/v1/meet/filtered/{teamId}", String.valueOf(teamId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(meetFilterDtoJson))
                 .andExpect(status().isOk());

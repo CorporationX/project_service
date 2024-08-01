@@ -36,9 +36,9 @@ public class MeetService {
     private final List<MeetFilter> meetFilters;
 
     @Transactional
-    public MeetDto createMeet(long teamId, MeetDto meetDto) {
+    public MeetDto createMeet(MeetDto meetDto) {
         long userId = userContext.getUserId();
-        Team team = teamValidator.verifyTeamExistence(teamId);
+        Team team = teamValidator.verifyTeamExistence(meetDto.getTeamId());
         teamValidator.verifyUserExistenceInTeam(userId, team);
         Meet meet = meetMapper.toEntity(meetDto);
         meet.setCreatedBy(userId);

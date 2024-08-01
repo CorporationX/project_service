@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -29,12 +29,12 @@ public class MeetController {
     @PostMapping("/new")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public MeetDto createMeet(@RequestParam Long teamId,
-                              @RequestBody @Valid MeetDto meetDto) {
-        return meetService.createMeet(teamId, meetDto);
+    public MeetDto createMeet(@RequestBody @Valid MeetDto meetDto) {
+        return meetService.createMeet(meetDto);
     }
 
-    @PostMapping("/{meetId}")
+    @PutMapping("/{meetId}")
+    @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     public MeetDto updateMeet(@PathVariable Long meetId,
                               @RequestBody MeetDto meetDto) {
@@ -47,10 +47,10 @@ public class MeetController {
         meetService.deleteMeet(meetId);
     }
 
-    @PostMapping("/filtered")
+    @PostMapping("/filtered/{teamId}")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public List<MeetDto> getFilteredMeetsOfTeam(@RequestParam Long teamId,
+    public List<MeetDto> getFilteredMeetsOfTeam(@PathVariable Long teamId,
                                                 @RequestBody MeetFilterDto meetFilterDto) {
         return meetService.getFilteredMeetsOfTeam(teamId, meetFilterDto);
     }

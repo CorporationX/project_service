@@ -25,7 +25,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = "meets")
+@ToString(exclude = {"meets", "teamMembers"})
 @Builder
 public class Team {
     @Id

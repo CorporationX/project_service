@@ -1,7 +1,9 @@
 package faang.school.projectservice.controller;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.exception.DeniedInAccessException;
 import faang.school.projectservice.exception.ErrorResponse;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,6 +36,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handlerNotFoundException(NotFoundException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(DeniedInAccessException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleDeniedInAccessException(DeniedInAccessException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException exception) {
         return new ErrorResponse(exception.getMessage());
     }
 }

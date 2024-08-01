@@ -13,11 +13,19 @@ import org.mapstruct.ReportingPolicy;
 public interface MeetMapper {
 
     @Mapping(ignore = true, target = "id")
+    @Mapping(source = "status", target = "status", defaultValue = "SCHEDULED")
+    @Mapping(source = "teamId", target = "team.id")
     Meet toEntity(MeetDto meetDto);
 
+
+    @Mapping(source = "team.id", target = "teamId")
     MeetDto toDto(Meet meet);
 
     @Mapping(ignore = true, target = "id")
+    @Mapping(ignore = true, target = "team.id")
+    @Mapping(ignore = true, target = "createdAt")
+    @Mapping(ignore = true, target = "updatedAt")
+    @Mapping(ignore = true, target = "createdBy")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Meet updateMeet(MeetDto meetDto, @MappingTarget Meet meet);
 }

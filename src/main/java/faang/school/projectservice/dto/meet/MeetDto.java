@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.meet;
 
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.meet.MeetStatus;
 import faang.school.projectservice.validator.meet.CreateMeet;
 import faang.school.projectservice.validator.meet.UpdateMeet;
@@ -34,7 +33,8 @@ public class MeetDto {
     @Size(max = 255, groups = {CreateMeet.class, UpdateMeet.class})
     private String location;
 
-    private Team team;
+    @NotNull(groups = {CreateMeet.class})
+    private Long teamId;
 
     @NotNull(groups = UpdateMeet.class)
     private MeetStatus status;
