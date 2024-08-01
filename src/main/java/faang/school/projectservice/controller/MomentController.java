@@ -13,12 +13,19 @@ import faang.school.projectservice.validator.MomentValidator;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 
 @RequiredArgsConstructor
+@RequestMapping("/moment")
 @RestController
 public class MomentController {
     private final MomentService momentService;
@@ -28,26 +35,31 @@ public class MomentController {
     private final MomentMapper mapper = Mappers.getMapper(MomentMapper.class);
     private final MomentFilterMapper filterMapper = Mappers.getMapper(MomentFilterMapper.class);
 
-    public MomentDto createMoment(MomentDto momentDto) {
+    @PostMapping("/create")
+    public MomentDto createMoment(@RequestBody MomentDto momentDto) {
         momentDtoValidator.validateMomentDo(momentDto);
         return momentService.createMoment(momentDto);
     }
 
-    public MomentDto updateMoment(MomentDto momentDto) {
+    @PutMapping("/update")
+    public MomentDto updateMoment(@RequestBody MomentDto momentDto) {
         momentDtoValidator.validateMomentDo(momentDto);
         return momentService.updateMoment(momentDto);
     }
 
-    public List<MomentDto> getMomentsFilteredByDateFromProjects(Long ProjectId, MomentFilterDto filter) {
+    @GetMapping("{projectId}/filtered")
+    public List<MomentDto> getMomentsFilteredByDateFromProjects(@PathVariable Long projectId, @RequestBody MomentFilterDto filter) {
         momentFilterDtoValidator.validateMomentFilterDto(filter);
-        return momentService.getMomentsFilteredByDateFromProjects(ProjectId, filter);
+        return momentService.getMomentsFilteredByDateFromProjects(projectId, filter);
     }
 
+    @GetMapping("/all")
     public List<MomentDto> getAllMoments(Long projectId) {
         return momentService.getAllMoments(projectId);
     }
 
-    public MomentDto getMomentById(Long momentId) {
+    @GetMapping("/{momentId}")
+    public MomentDto getMomentById(@PathVariable Long momentId) {
         return momentService.getMomentById(momentId);
     }
 }

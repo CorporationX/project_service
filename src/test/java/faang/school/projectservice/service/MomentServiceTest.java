@@ -136,6 +136,8 @@ public class MomentServiceTest {
 
     @Test
     public void testGetMomentById() {
+        momentDto.setUserIds(Collections.emptyList());
+        momentDto.setMemberIds(List.of(teamMember.getId()));
         Mockito.when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
         MomentDto actualDto = momentService.getMomentById(1L);
         Mockito.verify(momentRepository).findById(1L);
