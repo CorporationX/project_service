@@ -8,6 +8,7 @@ import faang.school.projectservice.dto.moment.MomentUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.service.MomentService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -31,16 +32,19 @@ public class MomentController {
     private final UserContext userContext;
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get Moment by id")
     public MomentResponseDto getById(@Positive @PathVariable long id) {
         return momentService.getById(id);
     }
 
     @GetMapping
+    @Operation(summary = "Get all Moments")
     public List<MomentResponseDto> getAll() {
         return momentService.getAll();
     }
 
     @GetMapping("/project/{projectId}")
+    @Operation(summary = "Get all filtered Moments of project by id")
     public List<MomentResponseDto> getAllFilteredByProjectId(@PathVariable @Positive Long projectId,
                                           @RequestBody(required = false) @Validated MomentFilterDto momentFilterDto) {
 
@@ -48,6 +52,7 @@ public class MomentController {
     }
 
     @PostMapping
+    @Operation(summary = "Add a new Moment")
     public MomentResponseDto addNew(@RequestBody @Validated MomentRequestDto momentRequestDto) {
 
         validateProjectsAndMembers(momentRequestDto);
@@ -55,6 +60,7 @@ public class MomentController {
     }
 
     @PatchMapping
+    @Operation(summary = "Update moment")
     public MomentResponseDto update(@RequestBody @Validated MomentUpdateDto momentUpdateDto) {
 
         return momentService.update(momentUpdateDto, userContext.getUserId());
