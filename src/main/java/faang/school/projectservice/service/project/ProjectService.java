@@ -5,13 +5,14 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.mapper.SubProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class ProjectService {
     private final ProjectRepository projectRepository;
-    private final ProjectServiceValidator validator;
+    private final ProjectValidator validator;
     private final SubProjectMapper subProjectMapper;
     private final ProjectMapper projectMapper;
     private final MomentService momentService;

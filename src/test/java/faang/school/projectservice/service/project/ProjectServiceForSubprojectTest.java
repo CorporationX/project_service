@@ -5,8 +5,8 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
-import faang.school.projectservice.mapper.SubProjectMapperImpl;
+import faang.school.projectservice.mapper.project.ProjectMapperImpl;
+import faang.school.projectservice.mapper.subproject.SubProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -14,6 +14,7 @@ import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import faang.school.projectservice.service.subproject.filter.SubProjectNameFilter;
 import faang.school.projectservice.service.subproject.filter.SubProjectStatusFilter;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,11 +32,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectServiceTest {
+public class ProjectServiceForSubprojectTest {
     @InjectMocks
     private ProjectService projectService;
     @Mock
-    private ProjectServiceValidator validator;
+    private ProjectValidator validator;
     @Spy
     private SubProjectMapperImpl subProjectMapper;
     @Spy

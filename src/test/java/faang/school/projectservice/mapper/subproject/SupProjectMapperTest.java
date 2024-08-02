@@ -1,7 +1,8 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.subproject;
 
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;

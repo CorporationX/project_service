@@ -1,6 +1,7 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;

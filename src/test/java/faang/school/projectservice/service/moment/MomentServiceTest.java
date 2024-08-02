@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;

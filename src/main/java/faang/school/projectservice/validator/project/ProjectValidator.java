@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.project;
+package faang.school.projectservice.validator.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class ProjectServiceValidator {
+public class ProjectValidator {
     private final ProjectRepository projectRepository;
     private final UserContext userContext;
 
