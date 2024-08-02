@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long> {
@@ -15,7 +16,7 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
                     "WHERE tm.userId = :userId " +
                     "AND t.project.id = :projectId"
     )
-    TeamMember findByUserIdAndProjectId(long userId, long projectId);
+    Optional<TeamMember> findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
 
