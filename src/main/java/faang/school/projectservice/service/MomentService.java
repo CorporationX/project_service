@@ -74,7 +74,6 @@ public class MomentService {
     public List<MomentDto> getAllMoments() {
         return momentMapper.toDto(momentRepository.findAll());
     }
-
     public MomentDto getMomentById(Long id) {
         Moment moment = momentRepository.findById(id)
                 .orElseThrow(() -> new DataValidationException("Moment not found"));
@@ -93,9 +92,8 @@ public class MomentService {
 
     private List<Long> getNewMemberIds(List<Project> projects) {
         Set<Long> memberIds = new HashSet<>();
-        projects.forEach(project -> project.getTeams()
-                .forEach(team -> team.getTeamMembers()
-                        .forEach(member -> memberIds.add(member.getId()))));
+        projects.forEach(project -> teamMemberRepository.findByProjectId(project.getId())
+                .forEach(member -> memberIds.add(member.getId())));
 
         return new ArrayList<>(memberIds);
     }

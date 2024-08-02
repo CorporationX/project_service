@@ -4,6 +4,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,4 +21,8 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     List<TeamMember> findByUserId(long userId);
 
     List<TeamMember> findByTeamId(long projectId);
+
+    @Query("SELECT tm FROM TeamMember tm JOIN tm.team t" +
+            " WHERE t.project.id = :projectId")
+    List<TeamMember> findByProjectId(@Param("projectId") long projectId);
 }
