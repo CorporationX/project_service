@@ -2,11 +2,13 @@ package faang.school.projectservice.validator.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.repository.ProjectRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class ProjectValidator {
-    ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
     public boolean id(ProjectDto projectDto) {
         if (projectDto.getId() == null || projectDto.getId().equals(0L)) {
