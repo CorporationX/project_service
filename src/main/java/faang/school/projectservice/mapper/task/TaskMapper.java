@@ -21,10 +21,7 @@ public interface TaskMapper {
     TaskDto toDto(Task task);
 
     @Mapping(source = "status", target = "status", qualifiedByName = "mapTaskStatus")
-    @Mapping(source = "parentTaskId", target = "parentTask.id")
     @Mapping(target = "linkedTasks", ignore = true)
-    @Mapping(source = "projectId", target = "project.id")
-    @Mapping(source = "stageId", target = "stage.stageId")
     Task toEntity(TaskDto taskDto);
 
     @Named("mapTaskStatus")
