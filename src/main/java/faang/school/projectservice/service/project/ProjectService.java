@@ -2,6 +2,16 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
+import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.filter.ProjectFilter;
+import faang.school.projectservice.service.project.updater.ProjectUpdater;
+import faang.school.projectservice.validator.project.ProjectValidator;
+import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
@@ -17,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -26,6 +38,82 @@ import java.util.stream.Stream;
 @Slf4j
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectMapper projectMapper;
+    private final List<ProjectFilter> projectFilters;
+    private final List<ProjectUpdater> projectUpdaters;
+    private final UserContext userContext;
+    private final ProjectValidator validator;
+
+    public ProjectDto add(ProjectDto projectDto) {
+        if (projectDto.getOwnerId() == null) {
+            projectDto.setOwnerId(userContext.getUserId());
+        }
+        validator.existsByOwnerUserIdAndName(projectDto);
+        projectDto.setStatus(ProjectStatus.CREATED);
+        log.info("Save project to database {}", projectDto);
+        log.debug("Mapping dto to entity {}", projectDto);
+        Project project = projectMapper.toEntity(projectDto);
+        log.debug("Saving project to database {}", project);
+        project = projectRepository.save(project);
+        log.info("Project saved to database successfully {}", project);
+        return projectMapper.toDto(project);
+    }
+
+    public ProjectDto update(ProjectDto projectDto) {
+        try {
+            Project project = projectRepository.getProjectById(projectDto.getId());
+            projectUpdaters.stream().filter(filter -> filter.isApplicable(projectDto))
+                    .forEach(filter -> filter.apply(project, projectDto));
+            return projectMapper.toDto(projectRepository.save(project));
+        } catch (EntityNotFoundException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+    }
+
+    public List<ProjectDto> getProjectsWithFilters(ProjectFilterDto filters) {
+        long userId = userContext.getUserId();
+        List<Project> publicProjects = projectRepository.findAll().stream()
+                .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC).toList();
+        List<Project> privateProjects = projectRepository.findAll().stream()
+                .filter(project -> project.getVisibility() == ProjectVisibility.PRIVATE)
+                .filter(project -> project.getTeams().stream()
+                        .anyMatch(team -> team.getTeamMembers().stream()
+                                .anyMatch(member -> member.getId().equals(userId)))).toList();
+
+        List<Project> resultProjects = Stream.concat(publicProjects.stream(), privateProjects.stream()).toList();
+        return projectFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(resultProjects.stream(), filters))
+                .distinct()
+                .map(projectMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProjectDto> getAllProjects() {
+        return projectRepository.findAll().stream()
+                .map(projectMapper::toDto)
+                .toList();
+    }
+
+    public ProjectDto getProjectById(Long projectId) {
+        long userId = userContext.getUserId();
+        Project project;
+        try {
+            project = projectRepository.getProjectById(projectId);
+        } catch (EntityNotFoundException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        if (project.getVisibility() == ProjectVisibility.PRIVATE) {
+            boolean hasAccess = project.getTeams().stream().anyMatch(team -> team.getTeamMembers().stream()
+                    .anyMatch(teamMember -> teamMember.getId().equals(userId)));
+            if (!hasAccess) {
+                throw new RuntimeException("User " + userId + " cannot get private project");
+            }
+        }
+        return projectMapper.toDto(project);
+    }
+
     private final ProjectValidator validator;
     private final SubProjectMapper subProjectMapper;
     private final ProjectMapper projectMapper;

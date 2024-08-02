@@ -3,6 +3,7 @@ package faang.school.projectservice.mapper.project;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -19,12 +20,14 @@ public class ProjectMapperTest {
             .name(name)
             .description(description)
             .ownerId(ownerId)
+            .status(ProjectStatus.CREATED)
             .build();
     private ProjectDto projectDto = ProjectDto.builder()
             .id(id)
             .name(name)
             .description(description)
             .ownerId(ownerId)
+            .status(ProjectStatus.CREATED)
             .build();
 
     @Test
