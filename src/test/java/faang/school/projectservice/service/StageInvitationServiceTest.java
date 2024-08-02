@@ -140,15 +140,13 @@ public class StageInvitationServiceTest {
     @Test
     @DisplayName("testGetStageInvitationForUser")
     public void getStageInvitationForUser() {
-        when(stageInvitationRepository.findByIdAllInvited(any())).thenReturn(stageInvitationList);
-        when(stageInvitationStatusFilter.isApplicable(any())).thenReturn(true);
-        when(stageInvitationStatusFilter.apply(stageInvitationList.stream(), stageInvitationFilterDto)).thenReturn(stageInvintationFiltered.stream());
-        when(stageInvitationMapper.toDto(any())).thenReturn(stageInvitationDto);
+        when(stageInvitationRepository.findByIdAllInvited(1L)).thenReturn(stageInvitationList);
+        when(stageInvitationMapper.toDto(stageInvitationList.get(0))).thenReturn(stageInvitationDto);
 
         List<StageInvitationDto> stageInvitationDtoResult = stageInvitationService.getStageInvitationForUser(stageInvitationFilterDto, 1L);
 
-        verify(stageInvitationMapper, times(1)).toDto(any(StageInvitation.class));
-        assertEquals(1, stageInvitationDtoResult.size());
+        verify(stageInvitationMapper, times(1)).toDto(stageInvitationList.get(0));
+        assertEquals(2, stageInvitationDtoResult.size());
         assertTrue(stageInvitationDtoResult.size() > 0);
     }
 }
