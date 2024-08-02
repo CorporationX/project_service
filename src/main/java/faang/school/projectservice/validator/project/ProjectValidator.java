@@ -1,6 +1,7 @@
 package faang.school.projectservice.validator.project;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -62,7 +63,7 @@ public class ProjectValidator {
         return subProject.getChildren().stream()
                 .allMatch(children ->
                         children.getStatus() == ProjectStatus.COMPLETED
-                        || children.getStatus() == ProjectStatus.CANCELLED);
+                                || children.getStatus() == ProjectStatus.CANCELLED);
     }
 
     public Project getProjectAfterValidateId(Long projectId) {
@@ -85,14 +86,10 @@ public class ProjectValidator {
                     .flatMap(Collection::stream)
                     .flatMap(team -> Optional.ofNullable(team.getTeamMembers()).stream()
                             .flatMap(Collection::stream))
-                            .anyMatch(member -> member.getUserId().equals(userId));
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.repository.ProjectRepository;
-import org.springframework.stereotype.Component;
-
-@Component
-public class ProjectValidator {
-    ProjectRepository projectRepository;
+                    .anyMatch(member -> member.getUserId().equals(userId));
+        }
+        return true;
+    }
 
     public boolean id(ProjectDto projectDto) {
         if (projectDto.getId() == null || projectDto.getId().equals(0L)) {

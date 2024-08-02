@@ -11,6 +11,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.service.project.filter.ProjectFilter;
+import faang.school.projectservice.service.project.updater.ProjectUpdater;
 import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import faang.school.projectservice.service.subproject.filter.SubProjectNameFilter;
 import faang.school.projectservice.service.subproject.filter.SubProjectStatusFilter;
@@ -23,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,7 +54,9 @@ public class ProjectServiceForSubprojectTest {
     private SubProjectNameFilter nameFilter = new SubProjectNameFilter();
     @Spy
     private SubProjectStatusFilter statusFilter = new SubProjectStatusFilter();
-    private List<SubProjectFilter> filters = List.of(nameFilter, statusFilter);
+    private List<SubProjectFilter> subProjectFilters = List.of(nameFilter, statusFilter);
+    private List<ProjectFilter> projectFilters = new ArrayList<>();
+    private List<ProjectUpdater> projectUpdaters = new ArrayList<>();
 
     private Long parentProjectId = 1L;
     private Long ownerId = 100L;
@@ -76,7 +81,8 @@ public class ProjectServiceForSubprojectTest {
     @BeforeEach
     void setUp() {
         projectService = new ProjectService(
-                projectRepository, validator, subProjectMapper, projectMapper, momentService, filters, userContext);
+                projectRepository, projectMapper, projectFilters, projectUpdaters,
+                userContext, validator, subProjectMapper, momentService, subProjectFilters);
         lenient().when(validator.getProjectAfterValidateId(parentProjectId)).thenReturn(parentProject);
         lenient().when(userContext.getUserId()).thenReturn(ownerId);
     }

@@ -15,14 +15,9 @@ import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
-import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
-import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Stream;
 
 @Service
@@ -43,6 +37,9 @@ public class ProjectService {
     private final List<ProjectUpdater> projectUpdaters;
     private final UserContext userContext;
     private final ProjectValidator validator;
+    private final SubProjectMapper subProjectMapper;
+    private final MomentService momentService;
+    private final List<SubProjectFilter> subProjectFilters;
 
     public ProjectDto add(ProjectDto projectDto) {
         if (projectDto.getOwnerId() == null) {
@@ -114,13 +111,6 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
-    private final ProjectValidator validator;
-    private final SubProjectMapper subProjectMapper;
-    private final ProjectMapper projectMapper;
-    private final MomentService momentService;
-    private final List<SubProjectFilter> filters;
-    private final UserContext userContext;
-
     public ProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
         validator.validateSubProjectForCreate(subProjectDto);
 
@@ -160,7 +150,7 @@ public class ProjectService {
         Long userId = userContext.getUserId();
         Stream<Project> projects = project.getChildren().stream();
 
-        return filters.stream()
+        return subProjectFilters.stream()
                 .filter(subProjectFilter -> subProjectFilter.isApplicable(filterDto))
                 .reduce(projects,
                         ((projectStream, filter) -> filter.apply(projectStream, filterDto)),
