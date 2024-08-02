@@ -4,8 +4,6 @@ import faang.school.projectservice.exception.task.TaskExceptionHandler;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +18,9 @@ public class TaskValidator {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-    public void validateTeamMember(Long memberId, Long projectId) {
+    public void validateTeamMember(Long userId, Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
-        TeamMember member = teamMemberRepository.findById(memberId);
-        boolean isMemberExist = project.getTeams().stream()
-                .anyMatch(team -> team.getTeamMembers().contains(member));
-        if (!isMemberExist) {
-            throw new TaskExceptionHandler("The user is not a member of the project team!");
-        }
+        teamMemberRepository.findByUserIdAndProjectId(userId, project.getId());
     }
 
     public Task validateTask(Long taskId) {
