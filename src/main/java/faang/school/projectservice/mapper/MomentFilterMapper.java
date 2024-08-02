@@ -15,7 +15,6 @@ public interface MomentFilterMapper {
 
     @Mapping(target = "userIds", expression = "java(this.setUserIds())")
     @Mapping(target = "projectIds", expression = "java(this.setProjectIds())")
-    @Mapping(target = "memberIds", expression = "java(this.setMemberIds())")
     MomentDto toMomentDto(MomentFilterDto momentFilterDto);
 
     @Named("setUserIds")
@@ -28,8 +27,4 @@ public interface MomentFilterMapper {
         return new ArrayList<>();
     }
 
-    @Named("setMemberIds")
-    default List<Long> setMemberIds() {
-        return new ArrayList<>();
-    }
 }

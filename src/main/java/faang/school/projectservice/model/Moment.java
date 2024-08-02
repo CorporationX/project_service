@@ -45,14 +45,6 @@ public class Moment {
     )
     private List<Project> projects;
 
-    @ManyToMany
-    @JoinTable(
-            name = "moment_team_member",
-            joinColumns = @JoinColumn(name = "moment_id"),
-            inverseJoinColumns = @JoinColumn(name = "team_member_id")
-    )
-    private List<TeamMember> members;
-
     @ElementCollection
     @CollectionTable(name = "moment_user", joinColumns = @JoinColumn(name = "moment_id"))
     @Column(name = "team_member_id")

@@ -41,7 +41,6 @@ public class MomentServiceTest {
     @Mock
     private ProjectRepository projectRepository;
     @Mock
-    private TeamMemberJpaRepository teamMemberRepository;
     private MomentFilter filterMock;
     private List<MomentFilter> filters;
 
@@ -51,37 +50,36 @@ public class MomentServiceTest {
     private Moment moment;
     private Project project;
     private MomentDto momentDto;
-    private TeamMember teamMember;
     private Team team;
+    private TeamMember teamMember;
 
     @BeforeEach
     void setUp() {
-
         project = Project.builder().id(1L).name("projectName").build();
-        teamMember = TeamMember.builder().id(2L).build();
-        moment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).members(List.of(teamMember)).build();
-        momentDto = MomentDto.builder().id(1L).name("momentName").memberIds(Collections.emptyList())
+        moment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).build();
+        momentDto = MomentDto.builder().id(1L).name("momentName")
                 .projectIds(List.of(1L)).build();
+        teamMember = TeamMember.builder().userId(4L).build();
         team = Team.builder().id(3L).teamMembers(List.of(teamMember)).build();
         filterMock = Mockito.mock(MomentFilter.class);
         filters = List.of(filterMock);
-        momentService = new MomentService(momentRepository, teamMemberRepository, projectRepository, momentValidator, filters);
+        momentService = new MomentService(momentRepository, projectRepository, momentValidator, filters);
     }
 
     @Test
     public void testCreateMoment() {
         Mockito.when(momentRepository.save(Mockito.any(Moment.class))).thenReturn(moment);
+        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
         momentService.createMoment(momentDto);
         Mockito.verify(momentRepository).save(Mockito.any(Moment.class));
     }
 
     @Test
     public void testUpdateMoment() {
-        Moment updatedMoment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).
-                userIds(List.of(1L, 2L)).members(List.of(teamMember)).build();
-
         momentDto.setUserIds(List.of(1L, 2L));
         project.setTeams(List.of(team));
+        Moment updatedMoment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).
+                userIds(List.of(1L, 2L, 4L)).build();
 
         Mockito.when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
         Mockito.when(momentRepository.save(Mockito.any(Moment.class))).thenReturn(moment);
@@ -104,7 +102,7 @@ public class MomentServiceTest {
         MomentFilterDto momentFilterDto = new MomentFilterDto(1L, "name",
                 LocalDateTime.of(2000, 10, 1, 1, 1));
         Moment anotherMoment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).
-                userIds(List.of(1L, 2L)).members(List.of(teamMember)).
+                userIds(List.of(1L, 2L)).
                 date(LocalDateTime.of(2000, 10, 10, 0, 0)).build();
         moment.setDate(LocalDateTime.of(2000, 10, 10, 0, 0));
         List<Moment> momentsToFilter = List.of(anotherMoment, moment);
@@ -137,7 +135,6 @@ public class MomentServiceTest {
     @Test
     public void testGetMomentById() {
         momentDto.setUserIds(Collections.emptyList());
-        momentDto.setMemberIds(List.of(teamMember.getId()));
         Mockito.when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
         MomentDto actualDto = momentService.getMomentById(1L);
         Mockito.verify(momentRepository).findById(1L);

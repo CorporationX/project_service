@@ -22,7 +22,7 @@ public class MomentFilterMapperTest {
     @BeforeEach
     void setUp() {
         filterDto = new MomentFilterDto(1L, "name", LocalDateTime.of(2000, 1, 1, 0, 0));
-        dto = new MomentDto(1L, "name", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), LocalDateTime.of(2000, 1, 1, 0, 0));
+        dto = new MomentDto(1L, "name", Collections.emptyList(), Collections.emptyList(), LocalDateTime.of(2000, 1, 1, 0, 0));
     }
 
     @Test

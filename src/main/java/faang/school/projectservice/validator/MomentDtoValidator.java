@@ -19,7 +19,7 @@ public class MomentDtoValidator {
         if (momentDto.getName().isBlank()) {
             throw new DataValidationException("name is empty");
         }
-        if (momentDto.getProjectIds().isEmpty()) {
+        if (momentDto.getProjectIds() == null ||momentDto.getProjectIds().isEmpty()) {
             throw new DataValidationException("dto has no projects");
         }
     }

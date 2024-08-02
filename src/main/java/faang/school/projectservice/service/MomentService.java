@@ -7,6 +7,7 @@ import faang.school.projectservice.filter.MomentFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -15,22 +16,24 @@ import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
 
 @Component
 @RequiredArgsConstructor
 public class MomentService {
     private final MomentRepository momentRepository;
     private final MomentMapper mapper = Mappers.getMapper(MomentMapper.class);
-    private final TeamMemberJpaRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
     private final MomentValidator momentValidator;
     private final List<MomentFilter> momentFilters;
 
     public MomentDto createMoment(MomentDto momentDto) {
         Moment moment = mapper.toEntity(momentDto);
+        processProjects(moment);
+        moment.setDate(LocalDateTime.now());
         momentRepository.save(moment);
         return mapper.toDto(moment);
     }
@@ -38,7 +41,7 @@ public class MomentService {
     public MomentDto updateMoment(MomentDto momentDto) {
         Moment momentToUpdate = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new DataValidationException("No such moment"));
         mapper.update(momentDto, momentToUpdate);
-        updateProjects(momentToUpdate);
+        processProjects(momentToUpdate);
         momentRepository.save(momentToUpdate);
         return mapper.toDto(momentToUpdate);
     }
@@ -66,12 +69,18 @@ public class MomentService {
         return mapper.toDto(moment);
     }
 
-    private void updateProjects(Moment moment) {
-        Set<Long> userIds = new HashSet<>(moment.getUserIds());
-        moment.getProjects().forEach(project -> {
-            List<Long> newUserIds = projectRepository.getProjectById(project.getId()).getTeams().stream().
-                    flatMap(team -> team.getTeamMembers().stream()).map(TeamMember::getId).distinct().toList();
-            userIds.addAll(newUserIds);
-        });
+    private void processProjects(Moment moment) {
+        momentValidator.validateMoment(moment);
+        List<Project> projects = new ArrayList<>();
+        List<Long> projectsIds = moment.getProjects().stream().map(Project::getId).distinct().toList();
+        for (Long projectId : projectsIds) {
+            Project project = projectRepository.getProjectById(projectId);
+            if (project.getTeams() != null) {
+                moment.getUserIds().addAll(project.getTeams().stream().flatMap(team -> team.getTeamMembers().stream()).map(TeamMember::getUserId).toList());
+            }
+            projects.add(project);
+        }
+        moment.setProjects(projects);
     }
+
 }

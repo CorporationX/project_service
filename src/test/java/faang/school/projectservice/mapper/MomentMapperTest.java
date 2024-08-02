@@ -27,11 +27,9 @@ public class MomentMapperTest {
     private List<Long> projectIds;
     private List<Long> userIds;
     private List<Project> projects;
-    private TeamMember member;
 
     @BeforeEach
     public void setUp() {
-        member = TeamMember.builder().id(3L).build();
         projectIds = new ArrayList<>();
         projectIds.add(1L);
         userIds = new ArrayList<>();
@@ -43,7 +41,6 @@ public class MomentMapperTest {
                 .name("test")
                 .date(LocalDateTime.of(2021, 1, 1, 0, 0))
                 .id(1L)
-                .memberIds(List.of(3L))
                 .projectIds(projectIds)
                 .userIds(userIds)
                 .build();
@@ -52,7 +49,6 @@ public class MomentMapperTest {
                 .date(LocalDateTime.of(2021, 1, 1, 0, 0))
                 .id(1L)
                 .projects(projects)
-                .members(List.of(member))
                 .userIds(userIds)
                 .build();
     }
@@ -75,13 +71,12 @@ public class MomentMapperTest {
                 .name("NewTest")
                 .date(LocalDateTime.of(2021, 1, 1, 0, 0))
                 .id(1L)
-                .memberIds(List.of(3L, 2L))
                 .projectIds(projectIds)
                 .userIds(userIds)
                 .build();
         mapper.update(newDto, ExpectedMoment);
         Assertions.assertEquals(newDto.getName(), "NewTest");
-        Assertions.assertEquals(newDto.getMemberIds(), List.of(3L, 2L));
+        Assertions.assertEquals(newDto.getUserIds(), List.of(3L, 2L));
     }
 
 }
