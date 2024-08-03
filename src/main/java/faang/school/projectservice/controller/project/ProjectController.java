@@ -7,7 +7,9 @@ import faang.school.projectservice.validator.project.ProjectValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -57,4 +59,10 @@ public class ProjectController {
         return projectService.getProjectById(projectId);
     }
 
+    @Operation(summary = "Add cover image to project")
+    @PostMapping("/{projectId}/cover")
+    public String addCover(@PathVariable Long projectId, @RequestBody MultipartFile coverImage) {
+        projectValidator.validateCover(coverImage);
+        return projectService.addCover(projectId, coverImage);
+    }
 }

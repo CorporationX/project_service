@@ -21,6 +21,7 @@ import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -159,5 +160,13 @@ public class ProjectService {
                 .filter(filteredProject -> validator.userHasAccessToProject(userId, filteredProject))
                 .map(projectMapper::toDto)
                 .toList();
+    }
+
+    public String addCover(Long projectId, MultipartFile coverImage) {
+        Project project = validator.getProjectAfterValidateId(projectId);
+        validator.validateOwnerId(project);
+
+
+        return new String();
     }
 }
