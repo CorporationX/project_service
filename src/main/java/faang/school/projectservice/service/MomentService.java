@@ -43,14 +43,11 @@ public class MomentService {
     }
 
     public MomentDto updateMoment(MomentDto momentDto) {
-        if (!momentRepository.existsById(momentDto.getId())) {
-            throw new EntityNotFoundException("no moment with such id to update");
-        } else {
-            Moment updatedMoment = mapper.toEntity(momentDto);
-            processProjects(updatedMoment);
-            momentRepository.save(updatedMoment);
-            return mapper.toDto(updatedMoment);
-        }
+        Moment momentToUpdate = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new EntityNotFoundException("no moment with such Id"));
+        mapper.update(momentDto, momentToUpdate);
+        processProjects(momentToUpdate);
+        momentRepository.save(momentToUpdate);
+        return mapper.toDto(momentToUpdate);
     }
 
     public List<MomentDto> getMomentsFilteredByDateFromProjects(Long ProjectId, MomentFilterDto filters) {
@@ -79,14 +76,15 @@ public class MomentService {
     private void processProjects(Moment moment) {
         momentValidator.validateMoment(moment);
         Set<Project> projects = new HashSet<>(moment.getProjects());
-        Set<Long> userIds = new HashSet<>(moment.getUserIds());
+        Set<Long> userIds = new HashSet<>();
+        if (moment.getUserIds() != null) {userIds.addAll(moment.getUserIds());}
         Set<Long> projectIds = moment.getProjects().stream().map(Project::getId).collect(Collectors.toSet());
         for (Long projectId : projectIds) {
             Project project = projectRepository.getProjectById(projectId);
             projects.add(project);
             if (project.getTeams() != null) {
                 Set<Long> newUserIds = project.getTeams().stream().flatMap(team -> team.getTeamMembers().stream())
-                        .map(TeamMember::getId).collect(Collectors.toSet());
+                        .map(TeamMember::getUserId).collect(Collectors.toSet());
                 userIds.addAll(newUserIds);
             }
         }
