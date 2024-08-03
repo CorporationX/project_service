@@ -27,4 +27,8 @@ public class StageInvitationRepository {
     public List<StageInvitation> findAll() {
         return repository.findAll();
     }
+
+    public List<StageInvitation> findByIdAllInvited(Long stageInvitationId) {
+        return repository.findByIdAllInvited(stageInvitationId);
+    }
 }
