@@ -5,6 +5,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -23,18 +24,24 @@ public class ImageService {
     @Value("${app.coverImage.maxWidthNonHorizontal}")
     private int maxWidthNonHorizontal;
 
-    public byte[] resizeImage(MultipartFile file) {
+    public MultipartFile resizeImage(MultipartFile file) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        String formatName = getFormatName(file.getContentType());
+
         try {
-            resize(outputStream, file);
+            resize(outputStream, file, formatName);
         } catch (IOException exception) {
             throw new RuntimeException("Failed to process image", exception);
         }
 
-        return outputStream.toByteArray();
+        byte[] imageBytes = outputStream.toByteArray();
+        return new MockMultipartFile(file.getName(),
+                                    file.getOriginalFilename(),
+                                    formatName,
+                                    imageBytes);
     }
 
-    private void resize(ByteArrayOutputStream outputStream, MultipartFile file)
+    private void resize(ByteArrayOutputStream outputStream, MultipartFile file, String formatName)
             throws IOException {
         BufferedImage originalImage = ImageIO.read(file.getInputStream());
 
@@ -42,8 +49,6 @@ public class ImageService {
         int originalWidth = originalImage.getWidth();
         int maxWidth = determineMaxWidth(originalImage);
         int maxHeight = determineMaxHeight(originalImage);
-
-        String formatName = getFormatName(file.getContentType());
 
         if (originalWidth > maxWidth || originalHeight > maxHeight) {
             Thumbnails.of(originalImage)
@@ -65,14 +70,10 @@ public class ImageService {
     }
 
     public String getFormatName(String contentType) {
-        String defaultType = "jpg";
-        if (contentType == null) {
-            return defaultType;
-        }
         return switch (contentType) {
-            case "image/png" -> "png";
-            case "image/gif" -> "gif";
-            default -> defaultType;
+            case "image/png" -> "image/png";
+            case "image/gif" -> "image/gif";
+            default -> "image/jpeg";
         };
     }
 
