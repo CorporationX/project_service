@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.ValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -9,7 +10,6 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validation.ProjectValidator;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,16 +36,14 @@ public class ProjectService {
         if (project.getVisibility() == null) {
             project.setVisibility(ProjectVisibility.PUBLIC);
         }
-        project = projectRepository.save(project);
-        return projectMapper.toDto(project);
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Transactional
     public ProjectDto update(ProjectDto projectDto) {
         projectServiceValidator.validateUpdating(projectDto);
         Project project = projectMapper.toEntity(projectDto);
-        project = projectRepository.save(project);
-        return projectMapper.toDto(project);
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Transactional(readOnly = true)
@@ -67,11 +65,12 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public ProjectDto findById(Long userId, ProjectFilterDto projectFilterDto) {
+        projectServiceValidator.validateProjectFilterDtoForFindById(projectFilterDto);
         return projectMapper.toDto(projectRepository
                 .findAvailableByUserIdAndProjectId(userId, projectFilterDto.getIdPattern())
                 .orElseThrow(() -> {
                     log.info("Project with id {} not found", projectFilterDto.getIdPattern());
-                    return new EntityNotFoundException("Project not found");
+                    return new ValidationException("Project not found");
                 }));
     }
 
@@ -81,6 +80,9 @@ public class ProjectService {
                 .toList();
     }
 
+    /**
+     * Do not use this method in Controller. Only for internal use.
+     */
     @Transactional(readOnly = true)
     public Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);

@@ -1,11 +1,11 @@
 package faang.school.projectservice.validation;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.ValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ public class ProjectValidator {
         if (projectDto.getId() != null) {
             Project project = projectRepository.findById(projectDto.getId()).orElseThrow(() -> {
                 log.info("Project with id {} does not exist.", projectDto.getId());
-                return new EntityNotFoundException("Project with id " + projectDto.getId() + " does not exist.");
+                return new ValidationException("Project with id " + projectDto.getId() + " does not exist.");
             });
             if (project.getStatus() == ProjectStatus.COMPLETED || project.getStatus() == ProjectStatus.CANCELLED) {
                 log.info("Project with id {} completed or cancelled", projectDto.getId());
@@ -39,6 +39,13 @@ public class ProjectValidator {
         } else {
             log.info("Field id is null");
             throw new ValidationException("Field id is null");
+        }
+    }
+
+    public void validateProjectFilterDtoForFindById(ProjectFilterDto projectFilterDto) {
+        if (projectFilterDto.getIdPattern() == null) {
+            log.info("Field id pattern is null");
+            throw new ValidationException("Field id pattern is null");
         }
     }
 }
