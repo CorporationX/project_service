@@ -12,13 +12,17 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.MomentValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -39,11 +43,14 @@ public class MomentService {
     }
 
     public MomentDto updateMoment(MomentDto momentDto) {
-        Moment momentToUpdate = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new DataValidationException("No such moment"));
-        mapper.update(momentDto, momentToUpdate);
-        processProjects(momentToUpdate);
-        momentRepository.save(momentToUpdate);
-        return mapper.toDto(momentToUpdate);
+        if (!momentRepository.existsById(momentDto.getId())) {
+            throw new EntityNotFoundException("no moment with such id to update");
+        } else {
+            Moment updatedMoment = mapper.toEntity(momentDto);
+            processProjects(updatedMoment);
+            momentRepository.save(updatedMoment);
+            return mapper.toDto(updatedMoment);
+        }
     }
 
     public List<MomentDto> getMomentsFilteredByDateFromProjects(Long ProjectId, MomentFilterDto filters) {
@@ -71,16 +78,20 @@ public class MomentService {
 
     private void processProjects(Moment moment) {
         momentValidator.validateMoment(moment);
-        List<Project> projects = new ArrayList<>();
-        List<Long> projectsIds = moment.getProjects().stream().map(Project::getId).distinct().toList();
-        for (Long projectId : projectsIds) {
+        Set<Project> projects = new HashSet<>(moment.getProjects());
+        Set<Long> userIds = new HashSet<>(moment.getUserIds());
+        Set<Long> projectIds = moment.getProjects().stream().map(Project::getId).collect(Collectors.toSet());
+        for (Long projectId : projectIds) {
             Project project = projectRepository.getProjectById(projectId);
-            if (project.getTeams() != null) {
-                moment.getUserIds().addAll(project.getTeams().stream().flatMap(team -> team.getTeamMembers().stream()).map(TeamMember::getUserId).toList());
-            }
             projects.add(project);
+            if (project.getTeams() != null) {
+                Set<Long> newUserIds = project.getTeams().stream().flatMap(team -> team.getTeamMembers().stream())
+                        .map(TeamMember::getId).collect(Collectors.toSet());
+                userIds.addAll(newUserIds);
+            }
         }
-        moment.setProjects(projects);
+        moment.setProjects(projects.stream().toList());
+        moment.setUserIds(userIds.stream().toList());
     }
 
 }

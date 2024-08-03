@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.dto.client.MomentFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.MomentFilter;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -14,6 +13,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.MomentValidator;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,25 +76,27 @@ public class MomentServiceTest {
 
     @Test
     public void testUpdateMoment() {
-        momentDto.setUserIds(List.of(1L, 2L));
+        momentDto.setUserIds(List.of(1L, 2L, 4L));
+        momentDto.setDate(LocalDateTime.of(2020, 1, 1, 1, 1));
         project.setTeams(List.of(team));
-        Moment updatedMoment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).
-                userIds(List.of(1L, 2L, 4L)).build();
+        MomentDto expectedDto = MomentDto.builder().id(1L).name("momentName").date(LocalDateTime.of(2020, 1, 1, 1, 1))
+                .projectIds(List.of(project.getId(), project.getId())).userIds(List.of(1L, 2L, 4L)).build();
+        Moment expectedMoment = momentMapper.toEntity(expectedDto);
 
-        Mockito.when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
-        Mockito.when(momentRepository.save(Mockito.any(Moment.class))).thenReturn(moment);
+        Mockito.when(momentRepository.existsById(1L)).thenReturn(true);
+        Mockito.when(momentRepository.save(Mockito.any(Moment.class))).thenReturn(expectedMoment);
         Mockito.when(projectRepository.getProjectById(1L)).thenReturn(project);
 
-        momentService.updateMoment(momentDto);
+        MomentDto actualDto = momentService.updateMoment(momentDto);
         Mockito.verify(momentRepository).save(Mockito.any(Moment.class));
         Mockito.verify(projectRepository).getProjectById(1L);
-        Assert.assertEquals(moment, updatedMoment);
+        Assert.assertEquals(expectedDto, actualDto);
     }
 
     @Test
     public void testUpdateNonexistentMoment() {
-        Mockito.when(momentRepository.findById(1L)).thenReturn(Optional.empty());
-        Assert.assertThrows(DataValidationException.class, () -> momentService.updateMoment(momentDto));
+        Mockito.when(momentRepository.existsById(1L)).thenReturn(false);
+        Assert.assertThrows(EntityNotFoundException.class, () -> momentService.updateMoment(momentDto));
     }
 
     @Test
@@ -134,7 +136,6 @@ public class MomentServiceTest {
 
     @Test
     public void testGetMomentById() {
-        momentDto.setUserIds(Collections.emptyList());
         Mockito.when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
         MomentDto actualDto = momentService.getMomentById(1L);
         Mockito.verify(momentRepository).findById(1L);
