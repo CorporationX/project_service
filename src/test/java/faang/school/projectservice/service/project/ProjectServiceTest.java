@@ -52,8 +52,6 @@ public class ProjectServiceTest {
     private SubProjectMapper subProjectMapper;
     private MomentService momentService;
     private List<SubProjectFilter> subProjectFilters = new ArrayList<>();
-    @Mock
-    private S3Service s3Service;
 
     @BeforeEach
     public void init() {
@@ -74,7 +72,7 @@ public class ProjectServiceTest {
 
         projectService = new ProjectService(
                 projectRepository, projectMapper, filters, updaters, userContext, validator,
-                subProjectMapper, momentService, subProjectFilters, s3Service);
+                subProjectMapper, momentService, subProjectFilters);
 
         project = Project.builder()
                 .id(projectId)

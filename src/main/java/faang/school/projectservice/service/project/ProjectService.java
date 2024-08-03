@@ -42,7 +42,6 @@ public class ProjectService {
     private final SubProjectMapper subProjectMapper;
     private final MomentService momentService;
     private final List<SubProjectFilter> subProjectFilters;
-    private final S3Service s3Service;
 
     public ProjectDto add(ProjectDto projectDto) {
         if (projectDto.getOwnerId() == null) {
@@ -162,16 +161,5 @@ public class ProjectService {
                 .filter(filteredProject -> validator.userHasAccessToProject(userId, filteredProject))
                 .map(projectMapper::toDto)
                 .toList();
-    }
-
-    public String addCover(Long projectId, MultipartFile coverImage) {
-        Project project = validator.getProjectAfterValidateId(projectId);
-        validator.validateOwnerId(project);
-
-        String folder = project.getId() + project.getName();
-        String key = s3Service.uploadFile(coverImage, folder);
-        project.setCoverImageId(key);
-
-        return key;
     }
 }

@@ -43,7 +43,7 @@ services:
     accessKey: user
     secretKey: password
     bucketName: project-bucket
-    region: region
+    region: us-east-1
     isMocked: false
   payment-service:
     host: http://localhost

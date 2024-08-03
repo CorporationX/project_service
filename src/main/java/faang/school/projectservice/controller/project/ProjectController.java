@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
 import faang.school.projectservice.service.image.ImageService;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,7 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ProjectValidator projectValidator;
     private final ImageService imageService;
+    private final S3Service s3Service;
 
     @Operation(summary = "Create new project")
     @PostMapping("/add")
@@ -66,6 +68,6 @@ public class ProjectController {
     public String addCover(@PathVariable Long projectId, @RequestBody MultipartFile coverImage) {
         projectValidator.validateCover(coverImage);
         MultipartFile coverImageCorrect = imageService.resizeImage(coverImage);
-        return projectService.addCover(projectId, coverImageCorrect);
+        return s3Service.addCover(projectId, coverImageCorrect);
     }
 }

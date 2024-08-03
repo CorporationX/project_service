@@ -58,9 +58,6 @@ public class ProjectServiceForSubprojectTest {
     private List<SubProjectFilter> subProjectFilters = List.of(nameFilter, statusFilter);
     private List<ProjectFilter> projectFilters = new ArrayList<>();
     private List<ProjectUpdater> projectUpdaters = new ArrayList<>();
-    @Mock
-    private S3Service s3Service;
-
     private Long parentProjectId = 1L;
     private Long ownerId = 100L;
     private String name = "SubProject name";
@@ -85,7 +82,7 @@ public class ProjectServiceForSubprojectTest {
     void setUp() {
         projectService = new ProjectService(
                 projectRepository, projectMapper, projectFilters, projectUpdaters,
-                userContext, validator, subProjectMapper, momentService, subProjectFilters, s3Service);
+                userContext, validator, subProjectMapper, momentService, subProjectFilters);
         lenient().when(validator.getProjectAfterValidateId(parentProjectId)).thenReturn(parentProject);
         lenient().when(userContext.getUserId()).thenReturn(ownerId);
     }

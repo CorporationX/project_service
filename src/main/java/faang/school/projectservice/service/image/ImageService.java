@@ -71,9 +71,9 @@ public class ImageService {
 
     public String getFormatName(String contentType) {
         return switch (contentType) {
-            case "image/png" -> "image/png";
-            case "image/gif" -> "image/gif";
-            default -> "image/jpeg";
+            case "image/png" -> "PNG";
+            case "image/gif" -> "GIF";
+            default -> "JPEG";
         };
     }
 

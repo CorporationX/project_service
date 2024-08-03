@@ -9,6 +9,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.image.ImageService;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,8 @@ public class ProjectControllerTest {
     private ProjectValidator projectValidator;
     private ProjectRepository projectRepository;
     private UserContext userContext;
+    @Mock
+    private S3Service s3Service;
     private final long ownerId = 1L;
     private final String name = "Project";
     private final String description = "Cool project";
@@ -51,7 +54,7 @@ public class ProjectControllerTest {
     @BeforeEach
     void setUp() {
         projectValidator = Mockito.spy(new ProjectValidator(projectRepository, userContext));
-        projectController = new ProjectController(projectService, projectValidator, imageService);
+        projectController = new ProjectController(projectService, projectValidator, imageService, s3Service);
 
         projectDto = ProjectDto.builder()
                 .id(projectId)
