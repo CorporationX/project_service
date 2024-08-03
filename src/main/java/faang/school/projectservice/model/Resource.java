@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "resource")
+@Table(name = "project_resource")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

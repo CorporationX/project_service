@@ -15,9 +15,9 @@ public class ProjectValidator {
     private final String VALIDATION_MASSAGE_NAME_OF_PROJECT_IS_EXISTS =
             "The owner with id:%d already has a project with  name:%s";
     public void validateProjectByOwnerWithNameOfProject(ProjectDto projectDto) {
-        if(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())){
-            throw new DataValidationException(String.format(VALIDATION_MASSAGE_NAME_OF_PROJECT_IS_EXISTS,
-                    projectDto.getOwnerId(), projectDto.getName()));
-        }
+       if(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())){
+           throw new DataValidationException(String.format(VALIDATION_MASSAGE_NAME_OF_PROJECT_IS_EXISTS,
+                   projectDto.getOwnerId(), projectDto.getName()));
+       }
     }
 }
