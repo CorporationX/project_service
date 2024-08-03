@@ -6,6 +6,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +18,11 @@ public class S3Service {
     private String accessKey;
     @Value("${services.s3.secretKey}")
     private String secretKey;
-    private final AWSCredentials credentials;
-    public final AmazonS3 client;
+    private  AWSCredentials credentials;
+    public  AmazonS3 client;
 
-    public S3Service() {
+    @PostConstruct
+    private void  postConstruct() {
         credentials = new BasicAWSCredentials(
                 accessKey,
                 secretKey

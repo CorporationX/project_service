@@ -1,75 +1,99 @@
 package faang.school.projectservice.service.resource;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.amazonaws.services.s3.transfer.Upload;
-import faang.school.projectservice.dto.sharedfiles.ResourceDto;
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.resource.ResourceMapper;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.s3.S3Service;
 import faang.school.projectservice.service.project.ProjectService;
-import jakarta.activation.MimetypesFileTypeMap;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import faang.school.projectservice.validator.resource.ResourceValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
     private final S3Service s3;
-    private final BigInteger MAX_SIZE = BigInteger.valueOf(2000000L);
     private final ProjectService projectService;
     private final ProjectMapper projectMapper;
     private final ResourceRepository resourceRepository;
-    private final String DEFAULT_BUCKET = "project";
-    public ResourceDto add(MultipartFile file, TeamMember teamMember, Long projectId) {
-        teamMember.setId(4L);
+    private final UserContext userContext;
+    private final ResourceValidator validator;
+    private final ResourceMapper resourceMapper;
+    private final ProjectRepository projectRepository;
+private final TeamMemberJpaRepository teamMemberJpaRepository;
+    private final TeamRepository teamRepository;
 
-        Project project = projectMapper.toEntity(projectService.getProjectById(projectId));
+    private final String DEFAULT_BUCKET = "project";
+
+    public ResourceDto add(MultipartFile file, List<TeamRole> allowedTeamRoles, Long projectId) {
+
+        long userId = userContext.getUserId();
+
+//        Project project1 = new Project();
+//        project1.setName("name");
+//        project1.setDescription("Desc");
+//        project1.setOwnerId(2L);
+//        project1.setStatus(ProjectStatus.CREATED);
+//        project1.setVisibility(ProjectVisibility.PUBLIC);
+//        project1.setMaxStorageSize(BigInteger.valueOf(2_147_483_648L));
+//        project1.setStorageSize(BigInteger.ZERO);
+//        project1 = projectRepository.save(project1);
+//        Team team = new Team();
+//        team.setProject(project1);
+//        team = teamRepository.save(team);
+//        TeamMember teamMember1 = new TeamMember();
+//        teamMember1.setUserId(userId);
+//        teamMember1.setRoles(List.of(TeamRole.OWNER, TeamRole.MANAGER, TeamRole.DEVELOPER));
+//        teamMember1.setTeam(team);
+//        teamMemberJpaRepository.save(teamMember1);
+
+
+
+
+        Project project = projectRepository.getProjectById(projectId);
+
+        validator.validateStorageOverflow(project, file);
+        TeamMember teamMember = validator.getTeamMember(project, userId);
+
+
+        //teamMember.setId(4L);
+        if (allowedTeamRoles == null || allowedTeamRoles.isEmpty()) {
+            allowedTeamRoles = new ArrayList<>(teamMember.getRoles());
+        }
         LocalDateTime now = LocalDateTime.now();
-        String key = file.getName() + now;
+        String key = file.getOriginalFilename() + now;
         Resource resource = new Resource();
         resource.setKey(key);
         resource.setName(file.getOriginalFilename());
         resource.setSize(BigInteger.valueOf(file.getSize()));
-        resource.setAllowedRoles(teamMember.getRoles());
+        resource.setAllowedRoles(allowedTeamRoles);
         resource.setType(ResourceType.getResourceType(file.getContentType()));
         resource.setStatus(ResourceStatus.ACTIVE);
         resource.setCreatedBy(teamMember);
+        resource.setUpdatedBy(teamMember);
         resource.setCreatedAt(now);
         resource.setUpdatedAt(now);
         resource.setProject(project);
@@ -82,16 +106,17 @@ public class ResourceService {
         ObjectMetadata data = new ObjectMetadata();
         data.setContentType(file.getContentType());
         data.setContentLength(file.getSize());
-        InputStream inputStream;
-        try {
-            inputStream = file.getInputStream();
+
+        try (InputStream inputStream = file.getInputStream()) {
+            s3.client.putObject(DEFAULT_BUCKET, path, inputStream, data);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
-
-        s3.client.putObject(DEFAULT_BUCKET, path, inputStream, data);
-        var a = resourceRepository.save(resource);
-        return new ResourceDto();
+        Resource result = resourceRepository.save(resource);
+        ResourceDto resourceDto = resourceMapper.toDto(result);
+        project.setStorageSize(project.getStorageSize().add(BigInteger.valueOf(file.getSize())));
+        projectRepository.save(project);
+        return resourceDto;
     }
 
     public ResponseEntity<InputStreamResource> get(Long resourceId) {
@@ -119,4 +144,5 @@ public class ResourceService {
                 .body(new InputStreamResource(inputStream));
 
     }
+
 }
