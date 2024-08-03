@@ -25,6 +25,10 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
 server:
   port: 8082
 
@@ -40,7 +44,7 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     isMocked: false
   payment-service:
     host: http://localhost
@@ -51,6 +55,5 @@ services:
 
 coverImage:
   maxsize: 5000000
-  maxHorizontalWidth: 1080
-  maxHorizontalHeight: 566
-  maxSquareSize: 1080
+  maxWidth: 1080
+  maxHeight: 566
