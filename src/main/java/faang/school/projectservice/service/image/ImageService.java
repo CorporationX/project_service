@@ -64,7 +64,7 @@ public class ImageService {
         return image.getWidth() > image.getHeight() ? maxHeightHorizontal : maxHeightNonHorizontal;
     }
 
-    private String getFormatName(String contentType) {
+    public String getFormatName(String contentType) {
         String defaultType = "jpg";
         if (contentType == null) {
             return defaultType;

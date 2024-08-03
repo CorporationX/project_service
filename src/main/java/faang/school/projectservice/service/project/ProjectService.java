@@ -7,6 +7,7 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.project.updater.ProjectUpdater;
@@ -162,10 +163,12 @@ public class ProjectService {
                 .toList();
     }
 
-    public String addCover(Long projectId, byte[] image) {
+    public String addCover(Long projectId, byte[] image, String contentType) {
         Project project = validator.getProjectAfterValidateId(projectId);
         validator.validateOwnerId(project);
 
+        String folder = project.getId() + project.getName();
+        Resource resource =
 
         return new String();
     }

@@ -65,7 +65,8 @@ public class ProjectController {
     @PostMapping("/{projectId}/cover")
     public String addCover(@PathVariable Long projectId, @RequestBody MultipartFile coverImage) {
         projectValidator.validateCover(coverImage);
-        byte [] image = imageService.resizeImage(coverImage);
-        return projectService.addCover(projectId, image);
+        byte [] imageByte = imageService.resizeImage(coverImage);
+        String contentType = imageService.getFormatName(coverImage.getContentType());
+        return projectService.addCover(projectId, imageByte, contentType);
     }
 }
