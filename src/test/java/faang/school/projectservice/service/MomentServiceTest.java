@@ -46,7 +46,10 @@ public class MomentServiceTest {
     private List<MomentFilter> momentFilters;
 
     @Mock
-    private ProjectRepository projectRepository;
+    private ProjectService projectService;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private MomentService momentService;
@@ -104,6 +107,8 @@ public class MomentServiceTest {
     public void testUpdateMoment() {
         when(momentRepository.findById(momentDto.getId())).thenReturn(Optional.of(moment));
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
+        when(projectService.findDifferentProjects(anyList(), anyList())).thenReturn(Collections.emptyList());
+        when(userService.findDifferentMemberIds(anyList(), anyList())).thenReturn(Collections.emptyList());
         momentService.updateMoment(momentDto);
 
         verify(momentRepository).save(moment);

@@ -7,18 +7,15 @@ import faang.school.projectservice.filter.MomentFilter;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.MomentServiceValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +24,11 @@ public class MomentService {
     private final MomentMapper momentMapper;
     private final MomentServiceValidator momentServiceValidator;
     private final List<MomentFilter> momentFilters;
-    private final ProjectRepository projectRepository;
-    private final TeamMemberRepository teamMemberRepository;
+    private final UserService userService;
+    private final ProjectService projectService;
 
+
+    @Transactional
     public MomentDto createMoment(MomentDto momentDto) {
         momentServiceValidator.validateCreateMoment(momentDto);
 
@@ -37,27 +36,14 @@ public class MomentService {
         return momentDto;
     }
 
+    @Transactional
     public MomentDto updateMoment(MomentDto momentDto) {
-        Moment moment = momentRepository.findById(momentDto.getId())
-                .orElseThrow(() -> new DataValidationException("Moment not found"));
-
-        List<Project> differentProjects = findDifferentProjects(moment.getProjects(),
-                new ArrayList<>(momentDto.getProjectsIds()));
-        if (!differentProjects.isEmpty()) {
-            moment.getUserIds().addAll(getNewMemberIds(differentProjects));
-        }
-
-        List<Long> differentMemberIds = findDifferentMemberIds(moment.getUserIds(),
-                new ArrayList<>(momentDto.getUserIds()));
-        if (!differentMemberIds.isEmpty()) {
-            moment.getProjects().addAll(getNewProjects(differentMemberIds));
-        }
-
-        if (!moment.getDescription().equals(momentDto.getDescription())) {
-            moment.setDescription(momentDto.getDescription());
-        }
-        momentRepository.save(moment);
-        return momentMapper.toDto(moment);
+        Moment moment = findMomentById(momentDto.getId());
+        Moment updatedMomentWithProjects = updateProjects(moment, momentDto.getProjectsIds());
+        Moment updatedMomentWithUsers = updateUserIds(updatedMomentWithProjects, momentDto.getUserIds());
+        Moment finalUpdatedMoment = updateDescription(updatedMomentWithUsers, momentDto.getDescription());
+        momentRepository.save(finalUpdatedMoment);
+        return momentMapper.toDto(finalUpdatedMoment);
     }
 
     public List<MomentDto> getFilteredMoments(MomentFilterDto momentFilterDto) {
@@ -74,6 +60,7 @@ public class MomentService {
     public List<MomentDto> getAllMoments() {
         return momentMapper.toDto(momentRepository.findAll());
     }
+
     public MomentDto getMomentById(Long id) {
         Moment moment = momentRepository.findById(id)
                 .orElseThrow(() -> new DataValidationException("Moment not found"));
@@ -82,40 +69,48 @@ public class MomentService {
         return momentMapper.toDto(moment);
     }
 
-    private List<Project> findDifferentProjects(List<Project> projectsFromDataBase, List<Long> newProjectIds) {
-        List<Long> existingProjectIds = projectsFromDataBase.stream()
-                .map(Project::getId)
-                .toList();
-        newProjectIds.removeAll(existingProjectIds);
-        return convertProjectsByIds(newProjectIds);
+    private Moment findMomentById(Long id) {
+        return momentRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("Moment not found"));
     }
 
-    private List<Long> getNewMemberIds(List<Project> projects) {
-        Set<Long> memberIds = new HashSet<>();
-        projects.forEach(project -> teamMemberRepository.findByProjectId(project.getId())
-                .forEach(member -> memberIds.add(member.getId())));
-
-        return new ArrayList<>(memberIds);
+    private Moment updateProjects(Moment moment, List<Long> newProjectIds) {
+        List<Project> differentProjects = projectService.findDifferentProjects(moment.getProjects(), newProjectIds);
+        List<Long> updatedUserIds = new ArrayList<>(moment.getUserIds());
+        if (!differentProjects.isEmpty()) {
+            updatedUserIds.addAll(userService.getNewMemberIds(differentProjects));
+        }
+        return Moment.builder().id(moment.getId())
+                .projects(moment.getProjects())
+                .description(moment.getDescription())
+                .userIds(updatedUserIds)
+                .build();
     }
 
-    private List<Long> findDifferentMemberIds(List<Long> userIdsFromDataBase, List<Long> newUserIds) {
-        newUserIds.removeAll(userIdsFromDataBase);
-        return newUserIds;
+    private Moment updateUserIds(Moment moment, List<Long> newUserIds) {
+        List<Long> differentMemberIds = userService.findDifferentMemberIds(moment.getUserIds(), newUserIds);
+        List<Project> updatedProjects = new ArrayList<>(moment.getProjects());
+        if (!differentMemberIds.isEmpty()) {
+            updatedProjects.addAll(projectService.getNewProjects(differentMemberIds));
+        }
+        return Moment.builder()
+                .id(moment.getId())
+                .projects(updatedProjects)
+                .description(moment.getDescription())
+                .userIds(moment.getUserIds())
+                .build();
     }
 
-    private List<Project> getNewProjects(List<Long> userIds) {
-        Set<Project> projects = new HashSet<>();
-        userIds.forEach(userId -> {
-            List<TeamMember> teamMembers = teamMemberRepository.findByUserId(userId);
-            teamMembers.forEach(teamMember -> projects.add(teamMember.getTeam().getProject()));
-        });
-        return new ArrayList<>(projects);
-    }
-
-    private List<Project> convertProjectsByIds(List<Long> projectIds) {
-        return projectIds.stream()
-                .map(projectRepository::getProjectById)
-                .toList();
+    private Moment updateDescription(Moment moment, String newDescription) {
+        if (!moment.getDescription().equals(newDescription)) {
+            return Moment.builder()
+                    .id(moment.getId())
+                    .projects(moment.getProjects())
+                    .description(newDescription)
+                    .userIds(moment.getUserIds())
+                    .build();
+        }
+        return moment;
     }
 }
 
