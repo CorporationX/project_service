@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -11,46 +10,67 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
+
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
-    @InjectMocks
-    private ProjectService projectService;
+
     @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
+
+    @InjectMocks
+    private ProjectService projectService;
+
     @Mock
     private ProjectMapper projectMapper;
-    @Mock
-    private UserContext userContext;
-    @Mock
-    private ProjectValidator projectValidator;
+
     @Mock
     private ProjectFilter projectFilter;
+
+    @Mock
+    private UserContext userContext;
+
+    @Mock
+    private ProjectValidator projectValidator;
+
 
     ProjectDto projectDto;
     Project project;
     List<Project> projects;
     List<ProjectDto> projectDtos;
     ProjectFilterDto projectFilterDto;
+    List<Project> projectsFromDataBase;
+    List<Long> newProjectIds;
+    List<Long> userIds;
 
     @BeforeEach
     void init() {
         List<ProjectFilter> projectFilters = List.of(projectFilter);
-        projectService = new ProjectService(projectRepository, projectMapper, userContext, projectValidator, projectFilters);
+        projectService = new ProjectService(projectRepository, projectMapper,
+                userContext, projectValidator, projectFilters, teamMemberRepository);
 
 
         Long id = 1L;
@@ -85,6 +105,10 @@ public class ProjectServiceTest {
 
         Mockito.lenient().when(projectFilters.get(0).isApplicable(projectFilterDto)).thenReturn(true);
         Mockito.lenient().when(projectFilters.get(0).apply(any(), any())).thenReturn(List.of(project).stream());
+
+        projectsFromDataBase = new ArrayList<>();
+        newProjectIds = new ArrayList<>();
+        userIds = new ArrayList<>();
     }
 
     @Test
@@ -142,6 +166,73 @@ public class ProjectServiceTest {
     void getAllProjectByFilters() {
         when(projectRepository.findAll()).thenReturn(projects);
         projectService.getAllProjectByFilters(projectFilterDto);
-        Mockito.verify(projectRepository, Mockito.times(1)).findAll();
+        verify(projectRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("Test findDifferentProjects with new projects not in database")
+    void testFindDifferentProjectsWhenNewProjectIdsNotInDatabase() {
+        projectsFromDataBase.add(Project.builder().id(1L).name("Existing Project").build());
+        newProjectIds = new ArrayList<>(Arrays.asList(1L, 2L, 3L));
+
+        when(projectRepository.getProjectById(2L)).thenReturn(new Project());
+        when(projectRepository.getProjectById(3L)).thenReturn(new Project());
+
+        List<Project> result = projectService.findDifferentProjects(projectsFromDataBase, newProjectIds);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    @DisplayName("Test findDifferentProjects with empty newProjectIds list")
+    void testFindDifferentProjectsWhenNewProjectIdsIsEmpty() {
+        projectsFromDataBase.add(Project.builder().id(1L).name("Existing Project").build());
+
+        List<Project> result = projectService.findDifferentProjects(projectsFromDataBase, new ArrayList<>());
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    @DisplayName("Test findDifferentProjects with empty projectsFromDataBase list")
+    void testFindDifferentProjectsWhenProjectsFromDataBaseIsEmpty() {
+        newProjectIds = Arrays.asList(1L, 2L, 3L);
+
+        when(projectRepository.getProjectById(1L)).thenReturn(new Project());
+        when(projectRepository.getProjectById(2L)).thenReturn(new Project());
+        when(projectRepository.getProjectById(3L)).thenReturn(new Project());
+
+        List<Project> result = projectService.findDifferentProjects(new ArrayList<>(), newProjectIds);
+
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    @DisplayName("Test findDifferentProjects with both lists empty")
+    void testFindDifferentProjectsWhenBothListsAreEmpty() {
+        List<Project> result = projectService.findDifferentProjects(new ArrayList<>(), new ArrayList<>());
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    @DisplayName("Test getNewProjects with empty user IDs list")
+    void testGetNewProjectsWhenUserIdsIsEmpty() {
+        List<Project> result = projectService.getNewProjects(new ArrayList<>());
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    @DisplayName("Test getNewProjects with user IDs having no team members")
+    void testGetNewProjectsWhenNoneOfUserIdsHaveTeamMembers() {
+        userIds = Arrays.asList(1L, 2L);
+
+        when(teamMemberRepository.findByUserId(1L)).thenReturn(new ArrayList<>());
+        when(teamMemberRepository.findByUserId(2L)).thenReturn(new ArrayList<>());
+
+        List<Project> result = projectService.getNewProjects(userIds);
+
+        assertEquals(0, result.size());
     }
 }
