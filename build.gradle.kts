@@ -36,6 +36,11 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
+     * Edit pictures
+     */
+    implementation("net.coobird:thumbnailator:0.4.14")
+
+    /**
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")

@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
+import faang.school.projectservice.service.image.ImageService;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +21,7 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
     private final ProjectValidator projectValidator;
+    private final ImageService imageService;
 
     @Operation(summary = "Create new project")
     @PostMapping("/add")
@@ -63,6 +65,7 @@ public class ProjectController {
     @PostMapping("/{projectId}/cover")
     public String addCover(@PathVariable Long projectId, @RequestBody MultipartFile coverImage) {
         projectValidator.validateCover(coverImage);
-        return projectService.addCover(projectId, coverImage);
+        byte [] image = imageService.resizeImage(coverImage);
+        return projectService.addCover(projectId, image);
     }
 }

@@ -54,3 +54,7 @@ services:
 app:
   coverImage:
     maxSize: 5242880
+    maxHeightHorizontal: 566
+    maxWidthHorizontal: 1080
+    maxHeightNonHorizontal: 1080
+    maxWidthNonHorizontal: 1080

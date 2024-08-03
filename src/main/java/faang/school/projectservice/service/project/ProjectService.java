@@ -162,7 +162,7 @@ public class ProjectService {
                 .toList();
     }
 
-    public String addCover(Long projectId, MultipartFile coverImage) {
+    public String addCover(Long projectId, byte[] image) {
         Project project = validator.getProjectAfterValidateId(projectId);
         validator.validateOwnerId(project);
 
