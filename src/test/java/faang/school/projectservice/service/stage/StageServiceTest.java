@@ -29,7 +29,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -188,14 +187,14 @@ public class StageServiceTest {
 
     @Test
     @DisplayName("testing that getStages() calls all his beans correctly + testing return value")
-    public void testGetStages() {
+    public void testGetStagesByFilter() {
         when(projectRepository.getProjectById(id)).thenReturn(project);
         when(stageFiltersMock.stream()).thenReturn(stageFilters.stream());
         when(stageStatusFilter.isApplicable(any())).thenReturn(true);
         when(stageStatusFilter.apply(any(), any())).thenReturn(stageStream);
         when(stageMapper.toDto(any())).thenReturn(stageDto);
 
-        List<StageDto> result = stageService.getStages(id, stageFilterDto);
+        List<StageDto> result = stageService.getStagesByFilter(id, stageFilterDto);
 
         verify(projectRepository).getProjectById(id);
         verify(stageFiltersMock).stream();

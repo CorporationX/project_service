@@ -36,7 +36,7 @@ public class StageController {
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     public List<StageDto> getStages(@PathVariable Long projectId, @RequestBody StageFilterDto filter) {
-        return stageService.getStages(projectId, filter);
+        return stageService.getStagesByFilter(projectId, filter);
     }
 
     @DeleteMapping("/remove/{stageId}")

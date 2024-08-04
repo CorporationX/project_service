@@ -1,5 +1,6 @@
 package faang.school.projectservice.model.stage_invitation;
 
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.*;
@@ -39,4 +40,14 @@ public class StageInvitation {
     @OneToOne
     @JoinColumn(name = "invited")
     private TeamMember invited;
+
+    public StageInvitation(TeamRole teamRole, TeamMember invited, Stage stage) {
+        this.description = "This is an automatic generated message\n" +
+                "You got this invite because there is deficit of " +
+                teamRole.toString() +
+                " on the stage with id " +
+                stage.getStageId();
+        this.invited = invited;
+        this.stage = stage;
+    }
 }

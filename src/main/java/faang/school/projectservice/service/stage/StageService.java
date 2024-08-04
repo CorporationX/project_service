@@ -56,7 +56,7 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
-    public List<StageDto> getStages(Long projectId, StageFilterDto filter) {
+    public List<StageDto> getStagesByFilter(Long projectId, StageFilterDto filter) {
         Project project = projectRepository.getProjectById(projectId);
         Stream<Stage> stageStream = project.getStages().stream();
 
@@ -75,7 +75,7 @@ public class StageService {
         List<Task> tasks = stage.getTasks();
 
         if (action.equals(StagePreDestroyAction.REMOVE)) {
-            tasks.forEach(task -> taskRepository.deleteById(task.getId()));
+            taskRepository.deleteAllById(tasks.stream().map(Task::getId).toList());
         } else if (action.equals(StagePreDestroyAction.DONE)) {
             tasks.forEach(task -> task.setStatus(TaskStatus.DONE));
         }
@@ -125,36 +125,21 @@ public class StageService {
     }
 
     private void searchAndSend(int rolesDeficit, Set<Long> gotStageInvitation, Stage stage, TeamRole teamRole) {
-        int sended = 0;
+        int sent = 0;
 
-        while (sended < rolesDeficit) {
+        while (sent < rolesDeficit) {
             List<Team> teams = stage.getProject().getTeams();
             for (Team team : teams) {
                 for (TeamMember teamMember : team.getTeamMembers()) {
                     if (teamMember.getRoles().contains(teamRole)
                             && !gotStageInvitation.contains(teamMember.getId())) {
-                        sendInvitation(teamMember, teamRole, stage);
+                        stageInvitationRepository.save(new StageInvitation(teamRole, teamMember, stage));
                         gotStageInvitation.add(teamMember.getId());
-                        sended++;
+                        sent++;
                     }
                 }
             }
         }
-    }
-
-    private void sendInvitation(TeamMember teamMember, TeamRole teamRole, Stage stage) {
-        stageInvitationRepository.save(StageInvitation
-                .builder()
-                .description(
-                        "This is an automatic generated message\n" +
-                                "You got this invite because there is deficit of " +
-                                teamRole.toString() +
-                                " on the stage with id " +
-                                stage.getStageId())
-                .invited(teamMember)
-                .description("")
-                .stage(stage)
-                .build());
     }
 
     public List<StageDto> getAllStages(Long projectId) {
