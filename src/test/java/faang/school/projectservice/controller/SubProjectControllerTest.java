@@ -79,7 +79,7 @@ class SubProjectControllerTest {
     @Test
     @DisplayName("testing createSubProject")
     public void testCreateSubProject() throws Exception {
-        mockMvc.perform(post("/api/v1/subproject/new")
+        mockMvc.perform(post("/api/v1/subproject")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createSubProjectDtoJson))
                 .andExpect(status().isCreated());

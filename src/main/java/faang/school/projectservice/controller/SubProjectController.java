@@ -22,9 +22,10 @@ import java.util.List;
 @RequestMapping("/api/v1/subproject")
 @RequiredArgsConstructor
 public class SubProjectController {
+
     private final SubProjectService subProjectService;
 
-    @PostMapping("/new")
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto createSubProject(@RequestBody @Valid CreateSubProjectDto createSubProjectDto) {
         return subProjectService.createSubProject(createSubProjectDto);
