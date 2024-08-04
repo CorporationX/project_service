@@ -17,10 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 
 @Service
@@ -39,12 +41,20 @@ public class VacancyService {
     }
 
     public List<VacancyDto> getAll(VacancyFilterDto filterDto) {
-        Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
-        List<VacancyFilter> filters = vacancyFilters.stream().filter(el -> el.isValid(filterDto)).toList();
-        for (VacancyFilter filter : filters) {
-            vacancies = filter.apply(vacancies, filterDto);
+
+        Stream<Vacancy> requestStream = StreamSupport.stream(vacancyRepository
+                .findAll().spliterator(), false);
+
+        List<VacancyFilter> requestFilterStream = vacancyFilters.stream()
+                .filter(filter -> filter.isValid(filterDto))
+                .toList();
+
+        for (VacancyFilter filter : requestFilterStream) {
+            requestStream = filter.apply(requestStream, filterDto);
         }
-        return vacancyMapper.toDtoList(vacancies.toList());
+        return requestStream
+                .map(vacancyMapper::toDto)
+                .toList();
     }
 
     public Map<String, String> create(VacancyDto vacancyDto) {

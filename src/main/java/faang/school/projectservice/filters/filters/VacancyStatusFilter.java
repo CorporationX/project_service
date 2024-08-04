@@ -13,11 +13,11 @@ public class VacancyStatusFilter implements VacancyFilter {
 
     @Override
     public boolean isValid(VacancyFilterDto dto) {
-        return dto.getStatus()!=null;
+        return dto.getStatus() != null;
     }
 
     @Override
     public Stream<Vacancy> apply(Stream<Vacancy> stream, VacancyFilterDto dto) {
-        return stream.filter(el->el.getStatus().equals(dto.getStatus()));
+        return stream.filter(el -> el.getStatus().equals(dto.getStatus()));
     }
 }

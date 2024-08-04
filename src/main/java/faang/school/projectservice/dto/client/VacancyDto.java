@@ -25,7 +25,7 @@ public class VacancyDto {
     @NotNull(message = "Vacancy must have a project")
     private Long projectId;
 
-    @Size(min = 1, message = "Candidates must be not empty")
+    //@Size(min = 1, message = "Candidates must be not empty")
     private List<Long> candidateIds;
 
     @NotNull

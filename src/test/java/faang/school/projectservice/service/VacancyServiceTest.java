@@ -7,6 +7,7 @@ import faang.school.projectservice.filters.filters.VacancyFilter;
 import faang.school.projectservice.filters.filters.VacancyNameFilter;
 import faang.school.projectservice.filters.filters.VacancyStatusFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
+import faang.school.projectservice.mapper.VacancyMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.CandidateRepository;
@@ -14,26 +15,21 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class VacancyServiceTest {
     @InjectMocks
     private VacancyService vacancyService;
@@ -42,16 +38,19 @@ class VacancyServiceTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Spy
-    private VacancyMapper vacancyMapper;
+    private VacancyMapper vacancyMapper = new VacancyMapperImpl();
     @Mock
     private CandidateRepository candidateRepository;
     @Mock
     private List<VacancyFilter> vacancyFilters;
+
     private Long vacancyId;
     private Vacancy vacancy;
     private TeamMember teamMember;
     private VacancyDto vacancyDto;
+    @Spy
     private VacancyNameFilter vacancyNameFilter;
+    @Spy
     private VacancyStatusFilter vacancyStatusFilter;
     private VacancyFilterDto vacancyFilterDto;
 
@@ -59,11 +58,11 @@ class VacancyServiceTest {
     public void setUp() {
         vacancyFilterDto = VacancyFilterDto
                 .builder()
-                .name("Java")
+                .name("Java developer")
                 .status(VacancyStatus.OPEN)
                 .build();
-        vacancyNameFilter = Mockito.mock(VacancyNameFilter.class);
-        vacancyStatusFilter = Mockito.mock(VacancyStatusFilter.class);
+        //vacancyNameFilter = Mockito.mock(VacancyNameFilter.class);
+        //vacancyStatusFilter = Mockito.mock(VacancyStatusFilter.class);
         List<VacancyFilter> filters = List.of(vacancyNameFilter, vacancyStatusFilter);
         vacancyService = new VacancyService(
                 vacancyRepository,
@@ -179,9 +178,9 @@ class VacancyServiceTest {
         when(vacancyRepository.findAll()).thenReturn(getVacancies());
 //        when(vacancyMapper.toDtoList(getFilteredVacancies(vacancyFilterDto)))
 //                .thenReturn(getFilteredDtos());
-        List<VacancyDto> result = vacancyService.getAll(vacancyFilterDto);
 
-        assertEquals(result.size(),getFilteredVacancies(vacancyFilterDto).size());
+        List<VacancyDto> result = vacancyService.getAll(vacancyFilterDto);
+        assertEquals(result.size(), 1);
     }
     private List<VacancyDto> getFilteredDtos(){
         VacancyDto firstDto = VacancyDto
@@ -189,18 +188,31 @@ class VacancyServiceTest {
                 .id(1L)
                 .name("Java developer")
                 .description("Java developer to startup")
-                .status(VacancyStatus.OPEN)
+                .status(VacancyStatus.valueOf("OPEN"))
                 .projectId(1L)
                 .salary(1000.0)
+                .candidateIds(Arrays.asList(1L))
                 .build();
 
-        return List.of(firstDto);
+        VacancyDto secondDto = VacancyDto
+                .builder()
+                .id(1L)
+                .name("Python developer")
+                .description("Java developer to startup")
+                .status(VacancyStatus.valueOf("OPEN"))
+                .projectId(1L)
+                .salary(1000.0)
+                .candidateIds(Arrays.asList(1L))
+                .build();
+
+        return Arrays.asList(firstDto, secondDto);
     }
-    private List<Vacancy> getFilteredVacancies(VacancyFilterDto filter ) {
+   /* private List<Vacancy> getFilteredVacancies(VacancyFilterDto filter ) {
         return getVacancies()
                 .stream().filter(el->
                 el.getName().contains(filter.getName())&& el.getStatus().equals(filter.getStatus())).toList();
-    }
+    }*/
+
     private List<Vacancy> getVacancies() {
         Vacancy firstVacancy = Vacancy
                 .builder()
@@ -210,20 +222,21 @@ class VacancyServiceTest {
                 .status(VacancyStatus.OPEN)
                 .project(new Project())
                 .salary(1000.0)
+                .candidates(Collections.singletonList(Candidate.builder().id(1L).build()))
                 .build();
+
         Vacancy secondVacancy = Vacancy
                 .builder()
                 .id(1L)
                 .name("Python developer")
-                .description("Python developer to real estate project")
+                .description("Java developer to startup")
                 .status(VacancyStatus.OPEN)
                 .project(new Project())
                 .salary(1000.0)
+                .candidates(Collections.singletonList(Candidate.builder().id(1L).build()))
                 .build();
-        ArrayList<Vacancy> result = new ArrayList<>();
-        result.add(firstVacancy);
-        result.add(secondVacancy);
-        return result;
+
+        return Arrays.asList(firstVacancy, secondVacancy);
     }
 
     private List<Candidate> getCandidates(Vacancy vacancy) {

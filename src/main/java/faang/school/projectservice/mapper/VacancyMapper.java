@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -21,7 +22,11 @@ public interface VacancyMapper {
 
     @Named("toCandidates")
     default List<Long> mapCandidate(List<Candidate> candidates) {
-        return candidates.stream().map(Candidate::getId).toList();
+        List<Long> candidates1 = new ArrayList<>();
+        for (Candidate candidate : candidates) {
+            candidates1.add(candidate.getId());
+        }
+        return candidates1;
     }
     List<VacancyDto> toDtoList(List<Vacancy> vacancies);
 }

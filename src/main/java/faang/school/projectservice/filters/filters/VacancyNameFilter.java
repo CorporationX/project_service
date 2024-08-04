@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 @Component
 public class VacancyNameFilter implements VacancyFilter {
+
     @Override
     public boolean isValid(VacancyFilterDto dto) {
         return dto.getName() != null && !dto.getName().isEmpty();
