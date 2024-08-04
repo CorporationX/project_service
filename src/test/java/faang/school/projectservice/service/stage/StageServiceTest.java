@@ -83,6 +83,7 @@ public class StageServiceTest {
     private Stream<Stage> stageStream;
     private List<StageFilter> stageFilters;
     private List<StageDto> stageDtos;
+    private List<Task> tasks;
 
     @BeforeEach
     public void setUp() {
@@ -136,7 +137,7 @@ public class StageServiceTest {
                 .id(id)
                 .build();
 
-        List<Task> tasks = new ArrayList<>(Collections.singletonList(task));
+        tasks = new ArrayList<>(Collections.singletonList(task));
         List<Task> tasksReplaced = new ArrayList<>(Collections.singletonList(task));
 
         List<Stage> stages = new ArrayList<>(Collections.singletonList(stage));
@@ -209,13 +210,13 @@ public class StageServiceTest {
     @DisplayName("testing that removeStage() calls all his beans correctly when StagePreDestroyAction.REMOVE was given")
     public void testRemoveStageRemove() {
         when(stageRepository.getById(id)).thenReturn(stage);
-        doNothing().when(taskRepository).deleteById(task.getId());
+        doNothing().when(taskRepository).deleteAllById(tasks.stream().map(Task::getId).toList());
         doNothing().when(stageRepository).delete(stage);
 
         stageService.removeStage(id, StagePreDestroyAction.REMOVE);
 
         verify(stageRepository).getById(id);
-        verify(taskRepository).deleteById(task.getId());
+        verify(taskRepository).deleteAllById(tasks.stream().map(Task::getId).toList());
         verify(stageRepository).delete(stage);
     }
 
