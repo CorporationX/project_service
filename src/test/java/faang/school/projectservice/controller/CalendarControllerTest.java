@@ -83,7 +83,7 @@ class CalendarControllerTest {
     @Test
     @DisplayName("testing createCalendarForProject endpoint")
     void testCreateCalendarForProject() throws Exception {
-        mockMvc.perform(post("/api/v1/calendar/new")
+        mockMvc.perform(post("/api/v1/calendar")
                         .param("projectId", String.valueOf(projectId))
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(calendarDtoJson))
@@ -94,7 +94,7 @@ class CalendarControllerTest {
     @Test
     @DisplayName("testing createEvent endpoint")
     void testCreateEvent() throws Exception {
-        mockMvc.perform(post("/api/v1/calendar/{calendarId}/event/new", calendarId)
+        mockMvc.perform(post("/api/v1/calendar/{calendarId}/event", calendarId)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(eventDtoJson))
                 .andExpect(status().isCreated());
@@ -120,7 +120,7 @@ class CalendarControllerTest {
     @Test
     @DisplayName("testing createEvents endpoint")
     void testCreateEvents() throws Exception {
-        mockMvc.perform(post("/api/v1/calendar/{calendarId}/event", calendarId)
+        mockMvc.perform(post("/api/v1/calendar/{calendarId}/events", calendarId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(eventDtoListJson))
                 .andExpect(status().isCreated());
@@ -130,7 +130,7 @@ class CalendarControllerTest {
     @Test
     @DisplayName("testing getEvents endpoint")
     void testGetEvents() throws Exception {
-        mockMvc.perform(get("/api/v1/calendar/{calendarId}/event", calendarId))
+        mockMvc.perform(get("/api/v1/calendar/{calendarId}/events", calendarId))
                 .andExpect(status().isOk());
         verify(calendarService, times(1)).getEvents(calendarId);
     }
