@@ -14,16 +14,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class S3Config {
 
-    @Value("${service.s3.accessKey}")
+    @Value("${services.s3.accessKey}")
     private String accessKey;
 
-    @Value("${service.s3.secretKey")
+    @Value("${services.s3.secretKey}")
     private String secretKey;
 
-    @Value("${service.s3.endpoint")
+    @Value("${services.s3.endpoint}")
     private String endpoint;
 
-    @Value("${service.s3.bucketName")
+    @Value("${services.s3.bucketName}")
     private String bucketName;
 
     @Bean(name = "clientAmazonS3")

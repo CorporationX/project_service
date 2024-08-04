@@ -42,4 +42,6 @@ public class ResourceService {
 
         return resourceMapper.resourceToDto(resource);
     }
+
+    public
 }

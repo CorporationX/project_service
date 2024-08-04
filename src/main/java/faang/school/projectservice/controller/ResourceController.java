@@ -12,9 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class ResourceController {
     private final ResourceService resourceService;
 
-    @PostMapping("/{projectId}/add")
+    @PutMapping("/{projectId}/add")
     public ResourceDto addResource(@PathVariable Long projectId, @RequestBody MultipartFile file) {
         return resourceService.addResource(projectId, file);
     }
 
+    @
 }

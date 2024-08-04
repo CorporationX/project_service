@@ -37,6 +37,7 @@ public class S3ServiceImpl {
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(),
                 file.getOriginalFilename());
         try {
+            log.info(bucketName + "bucketname");
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key,
                     file.getInputStream(),
                     objectMetadata);
