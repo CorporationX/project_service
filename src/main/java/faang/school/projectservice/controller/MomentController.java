@@ -47,14 +47,14 @@ public class MomentController {
         return momentService.updateMoment(momentDto);
     }
 
-    @GetMapping("{projectId}/filtered")
+    @GetMapping("/filtered/{projectId}")
     public List<MomentDto> getMomentsFilteredByDateFromProjects(@PathVariable Long projectId, @RequestBody MomentFilterDto filter) {
         momentFilterDtoValidator.validateMomentFilterDto(filter);
         return momentService.getMomentsFilteredByDateFromProjects(projectId, filter);
     }
 
-    @GetMapping("/all")
-    public List<MomentDto> getAllMoments(Long projectId) {
+    @GetMapping("/all/{projectId}")
+    public List<MomentDto> getAllMoments(@PathVariable Long projectId) {
         return momentService.getAllMoments(projectId);
     }
 

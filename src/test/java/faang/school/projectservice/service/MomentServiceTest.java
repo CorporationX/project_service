@@ -138,6 +138,7 @@ public class MomentServiceTest {
 
     @Test
     public void testGetMomentById() {
+        momentDto.setDate(LocalDateTime.of(2021, 1, 1, 1, 1));
         Mockito.when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
         MomentDto actualDto = momentService.getMomentById(1L);
         Mockito.verify(momentRepository).findById(1L);

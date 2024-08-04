@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.dto.client.MomentFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.MomentFilter;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -18,7 +17,6 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,7 +72,6 @@ public class MomentService {
     }
 
     private void processProjects(Moment moment) {
-        momentValidator.validateMoment(moment);
         Set<Project> projects = new HashSet<>(moment.getProjects());
         Set<Long> userIds = new HashSet<>();
         if (moment.getUserIds() != null) {userIds.addAll(moment.getUserIds());}

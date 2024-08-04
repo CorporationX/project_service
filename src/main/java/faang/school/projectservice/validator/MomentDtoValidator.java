@@ -22,7 +22,9 @@ public class MomentDtoValidator {
         if (momentDto.getProjectIds() == null ||momentDto.getProjectIds().isEmpty()) {
             throw new DataValidationException("dto has no projects");
         }
+        validateProjectIds(momentDto);
     }
+
     public void validateProjectIds(MomentDto momentDto) {
         for (Long projectId : momentDto.getProjectIds()) {
             if (!projectRepository.existsById(projectId)) {
