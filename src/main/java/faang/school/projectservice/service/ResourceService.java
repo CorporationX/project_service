@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.math.BigInteger;
 
 @Service
@@ -43,5 +44,16 @@ public class ResourceService {
         return resourceMapper.resourceToDto(resource);
     }
 
-    public
+    public ResourceDto updateResource(Long userId, Long resourceId, MultipartFile file) {
+        Resource resourceFromDB = resourceRepository.getOne(resourceId);
+        Project project = resourceFromDB.getProject();
+
+        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()))
+                .subtract(resourceFromDB.getSize());
+    }
+
+    public InputStream downloadResource(Long resourceId) {
+        Resource resourc = getRosoursById(resourceId);
+        return s3Service.downloadFile(resourc.getKey());
+    }
 }
