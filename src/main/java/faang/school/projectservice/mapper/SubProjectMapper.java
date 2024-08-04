@@ -10,6 +10,6 @@ import org.mapstruct.ReportingPolicy;
 public interface SubProjectMapper {
     @Mapping(target = "parentProject", ignore = true)
     Project toEntity(SubProjectDto subProjectDto);
-    @Mapping(source = "parentProject.id", target ="parentProjectId" )
+
     SubProjectDto toDto(Project project);
 }

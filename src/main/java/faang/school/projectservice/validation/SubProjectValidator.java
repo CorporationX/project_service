@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.subproject;
+package faang.school.projectservice.validation;
 
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
 import faang.school.projectservice.model.Project;

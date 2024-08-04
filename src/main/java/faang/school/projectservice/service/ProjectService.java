@@ -4,20 +4,18 @@ import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
-import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.mapper.SubProjectMapper;
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validator.subproject.SubProjectValidator;
+import faang.school.projectservice.validation.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -30,6 +28,7 @@ public class ProjectService {
     private final MomentService momentService;
     private final ProjectRepository projectRepository;
     private final List<SubProjectFilter> subProjectFilters;
+    private final TeamService teamService;
 
     @Transactional
     public SubProjectDto createSubProject(SubProjectDto subProjectDto) {
@@ -44,16 +43,26 @@ public class ProjectService {
 
     @Transactional
     public void updateSubProject(SubProjectDto subProjectDto) {
-        MomentDto momentDto = new MomentDto();
         Project subProject = subProjectMapper.toEntity(subProjectDto);
+        subProject.setStatus(subProjectDto.getStatus());
+        subProject.setVisibility(subProjectDto.getVisibility());
         projectRepository.save(subProject);
-        if (subProjectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
-            projectRepository.completeProjectSubprojects(subProjectDto.getId());
+        MomentDto momentDto = getMomentDto(subProject);
+        momentService.addMoment(momentDto);
+
+    }
+
+    private MomentDto getMomentDto(Project subProject) {
+        MomentDto momentDto = new MomentDto();
+        momentDto.setName("Выполнены все подпроекты");
+        momentDto.setProjectIds(Arrays.asList(subProject.getId()));
+        List<TeamMember> teamMember = teamService.getAllTeamMember(subProject.getId());
+        List<Long> userIds = new ArrayList<>();
+        for (TeamMember tm : teamMember) {
+            userIds.add(tm.getUserId());
         }
-        if (subProjectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
-            projectRepository.makeSubprojectsPrivate(subProjectDto.getId());
-            momentService.addMoment(momentDto);
-        }
+        momentDto.setUserIds(userIds);
+        return momentDto;
     }
 
     @Transactional
