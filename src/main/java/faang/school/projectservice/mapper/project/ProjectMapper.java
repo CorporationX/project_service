@@ -21,12 +21,12 @@ public interface ProjectMapper {
     @Mapping(target = "teams", ignore = true)
     Project toEntity(ProjectDto dto);
 
-    @Mapping(source = "children", target = "childrenIds", qualifiedByName = "childrenProjectsIds")
-    @Mapping(source = "stages", target = "stagesIds", qualifiedByName = "stagesIds")
-    @Mapping(source = "teams", target = "teamsIds", qualifiedByName = "teamsIds")
+    @Mapping(source = "children", target = "childrenIds", qualifiedByName = "childrenProjectsToListChildrenProjectsIds")
+    @Mapping(source = "stages", target = "stagesIds", qualifiedByName = "stagesToListStagesIds")
+    @Mapping(source = "teams", target = "teamsIds", qualifiedByName = "teamsToListTeamsIds")
     ProjectDto toDto(Project entity);
 
-    @Named("childrenProjectsIds")
+    @Named("childrenProjectsToListChildrenProjectsIds")
     default List<Long> getChildrenIds(List<Project> projects) {
         if (projects == null) {
             return null;
@@ -34,7 +34,7 @@ public interface ProjectMapper {
         return projects.stream().map(Project::getId).toList();
     }
 
-    @Named("stagesIds")
+    @Named("stagesToListStagesIds")
     default List<Long> getStagesIds(List<Stage> stages) {
         if (stages == null) {
             return null;
@@ -42,7 +42,7 @@ public interface ProjectMapper {
         return stages.stream().map(Stage::getStageId).toList();
     }
 
-    @Named("teamsIds")
+    @Named("teamsToListTeamsIds")
     default List<Long> getTeamsIds(List<Team> teams) {
         if (teams == null) {
             return null;

@@ -1,12 +1,13 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.FilterDto;
+import faang.school.projectservice.dto.project.FilterProjectDto;
+import faang.school.projectservice.dto.project.GeneralProjectInfoDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.ProjectValidator;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.listeners.events.MomentEvent;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
@@ -19,6 +20,7 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -33,47 +35,55 @@ public class ProjectService {
     private final TeamRepository teamRepository;
     private final ProjectMapper projectMapper;
     private final SubProjectMapper subProjectMapper;
-    private final List<Filter<FilterDto, Project>> filters;
+    private final List<Filter<FilterProjectDto, Project>> filters;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ProjectDto createProject(ProjectDto projectDto) {
         Project project = projectMapper.toEntity(projectDto);
-        checkDtoForNullFields(projectDto, project);
+        setStagesIfNotNull(projectDto, project);
+        setTeamsIfNotNull(projectDto, project);
         return projectMapper.toDto(projectJpaRepository.save(project));
     }
 
     public CreateSubProjectDto createSubProject(Long parentProjectId, CreateSubProjectDto subProjectDto) {
         Project parentProject = projectJpaRepository.getReferenceById(parentProjectId);
         Project childProject = subProjectMapper.toEntity(subProjectDto);
-        log.info("Got child project from Dto withing creating subproject with id = " + childProject.getId());
-        childProject.setParentProject(parentProject);
-        if (parentProject.getId() != null) {
-            parentProject.getChildren().add(childProject);
-            checkDtoForNullFields(subProjectDto, parentProject);
-            if (parentProject.getVisibility().equals(ProjectVisibility.PUBLIC) &&
-                    childProject.getVisibility().equals(ProjectVisibility.PRIVATE)) {
-                log.warn("It's not possible to a create private subproject for a public project");
-                throw new DataValidationException("It's not possible to a create private subproject for a public project");
-            }
+        if (parentProject.getVisibility().equals(ProjectVisibility.PUBLIC) &&
+                childProject.getVisibility().equals(ProjectVisibility.PRIVATE)) {
+            log.warn("It's not possible to a create private subproject for a public project. Parent project id {} is {}< Child project id {} is {}"
+                    , parentProjectId
+                    , parentProject.getVisibility()
+                    , childProject.getId()
+                    , childProject.getVisibility()
+            );
+            throw new DataValidationException("It's not possible to a create private subproject for a public project");
         }
-        projectJpaRepository.save(parentProject);
-        return subProjectMapper.toDto(projectJpaRepository.save(childProject));
+        log.info("Got child project from Dto withing creating subproject with id = {}", childProject.getId());
+        childProject.setParentProject(parentProject);
+        parentProject.getChildren().add(childProject);
+        setStagesIfNotNull(subProjectDto, parentProject);
+        setTeamsIfNotNull(subProjectDto, parentProject);
+        projectJpaRepository.saveAll(List.of(parentProject, childProject));
+        return subProjectMapper.toDto(childProject);
     }
 
     public CreateSubProjectDto updateProject(long id, CreateSubProjectDto dto, long userId) {
         Project project = projectJpaRepository.getReferenceById(id);
-        List<Project> children = projectJpaRepository.getAllSubprojectsFor(id);
-        log.info("Got all subprojects for project with id = " + id);
+        List<Project> children = projectJpaRepository.getAllSubprojectsForProjectId(id);
+        log.info("Got all subprojects for project with id = {}", id);
         List<Moment> moments = new ArrayList<>();
         dto.setId(id);
-        validateSetGeneralFields(project, dto);
-        updateStatus(project, dto, children, moments, userId);
-        updateVisibility(project, dto, children);
-        checkDtoForNullFields(dto, project);
+        setNameIfNotNull(project, dto);
+        changeParentProjectIdIfDifferent(project, dto);
+        updateStatusIfNotNull(project, dto, children, userId);
+        updateVisibilityIfNotNull(project, dto, children);
+        setStagesIfNotNull(dto, project);
+        setTeamsIfNotNull(dto, project);
         return subProjectMapper.toDto(projectJpaRepository.save(project));
     }
 
-    public List<CreateSubProjectDto> getProjectByFilters(FilterDto filterDto, Long projectId) {
-        Stream<Project> projectStream = projectJpaRepository.getAllSubprojectsFor(projectId).stream();
+    public List<CreateSubProjectDto> getProjectByFilters(FilterProjectDto filterDto, Long projectId) {
+        Stream<Project> projectStream = projectJpaRepository.getAllSubprojectsForProjectId(projectId).stream();
         return filters.stream()
                 .filter(f -> f.isApplicable(filterDto))
                 .reduce(projectStream, (stream, filter) -> filter.apply(stream, filterDto),
@@ -83,39 +93,33 @@ public class ProjectService {
                 .toList();
     }
 
-    private void validateSetGeneralFields(Project project, CreateSubProjectDto dto) {
-        if (dto.getId() != null || !dto.getId().equals(project.getId())) {
-            project.setId(dto.getId());
-        }
-        if (dto.getName() == null || dto.getName().isEmpty()) {
-            dto.setName(project.getName());
-        }
+    private void setNameIfNotNull(Project project, CreateSubProjectDto dto) {
+       if (dto.getName() == null || dto.getName().isEmpty()) {
+           dto.setName(project.getName());
+       }
         if (!dto.getName().isEmpty() || !dto.getName().isBlank() && !dto.getName().matches(project.getName())) {
             project.setName(dto.getName());
-        } else {
-            dto.setName(project.getName());
         }
+    }
+
+    private void changeParentProjectIdIfDifferent(Project project, CreateSubProjectDto dto) {
         if (dto.getParentProjectId() != null && !dto.getParentProjectId().equals(project.getId())) {
             Project recentParentProject = project.getParentProject();
             Optional<Project> supposedParentProject = projectJpaRepository.findById(dto.getParentProjectId());
 
             supposedParentProject.ifPresentOrElse(p -> {
                         List<Project> supposedList = new ArrayList<>();
-                        if (supposedParentProject.get().getChildren() == null) {
-                            supposedList.add(project);
-                            p.setChildren(supposedList);
-                        } else {
+                        if (p.getChildren() != null) {
                             supposedList.addAll(p.getChildren());
-                            supposedList.add(project);
-                            p.setChildren(supposedList);
                         }
+                        supposedList.add(project);
+                        p.setChildren(supposedList);
                         if (recentParentProject != null) {
                             List<Project> recentList = new ArrayList<>(recentParentProject.getChildren());
                             recentList.remove(project);
                             recentParentProject.setChildren(recentList);
                         }
-                        log.info("Replacing of the project id = " + dto.getId() + " to project id = "
-                                + supposedParentProject.get().getId() + " was successfully finished");
+                        log.info("Replacing of the project id = {} to project id = {} was successfully finished", dto.getId(), p.getId());
                     }
                     , () -> {
                         log.warn("Couldn't find project in DB withing replacing project to another one");
@@ -124,11 +128,11 @@ public class ProjectService {
         }
     }
 
-    private void updateVisibility(Project project, CreateSubProjectDto dto, List<Project> children) {
+    private void updateVisibilityIfNotNull(Project project, CreateSubProjectDto dto, List<Project> children) {
         if (dto.getVisibility() != project.getVisibility()) {
             if (dto.getVisibility() == ProjectVisibility.PRIVATE) {
                 project.setVisibility(dto.getVisibility());
-                log.info("Set PRIVATE visibility to project id = " + project.getId());
+                log.info("Set PRIVATE visibility to project id = {}", project.getId());
                 if (!children.isEmpty()) {
                     children.forEach(p -> p.setVisibility(dto.getVisibility()));
                     projectJpaRepository.saveAll(children);
@@ -136,12 +140,12 @@ public class ProjectService {
                 }
             } else {
                 project.setVisibility(dto.getVisibility());
-                log.info("Set " + dto.getVisibility() + " visibility to project id = " + project.getId());
+                log.info("Set {} visibility to project id = {}", dto.getVisibility(), project.getId());
             }
         }
     }
 
-    private void updateStatus(Project project, CreateSubProjectDto dto, List<Project> children, List<Moment> moments, Long userId) {
+    private void updateStatusIfNotNull(Project project, CreateSubProjectDto dto, List<Project> children, Long userId) {
         if (dto.getStatus() != project.getStatus()) {
             if (dto.getStatus().equals(ProjectStatus.COMPLETED)) {
                 List<Project> completedChildProjects = getCompletedChildProjects(children);
@@ -152,16 +156,18 @@ public class ProjectService {
                             map(Project::getMoments)
                             .flatMap(Collection::stream)
                             .toList();
-                    moments = addMomentToList(project.getId(), childrenMoments, userId);
-                    project.setMoments(moments);
-                    log.info("Moments from children projects was set successfully for project id = " + project.getId());
+                    assignMomentsToAccomplishedProject(project, userId, completedChildProjects);
+//                    moments = addMomentToList(project.getId(), childrenMoments, userId);
+//                    project.setMoments(moments);
+//                    log.info("Moments from children projects was set successfully for project id = " + project.getId());
                 } else if (completedChildProjects.isEmpty()) {
                     project.setStatus(dto.getStatus());
-                    moments = addMomentToList(project.getId(), moments, userId);
-                    project.setMoments(moments);
-                    log.info("Moment was set successfully for project id = " + project.getId());
+                    assignMomentsToAccomplishedProject(project, userId, new ArrayList<>());
+//                    moments = addMomentToList(project.getId(), moments, userId);
+//                    project.setMoments(moments);
+//                    log.info("Moment was set successfully for project id = " + project.getId());
                 } else {
-                    log.error("Project id = " + project.getId() + " has unfinished subprojects");
+                    log.error("Project id = {} has unfinished subprojects", project.getId());
                     throw new DataValidationException("current project has unfinished subprojects");
                 }
             } else {
@@ -171,16 +177,7 @@ public class ProjectService {
         }
     }
 
-    private List<Moment> addMomentToList(long id, List<Moment> moments, long userId) {
-        Moment moment = Moment.builder()
-                .name("project " + id + " has been completed")
-                .updatedBy(userId)
-                .createdBy(userId)
-                .build();
-        List<Moment> list = new ArrayList<>(moments);
-        list.add(moment);
-        return list;
-    }
+//
 
     private List<Project> getCompletedChildProjects(List<Project> childProjects) {
         if (!childProjects.isEmpty()) {
@@ -191,14 +188,23 @@ public class ProjectService {
         return List.of();
     }
 
-    private void checkDtoForNullFields(ProjectValidator dto, Project project) {
+    private void setStagesIfNotNull(GeneralProjectInfoDto dto, Project project) {
         if (dto.getStagesIds() != null) {
             List<Stage> stageList = stageRepository.findAllById(dto.getStagesIds());
             project.setStages(stageList);
         }
+    }
+
+    private void setTeamsIfNotNull(GeneralProjectInfoDto dto, Project project) {
         if (dto.getTeamsIds() != null) {
             List<Team> teamList = teamRepository.findAllById(dto.getTeamsIds());
             project.setTeams(teamList);
         }
+    }
+
+    private void assignMomentsToAccomplishedProject(Project project, Long userId, List<Project> childProjects) {
+        String message = String.format("Project with id = %s has been completed", project.getId());
+        MomentEvent momentEvent = new MomentEvent(project, userId, childProjects, message);
+        eventPublisher.publishEvent(momentEvent);
     }
 }

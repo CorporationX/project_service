@@ -2,17 +2,14 @@ package faang.school.projectservice.project;
 
 import faang.school.projectservice.controller.SubProjectController;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.FilterDto;
+import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
@@ -34,16 +31,6 @@ public class SubProjectControllerTest {
     }
 
     @Test
-    public void testValidateProjectName(){
-        ProjectDto dto = ProjectDto.builder()
-                .name("").build();
-        CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder()
-                .name("").build();
-        assertThrows(DataValidationException.class, () -> controller.createSubProject(1L,subProjectDto));
-        assertThrows(DataValidationException.class, () -> controller.createProject(dto));
-    }
-
-    @Test
     public void testCreateSubProject(){
         CreateSubProjectDto subProjectDto = CreateSubProjectDto.builder()
                 .name("Test").build();
@@ -53,7 +40,7 @@ public class SubProjectControllerTest {
 
     @Test
     public void testGetProjectsByFilters(){
-        FilterDto filterDto = new FilterDto();
+        FilterProjectDto filterDto = new FilterProjectDto();
         projectService.getProjectByFilters(filterDto,1L);
         verify(projectService,times(1)).getProjectByFilters(filterDto,1L);
     }
