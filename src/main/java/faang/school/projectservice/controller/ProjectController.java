@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+
 
 
 @RestController
@@ -28,7 +28,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PutMapping("/{projectId}/image")
-    public ResponseEntity<ProjectDto> addImage(@PathVariable Long projectId, @RequestBody MultipartFile file) throws IOException {
+    public ResponseEntity<ProjectDto> addImage(@PathVariable Long projectId, @RequestBody MultipartFile file){
         return ResponseEntity.status(HttpStatus.OK).body(projectService.addImage(projectId, file));
     }
 
