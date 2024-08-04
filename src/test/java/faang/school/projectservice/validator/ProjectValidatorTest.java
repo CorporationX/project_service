@@ -25,3 +25,26 @@ class ProjectValidatorTest {
                 () -> projectValidator.validateSubProjectVisibility(parentProjectVisibility, childProjectVisibility));
     }
 }
+@InjectMocks
+    private ProjectValidator projectValidator;
+    @Mock
+    private ProjectRepository projectRepository;
+
+    private ProjectDto projectDto = ProjectDto.builder()
+            .ownerId(1L)
+            .name("Some name").build();
+
+    @Test
+    void validateProjectByOwnerWithNameOfProjectTest() {
+        when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())).thenReturn(false);
+        projectValidator.validateProjectByOwnerWithNameOfProject(projectDto);
+        verify(projectRepository).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
+    }
+
+    @Test
+    void validateProjectWithNameOfProjectNotValidNameTest() {
+        when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())).thenReturn(true);
+        assertThrows(DataValidationException.class, () -> projectValidator.validateProjectByOwnerWithNameOfProject(projectDto));
+        verify(projectRepository).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
+    }
+}
