@@ -3,9 +3,9 @@ package faang.school.projectservice.service.image;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.mock.web.MockMultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -36,14 +36,14 @@ public class ImageService {
 
         byte[] imageBytes = outputStream.toByteArray();
         return new MockMultipartFile(file.getName(),
-                                    file.getOriginalFilename(),
-                                    formatName,
-                                    imageBytes);
+                file.getOriginalFilename(),
+                formatName,
+                imageBytes);
     }
 
     private void resize(ByteArrayOutputStream outputStream, MultipartFile file, String formatName)
             throws IOException {
-        BufferedImage originalImage = ImageIO.read(file.getInputStream());
+        BufferedImage originalImage = read(file);
 
         int originalHeight = originalImage.getHeight();
         int originalWidth = originalImage.getWidth();
@@ -61,6 +61,10 @@ public class ImageService {
         }
     }
 
+    public BufferedImage read(MultipartFile file) throws IOException {
+        return ImageIO.read(file.getInputStream());
+    }
+
     private int determineMaxWidth(BufferedImage image) {
         return image.getWidth() > image.getHeight() ? maxWidthHorizontal : maxWidthNonHorizontal;
     }
@@ -69,7 +73,7 @@ public class ImageService {
         return image.getWidth() > image.getHeight() ? maxHeightHorizontal : maxHeightNonHorizontal;
     }
 
-    public String getFormatName(String contentType) {
+    private String getFormatName(String contentType) {
         return switch (contentType) {
             case "image/png" -> "PNG";
             case "image/gif" -> "GIF";

@@ -35,7 +35,7 @@ public class S3Service {
         return "Cover Image added to project " + projectId;
     }
 
-    public String uploadFile(MultipartFile file, String folder) {
+    private String uploadFile(MultipartFile file, String folder) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
