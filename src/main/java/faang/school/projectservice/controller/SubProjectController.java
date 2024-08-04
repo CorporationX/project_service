@@ -19,16 +19,16 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/subprojects")
+@RequestMapping("/subprojects")
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping()
+    @PostMapping
     public SubProjectDto createSubProject(@Validated(New.class) @RequestBody SubProjectDto subProjectDto) {
         return projectService.createSubProject(subProjectDto);
     }
 
-    @PutMapping()
+    @PutMapping
     public void updateSubProject(@Validated(Update.class) @RequestBody SubProjectDto subProjectDto) {
         projectService.updateSubProject(subProjectDto);
     }
