@@ -12,7 +12,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.validation.StageValidator;
+import faang.school.projectservice.validator.StageValidator;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class StageService {
     private final StageRolesRepository stageRolesRepository;
 
     @Transactional
-    public void createStage(StageDto stageDto) {
+    public Stage createStageEntity(StageDto stageDto) {
         stageValidator.validationProjectById(stageDto.getProjectId());
         Stage stage = stageMapper.toEntity(stageDto);
         List<StageRoles> stageRoles = stage.getStageRoles();
@@ -45,6 +45,12 @@ public class StageService {
         Stage savedStage = stageRepository.save(stage);
         stageRoles.forEach(role -> role.setStage(savedStage));
         stageRolesRepository.saveAll(stageRoles);
+        return stage;
+    }
+
+    @Transactional
+    public StageDto createStage(StageDto stageDto){
+        return stageMapper.toDto(createStageEntity(stageDto));
     }
 
     @Transactional(readOnly = true)
@@ -148,4 +154,5 @@ public class StageService {
                 .limit(roleCount - teamSize)
                 .forEach(teamMember -> System.out.println("Glad to see you in our team dude!"));
     }
+
 }

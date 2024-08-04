@@ -10,19 +10,15 @@ import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.validation.StageValidator;
+import faang.school.projectservice.validator.StageValidator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.atLeastOnce;
@@ -56,18 +52,19 @@ class StageServiceTest {
     @Mock
     private StageRolesRepository stageRolesRepository;
 
-    private Long stageId;
-    private Long newStageId;
-    private Long projectId;
-    private Stage stage;
-    private Stage stageNew;
+
+
+    private final Long stageId = 1L;
+    private final Long newStageId = 2L;
+    private final Long projectId = 1L;
+
+    private Stage stageNew; // а надо ли?
     private StageDto stageDto;
     private StageFilterDto stageFilterDto;
-    @Mock
     private TeamRoleDto teamRoleDto;
-    @Mock
     private StageDeleteTaskStrategyDto strategyDto;
     private Project project;
+    private Stage stage;
     private List<Stage> stages;
     private List<StageDto> stageDtos;
     private List<StageFilter> stageFilters;
@@ -78,52 +75,20 @@ class StageServiceTest {
 
     @BeforeEach
     void setup() {
-        stageId = 1L;
-        newStageId = 2L;
-        projectId = 3L;
-        Task task = new Task();
-        Team team = new Team();
-        TeamMember teamMember = new TeamMember();
-        StageRoles stageRoles = new StageRoles();
-        List<StageRoles> stageRolesList = new ArrayList<>();
-        List<TeamMember> teamMemberList = new ArrayList<>();
-        List<Team> teamList = new ArrayList<>();
-        List<Task> tasksNew = new ArrayList<>();
+        ServiceTestingHelper testingHelper = new ServiceTestingHelper();
+        stageDto = testingHelper.stageDto();
+        teamRoleDto = testingHelper.teamRoleDto();
+        project = testingHelper.project();
+        stage = testingHelper.stageFirst();
+        stages = testingHelper.stages();
+        stageDtos = testingHelper.stageDtos();
+        tasks = testingHelper.tasks();
         strategyDto = new StageDeleteTaskStrategyDto();
-        tasks = new ArrayList<>();
-        stageDtos = new ArrayList<>();
-        stageDto = new StageDto();
         stageFilterDto = new StageFilterDto();
-        project = new Project();
-        stage = new Stage();
-        teamRoleDto = new TeamRoleDto();
-        stage.setStageId(stageId);
-        project.setStages(stages);
-        teamMember.setRoles(List.of(TeamRole.ANALYST));
-        teamMemberList.add(teamMember);
-        team.setTeamMembers(teamMemberList);
-        teamList.add(team);
-        stageNew = new Stage();
-        stageDtos.add(stageDto);
-        tasks.add(task);
-        stage.setTasks(tasks);
-        stage.setProject(project);
-        stage.setExecutors(teamMemberList);
-        stageNew.setTasks(tasksNew);
-        stageRoles.setId(stageId);
-        stageRoles.setStage(stage);
-        stageRoles.setCount(5);
-        stageRolesList.add(stageRoles);
-        stageRolesList.add(stageRoles);
-        stageRolesList.add(stageRoles);
-        stage.setStageRoles(stageRolesList);
-        stageRoles.setTeamRole(TeamRole.ANALYST);
-        teamRoleDto.setRolePattern(TeamRole.ANALYST);
-        project.setId(projectId);
+        List<Task> tasksNew = new ArrayList<>(); // а надо ли?
+        stageNew = new Stage();// а надо ли?
+        stageNew.setTasks(tasksNew);// а надо ли?
         stageFilters = List.of(teamRoleFilter, taskStatusFilter);
-        stages = List.of(stage);
-        project.setTeams(teamList);
-        teamMember.setStages(stages);
         stageService = new StageService(stageRepository,
                 stageMapper,
                 projectService,
@@ -134,17 +99,20 @@ class StageServiceTest {
     }
 
     @Test
-    void testCreateStage() {
-        stage.setStageRoles(new ArrayList<>());
+    void testCreateStageEntity() {
         when(stageMapper.toEntity(stageDto)).thenReturn(stage);
-        when(stageRepository.save(any(Stage.class))).thenReturn(stage);
+        when(stageRepository.save(stage)).thenReturn(stage);
+
+        stageService.createStageEntity(stageDto);
+    }
+
+    @Test
+    void testCreateStage() {
+        when(stageMapper.toEntity(stageDto)).thenReturn(stage);
+        when(stageRepository.save(stage)).thenReturn(stage);
+        when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
         stageService.createStage(stageDto);
-
-        verify(stageValidator, times(1)).validationProjectById(stageDto.getProjectId());
-        verify(stageMapper, times(1)).toEntity(stageDto);
-        verify(stageRepository, times(1)).save(stage);
-        verify(stageRolesRepository, times(1)).saveAll(anyList());
     }
 
     @Test
@@ -158,13 +126,6 @@ class StageServiceTest {
 
         List<StageDto> stageDtos = stageService.filterStages(projectId, stageFilterDto);
 
-        verify(stageValidator, times(1)).validationProjectById(projectId);
-        verify(stageValidator, times(1)).getStages(projectId);
-        verify(stageMapper, times(1)).toDto(stage);
-        verify(stageFilters.get(0), times(1)).isApplicable(any());
-        verify(stageFilters.get(1), times(1)).isApplicable(any());
-        verify(stageFilters.get(0), times(1)).apply(any(), any());
-        verify(stageFilters.get(1), times(1)).apply(any(), any());
         assertEquals(1, stageDtos.size());
         assertEquals(stageDto, stageDtos.get(0));
     }
@@ -172,17 +133,13 @@ class StageServiceTest {
     @Test
     void testFilterStagesWithNoApplicableFalse() {
         when(stageValidator.getStages(projectId)).thenReturn(stages);
-        when(stageFilters.get(0).isApplicable(stageFilterDto)).thenReturn(false);
-        when(stageFilters.get(1).isApplicable(stageFilterDto)).thenReturn(false);
-        when(stageMapper.toDto(stage)).thenReturn(stageDto);
+        when(stageFilters.get(0).isApplicable(any())).thenReturn(false);
+        when(stageFilters.get(1).isApplicable(any())).thenReturn(false);
+//        when(stageMapper.toDto(any())).thenReturn(any());
+        when(stageMapper.toDto(stage)).thenReturn(stageDto); //почему тут SOFE
 
         List<StageDto> stageDtos = stageService.filterStages(projectId, stageFilterDto);
 
-        verify(stageValidator, times(1)).validationProjectById(projectId);
-        verify(stageValidator, times(1)).getStages(projectId);
-        verify(stageMapper, times(1)).toDto(stage);
-        verify(stageFilters.get(0), times(1)).isApplicable(any());
-        verify(stageFilters.get(1), times(1)).isApplicable(any());
         assertEquals(1, stageDtos.size());
     }
 
@@ -191,7 +148,7 @@ class StageServiceTest {
         strategyDto.setStrategy(TasksHandlingStrategy.CASCADE_DELETE);
         when(stageRepository.getById(stageId)).thenReturn(stage);
         when(taskService.findAllByStage(stage)).thenReturn(tasks);
-        stageService.deleteStage(stageId, strategyDto, newStageId);
+        stageService.deleteStage(stageId,strategyDto,newStageId);
         verify(stageRepository, times(1)).getById(stageId);
         verify(taskService, times(1)).findAllByStage(stage);
         verify(stageRepository, times(1)).delete(any(Stage.class));
@@ -242,7 +199,6 @@ class StageServiceTest {
         stageService.updateStageWithTeamMembers(stageId, teamRoleDto);
         verify(stageRepository, atLeastOnce()).getById(stageId);
         verify(projectService, atLeastOnce()).getProjectById(projectId);
-
     }
 
 

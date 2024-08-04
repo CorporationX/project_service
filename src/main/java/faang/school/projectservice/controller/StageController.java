@@ -28,8 +28,8 @@ public class StageController {
 
     @PostMapping(value = "/")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createStage(@RequestBody @Valid StageDto stageDto) {
-        stageService.createStage(stageDto);
+    public StageDto createStage(@RequestBody @Valid StageDto stageDto) {
+        return stageService.createStage(stageDto);
     }
 
     @GetMapping(value = "{projectId}/filter")

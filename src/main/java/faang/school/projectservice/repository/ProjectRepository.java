@@ -1,31 +1,41 @@
 package faang.school.projectservice.repository;
 
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import faang.school.projectservice.exception.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.List;
 
 @Repository
-public interface ProjectRepository extends JpaRepository<Project, Long> {
+@RequiredArgsConstructor
+public class ProjectRepository {
+    private final ProjectJpaRepository projectJpaRepository;
 
-    @Query(nativeQuery = true, value = """
-            SELECT DISTINCT project.* FROM project
-            LEFT JOIN team ON team.project_id = project.id
-            LEFT JOIN team_member ON team_member.team_id = team.id
-            WHERE project.visibility = 'PUBLIC' OR team_member.id = ?1 OR project.owner_id = ?1
-            """)
-    Stream<Project> findAllAvailableProjectsByUserId(Long userId);
+    public Project getProjectById(Long projectId) {
+        return projectJpaRepository.findById(projectId).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
+        );
+    }
 
-    @Query(nativeQuery = true, value = """
-            SELECT project.* FROM project
-            LEFT JOIN team ON team.project_id = project.id
-            LEFT JOIN team_member ON team_member.team_id = team.id
-            WHERE project.id = ?2 AND (project.visibility = 'PUBLIC' OR team_member.id = ?1 OR project.owner_id = ?1)
-            """)
-    Optional<Project> findAvailableByUserIdAndProjectId(Long userId, Long projectId);
+    public List<Project> findAll() {
+        return projectJpaRepository.findAll();
+    }
 
-    Project getProjectById(Long projectId);
+    public List<Project> findAllByIds(List<Long> ids) {
+        return projectJpaRepository.findAllById(ids);
+    }
+
+    public boolean existsByOwnerUserIdAndName(Long userId, String name) {
+        return projectJpaRepository.existsByOwnerIdAndName(userId, name);
+    }
+
+    public Project save(Project project){
+        return projectJpaRepository.save(project);
+    }
+
+    public boolean existsById(Long id){
+        return projectJpaRepository.existsById(id);
+    }
 }

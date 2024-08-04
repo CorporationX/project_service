@@ -22,4 +22,8 @@ public interface StageMapper {
 
     List<StageDto> toDtos(List<Stage> entities);
 
+    @Mapping(source = "projectId", target = "project")
+    @Mapping(source = "stageRolesDtosList", target = "stageRoles")
+    List<Stage> toEntities(List<StageDto> dtos);
+
 }
