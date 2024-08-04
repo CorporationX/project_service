@@ -44,14 +44,12 @@ public class VacancyService {
         for (VacancyFilter filter : filters) {
             vacancies = filter.apply(vacancies, filterDto);
         }
-        return vacancies.map(vacancyMapper::toDto).toList();
+        return vacancyMapper.toDtoList(vacancies.toList());
     }
 
     public Map<String, String> create(VacancyDto vacancyDto) {
         TeamMember memberInCharge = teamMemberRepository.findById(vacancyDto.getCreatedBy());
-        if (memberInCharge == null) {
-            throw new EntityNotFoundException("Team member not found");
-        }
+
         isHrValidation(memberInCharge);
         Vacancy createdVacancy = vacancyRepository.save(vacancyMapper.toEntity(vacancyDto));
 

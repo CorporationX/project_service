@@ -23,4 +23,5 @@ public interface VacancyMapper {
     default List<Long> mapCandidate(List<Candidate> candidates) {
         return candidates.stream().map(Candidate::getId).toList();
     }
+    List<VacancyDto> toDtoList(List<Vacancy> vacancies);
 }

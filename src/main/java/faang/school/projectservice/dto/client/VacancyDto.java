@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Builder
 public class VacancyDto {
     private Long id;
     @NotEmpty(message = "Title cannot be empty")
