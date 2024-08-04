@@ -1,8 +1,10 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
+import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -25,12 +27,14 @@ import java.util.stream.Stream;
 public class ProjectService {
     private final SubProjectValidator subProjectValidator;
     private final SubProjectMapper subProjectMapper;
+    private final MomentService momentService;
     private final ProjectRepository projectRepository;
     private final List<SubProjectFilter> subProjectFilters;
 
     @Transactional
     public SubProjectDto createSubProject(SubProjectDto subProjectDto) {
-        checkAllValidationsForCreateSubProject(subProjectDto);
+        Project project = getProjectById(subProjectDto.getId());
+        subProjectValidator.checkAllValidationsForCreateSubProject(subProjectDto, project);
         Project subProject = subProjectMapper.toEntity(subProjectDto);
         Project parentProject = getProjectById(subProjectDto.getParentProjectId());
         subProject.setParentProject(parentProject);
@@ -40,15 +44,15 @@ public class ProjectService {
 
     @Transactional
     public void updateSubProject(SubProjectDto subProjectDto) {
+        MomentDto momentDto = new MomentDto();
         Project subProject = subProjectMapper.toEntity(subProjectDto);
-        subProject.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(subProject);
         if (subProjectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
             projectRepository.completeProjectSubprojects(subProjectDto.getId());
         }
         if (subProjectDto.getVisibility().equals(ProjectVisibility.PRIVATE)) {
             projectRepository.makeSubprojectsPrivate(subProjectDto.getId());
-            subProject.setMoments(List.of(new Moment()));
+            momentService.addMoment(momentDto);
         }
     }
 
@@ -63,14 +67,6 @@ public class ProjectService {
                 .reduce(projects, (stream, filter) -> filter.apply(stream, subProjectFilterDto), Stream::concat)
                 .map(subProjectMapper::toDto)
                 .toList();
-    }
-
-    private void checkAllValidationsForCreateSubProject(SubProjectDto subProjectDto) {
-        Long parentProjectId = subProjectDto.getParentProjectId();
-        Project project = getProjectById(subProjectDto.getId());
-        subProjectValidator.validateTheExistenceOfTheParenProject(parentProjectId, project);
-        subProjectValidator.validateRootProjectHasNotParentProject(parentProjectId, project);
-        subProjectValidator.validateVisibilityOfParentProjectAndSubproject(subProjectDto.getVisibility(), parentProjectId, project);
     }
 
     private Project getProjectById(Long projectId) {

@@ -1,5 +1,6 @@
 package faang.school.projectservice.validator.subproject;
 
+import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -22,7 +23,7 @@ public class SubProjectValidator {
         }
     }
 
-    public void validateTheExistenceOfTheParenProject(Long parentProjectId, Project project) {
+    public void checkIfParentExists(Long parentProjectId, Project project) {
         Project rootProject = project.getParentProject();
         if (rootProject == null) {
             log.info("Project {} does not exist", parentProjectId);
@@ -30,11 +31,18 @@ public class SubProjectValidator {
         }
     }
 
-    public void validateVisibilityOfParentProjectAndSubproject(ProjectVisibility projectVisibility, Long parentProjectId, Project project) {
+    public void checkIfVisible(ProjectVisibility projectVisibility, Long parentProjectId, Project project) {
         ProjectVisibility parentProjectVisibility = project.getParentProject().getVisibility();
         if (parentProjectVisibility != projectVisibility) {
             log.info("Project {} has a visibility of parent project", parentProjectId);
             throw new ValidationException("The parent project visibility is not the same as the project visibility");
         }
+    }
+
+    public void checkAllValidationsForCreateSubProject(SubProjectDto subProjectDto, Project project) {
+        Long parentProjectId = subProjectDto.getParentProjectId();
+        checkIfParentExists(parentProjectId, project);
+        validateRootProjectHasNotParentProject(parentProjectId, project);
+        checkIfVisible(subProjectDto.getVisibility(), parentProjectId, project);
     }
 }
