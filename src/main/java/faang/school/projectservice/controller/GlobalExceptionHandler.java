@@ -36,4 +36,10 @@ public class GlobalExceptionHandler {
     public ErrorResponse handlerNotFoundException(NotFoundException exception) {
         return new ErrorResponse(exception.getMessage());
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handlerNotFoundException(IllegalStateException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
 }
