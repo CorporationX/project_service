@@ -1,14 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.filter.ProjectFilterDto;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.ProjectFilter;
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.IllegalSubProjectsStatusException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -34,6 +29,7 @@ import java.util.stream.Stream;
 @Service
 @AllArgsConstructor
 public class ProjectService {
+
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final UserContext userContext;
@@ -44,7 +40,7 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public List<ProjectDto> findAll() {
         List<Project> projects = projectRepository.findAll();
-        return projectMapper.entitiesToDtos(projects);
+        return projectMapper.toDtoList(projects);
     }
 
     @Transactional
@@ -54,8 +50,8 @@ public class ProjectService {
         }
         projectValidator.validateProjectByOwnerWithNameOfProject(projectDto);
         projectDto.setStatus(ProjectStatus.CREATED);
-        Project project = projectMapper.dtoToEntity(projectDto);
-        return projectMapper.entityToDto(projectRepository.save(project));
+        Project project = projectMapper.toEntity(projectDto);
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Transactional
@@ -66,28 +62,28 @@ public class ProjectService {
         project.setDescription(project.getDescription());
         project.setStatus(updatedProjectDto.getStatus());
         project.setVisibility(updatedProjectDto.getVisibility());
-        return projectMapper.entityToDto(projectRepository.save(project));
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Transactional(readOnly = true)
     public ProjectDto findById(Long id) {
         existById(id);
-        return projectMapper.entityToDto(projectRepository.getProjectById(id));
+        return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectDto> getAllProjectByFilters(ProjectFilterDto projectFilter) {
+    public List<ProjectDto> getAllProjectByFilters(ProjectFilterDto projectFilterDto) {
         Stream<Project> projects = projectRepository.findAll().stream();
-        Stream<Project> filtredProjects = projectFilters.stream()
-                .filter(filter -> filter.isApplicable(projectFilter))
-                .flatMap(filter -> filter.apply(projects, projectFilter));
+        for (ProjectFilter projectFilter : projectFilters) {
+            projects = projectFilter.filter(projects, projectFilterDto);
+        }
         Predicate<Project> filterByVisibility = project -> !project.getVisibility().equals(ProjectVisibility.PRIVATE)
                 || project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .anyMatch(teamMember -> teamMember.getId().equals(userContext.getUserId()));
-        return filtredProjects
+        return projects
                 .filter(filterByVisibility)
-                .map(projectMapper::entityToDto)
+                .map(projectMapper::toDto)
                 .toList();
     }
 
@@ -101,6 +97,7 @@ public class ProjectService {
         return projectRepository.existsById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<Project> findDifferentProjects(List<Project> projectsFromDataBase, List<Long> newProjectIds) {
         List<Long> existingProjectIds = projectsFromDataBase.stream()
                 .map(Project::getId)
@@ -109,6 +106,7 @@ public class ProjectService {
         return convertProjectsByIds(newProjectIds);
     }
 
+    @Transactional(readOnly = true)
     public List<Project> getNewProjects(List<Long> userIds) {
         Set<Project> projects = new HashSet<>();
         userIds.forEach(userId -> {
@@ -122,60 +120,5 @@ public class ProjectService {
         return projectIds.stream()
                 .map(projectRepository::getProjectById)
                 .toList();
-
-    }
-
-    @Transactional
-    public ProjectDto createSubProject(CreateSubProjectDto createSubProjectDto) {
-        Project parentProject = projectRepository.getProjectById(createSubProjectDto.getParentProjectId());
-        projectValidator.validateSubProjectVisibility(parentProject.getVisibility(),
-                createSubProjectDto.getVisibility());
-
-        Project newChildProject = projectMapper.toEntity(createSubProjectDto);
-        newChildProject.setParentProject(parentProject);
-        newChildProject.setStatus(ProjectStatus.CREATED);
-
-        return projectMapper.toDto(projectRepository.save(newChildProject));
-    }
-
-    @Transactional
-    public ProjectDto updateProject(long projectId, ProjectDto projectDto) {
-        Project project = projectRepository.getProjectById(projectId);
-        List<Project> allSubProjects = projectRepository.getAllSubProjectsFor(projectId);
-        changeProjectStatus(project, allSubProjects, projectDto);
-        changeProjectVisibility(project, allSubProjects, projectDto);
-        return projectMapper.toDto(project);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProjectDto> getSubProjects(long projectId, ProjectFilterDto projectFilterDto) {
-        Project project = projectRepository.getProjectById(projectId);
-        Stream<Project> allMatchedSubProjects = project.getChildren().stream()
-                .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
-        for (ProjectFilter projectFilter : projectFilterList) {
-            allMatchedSubProjects = projectFilter.filter(allMatchedSubProjects, projectFilterDto);
-        }
-        return projectMapper.toDtoList(allMatchedSubProjects.toList());
-    }
-
-    private void changeProjectStatus(Project project, List<Project> allSubProjects, ProjectDto projectDto) {
-        boolean areProjectStatusesMatched = allSubProjects.stream()
-                .allMatch(subProject -> subProject.getStatus() == projectDto.getStatus());
-        if (!areProjectStatusesMatched) {
-            throw new IllegalSubProjectsStatusException(project.getId(), projectDto.getStatus());
-        }
-        // TODO: if project is COMPLETED, then project gets Moment "All subtasks are completed".
-        //  All members of task should become members of Moment
-        //  will be done if MOMENTS PART is finished and merged into titan-master
-        project.setStatus(projectDto.getStatus());
-    }
-
-    private void changeProjectVisibility(Project project, List<Project> allSubProjects, ProjectDto projectDto) {
-        if (projectDto.getVisibility() == ProjectVisibility.PRIVATE) {
-            for (Project subProject : allSubProjects) {
-                subProject.setVisibility(projectDto.getVisibility());
-            }
-        }
-        project.setVisibility(projectDto.getVisibility());
     }
 }

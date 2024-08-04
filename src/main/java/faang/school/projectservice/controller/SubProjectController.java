@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.SubProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -22,24 +22,24 @@ import java.util.List;
 @RequestMapping("/api/v1/subproject")
 @RequiredArgsConstructor
 public class SubProjectController {
-    private final ProjectService projectService;
+    private final SubProjectService subProjectService;
 
     @PostMapping("/new")
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto createSubProject(@RequestBody @Valid CreateSubProjectDto createSubProjectDto) {
-        return projectService.createSubProject(createSubProjectDto);
+        return subProjectService.createSubProject(createSubProjectDto);
     }
 
     @PutMapping("/{projectId}")
     @ResponseStatus(HttpStatus.OK)
-    public ProjectDto updateProject(@PathVariable @NotNull Long projectId,
-                                    @RequestBody ProjectDto projectDto) {
-        return projectService.updateProject(projectId, projectDto);
+    public ProjectDto updateSubProject(@PathVariable @NotNull Long projectId,
+                                       @RequestBody ProjectDto projectDto) {
+        return subProjectService.updateProject(projectId, projectDto);
     }
 
     @PostMapping("/{projectId}")
     public List<ProjectDto> getSubProjects(@PathVariable @NotNull Long projectId,
                                            @RequestBody ProjectFilterDto projectFilterDto) {
-        return projectService.getSubProjects(projectId, projectFilterDto);
+        return subProjectService.getSubProjects(projectId, projectFilterDto);
     }
 }

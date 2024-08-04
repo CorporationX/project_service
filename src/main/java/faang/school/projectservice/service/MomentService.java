@@ -3,12 +3,11 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.MomentFilter;
+import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.MomentServiceValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class MomentService {
+
     private final MomentRepository momentRepository;
     private final MomentMapper momentMapper;
     private final MomentServiceValidator momentServiceValidator;

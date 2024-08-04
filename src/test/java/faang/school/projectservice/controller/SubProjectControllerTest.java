@@ -5,7 +5,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.SubProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SubProjectControllerTest {
 
     @Mock
-    private ProjectService projectService;
+    private SubProjectService subProjectService;
 
     @InjectMocks
     private SubProjectController subProjectController;
@@ -49,6 +49,8 @@ class SubProjectControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         long ownerId = 1L;
         projectId = 2L;
+        String description = "descrioption";
+        String name = "name";
 
         projectFilterDto = new ProjectFilterDto();
 
@@ -61,6 +63,9 @@ class SubProjectControllerTest {
                 .build();
 
         projectDto = ProjectDto.builder()
+                .ownerId(ownerId)
+                .name(name)
+                .description(description)
                 .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
@@ -78,7 +83,7 @@ class SubProjectControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createSubProjectDtoJson))
                 .andExpect(status().isCreated());
-        verify(projectService, times(1)).createSubProject(createSubProjectDto);
+        verify(subProjectService, times(1)).createSubProject(createSubProjectDto);
     }
 
     @Test
@@ -88,7 +93,7 @@ class SubProjectControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(projectDtoJson))
                 .andExpect(status().isOk());
-        verify(projectService, times(1)).updateProject(projectId, projectDto);
+        verify(subProjectService, times(1)).updateProject(projectId, projectDto);
     }
 
     @Test
@@ -98,6 +103,6 @@ class SubProjectControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(projectFilterDtoJson))
                 .andExpect(status().isOk());
-        verify(projectService, times(1)).getSubProjects(projectId, projectFilterDto);
+        verify(subProjectService, times(1)).getSubProjects(projectId, projectFilterDto);
     }
 }

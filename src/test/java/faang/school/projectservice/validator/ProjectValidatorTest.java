@@ -1,20 +1,38 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ProjectValidatorTest {
 
+    @InjectMocks
     private ProjectValidator projectValidator;
+    @Mock
+    private ProjectRepository projectRepository;
+
+    private ProjectDto projectDto;
 
     @BeforeEach
     public void setUp() {
-        projectValidator = new ProjectValidator();
+        projectDto = ProjectDto.builder()
+                .ownerId(1L)
+                .name("Some name").build();
     }
+
 
     @Test
     @DisplayName("testing validateSubProjectVisibility with non appropriate values")
@@ -24,15 +42,6 @@ class ProjectValidatorTest {
         assertThrows(IllegalStateException.class,
                 () -> projectValidator.validateSubProjectVisibility(parentProjectVisibility, childProjectVisibility));
     }
-}
-@InjectMocks
-    private ProjectValidator projectValidator;
-    @Mock
-    private ProjectRepository projectRepository;
-
-    private ProjectDto projectDto = ProjectDto.builder()
-            .ownerId(1L)
-            .name("Some name").build();
 
     @Test
     void validateProjectByOwnerWithNameOfProjectTest() {

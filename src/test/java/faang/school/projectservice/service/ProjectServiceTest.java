@@ -1,13 +1,10 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.IllegalSubProjectsStatusException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.project.ProjectFilter;
-import faang.school.projectservice.filter.project.ProjectNameFilter;
-import faang.school.projectservice.filter.project.ProjectStatusFilter;
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -19,172 +16,57 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
 
-    @Captor
-    private ArgumentCaptor<Project> projectArgumentCaptor;
-
+    private ProjectService projectService;
     @Mock
     private ProjectValidator projectValidator;
-
-
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
+    @Mock
+    private ProjectMapper projectMapper;
+    @Mock
+    private ProjectFilter projectFilter;
+    @Mock
+    private UserContext userContext;
     @Mock
     private ProjectRepository projectRepository;
-
-    private ProjectService projectService;
-
-    private CreateSubProjectDto createSubProjectDto;
-    private Project parentProject;
-    private List<Project> subProjects;
-    private ProjectMapperImpl projectMapperImpl;
     private ProjectFilterDto projectFilterDto;
+    private ProjectDto projectDto;
+    private Project project;
+    private List<Project> projects;
+    private List<ProjectDto> projectDtos;
 
     @BeforeEach
     public void setUp() {
-        List<ProjectFilter> projectFilterList = List.of(
-                new ProjectNameFilter(),
-                new ProjectStatusFilter()
-        );
-
-        projectMapperImpl = new ProjectMapperImpl();
-
-        projectService = new ProjectService(projectMapperImpl, projectValidator,
-                projectRepository, projectFilterList);
-
-        subProjects = List.of(
-                Project.builder()
-                        .name("ProjectName")
-                        .status(ProjectStatus.IN_PROGRESS)
-                        .visibility(ProjectVisibility.PUBLIC)
-                        .children(new ArrayList<>()).build(),
-                Project.builder()
-                        .name("not")
-                        .status(ProjectStatus.IN_PROGRESS)
-                        .visibility(ProjectVisibility.PUBLIC)
-                        .children(new ArrayList<>()).build()
-        );
-
-        parentProject = Project.builder()
-                .id(1L)
-                .children(subProjects)
-                .build();
-
-        createSubProjectDto = CreateSubProjectDto.builder()
-                .parentProjectId(parentProject.getId())
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-
-        projectFilterDto = ProjectFilterDto.builder()
-                .name("ProjectName")
-                .projectStatus(ProjectStatus.IN_PROGRESS)
-                .build();
-
-        lenient().when(projectRepository.getProjectById(parentProject.getId())).thenReturn(parentProject);
-    }
-
-    @Test
-    @DisplayName("testing createSubProject")
-    public void testCreateSubProjectWithProjectRepositoryMethodExecution() {
-        projectService.createSubProject(createSubProjectDto);
-        verify(projectRepository, times(1))
-                .getProjectById(createSubProjectDto.getParentProjectId());
-        verify(projectValidator, times(1))
-                .validateSubProjectVisibility(parentProject.getVisibility(), createSubProjectDto.getVisibility());
-        verify(projectRepository, times(1)).save(projectArgumentCaptor.capture());
-    }
-
-    @Test
-    @DisplayName("testing updateSubProject with non appropriate Status")
-    public void testUpdateSubProjectWithNonAppropriateStatus() {
-        ProjectDto projectDto = ProjectDto.builder()
-                .status(ProjectStatus.COMPLETED).build();
-        when(projectRepository.getAllSubProjectsFor(parentProject.getId())).thenReturn(parentProject.getChildren());
-        assertThrows(IllegalSubProjectsStatusException.class,
-                () -> projectService.updateProject(parentProject.getId(), projectDto));
-    }
-
-    @Test
-    @DisplayName("testing updateSubProject with changing visibility to private and status to completed")
-    public void testUpdateSubProjectWithVisibilityPrivateChangeStatusCompleted() {
-        ProjectDto projectDto = ProjectDto.builder()
-                .visibility(ProjectVisibility.PRIVATE)
-                .status(ProjectStatus.COMPLETED).build();
-        when(projectRepository.getAllSubProjectsFor(parentProject.getId())).thenReturn(parentProject.getChildren());
-        parentProject.setVisibility(ProjectVisibility.PUBLIC);
-        parentProject.getChildren().forEach(project -> {
-            project.setVisibility(ProjectVisibility.PUBLIC);
-            project.setStatus(ProjectStatus.COMPLETED);
-        });
-
-        projectService.updateProject(parentProject.getId(), projectDto);
-        assertEquals(ProjectVisibility.PRIVATE, parentProject.getVisibility());
-        assertEquals(ProjectVisibility.PRIVATE, parentProject.getChildren().get(0).getVisibility());
-        assertEquals(ProjectStatus.COMPLETED, parentProject.getStatus());
-    }
-
-    @Test
-    @DisplayName("testing updateSubProject with visibility to public changing and status to cancelled")
-    public void testUpdateSubProjectWithVisibilityPublicStatusCancelled() {
-        ProjectDto projectDto = ProjectDto.builder()
-                .visibility(ProjectVisibility.PUBLIC)
-                .status(ProjectStatus.CANCELLED).build();
-        parentProject.setVisibility(ProjectVisibility.PRIVATE);
-        parentProject.getChildren().forEach(project -> {
-            project.setVisibility(ProjectVisibility.PRIVATE);
-            project.setStatus(ProjectStatus.CANCELLED);
-        });
-
-        projectService.updateProject(parentProject.getId(), projectDto);
-        assertEquals(parentProject.getVisibility(), ProjectVisibility.PUBLIC);
-        assertEquals(parentProject.getChildren().get(0).getVisibility(), ProjectVisibility.PRIVATE);
-        assertEquals(parentProject.getStatus(), ProjectStatus.CANCELLED);
-    }
-
-    @Test
-    @DisplayName("testing getSubProjects with selection correct subProject")
-    public void testGetSubProjects() {
-        List<ProjectDto> selectedSubProjects = projectService.getSubProjects(parentProject.getId(), projectFilterDto);
-        assertEquals(1, selectedSubProjects.size());
-        assertEquals(projectMapperImpl.toDto(subProjects.get(0)), selectedSubProjects.get(0));
-    @Mock
-    private TeamMemberRepository teamMemberRepository;
-
-    @InjectMocks
-    private ProjectService projectService;
-
-    @Mock
-    private ProjectMapper projectMapper;
-
-    @Mock
-    private ProjectFilter projectFilter;
-
-    @Mock
-    private UserContext userContext;
-
-    @Mock
-    private ProjectValidator projectValidator;
-
-
-    ProjectDto projectDto;
-    Project project;
-    List<Project> projects;
-    List<ProjectDto> projectDtos;
-    ProjectFilterDto projectFilterDto;
-    List<Project> projectsFromDataBase;
-    List<Long> newProjectIds;
-    List<Long> userIds;
-
-    @BeforeEach
-    void init() {
         List<ProjectFilter> projectFilters = List.of(projectFilter);
+
         projectService = new ProjectService(projectRepository, projectMapper,
                 userContext, projectValidator, projectFilters, teamMemberRepository);
 
 
-        Long id = 1L;
-        Long ownerId = 2L;
+        long id = 1L;
+        long ownerId = 2L;
         String name = "some name";
         LocalDateTime creationDate = LocalDateTime.now();
         ProjectStatus created = ProjectStatus.CREATED;
@@ -213,19 +95,15 @@ class ProjectServiceTest {
                 .name("some name")
                 .projectStatus(ProjectStatus.CREATED).build();
 
-        Mockito.lenient().when(projectFilters.get(0).isApplicable(projectFilterDto)).thenReturn(true);
-        Mockito.lenient().when(projectFilters.get(0).apply(any(), any())).thenReturn(List.of(project).stream());
-
-        projectsFromDataBase = new ArrayList<>();
-        newProjectIds = new ArrayList<>();
-        userIds = new ArrayList<>();
+        lenient().when(projectFilters.get(0).isApplicable(projectFilterDto)).thenReturn(true);
+        lenient().when(projectFilters.get(0).filter(any(), any())).thenReturn(Stream.of(project));
     }
 
     @Test
     void findByIdTest() {
         when(projectRepository.existsById(anyLong())).thenReturn(true);
         when(projectRepository.getProjectById(anyLong())).thenReturn(project);
-        when(projectMapper.entityToDto(project)).thenReturn(projectDto);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
         ProjectDto result = projectService.findById(1L);
         assertNotNull(result);
         assertEquals(projectDto, result);
@@ -234,16 +112,16 @@ class ProjectServiceTest {
     @Test
     void findAllTest() {
         when(projectRepository.findAll()).thenReturn(projects);
-        when(projectMapper.entitiesToDtos(projects)).thenReturn(projectDtos);
+        when(projectMapper.toDtoList(projects)).thenReturn(projectDtos);
         List<ProjectDto> result = projectService.findAll();
         assertNotNull(result);
     }
 
     @Test
     void createProjectTest() {
-        when(projectMapper.dtoToEntity(projectDto)).thenReturn(project);
+        when(projectMapper.toEntity(projectDto)).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.entityToDto(project)).thenReturn(projectDto);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
         ProjectDto result = projectService.createProject(projectDto);
         assertNotNull(result);
         assertEquals(projectDto, result);
@@ -251,9 +129,9 @@ class ProjectServiceTest {
 
     @Test
     void updateProjectTest() {
-        when(projectMapper.dtoToEntity(projectDto)).thenReturn(project);
+        when(projectMapper.toEntity(projectDto)).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.entityToDto(project)).thenReturn(projectDto);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
         ProjectDto result = projectService.createProject(projectDto);
         assertNotNull(result);
         assertEquals(projectDto, result);
@@ -282,8 +160,8 @@ class ProjectServiceTest {
     @Test
     @DisplayName("Test findDifferentProjects with new projects not in database")
     void testFindDifferentProjectsWhenNewProjectIdsNotInDatabase() {
-        projectsFromDataBase.add(Project.builder().id(1L).name("Existing Project").build());
-        newProjectIds = new ArrayList<>(Arrays.asList(1L, 2L, 3L));
+        List<Project> projectsFromDataBase = List.of(Project.builder().id(1L).name("Existing Project").build());
+        List<Long> newProjectIds = new ArrayList<>(Arrays.asList(1L, 2L, 3L));
 
         when(projectRepository.getProjectById(2L)).thenReturn(new Project());
         when(projectRepository.getProjectById(3L)).thenReturn(new Project());
@@ -296,7 +174,7 @@ class ProjectServiceTest {
     @Test
     @DisplayName("Test findDifferentProjects with empty newProjectIds list")
     void testFindDifferentProjectsWhenNewProjectIdsIsEmpty() {
-        projectsFromDataBase.add(Project.builder().id(1L).name("Existing Project").build());
+        List<Project> projectsFromDataBase = List.of(Project.builder().id(1L).name("Existing Project").build());
 
         List<Project> result = projectService.findDifferentProjects(projectsFromDataBase, new ArrayList<>());
 
@@ -306,7 +184,7 @@ class ProjectServiceTest {
     @Test
     @DisplayName("Test findDifferentProjects with empty projectsFromDataBase list")
     void testFindDifferentProjectsWhenProjectsFromDataBaseIsEmpty() {
-        newProjectIds = Arrays.asList(1L, 2L, 3L);
+        List<Long> newProjectIds = Arrays.asList(1L, 2L, 3L);
 
         when(projectRepository.getProjectById(1L)).thenReturn(new Project());
         when(projectRepository.getProjectById(2L)).thenReturn(new Project());
@@ -336,7 +214,7 @@ class ProjectServiceTest {
     @Test
     @DisplayName("Test getNewProjects with user IDs having no team members")
     void testGetNewProjectsWhenNoneOfUserIdsHaveTeamMembers() {
-        userIds = Arrays.asList(1L, 2L);
+        List<Long> userIds = Arrays.asList(1L, 2L);
 
         when(teamMemberRepository.findByUserId(1L)).thenReturn(new ArrayList<>());
         when(teamMemberRepository.findByUserId(2L)).thenReturn(new ArrayList<>());
