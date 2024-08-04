@@ -69,7 +69,8 @@ public class ProjectService {
                 .toList();
     }
 
-    private Project getProjectById(Long projectId) {
+    @Transactional(readOnly = true)
+    public Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);
     }
 }

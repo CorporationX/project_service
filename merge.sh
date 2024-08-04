@@ -1,31 +1,31 @@
-git checkout unicorn-master
+git checkout griffon-master-bc5
 git merge dev
-git push origin unicorn-master
+git push origin griffon-master-bc5
 
-git checkout unicorn-master
+git checkout murloc-master-bc5
 git merge dev
-git push origin unicorn-master
+git push origin murloc-master-bc5
 
-git checkout medusa-master
+git checkout manticore-master-bc5
 git merge dev
-git push origin medusa-master
+git push origin manticore-master-bc5
 
-git checkout chimera-master
+git checkout titan-master-bc5
 git merge dev
-git push origin chimera-master
+git push origin titan-master-bc5
 
-git checkout werewolf-master
+git checkout centaur-master-bc5
 git merge dev
-git push origin werewolf-master
+git push origin centaur-master-bc5
 
-git checkout griffon-master
+git checkout minotaur-master-bc5
 git merge dev
-git push origin griffon-master
+git push origin minotaur-master-bc5
 
-git checkout cerberus-master
+git checkout cyclop-master-bc5
 git merge dev
-git push origin cerberus-master
+git push origin cyclop-master-bc5
 
-git checkout basilisk-master
+git checkout medusa-master-bc5
 git merge dev
-git push origin basilisk-master
+git push origin medusa-master-bc5
