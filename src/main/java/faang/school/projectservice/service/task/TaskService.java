@@ -6,14 +6,10 @@ import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.dto.task.filter.TaskFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.TaskRepository;
-import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.task.TaskMapper;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.task.TaskValidator;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +29,6 @@ public class TaskService {
     private final ProjectRepository projectRepository;
     private final UserServiceClient userServiceClient;
     private final ProjectService projectService;
-    private final ProjectMapper projectMapper;
     private final List<Filter<TaskFilterDto, Task>> taskFilters;
 
     @Transactional
@@ -42,7 +37,7 @@ public class TaskService {
         taskValidator.validateTeamMember(taskDto.getPerformerUserId(), taskDto.getProjectId());
         Task task = taskMapper.toEntity(taskDto);
         task.setProject(projectRepository.getProjectById(taskDto.getProjectId()));
-        if(taskDto.getParentTaskId() != null) {
+        if (!taskValidator.isNull(taskDto.getParentTaskId())) {
             task.setParentTask(taskValidator.validateTask(taskDto.getParentTaskId()));
         }
         return taskMapper.toDto(taskRepository.save(task));
@@ -75,7 +70,7 @@ public class TaskService {
     public List<TaskDto> getTasksByProjectIdAndFilter(Long projectId, Long userId, TaskFilterDto filters) {
         projectService.getProjectById(projectId);
         validateUserRights(userId, projectId);
-        Stream<Task> tasks =  taskRepository.findAllByProjectId(projectId).stream();
+        Stream<Task> tasks = taskRepository.findAllByProjectId(projectId).stream();
         return taskFilters.stream()
                 .filter(taskFilter -> taskFilter.isApplicable(filters))
                 .flatMap(taskFilter -> taskFilter.apply(tasks, filters))
@@ -90,20 +85,20 @@ public class TaskService {
     }
 
     private void updateFields(Task task, TaskDto taskDto) {
-        if(!taskValidator.descriptionIsNull(taskDto.getDescription())) {
+        if (!taskValidator.isNull(taskDto.getDescription())) {
             task.setDescription(taskDto.getDescription());
         }
-        if(!taskValidator.statusIsNull(taskDto.getStatus())) {
+        if (!taskValidator.isNull(taskDto.getStatus())) {
             task.setStatus(TaskStatus.valueOf(taskDto.getStatus()));
         }
-        if(!taskValidator.performerUserIdIsNull(taskDto.getPerformerUserId())) {
+        if (!taskValidator.isNull(taskDto.getPerformerUserId())) {
             task.setPerformerUserId(taskDto.getPerformerUserId());
         }
-        if(!taskValidator.parentTaskIdIsNull(taskDto.getParentTaskId())) {
+        if (!taskValidator.isNull(taskDto.getParentTaskId())) {
             Task parentTask = taskValidator.validateTask(taskDto.getParentTaskId());
             task.setParentTask(parentTask);
         }
-        if(!taskValidator.linkedTasksIdsIsNull(taskDto.getLinkedTasksIds())) {
+        if (!taskValidator.isNull(taskDto.getLinkedTasksIds())) {
             List<Task> linkedTasks = taskDto.getLinkedTasksIds().stream()
                     .map(taskValidator::validateTask)
                     .collect(Collectors.toList());

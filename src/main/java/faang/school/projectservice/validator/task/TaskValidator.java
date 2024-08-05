@@ -9,8 +9,6 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class TaskValidator {
@@ -27,23 +25,8 @@ public class TaskValidator {
         return taskRepository.findById(taskId).orElseThrow(() ->
                 new TaskExceptionHandler("The task does not exist!"));
     }
-    public boolean descriptionIsNull(String description) {
-        return description == null;
-    }
 
-    public boolean statusIsNull(String status) {
-        return status == null;
-    }
-
-    public boolean performerUserIdIsNull(Long performerUserId) {
-        return performerUserId == null;
-    }
-
-    public boolean parentTaskIdIsNull(Long parentTaskId) {
-        return parentTaskId == null;
-    }
-
-    public boolean linkedTasksIdsIsNull(List<Long> linkedTasksIds) {
-        return linkedTasksIds == null;
+    public boolean isNull(Object obj) {
+        return obj == null;
     }
 }
