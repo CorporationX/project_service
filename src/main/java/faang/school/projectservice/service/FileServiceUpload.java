@@ -56,7 +56,7 @@ public class FileServiceUpload {
     }
 
     @Transactional
-    public ResponseEntity<Void> deleteFile(long resourceId, long userId) {
+    public void deleteFile(long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
         Project project = projectRepository.getProjectById(resource.getProject().getId());
         if (project.getOwnerId() != userId || resource.getCreatedBy().getId() != userId) {
@@ -70,6 +70,5 @@ public class FileServiceUpload {
         resource.setUpdatedBy(teamMemberRepository.findById(userId));
         projectRepository.save(project);
         resourceRepository.delete(resource);
-        return ResponseEntity.noContent().build();
     }
 }

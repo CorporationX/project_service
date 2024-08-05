@@ -142,9 +142,6 @@ public class TestFileService {
         when(projectRepository.getProjectById(resource.getProject().getId())).thenReturn(project);
         when(teamMemberRepository.findById(userId)).thenReturn(teamMember);
 
-        ResponseEntity<Void> response = fileService.deleteFile(resourceId, userId);
-
-        assertNotNull(response);
         verify(s3Service, times(1)).deleteFile(resource);
         verify(projectRepository, times(1)).save(project);
         verify(resourceRepository, times(1)).delete(resource);
