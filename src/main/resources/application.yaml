@@ -31,8 +31,6 @@ spring:
 
 server:
   port: 8082
-#  tomcat:
-#    max-swallow-size: -1
 
 logging:
   level:
@@ -46,7 +44,7 @@ services:
     endpoint: http://192.168.0.102:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: project
     isMocked: false
   payment-service:
     host: http://localhost

@@ -1,37 +1,40 @@
 package faang.school.projectservice.s3;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-@Component
+import java.io.IOException;
+import java.io.InputStream;
+
+@Service
+@RequiredArgsConstructor
 public class S3Service {
-    @Value("${services.s3.endpoint}")
-    private String endpoint;
-    @Value("${services.s3.accessKey}")
-    private String accessKey;
-    @Value("${services.s3.secretKey}")
-    private String secretKey;
-    private  AWSCredentials credentials;
-    public  AmazonS3 client;
+    private final S3Client s3;
 
-    @PostConstruct
-    private void  postConstruct() {
-        credentials = new BasicAWSCredentials(
-                accessKey,
-                secretKey
-        );
-        client = AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, ""))
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .build();
+    public boolean uploadFile(MultipartFile file, String bucketName, String path) {
+        ObjectMetadata data = new ObjectMetadata();
+        data.setContentType(file.getContentType());
+        data.setContentLength(file.getSize());
+        try (InputStream inputStream = file.getInputStream()) {
+            s3.client.putObject(bucketName, path, inputStream, data);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return true;
     }
 
+    public S3Object downloadFile(String bucketName, String path) {
+        return s3.client.getObject(bucketName, path);
+    }
 
+    public void deleteFile(String bucketName, String path) {
+        s3.client.deleteObject(bucketName, path);
+    }
+
+    public boolean doesObjectExist(String bucketName, String path) {
+        return s3.client.doesObjectExist(bucketName, path);
+    }
 }
