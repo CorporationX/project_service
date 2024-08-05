@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.ValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -62,8 +62,8 @@ public class ProjectServiceTest {
 
     @Test
     void createWithProjectNameExistsShouldTrowsException() {
-        doThrow(ValidationException.class).when(projectValidator).validateCreation(userId, projectDto);
-        assertThrows(ValidationException.class, () -> projectService.create(userId, projectDto));
+        doThrow(DataValidationException.class).when(projectValidator).validateCreation(userId, projectDto);
+        assertThrows(DataValidationException.class, () -> projectService.create(userId, projectDto));
         verify(projectRepository, never()).save(any(Project.class));
     }
 
@@ -111,8 +111,8 @@ public class ProjectServiceTest {
 
     @Test
     void updateWithNotValidParametersShouldThrowException() {
-        doThrow(ValidationException.class).when(projectValidator).validateUpdating(projectDto);
-        Assertions.assertThrows(ValidationException.class, () -> projectService.update(projectDto));
+        doThrow(DataValidationException.class).when(projectValidator).validateUpdating(projectDto);
+        Assertions.assertThrows(DataValidationException.class, () -> projectService.update(projectDto));
         verify(projectRepository, never()).save(any(Project.class));
     }
 
@@ -151,14 +151,14 @@ public class ProjectServiceTest {
 
     @Test
     void findByIdWithNotExistIdPatternShouldThrowException() {
-        doThrow(ValidationException.class).when(projectValidator).validateProjectFilterDtoForFindById(projectFilterDto);
-        assertThrows(ValidationException.class, () -> projectService.findById(userId, projectFilterDto));
+        doThrow(DataValidationException.class).when(projectValidator).validateProjectFilterDtoForFindById(projectFilterDto);
+        assertThrows(DataValidationException.class, () -> projectService.findById(userId, projectFilterDto));
     }
 
     @Test
     void findByIdWithNotExistProjectShouldThrowException() {
         projectFilterDto.setIdPattern(1L);
-        Exception exception = assertThrows(ValidationException.class,
+        Exception exception = assertThrows(DataValidationException.class,
                 () -> projectService.findById(userId, projectFilterDto));
         assertEquals("Project not found", exception.getMessage());
     }

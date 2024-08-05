@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.ValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -70,7 +70,7 @@ public class ProjectService {
                 .findAvailableByUserIdAndProjectId(userId, projectFilterDto.getIdPattern())
                 .orElseThrow(() -> {
                     log.info("Project with id {} not found", projectFilterDto.getIdPattern());
-                    return new ValidationException("Project not found");
+                    return new DataValidationException("Project not found");
                 }));
     }
 

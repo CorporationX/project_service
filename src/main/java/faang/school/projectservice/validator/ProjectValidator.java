@@ -2,7 +2,7 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.ValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -22,7 +22,7 @@ public class ProjectValidator {
                 .filter(project -> project.getOwnerId().equals(userId))
                 .anyMatch(project -> project.getName().equals(projectDto.getName()))) {
             log.info("Project with name {} already exists.", projectDto.getName());
-            throw new ValidationException("Project with name " + projectDto.getName() + " already exists.");
+            throw new DataValidationException("Project with name " + projectDto.getName() + " already exists.");
         }
     }
 
@@ -30,22 +30,22 @@ public class ProjectValidator {
         if (projectDto.getId() != null) {
             Project project = projectRepository.findById(projectDto.getId()).orElseThrow(() -> {
                 log.info("Project with id {} does not exist.", projectDto.getId());
-                return new ValidationException("Project with id " + projectDto.getId() + " does not exist.");
+                return new DataValidationException("Project with id " + projectDto.getId() + " does not exist.");
             });
             if (project.getStatus() == ProjectStatus.COMPLETED || project.getStatus() == ProjectStatus.CANCELLED) {
                 log.info("Project with id {} completed or cancelled", projectDto.getId());
-                throw new ValidationException("Project with id " + projectDto.getId() + " completed or cancelled.");
+                throw new DataValidationException("Project with id " + projectDto.getId() + " completed or cancelled.");
             }
         } else {
             log.info("Field id is null");
-            throw new ValidationException("Field id is null");
+            throw new DataValidationException("Field id is null");
         }
     }
 
     public void validateProjectFilterDtoForFindById(ProjectFilterDto projectFilterDto) {
         if (projectFilterDto.getIdPattern() == null) {
             log.info("Field id pattern is null");
-            throw new ValidationException("Field id pattern is null");
+            throw new DataValidationException("Field id pattern is null");
         }
     }
 }
