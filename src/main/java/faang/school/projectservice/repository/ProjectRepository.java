@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Repository
 @RequiredArgsConstructor
@@ -37,5 +39,17 @@ public class ProjectRepository {
 
     public boolean existsById(Long id){
         return projectJpaRepository.existsById(id);
+    }
+
+    public Stream<Project> findAllAvailableProjectsByUserId(Long userId) {
+        return projectJpaRepository.findAllAvailableProjectsByUserId(userId);
+    }
+
+    public Optional<Project> findAvailableByUserIdAndProjectId(Long userId, Long projectId) {
+        return projectJpaRepository.findAvailableByUserIdAndProjectId(userId, projectId);
+    }
+
+    public Optional<Project> findById(Long id) {
+        return projectJpaRepository.findById(id);
     }
 }
