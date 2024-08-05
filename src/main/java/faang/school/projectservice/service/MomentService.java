@@ -6,6 +6,7 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 @Service
 @RequiredArgsConstructor
 public class MomentService {
@@ -13,12 +14,12 @@ public class MomentService {
     private final MomentMapper momentMapper;
 
     public Moment createMoment(MomentDto momentDto) {
-        return momentRepository.save(momentMapper.toEntity(momentDto));
+        return momentRepository.save(momentMapper.momentDtoToMoment(momentDto));
     }
 
     public MomentDto addMoment(MomentDto momentDto) {
-        Moment moment = momentMapper.MomentDtoToMoment(momentDto);
+        Moment moment = momentMapper.momentDtoToMoment(momentDto);
         momentRepository.save(moment);
-        return momentMapper.MomentToMomentDto(moment);
+        return momentMapper.momentToMomentDto(moment);
     }
 }

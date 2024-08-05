@@ -38,12 +38,4 @@ public class ProjectRepository {
     public boolean existsById(Long id) {
         return projectJpaRepository.existsById(id);
     }
-
-    public void completeProjectSubprojects(Long id) {
-        projectJpaRepository.completeProjectSubprojects(id);
-    }
-
-    public void makeSubprojectsPrivate(Long id) {
-        projectJpaRepository.makeSubprojectsPrivate(id);
-    }
 }

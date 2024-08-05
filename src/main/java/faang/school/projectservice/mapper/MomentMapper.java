@@ -11,8 +11,7 @@ public interface MomentMapper {
 
     @Mapping(target = "project.id", ignore = true)
     @Mapping(target = "user.id", ignore = true)
-    Moment MomentDtoToMoment(MomentDto momentDto);
+    Moment momentDtoToMoment(MomentDto momentDto);
 
-    @Mapping(source = "projects.id", target = "progectIds")
-    MomentDto MomentToMomentDto(Moment moment);
+    MomentDto momentToMomentDto(Moment moment);
 }
