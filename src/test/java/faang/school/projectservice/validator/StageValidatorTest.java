@@ -1,4 +1,4 @@
-package faang.school.projectservice.validation;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;

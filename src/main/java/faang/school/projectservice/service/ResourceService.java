@@ -28,7 +28,7 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
 
     public ResourceDto addResource(Long projectId, MultipartFile file) {
-        Project project = projectService.getProject(projectId);
+        Project project = projectService.getProjectById(projectId);
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         resourceValidator.checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
@@ -44,16 +44,16 @@ public class ResourceService {
         return resourceMapper.resourceToDto(resource);
     }
 
-    public ResourceDto updateResource(Long userId, Long resourceId, MultipartFile file) {
-        Resource resourceFromDB = resourceRepository.getOne(resourceId);
-        Project project = resourceFromDB.getProject();
-
-        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()))
-                .subtract(resourceFromDB.getSize());
-    }
-
-    public InputStream downloadResource(Long resourceId) {
-        Resource resourc = getRosoursById(resourceId);
-        return s3Service.downloadFile(resourc.getKey());
-    }
+//    public ResourceDto updateResource(Long userId, Long resourceId, MultipartFile file) {
+//        Resource resourceFromDB = resourceRepository.getOne(resourceId);
+//        Project project = resourceFromDB.getProject();
+//
+//        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()))
+//                .subtract(resourceFromDB.getSize());
+//    }
+//
+//    public InputStream downloadResource(Long resourceId) {
+//        Resource resourc = getRosoursById(resourceId);
+//        return s3Service.downloadFile(resourc.getKey());
+//    }
 }

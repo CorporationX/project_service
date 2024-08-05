@@ -18,14 +18,14 @@ public class ResourceController {
         return resourceService.addResource(projectId, file);
     }
 
-    @PostMapping("/{resourceId}")
-    public ResourceDto updateResource(@PathVariable Long resourceId, @RequestBody MultipartFile file) {
-        return resourceService.updateResource();
-    }
-
-    @DeleteMapping("{/resourceId}")
-    public ResponseEntity<String> deleteResource(@PathVariable Long resourceId) {
-        resourceService.deleteResource();
-        return ResponseEntity.ok("Resource deleted");
-    }
+//    @PostMapping("/{resourceId}")
+//    public ResourceDto updateResource(@PathVariable Long resourceId, @RequestBody MultipartFile file) {
+//        return resourceService.updateResource();
+//    }
+//
+//    @DeleteMapping("{/resourceId}")
+//    public ResponseEntity<String> deleteResource(@PathVariable Long resourceId) {
+//        resourceService.deleteResource();
+//        return ResponseEntity.ok("Resource deleted");
+//    }
 }
