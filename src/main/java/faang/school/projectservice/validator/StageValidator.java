@@ -1,4 +1,4 @@
-package faang.school.projectservice.validation;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;
