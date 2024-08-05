@@ -1,8 +1,10 @@
 package faang.school.projectservice.controller.initiative;
 
-import faang.school.projectservice.dtos.initiative.InitiativeDto;
-import faang.school.projectservice.model.initiative.InitiativeStatus;
+import faang.school.projectservice.controller.ApiPath;
+import faang.school.projectservice.dto.filter.initiative.InitiativeFilterDto;
+import faang.school.projectservice.dto.initiative.InitiativeDto;
 import faang.school.projectservice.service.initiative.InitiativeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,45 +12,37 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/initiatives")
+@RequestMapping(ApiPath.INITIATIVES_PATH)
 public class InitiativeController {
     private final InitiativeService initiativeService;
 
     @PostMapping
-    public InitiativeDto createInitiative(@RequestBody InitiativeDto initiativeDto) {
-        if (initiativeDto.getName() == null || initiativeDto.getName().isEmpty() || initiativeDto.getName().isBlank()) {
-            throw new IllegalArgumentException("Initiative name cannot be empty");
-        }
+    public InitiativeDto createInitiative(@RequestBody @Valid InitiativeDto initiativeDto) {
         return initiativeService.createInitiative(initiativeDto);
     }
 
-    @PutMapping("/{id}")
-    public InitiativeDto updateInitiative(@PathVariable("id") Long id, @RequestBody InitiativeDto initiativeDto) {
-        if (initiativeDto.getName() == null || initiativeDto.getName().isEmpty() || initiativeDto.getName().isBlank()) {
-            throw new IllegalArgumentException("Initiative name cannot be empty");
-        }
-        return initiativeService.updateInitiative(id, initiativeDto);
+    @PutMapping
+    public InitiativeDto updateInitiative(@RequestBody @Valid InitiativeDto initiativeDto) {
+        return initiativeService.updateInitiative(initiativeDto.getId(), initiativeDto);
     }
 
-    @GetMapping("/filter")
-    public List<InitiativeDto> getAllInitiativesWithFilter(@RequestParam InitiativeStatus status,
-                                                           @RequestParam Long curatorId) {
-        return initiativeService.getAllInitiativesWithFilter(status, curatorId);
+    @PostMapping(ApiPath.FILTER_FUNCTIONALITY)
+    public List<InitiativeDto> getAllInitiativesWithFilter(@RequestBody @Valid InitiativeFilterDto filterDto) {
+        return initiativeService.getAllInitiativesWithFilter(filterDto);
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public List<InitiativeDto> getAllInitiatives() {
         return initiativeService.getAllInitiatives();
     }
 
-    @GetMapping("{id}")
+    @GetMapping(ApiPath.GENERAL_ID_PLACEHOLDER)
     public InitiativeDto getInitiativeById(@PathVariable Long id) {
         return initiativeService.getInitiativeById(id);
     }

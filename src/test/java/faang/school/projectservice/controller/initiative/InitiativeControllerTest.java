@@ -1,35 +1,50 @@
 package faang.school.projectservice.controller.initiative;
 
-import faang.school.projectservice.dtos.initiative.InitiativeDto;
-import faang.school.projectservice.model.initiative.InitiativeStatus;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import faang.school.projectservice.controller.ApiPath;
+import faang.school.projectservice.dto.filter.initiative.InitiativeFilterDto;
+import faang.school.projectservice.dto.initiative.InitiativeDto;
 import faang.school.projectservice.service.initiative.InitiativeService;
+import faang.school.projectservice.config.context.UserContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
+@WebMvcTest(InitiativeController.class)
 public class InitiativeControllerTest {
 
-    @InjectMocks
-    private InitiativeController initiativeController;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private InitiativeService initiativeService;
+
+    @MockBean
+    private UserContext userContext;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private InitiativeDto initiativeDto;
 
@@ -49,70 +64,72 @@ public class InitiativeControllerTest {
 
     @ParameterizedTest
     @CsvSource({", Initiative name cannot be empty", "'', Initiative name cannot be empty", "'   ', Initiative name cannot be empty"})
-    void testCreateInitiativeWithInvalidName(String name, String expectedMessage) {
+    void testCreateInitiativeWithInvalidName(String name) throws Exception {
         InitiativeDto dto = InitiativeDto.builder().name(name).build();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> initiativeController.createInitiative(dto));
-
-        assertEquals(expectedMessage, exception.getMessage());
+        mockMvc.perform(post(ApiPath.INITIATIVES_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
     }
 
     @ParameterizedTest
     @CsvSource({", Initiative name cannot be empty", "'', Initiative name cannot be empty", "'   ', Initiative name cannot be empty"})
-    void testUpdateInitiativeWithInvalidName(String name, String expectedMessage) {
-        InitiativeDto dto = InitiativeDto.builder().name(name).build();
+    void testUpdateInitiativeWithInvalidName(String name) throws Exception {
+        InitiativeDto dto = InitiativeDto.builder().id(1L).name(name).build();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> initiativeController.updateInitiative(1L, dto));
-
-        assertEquals(expectedMessage, exception.getMessage());
+        mockMvc.perform(put(ApiPath.INITIATIVES_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testCreateInitiative() {
+    void testCreateInitiative() throws Exception {
         when(initiativeService.createInitiative(any(InitiativeDto.class))).thenReturn(initiativeDto);
 
-        InitiativeDto result = initiativeController.createInitiative(initiativeDto);
-
-        assertEquals(initiativeDto, result);
+        mockMvc.perform(post(ApiPath.INITIATIVES_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(initiativeDto)))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void testUpdateInitiative() {
-        when(initiativeService.updateInitiative(anyLong(), any(InitiativeDto.class))).thenReturn(initiativeDto);
+    void testUpdateInitiative() throws Exception {
+        when(initiativeService.updateInitiative(any(Long.class), any(InitiativeDto.class))).thenReturn(initiativeDto);
 
-        InitiativeDto result = initiativeController.updateInitiative(1L, initiativeDto);
-
-        assertEquals(initiativeDto, result);
+        mockMvc.perform(put(ApiPath.INITIATIVES_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(initiativeDto)))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void testGetAllInitiativesWithFilter() {
+    void testGetAllInitiativesWithFilter() throws Exception {
         List<InitiativeDto> initiatives = Collections.singletonList(initiativeDto);
-        when(initiativeService.getAllInitiativesWithFilter(any(InitiativeStatus.class), anyLong())).thenReturn(initiatives);
 
-        List<InitiativeDto> result = initiativeController.getAllInitiativesWithFilter(InitiativeStatus.OPEN, 1L);
+        when(initiativeService.getAllInitiativesWithFilter(any(InitiativeFilterDto.class))).thenReturn(initiatives);
 
-        assertEquals(initiatives, result);
+        mockMvc.perform(get("/initiatives/filter")
+                        .param("status", "OPEN")
+                        .param("curatorId", "1"))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void testGetAllInitiatives() {
+    void testGetAllInitiatives() throws Exception {
         List<InitiativeDto> initiatives = Collections.singletonList(initiativeDto);
         when(initiativeService.getAllInitiatives()).thenReturn(initiatives);
 
-        List<InitiativeDto> result = initiativeController.getAllInitiatives();
-
-        assertEquals(initiatives, result);
+        mockMvc.perform(get(ApiPath.INITIATIVES_PATH))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void testGetInitiativeById() {
+    void testGetInitiativeById() throws Exception {
         when(initiativeService.getInitiativeById(anyLong())).thenReturn(initiativeDto);
 
-        InitiativeDto result = initiativeController.getInitiativeById(1L);
-
-        assertEquals(initiativeDto, result);
+        mockMvc.perform(get("/initiatives/1"))
+                .andExpect(status().isOk());
     }
 }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper.initiative;
 
-import faang.school.projectservice.dtos.initiative.InitiativeDto;
+import faang.school.projectservice.dto.initiative.InitiativeDto;
 import faang.school.projectservice.model.initiative.Initiative;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
