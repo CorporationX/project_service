@@ -1,6 +1,8 @@
 package faang.school.projectservice.mapper.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.mapper.InternshipMapper;
+import faang.school.projectservice.mapper.InternshipMapperImpl;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;

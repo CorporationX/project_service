@@ -1,10 +1,9 @@
-package faang.school.projectservice.controller.internship;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.exception.internShip.InternshipDtoValidateException;
-import faang.school.projectservice.filter.internship.InternshipFilterDto;
-import faang.school.projectservice.service.internShip.InternshipService;
-import faang.school.projectservice.validator.internShip.InternshipDtoValidator;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.service.internship.InternshipService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,41 +17,34 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/internship")
+@RequestMapping("/internships")
 public class InternshipController {
-    private final InternshipDtoValidator validator;
     private final InternshipService internshipService;
 
     @PostMapping("/")
-    public InternshipDto create(@RequestBody InternshipDto internShipDto) {
-        if (!validator.validateInternshipDto(internShipDto)) {
-            throw new InternshipDtoValidateException("InternShipDto не прошёл валидацию.");
-        }
+    public InternshipDto create(@Valid @RequestBody InternshipDto internShipDto) {
         return internshipService.create(internShipDto);
     }
 
     @PutMapping("/")
-    public InternshipDto update(@RequestBody InternshipDto internShipDto) {
-        if (!validator.validateInternshipDto(internShipDto)) {
-            throw new InternshipDtoValidateException("InternShipDto не прошёл валидацию.");
-        }
+    public InternshipDto update(@Valid @RequestBody InternshipDto internShipDto) {
         return internshipService.update(internShipDto);
     }
 
     @GetMapping("/{id}")
     public InternshipDto getInternship(@PathVariable(name = "id") Long internshipId) {
-        validator.validateInternshipId(internshipId);
         return internshipService.getInternship(internshipId);
 
     }
 
-    @PostMapping("/filtered")
+    @GetMapping("/filtered")
     public List<InternshipDto> getFilteredInternship(@RequestBody InternshipFilterDto filters) {
-        return internshipService.getFilteredInternship(filters);
+        return internshipService.getFilteredInternships(filters);
     }
 
     @GetMapping("/all")
     public List<InternshipDto> getAllInternships() {
         return internshipService.getAllInternships();
     }
+
 }

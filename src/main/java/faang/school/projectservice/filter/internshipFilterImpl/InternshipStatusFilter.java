@@ -1,14 +1,14 @@
-package faang.school.projectservice.filter.filterImpl;
+package faang.school.projectservice.filter.internshipFilterImpl;
 
-import faang.school.projectservice.filter.internship.InternshipFilter;
-import faang.school.projectservice.filter.internship.InternshipFilterDto;
+import faang.school.projectservice.filter.InternshipFilter;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 @Component
-public class StatusFilter implements InternshipFilter {
+public class InternshipStatusFilter implements InternshipFilter {
     @Override
     public boolean isApplicable(InternshipFilterDto filters) {
         return filters.getStatus() != null;

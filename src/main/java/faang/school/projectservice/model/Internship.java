@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,6 +34,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 @Table(name = "internship")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Internship {
 
     @Id
@@ -46,7 +48,7 @@ public class Internship {
     @ManyToOne
     @JoinColumn(name = "mentor_id")
     @NotNull
-    private TeamMember mentorId;
+    private TeamMember mentor;
 
     @ManyToMany
     @JoinTable(
