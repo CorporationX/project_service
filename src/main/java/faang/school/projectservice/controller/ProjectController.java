@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.project;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -48,8 +48,8 @@ public class ProjectController {
     }
 
     @PostMapping("/{userId}/accessible/project")
-    public  ProjectDto findById(@PathVariable Long userId,
-                                @Validated @RequestBody ProjectFilterDto projectFilterDto) {
+    public ProjectDto findById(@PathVariable Long userId,
+                               @Validated @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.findById(userId, projectFilterDto);
     }
 }
