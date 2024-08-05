@@ -4,18 +4,22 @@ import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.dto.moment.MomentUpdateDto;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.repository.moment.MomentRepository;
 import faang.school.projectservice.service.utilservice.MomentUtilService;
 import faang.school.projectservice.service.utilservice.ProjectUtilService;
 import faang.school.projectservice.service.utilservice.TeamMemberUtilService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +27,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional
 public class MomentService {
 
@@ -31,6 +36,8 @@ public class MomentService {
 
     private final TeamMemberUtilService teamMemberUtilService;
     private final ProjectUtilService projectUtilService;
+    private final MomentRepository momentRepository;
+
 
     @Transactional(readOnly = true)
     public MomentResponseDto getById(long id) {
@@ -217,5 +224,28 @@ public class MomentService {
         if (momentUpdateDto.getImageId() != null) {
             moment.setImageId(momentUpdateDto.getImageId());
         }
+    }
+
+    public void addMomentToAccomplishedProject(Project project, List<Moment> moments, Long userId) {
+        List<Moment> momentsOfCompletedProjects;
+        if (moments.isEmpty()) {
+            momentsOfCompletedProjects = addMomentToList(project.getId(), new ArrayList<>(), userId);
+        } else {
+            momentsOfCompletedProjects = addMomentToList(project.getId(), moments, userId);
+        }
+        project.setMoments(momentsOfCompletedProjects);
+        log.info("Moment was set successfully for project id = {}", project.getId());
+        momentRepository.saveAll(moments);
+    }
+
+    private List<Moment> addMomentToList(long id, List<Moment> moments, long userId) {
+        Moment moment = Moment.builder()
+                .name("project " + id + " has been completed")
+                .updatedBy(userId)
+                .createdBy(userId)
+                .build();
+        List<Moment> list = new ArrayList<>(moments);
+        list.add(moment);
+        return list;
     }
 }

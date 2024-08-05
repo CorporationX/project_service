@@ -1,7 +1,7 @@
 package faang.school.projectservice.project;
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.FilterDto;
+import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.filter.Filter;
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,17 +49,19 @@ public class ProjectServiceTest {
     @Mock
     private SubProjectMapperImpl subProjectMapper;
     @Mock
-    private List<Filter<FilterDto, Project>> filters = new ArrayList<>();
+    private List<Filter<FilterProjectDto, Project>> filters = new ArrayList<>();
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
     @InjectMocks
     private ProjectService service;
 
     @BeforeEach
     public void init() {
-        Filter<FilterDto, Project> createdAtFilter = mock(CreatedAtFilter.class);
-        Filter<FilterDto, Project> nameFilter = mock(NameFilter.class);
-        Filter<FilterDto, Project> statusFilter = mock(StatusFilter.class);
-        Filter<FilterDto, Project> updatedAtFilter = mock(UpdatedAtFilter.class);
-        Filter<FilterDto, Project> visibilityFilter = mock(VisibilityFilter.class);
+        Filter<FilterProjectDto, Project> createdAtFilter = mock(CreatedAtFilter.class);
+        Filter<FilterProjectDto, Project> nameFilter = mock(NameFilter.class);
+        Filter<FilterProjectDto, Project> statusFilter = mock(StatusFilter.class);
+        Filter<FilterProjectDto, Project> updatedAtFilter = mock(UpdatedAtFilter.class);
+        Filter<FilterProjectDto, Project> visibilityFilter = mock(VisibilityFilter.class);
         filters = List.of(createdAtFilter, nameFilter, statusFilter, updatedAtFilter, visibilityFilter);
     }
 
@@ -96,8 +99,7 @@ public class ProjectServiceTest {
         when(subProjectMapper.toEntity(any())).thenReturn(childProject);
         service.createSubProject(1L, projectDto);
         assertEquals(childProject.getParentProject(), parentProject);
-        verify(projectJpaRepository, times(1)).save(parentProject);
-        verify(projectJpaRepository, times(1)).save(childProject);
+        verify(projectJpaRepository, times(1)).saveAll(List.of(parentProject, childProject));
     }
 
     @Test
@@ -119,6 +121,7 @@ public class ProjectServiceTest {
     public void testUpdateProject() {
         CreateSubProjectDto parentDto = CreateSubProjectDto.builder()
                 .id(1L)
+                .name("UpdatedName")
                 .status(ProjectStatus.COMPLETED)
                 .visibility(ProjectVisibility.PRIVATE)
                 .build();
@@ -148,7 +151,7 @@ public class ProjectServiceTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
         when(projectJpaRepository.getReferenceById(any())).thenReturn(parentProject);
-        when(projectJpaRepository.getAllSubprojectsFor(any())).thenReturn(parentProject.getChildren());
+        when(projectJpaRepository.getAllSubprojectsForProjectId(any())).thenReturn(parentProject.getChildren());
         when(projectJpaRepository.save(parentProject)).thenReturn(parentProject);
         when(projectJpaRepository.saveAll(any())).thenReturn(List.of(firstChildProject, secondChildProject));
         service.updateProject(1L, parentDto, 1L);
@@ -190,7 +193,7 @@ public class ProjectServiceTest {
                 .build();
         firstBaseProject.setChildren(List.of(parentProject));
         when(projectJpaRepository.getReferenceById(any())).thenReturn(parentProject);
-        when(projectJpaRepository.getAllSubprojectsFor(any())).thenReturn(parentProject.getChildren());
+        when(projectJpaRepository.getAllSubprojectsForProjectId(any())).thenReturn(parentProject.getChildren());
         when(projectJpaRepository.findById(any())).thenReturn(Optional.of(secondBaseProject));
         service.updateProject(1L, parentDto, 1L);
         assertEquals(secondBaseProject.getChildren().get(0), parentProject);
@@ -224,7 +227,7 @@ public class ProjectServiceTest {
                 .build();
         firstBaseProject.setChildren(List.of(parentProject));
         when(projectJpaRepository.getReferenceById(any())).thenReturn(parentProject);
-        when(projectJpaRepository.getAllSubprojectsFor(any())).thenReturn(parentProject.getChildren());
+        when(projectJpaRepository.getAllSubprojectsForProjectId(any())).thenReturn(parentProject.getChildren());
         when(projectJpaRepository.findById(any())).thenReturn(Optional.empty());
         assertThrows(DataValidationException.class, () -> service.updateProject(1L, parentDto, 1L));
     }
@@ -261,10 +264,9 @@ public class ProjectServiceTest {
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
         when(projectJpaRepository.getReferenceById(any())).thenReturn(parentProject);
-        when(projectJpaRepository.getAllSubprojectsFor(any())).thenReturn(parentProject.getChildren());
+        when(projectJpaRepository.getAllSubprojectsForProjectId(any())).thenReturn(parentProject.getChildren());
         service.updateProject(1L, parentDto, 1L);
         assertEquals(parentDto.getStatus(), parentProject.getStatus());
-        assertEquals(parentProject.getMoments().size(), parentProject.getChildren().size() + 1);
     }
 
     @Test
@@ -284,10 +286,9 @@ public class ProjectServiceTest {
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
         when(projectJpaRepository.getReferenceById(any())).thenReturn(parentProject);
-        when(projectJpaRepository.getAllSubprojectsFor(any())).thenReturn(parentProject.getChildren());
+        when(projectJpaRepository.getAllSubprojectsForProjectId(any())).thenReturn(parentProject.getChildren());
         service.updateProject(1L, parentDto, 1L);
         assertEquals(parentDto.getStatus(), parentProject.getStatus());
-        assertEquals(parentProject.getMoments().size(), parentProject.getChildren().size() + 1);
     }
 
     @Test
@@ -320,13 +321,13 @@ public class ProjectServiceTest {
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
         when(projectJpaRepository.getReferenceById(any())).thenReturn(parentProject);
-        when(projectJpaRepository.getAllSubprojectsFor(any())).thenReturn(parentProject.getChildren());
+        when(projectJpaRepository.getAllSubprojectsForProjectId(any())).thenReturn(parentProject.getChildren());
         assertThrows(DataValidationException.class, () -> service.updateProject(2L, parentDto, 1L));
     }
 
     @Test
     public void testGetProjectByFilters() {
-        FilterDto nameFilter = new FilterDto();
+        FilterProjectDto nameFilter = new FilterProjectDto();
         nameFilter.setName("Second");
         Long id = 1L;
         Project p1 = new Project();
@@ -340,7 +341,7 @@ public class ProjectServiceTest {
         Project p5 = new Project();
         p1.setName("Second");
         List<Project> projects = List.of(p1, p2, p3, p4, p5);
-        when(projectJpaRepository.getAllSubprojectsFor(any())).thenReturn(projects);
+        when(projectJpaRepository.getAllSubprojectsForProjectId(any())).thenReturn(projects);
 
         List<CreateSubProjectDto> resultProjects = service.getProjectByFilters(nameFilter, 1L);
     }

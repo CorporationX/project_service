@@ -33,7 +33,7 @@ public class ProjectUtilService {
     }
 
     public void checkProjectsNotClosed(Collection<Project> projects) {
-        if (!verifyProjectsNotIncludeStatuses(projects, ProjectStatus.COMPLETED, ProjectStatus.CANCELLED)) {
+        if (verifyProjectsNotIncludeStatuses(projects, ProjectStatus.COMPLETED, ProjectStatus.CANCELLED)) {
             throw new ConflictException(ErrorMessage.PROJECT_STATUS_INVALID);
         }
     }

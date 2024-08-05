@@ -33,7 +33,7 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
                     "SELECT DISTINCT project.id, name, description, parent_project_id, storage_size, max_storage_size, owner_id, created_at, updated_at, status, visibility, cover_image_id\n" +
                     "FROM project inner join search on search.id = project.id", nativeQuery = true
     )
-    List<Project> getAllSubprojectsFor(@Param("projectId") Long projectId);
+    List<Project> getAllSubprojectsForProjectId(@Param("projectId") Long projectId);
 
     @Query("""
             SELECT DISTINCT p FROM Project p

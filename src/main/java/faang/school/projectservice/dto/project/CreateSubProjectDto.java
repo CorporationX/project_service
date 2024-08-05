@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateSubProjectDto implements ProjectValidator {
+public class CreateSubProjectDto implements GeneralProjectInfoDto {
     @Schema(description = "Unique identifier of the project", example = "1")
     private Long id;
     @Schema(description = "Id of the parent project", example = "1")
