@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 class ProjectVisibilityFilterTest {
 
     ProjectVisibilityFilter projectVisibilityFilter = new ProjectVisibilityFilter();
