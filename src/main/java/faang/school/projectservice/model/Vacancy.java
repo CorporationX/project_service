@@ -84,8 +84,4 @@ public class Vacancy {
     @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "skill_id")
     private List<Long> requiredSkillIds;
-
-    @Column(name = "role", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TeamRole position;
 }

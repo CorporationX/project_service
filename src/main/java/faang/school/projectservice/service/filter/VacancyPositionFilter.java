@@ -9,12 +9,12 @@ import java.util.stream.Stream;
 public class VacancyPositionFilter implements VacancyFilter {
     @Override
     public boolean isApplicable(VacancyFilterDto filters) {
-        return filters.getTeamRole() != null;
+        return filters.getProject() != null;
     }
 
     @Override
     public Stream<Vacancy> apply(Supplier<Stream<Vacancy>> vacancyStream, VacancyFilterDto filters) {
         return vacancyStream.get()
-                .filter(vacancy -> vacancy.getPosition().equals(filters.getTeamRole()));
+                .filter(vacancy -> vacancy.getProject().equals(filters.getProject()));
     }
 }

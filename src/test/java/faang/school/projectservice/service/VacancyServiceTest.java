@@ -106,25 +106,27 @@ public class VacancyServiceTest {
         vacancyDtoList = List.of(vacancyDto);
         filterDto = VacancyFilterDto.builder()
                 .namePattern("Java developer")
-                .teamRole(TeamRole.DEVELOPER)
+                .project(project)
                 .build();
     }
 
     @Test
     @DisplayName("Create a vacancy when everything is fine")
     void testCreateSuccess() {
+        // Arrange
         when(projectRepository.getProjectById(vacancyDto.getProjectId())).thenReturn(project);
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
 
+        // Act
         VacancyDto actual = vacancyService.create(vacancyDto);
 
+        // Assert
         verify(projectRepository).getProjectById(vacancyDto.getProjectId());
         verify(vacancyMapper).toEntity(vacancyDto);
         verify(vacancyRepository).save(vacancy);
         verify(vacancyMapper).toDto(vacancy);
-
         assertThat(actual).isEqualTo(vacancyDto);
         assertThat(actual.getStatus()).isEqualTo(VacancyStatus.OPEN);
         assertThat(actual.getProjectId()).isEqualTo(PROJECT_ID);
@@ -133,13 +135,14 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Create a vacancy when vacancy repository error")
     void testCreateWithVacancyRepositoryException() {
+        // Arrange
         when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(vacancyRepository.save(vacancy)).thenThrow(new RuntimeException("Repository error"));
 
+        // Act & Assert
         assertThatThrownBy(() -> vacancyService.create(vacancyDto)).isInstanceOf(RuntimeException.class)
                 .hasMessage("Repository error");
-
         verify(projectRepository).getProjectById(PROJECT_ID);
         verify(vacancyValidator).validate(vacancyDto, project);
         verify(vacancyMapper).toEntity(vacancyDto);
@@ -149,11 +152,12 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Create a vacancy when project repository error")
     void testCreateWithProjectRepositoryException() {
+        // Arrange
         when(projectRepository.getProjectById(PROJECT_ID)).thenThrow(new RuntimeException("Repository error"));
 
+        // Act & Assert
         assertThatThrownBy(() -> vacancyService.create(vacancyDto)).isInstanceOf(RuntimeException.class)
                 .hasMessage("Repository error");
-
         verify(projectRepository).getProjectById(PROJECT_ID);
         verify(vacancyValidator, never()).validate(vacancyDto, project);
         verify(vacancyMapper, never()).toEntity(vacancyDto);
@@ -163,6 +167,7 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Update a vacancy when everything is fine")
     void testUpdateSuccess() {
+        // Arrange
         when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(vacancy));
         when(candidateRepository.findById(CANDIDATE_ID)).thenReturn(Optional.of(candidate));
         when(teamMemberRepository.findByUserIdAndProjectId(CANDIDATE_ID, PROJECT_ID)).thenReturn(teamMember);
@@ -170,11 +175,12 @@ public class VacancyServiceTest {
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
 
+        // Act
         VacancyDto result = vacancyService.update(vacancyDto);
 
+        // Assert
         assertThat(result).isEqualTo(vacancyDto);
         assertThat(vacancy.getStatus()).isEqualTo(VacancyStatus.CLOSED);
-
         verify(vacancyValidator).validate(vacancyDto, project);
         verify(vacancyValidator).validateCandidatesCount(any(), eq(vacancyDto));
         verify(teamMemberRepository, times(1)).save(any(TeamMember.class));
@@ -186,11 +192,12 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Update a vacancy when vacancy is not found")
     void testUpdateVacancyNotFound() {
+        // Arrange
         when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.empty());
 
+        // Act & Assert
         assertThatThrownBy(() -> vacancyService.update(vacancyDto)).isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Vacancy not found!");
-
         verify(vacancyRepository, times(1)).findById(VACANCY_ID);
         verifyNoMoreInteractions(vacancyRepository);
         verifyNoInteractions(candidateRepository);
@@ -201,12 +208,13 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Update a vacancy when candidate is not found")
     void testUpdateCandidateNotFound() {
+        // Arrange
         when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(vacancy));
         when(candidateRepository.findById(CANDIDATE_ID)).thenReturn(Optional.empty());
 
+        // Act & Assert
         assertThatThrownBy(() -> vacancyService.update(vacancyDto)).isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Candidate doesn't exist by id: 1");
-
         verify(vacancyRepository, times(1)).findById(VACANCY_ID);
         verify(candidateRepository, times(1)).findById(CANDIDATE_ID);
         verifyNoMoreInteractions(vacancyRepository);
@@ -218,13 +226,14 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Update a vacancy when team member is not found")
     void testUpdateTeamMemberNotFound() {
+        // Arrange
         when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(vacancy));
         when(candidateRepository.findById(CANDIDATE_ID)).thenReturn(Optional.of(candidate));
         doThrow(new EntityNotFoundException("Validation failed")).when(teamMemberRepository).findByUserIdAndProjectId(any(), any());
 
+        // Act & Assert
         assertThatThrownBy(() -> vacancyService.update(vacancyDto)).isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Validation failed");
-
         verify(vacancyRepository, times(1)).findById(VACANCY_ID);
         verify(candidateRepository, times(1)).findById(CANDIDATE_ID);
         verify(teamMemberRepository, times(1)).findByUserIdAndProjectId(CANDIDATE_ID, PROJECT_ID);
@@ -236,15 +245,17 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Delete vacancy when everything is fine")
     void testDeleteSuccess() {
+        // Arrange
         when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(vacancy));
         when(teamMemberRepository.findByUserIdAndProjectId(CANDIDATE_ID, PROJECT_ID)).thenReturn(teamMember);
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
 
+        // Act
         VacancyDto result = vacancyService.delete(VACANCY_ID);
 
+        // Assert
         assertThat(result).isNotNull();
         assertThat(VACANCY_ID).isEqualTo(result.getId());
-
         verify(vacancyRepository).findById(VACANCY_ID);
         verify(teamMemberRepository).findByUserIdAndProjectId(CANDIDATE_ID, PROJECT_ID);
         verify(vacancyRepository).deleteById(VACANCY_ID);
@@ -254,11 +265,12 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Delete vacancy when vacancy not found")
     void testDeleteVacancyNotFound() {
+        // Arrange
         when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.empty());
 
+        // Act & Assert
         assertThatThrownBy(() -> vacancyService.delete(VACANCY_ID)).isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Vacancy not found!");
-
         verify(vacancyRepository).findById(VACANCY_ID);
         verify(vacancyRepository, never()).deleteById(VACANCY_ID);
     }
@@ -266,6 +278,7 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Get all vacancies by filter when everything is fine")
     void testGetAllByFilterSuccess() {
+        // Arrange
         when(vacancyRepository.findAll()).thenReturn(allVacancies);
         when(vacancyFilters.stream()).thenReturn(Stream.of(filter));
         when(filter.isApplicable(filterDto)).thenReturn(true);
@@ -275,12 +288,13 @@ public class VacancyServiceTest {
         });
         when(vacancyMapper.toDtoList(anyList())).thenReturn(vacancyDtoList);
 
+        // Act
         List<VacancyDto> result = vacancyService.getAllByFilter(filterDto);
 
+        // Assert
         assertThat(result).isNotNull();
         assertThat(result.size()).isEqualTo(1);
         assertThat(result).isEqualTo(vacancyDtoList);
-
         verify(vacancyRepository).findAll();
         verify(filter).isApplicable(filterDto);
         verify(filter).apply(any(Supplier.class), eq(filterDto));
@@ -290,12 +304,15 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Get vacancy when everything is fine")
     void testGetSuccess() {
+        // Arrange
         when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.of(vacancy));
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
 
+        // Act
         VacancyDto result = vacancyService.get(VACANCY_ID);
-        assertThat(result).isEqualTo(vacancyDto);
 
+        // Assert
+        assertThat(result).isEqualTo(vacancyDto);
         verify(vacancyRepository).findById(VACANCY_ID);
         verify(vacancyMapper).toDto(vacancy);
     }
@@ -303,11 +320,12 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Get vacancy when vacancy not founded")
     void testGetWhenVacancyNotFound() {
+        // Arrange
         when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.empty());
 
+        // Act & Assert
         assertThatThrownBy(() -> vacancyService.get(VACANCY_ID)).isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Vacancy not found!");
-
         verify(vacancyRepository).findById(VACANCY_ID);
     }
 }
