@@ -1,54 +1,46 @@
 package faang.school.projectservice.mapper.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mapstruct.factory.Mappers;
 
-@ExtendWith(MockitoExtension.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class ProjectMapperTest {
-    @InjectMocks
-    private ProjectMapperImpl mapper;
+    private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
+    private long id = 100L;
+    private long ownerId = 10L;
+    private String name = "Project name";
+    private String description = "Project description";
+    private Project project = Project.builder()
+            .id(id)
+            .name(name)
+            .description(description)
+            .ownerId(ownerId)
+            .status(ProjectStatus.CREATED)
+            .build();
+    private ProjectDto projectDto = ProjectDto.builder()
+            .id(id)
+            .name(name)
+            .description(description)
+            .ownerId(ownerId)
+            .status(ProjectStatus.CREATED)
+            .build();
 
     @Test
-    public void testToDto() {
-        Project project = Project.builder()
-                .name("name")
-                .id(1L)
-                .ownerId(1L)
-                .description("des")
-                .status(ProjectStatus.CREATED)
-                .build();
+    void testToDto() {
+        ProjectDto result = projectMapper.toDto(project);
 
-        ProjectDto projectDto = mapper.toDto(project);
-
-        equals(project, projectDto);
+        assertEquals(projectDto, result);
     }
 
     @Test
-    public void testToEntity() {
-        ProjectDto projectDto = ProjectDto.builder()
-                .name("name")
-                .id(1L)
-                .ownerId(1L)
-                .description("des")
-                .status(ProjectStatus.CREATED)
-                .build();
+    void testToEntity() {
+        Project result = projectMapper.toEntity(projectDto);
 
-        Project project = mapper.toEntity(projectDto);
-
-        equals(project, projectDto);
-    }
-
-    private void equals(Project project, ProjectDto projectDto) {
-        Assertions.assertEquals(project.getId(), projectDto.getId());
-        Assertions.assertEquals(project.getName(), projectDto.getName());
-        Assertions.assertEquals(project.getDescription(), projectDto.getDescription());
-        Assertions.assertEquals(project.getStatus(), projectDto.getStatus());
-        Assertions.assertEquals(project.getOwnerId(), projectDto.getOwnerId());
+        assertEquals(project, result);
     }
 }
