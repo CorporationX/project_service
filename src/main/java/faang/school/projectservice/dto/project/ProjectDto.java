@@ -4,11 +4,11 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ public class ProjectDto implements GeneralProjectInfoDto {
     @Schema(description = "Unique identifier of the project", example = "1", nullable = true)
     private Long id;
     @Schema(description = "name of the project", example = "Project Name")
-    @NonNull
+    @NotNull
     @NotEmpty
     private String name;
     @Schema(description = "IDs of the children projects", example = "[1,2,3,5]", nullable = true)

@@ -33,11 +33,9 @@ public class MomentService {
 
     private final MomentUtilService momentUtilService;
     private final MomentMapper momentMapper;
-
     private final TeamMemberUtilService teamMemberUtilService;
     private final ProjectUtilService projectUtilService;
     private final MomentRepository momentRepository;
-
 
     @Transactional(readOnly = true)
     public MomentResponseDto getById(long id) {

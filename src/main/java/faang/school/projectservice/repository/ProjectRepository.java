@@ -20,6 +20,10 @@ public class ProjectRepository {
         );
     }
 
+    public List<Project> getAllSubprojectsToProjectById(Long projectId) {
+        return projectJpaRepository.getAllSubprojectsForProjectId(projectId);
+    }
+
     public List<Project> findAll() {
         return projectJpaRepository.findAll();
     }
@@ -34,6 +38,10 @@ public class ProjectRepository {
 
     public Project save(Project project){
         return projectJpaRepository.save(project);
+    }
+
+    public void saveAll(List<Project> projects){
+         projectJpaRepository.saveAll(projects);
     }
 
     public boolean existsById(Long id){

@@ -44,7 +44,7 @@ public class SubProjectController {
                     in = ParameterIn.HEADER, required = true,
                     description = "User ID")
     )
-                    public CreateSubProjectDto updateProject(@PathVariable @Positive long projectId, @RequestBody CreateSubProjectDto dto) {
+    public CreateSubProjectDto updateProject(@PathVariable @Positive long projectId, @RequestBody CreateSubProjectDto dto) {
         long userId = userContext.getUserId();
         return projectService.updateProject(projectId, dto, userId);
     }
@@ -56,17 +56,12 @@ public class SubProjectController {
     }
 
     @GetMapping("/project/{projectId}")
-    public ProjectDto getProject(@PathVariable @Positive long projectId){
+    public ProjectDto getProject(@PathVariable @Positive long projectId) {
         return projectService.getProjectById(projectId);
     }
 
     @PostMapping("/projects")
-    public List<ProjectDto> getProjectsByIds(@RequestBody @Positive List<Long> ids){
+    public List<ProjectDto> getProjectsByIds(@RequestBody @Positive List<Long> ids) {
         return projectService.getProjectsByIds(ids);
     }
-
-    private boolean validateProjectName(String name) {
-        return name != null && !name.isEmpty();
-    }
-
 }
