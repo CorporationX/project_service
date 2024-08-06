@@ -8,21 +8,29 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.Validator;
 import faang.school.projectservice.service.project.subproject_filter.SubProjectFilter;
 import faang.school.projectservice.service.project.update_subproject_param.UpdateSubProjectParam;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
     private final ProjectRepository repository;
     private final ProjectMapper mapper;
     private final List<UpdateSubProjectParam> updateSubProjectParams;
     private final List<SubProjectFilter> subProjectFilters;
+    private final Validator validator;
+    private final S3ServiceImpl s3ServiceImpl;
+
 
     public ProjectDto createSubProject(ProjectDto projectDto) {
         validateCreateSubProject(projectDto);
@@ -58,7 +66,7 @@ public class ProjectService {
         List<SubProjectFilter> filters = subProjectFilters.stream()
                 .filter(filter -> filter.isApplecable(subProjectFilter))
                 .toList();
-        for(SubProjectFilter filter : filters) {
+        for (SubProjectFilter filter : filters) {
             projectChildren = filter.apply(projectChildren, subProjectFilter);
         }
 
@@ -93,5 +101,19 @@ public class ProjectService {
         List<Project> projects = repository.findAllByIds(ids);
 
         return projects.stream().map(mapper::toDto).toList();
+    }
+
+    public String addCover(long projectId, MultipartFile file) {
+        Project project = repository.getProjectById(projectId);
+        long fileSize = file.getSize();
+        if (!validator.validateFileSize(fileSize)) {
+            log.error("Размер файла {} превышает ограничение.", fileSize);
+            return "Файл не был загружен.";
+        } else {
+            String folder = projectId + project.getName();
+            s3ServiceImpl.uploadFile(file, folder);
+            log.info("Файл {} загружен в облако.", file.getOriginalFilename());
+            return "Файл успешно загружен.";
+        }
     }
 }
