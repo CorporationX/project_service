@@ -52,19 +52,7 @@ public class ResourceServiceTest {
     private String bucketName = null;
     @Captor
     private ArgumentCaptor<Resource> resourceCaptor;
-//    @Test
-//    public void testAdd(){
-//        MockMultipartFile file = new MockMultipartFile("file",
-//                "filename.txt", "text/plain", "some content".getBytes());
-//        Project project = new Project();
-//        project.setId(1L);
-//        project.setStorageSize(BigInteger.ZERO);
-//        Resource resource = new Resource();
-//
-//        //Mockito.when(projectRepository.getProjectById(project.getId())).thenReturn(project);
-//        ResourceDto result = resourceService.add(file,null,1L);
-//        Assertions.assertEquals(resourceMapper.toDto(resource),result);
-//    }
+
 
     @Test
     void testAdd() {
