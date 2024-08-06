@@ -10,7 +10,7 @@ import org.mapstruct.ReportingPolicy;
         uses = {MomentMapperHelper.class})
 public interface MomentMapper {
     @Mapping(source = "projectIds", target = "projects")
-    Moment momentDtoToMoment(MomentDto momentDto);
+    Moment toEntity(MomentDto momentDto);
 
-    MomentDto momentToMomentDto(Moment moment);
+    MomentDto toDto(Moment moment);
 }

@@ -14,12 +14,12 @@ public class MomentService {
     private final MomentMapper momentMapper;
 
     public Moment createMoment(MomentDto momentDto) {
-        return momentRepository.save(momentMapper.momentDtoToMoment(momentDto));
+        return momentRepository.save(momentMapper.toEntity(momentDto));
     }
 
     public MomentDto addMoment(MomentDto momentDto) {
-        Moment moment = momentMapper.momentDtoToMoment(momentDto);
+        Moment moment = momentMapper.toEntity(momentDto);
         momentRepository.save(moment);
-        return momentMapper.momentToMomentDto(moment);
+        return momentMapper.toDto(moment);
     }
 }
