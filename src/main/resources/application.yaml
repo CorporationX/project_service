@@ -17,6 +17,9 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  config:
+    import: classpath:jira.yaml
+
   data:
     redis:
       port: 6379
@@ -24,6 +27,10 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+
+  jira:
+    url: https://crpx.atlassian.net
+    username: vlzh.nik@mail.ru
 
 server:
   port: 8082
