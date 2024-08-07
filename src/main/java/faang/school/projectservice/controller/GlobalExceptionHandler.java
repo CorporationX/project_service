@@ -58,6 +58,7 @@ public class GlobalExceptionHandler {
         });
 
         return new JiraErrorResponse(messages, errors);
+    }
   
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
