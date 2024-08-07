@@ -1,19 +1,32 @@
 package faang.school.projectservice.service.coverimage;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 
-@RequiredArgsConstructor
+@Data
+@NoArgsConstructor
 public class MultipartFileImpl implements MultipartFile {
 
-    private final String name;
-    private final String originalFilename;
-    private final String contentType;
-    private final byte[] content;
+    private byte[] bytes;
+    private String name;
+    private String originalFilename;
+    private String contentType;
+    private boolean isEmpty;
+    private long size;
+
+    public MultipartFileImpl(String contentType, String originalFilename, String name, byte[] bytes, long size) {
+        this.contentType = contentType;
+        this.originalFilename = originalFilename;
+        this.name = name;
+        this.bytes = bytes;
+        this.size = size;
+        this.isEmpty = false;
+    }
 
     @Override
     public String getName() {
@@ -32,22 +45,22 @@ public class MultipartFileImpl implements MultipartFile {
 
     @Override
     public boolean isEmpty() {
-        return content.length == 0;
+        return isEmpty;
     }
 
     @Override
     public long getSize() {
-        return content.length;
+        return size;
     }
 
     @Override
     public byte[] getBytes() {
-        return content;
+        return bytes;
     }
 
     @Override
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(content);
+        return new ByteArrayInputStream(bytes);
     }
 
     @Override

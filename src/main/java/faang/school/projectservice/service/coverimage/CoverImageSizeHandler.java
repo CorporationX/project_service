@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 @Component
 public class CoverImageSizeHandler {
@@ -22,39 +23,50 @@ public class CoverImageSizeHandler {
     @Value("${coverImage.maxHeight}")
     private int maxHeight;
 
-
     public MultipartFile validateSizeAndResolution(MultipartFile file) {
         if (file.getSize() > maxImageSize) {
             throw new RuntimeException("File " + file.getOriginalFilename() + " should be max 5mb.");
         }
 
         try {
-            MultipartFile resized;
             BufferedImage image = ImageIO.read(file.getInputStream());
             int width = image.getWidth();
             int height = image.getHeight();
 
-            if (width > height && (width > maxWidth || height > maxHeight)) {    // horizontal image
-                resized = resizedImage(image, file, file.getContentType(), maxHeight);
-                return resized;
+            if (width > height && width > maxWidth && height > maxHeight) {    // horizontal image
+                file = resizedImage(image, file, maxHeight);
             } else if (width == height && width > maxWidth) { // square image
-                resized = resizedImage(image, file, file.getContentType(), maxWidth);
-                return resized;
-            } else {
-                return file;
+                file = resizedImage(image, file, maxWidth);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return file;
+    }
+
+    private MultipartFile resizedImage(BufferedImage image, MultipartFile file, int height) {
+        String[] formatArr = Objects.requireNonNull(file.getContentType()).split("/");
+        String formatName = "jpg";
+        if (formatArr.length == 2) {
+            formatName = formatArr[1];
+        }
+        try {
+            BufferedImage resized = resizeImage(image, height);
+            byte[] byteArrImage = toByteArray(resized, formatName);
+
+            return new MultipartFileImpl(file.getContentType(),
+                    file.getOriginalFilename(),
+                    file.getName(),
+                    byteArrImage,
+                    byteArrImage.length);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private MultipartFile resizedImage(BufferedImage image, MultipartFile file, String contentType, int height) {
-        try {
-            byte[] byteArrImage = toByteArray(Scalr.resize(image, Scalr.Method.SPEED, maxWidth, height), contentType);
-            return new MultipartFileImpl(file.getName(), file.getOriginalFilename(), file.getContentType(), byteArrImage);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private BufferedImage resizeImage(BufferedImage originalImage, int targetHeight) {
+        return Scalr.resize(originalImage, maxWidth, targetHeight);
     }
 
     private byte[] toByteArray(BufferedImage bi, String formatName) throws IOException {
