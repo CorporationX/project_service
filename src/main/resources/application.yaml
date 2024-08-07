@@ -44,12 +44,18 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
     isMocked: false
-    image:
-      min-height: 566
-      max-height: 1080
-      max-width: 1080
+    bucketName: project-bucket
+    project:
+      image:
+        minHeight: 566
+        maxHeight: 1080
+        maxWidth: 1080
+        bufferSize: 4096
+
+
+
+
 
   payment-service:
     host: http://localhost

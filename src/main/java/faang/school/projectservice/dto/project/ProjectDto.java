@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,7 +19,6 @@ import java.util.List;
 
 public class ProjectDto {
     private Long id;
-    private MultipartFile file;
     @NotBlank(message = "name should not be blank")
     private String name;
     @NotBlank(message = "description should not be blank")

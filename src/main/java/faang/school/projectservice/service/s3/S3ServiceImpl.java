@@ -16,7 +16,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -24,65 +23,61 @@ import java.io.InputStream;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+
 public class S3ServiceImpl implements S3Service {
     private final AmazonS3 s3Client;
+    private final S3Properties s3Properties;
 
     @Value("${services.s3.bucketName}")
-    private String bucket;
-    @Value("${services.s3.image.min-height}")
-    private int heightFirst;
-    @Value("${services.s3.image.max-height}")
-    private int heightSecond;
-    @Value("${services.s3.image.max-width}")
-    private int width;
+    private String bucketName;
 
 
     @Override
-    public Project uploadFile(MultipartFile file, String folder) throws IOException {
-        BufferedImage bufferedImage = simpleResizeImage(ImageIO.read(file.getInputStream()),
-                width, heightFirst, heightSecond);
-
+    public Project uploadImage(MultipartFile file, Project project) {
+        String folder = project.getName() + project.getId();
+        BufferedImage bufferedImage;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "jpeg", baos);
         byte[] bytes = baos.toByteArray();
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(bytes.length);
         objectMetadata.setContentType(file.getContentType());
-
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-        try (InputStream is = new ByteArrayInputStream(bytes)) {
-            s3Client.putObject(bucket, key, is, objectMetadata);
-            log.info("File uploaded to bucket({}): {}", bucket, key);
+
+        try (InputStream is = new ByteArrayInputStream(bytes)){
+            bufferedImage = simpleResizeImage(ImageIO.read(file.getInputStream()),
+                    s3Properties.getMaxWidth(), s3Properties.getMinHeight(), s3Properties.getMaxHeight());
+            ImageIO.write(bufferedImage, "jpeg", baos);
+            s3Client.putObject(bucketName, key, is, objectMetadata);
+            log.info("File uploaded to bucket({}): {}", bucketName, key);
         } catch (AmazonClientException | IOException e) {
             log.error(e.getMessage(), e);
             throw new AmazonClientException(e.getMessage(), e);
         }
 
-        return Project.builder()
-                .coverImageId(key)
-                .build();
+        project.setCoverImageId(key);
+        return project;
     }
 
     @Override
-    public void deleteFile(String key) {
-        s3Client.deleteObject(bucket, key);
+    public void deleteImage(String key) {
+        s3Client.deleteObject(bucketName, key);
     }
 
     @Override
-    public ByteArrayOutputStream downloadFile(String key) {
+    public ByteArrayOutputStream downloadImage(String key) {
         try {
-            S3Object s3Object = s3Client.getObject(bucket, key);
+            S3Object s3Object = s3Client.getObject(bucketName, key);
             InputStream inputStream = s3Object.getObjectContent();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
             int len;
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[s3Properties.getBufferSize()];
             while ((len = inputStream.read(buffer, 0, buffer.length)) != -1) {
                 outputStream.write(buffer, 0, len);
             }
 
-            log.info("File downloaded from bucket({}): {}", bucket, key);
+            log.info("File downloaded from bucket({}): {}", bucketName, key);
             return outputStream;
         } catch (AmazonClientException | IOException e) {
             log.error(e.getMessage());
