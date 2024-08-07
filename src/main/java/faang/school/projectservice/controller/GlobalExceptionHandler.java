@@ -4,7 +4,11 @@ import com.amazonaws.services.kms.model.NotFoundException;
 import com.atlassian.jira.rest.client.api.RestClientException;
 import faang.school.projectservice.exception.ErrorResponse;
 import faang.school.projectservice.exception.JiraErrorResponse;
+import faang.school.projectservice.exception.IllegalSubProjectsStatusException;
+import feign.FeignException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -41,7 +45,7 @@ public class GlobalExceptionHandler {
     public ErrorResponse handlerNotFoundException(NotFoundException exception) {
         return new ErrorResponse(exception.getMessage());
     }
-
+  
     @ExceptionHandler(RestClientException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public JiraErrorResponse handlerRestClientException(RestClientException exception) {
@@ -54,5 +58,34 @@ public class GlobalExceptionHandler {
         });
 
         return new JiraErrorResponse(messages, errors);
+  
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalStateException(IllegalStateException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserNotFoundException(EntityNotFoundException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(FeignException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleFeignException(FeignException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(IllegalSubProjectsStatusException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalSubProjectStatusException(IllegalSubProjectsStatusException exception) {
+        return new ErrorResponse(exception.getMessage());
     }
 }

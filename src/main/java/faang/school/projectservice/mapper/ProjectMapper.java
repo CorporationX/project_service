@@ -1,20 +1,25 @@
 package faang.school.projectservice.mapper;
 
+import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",
+        unmappedSourcePolicy = ReportingPolicy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
 
-    ProjectDto entityToDto(Project project);
+    @Mapping(source = "parentProject.id", target = "parentProjectId")
+    ProjectDto toDto(Project project);
 
-    Project dtoToEntity(ProjectDto dto);
+    Project toEntity(ProjectDto projectDto);
 
-    List<ProjectDto> entitiesToDtos(List<Project> projectList);
+    Project toEntity(CreateSubProjectDto createSubProjectDto);
+
+    List<ProjectDto> toDtoList(List<Project> projectList);
 }
