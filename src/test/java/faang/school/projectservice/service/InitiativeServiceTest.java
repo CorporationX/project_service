@@ -17,7 +17,7 @@ import faang.school.projectservice.model.initiative.Initiative;
 import faang.school.projectservice.model.initiative.InitiativeStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InitiativeRepository;
-import faang.school.projectservice.validation.InitiativeValidator;
+import faang.school.projectservice.validator.InitiativeValidator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
