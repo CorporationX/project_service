@@ -57,6 +57,7 @@ dependencies {
     implementation("org.glassfish.jersey.core:jersey-common:2.34")
     implementation("org.glassfish.jersey.media:jersey-media-json-jackson:2.34")
     implementation("org.glassfish.jersey.inject:jersey-hk2:2.34")
+
     /**
      * Test containers
      */
