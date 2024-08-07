@@ -8,9 +8,8 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ResourceMapper {
+    ResourceDto toDto(Resource resource);
 
-    ResourceDto resourceToDto(Resource resource);
-
-    @Mapping(target = "project", ignore = true )
-    Resource resourceToResource(ResourceDto resourceDto);
+    @Mapping(target = "project", ignore = true)
+    Resource toEntity(ResourceDto resourceDto);
 }

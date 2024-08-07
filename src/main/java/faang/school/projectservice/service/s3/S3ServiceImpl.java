@@ -54,9 +54,7 @@ public class S3ServiceImpl {
         resource.setStatus(ResourceStatus.ACTIVE);
         resource.setType(ResourceType.getResourceType(file.getContentType()));
         resource.setName(file.getOriginalFilename());
-
         return resource;
-
     }
 
     public void deleteFile(String key) {

@@ -5,55 +5,74 @@ import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.resource.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
 import faang.school.projectservice.validation.ResourceValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
     private final ResourceRepository resourceRepository;
     private final ProjectService projectService;
-    private final S3ServiceImpl s3Service;
+    private final S3ServiceImpl s3ServiceImpl;
     private final ResourceValidator resourceValidator;
     private final ResourceMapper resourceMapper;
 
+    @Transactional
     public ResourceDto addResource(Long projectId, MultipartFile file) {
         Project project = projectService.getProjectById(projectId);
-
-        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
+        BigInteger storageSize = Optional.ofNullable(project.getStorageSize()).orElse(BigInteger.ZERO);
+        BigInteger newStorageSize = storageSize.add(BigInteger.valueOf(file.getSize()));
         resourceValidator.checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
-        Resource resource = s3Service.uploadFile(file, folder);
+        Resource resource = s3ServiceImpl.uploadFile(file, folder);
         resource.setProject(project);
         resource = resourceRepository.save(resource);
 
         project.setStorageSize(newStorageSize);
         projectService.save(project);
-
-        return resourceMapper.resourceToDto(resource);
+        resourceRepository.save(resource);
+        return resourceMapper.toDto(resource);
     }
 
-//    public ResourceDto updateResource(Long userId, Long resourceId, MultipartFile file) {
-//        Resource resourceFromDB = resourceRepository.getOne(resourceId);
-//        Project project = resourceFromDB.getProject();
-//
-//        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()))
-//                .subtract(resourceFromDB.getSize());
-//    }
-//
-//    public InputStream downloadResource(Long resourceId) {
-//        Resource resourc = getRosoursById(resourceId);
-//        return s3Service.downloadFile(resourc.getKey());
-//    }
+    public InputStream downloadResource(Long resourceId) {
+        Resource resource = resourceRepository.getReferenceById(resourceId);
+        return s3ServiceImpl.downloadFile(resource.getKey());
+    }
+
+    @Transactional
+    public void deleteResource(Long resourceId, long userId) {
+        Resource resource = resourceRepository.getReferenceById(resourceId);
+        Project project = resource.getProject();
+        resourceValidator.checkingAccessRights(userId, resource, project);
+
+        String resourceKey = resource.getKey();
+        s3ServiceImpl.deleteFile(resourceKey);
+
+        subtractCapacity(project, resource);
+        resource.setKey(null);
+        resource.setSize(null);
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedAt(null);
+    }
+
+    private void subtractCapacity(Project project, Resource resource) {
+        BigInteger newSizeCapacity = project.getStorageSize().subtract(resource.getSize());
+        if (newSizeCapacity.compareTo(BigInteger.ZERO) < 0) {
+            newSizeCapacity = BigInteger.ZERO;
+        }
+        project.setStorageSize(newSizeCapacity);
+        projectService.save(project);
+    }
 }
