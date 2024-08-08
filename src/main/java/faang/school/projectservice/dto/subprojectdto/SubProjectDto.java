@@ -21,6 +21,7 @@ public class SubProjectDto {
     @NotBlank(message = "specify the project name", groups = {New.class, Update.class})
     private String name;
 
+    @NotBlank(message = "specify the project description", groups = {New.class, Update.class})
     private String description;
 
     @NotNull(message = "specify the parent of the subproject", groups = {New.class, Update.class})

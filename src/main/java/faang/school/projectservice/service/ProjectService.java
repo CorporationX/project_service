@@ -8,15 +8,15 @@ import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
-import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validation.SubProjectValidator;
 import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,13 +39,14 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final List<SubProjectFilter> subProjectFilters;
     private final TeamService teamService;
+    private final List<ProjectFilter> filters;
+
 
     @Transactional
     public SubProjectDto createSubProject(SubProjectDto subProjectDto) {
-        Project project = getProjectById(subProjectDto.getId());
-        subProjectValidator.checkAllValidationsForCreateSubProject(subProjectDto, project);
-        Project subProject = subProjectMapper.toEntity(subProjectDto);
         Project parentProject = getProjectById(subProjectDto.getParentProjectId());
+        subProjectValidator.checkAllValidationsForCreateSubProject(subProjectDto, parentProject);
+        Project subProject = subProjectMapper.toEntity(subProjectDto);
         subProject.setParentProject(parentProject);
         Project save = projectRepository.save(subProject);
         return subProjectMapper.toDto(save);
@@ -53,16 +54,13 @@ public class ProjectService {
 
     @Transactional
     public void updateSubProject(SubProjectDto subProjectDto) {
-        Project subProject = subProjectMapper.toEntity(subProjectDto);
+        Project subProject = projectRepository.getProjectById(subProjectDto.getId());
         subProject.setStatus(subProjectDto.getStatus());
         subProject.setVisibility(subProjectDto.getVisibility());
         projectRepository.save(subProject);
         MomentDto momentDto = getMomentDto(subProject);
         momentService.addMoment(momentDto);
-
     }
-
-    private final List<ProjectFilter> filters;
 
     @Transactional
     public ProjectDto create(Long userId, ProjectDto projectDto) {
@@ -100,19 +98,6 @@ public class ProjectService {
                 .toList());
     }
 
-    private MomentDto getMomentDto(Project subProject) {
-        MomentDto momentDto = new MomentDto();
-        momentDto.setName("Выполнены все подпроекты");
-        momentDto.setProjectIds(Arrays.asList(subProject.getId()));
-        List<TeamMember> teamMember = teamService.getAllTeamMember(subProject.getId());
-        List<Long> userIds = new ArrayList<>();
-        for (TeamMember tm : teamMember) {
-            userIds.add(tm.getUserId());
-        }
-        momentDto.setUserIds(userIds);
-        return momentDto;
-    }
-
     @Transactional
     public List<SubProjectDto> getAllFilteredSubprojectsOfAProject(SubProjectFilterDto subProjectFilterDto,
                                                                    Long projectId) {
@@ -137,17 +122,30 @@ public class ProjectService {
                 }));
     }
 
-    private List<ProjectFilter> getApplicableProjectFilters(ProjectFilterDto projectFilterDto) {
-        return filters.stream()
-                .filter(filter -> filter.isApplicable(projectFilterDto))
-                .toList();
-    }
-
     /**
      * Do not use this method in Controller. Only for internal use.
      */
     @Transactional(readOnly = true)
     public Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);
+    }
+
+    private List<ProjectFilter> getApplicableProjectFilters(ProjectFilterDto projectFilterDto) {
+        return filters.stream()
+                .filter(filter -> filter.isApplicable(projectFilterDto))
+                .toList();
+    }
+
+    private MomentDto getMomentDto(Project subProject) {
+        MomentDto momentDto = new MomentDto();
+        momentDto.setName("Выполнены все подпроекты");
+        momentDto.setProjectIds(Arrays.asList(subProject.getId()));
+        List<TeamMember> teamMember = teamService.getAllTeamMember(subProject.getId());
+        List<Long> userIds = new ArrayList<>();
+        for (TeamMember tm : teamMember) {
+            userIds.add(tm.getUserId());
+        }
+        momentDto.setUserIds(userIds);
+        return momentDto;
     }
 }

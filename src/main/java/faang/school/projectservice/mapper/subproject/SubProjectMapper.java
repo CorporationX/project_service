@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.subproject;
 
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
 import faang.school.projectservice.model.Project;

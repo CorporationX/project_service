@@ -25,12 +25,12 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  mvc:
+    servlet:
+      path: /api/v1
 
 server:
   port: 8082
-  servlet:
-    context-path: /api/v1
-
 
 logging:
   level:
