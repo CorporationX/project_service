@@ -67,6 +67,7 @@ public class MomentService {
         );
         momentDto.setDate(LocalDateTime.now());
         Moment moment = momentMapper.toEntity(momentDto);
+        momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
 
@@ -75,6 +76,7 @@ public class MomentService {
         ProjectDto projectDto = projectService.getProjectDtoById(projectId);
         momentDto.getProjectsId().add(projectDto.getId());
         var moment = momentMapper.toEntity(momentDto);
+        momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
 }
