@@ -1,4 +1,4 @@
-package faang.school.projectservice.validation;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
@@ -16,7 +16,7 @@ import java.util.List;
 public class ResourceValidator {
     public void checkStorageSizeExceeded(BigInteger newStorageSize, BigInteger projectMaxStorageSize) {
         if (newStorageSize.compareTo(projectMaxStorageSize) >= 0) {
-            log.info("{} is less than {}", projectMaxStorageSize.toString(), newStorageSize.toString());
+            log.info("{} is less than {}", projectMaxStorageSize.toString(), newStorageSize);
             throw new MaxUploadSizeExceededException(projectMaxStorageSize.longValue());
         }
     }

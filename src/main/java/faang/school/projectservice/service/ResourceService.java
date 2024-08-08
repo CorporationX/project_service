@@ -7,7 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
-import faang.school.projectservice.validation.ResourceValidator;
+import faang.school.projectservice.validator.ResourceValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto;
 
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ResourceType;
 import lombok.Data;
 
@@ -16,5 +15,5 @@ public class ResourceDto {
     private ResourceType type;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long projectId;
+    private long projectId;
 }
