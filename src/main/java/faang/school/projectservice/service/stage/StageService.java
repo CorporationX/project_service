@@ -1,8 +1,8 @@
 package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.exception.ProjectStatusException;
 import faang.school.projectservice.jpa.TaskRepository;
+import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -14,7 +14,8 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.validate.project.ProjectValidator;
+import faang.school.projectservice.service.stageInvitation.StageInvitationService;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,8 @@ public class StageService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
     private final ProjectValidator projectValidator;
+    private final StageInvitationService stageInvitationService;
+    private final StageInvitationMapper stageInvitationMapper;
 
     public StageDto create(StageDto stageDto) {
         projectValidator.validateProjectNotCancelled(stageDto.getProjectId());
@@ -99,8 +102,7 @@ public class StageService {
     }
 
     private void sendInvitation(StageInvitation stageInvitation) {
-//        TODO
-//         stageInvitationService.send(stageInvitation);
+        stageInvitationService.sendAnInvitation(stageInvitationMapper.toDto(stageInvitation));
     }
 
     public List<StageDto> getAll() {

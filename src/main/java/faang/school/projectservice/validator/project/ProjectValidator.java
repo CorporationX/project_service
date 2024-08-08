@@ -1,4 +1,4 @@
-package faang.school.projectservice.validate.project;
+package faang.school.projectservice.validator.project;
 
 import faang.school.projectservice.exception.ProjectStatusException;
 import faang.school.projectservice.model.Project;
