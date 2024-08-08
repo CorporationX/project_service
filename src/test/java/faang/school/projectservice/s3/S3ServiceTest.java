@@ -22,9 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
 @ActiveProfiles("test")
-@TestPropertySource(locations = "classpath:application-test.yaml")
 class S3ServiceTest {
 
     @Mock
@@ -90,7 +88,7 @@ class S3ServiceTest {
 
         // Assert
         assertTrue(result);
-        verify(s3Client, times(1)).doesObjectExist("test-bucket", key);
+        verify(s3Client, times(1)).doesObjectExist(bucketName, key);
     }
 
     @Test
