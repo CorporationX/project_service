@@ -1,7 +1,5 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.exception;
 
-import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.exceptions.ErrorMessage;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
