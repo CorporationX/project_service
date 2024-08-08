@@ -26,7 +26,7 @@ public class ImageService {
 
     public MultipartFile resizeImage(MultipartFile file) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        String formatName = getFormatName(file.getContentType());
+        String formatName = FormatNames.getFormatByContentType(file.getContentType());
 
         try {
             resize(outputStream, file, formatName);
@@ -72,13 +72,4 @@ public class ImageService {
     private int determineMaxHeight(BufferedImage image) {
         return image.getWidth() > image.getHeight() ? maxHeightHorizontal : maxHeightNonHorizontal;
     }
-
-    private String getFormatName(String contentType) {
-        return switch (contentType) {
-            case "image/png" -> "PNG";
-            case "image/gif" -> "GIF";
-            default -> "JPEG";
-        };
-    }
-
 }
