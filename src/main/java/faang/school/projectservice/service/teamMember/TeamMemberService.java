@@ -11,6 +11,6 @@ public class TeamMemberService {
     private final TeamMemberJpaRepository repository;
 
     public TeamMember getOneByUserIdAndProjectIdOrThrow(long userId, long projectId) {
-        return repository.findByUserIdAndProjectId(userId, projectId);
+        return repository.findByUserIdAndProjectId(userId, projectId).orElseThrow();
     }
 }
