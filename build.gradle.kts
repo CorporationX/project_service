@@ -68,6 +68,15 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    /**
+     * Image working
+     */
+// https://mvnrepository.com/artifact/org.imgscalr/imgscalr-lib
+    implementation("org.imgscalr:imgscalr-lib:4.2")
+    // https://mvnrepository.com/artifact/net.coobird/thumbnailator
+    implementation("net.coobird:thumbnailator:0.4.20")
+
 }
 
 tasks.withType<Test> {
@@ -127,3 +136,5 @@ tasks.jacocoTestCoverageVerification {
         }
     }
 }
+
+

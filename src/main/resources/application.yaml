@@ -48,3 +48,7 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+maxfilesize: 5_000_000
+maxwidth: 1080
+maxheight: 566

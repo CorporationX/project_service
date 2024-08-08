@@ -13,10 +13,23 @@ import faang.school.projectservice.service.project.subproject_filter.SubProjectF
 import faang.school.projectservice.service.project.update_subproject_param.UpdateSubProjectParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnailator;
+import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +43,7 @@ public class ProjectService {
     private final List<SubProjectFilter> subProjectFilters;
     private final Validator validator;
     private final S3ServiceImpl s3ServiceImpl;
+    private final ImageResizer imageResizer;
 
 
     public ProjectDto createSubProject(ProjectDto projectDto) {
@@ -103,12 +117,74 @@ public class ProjectService {
         return projects.stream().map(mapper::toDto).toList();
     }
 
-    public String addCover(long projectId, MultipartFile file) {
+    public String addCover(long projectId, MultipartFile file) throws IOException {
         Project project = repository.getProjectById(projectId);
         long fileSize = file.getSize();
+
+        BufferedImage inputImage = null;
+        BufferedImage outputImage = null;
+        try {
+            inputImage = ImageIO.read(file.getInputStream());
+        } catch (IOException e) {
+            log.error("Ошибка при чтении изображения.", e);
+            throw new RuntimeException(e);
+        }
+        int width = inputImage.getWidth();
+        int height = inputImage.getHeight();
+
         if (!validator.validateFileSize(fileSize)) {
             log.error("Размер файла {} превышает ограничение.", fileSize);
             return "Файл не был загружен.";
+        } else if (!validator.validatesImageSize(width, height)) {
+            outputImage = imageResizer.resizeImage(inputImage,
+                    validator.getMaxWidth(),
+                    validator.getMaxHeight());
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(outputImage, "jpg", outputStream);
+            InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+
+            MultipartFile newFile = new MultipartFile() {
+                @Override
+                public String getName() {
+                    return null;
+                }
+
+                @Override
+                public String getOriginalFilename() {
+                    return null;
+                }
+
+                @Override
+                public String getContentType() {
+                    return null;
+                }
+
+                @Override
+                public boolean isEmpty() {
+                    return false;
+                }
+
+                @Override
+                public long getSize() {
+                    return 0;
+                }
+
+                @Override
+                public byte[] getBytes() throws IOException {
+                    return new byte[0];
+                }
+
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    return null;
+                }
+
+                @Override
+                public void transferTo(File dest) throws IOException, IllegalStateException {
+
+                }
+            };
+            return "Файл успешно загружен.";//переделать
         } else {
             String folder = projectId + project.getName();
             s3ServiceImpl.uploadFile(file, folder);
@@ -116,4 +192,5 @@ public class ProjectService {
             return "Файл успешно загружен.";
         }
     }
+
 }
