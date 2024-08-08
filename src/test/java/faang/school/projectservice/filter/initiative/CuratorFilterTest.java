@@ -38,7 +38,7 @@ class CuratorFilterTest {
     @Test
     void testApplyWhenInitiativesMatchCuratorPattern() {
         List<Initiative> filteredInitiatives = getInitiatives();
-        assertEquals(2, initiatives.size());
+        assertEquals(2, filteredInitiatives.size());
         assertTrue(filteredInitiatives.containsAll(initiatives));
     }
 
