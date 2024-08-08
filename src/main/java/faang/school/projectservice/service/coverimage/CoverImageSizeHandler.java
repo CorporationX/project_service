@@ -1,5 +1,7 @@
 package faang.school.projectservice.service.coverimage;
 
+import faang.school.projectservice.validator.CoverImageSizeValidator;
+import lombok.RequiredArgsConstructor;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,10 +14,10 @@ import java.io.IOException;
 import java.util.Objects;
 
 @Component
+@RequiredArgsConstructor
 public class CoverImageSizeHandler {
 
-    @Value("${coverImage.maxsize}")
-    private long maxImageSize;
+    private final CoverImageSizeValidator coverImageSizeValidator;
 
     @Value("${coverImage.maxWidth}")
     private int maxWidth;
@@ -24,9 +26,7 @@ public class CoverImageSizeHandler {
     private int maxHeight;
 
     public MultipartFile validateSizeAndResolution(MultipartFile file) {
-        if (file.getSize() > maxImageSize) {
-            throw new RuntimeException("File " + file.getOriginalFilename() + " should be max 5mb.");
-        }
+        coverImageSizeValidator.validateSize(file);
 
         try {
             BufferedImage image = ImageIO.read(file.getInputStream());
