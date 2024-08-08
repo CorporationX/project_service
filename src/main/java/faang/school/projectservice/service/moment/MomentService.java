@@ -2,14 +2,15 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.exceptions.MomentValidationExceptions;
-import faang.school.projectservice.exceptions.NotFoundElementInDataBaseException;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exception.DataValidationExceptions;
+import faang.school.projectservice.exception.NotFoundEntityException;
 import faang.school.projectservice.mapper.moment.MomentMapper;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.filter.MomentFilter;
-import jakarta.validation.constraints.NotNull;
+import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,68 +24,57 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MomentService {
     private final MomentRepository momentRepository;
-    private final ProjectRepository projectRepository;
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilters;
+    private final ProjectService projectService;
 
     @Transactional(readOnly = true)
-    public MomentDto getMomentById(@NotNull Long momentId) {
+    public MomentDto getMomentById(long momentId) {
         var moment = momentRepository.findById(momentId)
                 .orElseThrow(() ->
-                        new NotFoundElementInDataBaseException("Not found moment for id: " + momentId));
+                        new NotFoundEntityException("Not found moment for id: " + momentId));
         return momentMapper.toDto(moment);
     }
 
     @Transactional(readOnly = true)
-    public List<MomentDto> getListMomentForFilter(Long projectId, @NotNull MomentFilterDto filters) {
-        validateProjectId(projectId);
+    public List<MomentDto> getListMomentForFilter(long projectId, MomentFilterDto filters) {
         var listAllMoment = momentRepository.findAllByProjectId(projectId);
         return momentFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .flatMap(filter -> filter.apply(listAllMoment, filters))
-                .map(moment -> momentMapper.toDto(moment))
+                .map(momentMapper::toDto)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<MomentDto> getAllMomentProject(Long projectId) {
-        validateProjectId(projectId);
-        var momentsForProject = projectRepository.getProjectById(projectId).getMoments();
-        return momentsForProject.stream().map(moment -> momentMapper.toDto(moment)).toList();
+    public List<MomentDto> getAllMomentProject(long projectId) {
+        List<Moment> moments = momentRepository.findAllByProjectId(projectId);
+        return momentMapper.toListDto(moments);
     }
 
     @Transactional
-    public MomentDto createMoment(Long projectId, @NotNull MomentDto momentDto) {
-        validateProjectId(projectId);
-        var project = projectRepository.getProjectById(projectId);
-        if (project.getStatus() == ProjectStatus.CANCELLED) {
+    public MomentDto createMoment(long projectId, MomentDto momentDto) {
+        var projectDto = projectService.getProjectDtoById(projectId);
+        if (projectDto.getStatus() == ProjectStatus.CANCELLED) {
             String errorMessage = "Сan't create moment for a closed project in MomentService class id: " + projectId;
-            log.error(errorMessage);
-            throw new MomentValidationExceptions(errorMessage);
+            log.info(errorMessage);
+            throw new DataValidationExceptions(errorMessage);
         }
-        var projectsList = List.of(project);
-        var moment = momentMapper.toEntity(momentDto);
-        moment.setProjects(projectsList);
-        moment.setDate(LocalDateTime.now());
-        var returnMoment = momentRepository.save(moment);
-        return momentMapper.toDto(returnMoment);
+        List<ProjectDto> projectIdList = List.of(projectDto);
+        momentDto.setProjectsId(projectIdList.stream()
+                .map(ProjectDto::getId)
+                .toList()
+        );
+        momentDto.setDate(LocalDateTime.now());
+        Moment moment = momentMapper.toEntity(momentDto);
+        return momentMapper.toDto(moment);
     }
 
     @Transactional
-    public MomentDto updateMoment(Long projectId, @NotNull MomentDto momentDto) {
-        validateProjectId(projectId);
-        var project = projectRepository.getProjectById(projectId);
+    public MomentDto updateMoment(long projectId, MomentDto momentDto) {
+        ProjectDto projectDto = projectService.getProjectDtoById(projectId);
+        momentDto.getProjectsId().add(projectDto.getId());
         var moment = momentMapper.toEntity(momentDto);
-        moment.getProjects().add(project);
-        var returnMoment = momentRepository.save(moment);
-        return momentMapper.toDto(returnMoment);
-    }
-
-    private void validateProjectId(@NotNull Long projectId) {
-        if (!projectRepository.existsById(projectId)) {
-            String errorMessage = "Not found projectId in DataBase for id in MomentService class id: " + projectId;
-            log.error(errorMessage);
-            throw new NotFoundElementInDataBaseException(errorMessage);
-        }
+        return momentMapper.toDto(moment);
     }
 }
