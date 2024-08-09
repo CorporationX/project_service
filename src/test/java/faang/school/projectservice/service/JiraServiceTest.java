@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,8 +66,8 @@ public class JiraServiceTest {
         when(promise.claim()).thenReturn(basicIssue);
         when(issueRestClient.createIssue(any(IssueInput.class))).thenReturn(promise);
 
-        ResponseEntity<String> response = jiraService.createIssue(projectKey, issueDto);
-        assertEquals("Issue created", response.getBody());
+        ResponseEntity<Void> response = jiraService.createIssue(projectKey, issueDto);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
@@ -77,10 +78,8 @@ public class JiraServiceTest {
 
         Promise<Void> promise = mock(Promise.class);
         when(promise.claim()).thenReturn(null);
-        when(issueRestClient.updateIssue(eq(issueKey), any(IssueInput.class))).thenReturn(promise);
-
-        ResponseEntity<String> response = jiraService.updateIssueDescription(issueKey, description);
-        assertEquals("Description updated", response.getBody());
+        when(issueRestClient.updateIssue(issueKey, any(IssueInput.class))).thenReturn(promise);
+        jiraService.updateIssueDescription(issueKey, description);
 
         ArgumentCaptor<IssueInput> captor = ArgumentCaptor.forClass(IssueInput.class);
         verify(issueRestClient).updateIssue(eq(issueKey), captor.capture());
@@ -108,11 +107,11 @@ public class JiraServiceTest {
         String issueKey = "ISSUE-1";
         boolean deleteSubtask = true;
 
-        when(issueRestClient.deleteIssue(eq(issueKey), eq(deleteSubtask))).thenReturn(mock(Promise.class));
+        when(issueRestClient.deleteIssue(issueKey, deleteSubtask)).thenReturn(mock(Promise.class));
 
-        ResponseEntity<String> response = jiraService.deleteIssue(issueKey, deleteSubtask);
-        assertEquals("Issue deleted", response.getBody());
-        verify(issueRestClient).deleteIssue(eq(issueKey), eq(deleteSubtask));
+        ResponseEntity<Void> response = jiraService.deleteIssue(issueKey, deleteSubtask);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(issueRestClient).deleteIssue(issueKey, deleteSubtask);
     }
 
     @Test

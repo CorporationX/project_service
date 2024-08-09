@@ -19,7 +19,7 @@ public class JiraService {
     private final JiraRestClient jiraRestClient;
     private final IssueMapper issueMapper;
 
-    public ResponseEntity<String> createIssue(String projectKey, IssueDto issueDto) {
+    public ResponseEntity<Void> createIssue(String projectKey, IssueDto issueDto) {
         IssueInput input = new IssueInputBuilder(projectKey, issueDto.getTypeId())
                 .setSummary(issueDto.getSummary())
                 .setDescription(issueDto.getDescription())
@@ -27,23 +27,24 @@ public class JiraService {
                 .build();
 
         jiraRestClient.getIssueClient().createIssue(input).claim();
-        return ResponseEntity.ok("Issue created");
+
+        return ResponseEntity.ok().build();
     }
 
     public IssueDto getIssueDto(String issueKey) {
         return issueMapper.toIssueDto(getIssue(issueKey));
     }
 
-    public ResponseEntity<String> updateIssueDescription(String issueKey, String description) {
+    public ResponseEntity<Void> updateIssueDescription(String issueKey, String description) {
         IssueInput input = new IssueInputBuilder()
                 .setDescription(description)
                 .build();
         updateIssue(issueKey, input);
 
-        return ResponseEntity.ok("Description updated");
+        return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<String> updateIssueStatus(String issueKey, int statusId) {
+    public ResponseEntity<Void> updateIssueStatus(String issueKey, int statusId) {
         TransitionInput transitionInput = new TransitionInput(statusId);
         try {
             jiraRestClient.getIssueClient().transition(getIssue(issueKey), transitionInput);
@@ -52,20 +53,20 @@ public class JiraService {
             throw e;
         }
 
-        return ResponseEntity.ok("Status updated");
+        return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<String> updateIssueParent(String issueKey, String parentKey) {
+    public ResponseEntity<Void> updateIssueParent(String issueKey, String parentKey) {
         IssueInput input = new IssueInputBuilder()
                 .setFieldInput(new FieldInput("parent", ComplexIssueInputFieldValue.with("key", parentKey)))
                 .build();
 
         jiraRestClient.getIssueClient().updateIssue(issueKey, input).claim();
 
-        return ResponseEntity.ok("Parent updated");
+        return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<String> deleteIssue(String issueKey, boolean deleteSubtask) {
+    public ResponseEntity<Void> deleteIssue(String issueKey, boolean deleteSubtask) {
         try {
             jiraRestClient.getIssueClient().deleteIssue(issueKey, deleteSubtask).claim();
 
@@ -74,7 +75,7 @@ public class JiraService {
             throw e;
         }
 
-        return ResponseEntity.ok("Issue deleted");
+        return ResponseEntity.ok().build();
     }
 
     public Iterable<IssueDto> searchIssues(String jql) {
@@ -87,17 +88,16 @@ public class JiraService {
         }
     }
 
-    public ResponseEntity<String> addComment(String issueKey, String commentBody) {
+    public ResponseEntity<Void> addComment(String issueKey, String commentBody) {
         try {
-            jiraRestClient.getIssueClient()
-                    .addComment(getIssue(issueKey).getCommentsUri(),
-                            Comment.valueOf(commentBody));
+            jiraRestClient.getIssueClient().addComment(
+                    getIssue(issueKey).getCommentsUri(), Comment.valueOf(commentBody));
         } catch (RestClientException e) {
             log.error(e.getMessage());
             throw e;
         }
 
-        return ResponseEntity.ok("Comment added");
+        return ResponseEntity.ok().build();
     }
 
     private void updateIssue(String issueKey, IssueInput input) {
