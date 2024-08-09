@@ -20,4 +20,8 @@ public class ProjectService {
         var project = projectRepository.getProjectById(id);
         return projectMapper.toDto(project);
     }
+
+    public boolean existsById(Long id) {
+        return projectRepository.existsById(id);
+    }
 }
