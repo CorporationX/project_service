@@ -11,7 +11,9 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -21,6 +23,9 @@ import java.util.Optional;
 public class ProjectValidator {
     private final ProjectRepository projectRepository;
     private final UserContext userContext;
+
+    @Value("${app.coverImage.maxSize}")
+    private long coverMaxSize;
 
     public void validateSubProjectForCreate(CreateSubProjectDto subProjectDto) {
         if (subProjectDto.getOwnerId() == null) {
@@ -124,5 +129,11 @@ public class ProjectValidator {
             throw new RuntimeException("Project " + projectDto.getName() + " already created by " + projectDto.getOwnerId());
         }
         return true;
+    }
+
+    public void validateCover(MultipartFile coverImage) {
+        if (coverImage.getSize() > coverMaxSize) {
+            throw new DataValidationException("cover image size can't be more " + coverMaxSize + " bytes");
+        }
     }
 }

@@ -3,28 +3,30 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.project.updater.ProjectUpdater;
+import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
-import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
-import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
-import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
-import faang.school.projectservice.mapper.subproject.SubProjectMapper;
-import faang.school.projectservice.service.moment.MomentService;
-import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 @Service
