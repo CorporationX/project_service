@@ -1,10 +1,8 @@
 package faang.school.projectservice.service.coverimage;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.s3.S3Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,8 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +29,7 @@ class CoverImageServiceTest {
     private CoverImageSizeHandler coverImageSizeHandler;
 
     @Mock
-    private AmazonS3 amazonS3;
+    private S3Service s3Service;
 
     private MultipartFileImpl multipartFile;
 
@@ -40,7 +38,7 @@ class CoverImageServiceTest {
     @BeforeEach
     void setUp() {
         multipartFile = new MultipartFileImpl(
-                "image/jpeg", "test.jpg", "file", new byte[]{1,2,3,4,5}, 5);
+                "image/jpeg", "test.jpg", "file", new byte[]{1, 2, 3, 4, 5}, 5);
         project = new Project();
     }
 
@@ -48,24 +46,29 @@ class CoverImageServiceTest {
     void testCreate() {
         when(coverImageSizeHandler.validateSizeAndResolution(multipartFile)).thenReturn(multipartFile);
         when(projectRepository.getProjectById(1L)).thenReturn(project);
-        when(amazonS3.putObject(any(PutObjectRequest.class))).thenReturn(new PutObjectResult());
+        when(s3Service.putIntoBucket(multipartFile)).thenReturn("Key");
         when(projectRepository.save(project)).thenReturn(project);
 
         coverImageService.create(1L, multipartFile);
 
         verify(coverImageSizeHandler, times(1)).validateSizeAndResolution(multipartFile);
         verify(projectRepository, times(1)).getProjectById(1L);
-        verify(amazonS3, times(1)).putObject(any(PutObjectRequest.class));
+        verify(s3Service, times(1)).putIntoBucket(multipartFile);
         verify(projectRepository, times(1)).save(project);
     }
 
     @Test
-    void testCreateWithException() {
-        multipartFile.setBytes(null);
+    void testDelete() {
+        project.setCoverImageId("Key");
 
-        when(coverImageSizeHandler.validateSizeAndResolution(multipartFile)).thenReturn(multipartFile);
         when(projectRepository.getProjectById(1L)).thenReturn(project);
+        doNothing().when(s3Service).deleteFromBucket(any(String.class));
+        when(projectRepository.save(project)).thenReturn(project);
 
-        assertThrows(RuntimeException.class, () -> coverImageService.create(1L, multipartFile));
+        coverImageService.delete(1L);
+
+        verify(projectRepository, times(1)).getProjectById(1L);
+        verify(s3Service, times(1)).deleteFromBucket(any(String.class));
+        verify(projectRepository, times(1)).save(project);
     }
 }

@@ -13,8 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,7 +35,8 @@ class CoverImageControllerTest {
 
     @Test
     void testCreate() throws Exception {
-        MockMultipartFile multipartFile = new MockMultipartFile("file", "test.jpg", MediaType.IMAGE_JPEG_VALUE, "Test Image Content".getBytes());
+        MockMultipartFile multipartFile = new MockMultipartFile("file", "test.jpg",
+                MediaType.IMAGE_JPEG_VALUE, "Test Image Content".getBytes());
         doNothing().when(coverImageService).create(1L, multipartFile);
 
         mockMvc.perform(multipart("/cover-image/1")
@@ -46,11 +46,10 @@ class CoverImageControllerTest {
     }
 
     @Test
-    void testDelete() {
+    void testDelete() throws Exception {
         doNothing().when(coverImageService).delete(1L);
 
-        coverImageController.delete(1L);
-
-        verify(coverImageService, times(1)).delete(1L);
+        mockMvc.perform(delete("/cover-image/1"))
+                .andExpect(status().isOk());
     }
 }
