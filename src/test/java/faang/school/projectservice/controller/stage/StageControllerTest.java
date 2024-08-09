@@ -78,7 +78,7 @@ class StageControllerTest {
 
         when(stageService.getByStatus(ProjectStatus.IN_PROGRESS)).thenReturn(stages);
 
-        mockMvc.perform(get("/stages")
+        mockMvc.perform(post("/stages/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ProjectStatus.IN_PROGRESS)))
                 .andExpect(status().isOk())

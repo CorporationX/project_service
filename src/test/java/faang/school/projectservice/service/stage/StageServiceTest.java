@@ -2,7 +2,6 @@ package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
-import faang.school.projectservice.exception.ProjectStatusException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.mapper.stage.StageRolesMapperImpl;
@@ -15,6 +14,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -48,6 +47,9 @@ class StageServiceTest {
 
     @Mock
     private TaskRepository taskRepository;
+
+    @Mock
+    private ProjectValidator projectValidator;
 
     @Spy
     @InjectMocks
@@ -77,33 +79,15 @@ class StageServiceTest {
     }
 
     @Test
-    void testCreateWhenProjectStatusCANCELLED() {
-        when(projectRepository.getProjectById(1L)).thenReturn(getProjectByStatus(ProjectStatus.CANCELLED));
-
-        assertThrows(ProjectStatusException.class, () -> stageService.create(stageDto));
-    }
-
-    @Test
-    void TestCreateWhenProjectStatusCOMPLETED() {
-        when(projectRepository.getProjectById(1L)).thenReturn(getProjectByStatus(ProjectStatus.COMPLETED));
-
-        assertThrows(ProjectStatusException.class, () -> stageService.create(stageDto));
-    }
-
-    private Project getProjectByStatus(ProjectStatus status) {
-        return Project.builder()
-                .status(status)
-                .build();
-    }
-
-    @Test
-    void testCreateWhenSuccess() {
-        when(projectRepository.getProjectById(1L)).thenReturn(getProjectByStatus(ProjectStatus.IN_PROGRESS));
+    void testCreate() {
+        doNothing().when(projectValidator).validateProjectNotCancelled(1L);
+        doNothing().when(projectValidator).validateProjectNotCompleted(1L);
         when(stageRepository.save(stage)).thenReturn(stage);
 
         StageDto returnedDto = stageService.create(stageDto);
 
-        verify(projectRepository, times(1)).getProjectById(1L);
+        verify(projectValidator, times(1)).validateProjectNotCancelled(1L);
+        verify(projectValidator, times(1)).validateProjectNotCompleted(1L);
         verify(stageRepository, times(1)).save(stage);
         assertEquals(stageDto, returnedDto);
     }

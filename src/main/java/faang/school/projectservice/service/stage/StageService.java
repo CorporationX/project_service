@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.mapper.stage.StageMapper;
@@ -11,7 +13,6 @@ import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.stageInvitation.StageInvitationService;
@@ -19,6 +20,7 @@ import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +34,7 @@ public class StageService {
     private final ProjectValidator projectValidator;
     private final StageInvitationService stageInvitationService;
     private final StageInvitationMapper stageInvitationMapper;
+    private final UserContext userContext;
 
     public StageDto create(StageDto stageDto) {
         projectValidator.validateProjectNotCancelled(stageDto.getProjectId());
@@ -72,6 +75,7 @@ public class StageService {
         Project project = projectRepository.getProjectById(currentStage.getProject().getId());
 
         List<TeamMember> currentExecutors = currentStage.getExecutors();
+        List<StageInvitationDto> stageInvitations = new ArrayList<>();
 
         stageDto.getStageRoles().forEach(stageRoles -> {
             List<TeamMember> teamMembers = currentExecutors.stream()
@@ -81,9 +85,18 @@ public class StageService {
             if (teamMembers.isEmpty()) {
                 List<TeamMember> availableMembersWithRole = findAvailableMembersWithRole
                         (project, stageRoles.getTeamRole(), stageRoles.getCount(), currentStage);
-                availableMembersWithRole.forEach(teamMember -> sendInvitation(StageInvitation.builder().build()));
+                availableMembersWithRole.forEach(teamMember -> stageInvitations.add(StageInvitationDto.builder()
+                        .authorId(userContext.getUserId())
+                        .description("Invitation to stage with id " + stageDto.getStageId())
+                        .invitedId(teamMember.getId())
+                        .stageId(stageDto.getStageId())
+                        .build()));
             }
         });
+
+        if (!stageInvitations.isEmpty()) {
+            stageInvitationService.sendStageInvitations(stageInvitations);
+        }
 
         return stageMapper.toDto(stageRepository.save(stageMapper.toEntity(stageDto)));
     }
@@ -99,10 +112,6 @@ public class StageService {
                 .filter(member -> member.getRoles().contains(role))
                 .limit(needed)
                 .collect(Collectors.toList());
-    }
-
-    private void sendInvitation(StageInvitation stageInvitation) {
-        stageInvitationService.sendAnInvitation(stageInvitationMapper.toDto(stageInvitation));
     }
 
     public List<StageDto> getAll() {

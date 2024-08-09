@@ -28,7 +28,7 @@ public class StageController {
         return stageService.create(stageDto);
     }
 
-    @GetMapping
+    @PostMapping("/status")
     public List<StageDto> findByStatus(@RequestBody ProjectStatus status) {
         return stageService.getByStatus(status);
     }
