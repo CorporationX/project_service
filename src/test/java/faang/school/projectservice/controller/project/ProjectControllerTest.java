@@ -1,20 +1,20 @@
 package faang.school.projectservice.controller.project;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,12 +29,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectControllerTest {
+    private ProjectController projectController;
     @Mock
     private ProjectService projectService;
-    @Spy
     private ProjectValidator projectValidator;
-    @InjectMocks
-    private ProjectController projectController;
+    private ProjectRepository projectRepository;
+    private UserContext userContext;
     private final long ownerId = 1L;
     private final String name = "Project";
     private final String description = "Cool project";
@@ -47,6 +47,9 @@ public class ProjectControllerTest {
 
     @BeforeEach
     void setUp() {
+        projectValidator = Mockito.spy(new ProjectValidator(projectRepository, userContext));
+        projectController = new ProjectController(projectService, projectValidator);
+
         projectDto = ProjectDto.builder()
                 .id(projectId)
                 .name(name)

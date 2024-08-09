@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/resources/v1")
+@RequestMapping("/resources")
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Resources", description = "Resource handler")
@@ -28,7 +28,7 @@ public class ResourceController {
     @Operation(summary = "Create new resource")
     @PostMapping("/project/{projectId}/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResourceDto add(@PathVariable @Min(1L) Long projectId,
+    public ResourceDto add(@PathVariable @Min(value = 1L, message = "Project id cannot be less than 1") Long projectId,
                            @RequestHeader(value = "x-user-id") String userid,
                            @RequestParam(value = "allowedTeamRoles", required = false) List<TeamRole> allowedTeamRoles,
                            @RequestBody MultipartFile file) {
@@ -39,8 +39,8 @@ public class ResourceController {
     @Operation(summary = "Update resource")
     @PutMapping("/project/{projectId}/update/{resourceId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResourceDto update(@PathVariable @Min(1L) Long projectId,
-                              @PathVariable @Min(1L) Long resourceId,
+    public ResourceDto update(@PathVariable @Min(value = 1L, message = "Project id cannot be less than 1") Long projectId,
+                              @PathVariable @Min(value = 1L, message = "Resource id cannot be less than 1") Long resourceId,
                               @RequestHeader(value = "x-user-id") String userid,
                               @RequestParam(value = "allowedTeamRoles", required = false) List<TeamRole> allowedTeamRoles,
                               @RequestParam(value = "resourceStatus", required = false) ResourceStatus resourceStatus,
@@ -50,19 +50,19 @@ public class ResourceController {
     }
 
     @Operation(summary = "Get resource")
-    @GetMapping("/project/{projectId}/get/{resourceId}")
-    public ResponseEntity<InputStreamResource> get(@PathVariable @Min(1L) Long projectId,
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<InputStreamResource> get(@PathVariable @Min(value = 1L, message = "Project id cannot be less than 1") Long projectId,
                                                    @RequestHeader(value = "x-user-id") String userid,
-                                                   @PathVariable @Min(1L) Long resourceId) {
+                                                   @RequestParam(value = "resourceId") @Min(value = 1L, message = "Resource id cannot be less than 1") Long resourceId) {
         return resourceService.get(projectId, resourceId);
     }
 
     @Operation(summary = "Delete resource")
-    @DeleteMapping("/project/{projectId}/remove/{resourceId}")
+    @DeleteMapping("/project/{projectId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResourceDto remove(@PathVariable @Min(1L) Long projectId,
+    public ResourceDto remove(@PathVariable @Min(value = 1L, message = "Project id cannot be less than 1") Long projectId,
                               @RequestHeader(value = "x-user-id") String userid,
-                              @PathVariable @Min(1L) Long resourceId) {
+                              @RequestParam(value = "resourceId") @Min(value = 1L, message = "Resource id cannot be less than 1") Long resourceId) {
         return resourceService.remove(projectId, resourceId);
     }
 }

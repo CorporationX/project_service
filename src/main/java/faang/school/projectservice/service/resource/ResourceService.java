@@ -47,18 +47,19 @@ public class ResourceService {
         resourceValidator.getAllowedRolesAndValidate(allowedTeamRoles, teamMember);
         LocalDateTime now = LocalDateTime.now();
         String key = file.getOriginalFilename() + now;
-        Resource resource = new Resource();
-        resource.setKey(key);
-        resource.setName(file.getOriginalFilename());
-        resource.setSize(BigInteger.valueOf(file.getSize()));
-        resource.setAllowedRoles(allowedTeamRoles);
-        resource.setType(ResourceType.getResourceType(file.getContentType()));
-        resource.setStatus(ResourceStatus.ACTIVE);
-        resource.setCreatedBy(teamMember);
-        resource.setUpdatedBy(teamMember);
-        resource.setCreatedAt(now);
-        resource.setUpdatedAt(now);
-        resource.setProject(project);
+        Resource resource = Resource.builder()
+                .key(key)
+                .name(file.getOriginalFilename())
+                .size(BigInteger.valueOf(file.getSize()))
+                .allowedRoles(allowedTeamRoles)
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .status(ResourceStatus.ACTIVE)
+                .createdBy(teamMember)
+                .updatedBy(teamMember)
+                .createdAt(now)
+                .updatedAt(now)
+                .project(project)
+                .build();
         String path = projectId + "/" + key;
         s3Service.uploadFile(file, bucketName, path);
         Resource result = resourceRepository.save(resource);

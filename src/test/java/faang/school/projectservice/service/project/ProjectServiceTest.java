@@ -5,14 +5,18 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
+import faang.school.projectservice.mapper.subproject.SubProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.project.filter.ProjectNameFilter;
 import faang.school.projectservice.service.project.filter.ProjectStatusFilter;
 import faang.school.projectservice.service.project.updater.ProjectDescriptionUpdater;
 import faang.school.projectservice.service.project.updater.ProjectStatusUpdater;
 import faang.school.projectservice.service.project.updater.ProjectUpdater;
+import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -22,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +47,9 @@ public class ProjectServiceTest {
     private List<ProjectFilter> filters;
     private List<ProjectUpdater> updaters;
     private ProjectValidator validator;
+    private SubProjectMapper subProjectMapper;
+    private MomentService momentService;
+    private List<SubProjectFilter> subProjectFilters = new ArrayList<>();
 
     @BeforeEach
     public void init() {
@@ -53,12 +61,16 @@ public class ProjectServiceTest {
         ProjectNameFilter filter1 = Mockito.spy(ProjectNameFilter.class);
         ProjectStatusFilter filter2 = Mockito.spy(ProjectStatusFilter.class);
         filters = List.of(filter1, filter2);
+        subProjectMapper = Mockito.mock(SubProjectMapperImpl.class);
+        momentService = Mockito.mock(MomentService.class);
 
         ProjectDescriptionUpdater updater1 = new ProjectDescriptionUpdater();
         ProjectStatusUpdater updater2 = new ProjectStatusUpdater();
         updaters = List.of(updater1, updater2);
 
-        projectService = new ProjectService(projectRepository, projectMapper, filters, updaters, userContext,validator);
+        projectService = new ProjectService(
+                projectRepository, projectMapper, filters, updaters, userContext, validator,
+                subProjectMapper, momentService, subProjectFilters);
 
         project = Project.builder()
                 .id(projectId)
