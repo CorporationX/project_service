@@ -75,10 +75,11 @@ public class JiraServiceTest {
     void updateIssueDescriptionTest() {
         String issueKey = "ISSUE-1";
         String description = "New Description";
-
         Promise<Void> promise = mock(Promise.class);
+
         when(promise.claim()).thenReturn(null);
-        when(issueRestClient.updateIssue(issueKey, any(IssueInput.class))).thenReturn(promise);
+        when(issueRestClient.updateIssue(eq(issueKey), any(IssueInput.class))).thenReturn(promise);
+
         jiraService.updateIssueDescription(issueKey, description);
 
         ArgumentCaptor<IssueInput> captor = ArgumentCaptor.forClass(IssueInput.class);
