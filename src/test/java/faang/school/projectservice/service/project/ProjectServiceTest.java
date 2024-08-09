@@ -16,6 +16,7 @@ import faang.school.projectservice.service.project.filter.ProjectStatusFilter;
 import faang.school.projectservice.service.project.updater.ProjectDescriptionUpdater;
 import faang.school.projectservice.service.project.updater.ProjectStatusUpdater;
 import faang.school.projectservice.service.project.updater.ProjectUpdater;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 

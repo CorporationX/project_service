@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.project;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
@@ -18,14 +18,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +61,9 @@ public class ProjectValidatorTest {
             .status(ProjectStatus.IN_PROGRESS)
             .visibility(ProjectVisibility.PRIVATE)
             .build();
+
+    @Value("${app.coverImage.maxSize}")
+    private long coverMaxSize;
 
     @BeforeEach
     void setUp() {
@@ -179,5 +186,24 @@ public class ProjectValidatorTest {
         parentProject.setVisibility(ProjectVisibility.PRIVATE);
 
         assertFalse(validator.userHasAccessToProject(ownerId, parentProject));
+    }
+
+    @Test
+    public void testValidateCoverWithWrongSize() {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getSize()).thenReturn(coverMaxSize + 1);
+
+        DataValidationException e =
+                assertThrows(DataValidationException.class, () -> validator.validateCover(file));
+
+        assertEquals("cover image size can't be more " + coverMaxSize + " bytes", e.getMessage());
+    }
+
+    @Test
+    public void testValidateCoverWithCorrectSize() {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getSize()).thenReturn(coverMaxSize - 1);
+
+        assertDoesNotThrow(() -> validator.validateCover(file));
     }
 }

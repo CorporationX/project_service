@@ -7,7 +7,9 @@ import faang.school.projectservice.dto.project.filter.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.image.ImageService;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -24,6 +27,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,9 +39,13 @@ public class ProjectControllerTest {
     private ProjectController projectController;
     @Mock
     private ProjectService projectService;
+    @Mock
+    private ImageService imageService;
     private ProjectValidator projectValidator;
     private ProjectRepository projectRepository;
     private UserContext userContext;
+    @Mock
+    private S3Service s3Service;
     private final long ownerId = 1L;
     private final String name = "Project";
     private final String description = "Cool project";
@@ -48,7 +59,7 @@ public class ProjectControllerTest {
     @BeforeEach
     void setUp() {
         projectValidator = Mockito.spy(new ProjectValidator(projectRepository, userContext));
-        projectController = new ProjectController(projectService, projectValidator);
+        projectController = new ProjectController(projectService, projectValidator, imageService, s3Service);
 
         projectDto = ProjectDto.builder()
                 .id(projectId)
@@ -91,7 +102,7 @@ public class ProjectControllerTest {
     @Test
     public void testAdd() throws Exception {
         String jsonRequest = new ObjectMapper().writeValueAsString(projectDto);
-        Mockito.when(projectService.add(projectDto)).thenReturn(projectDto);
+        when(projectService.add(projectDto)).thenReturn(projectDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/project/add")
                         .header("x-user-id", "3")
@@ -100,7 +111,7 @@ public class ProjectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(projectDto.getName()));
 
-        Mockito.verify(projectService).add(projectDto);
+        verify(projectService).add(projectDto);
     }
 
     @Test
@@ -116,7 +127,7 @@ public class ProjectControllerTest {
     @Test
     public void testUpdate() throws Exception {
         String jsonRequest = new ObjectMapper().writeValueAsString(projectDto);
-        Mockito.when(projectService.update(projectDto)).thenReturn(projectDto);
+        when(projectService.update(projectDto)).thenReturn(projectDto);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/project")
                         .header("x-user-id", "3")
@@ -125,13 +136,13 @@ public class ProjectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(projectDto.getName()));
 
-        Mockito.verify(projectService).update(projectDto);
+        verify(projectService).update(projectDto);
     }
 
     @Test
     public void testGetProjectsWithFilters() throws Exception {
         filters = new ProjectFilterDto("name", ProjectStatus.CREATED);
-        Mockito.when(projectService.getProjectsWithFilters(filters)).thenReturn(List.of(projectDto));
+        when(projectService.getProjectsWithFilters(filters)).thenReturn(List.of(projectDto));
         String jsonRequest = new ObjectMapper().writeValueAsString(filters);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/project/getByFilters")
@@ -142,14 +153,14 @@ public class ProjectControllerTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].name").value(projectDto.getName()));
 
-        Mockito.verify(projectService).getProjectsWithFilters(filters);
+        verify(projectService).getProjectsWithFilters(filters);
     }
 
     @Test
     public void testGetAllProjects() {
-        Mockito.when(projectService.getAllProjects()).thenReturn(List.of(projectDto));
+        when(projectService.getAllProjects()).thenReturn(List.of(projectDto));
         projectController.getAllProjects();
-        Mockito.verify(projectService).getAllProjects();
+        verify(projectService).getAllProjects();
     }
 
     @Test
@@ -161,7 +172,7 @@ public class ProjectControllerTest {
 
     @Test
     public void testGetProjectById() throws Exception {
-        Mockito.when(projectService.getProjectById(projectId)).thenReturn(projectDto);
+        when(projectService.getProjectById(projectId)).thenReturn(projectDto);
         String jsonRequest = new ObjectMapper().writeValueAsString(projectDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/project/" + projectId)
@@ -171,6 +182,28 @@ public class ProjectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(projectDto.getName()));
 
-        Mockito.verify(projectService).getProjectById(projectId);
+        verify(projectService).getProjectById(projectId);
+    }
+
+    @Test
+    public void testAddCoverImage() throws Exception {
+        String result = "Success";
+        MockMultipartFile coverImage = new MockMultipartFile(
+                "coverImage", "filename.jpg", "image/jpeg", description.getBytes());
+        doNothing().when(projectValidator).validateCover(coverImage);
+        when(imageService.resizeImage(coverImage)).thenReturn(coverImage);
+        when(s3Service.addCover(projectId, coverImage)).thenReturn(result);
+
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/project/" + projectId + "/cover")
+                        .file(coverImage)
+                        .header("x-user-id", "3")
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(content().string(result));
+
+        verify(projectValidator).validateCover(coverImage);
+        verify(imageService).resizeImage(coverImage);
+        verify(s3Service).addCover(projectId, coverImage);
     }
 }

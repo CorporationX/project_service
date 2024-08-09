@@ -42,7 +42,8 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: project-bucket
+    region: us-east-1
     isMocked: false
   payment-service:
     host: http://localhost
@@ -50,3 +51,11 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+app:
+  coverImage:
+    maxSize: 5242880
+    maxHeightHorizontal: 566
+    maxWidthHorizontal: 1080
+    maxHeightNonHorizontal: 1080
+    maxWidthNonHorizontal: 1080

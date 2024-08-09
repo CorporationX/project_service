@@ -13,6 +13,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.project.updater.ProjectUpdater;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import faang.school.projectservice.service.subproject.filter.SubProjectNameFilter;
 import faang.school.projectservice.service.subproject.filter.SubProjectStatusFilter;
@@ -57,7 +58,6 @@ public class ProjectServiceForSubprojectTest {
     private List<SubProjectFilter> subProjectFilters = List.of(nameFilter, statusFilter);
     private List<ProjectFilter> projectFilters = new ArrayList<>();
     private List<ProjectUpdater> projectUpdaters = new ArrayList<>();
-
     private Long parentProjectId = 1L;
     private Long ownerId = 100L;
     private String name = "SubProject name";
