@@ -2,7 +2,6 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,10 +18,8 @@ public class MomentMapperTest {
     private MomentMapperImpl mapper;
     private Moment moment;
     private MomentDto momentDto;
-    private Project project;
     private List<Long> projectIds;
     private List<Long> userIds;
-    private List<Project> projects;
 
     @BeforeEach
     public void setUp() {
@@ -31,15 +28,12 @@ public class MomentMapperTest {
         projectIds.add(1L);
         userIds = new ArrayList<>();
         userIds.add(2L);
-        project = Project.builder().id(1L).build();
-        projects = new ArrayList<>();
-        projects.add(project);
-        momentDto = momentDto.builder().name("test")
+        momentDto = MomentDto.builder().name("test")
                 .date(LocalDateTime.of(2021, 1, 1, 0, 0))
                 .id(1L).projectIds(projectIds).userIds(userIds).build();
-        moment = moment.builder().name("test")
+        moment = Moment.builder().name("test")
                 .date(LocalDateTime.of(2021, 1, 1, 0, 0))
-                .id(1L).projects(projects).userIds(userIds).build();
+                .id(1L).userIds(userIds).build();
     }
 
     @Test
@@ -50,21 +44,20 @@ public class MomentMapperTest {
 
     @Test
     public void testDtoToEntity() {
+        momentDto.setProjectIds(null);
         MomentDto actualMomentDto = mapper.toDto(moment);
         Assertions.assertEquals(actualMomentDto, momentDto);
     }
 
     @Test
-    public void testUpdate() {
-        MomentDto newMomentDto = MomentDto.builder().id(3L).name("newName").
-                date(LocalDateTime.of(2022, 1, 1, 0, 0))
-                .projectIds(List.of(2L, 3L)).userIds(List.of(2L, 3L)).build();
-        mapper.update(newMomentDto, moment);
-        Assertions.assertEquals("newName", moment.getName());
-        Assertions.assertEquals(LocalDateTime.of(2022, 1, 1, 0, 0), moment.getDate());
-        Assertions.assertEquals(3L, moment.getId());
-        Assertions.assertEquals(List.of(2L, 3L), moment.getProjects().stream().map(Project::getId).toList());
-        Assertions.assertEquals(List.of(2L, 3L), moment.getUserIds());
+    public void testUpdateEntity() {
+        momentDto.setDate(LocalDateTime.of(2022, 1, 1, 0, 0));
+        momentDto.setName("newName");
+        momentDto.setUserIds(List.of(2L, 3L));
+        Moment updatedMoment = mapper.update(moment, momentDto);
+        Assertions.assertEquals(updatedMoment.getName(), "newName");
+        Assertions.assertEquals(updatedMoment.getDate(), LocalDateTime.of(2022, 1, 1, 0, 0));
+        Assertions.assertEquals(updatedMoment.getUserIds(), List.of(2L, 3L));
     }
 
 }

@@ -15,27 +15,19 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MomentMapper {
 
-    @Mapping(target = "projects", source = "projectIds", qualifiedByName = "fromProjectIdsToProjects")
     Moment toEntity(MomentDto momentDto);
 
     @Mapping(target = "projectIds", source = "projects", qualifiedByName = "fromProjectsToProjectIds")
     MomentDto toDto(Moment moment);
 
-    @Mapping(target = "projects", source = "projectIds", qualifiedByName = "fromProjectIdsToProjects")
-    void update(MomentDto momentDto, @MappingTarget Moment moment);
-
-    @Named("fromProjectIdsToProjects")
-    default List<Project> toProjects(List<Long> projectIds) {
-        return projectIds.stream().map(id -> {
-            Project project = new Project();
-            project.setId(id);
-            return project;
-        }).collect(Collectors.toList());
-    }
+    Moment update(@MappingTarget Moment moment, MomentDto momentDto);
 
     @Named("fromProjectsToProjectIds")
     default List<Long> toProjectIds(List<Project> projects) {
-        return projects.stream().map(Project::getId).collect(Collectors.toList());
+        if (projects == null) {
+            return null;
+        } else {
+            return projects.stream().map(Project::getId).collect(Collectors.toList());
+        }
     }
-
 }
