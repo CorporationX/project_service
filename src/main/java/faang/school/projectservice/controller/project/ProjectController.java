@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.project;
 
+import faang.school.projectservice.dto.project.ProjectCoverDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.constraints.Min;
@@ -37,10 +38,11 @@ public class ProjectController {
     }
 
     @PutMapping("/project/{projectId}/covers")
-    public ResponseEntity<?> addCover(@PathVariable("projectId")
-                         @Min(value = 1, message = "Must be more then 0.")
-                         long id,
-                                   @RequestBody MultipartFile file) {
-        return ResponseEntity.ok(service.addCover(id,file));
+    public ResponseEntity<ProjectCoverDto> addCover(@PathVariable("projectId")
+                                      @Min(value = 1, message = "Must be more then 0.")
+                                      long id,
+                                                    @RequestBody MultipartFile file) {
+        service.addCover(id, file);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.project.ProjectCoverDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.SubProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
@@ -7,6 +8,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.Validator;
 import faang.school.projectservice.service.project.subproject_filter.SubProjectFilter;
@@ -117,12 +119,13 @@ public class ProjectService {
         return projects.stream().map(mapper::toDto).toList();
     }
 
-    public String addCover(long projectId, MultipartFile file) throws IOException {
+    public ProjectCoverDto addCover(long projectId, MultipartFile file) {
         Project project = repository.getProjectById(projectId);
         long fileSize = file.getSize();
 
         BufferedImage inputImage = null;
-        BufferedImage outputImage = null;
+        MultipartFile outputFile = null;
+        Resource resource = new Resource();
         try {
             inputImage = ImageIO.read(file.getInputStream());
         } catch (IOException e) {
@@ -134,63 +137,32 @@ public class ProjectService {
 
         if (!validator.validateFileSize(fileSize)) {
             log.error("Размер файла {} превышает ограничение.", fileSize);
-            return "Файл не был загружен.";
         } else if (!validator.validatesImageSize(width, height)) {
-            outputImage = imageResizer.resizeImage(inputImage,
-                    validator.getMaxWidth(),
-                    validator.getMaxHeight());
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write(outputImage, "jpg", outputStream);
-            InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-
-            MultipartFile newFile = new MultipartFile() {
-                @Override
-                public String getName() {
-                    return null;
-                }
-
-                @Override
-                public String getOriginalFilename() {
-                    return null;
-                }
-
-                @Override
-                public String getContentType() {
-                    return null;
-                }
-
-                @Override
-                public boolean isEmpty() {
-                    return false;
-                }
-
-                @Override
-                public long getSize() {
-                    return 0;
-                }
-
-                @Override
-                public byte[] getBytes() throws IOException {
-                    return new byte[0];
-                }
-
-                @Override
-                public InputStream getInputStream() throws IOException {
-                    return null;
-                }
-
-                @Override
-                public void transferTo(File dest) throws IOException, IllegalStateException {
-
-                }
-            };
-            return "Файл успешно загружен.";//переделать
+            try {
+                outputFile = imageResizer.resizeImage(file,
+                        validator.getMaxWidth(),
+                        validator.getMaxHeight());
+            } catch (IOException e) {
+                log.error("Ошибка преобразования изображения.", e);
+                throw new RuntimeException(e);
+            }
+            resource = uploadFile(outputFile, projectId, project.getName());
         } else {
-            String folder = projectId + project.getName();
-            s3ServiceImpl.uploadFile(file, folder);
-            log.info("Файл {} загружен в облако.", file.getOriginalFilename());
-            return "Файл успешно загружен.";
+            resource = uploadFile(file, projectId, project.getName());
         }
+        project.setCoverImageId(resource.getKey());
+        return mapper.toProjectCoverDto(repository.save(project));
     }
+
+    private Resource uploadFile(MultipartFile multipartFile,
+                                long projectId, String projectName) {
+
+        String folder = projectId + projectName;
+        Resource resource = s3ServiceImpl.uploadFile(multipartFile, folder);
+        log.info("Файл {} загружен в облако.", multipartFile.getOriginalFilename());
+        return resource;
+    }
+
+
 
 }

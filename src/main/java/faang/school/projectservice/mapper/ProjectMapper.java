@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper;
 
 
+import faang.school.projectservice.dto.project.ProjectCoverDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.team.TeamDto;
 import faang.school.projectservice.model.Moment;
@@ -84,5 +85,7 @@ public interface ProjectMapper {
                 .map(Moment::getId)
                 .toList();
     }
+
+    ProjectCoverDto toProjectCoverDto(Project project);
 
 }
