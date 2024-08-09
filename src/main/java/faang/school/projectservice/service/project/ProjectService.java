@@ -94,4 +94,8 @@ public class ProjectService {
 
         return projects.stream().map(mapper::toDto).toList();
     }
+
+    public Project getOneOrThrow(long projectId) {
+        return repository.getProjectById(projectId);
+    }
 }
