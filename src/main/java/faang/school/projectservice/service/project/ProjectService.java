@@ -66,8 +66,6 @@ public class ProjectService {
         Project project = projectUtilService.getProjectById(id);
         List<Project> children = projectUtilService.getAllSubprojectsToProjectById(id);
         log.info("Got all subprojects for project with id = {}", id);
-        List<Moment> moments = new ArrayList<>();
-        dto.setId(id);
         project.setName(projectValidateService.getName(project.getName(), dto));
         if (projectValidateService.dtoParentProjectIdDoesNotMatchProjectIdAndNotNull(project.getId(), dto)) {
             changeParentProject(project, dto);
@@ -98,53 +96,53 @@ public class ProjectService {
         Project recentParentProject = project.getParentProject();
         Project supposedParentProject = projectUtilService.getProjectById(dto.getParentProjectId());
         project.setParentProject(supposedParentProject);
-                    List<Project> supposedList = new ArrayList<>();
-                    if (supposedParentProject.getChildren() != null) {
-                        supposedList.addAll(supposedParentProject.getChildren());
-                    }
-                    supposedList.add(project);
+        List<Project> supposedList = new ArrayList<>();
+        if (supposedParentProject.getChildren() != null) {
+            supposedList.addAll(supposedParentProject.getChildren());
+        }
+        supposedList.add(project);
         supposedParentProject.setChildren(supposedList);
-                    if (recentParentProject != null) {
-                        List<Project> recentList = new ArrayList<>(recentParentProject.getChildren());
-                        recentList.remove(project);
-                        recentParentProject.setChildren(recentList);
-                    }
-                    log.info("Replacing of the project id = {} to project id = {} was successfully finished", dto.getId(), supposedParentProject.getId());
-                }
+        if (recentParentProject != null) {
+            List<Project> recentList = new ArrayList<>(recentParentProject.getChildren());
+            recentList.remove(project);
+            recentParentProject.setChildren(recentList);
+        }
+        log.info("Replacing of the project id = {} to project id = {} was successfully finished", project.getId(), supposedParentProject.getId());
+    }
 
     private void updateVisibility(Project project, CreateSubProjectDto dto, List<Project> children) {
-            if (dto.getVisibility() == ProjectVisibility.PRIVATE) {
-                project.setVisibility(dto.getVisibility());
-                log.info("Set PRIVATE visibility to project id = {}", project.getId());
-                if (!children.isEmpty()) {
-                    children.forEach(p -> p.setVisibility(dto.getVisibility()));
-                    projectUtilService.saveAllProjects(children);
-                    log.info("All children projects were saved with Private visibility");
-                }
-            } else {
-                project.setVisibility(dto.getVisibility());
-                log.info("Set {} visibility to project id = {}", dto.getVisibility(), project.getId());
+        if (dto.getVisibility() == ProjectVisibility.PRIVATE) {
+            project.setVisibility(dto.getVisibility());
+            log.info("Set PRIVATE visibility to project id = {}", project.getId());
+            if (!children.isEmpty()) {
+                children.forEach(p -> p.setVisibility(dto.getVisibility()));
+                projectUtilService.saveAllProjects(children);
+                log.info("All children projects were saved with Private visibility");
             }
+        } else {
+            project.setVisibility(dto.getVisibility());
+            log.info("Set {} visibility to project id = {}", dto.getVisibility(), project.getId());
+        }
     }
 
     private void updateStatus(Project project, CreateSubProjectDto dto, List<Project> children, Long userId) {
-            if (dto.getStatus().equals(ProjectStatus.COMPLETED)) {
-                List<Project> completedChildProjects = getCompletedChildProjects(children);
-                log.info("Got list of completed projects");
-                if (!completedChildProjects.isEmpty() && completedChildProjects.size() == children.size()) {
-                    project.setStatus(dto.getStatus());
-                    addMoment(project.getId(),completedChildProjects, userId);
-                } else if (completedChildProjects.isEmpty()) {
-                    project.setStatus(dto.getStatus());
-                    addMoment(project.getId(),new ArrayList<>(), userId);
-                } else {
-                    log.error("Project id = {} has unfinished subprojects", project.getId());
-                    throw new DataValidationException("current project has unfinished subprojects");
-                }
-            } else {
+        if (dto.getStatus().equals(ProjectStatus.COMPLETED)) {
+            List<Project> completedChildProjects = getCompletedChildProjects(children);
+            log.info("Got list of completed projects");
+            if (!completedChildProjects.isEmpty() && completedChildProjects.size() == children.size()) {
                 project.setStatus(dto.getStatus());
-                log.info("Set any status except for COMPLETED");
+                addMoment(project.getId(), completedChildProjects, userId);
+            } else if (completedChildProjects.isEmpty()) {
+                project.setStatus(dto.getStatus());
+                addMoment(project.getId(), new ArrayList<>(), userId);
+            } else {
+                log.error("Project id = {} has unfinished subprojects", project.getId());
+                throw new DataValidationException("current project has unfinished subprojects");
             }
+        } else {
+            project.setStatus(dto.getStatus());
+            log.info("Set any status except for COMPLETED");
+        }
     }
 
     private List<Project> getCompletedChildProjects(List<Project> childProjects) {
@@ -158,7 +156,7 @@ public class ProjectService {
 
     public ProjectDto getProjectById(long projectId) {
         Project project = projectUtilService.getProjectById(projectId);
-            return projectMapper.toDto(project);
+        return projectMapper.toDto(project);
     }
 
     public List<ProjectDto> getProjectsByIds(List<Long> ids) {
