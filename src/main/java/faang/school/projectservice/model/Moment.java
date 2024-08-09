@@ -13,11 +13,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "moment")
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class Moment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

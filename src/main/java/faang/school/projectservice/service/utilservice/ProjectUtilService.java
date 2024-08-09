@@ -34,6 +34,14 @@ public class ProjectUtilService {
         return projectJpaRepository.save(project);
     }
 
+    public Project save(Project project) {
+        return projectRepository.save(project);
+    }
+
+    public void saveAllProjects(List<Project> projects) {
+        projectRepository.saveAll(projects);
+    }
+
     public List<Project> getAllByIdsStrictly(Collection<Long> ids) {
         List<Project> projects = projectJpaRepository.findAllById(ids);
         if (ids.size() != projects.size()) {
@@ -42,12 +50,24 @@ public class ProjectUtilService {
         return projects;
     }
 
+    public List<Project> getAllByIds(List<Long> ids) {
+        return projectRepository.findAllByIds(ids);
+    }
+
+    public Project getProjectById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
+
+    public List<Project> getAllSubprojectsToProjectById(Long id) {
+        return projectRepository.getAllSubprojectsToProjectById(id);
+    }
+
     public List<Project> findAllDistinctByTeamMemberIds(Collection<Long> teamMemberIds) {
         return projectJpaRepository.findAllDistinctByTeamMemberIds(teamMemberIds);
     }
 
     public void checkProjectsNotClosed(Collection<Project> projects) {
-        if (!verifyProjectsNotIncludeStatuses(projects, ProjectStatus.COMPLETED, ProjectStatus.CANCELLED)) {
+        if (verifyProjectsNotIncludeStatuses(projects, ProjectStatus.COMPLETED, ProjectStatus.CANCELLED)) {
             throw new ConflictException(ErrorMessage.PROJECT_STATUS_INVALID);
         }
     }

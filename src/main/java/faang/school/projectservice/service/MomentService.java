@@ -4,18 +4,22 @@ import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.dto.moment.MomentUpdateDto;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.repository.moment.MomentRepository;
 import faang.school.projectservice.service.utilservice.MomentUtilService;
 import faang.school.projectservice.service.utilservice.ProjectUtilService;
 import faang.school.projectservice.service.utilservice.TeamMemberUtilService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -23,14 +27,15 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional
 public class MomentService {
 
     private final MomentUtilService momentUtilService;
     private final MomentMapper momentMapper;
-
     private final TeamMemberUtilService teamMemberUtilService;
     private final ProjectUtilService projectUtilService;
+    private final MomentRepository momentRepository;
 
     @Transactional(readOnly = true)
     public MomentResponseDto getById(long id) {

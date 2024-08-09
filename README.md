@@ -105,3 +105,6 @@ RESTful приложения калькулятор с единственным 
 * Dockerfile, который подключается к сети запущенной postgres в docker-compose
 * Redis connectivity
 * ...
+
+# Link to Swagger
+http://localhost:8082/swagger-ui/index.html
