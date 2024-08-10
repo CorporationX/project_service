@@ -35,8 +35,7 @@ public class ResourceService {
         BigInteger newStorageSize = storageSize.add(BigInteger.valueOf(file.getSize()));
         resourceValidator.checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
 
-        String folder = project.getId() + project.getName();
-        Resource resource = s3ServiceImpl.uploadFile(file, folder);
+        Resource resource = s3ServiceImpl.uploadFile(file, project);
         resource.setProject(project);
         resource = resourceRepository.save(resource);
 

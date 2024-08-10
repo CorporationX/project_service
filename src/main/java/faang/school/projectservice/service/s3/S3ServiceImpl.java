@@ -1,10 +1,10 @@
 package faang.school.projectservice.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
@@ -29,11 +29,12 @@ public class S3ServiceImpl {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public Resource uploadFile(MultipartFile file, String folder) {
+    public Resource uploadFile(MultipartFile file, Project project) {
         long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
         objectMetadata.setContentType(file.getContentType());
+        String folder = project.getId() + project.getName();
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(),
                 file.getOriginalFilename());
         try {
@@ -46,15 +47,15 @@ public class S3ServiceImpl {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage());
         }
-        Resource resource = new Resource();
-        resource.setKey(key);
-        resource.setSize(BigInteger.valueOf(fileSize));
-        resource.setCreatedAt(LocalDateTime.now());
-        resource.setUpdatedAt(LocalDateTime.now());
-        resource.setStatus(ResourceStatus.ACTIVE);
-        resource.setType(ResourceType.getResourceType(file.getContentType()));
-        resource.setName(file.getOriginalFilename());
-        return resource;
+        return Resource.builder()
+                .key(key)
+                .size(BigInteger.valueOf(fileSize))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .status(ResourceStatus.ACTIVE)
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .name(file.getOriginalFilename())
+                .build();
     }
 
     public void deleteFile(String key) {
