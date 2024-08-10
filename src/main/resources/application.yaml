@@ -4,6 +4,10 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
+  servlet:
+    multipart:
+      max-file-size: 1000MB # Максимальный размер загружаемого файла
+      max-request-size: 1000MB # Максимальный размер всего запроса, включая все загружаемые файлы
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

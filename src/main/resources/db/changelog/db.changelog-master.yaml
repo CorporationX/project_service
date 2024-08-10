@@ -21,3 +21,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V013_create_initiative.sql
   - include:
         file: db/changelog/changeset/project_V014_resource.sql
+  - include:
+      file: db/changelog/changeset/project_V015_resource_allowed_roles.sql
