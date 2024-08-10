@@ -1,4 +1,4 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.exception.errorResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

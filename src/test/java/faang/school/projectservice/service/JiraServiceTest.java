@@ -19,8 +19,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,8 +64,8 @@ public class JiraServiceTest {
         when(promise.claim()).thenReturn(basicIssue);
         when(issueRestClient.createIssue(any(IssueInput.class))).thenReturn(promise);
 
-        ResponseEntity<Void> response = jiraService.createIssue(projectKey, issueDto);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        jiraService.createIssue(projectKey, issueDto);
+        verify(promise, times(1)).claim();
     }
 
     @Test
@@ -110,8 +108,7 @@ public class JiraServiceTest {
 
         when(issueRestClient.deleteIssue(issueKey, deleteSubtask)).thenReturn(mock(Promise.class));
 
-        ResponseEntity<Void> response = jiraService.deleteIssue(issueKey, deleteSubtask);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        jiraService.deleteIssue(issueKey, deleteSubtask);
         verify(issueRestClient).deleteIssue(issueKey, deleteSubtask);
     }
 

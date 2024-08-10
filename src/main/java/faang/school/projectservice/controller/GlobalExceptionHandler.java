@@ -2,8 +2,8 @@ package faang.school.projectservice.controller;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.atlassian.jira.rest.client.api.RestClientException;
-import faang.school.projectservice.exception.ErrorResponse;
-import faang.school.projectservice.exception.JiraErrorResponse;
+import faang.school.projectservice.exception.errorResponse.ErrorResponse;
+import faang.school.projectservice.exception.errorResponse.JiraErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
