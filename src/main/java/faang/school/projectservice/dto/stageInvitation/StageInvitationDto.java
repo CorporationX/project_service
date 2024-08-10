@@ -4,10 +4,12 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class StageInvitationDto {
     private Long id;
     @NotNull @NotBlank

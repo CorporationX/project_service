@@ -1,9 +1,11 @@
 package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.StageJpaRepository;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,5 +31,9 @@ public class StageRepository {
 
     public List<Stage> findAll() {
         return jpaRepository.findAll();
+    }
+
+    public List<Stage> findByStatus(ProjectStatus status) {
+        return jpaRepository.findByStatus(status);
     }
 }

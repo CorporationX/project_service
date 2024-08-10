@@ -63,4 +63,19 @@ public class StageInvitationService {
                 .map(stageInvitationMapper::toDto)
                 .toList();
     }
+
+    public List<StageInvitationDto> sendStageInvitations(List<StageInvitationDto> invitations) {
+        List<StageInvitation> toSave = invitations.stream()
+                .peek(invitation -> {
+                    invitation.setStatus(StageInvitationStatus.PENDING);
+                })
+                .map(stageInvitationMapper::toEntity)
+                .toList();
+
+        List<StageInvitation> result = stageInvitationRepository.saveAll(toSave);
+
+        return result.stream()
+                .map(stageInvitationMapper::toDto)
+                .toList();
+    }
 }

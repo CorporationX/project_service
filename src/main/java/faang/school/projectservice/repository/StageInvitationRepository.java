@@ -31,4 +31,8 @@ public class StageInvitationRepository {
     public List<StageInvitation> findByIdAllInvited(Long stageInvitationId) {
         return repository.findByIdAllInvited(stageInvitationId);
     }
+
+    public List<StageInvitation> saveAll(List<StageInvitation> invitations) {
+        return repository.saveAll(invitations);
+    }
 }
