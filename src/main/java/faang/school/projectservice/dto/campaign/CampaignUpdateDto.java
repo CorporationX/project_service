@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,7 +21,7 @@ public class CampaignUpdateDto {
     private String description;
 
     @Min(1)
-    private BigDecimal goal;
+    private Double goal;
 
     private CampaignStatus status;
 }

@@ -11,6 +11,7 @@ import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.CampaignRepository;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,8 +55,8 @@ public class CampaignServiceTest {
         campaignDto = CampaignDto.builder()
                 .title("Campaign title")
                 .description("Campaign description")
-                .goal(BigDecimal.valueOf(100))
-                .amountRaised(BigDecimal.valueOf(0))
+                .goal(100.0)
+                .amountRaised((double) 0)
                 .currency(Currency.USD)
                 .projectId(PROJECT_ID)
                 .status(CampaignStatus.ACTIVE)
@@ -77,7 +78,7 @@ public class CampaignServiceTest {
         updateCampaignDto = CampaignUpdateDto.builder()
                 .title("Updated title")
                 .description("Updated description")
-                .goal(BigDecimal.valueOf(200))
+                .goal(200.0)
                 .status(CampaignStatus.ACTIVE)
                 .build();
 
@@ -89,9 +90,9 @@ public class CampaignServiceTest {
                 .build();
     }
 
-
     @Mock
-    private ProjectService projectService;
+    private ProjectValidator projectValidator;
+
     @Mock
     private CampaignRepository campaignRepository;
     @Spy
@@ -104,9 +105,6 @@ public class CampaignServiceTest {
     @Test
     @DisplayName("Test create campaign with manager permission")
     void testCreateCampaign() {
-
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(true);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
         when(campaignRepository.save(any())).thenReturn(testCampaign);
 
         CampaignDto actualCampaignDto = campaignService.createCampaign(campaignDto, USER_ID);
@@ -117,8 +115,6 @@ public class CampaignServiceTest {
     @Test
     @DisplayName("Test create campaign with owner permission")
     void testCreateCampaignWithOwnerPermission() {
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(true);
         when(campaignRepository.save(any())).thenReturn(testCampaign);
 
         CampaignDto actualCampaignDto = campaignService.createCampaign(campaignDto, USER_ID);
@@ -127,20 +123,9 @@ public class CampaignServiceTest {
     }
 
     @Test
-    @DisplayName("Test create campaign with wrong permission")
-    void testCreateCampaignWithWrongPermission() {
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-
-        assertThrows(DataValidationException.class, () -> campaignService.createCampaign(campaignDto, USER_ID));
-    }
-
-    @Test
     @DisplayName("Test update campaign with manager permission")
     void testUpdateCampaign() {
         when(campaignRepository.findById(eq(CAMPAIGN_ID))).thenReturn(Optional.ofNullable(testCampaign));
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(true);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
         when(campaignRepository.save(any())).thenReturn(updatedCampaign);
 
         CampaignDto actualCampaignDto = campaignService.updateCampaign(updateCampaignDto, USER_ID, CAMPAIGN_ID);
@@ -153,16 +138,7 @@ public class CampaignServiceTest {
         );
     }
 
-    @Test
-    @DisplayName("Test update campaign with wrong permission")
-    void testUpdateCampaignWithWrongPermission() {
-        when(campaignRepository.findById(eq(CAMPAIGN_ID))).thenReturn(Optional.ofNullable(testCampaign));
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
 
-        assertThrows(DataValidationException.class,
-                () -> campaignService.updateCampaign(updateCampaignDto, USER_ID, CAMPAIGN_ID));
-    }
 
     @Test
     @DisplayName("Test update campaign when campaign not found")
@@ -176,8 +152,6 @@ public class CampaignServiceTest {
     @Test
     @DisplayName("Test soft delete campaign with manager permission")
     void testSoftDeleteCampaign() {
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(true);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
         when(campaignRepository.findById(eq(CAMPAIGN_ID))).thenReturn(Optional.ofNullable(testCampaign));
         when(campaignRepository.save(any())).thenReturn(updatedCampaign);
 
@@ -185,16 +159,6 @@ public class CampaignServiceTest {
 
         assertEquals(CampaignStatus.DELETED, testCampaign.getStatus());
         verify(campaignRepository, times(1)).save(any());
-    }
-
-    @Test
-    @DisplayName("Test soft delete campaign with wrong permission")
-    void testSoftDeleteCampaignWithWrongPermission() {
-        when(campaignRepository.findById(eq(CAMPAIGN_ID))).thenReturn(Optional.ofNullable(testCampaign));
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-
-        assertThrows(DataValidationException.class, () -> campaignService.softDeleteCampaign(CAMPAIGN_ID, USER_ID));
     }
 
     @Test
@@ -227,7 +191,7 @@ public class CampaignServiceTest {
     void testGetAllCampaignsByFilter() {
         CampaignFilter campaignFilter = Mockito.mock(CampaignFilter.class);
 
-        campaignService = new CampaignService(projectService, campaignRepository, campaignMapper, List.of(campaignFilter));
+        campaignService = new CampaignService(campaignRepository, campaignMapper, List.of(campaignFilter), projectValidator);
 
         CampaignFiltersDto campaignFiltersDto = new CampaignFiltersDto();
         List<Campaign> campaigns = new ArrayList<>(List.of(Campaign.builder().title("title 2").createdAt(LocalDateTime.now()).build(),
