@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.vacancy;
 
-import faang.school.projectservice.dto.filter.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.filter.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;

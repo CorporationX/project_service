@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.filter;
+package faang.school.projectservice.dto.vacancy.filter;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.vacancy;
 
-import faang.school.projectservice.dto.filter.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.filter.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import jakarta.validation.Valid;
