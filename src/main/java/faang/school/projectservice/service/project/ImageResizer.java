@@ -1,23 +1,28 @@
 package faang.school.projectservice.service.project;
 
+import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
-import org.imgscalr.Scalr;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
+@Slf4j
 @Component
 public class ImageResizer {
-    public MultipartFile resizeImage(MultipartFile file,
-                                     int targetWidth,
-                                     int targetHeight) throws IOException {
-        Thumbnails.of(file.getInputStream())
+    public InputStream resizeImage(InputStream file,
+                                   int targetWidth,
+                                   int targetHeight) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Thumbnails.of(file)
                 .size(targetWidth, targetHeight)
-                .toFile(file.getOriginalFilename());
-
-        return file;
+                .outputFormat("jpeg")
+                .toOutputStream(outputStream);
+        byte[] data = outputStream.toByteArray();
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+        log.info("Размерфайла изменЁн.");
+        return inputStream;
     }
-
 }

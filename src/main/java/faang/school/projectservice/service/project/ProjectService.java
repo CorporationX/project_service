@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.project.ProjectCoverDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.SubProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -15,23 +16,13 @@ import faang.school.projectservice.service.project.subproject_filter.SubProjectF
 import faang.school.projectservice.service.project.update_subproject_param.UpdateSubProjectParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnailator;
-import net.coobird.thumbnailator.Thumbnails;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +37,7 @@ public class ProjectService {
     private final Validator validator;
     private final S3ServiceImpl s3ServiceImpl;
     private final ImageResizer imageResizer;
+    private final ResourceRepository resourceRepository;
 
 
     public ProjectDto createSubProject(ProjectDto projectDto) {
@@ -123,46 +115,74 @@ public class ProjectService {
         Project project = repository.getProjectById(projectId);
         long fileSize = file.getSize();
 
-        BufferedImage inputImage = null;
-        MultipartFile outputFile = null;
         Resource resource = new Resource();
-        try {
-            inputImage = ImageIO.read(file.getInputStream());
-        } catch (IOException e) {
-            log.error("Ошибка при чтении изображения.", e);
-            throw new RuntimeException(e);
-        }
+        BufferedImage inputImage = convertImage(convertToInputStream(file));
+        InputStream resizedImage;
+
         int width = inputImage.getWidth();
         int height = inputImage.getHeight();
+        int maxWidth = validator.getMaxWidth();
+        int maxHeight = validator.getMaxHeight();
 
         if (!validator.validateFileSize(fileSize)) {
             log.error("Размер файла {} превышает ограничение.", fileSize);
-        } else if (!validator.validatesImageSize(width, height)) {
+        } else if (validator.validatesImageSize(width, height)) {
             try {
-                outputFile = imageResizer.resizeImage(file,
-                        validator.getMaxWidth(),
-                        validator.getMaxHeight());
+                resizedImage = imageResizer.resizeImage(file.getInputStream(),
+                        maxWidth,
+                        maxHeight);
             } catch (IOException e) {
                 log.error("Ошибка преобразования изображения.", e);
                 throw new RuntimeException(e);
             }
-            resource = uploadFile(outputFile, projectId, project.getName());
+            BufferedImage convertedImage = convertImage(resizedImage);
+            log.info("Файл преобразован.");
+            System.out.println("convertedImage.getWidth() = " + convertedImage.getWidth());
+            resource = uploadFile(file, projectId, project.getName(),
+                    convertedImage.getWidth(), convertedImage.getHeight());
+            resourceRepository.save(resource);
         } else {
-            resource = uploadFile(file, projectId, project.getName());
+            resource = uploadFile(file, projectId, project.getName(), width, height);
+            resourceRepository.save(resource);
         }
         project.setCoverImageId(resource.getKey());
         return mapper.toProjectCoverDto(repository.save(project));
     }
 
     private Resource uploadFile(MultipartFile multipartFile,
-                                long projectId, String projectName) {
+                                long projectId, String projectName,
+                                int width,
+                                int height) {
 
         String folder = projectId + projectName;
-        Resource resource = s3ServiceImpl.uploadFile(multipartFile, folder);
+        Resource resource = s3ServiceImpl.uploadFile(multipartFile, folder,
+                width, height);
         log.info("Файл {} загружен в облако.", multipartFile.getOriginalFilename());
         return resource;
     }
 
+    private BufferedImage convertImage(InputStream file) {
+        BufferedImage image;
+        try {
+            image = ImageIO.read(file);
+        } catch (IOException e) {
+            log.error("Ошибка при чтении изображения.", e);
+            throw new RuntimeException(e);
+        }
+        return image;
+    }
+
+    private InputStream convertToInputStream(MultipartFile file) {
+        InputStream inputStreamFile;
+        try {
+            inputStreamFile = file.getInputStream();
+        } catch (IOException e) {
+            log.info("Не удалось конвертировать в InputStream {}.",
+                    file.getOriginalFilename());
+            throw new RuntimeException(e);
+        }
+        return inputStreamFile;
+    }
 
 
 }

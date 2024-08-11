@@ -17,24 +17,30 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service()
 @Data
 @RequiredArgsConstructor
-//@ConditionalOnProperty
 public class S3ServiceImpl implements S3Service {
     private final AmazonS3 s3Client;
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
     @Override
-    public Resource uploadFile(MultipartFile file, String folder) {
+    public Resource uploadFile(MultipartFile file, String folder,
+                               int width, int height) {
         Resource resource = new Resource();
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());
+        Map<String, String> userMetadata = new HashMap<>();
+        userMetadata.put("Width", String.valueOf(width));
+        userMetadata.put("Height", String.valueOf(height));
+        metadata.setUserMetadata(userMetadata);
 
         String key = String.format("%s/%d%s", folder,
                 System.currentTimeMillis(), file.getOriginalFilename());
