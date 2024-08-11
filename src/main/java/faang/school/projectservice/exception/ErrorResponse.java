@@ -18,7 +18,7 @@ public class ErrorResponse {
     private String error;
     private String message;
 
-    public ErrorResponse(String message) {
+    public ErrorResponse(LocalDateTime now, String message) {
         this.message = message;
     }
 }
