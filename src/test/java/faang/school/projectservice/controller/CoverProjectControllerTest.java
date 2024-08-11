@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.CoverFromStorageDto;
 import faang.school.projectservice.dto.ProjectCoverDto;
 import faang.school.projectservice.service.CoverProjectService;
 import faang.school.projectservice.validator.ControllerValidator;
@@ -10,34 +11,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class CoverProjectControllerTest {
-    public static final long MAX_IMAGE_SIZE = 5242880L;
-
-    private static final String MESSAGE_INVALID_PROJECT_ID = "Invalid projectId";
     private static final long VALID_ID = 1L;
-    private static final String RANDOM_KEY = "key";
+    private static final String KEY = "1";
+    private static final String TEST_STRING = "cover";
     private MockMvc mockMvc;
-    private ObjectWriter objectWriter;
-    private MultipartFile cover;
-    private ProjectCoverDto dto;
+    private MockMultipartFile mockCover;
+
     @Mock
     private ControllerValidator validator;
     @Mock
@@ -49,19 +42,40 @@ class CoverProjectControllerTest {
     public void setUp() {
         //Arrange
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
+        mockCover = new MockMultipartFile(TEST_STRING, TEST_STRING.getBytes());
     }
 
     @Test
-    public void testServiceAddPostLike() throws Exception {
+    public void testUploadOrChangeProjectCover() throws Exception {
         //Act
-        MockMultipartFile mockCover = new MockMultipartFile("cover", "hey".getBytes());
+        Mockito.when(service.uploadProjectCover(Mockito.anyLong(), Mockito.any()))
+                .thenReturn(new ProjectCoverDto(VALID_ID, KEY));
         //Assert
-        mockMvc.perform(post("/api/project/1/cover")
-                        .contentType(MediaType.MULTIPART_FORM_DATA).content(mockCover.getBytes()))
+        mockMvc.perform(multipart("/api/project/1/cover")
+                        .file(mockCover)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(VALID_ID))
-                .andExpect(jsonPath("$.userId").value(VALID_ID));
+                .andExpect(jsonPath("$.projectId").value(VALID_ID))
+                .andExpect(jsonPath("$.coverId").value(KEY));
+    }
+
+    @Test
+    public void testGetProjectCover() throws Exception {
+        //Act
+        Mockito.when(service.getProjectCover(Mockito.anyLong()))
+                .thenReturn(new CoverFromStorageDto(mockCover.getBytes(), mockCover.getContentType()));
+        //Assert
+        mockMvc.perform(get("/api/project/1/cover")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(mockCover.getBytes()));
+    }
+
+    @Test
+    public void testDeleteProjectCover() throws Exception {
+        //Assert
+        mockMvc.perform(delete("/api/project/1/cover")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 }

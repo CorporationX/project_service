@@ -27,7 +27,7 @@ public class ImageService {
             height = originalImage.getHeight();
             width = originalImage.getWidth();
             boolean isSquare = height == width;
-            if ((isSquare && height > MAX_HEIGHT) || width > MAX_WIDTH || height > MAX_HEIGHT) {
+            if ((isSquare && height > MAX_HEIGHT) || (!isSquare && (width > MAX_WIDTH || height > MAX_HEIGHT))) {
                 getNewSize(isSquare);
             }
             BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -51,23 +51,25 @@ public class ImageService {
     }
 
     private void changeProportionally() {
-        double coefficient = 0;
+        double coefficient;
         if (height > MAX_HEIGHT && width > MAX_WIDTH) {
-            coefficient = getCoefficientIfHeightAndWidthGreater(coefficient);
+            coefficient = getCoefficientIfHeightAndWidthGreater();
         } else {
-            coefficient = getCoefficientIfOneParameterGreater(coefficient);
+            coefficient = getCoefficientIfOneParameterGreater();
         }
         height = (int) (height / coefficient);
         width = (int) (width / coefficient);
     }
 
-    private double getCoefficientIfOneParameterGreater(double coefficient) {
+    private double getCoefficientIfOneParameterGreater() {
+        double coefficient;
         if (height > MAX_HEIGHT) coefficient = (double) height / MAX_HEIGHT;
         else coefficient = (double) width / MAX_WIDTH;
         return coefficient;
     }
 
-    private double getCoefficientIfHeightAndWidthGreater(double coefficient) {
+    private double getCoefficientIfHeightAndWidthGreater() {
+        double coefficient;
         if (width > height) coefficient = (double) width / MAX_WIDTH;
         else coefficient = (double) height / MAX_HEIGHT;
         return coefficient;

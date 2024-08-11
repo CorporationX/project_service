@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -37,8 +36,7 @@ public class CoverProjectService {
     private String bucketName;
 
     public ProjectCoverDto uploadProjectCover(Long projectId, MultipartFile cover) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException(MESSAGE_PROJECT_NOT_IN_DB));
+        Project project = getProject(projectId);
         String key = getKeyNewCoverAndSaveCover(cover, project);
         return new ProjectCoverDto(project.getId(), key);
     }
@@ -50,12 +48,8 @@ public class CoverProjectService {
     }
 
     public CoverFromStorageDto getProjectCover(Long projectId) throws IOException {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException(MESSAGE_PROJECT_NOT_IN_DB));
-        String key = project.getCoverImageId();
-        if (key == null) {
-            throw new RuntimeException(MESSAGE_NO_IMAGE_IN_PROJECT);
-        }
+        Project project = getProject(projectId);
+        String key = getKey(project);
         S3Object s3Object = amazonS3.getObject(bucketName, key);
         byte[] imageBytes = s3Object.getObjectContent().readAllBytes();
         return new CoverFromStorageDto(imageBytes, s3Object.getObjectMetadata().getContentType());
@@ -67,15 +61,25 @@ public class CoverProjectService {
         projectRepository.save(project);
     }
 
+    private Project getProject(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException(MESSAGE_PROJECT_NOT_IN_DB));
+    }
+
     private String getKeyNewCoverAndSaveCover(MultipartFile cover, Project project) {
         byte[] bytesImage = imageService.resizeImage(cover);
-        String key = uploadAndGetKey(
+        String key = uploadAndGetNewKey(
                 cover.getOriginalFilename(),
                 cover.getContentType(),
                 bytesImage.length,
                 new ByteArrayInputStream(bytesImage));
         project.setCoverImageId(key);
         projectRepository.save(project);
+        saveResource(cover, key);
+        return key;
+    }
+
+    private void saveResource(MultipartFile cover, String key) {
         Resource resource = new Resource();
         resource.setName(cover.getName());
         resource.setKey(key);
@@ -83,24 +87,28 @@ public class CoverProjectService {
         resource.setType(ResourceType.IMAGE);
         resource.setStatus(ResourceStatus.ACTIVE);
         resourceRepository.save(resource);
-        return key;
     }
 
-    private Project deleteCoverFromStorageAndResources(Long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException(MESSAGE_PROJECT_NOT_IN_DB));
+    private String getKey(Project project) {
         String key = project.getCoverImageId();
         if (key == null) {
             throw new RuntimeException(MESSAGE_NO_IMAGE_IN_PROJECT);
         }
+        return key;
+    }
+
+    private Project deleteCoverFromStorageAndResources(Long projectId) {
+        Project project = getProject(projectId);
+        String key = getKey(project);
         amazonS3.deleteObject(bucketName, key);
         Resource resource = resourceRepository.findResourceByKey(key)
                 .orElseThrow(() -> new RuntimeException(MESSAGE_RESOURCE_NOT_IN_DB));
-        resourceRepository.delete(resource);
+        resource.setStatus(ResourceStatus.DELETED);
+        resourceRepository.save(resource);
         return project;
     }
 
-    private String uploadAndGetKey(String originalName, String contentType, int fileSize, InputStream stream) {
+    private String uploadAndGetNewKey(String originalName, String contentType, int fileSize, InputStream stream) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(fileSize);
         metadata.setContentType(contentType);

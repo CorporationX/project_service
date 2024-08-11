@@ -40,7 +40,7 @@ public class CoverProjectController {
     }
 
     @PutMapping
-    public ProjectCoverDto changeProjectImage(@PathVariable Long projectId, @RequestParam MultipartFile cover) {
+    public ProjectCoverDto changeProjectCover(@PathVariable Long projectId, @RequestParam MultipartFile cover) {
         validator.validateId(projectId, MESSAGE_INVALID_PROJECT_ID);
         validator.validateDto(cover);
         validator.validateMaximumSize(cover.getSize(), MAX_IMAGE_SIZE);

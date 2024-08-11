@@ -2,8 +2,10 @@ package faang.school.projectservice.validator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ControllerValidatorTest {
     private static final String MESSAGE_INVALID_ID = "Message invalid id";
@@ -12,6 +14,7 @@ class ControllerValidatorTest {
     private static final String MESSAGE_EXCEEDING_MAX_FILE_SIZE = "Exceeding the maximum file size";
     private static final long RANDOM_INVALID_SIZE = 10000000L;
     public static final long MAX_IMAGE_SIZE = 5242880L;
+    @Mock
     private ControllerValidator validator;
 
     @BeforeEach
@@ -34,6 +37,7 @@ class ControllerValidatorTest {
                 assertThrows(RuntimeException.class,
                         () -> validator.validateDto(null)).getMessage());
     }
+
     @Test
     public void testInvalidMaxSize() {
         //Assert
