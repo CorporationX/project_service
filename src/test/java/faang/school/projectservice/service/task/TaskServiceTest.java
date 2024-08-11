@@ -4,6 +4,7 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.dto.task.filter.TaskFilterDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.task.TaskMapper;
 import faang.school.projectservice.model.Project;
@@ -42,6 +43,9 @@ public class TaskServiceTest {
 
     @Mock
     private ProjectService projectService;
+
+    @Mock
+    private  Filter<TaskFilterDto, Task> filter;
 
     @InjectMocks
     private TaskService taskService;
@@ -85,6 +89,9 @@ public class TaskServiceTest {
         taskDto.setName("task");
         taskDto.setStatus("TODO");
         taskDto.setLinkedTasksIds(List.of());
+
+        List<Filter<TaskFilterDto, Task>> taskFilters = List.of(filter);
+        taskService = new TaskService(taskMapper, taskValidator, taskRepository, projectRepository, userServiceClient, projectService, taskFilters);
     }
 
     @Test

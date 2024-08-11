@@ -4,8 +4,10 @@ import faang.school.projectservice.exception.task.TaskExceptionHandler;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +20,10 @@ public class TaskValidator {
 
     public void validateTeamMember(Long userId, Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
-        teamMemberRepository.findByUserIdAndProjectId(userId, project.getId());
+        TeamMember teamMember =  teamMemberRepository.findByUserIdAndProjectId(userId, project.getId());
+        if(teamMember == null) {
+            throw new EntityNotFoundException("The user is not a member of the project team!");
+        }
     }
 
     public Task validateTask(Long taskId) {

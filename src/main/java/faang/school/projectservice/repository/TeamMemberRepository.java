@@ -17,12 +17,6 @@ public class TeamMemberRepository {
     }
 
     public TeamMember findByUserIdAndProjectId(Long userId, Long projectId) {
-        TeamMember teamMember = jpaRepository.findByUserIdAndProjectId(userId, projectId);
-        if(teamMember == null) {
-            throw new EntityNotFoundException("The user is not a member of the project team!");
-        }
-        else {
-            return teamMember;
-        }
+        return jpaRepository.findByUserIdAndProjectId(userId, projectId);
     }
 }
