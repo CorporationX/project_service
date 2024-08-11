@@ -22,4 +22,6 @@ databaseChangeLog:
   - include:
         file: db/changelog/changeset/project_V014_resource.sql
   - include:
-        file: db/changelog/changeset/project_V015_create_task_linked_tasks.sql
+      file: db/changelog/changeset/project_V015_resource_allowed_roles.sql
+  - include:
+      file: db/changelog/changeset/project_V016_create_task_linked_tasks.sql

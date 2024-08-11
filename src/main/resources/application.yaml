@@ -4,6 +4,10 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
+  servlet:
+    multipart:
+      max-file-size: 1000MB # Максимальный размер загружаемого файла
+      max-request-size: 1000MB # Максимальный размер всего запроса, включая все загружаемые файлы
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -27,6 +31,8 @@ spring:
 
 server:
   port: 8082
+  servlet:
+    context-path: /api/v1
 
 logging:
   level:
@@ -40,7 +46,8 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: project-bucket
+    region: us-east-1
     isMocked: false
   payment-service:
     host: http://localhost
@@ -48,3 +55,11 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+app:
+  coverImage:
+    maxSize: 5242880
+    maxHeightHorizontal: 566
+    maxWidthHorizontal: 1080
+    maxHeightNonHorizontal: 1080
+    maxWidthNonHorizontal: 1080
