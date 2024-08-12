@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-public class BeanConfiguration {
+public class AppConfig {
 
     @Bean
     public ObjectMapper objectMapper() {

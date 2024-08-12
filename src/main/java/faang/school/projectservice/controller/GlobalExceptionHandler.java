@@ -38,8 +38,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handlerNotFoundException(IllegalStateException exception) {
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ErrorResponse handlerIllegalStateException(IllegalStateException exception) {
         return new ErrorResponse(exception.getMessage());
     }
 }

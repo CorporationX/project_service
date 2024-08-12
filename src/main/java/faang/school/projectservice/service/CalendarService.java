@@ -5,7 +5,6 @@ import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Event;
 import faang.school.projectservice.dto.calendar.CalendarDto;
 import faang.school.projectservice.dto.calendar.EventDto;
-import faang.school.projectservice.exception.ThrowingSupplier;
 import faang.school.projectservice.mapper.CalendarMapper;
 import faang.school.projectservice.mapper.EventMapper;
 import faang.school.projectservice.model.Project;
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 @Service
 @Slf4j
@@ -42,7 +42,6 @@ public class CalendarService {
             return calendarMapper.toDto(newCalendar);
         });
     }
-
 
     public EventDto createEvent(String calendarId, EventDto eventDto) {
         return processOrCatchException(() -> {
@@ -99,9 +98,9 @@ public class CalendarService {
         processOrCatchException(() -> googleCalendar.acl().delete(calendarId, ruleId).execute());
     }
 
-    private <T> T processOrCatchException(ThrowingSupplier<T> supplier) {
+    private <T> T processOrCatchException(Callable<T> supplier) {
         try {
-            return supplier.get();
+            return supplier.call();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage());
