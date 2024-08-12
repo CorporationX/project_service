@@ -32,7 +32,7 @@ public class CalendarService {
 
     @Transactional
     public CalendarDto createCalendarForProject(Long projectId, CalendarDto calendarDto) {
-        return processOrCatchException(() -> {
+        return handleRequest(() -> {
             Project project = projectRepository.getProjectById(projectId);
             projectValidator.verifyProjectDoesNotHaveCalendar(project);
             com.google.api.services.calendar.model.Calendar newCalendar = calendarMapper.toEntity(calendarDto);
@@ -44,7 +44,7 @@ public class CalendarService {
     }
 
     public EventDto createEvent(String calendarId, EventDto eventDto) {
-        return processOrCatchException(() -> {
+        return handleRequest(() -> {
             Event event = eventMapper.toEvent(eventDto);
             event = googleCalendar.events().insert(calendarId, event).execute();
             return eventMapper.toDto(event);
@@ -52,14 +52,14 @@ public class CalendarService {
     }
 
     public EventDto getEvent(String calendarId, String eventId) {
-        return processOrCatchException(() -> {
+        return handleRequest(() -> {
             Event event = googleCalendar.events().get(calendarId, eventId).execute();
             return eventMapper.toDto(event);
         });
     }
 
     public void deleteEvent(String calendarId, String eventId) {
-        processOrCatchException(() -> googleCalendar.events().delete(calendarId, eventId).execute());
+        handleRequest(() -> googleCalendar.events().delete(calendarId, eventId).execute());
     }
 
     public List<EventDto> createEvents(String calendarId, List<EventDto> eventDtoList) {
@@ -72,15 +72,14 @@ public class CalendarService {
     }
 
     public List<EventDto> getEvents(String calendarId) {
-        return processOrCatchException(() -> {
+        return handleRequest(() -> {
             List<Event> calendarEvents = googleCalendar.events().list(calendarId).execute().getItems();
             return calendarEvents.stream().map(eventMapper::toDto).toList();
         });
     }
 
-
     public AclRule addAclRule(String calendarId, String email, String role, String scopeType) {
-        return processOrCatchException(() -> {
+        return handleRequest(() -> {
             AclRule rule = new AclRule()
                     .setRole(role)
                     .setScope(new AclRule.Scope().setType(scopeType).setValue(email));
@@ -90,15 +89,15 @@ public class CalendarService {
 
 
     public List<AclRule> getAclRules(String calendarId) {
-        return processOrCatchException(() -> googleCalendar.acl().list(calendarId).execute().getItems());
+        return handleRequest(() -> googleCalendar.acl().list(calendarId).execute().getItems());
     }
 
 
     public void deleteAclRule(String calendarId, String ruleId) {
-        processOrCatchException(() -> googleCalendar.acl().delete(calendarId, ruleId).execute());
+        handleRequest(() -> googleCalendar.acl().delete(calendarId, ruleId).execute());
     }
 
-    private <T> T processOrCatchException(Callable<T> supplier) {
+    private <T> T handleRequest(Callable<T> supplier) {
         try {
             return supplier.call();
         } catch (Exception e) {

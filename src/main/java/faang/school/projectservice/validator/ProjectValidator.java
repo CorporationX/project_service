@@ -1,10 +1,8 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.model.Project;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
