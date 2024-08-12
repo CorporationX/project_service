@@ -1,0 +1,2 @@
+ALTER TABLE project
+ADD COLUMN calendar_id VARCHAR(1024);

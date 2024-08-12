@@ -47,12 +47,6 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(exception.getMessage());
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIllegalStateException(IllegalStateException exception) {
-        return new ErrorResponse(exception.getMessage());
-    }
-
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleUserNotFoundException(EntityNotFoundException exception) {
@@ -68,6 +62,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalSubProjectsStatusException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalSubProjectStatusException(IllegalSubProjectsStatusException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ErrorResponse handlerIllegalStateException(IllegalStateException exception) {
         return new ErrorResponse(exception.getMessage());
     }
 }

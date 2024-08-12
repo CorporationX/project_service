@@ -36,6 +36,14 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
+     * Google
+     * */
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.oauth-client:google-oauth-client:1.32.1")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.15.0")
+
+    /**
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
@@ -119,6 +127,3 @@ tasks.jacocoTestCoverageVerification {
         }
     }
 }
-
-
-
