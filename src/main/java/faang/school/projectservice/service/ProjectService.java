@@ -10,10 +10,7 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.SubProjectValidator;
@@ -23,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -54,12 +51,13 @@ public class ProjectService {
 
     @Transactional
     public void updateSubProject(SubProjectDto subProjectDto) {
-        Project subProject = projectRepository.getProjectById(subProjectDto.getId());
-        subProject.setStatus(subProjectDto.getStatus());
-        subProject.setVisibility(subProjectDto.getVisibility());
+        if (subProjectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
+            MomentDto momentDto = getMomentDto(subProjectDto);
+            MomentDto savedMomentDto = momentService.addMoment(momentDto);
+            subProjectDto.setMomentId(savedMomentDto.getId());
+        }
+        Project subProject = subProjectMapper.toEntity(subProjectDto);
         projectRepository.save(subProject);
-        MomentDto momentDto = getMomentDto(subProject);
-        momentService.addMoment(momentDto);
     }
 
     @Transactional
@@ -136,11 +134,12 @@ public class ProjectService {
                 .toList();
     }
 
-    private MomentDto getMomentDto(Project subProject) {
-        MomentDto momentDto = new MomentDto();
-        momentDto.setName("Выполнены все подпроекты");
-        momentDto.setProjectIds(Arrays.asList(subProject.getId()));
-        List<TeamMember> teamMember = teamService.getAllTeamMember(subProject.getId());
+    private MomentDto getMomentDto(SubProjectDto subProjectDto) {
+        MomentDto momentDto = MomentDto.builder()
+                .name("Выполнены все подпроекты")
+                .projectIds(Collections.singletonList(subProjectDto.getChildrenId()))
+                .build();
+        List<TeamMember> teamMember = teamService.getAllTeamMember(subProjectDto.getId());
         List<Long> userIds = new ArrayList<>();
         for (TeamMember tm : teamMember) {
             userIds.add(tm.getUserId());

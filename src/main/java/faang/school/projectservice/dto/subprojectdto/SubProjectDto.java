@@ -6,11 +6,13 @@ import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.sql.Update;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Data
 public class SubProjectDto {
 
@@ -27,6 +29,8 @@ public class SubProjectDto {
     @NotNull(message = "specify the parent of the subproject", groups = {New.class, Update.class})
     private Long parentProjectId;
 
+    private Long childrenId;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
@@ -36,4 +40,6 @@ public class SubProjectDto {
 
     @NotNull(message = "indicate the project visibility", groups = {New.class, Update.class})
     private ProjectVisibility visibility;
+
+    private Long momentId;
 }

@@ -19,7 +19,6 @@ public class MomentService {
 
     public MomentDto addMoment(MomentDto momentDto) {
         Moment moment = momentMapper.toEntity(momentDto);
-        momentRepository.save(moment);
-        return momentMapper.toDto(moment);
+        return momentMapper.toDto(momentRepository.save(moment));
     }
 }
