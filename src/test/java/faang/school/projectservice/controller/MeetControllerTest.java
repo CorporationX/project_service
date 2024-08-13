@@ -1,7 +1,11 @@
 package faang.school.projectservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
+import faang.school.projectservice.model.meet.MeetStatus;
 import faang.school.projectservice.service.MeetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,10 +48,19 @@ class MeetControllerTest {
     public void setUp() throws JsonProcessingException {
         mockMvc = MockMvcBuilders.standaloneSetup(meetController).build();
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
 
         teamId = 1L;
         meetId = 2L;
         meetDto = MeetDto.builder()
+                .id(meetId)
+                .title("title")
+                .description("description")
+                .location("location")
+                .teamId(teamId)
+                .status(MeetStatus.ACTIVE)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now())
                 .build();
         MeetFilterDto meetFilterDto = MeetFilterDto.builder()
                 .build();
@@ -58,8 +71,7 @@ class MeetControllerTest {
     @Test
     @DisplayName("testing createMeet method")
     public void testCreateMeet() throws Exception {
-        mockMvc.perform(post("/api/v1/meet/new")
-                        .param("teamId", String.valueOf(teamId))
+        mockMvc.perform(post("/api/v1/meet")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(meetDtoJson))
                 .andExpect(status().isCreated());
@@ -69,11 +81,11 @@ class MeetControllerTest {
     @Test
     @DisplayName("testing updateMeet method")
     public void testUpdateMethod() throws Exception {
-        mockMvc.perform(put("/api/v1/meet/{meetId}", meetId)
+        mockMvc.perform(put("/api/v1/meet")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(meetDtoJson))
                 .andExpect(status().isOk());
-        verify(meetService, times(1)).updateMeet(meetId, meetDto);
+        verify(meetService, times(1)).updateMeet(meetDto);
     }
 
     @Test
@@ -96,7 +108,7 @@ class MeetControllerTest {
     @Test
     @DisplayName("testing getAllMeetsOfUser method")
     public void testGetAllMeetsOfUser() throws Exception {
-        mockMvc.perform(get("/api/v1/meet/all"))
+        mockMvc.perform(get("/api/v1/meet"))
                 .andExpect(status().isOk());
         verify(meetService, times(1)).getAllMeetsOfUser();
     }

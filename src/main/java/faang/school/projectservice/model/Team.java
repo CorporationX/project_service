@@ -16,7 +16,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -40,9 +39,8 @@ public class Team {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @Builder.Default
     @OneToMany(mappedBy = "team")
-    private List<Meet> meets = new ArrayList<>();
+    private List<Meet> meets;
 
     public void addMeet(Meet meet) {
         meets.add(meet);

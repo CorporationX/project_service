@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
+import faang.school.projectservice.exception.ExceptionProcessor;
 import faang.school.projectservice.filter.meet.MeetEndFilter;
 import faang.school.projectservice.filter.meet.MeetFilter;
 import faang.school.projectservice.filter.meet.MeetStartFilter;
@@ -14,15 +15,15 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.meet.Meet;
 import faang.school.projectservice.model.meet.MeetStatus;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.validator.TeamValidator;
 import faang.school.projectservice.validator.meet.MeetValidator;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,8 +31,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,12 +55,16 @@ class MeetServiceTest {
     private MeetJpaRepository meetJpaRepository;
 
     @Mock
+    private TeamRepository teamRepository;
+
+    @Mock
     private TeamMemberJpaRepository teamMemberJpaRepository;
+    @Mock
+    private EntityUpdaterService entityUpdaterService;
+
+    private MeetMapperImpl meetMapperImpl;
 
     private MeetService meetService;
-
-    @Captor
-    private ArgumentCaptor<Meet> meetArgumentCaptor;
 
     private long userId;
     private long teamId;
@@ -65,10 +72,8 @@ class MeetServiceTest {
     private Team team;
     private Meet meet;
     private MeetDto meetDto;
-    private MeetDto updateMeetDto;
     private MeetFilterDto meetFilterDto;
     private Meet appropriateMeet;
-    private MeetMapperImpl meetMapperImpl;
     private List<TeamMember> teamMemberList;
 
     @BeforeEach
@@ -103,18 +108,15 @@ class MeetServiceTest {
         meet = Meet.builder()
                 .title("title")
                 .team(team)
-                .status(MeetStatus.SCHEDULED)
+                .status(MeetStatus.ACTIVE)
                 .createdBy(userId)
                 .build();
         meetDto = MeetDto.builder()
                 .id(meetId)
                 .title("title")
                 .teamId(teamId)
-                .status(MeetStatus.SCHEDULED)
+                .status(MeetStatus.ACTIVE)
                 .createdBy(userId)
-                .build();
-        updateMeetDto = MeetDto.builder()
-                .title("new title")
                 .build();
         meetFilterDto = MeetFilterDto.builder()
                 .titlePattern("title")
@@ -130,53 +132,105 @@ class MeetServiceTest {
                 .userId(userId)
                 .team(team)
                 .build());
+
+        ExceptionProcessor exceptionProcessor = new ExceptionProcessor();
         meetMapperImpl = new MeetMapperImpl();
         meetService = MeetService.builder()
                 .userContext(userContext)
                 .meetMapper(meetMapperImpl)
                 .meetValidator(meetValidator)
                 .teamValidator(teamValidator)
+                .teamRepository(teamRepository)
                 .meetJpaRepository(meetJpaRepository)
                 .teamMemberJpaRepository(teamMemberJpaRepository)
                 .meetFilters(meetFiltersImpl)
+                .exceptionProcessor(exceptionProcessor)
+                .entityUpdaterService(entityUpdaterService)
                 .build();
     }
 
-    @Test
-    @DisplayName("testing createMethod method")
-    void testCreateMeet() {
-        when(userContext.getUserId()).thenReturn(userId);
-        when(teamValidator.verifyTeamExistence(teamId)).thenReturn(team);
-        when(meetJpaRepository.save(meet)).thenReturn(meet);
-        meetService.createMeet(meetDto);
-        verify(userContext, times(1)).getUserId();
-        verify(teamValidator, times(1)).verifyTeamExistence(teamId);
-        verify(teamValidator, times(1)).verifyUserExistenceInTeam(userId, team);
-        verify(meetJpaRepository, times(1)).save(meet);
+    @Nested
+    @DisplayName("Method: createMeet")
+    class testCreateMeet {
+
+        @Test
+        @DisplayName("testing createMethod method with team absence")
+        void testCreateMeetWithTeamAbsence() {
+            when(userContext.getUserId()).thenReturn(userId);
+            when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
+            assertThrows(EntityNotFoundException.class, () -> meetService.createMeet(meetDto));
+            verify(userContext, times(1)).getUserId();
+            verify(teamRepository, times(1)).findById(teamId);
+        }
+
+        @Test
+        @DisplayName("testing createMeet method with methods execution")
+        void testCreateMeetMethodsExecution() {
+            when(userContext.getUserId()).thenReturn(userId);
+            when(teamRepository.findById(teamId)).thenReturn(Optional.ofNullable(team));
+            when(meetJpaRepository.save(meet)).thenReturn(meet);
+            meetService.createMeet(meetDto);
+            verify(userContext, times(1)).getUserId();
+            verify(teamRepository, times(1)).findById(teamId);
+            verify(teamValidator, times(1)).verifyUserExistenceInTeam(userId, team);
+            verify(meetJpaRepository, times(1)).save(meet);
+        }
     }
 
-    @Test
-    @DisplayName("testing updateMeet method")
-    void testUpdateMeet() {
-        when(userContext.getUserId()).thenReturn(userId);
-        when(meetValidator.verifyMeetExistence(meetId)).thenReturn(meet);
-        when(meetJpaRepository.save(meet)).thenReturn(meet);
-        meetService.updateMeet(meetId, updateMeetDto);
-        verify(userContext, times(1)).getUserId();
-        verify(meetValidator, times(1)).verifyMeetExistence(meetId);
-        verify(meetValidator, times(1)).verifyUserIsCreatorOfMeet(userId, meet);
-        verify(meetJpaRepository, times(1)).save(meetArgumentCaptor.capture());
+    @Nested
+    @DisplayName("Method: updateMeet")
+    class testUpdateMeet {
+
+        @Test
+        @DisplayName("testing updateMethod method with non existing meet")
+        void testUpdateMeetWithMeetAbsence() {
+            when(userContext.getUserId()).thenReturn(userId);
+            when(meetJpaRepository.findById(meetId)).thenReturn(Optional.empty());
+            assertThrows(EntityNotFoundException.class, () -> meetService.updateMeet(meetDto));
+            verify(userContext, times(1)).getUserId();
+            verify(meetJpaRepository, times(1)).findById(meetId);
+        }
+
+        @Test
+        @DisplayName("testing updateMeet method with methods execution")
+        void testUpdateMeetMethodsExecution() {
+            when(userContext.getUserId()).thenReturn(userId);
+            when(meetJpaRepository.findById(meetId)).thenReturn(Optional.ofNullable(meet));
+            when(meetJpaRepository.save(meet)).thenReturn(meet);
+            meetService.updateMeet(meetDto);
+            verify(userContext, times(1)).getUserId();
+            verify(meetJpaRepository, times(1)).findById(meetId);
+            verify(meetValidator, times(1)).verifyUserIsCreatorOfMeet(userId, meet);
+            verify(entityUpdaterService, times(1)).updateNonNullFields(meetDto, meet);
+            verify(meetJpaRepository, times(1)).save(meet);
+        }
     }
 
-    @Test
-    @DisplayName("testing deleteMeet method")
-    void testDeleteMeet() {
-        when(userContext.getUserId()).thenReturn(userId);
-        when(meetValidator.verifyMeetExistence(meetId)).thenReturn(meet);
-        meetService.deleteMeet(meetId);
-        verify(userContext, times(1)).getUserId();
-        verify(meetValidator, times(1)).verifyUserIsCreatorOfMeet(userId, meet);
-        verify(meetJpaRepository, times(1)).delete(meet);
+    @Nested
+    @DisplayName("Method: deleteMeet")
+    class testDeleteMeet {
+
+        @Test
+        @DisplayName("testing deleteMethod method with non existing meet")
+        void testDeleteMeetWithMeetAbsence() {
+            when(userContext.getUserId()).thenReturn(userId);
+            when(meetJpaRepository.findById(meetId)).thenReturn(Optional.empty());
+            assertThrows(EntityNotFoundException.class, () -> meetService.deleteMeet(meetId));
+            verify(userContext, times(1)).getUserId();
+            verify(meetJpaRepository, times(1)).findById(meetId);
+        }
+
+        @Test
+        @DisplayName("testing deleteMeet method with methods execution")
+        void testDeleteMeetMethodsExecution() {
+            when(userContext.getUserId()).thenReturn(userId);
+            when(meetJpaRepository.findById(meetId)).thenReturn(Optional.ofNullable(meet));
+            meetService.deleteMeet(meetId);
+            verify(userContext, times(1)).getUserId();
+            verify(meetJpaRepository, times(1)).findById(meetId);
+            verify(meetValidator, times(1)).verifyUserIsCreatorOfMeet(userId, meet);
+            verify(meetJpaRepository, times(1)).delete(meet);
+        }
     }
 
     @Nested
@@ -184,13 +238,23 @@ class MeetServiceTest {
     class testGetFilteredMeetsOfTeam {
 
         @Test
+        @DisplayName("testing getFilteredMeetsOfTeam with meet absence")
+        void testGetFilteredMeetsOfTeamMethodsExecutionWithMeetAbsence() {
+            when(userContext.getUserId()).thenReturn(userId);
+            when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
+            assertThrows(EntityNotFoundException.class, () -> meetService.getFilteredMeetsOfTeam(teamId, meetFilterDto));
+            verify(userContext, times(1)).getUserId();
+            verify(teamRepository, times(1)).findById(teamId);
+        }
+
+        @Test
         @DisplayName("testing getFilteredMeetsOfTeam methods execution")
         void testGetFilteredMeetsOfTeamMethodsExecution() {
             when(userContext.getUserId()).thenReturn(userId);
-            when(teamValidator.verifyTeamExistence(teamId)).thenReturn(team);
+            when(teamRepository.findById(teamId)).thenReturn(Optional.ofNullable(team));
             meetService.getFilteredMeetsOfTeam(teamId, meetFilterDto);
             verify(userContext, times(1)).getUserId();
-            verify(teamValidator, times(1)).verifyTeamExistence(teamId);
+            verify(teamRepository, times(1)).findById(teamId);
             verify(teamValidator, times(1)).verifyUserExistenceInTeam(userId, team);
         }
 
@@ -198,10 +262,10 @@ class MeetServiceTest {
         @DisplayName("testing getFilteredMeetsOfTeam filters")
         void testGetFilteredMeetsOfTeamFilters() {
             when(userContext.getUserId()).thenReturn(userId);
-            when(teamValidator.verifyTeamExistence(teamId)).thenReturn(team);
+            when(teamRepository.findById(teamId)).thenReturn(Optional.ofNullable(team));
             List<MeetDto> filteredMeetsOfTeam = meetService.getFilteredMeetsOfTeam(teamId, meetFilterDto);
             verify(userContext, times(1)).getUserId();
-            verify(teamValidator, times(1)).verifyTeamExistence(teamId);
+            verify(teamRepository, times(1)).findById(teamId);
             verify(teamValidator, times(1)).verifyUserExistenceInTeam(userId, team);
             assertEquals(1, filteredMeetsOfTeam.size());
             assertEquals(meetMapperImpl.toDto(appropriateMeet), filteredMeetsOfTeam.get(0));
@@ -218,16 +282,31 @@ class MeetServiceTest {
         assertEquals(team.getMeets().size(), allMeetsOfUser.size());
     }
 
-    @Test
-    @DisplayName("testing getMethodById method")
-    void testGetMeetById() {
-        meet.setId(meetId);
-        when(userContext.getUserId()).thenReturn(userId);
-        when(meetValidator.verifyMeetExistence(meetId)).thenReturn(meet);
-        MeetDto meetDtoById = meetService.getMeetById(meetId);
-        verify(userContext, times(1)).getUserId();
-        verify(meetValidator, times(1)).verifyMeetExistence(meetId);
-        verify(teamValidator, times(1)).verifyUserExistenceInTeam(userId, meet.getTeam());
-        assertEquals(meetDto, meetDtoById);
+    @Nested
+    @DisplayName("Method: getMeetById")
+    class testGetMeetById {
+
+        @Test
+        @DisplayName("testing getFilteredMeetsOfTeam with meet absence")
+        void testGetFilteredMeetsOfTeamMethodsExecutionWithMeetAbsence() {
+            when(userContext.getUserId()).thenReturn(userId);
+            when(meetJpaRepository.findById(meetId)).thenReturn(Optional.empty());
+            assertThrows(EntityNotFoundException.class, () -> meetService.getMeetById(meetId));
+            verify(userContext, times(1)).getUserId();
+            verify(meetJpaRepository, times(1)).findById(meetId);
+        }
+
+        @Test
+        @DisplayName("testing getMethodById method")
+        void testGetMeetByIdMethodsExecution() {
+            meet.setId(meetId);
+            when(userContext.getUserId()).thenReturn(userId);
+            when(meetJpaRepository.findById(meetId)).thenReturn(Optional.ofNullable(meet));
+            MeetDto meetDtoById = meetService.getMeetById(meetId);
+            verify(userContext, times(1)).getUserId();
+            verify(meetJpaRepository, times(1)).findById(meetId);
+            verify(teamValidator, times(1)).verifyUserExistenceInTeam(userId, meet.getTeam());
+            assertEquals(meetDto, meetDtoById);
+        }
     }
 }

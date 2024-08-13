@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @Validated
 public class MeetDto {
 
+    @NotNull(groups = {UpdateMeet.class})
     private Long id;
 
     @NotBlank(message = "Title should not be blank", groups = {CreateMeet.class, UpdateMeet.class})
@@ -36,7 +37,7 @@ public class MeetDto {
     @NotNull(groups = {CreateMeet.class})
     private Long teamId;
 
-    @NotNull(groups = UpdateMeet.class)
+    @NotNull(groups = {UpdateMeet.class})
     private MeetStatus status;
 
     @NotNull(groups = {CreateMeet.class, UpdateMeet.class})

@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
+import faang.school.projectservice.exception.ExceptionProcessor;
 import faang.school.projectservice.filter.meet.MeetFilter;
 import faang.school.projectservice.jpa.MeetJpaRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
@@ -10,6 +11,7 @@ import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.meet.Meet;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.validator.TeamValidator;
 import faang.school.projectservice.validator.meet.MeetValidator;
 import lombok.Builder;
@@ -31,14 +33,19 @@ public class MeetService {
     private final MeetMapper meetMapper;
     private final MeetValidator meetValidator;
     private final TeamValidator teamValidator;
+    private final TeamRepository teamRepository;
     private final MeetJpaRepository meetJpaRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final List<MeetFilter> meetFilters;
+    private final ExceptionProcessor exceptionProcessor;
+    private final EntityUpdaterService entityUpdaterService;
 
     @Transactional
     public MeetDto createMeet(MeetDto meetDto) {
         long userId = userContext.getUserId();
-        Team team = teamValidator.verifyTeamExistence(meetDto.getTeamId());
+        long teamId = meetDto.getTeamId();
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> exceptionProcessor.processEntityNotFoundException(Team.class, teamId));
         teamValidator.verifyUserExistenceInTeam(userId, team);
         Meet meet = meetMapper.toEntity(meetDto);
         meet.setCreatedBy(userId);
@@ -48,19 +55,22 @@ public class MeetService {
     }
 
     @Transactional
-    public MeetDto updateMeet(long meetId, MeetDto meetDto) {
+    public MeetDto updateMeet(MeetDto meetDto) {
         long userId = userContext.getUserId();
-        Meet meet = meetValidator.verifyMeetExistence(meetId);
+        long meetId = meetDto.getId();
+        Meet meet = meetJpaRepository.findById(meetId)
+                .orElseThrow(() -> exceptionProcessor.processEntityNotFoundException(Meet.class, meetId));
         meetValidator.verifyUserIsCreatorOfMeet(userId, meet);
-        Meet updatedMeet = meetMapper.updateMeet(meetDto, meet);
-        Meet savedMeet = meetJpaRepository.save(updatedMeet);
+        entityUpdaterService.updateNonNullFields(meetDto, meet);
+        Meet savedMeet = meetJpaRepository.save(meet);
         return meetMapper.toDto(savedMeet);
     }
 
     @Transactional
     public void deleteMeet(long meetId) {
         long userId = userContext.getUserId();
-        Meet meet = meetValidator.verifyMeetExistence(meetId);
+        Meet meet = meetJpaRepository.findById(meetId)
+                .orElseThrow(() -> exceptionProcessor.processEntityNotFoundException(Meet.class, meetId));
         meetValidator.verifyUserIsCreatorOfMeet(userId, meet);
         meet.getTeam().removeMeet(meet);
         meetJpaRepository.delete(meet);
@@ -70,7 +80,8 @@ public class MeetService {
     @Transactional(readOnly = true)
     public List<MeetDto> getFilteredMeetsOfTeam(long teamId, MeetFilterDto meetFilterDto) {
         long userId = userContext.getUserId();
-        Team team = teamValidator.verifyTeamExistence(teamId);
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> exceptionProcessor.processEntityNotFoundException(Team.class, teamId));
         teamValidator.verifyUserExistenceInTeam(userId, team);
         Stream<Meet> meets = team.getMeets().stream();
         for (MeetFilter meetFilter : meetFilters) {
@@ -91,7 +102,8 @@ public class MeetService {
     @Transactional(readOnly = true)
     public MeetDto getMeetById(long meetId) {
         long userId = userContext.getUserId();
-        Meet meet = meetValidator.verifyMeetExistence(meetId);
+        Meet meet = meetJpaRepository.findById(meetId)
+                .orElseThrow(() -> exceptionProcessor.processEntityNotFoundException(Meet.class, meetId));
         teamValidator.verifyUserExistenceInTeam(userId, meet.getTeam());
         return meetMapper.toDto(meet);
     }
