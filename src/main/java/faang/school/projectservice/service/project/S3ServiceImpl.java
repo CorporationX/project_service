@@ -3,6 +3,7 @@ package faang.school.projectservice.service.project;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -66,5 +68,11 @@ public class S3ServiceImpl implements S3Service {
         resource.setName(file.getOriginalFilename());
 
         return resource;
+    }
+
+    @Override
+    public InputStream downloadFile(String key) {
+        S3Object s3Object = s3Client.getObject(bucketName, key);
+        return s3Object.getObjectContent();
     }
 }

@@ -43,4 +43,11 @@ public class ProjectController {
                                                     @RequestBody MultipartFile file) {
         return ResponseEntity.ok(service.addCover(id, file));
     }
+
+//    @GetMapping("/project/{projectId}/covers")
+//    public ResponseEntity<byte[]> getProjectCover(@PathVariable("projectId")
+//                                                  @Min(value = 1, message = "Должно быть более 0.")
+//                                                  long id) {
+//        service.getProject(id).getCoverImageId();
+//    }
 }
