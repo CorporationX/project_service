@@ -10,6 +10,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -121,4 +122,23 @@ public class ProjectService {
                 .map(projectRepository::getProjectById)
                 .toList();
     }
+
+
+    public boolean checkOwnerPermission(Long userId, Long projectId) {
+        Project project = getProjectById(projectId);
+        return projectRepository.existsByOwnerUserIdAndName(userId, project.getName());
+    }
+
+    public boolean checkManagerPermission(Long userId, Long projectId) {
+        Project project = getProjectById(projectId);
+        return project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(teamMember -> teamMember.getUserId().equals(userId))
+                .anyMatch(teamMember -> teamMember.getRoles().contains(TeamRole.MANAGER));
+    }
+
+    public Project getProjectById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
 }
+
