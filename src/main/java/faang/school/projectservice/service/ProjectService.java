@@ -10,6 +10,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.ProjectValidator;
