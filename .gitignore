@@ -50,6 +50,3 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
-
-### Google Calendar ###
-!**/src/main/resources/calendar
