@@ -1,8 +1,5 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.exception;
 
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.ErrorResponse;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
