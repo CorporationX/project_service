@@ -9,7 +9,7 @@ import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.repository.CampaignRepository;
-import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.CampaignValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class CampaignService {
     private final CampaignRepository campaignRepository;
     private final CampaignMapper campaignMapper;
     private final List<CampaignFilter> campaignFilters;
-    private final ProjectValidator projectValidator;
+    private final CampaignValidator campaignValidator;
 
     @Transactional
     public CampaignDto createCampaign(CampaignDto campaignDto, long userId) {
@@ -34,7 +34,7 @@ public class CampaignService {
         campaignDto.setCreatedBy(userId);
         campaignDto.setUpdatedBy(userId);
 
-        projectValidator.checkUserPermission(campaignDto.getProjectId(), userId);
+        campaignValidator.checkUserPermission(campaignDto.getProjectId(), userId);
 
         Campaign savedCampaign = campaignRepository.save(campaignMapper.toEntity(campaignDto));
         return campaignMapper.toDto(savedCampaign);
@@ -45,7 +45,7 @@ public class CampaignService {
 
         Campaign campaign = getCampaignById(campaignId);
 
-        projectValidator.checkUserPermission(campaign.getProject().getId(), userId);
+        campaignValidator.checkUserPermission(campaign.getProject().getId(), userId);
 
         Campaign updatedCampaign = campaignMapper.updateCampaign(campaignUpdateDto, campaign);
         updatedCampaign.setUpdatedBy(userId);
@@ -55,7 +55,7 @@ public class CampaignService {
     @Transactional
     public void softDeleteCampaign(long campaignId, long userId) {
 
-        projectValidator.checkUserPermission(getCampaignById(campaignId).getProject().getId(), userId);
+        campaignValidator.checkUserPermission(getCampaignById(campaignId).getProject().getId(), userId);
         Campaign campaign = getCampaignById(campaignId);
         campaign.setStatus(CampaignStatus.DELETED);
 

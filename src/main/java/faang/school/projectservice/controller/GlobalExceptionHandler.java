@@ -6,7 +6,6 @@ import faang.school.projectservice.exception.ErrorResponse;
 import faang.school.projectservice.exception.IllegalSubProjectsStatusException;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -76,12 +75,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerDataValidationException(DataValidationException exception) {
-        return new ErrorResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handlerEntityNotFoundException(EntityNotFoundException exception) {
         return new ErrorResponse(exception.getMessage());
     }
 }

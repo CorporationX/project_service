@@ -6,8 +6,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,17 +22,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ProjectValidatorTest {
 
-    private static final long PROJECT_ID = 1L;
-    private static final long USER_ID = 3L;
-
-
     @InjectMocks
     private ProjectValidator projectValidator;
     @Mock
     private ProjectRepository projectRepository;
-
-    @Mock
-    private ProjectService projectService;
 
     private ProjectDto projectDto;
 
@@ -91,35 +82,5 @@ class ProjectValidatorTest {
                 () -> projectValidator.validateProjectByOwnerWithNameOfProject(projectDto));
 
         verify(projectRepository).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
-    }
-
-    @Test
-    @DisplayName("Test check user permission when user has manager permission")
-    void testCheckUserPermission() {
-
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(true);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-
-        assertDoesNotThrow(() -> projectValidator.checkUserPermission(PROJECT_ID, USER_ID));
-    }
-
-    @Test
-    @DisplayName("Test check user permission when user has owner permission")
-    void testCheckUserPermissionManagerPermission() {
-
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(true);
-
-        assertDoesNotThrow(() -> projectValidator.checkUserPermission(PROJECT_ID, USER_ID));
-    }
-
-    @Test
-    @DisplayName("Test check user permission when user has no permission")
-    void testCheckUserPermissionNoPermission() {
-
-        when(projectService.checkManagerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-        when(projectService.checkOwnerPermission(USER_ID, PROJECT_ID)).thenReturn(false);
-
-        assertThrows(DataValidationException.class, () -> projectValidator.checkUserPermission(PROJECT_ID, USER_ID));
     }
 }
