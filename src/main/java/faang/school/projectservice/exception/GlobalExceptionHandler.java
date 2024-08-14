@@ -1,31 +1,77 @@
-package school.faang.user_service.exceptions;
+package faang.school.projectservice.exception;
 
-import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.DataValidationException;
+import feign.FeignException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
+    private ErrorResponse response;
 
     @ExceptionHandler(DataValidationException.class)
-    public ResponseEntity<Map<String,String>> handleValidationException(DataValidationException ex) {
-        return new ResponseEntity<>(Map.of("message",ex.getMessage(),"status",HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorResponse> handlerDataValidationException(DataValidationException e) {
+        extracted(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Map<String,String>> handleEntityNotFoundException(EntityNotFoundException ex) {
-        return new ResponseEntity<>(Map.of("message",ex.getMessage(),"status",HttpStatus.NOT_FOUND.toString()), HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponse> handlerEntityNotFoundException(EntityNotFoundException e) {
+        extracted(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(FeignException.FeignClientException.class)
+    public ResponseEntity<ErrorResponse> handlerFeignClientException(FeignException.FeignClientException e){
+        extracted(e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handlerException(Exception e){
+        extracted(e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    private void extracted(String message) {
+        String formattedDateTime = getString();
+        response = new ErrorResponse(String.format("%s %s", formattedDateTime, message));
+        log.info(message, response.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handlerMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        String formattedDateTime = getString();
+        Map<String, String> errors = e.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        fieldError -> Objects.requireNonNull(fieldError.getDefaultMessage(), " ")
+                ));
+        String errorMessage = errors.entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(Collectors.joining(", "));
+
+        String message = String.format("%s - Validation failed: %s", formattedDateTime, errorMessage);
+        ErrorResponse errorResponse = new ErrorResponse(message);
+        log.info(e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    private static String getString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return LocalDateTime.now().format(formatter);
     }
 }
