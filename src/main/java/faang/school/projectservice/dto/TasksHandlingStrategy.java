@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.task;
+package faang.school.projectservice.dto;
 
 public enum TasksHandlingStrategy {
     CASCADE_DELETE,
