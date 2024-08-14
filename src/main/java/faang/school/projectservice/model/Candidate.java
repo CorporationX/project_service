@@ -2,11 +2,14 @@ package faang.school.projectservice.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
 @Table(name = "candidate")
+@Builder
 public class Candidate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
