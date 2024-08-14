@@ -3,11 +3,10 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.dto.client.VacancyFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filters.filters.VacancyFilter;
-import faang.school.projectservice.filters.filters.VacancyNameFilter;
-import faang.school.projectservice.filters.filters.VacancyStatusFilter;
+import faang.school.projectservice.filter.VacancyFilter;
+import faang.school.projectservice.filter.VacancyNameFilter;
+import faang.school.projectservice.filter.VacancyStatusFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
-import faang.school.projectservice.mapper.VacancyMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.CandidateRepository;
@@ -38,7 +37,7 @@ class VacancyServiceTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Spy
-    private VacancyMapper vacancyMapper = new VacancyMapperImpl();
+    private VacancyMapper vacancyMapper;
     @Mock
     private CandidateRepository candidateRepository;
     @Mock
@@ -158,7 +157,6 @@ class VacancyServiceTest {
         Candidate candidate2 = Candidate.builder().build();
         when(candidateRepository.findById(1L)).thenReturn(Optional.of(candidate1));
         when(candidateRepository.findById(2L)).thenReturn(Optional.of(candidate2));
-        when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
 
         Map<String, String> result = vacancyService.update(vacancyId, vacancyDto);
         assertEquals(result, Map.of("message", "vacancy updated", "status", HttpStatus.OK.toString()));

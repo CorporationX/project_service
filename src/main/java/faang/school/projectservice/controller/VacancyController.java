@@ -32,15 +32,15 @@ public class VacancyController {
     public ResponseEntity<List<VacancyDto>> getAll(@RequestBody VacancyFilterDto filterDto) {
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.getAll(filterDto));
     }
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<Map<String,String>> create(@Valid @RequestBody VacancyDto vacancy) throws ValidationException {
         return ResponseEntity.status(HttpStatus.CREATED).body(vacancyService.create(vacancy));
     }
-    @PostMapping("/update/{id}")
+    @PostMapping("/{id}")
     public ResponseEntity<Map<String,String>> update(@PathVariable Long id, @Valid @RequestBody VacancyDto vacancy) throws ValidationException {
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.update(id,vacancy));
     }
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Map<String,String>> delete(@PathVariable Long id) throws ValidationException {
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.delete(id));
     }
