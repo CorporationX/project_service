@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 
 
 @Data
-@Component
 public class ProjectDto {
     @NotNull
     private Long id;
