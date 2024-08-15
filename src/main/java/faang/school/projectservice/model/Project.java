@@ -103,4 +103,7 @@ public class Project {
 
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
+
+    @Column(name = "calendar_id")
+    private String calendarId;
 }
