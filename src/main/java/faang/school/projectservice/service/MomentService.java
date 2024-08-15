@@ -9,7 +9,6 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.MomentValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,19 +26,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MomentService {
     private final MomentMapper mapper = Mappers.getMapper(MomentMapper.class);
+    private final ProjectService projectService;
     private final MomentRepository momentRepository;
-    private final ProjectRepository projectRepository;
     private final List<MomentFilter> momentFilters;
     private final MomentValidator momentValidator;
 
-    public MomentDto createMoment(MomentDto momentDto) {
+    public MomentDto create(MomentDto momentDto) {
         Moment moment = mapper.toEntity(momentDto);
         moment.setProjects(getProjectsByIds(momentDto));
         moment.setUserIds(getMembers(momentDto, moment.getProjects()));
         return mapper.toDto(momentRepository.save(moment));
     }
 
-    public MomentDto updateMoment(MomentDto momentDto) {
+    public MomentDto update(MomentDto momentDto) {
         Moment momentToUpdate = momentRepository.findById(momentDto.getId()).orElseThrow(() -> new EntityNotFoundException("no moment with such Id"));
         Moment updatedMoment = mapper.update(momentToUpdate, momentDto);
         updatedMoment.setProjects(getProjectsByIds(momentDto));
@@ -47,15 +46,15 @@ public class MomentService {
         return mapper.toDto(momentRepository.save(updatedMoment));
     }
 
-    public List<MomentDto> getMomentsFilteredByDateFromProjects(Long projectId, MomentFilterDto filters) {
-        List<Moment> moments = getMomentsAttachedToProject(projectId);
+    public List<MomentDto> getMomentsFiltered(Long projectId, MomentFilterDto filters) {
+        List<Moment> moments = momentValidator.getMomentsAttachedToProject(projectId);
         return momentFilters.stream().filter(filter -> filter.isApplicable(filters))
                 .flatMap(filter -> filter.apply(moments, filters))
                 .map(mapper::toDto).toList();
     }
 
     public List<MomentDto> getAllMoments(Long projectId) {
-        List<Moment> moments = getMomentsAttachedToProject(projectId);
+        List<Moment> moments = momentValidator.getMomentsAttachedToProject(projectId);
         return moments.stream().map(mapper::toDto).toList();
     }
 
@@ -80,20 +79,11 @@ public class MomentService {
 
     private List<Project> getProjectsByIds(MomentDto momentDto) {
         List<Long> projectIds = momentDto.getProjectIds();
-        Set<Project> obtainedProjects = projectIds.stream().map(projectRepository::getProjectById).collect(Collectors.toSet());
+        Set<Project> obtainedProjects = projectIds.stream().map(projectService::getProjectById).collect(Collectors.toSet());
         for (Project project : obtainedProjects) {
             momentValidator.validateProject(project);
         }
         return new ArrayList<>(obtainedProjects);
 
     }
-
-    public List<Moment> getMomentsAttachedToProject(Long projectId) {
-        List<Moment> moments = momentRepository.findAllByProjectId(projectId);
-        if (moments == null || moments.isEmpty()) {
-            throw new EntityNotFoundException("no moments found for project " + projectId);
-        } else return moments;
-    }
-
-
 }

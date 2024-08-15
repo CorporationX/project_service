@@ -3,6 +3,7 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.Assert;
@@ -15,12 +16,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+
 @ExtendWith(MockitoExtension.class)
 public class MomentValidatorTest {
 
     @Mock
     private ProjectRepository projectRepository;
-
+    @Mock
+    private MomentRepository momentRepository;
     @InjectMocks
     private MomentValidator momentValidator;
 
@@ -28,7 +32,7 @@ public class MomentValidatorTest {
 
     @BeforeEach
     public void setUp() {
-        momentValidator = new MomentValidator(projectRepository);
+        momentValidator = new MomentValidator(projectRepository, momentRepository);
         project = Project.builder()
                 .id(1L)
                 .name("test")
@@ -75,5 +79,11 @@ public class MomentValidatorTest {
         Assert.assertThrows(DataValidationException.class, () -> {
             momentValidator.validateProject(project);
         });
+    }
+
+    @Test
+    public void testGetAllMomentsByIncorrectProjectId() {
+        Mockito.when(momentRepository.findAllByProjectId(1L)).thenReturn(Collections.emptyList());
+        Assertions.assertThrows(EntityNotFoundException.class, () -> momentValidator.getMomentsAttachedToProject(1L));
     }
 }

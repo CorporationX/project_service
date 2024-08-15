@@ -10,7 +10,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.MomentValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.Assert;
@@ -41,7 +40,7 @@ public class MomentServiceTest {
     @Mock
     private MomentRepository momentRepository;
     @Mock
-    private ProjectRepository projectRepository;
+    private ProjectService projectService;
     @Mock
     private MomentFilter filterMock;
     private List<MomentFilter> filters;
@@ -80,27 +79,27 @@ public class MomentServiceTest {
                 .build();
         filterMock = Mockito.mock(MomentFilter.class);
         filters = List.of(filterMock);
-        momentService = new MomentService(momentRepository, projectRepository, filters, momentValidator);
+        momentService = new MomentService(projectService, momentRepository, filters, momentValidator);
         momentMapper = Mappers.getMapper(MomentMapper.class);
     }
 
     @Test
-    public void testCreateMoment() {
+    public void testCreate() {
         project.setTeams(List.of(team));
         momentDto.getProjectIds().add(1L);
-        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(project);
+        Mockito.when(projectService.getProjectById(Mockito.anyLong())).thenReturn(project);
         Mockito.when(momentRepository.save(Mockito.any(Moment.class))).thenAnswer(i -> i.getArguments()[0]);
         Mockito.doNothing().when(momentValidator).validateProject(Mockito.any(Project.class));
-        MomentDto actualMoment = momentService.createMoment(momentDto);
+        MomentDto actualMoment = momentService.create(momentDto);
         Mockito.verify(momentRepository, Mockito.times(1)).save(Mockito.any(Moment.class));
         Mockito.verify(momentValidator, Mockito.times(1)).validateProject(Mockito.any(Project.class));
-        Mockito.verify(projectRepository, Mockito.times(2)).getProjectById(Mockito.anyLong());
+        Mockito.verify(projectService, Mockito.times(2)).getProjectById(Mockito.anyLong());
         Assertions.assertEquals(List.of(4L), actualMoment.getUserIds());
         Assertions.assertEquals(List.of(1L), actualMoment.getProjectIds());
     }
 
     @Test
-    public void testUpdateMoment() {
+    public void testUpdate() {
         Project newProject = Project.builder()
                 .id(2L)
                 .name("project")
@@ -117,13 +116,13 @@ public class MomentServiceTest {
         momentDto.setDate(LocalDateTime.of(2024, 1, 1, 1, 1));
         newProject.setTeams(List.of(newTeam));
         Mockito.when(momentRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(moment));
-        Mockito.when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(newProject);
+        Mockito.when(projectService.getProjectById(Mockito.anyLong())).thenReturn(newProject);
         Mockito.when(momentRepository.save(Mockito.any(Moment.class))).thenAnswer(i -> i.getArguments()[0]);
         Mockito.doNothing().when(momentValidator).validateProject(Mockito.any(Project.class));
-        MomentDto actualMoment = momentService.updateMoment(momentDto);
+        MomentDto actualMoment = momentService.update(momentDto);
         Mockito.verify(momentRepository, Mockito.times(1)).save(Mockito.any(Moment.class));
         Mockito.verify(momentValidator, Mockito.times(1)).validateProject(Mockito.any(Project.class));
-        Mockito.verify(projectRepository, Mockito.times(1)).getProjectById(Mockito.anyLong());
+        Mockito.verify(projectService, Mockito.times(1)).getProjectById(Mockito.anyLong());
         Assertions.assertEquals(List.of(2L), actualMoment.getProjectIds());
         Assertions.assertEquals(LocalDateTime.of(2024, 1, 1, 1, 1), actualMoment.getDate());
         Assertions.assertEquals(List.of(4L, 5L), actualMoment.getUserIds());
@@ -132,11 +131,11 @@ public class MomentServiceTest {
     @Test
     public void testUpdateNoneExistingMoment() {
         Mockito.when(momentRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-        Assertions.assertThrows(EntityNotFoundException.class, () -> momentService.updateMoment(momentDto));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> momentService.update(momentDto));
     }
 
     @Test
-    public void testGetMomentsFilteredByDateFromProjects() {
+    public void testGetMomentsFiltered() {
         MomentFilterDto momentFilterDto = new MomentFilterDto(1L, "name",
                 LocalDateTime.of(2000, 10, 1, 1, 1));
         Moment anotherMoment = Moment.builder().id(1L).name("momentName").projects(List.of(project)).
@@ -144,11 +143,11 @@ public class MomentServiceTest {
                 date(LocalDateTime.of(2000, 10, 10, 0, 0)).build();
         moment.setDate(LocalDateTime.of(2000, 10, 10, 0, 0));
         List<Moment> momentsToFilter = List.of(anotherMoment, moment);
-        Mockito.when(momentRepository.findAllByProjectId(1L)).thenReturn(momentsToFilter);
+        Mockito.when(momentValidator.getMomentsAttachedToProject(1L)).thenReturn(momentsToFilter);
         Mockito.when(filters.get(0).isApplicable(momentFilterDto)).thenReturn(true);
         Mockito.when(filters.get(0).apply(momentsToFilter, momentFilterDto)).thenReturn(momentsToFilter.stream());
-        List<MomentDto> actualMomentsDto = momentService.getMomentsFilteredByDateFromProjects(1L, momentFilterDto);
-        Mockito.verify(momentRepository).findAllByProjectId(1L);
+        List<MomentDto> actualMomentsDto = momentService.getMomentsFiltered(1L, momentFilterDto);
+        Mockito.verify(momentValidator).getMomentsAttachedToProject(1L);
         Mockito.verify(filterMock).isApplicable(momentFilterDto);
         Mockito.verify(filterMock).apply(momentsToFilter, momentFilterDto);
         Assert.assertEquals(momentsToFilter.stream().map(moment -> momentMapper.toDto(moment)).toList(), actualMomentsDto);
@@ -157,15 +156,9 @@ public class MomentServiceTest {
     @Test
     public void testGetAllMoments() {
         List<Moment> singleMoment = List.of(moment);
-        Mockito.when(momentRepository.findAllByProjectId(1L)).thenReturn(singleMoment);
+        Mockito.when(momentValidator.getMomentsAttachedToProject(1L)).thenReturn(singleMoment);
         List<MomentDto> actual = momentService.getAllMoments(1L);
         Assertions.assertEquals(singleMoment.stream().map(moment -> momentMapper.toDto(moment)).toList(), actual);
-    }
-
-    @Test
-    public void testGetAllMomentsByIncorrectProjectId() {
-        Mockito.when(momentRepository.findAllByProjectId(1L)).thenReturn(Collections.emptyList());
-        Assertions.assertThrows(EntityNotFoundException.class, () -> momentService.getAllMoments(1L));
     }
 
     @Test
@@ -182,5 +175,4 @@ public class MomentServiceTest {
         Mockito.when(momentRepository.findById(1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(DataValidationException.class, () -> momentService.getMomentById(1L));
     }
-
 }

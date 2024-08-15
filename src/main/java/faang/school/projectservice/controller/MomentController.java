@@ -24,17 +24,17 @@ public class MomentController {
 
     @PostMapping("/")
     public MomentDto createMoment(@Valid @RequestBody MomentDto momentDto) {
-        return momentService.createMoment(momentDto);
+        return momentService.create(momentDto);
     }
 
     @PutMapping("/")
     public MomentDto updateMoment(@Valid @RequestBody MomentDto momentDto) {
-        return momentService.updateMoment(momentDto);
+        return momentService.update(momentDto);
     }
 
     @GetMapping("/filtered/{projectId}")
-    public List<MomentDto> getMomentsFilteredByDateFromProjects(@PathVariable Long projectId, @RequestBody MomentFilterDto filter) {
-        return momentService.getMomentsFilteredByDateFromProjects(projectId, filter);
+    public List<MomentDto> getMomentsFiltered(@PathVariable Long projectId, @RequestBody MomentFilterDto filter) {
+        return momentService.getMomentsFiltered(projectId, filter);
     }
 
     @GetMapping("/all/{projectId}")

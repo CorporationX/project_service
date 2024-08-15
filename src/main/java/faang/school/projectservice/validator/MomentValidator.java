@@ -4,6 +4,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.List;
 @Component
 public class MomentValidator {
     private final ProjectRepository projectRepository;
+    private final MomentRepository momentRepository;
 
     public void validateProjects(Moment moment) {
         List<Project> projects = moment.getProjects();
@@ -33,6 +35,13 @@ public class MomentValidator {
         if (project.getStatus().equals(ProjectStatus.CANCELLED) || project.getStatus().equals(ProjectStatus.COMPLETED)) {
             throw new DataValidationException("Project " + project.getId() + "has been completed or cancelled");
         }
+    }
+
+    public List<Moment> getMomentsAttachedToProject(Long projectId) {
+        List<Moment> moments = momentRepository.findAllByProjectId(projectId);
+        if (moments == null || moments.isEmpty()) {
+            throw new EntityNotFoundException("no moments found for project " + projectId);
+        } else return moments;
     }
 
 }
