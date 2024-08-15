@@ -47,7 +47,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DeniedInAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleDeniedInAccessException(DeniedInAccessException exception) {
-      
+        return new ErrorResponse(exception.getMessage());
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
@@ -60,9 +62,9 @@ public class GlobalExceptionHandler {
       return new ErrorResponse(exception.getMessage());
     }
     
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(UserNotFoundException exception) {
+    public ErrorResponse handleUserNotFoundException(EntityNotFoundException exception) {
         return new ErrorResponse(exception.getMessage());
     }
 
