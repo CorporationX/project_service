@@ -4,8 +4,11 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.StageStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -16,6 +19,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -24,6 +28,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "project_stage")
@@ -43,6 +48,13 @@ public class Stage {
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
+
+    @ElementCollection
+    @CollectionTable(name = "roles_deficit_mapping",
+            joinColumns = @JoinColumn(name = "project_stage_id"))
+    @MapKeyColumn(name = "team_role")
+    @Column(name = "deficit_count")
+    private Map<TeamRole, Integer> rolesDeficit;
 
     @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
     private List<StageRoles> stageRoles;

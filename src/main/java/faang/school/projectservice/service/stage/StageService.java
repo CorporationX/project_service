@@ -56,7 +56,7 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
-    public List<StageDto> getStagesByFilter(Long projectId, StageFilterDto filter) {
+    public List<StageDto> getStagesByFilter(long projectId, StageFilterDto filter) {
         Project project = projectRepository.getProjectById(projectId);
         Stream<Stage> stageStream = project.getStages().stream();
 
@@ -70,7 +70,7 @@ public class StageService {
     }
 
     @Transactional
-    public void removeStage(Long stageId, StagePreDestroyAction action) {
+    public void removeStage(long stageId, StagePreDestroyAction action) {
         Stage stage = stageRepository.getById(stageId);
         List<Task> tasks = stage.getTasks();
 
@@ -84,7 +84,7 @@ public class StageService {
     }
 
     @Transactional
-    public void removeStage(Long stageId, Long replaceStageId) {
+    public void removeStageAndReplaceTasks(long stageId, Long replaceStageId) {
         stageIdValidator.validateReplaceId(stageId, replaceStageId);
         Stage stage = stageRepository.getById(stageId);
         Stage replaceStage = stageRepository.getById(replaceStageId);
@@ -95,25 +95,45 @@ public class StageService {
         stageRepository.delete(stage);
     }
 
+    public Map<String, Integer> getAllRolesDeficit(long stageId) {
+        Stage stage = stageRepository.getById(stageId);
+        Map<TeamRole, Integer> roles = new HashMap<>();
+        Map<String, Integer> rolesDeficit = new HashMap<>();
+
+        for (StageRoles stageRoles : stage.getStageRoles()) {
+            countExecutorsWithRole(roles, stage.getExecutors(), stageRoles.getTeamRole());
+        }
+
+        for (StageRoles stageRoles : stage.getStageRoles()) {
+            TeamRole role = stageRoles.getTeamRole();
+            int roleDeficit = stageRoles.getCount() - roles.get(role);
+            if(roleDeficit > 0) {
+                rolesDeficit.put(role.toString(), roleDeficit);
+            }
+        }
+
+        return rolesDeficit;
+    }
+
     @Transactional
-    public void updateStage(Long stageId) {
+    public void updateStage(long stageId) {
         Stage stage = stageRepository.getById(stageId);
         Map<TeamRole, Integer> roles = new HashMap<>();
         Set<Long> gotStageInvitation = new HashSet<>();
 
         for (StageRoles stageRoles : stage.getStageRoles()) {
-            countRoles(roles, stage.getExecutors(), stageRoles.getTeamRole());
+            countExecutorsWithRole(roles, stage.getExecutors(), stageRoles.getTeamRole());
         }
 
         for (StageRoles stageRoles : stage.getStageRoles()) {
             int rolesDeficit = stageRoles.getCount() - roles.get(stageRoles.getTeamRole());
             if(rolesDeficit > 0) {
-                searchAndSend(rolesDeficit, gotStageInvitation, stage, stageRoles.getTeamRole());
+                searchCorrectExecutorsAndSendInvite(rolesDeficit, gotStageInvitation, stage, stageRoles.getTeamRole());
             }
         }
     }
 
-    private void countRoles(Map<TeamRole, Integer> roles, List<TeamMember> executors, TeamRole teamRole) {
+    private void countExecutorsWithRole(Map<TeamRole, Integer> roles, List<TeamMember> executors, TeamRole teamRole) {
         int amount = 0;
 
         for (TeamMember executor : executors) {
@@ -124,7 +144,7 @@ public class StageService {
         roles.put(teamRole, amount);
     }
 
-    private void searchAndSend(int rolesDeficit, Set<Long> gotStageInvitation, Stage stage, TeamRole teamRole) {
+    private void searchCorrectExecutorsAndSendInvite(int rolesDeficit, Set<Long> gotStageInvitation, Stage stage, TeamRole teamRole) {
         int sent = 0;
 
         while (sent < rolesDeficit) {
@@ -142,7 +162,7 @@ public class StageService {
         }
     }
 
-    public List<StageDto> getAllStages(Long projectId) {
+    public List<StageDto> getAllStages(long projectId) {
         Project project = projectRepository.getProjectById(projectId);
 
         return project.getStages().stream()
@@ -150,7 +170,7 @@ public class StageService {
                 .toList();
     }
 
-    public StageDto getStage(Long stageId) {
+    public StageDto getStage(long stageId) {
         Stage stage = stageRepository.getById(stageId);
 
         return stageMapper.toDto(stage);

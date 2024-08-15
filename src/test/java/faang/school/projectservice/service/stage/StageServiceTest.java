@@ -235,14 +235,14 @@ public class StageServiceTest {
 
     @Test
     @DisplayName("testing that removeStage() calls all his beans correctly when replaceId was given")
-    public void testRemoveStageReplace() {
+    public void testRemoveStageAndReplaceTasks() {
         doNothing().when(stageIdValidator).validateReplaceId(anyLong(), anyLong());
         when(stageRepository.getById(id)).thenReturn(stage);
         when(stageRepository.getById(replaceId)).thenReturn(replaceStage);
         when(stageRepository.save(any(Stage.class))).thenReturn(stage);
         doNothing().when(stageRepository).delete(stage);
 
-        stageService.removeStage(id, replaceId);
+        stageService.removeStageAndReplaceTasks(id, replaceId);
 
         verify(stageIdValidator).validateReplaceId(anyLong(), anyLong());
         verify(stageRepository).getById(id);
