@@ -1,6 +1,8 @@
 package faang.school.projectservice.controller;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.exception.DeniedInAccessException;
+import faang.school.projectservice.exception.ErrorResponse;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorResponse;
 import faang.school.projectservice.exception.IllegalSubProjectsStatusException;
@@ -42,6 +44,10 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(exception.getMessage());
     }
 
+    @ExceptionHandler(DeniedInAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleDeniedInAccessException(DeniedInAccessException exception) {
+      
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
@@ -50,7 +56,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(EntityNotFoundException exception) {
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException exception) {
+      return new ErrorResponse(exception.getMessage());
+    }
+    
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserNotFoundException(UserNotFoundException exception) {
         return new ErrorResponse(exception.getMessage());
     }
 
