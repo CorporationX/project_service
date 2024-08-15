@@ -1,15 +1,14 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.math.BigInteger;
-import java.util.List;
 
 @Component
 @Slf4j
@@ -22,17 +21,15 @@ public class ResourceValidator {
     }
 
     public void checkingAccessRights(long userId, Resource resource, Project project) {
-        List<TeamMember> teemManager = project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream()
-                        .filter(tm -> tm.getRoles().contains(TeamRole.MANAGER)))
-                .toList();
-        long count = teemManager.stream()
-                .filter(tm -> tm.getUserId() == userId)
-                .count();
-        boolean equals = resource.getCreatedBy().getUserId().equals(userId);
-        if (count == 0 && !equals) {
+        boolean isManager = project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .anyMatch(tm -> tm.getRoles().contains(TeamRole.MANAGER) && tm.getUserId() == userId);
+        boolean isAuthor = resource.getCreatedBy().getUserId() == userId;
+
+        if (!isManager && !isAuthor) {
             log.info("the user is not the author of the photo or the project manager");
-            throw new RuntimeException("you can't delete this file");
+            throw new DataValidationException("you can't delete this file");
         }
     }
 }
+

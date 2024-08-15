@@ -37,10 +37,8 @@ public class ResourceService {
 
         Resource resource = s3ServiceImpl.uploadFile(file, project);
         resource.setProject(project);
-        resource = resourceRepository.save(resource);
 
         project.setStorageSize(newStorageSize);
-        projectService.save(project);
         resourceRepository.save(resource);
         return resourceMapper.toDto(resource);
     }
@@ -72,6 +70,5 @@ public class ResourceService {
             newSizeCapacity = BigInteger.ZERO;
         }
         project.setStorageSize(newSizeCapacity);
-        projectService.save(project);
     }
 }
