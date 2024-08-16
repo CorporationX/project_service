@@ -1,4 +1,4 @@
-package faang.school.projectservice;
+package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.filter.stage.ProjectStatusFilter;

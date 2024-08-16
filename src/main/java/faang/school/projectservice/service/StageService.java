@@ -3,10 +3,9 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ErrorMessage;
-import faang.school.projectservice.exception.StageException;
 import faang.school.projectservice.filter.stage.StageFilter;
-import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
@@ -18,16 +17,10 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.FateOfTasksAfterDelete;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -36,42 +29,36 @@ import java.util.stream.Stream;
 public class StageService {
 
     private final StageRepository stageRepository;
-    private final ProjectRepository projectRepository;
-    private final TeamMemberRepository teamMemberRepository;
-    private final StageInvitationRepository stageInvitationRepository;
     private final TaskRepository taskRepository;
-    private final StageRolesRepository stageRolesRepository;
+    private final TeamMemberService teamMembersService;
+    private final ProjectService projectService;
+    private final StageRolesService stageRolesService;
     private final StageMapper stageMapper;
     private final StageRolesMapper stageRolesMapper;
     private final List<StageFilter> filters;
 
     public StageDto createStage(StageDto stageDto) {
-        Project project = projectRepository.getProjectById(stageDto.getProjectId());
+        Project project = projectService.getProject(stageDto.getProjectId());
         ProjectStatus currentStatus = project.getStatus();
         validatedProjectStatus(currentStatus);
 
         Stage stage = stageMapper.toEntity(stageDto);
         stage.setProject(project);
-        List<TeamMember> executors = stageDto.getExecutorIds()
-                .stream()
-                .map(teamMemberRepository::findById)
-                .toList();
+        List<Long> executorIds = stageDto.getExecutorIds();
+        List<TeamMember> executors = teamMembersService.findAllById(executorIds);
         stage.setExecutors(executors);
 
         executors.forEach(teamMember -> {
             if (teamMember.getRoles() == null) {
-                throw new StageException("Team member with id: " + teamMember.getId() + " has no role");
+                throw new DataValidationException("Team member with id: " + teamMember.getId() + " has no role");
             }
         });
 
         List<StageRoles> stageRolesList = stageRolesMapper.toEntityList(stageDto.getStageRoles());
-        stageRolesList.forEach(stageRoles -> {
-            stageRoles.setStage(stage);
-
-        });
+        stageRolesList.forEach(stageRoles -> stageRoles.setStage(stage));
         stage.setStageRoles(stageRolesList);
         Stage saveStage = stageRepository.save(stage);
-        stageRolesRepository.saveAll(stageRolesList);
+        stageRolesService.saveAll(stageRolesList);
         List<StageRolesDto> stageRolesDtoList = stageRolesMapper.toDtoList(stageRolesList);
         StageDto saveStageDto = stageMapper.toDto(saveStage);
         saveStageDto.setStageRoles(stageRolesDtoList);
@@ -80,10 +67,10 @@ public class StageService {
 
     private static void validatedProjectStatus(ProjectStatus currentStatus) {
         if (currentStatus.equals(ProjectStatus.CANCELLED)) {
-            throw new StageException(ErrorMessage.PROJECT_CANCELED);
+            throw new DataValidationException(ErrorMessage.PROJECT_CANCELED);
         }
         if (currentStatus.equals(ProjectStatus.COMPLETED)) {
-            throw new StageException(ErrorMessage.PROJECT_COMPLETED);
+            throw new DataValidationException(ErrorMessage.PROJECT_COMPLETED);
         }
     }
 
@@ -107,6 +94,7 @@ public class StageService {
             case TRANSFER_TO_ANOTHER_STAGE -> transferTasksAfterDeleteStage(deletedStageId, receivingStageId);
         }
     }
+
     private void closeTasksAfterDeleteStage(Long id) {
         Stage deletedStage = stageRepository.getById(id);
         deletedStage.getTasks()
@@ -122,8 +110,8 @@ public class StageService {
     }
 
     private void transferTasksAfterDeleteStage(Long deletedStageId, Long receivingStageId) {
-        if(receivingStageId == null){
-            throw new StageException(ErrorMessage.NULL_ID);
+        if (receivingStageId == null) {
+            throw new DataValidationException(ErrorMessage.NULL_ID);
         }
         Stage deletedStage = stageRepository.getById(deletedStageId);
         List<Task> transferredTasks = deletedStage.getTasks();
@@ -132,108 +120,24 @@ public class StageService {
     }
 
     public StageDto updateStage(StageDto stageDto) {
-        Project project = projectRepository.getProjectById(stageDto.getProjectId());
+        Project project = projectService.getProject(stageDto.getProjectId());
         Stage stage = stageMapper.toEntity(stageDto);
         stage.setProject(project);
-        List<TeamMember> executors = stageDto.getExecutorIds()
-                .stream()
-                .map(teamMemberRepository::findById)
-                .toList();
+        List<Long> executorIds = stageDto.getExecutorIds();
+        List<TeamMember> executors = teamMembersService.findAllById(executorIds);
         stage.setExecutors(executors);
 
         List<StageRoles> stageRolesList = stageRolesMapper.toEntityList(stageDto.getStageRoles());
         stage.setStageRoles(stageRolesList);
         stageRolesList.forEach(
-                stageRoles -> getExecutorsForRole(stage, stageRoles));
-
+                stageRoles -> stageRolesService.getExecutorsForRole(stage, stageRoles));
         stage.setStageRoles(stageRolesList);
         Stage updatedStage = stageRepository.save(stage);
-        stageRolesRepository.saveAll(stageRolesList);
+        stageRolesService.saveAll(stageRolesList);
         List<StageRolesDto> stageRolesDtoList = stageRolesMapper.toDtoList(stageRolesList);
         StageDto updetedStageDto = stageMapper.toDto(updatedStage);
         updetedStageDto.setStageRoles(stageRolesDtoList);
         return updetedStageDto;
-    }
-
-    //Возникает ошибка при тестировании данного метода
-    private void getExecutorsForRole(Stage stage, StageRoles stageRoles) {
-        List<TeamMember> executorsWithTheRole = getTeamMembersWithTheRole(stage, stageRoles);
-
-        //Разница между необходимым количеством участников для данной роли
-        //и тем количеством участников, которые уже работают на этом этапе проекта.
-        //Если она больше 0, ищу среди всего проекта (а не только одного этапа) участников с такой же ролью,
-        //чтобы затем отправить им приглашение участвовать в данном этапе проекта
-        int requiredNumberOfInvitation = stageRoles.getCount() - executorsWithTheRole.size();
-
-        List<TeamMember> projectMembersWithTheSameRole = new ArrayList<>();
-        if (requiredNumberOfInvitation > 0) {
-            getProjectMembersWithTheSameRole(stage, stageRoles, projectMembersWithTheSameRole);
-        }
-
-        if (projectMembersWithTheSameRole.size() < requiredNumberOfInvitation) {  //Если число учасников проекта с нужной ролью
-            projectMembersWithTheSameRole.forEach(teamMember -> {                 //меньше, чем количество учасников,
-                StageInvitation stageInvitationToSend =                           //которое нужно пригласить,
-                        getStageInvitation(teamMember, stage, stageRoles);        //отправляю приглашения тому количеству учасников,
-                stageInvitationRepository.save(stageInvitationToSend);            //которые есть в списке
-            });
-
-            int numberOfMissingTeamMembers = requiredNumberOfInvitation - projectMembersWithTheSameRole.size();
-
-            //И выводится сообщение о том, сколько еще участников с нужной ролью нужно найти для работы на данном этапе проекта
-            throw new StageException("To work at the project stage, " + stageRoles.getCount() +
-                    " executor(s) with a role " + stageRoles.getTeamRole().name() + " are required. But there is(are) only " +
-                    projectMembersWithTheSameRole.size() + " executor(s) on the project with this role. " +
-                    " There is a need for " + numberOfMissingTeamMembers + " more executor(s).");
-        }
-
-        projectMembersWithTheSameRole.stream()              //Если же число учасников в списке больше либо равно искомому
-                .limit(requiredNumberOfInvitation)          //числу учасников с нужной ролью, отправляю столько приглашений,
-                .forEach(teamMember -> {                    //сколько требуется
-                    StageInvitation stageInvitationToSend =
-                            getStageInvitation(teamMember, stage, stageRoles);
-                    stageInvitationRepository.save(stageInvitationToSend);
-                });
-    }
-
-    private List<TeamMember> getTeamMembersWithTheRole(Stage stage, StageRoles stageRoles) {
-        List<TeamMember> executorsWithTheRole = new ArrayList<>();
-        stage.getExecutors().forEach(executor -> {                //Определяю роль каждого участника
-            if (executor.getRoles()                               //данного этапа проекта.
-                    .contains(stageRoles.getTeamRole())) {        //Если она совпадает с ролью, к которой применяется этот метод,
-                executorsWithTheRole.add(executor);               //добавляю ее с список.
-            }                                                     //Получаю список участников этапа с данной ролью
-        });
-        return executorsWithTheRole;
-    }
-
-    private void getProjectMembersWithTheSameRole(Stage stage,
-                                                         StageRoles stageRoles,
-                                                         List<TeamMember> projectMembersWithTheSameRole) {
-        stage.getProject()
-                .getTeams()                                           //Получаю все команды проекта, к которому относится этап.
-                .forEach(team ->                                      //Из каждой команды получаю участников
-                        projectMembersWithTheSameRole.addAll(
-                                team.getTeamMembers()
-                                        .stream()
-                                        .filter(teamMember ->                             //Проверяю, не работает ли данный участник
-                                                !teamMember.getStages().contains(stage))  //уже над данным этапом
-                                        .filter(teamMember ->
-                                                teamMember.getRoles()                          //Отбираю участников
-                                                        .contains(stageRoles.getTeamRole()))   //с нужной ролью
-                                        .toList()));                                           //и добавляю их в отдельный список
-    }
-
-    private StageInvitation getStageInvitation(TeamMember invited, Stage stage, StageRoles stageRoles) {
-        StageInvitation stageInvitationToSend = new StageInvitation();
-        String INVITATIONS_MESSAGE = String.format("Invite you to participate in the development stage %s " +
-                "of the project %s for the role %s",
-                stage.getStageName(), stage.getProject().getName(), stageRoles.getTeamRole());
-        stageInvitationToSend.setDescription(INVITATIONS_MESSAGE);
-        stageInvitationToSend.setStatus(StageInvitationStatus.PENDING);
-        stageInvitationToSend.setAuthor(stage.getExecutors().get(0));
-        stageInvitationToSend.setInvited(invited);
-        stageInvitationToSend.setStage(stage);
-        return stageInvitationToSend;
     }
 
     public List<StageDto> getAllStages() {

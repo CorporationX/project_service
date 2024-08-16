@@ -28,12 +28,12 @@ public class StageController {
 
     private final StageService stageService;
 
-    @PostMapping()
+    @PostMapping
     public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.createStage(stageDto);
     }
 
-    @PostMapping("/filter_stage")
+    @PostMapping("/filter")
     public List<StageDto> getFilteredStages(@RequestBody StageFilterDto filterDto) {
         return stageService.getFilteredStages(filterDto);
     }
@@ -46,12 +46,12 @@ public class StageController {
         stageService.deleteStage(deletedStageId, tasksAfterDelete, receivingStageId);
     }
 
-    @PutMapping()
+    @PutMapping
     public StageDto updateStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.updateStage(stageDto);
     }
 
-    @GetMapping("")
+    @GetMapping
     public List<StageDto> getAllStages() {
         return stageService.getAllStages();
     }

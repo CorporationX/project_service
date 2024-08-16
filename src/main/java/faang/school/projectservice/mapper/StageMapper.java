@@ -1,7 +1,6 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.Mapper;
@@ -10,14 +9,12 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "executors", target = "executorIds", qualifiedByName = "mapExecutor")
-    //@Mapping(source = "stageRoles.stage.id", target = "stageRoles.stageId")
     StageDto toDto(Stage stage);
 
     List<StageDto> toDtoList(List<Stage> stages);
