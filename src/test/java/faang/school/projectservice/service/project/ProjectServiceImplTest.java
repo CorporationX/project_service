@@ -11,6 +11,7 @@ import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.filter.project.ProjectTeamMemberFilter;
 import faang.school.projectservice.filter.project.PublicProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.messaging.publisher.project.ProjectViewEventPublisher;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -39,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,19 +50,16 @@ class ProjectServiceImplTest {
 
     @Mock
     private ProjectRepository projectRepository;
-
     @Mock
     private ProjectMapper mapper;
-
     @Captor
     private ArgumentCaptor<Project> projectArgumentCaptor;
-
     @Captor
     private ArgumentCaptor<Set<Project>> projectSetArgumentCaptor;
-
     @Mock
     private UserContext userContext;
-
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
     @InjectMocks
     private ProjectServiceImpl sut;
 
@@ -242,6 +241,7 @@ class ProjectServiceImplTest {
 
         ProjectDto retrievedProjectDto = sut.retrieveProject(1L);
 
+        verify(projectViewEventPublisher).toEventAndPublish(1L);
         assertEquals(projectDto, retrievedProjectDto);
     }
 
@@ -250,6 +250,9 @@ class ProjectServiceImplTest {
         when(projectRepository.getProjectById(1L)).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class, () -> sut.retrieveProject(1L));
+
+        verifyNoInteractions(projectViewEventPublisher);
+        verifyNoInteractions(mapper);
     }
 
     @Test

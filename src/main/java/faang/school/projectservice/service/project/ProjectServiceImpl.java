@@ -7,6 +7,7 @@ import faang.school.projectservice.exception.ExceptionMessages;
 import faang.school.projectservice.filter.project.DefaultProjectFilter;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.messaging.publisher.project.ProjectViewEventPublisher;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.PersistenceException;
@@ -25,10 +26,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
-    private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
+    private final ProjectRepository projectRepository;
     private final List<ProjectFilter> userDefinedProjectFilters;
     private final List<DefaultProjectFilter> defaultProjectFilters;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     @Override
     @Transactional
@@ -63,7 +65,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDto retrieveProject(long id) {
-        return mapper.toDto(projectRepository.getProjectById(id));
+        var projectById = projectRepository.getProjectById(id);
+        projectViewEventPublisher.toEventAndPublish(id);
+        return mapper.toDto(projectById);
     }
 
     @Override
