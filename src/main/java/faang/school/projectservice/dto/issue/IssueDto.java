@@ -8,7 +8,6 @@ import org.joda.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class IssueDto {
     String key;
