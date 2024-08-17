@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.stage.StageDeleteTaskStrategyDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.dto.teamrole.TeamRoleDto;
+import faang.school.projectservice.dto.TeamRoleDto;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
