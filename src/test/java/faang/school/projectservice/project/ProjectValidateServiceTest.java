@@ -8,8 +8,8 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.project.ProjectValidateService;
-import faang.school.projectservice.service.project.StageService;
 import faang.school.projectservice.service.project.TeamService;
+import faang.school.projectservice.service.utilservice.StageUtilService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ProjectValidateServiceTest {
     @Mock
-    private StageService stageService;;
+    private StageUtilService stageService;;
     @Mock
     private TeamService teamService;
     @InjectMocks

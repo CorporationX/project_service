@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class ProjectUtilService {
 
     private final ProjectJpaRepository projectJpaRepository;
+    private final ProjectRepository projectRepository;
 
     @Transactional(readOnly = true)
     public Project getById(long id) {
@@ -32,10 +34,6 @@ public class ProjectUtilService {
 
     public Project save(Project project) {
         return projectJpaRepository.save(project);
-    }
-
-    public Project save(Project project) {
-        return projectRepository.save(project);
     }
 
     public void saveAllProjects(List<Project> projects) {

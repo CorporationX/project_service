@@ -18,6 +18,7 @@ import faang.school.projectservice.model.stage.FateOfTasksAfterDelete;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.utilservice.ProjectUtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,14 +32,14 @@ public class StageService {
     private final StageRepository stageRepository;
     private final TaskRepository taskRepository;
     private final TeamMemberService teamMembersService;
-    private final ProjectService projectService;
+    private final ProjectUtilService projectService;
     private final StageRolesService stageRolesService;
     private final StageMapper stageMapper;
     private final StageRolesMapper stageRolesMapper;
     private final List<StageFilter> filters;
 
     public StageDto createStage(StageDto stageDto) {
-        Project project = projectService.getProject(stageDto.getProjectId());
+        Project project = projectService.getProjectById(stageDto.getProjectId());
         ProjectStatus currentStatus = project.getStatus();
         validatedProjectStatus(currentStatus);
 
@@ -120,7 +121,7 @@ public class StageService {
     }
 
     public StageDto updateStage(StageDto stageDto) {
-        Project project = projectService.getProject(stageDto.getProjectId());
+        Project project = projectService.getProjectById(stageDto.getProjectId());
         Stage stage = stageMapper.toEntity(stageDto);
         stage.setProject(project);
         List<Long> executorIds = stageDto.getExecutorIds();
