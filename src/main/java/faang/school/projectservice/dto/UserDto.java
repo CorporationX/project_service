@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.user;
+package faang.school.projectservice.dto;
 
 import lombok.Data;
 

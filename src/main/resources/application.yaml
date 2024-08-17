@@ -24,6 +24,10 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+  servlet:
+    multipart:
+      max-request-size: 5MB
+      max-file-size: 5MB
 
   mvc:
     servlet:
@@ -31,6 +35,8 @@ spring:
 
 server:
   port: 8082
+  servlet:
+    contextPath: /api
 
 logging:
   level:
@@ -44,8 +50,19 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
     isMocked: false
+    bucketName: project-bucket
+    project:
+      image:
+        minHeight: 566
+        maxHeight: 1080
+        maxWidth: 1080
+        bufferSize: 4096
+
+
+
+
+
   payment-service:
     host: http://localhost
     port: 9080

@@ -3,7 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.stage.StageDeleteTaskStrategyDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.dto.teamrole.TeamRoleDto;
+import faang.school.projectservice.dto.TeamRoleDto;
 import faang.school.projectservice.filter.stagefilter.StageFilter;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;

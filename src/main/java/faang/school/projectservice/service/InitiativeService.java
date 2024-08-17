@@ -3,7 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.initiative.InitiativeDto;
 import faang.school.projectservice.dto.initiative.InitiativeFilterDto;
 import faang.school.projectservice.dto.initiative.InitiativeStatusDto;
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.initiative.InitiativeFilter;
 import faang.school.projectservice.mapper.initiative.InitiativeMapper;

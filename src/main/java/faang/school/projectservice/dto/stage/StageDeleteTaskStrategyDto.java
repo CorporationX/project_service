@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.stage;
 
 
-import faang.school.projectservice.dto.task.TasksHandlingStrategy;
+import faang.school.projectservice.dto.TasksHandlingStrategy;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

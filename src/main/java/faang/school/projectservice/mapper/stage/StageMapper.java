@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.mapper.stagerole.StageRolesMapper;
+import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

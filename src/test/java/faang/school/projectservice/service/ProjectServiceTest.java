@@ -10,10 +10,12 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectNameFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectStatusFilter;
-import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
-import faang.school.projectservice.mapper.subproject.SubProjectMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.mapper.moment.MomentMapper;
+
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.SubProjectValidator;

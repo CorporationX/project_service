@@ -10,17 +10,23 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.s3.S3ServiceImpl;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -37,6 +43,8 @@ public class ProjectService {
     private final List<SubProjectFilter> subProjectFilters;
     private final TeamService teamService;
     private final List<ProjectFilter> filters;
+    private final S3ServiceImpl s3Service;
+
 
 
     @Transactional
@@ -127,6 +135,33 @@ public class ProjectService {
     public Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);
     }
+
+    @Transactional
+    public ProjectDto addImage(Long projectId, MultipartFile file) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
+        if (project.getMaxStorageSize().compareTo(newStorageSize) > 0) {
+            Project simpleProject;
+            simpleProject = s3Service.uploadImage(file, project);
+            project.setCoverImageId(simpleProject.getCoverImageId());
+            project.setStorageSize(newStorageSize);
+        }
+        return projectMapper.toDto(project);
+    }
+
+    @Transactional
+    public void deleteImage(Long projectId) {
+        Project project = getProjectById(projectId);
+        project.setStorageSize(BigInteger.valueOf(1));
+        s3Service.deleteImage(project.getCoverImageId());
+    }
+
+    @Transactional(readOnly = true)
+    public ByteArrayOutputStream getImage(long projectId) {
+        return s3Service.downloadImage(projectRepository.getProjectById(projectId).getCoverImageId());
+    }
+
 
     private List<ProjectFilter> getApplicableProjectFilters(ProjectFilterDto projectFilterDto) {
         return filters.stream()

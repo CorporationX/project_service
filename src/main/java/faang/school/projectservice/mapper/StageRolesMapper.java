@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper.stagerole;
+package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.mapper.stage.StageMapperHelper;
