@@ -1,6 +1,6 @@
 package faang.school.projectservice.project;
 
-import faang.school.projectservice.service.project.StageService;
+import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.project.TeamService;
 import faang.school.projectservice.service.utilservice.StageUtilService;
 import org.junit.jupiter.api.Test;

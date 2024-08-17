@@ -15,7 +15,9 @@ public enum ErrorMessage {
     MOMENT_NOT_EXIST("Moment with passed ID don't exist"),
     TEAMS_NOT_FOUND("Teams with passed IDs have not been found"),
     STAGES_NOT_FOUND("Stages with passed IDs have not been found"),
-    ;
+    PROJECT_CANCELED("Project canceled. You can't create stage in canceled project."),
+    PROJECT_COMPLETED("Project completed. You can't create stage in completed project."),
+    NULL_ID("Receiving ID is NULL. Enter correct ID.");
 
     private final String message;
 }

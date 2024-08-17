@@ -6,6 +6,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.service.utilservice.StageUtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProjectValidateService {
-    private final StageService stageService;
+    private final StageUtilService stageService;
     private final TeamService teamService;
 
     public List<Stage> getStages(GeneralProjectInfoDto dto) {

@@ -19,6 +19,10 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
+    public List<TeamMember> findAllById(List<Long> ids) {
+        return jpaRepository.findAllById(ids);
+    }
+
     public boolean existAllByIds(Collection<Long> teamMemberIds) {
         return jpaRepository.countAllByIds(teamMemberIds) == teamMemberIds.size();
     }
