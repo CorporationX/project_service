@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,10 +26,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "resource")
+@Table(name = "project_resource")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,7 +46,7 @@ public class Resource {
     @ElementCollection(targetClass = TeamRole.class)
     @CollectionTable(name = "resource_allowed_roles",
             joinColumns = @JoinColumn(name = "resource_id"))
-    @Column(name = "role_id")
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private List<TeamRole> allowedRoles;
 

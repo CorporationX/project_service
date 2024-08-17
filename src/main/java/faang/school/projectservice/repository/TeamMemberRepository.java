@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -20,5 +21,13 @@ public class TeamMemberRepository {
 
     public List<TeamMember> findAllById(List<Long> ids) {
         return jpaRepository.findAllById(ids);
+    }
+
+    public boolean existAllByIds(Collection<Long> teamMemberIds) {
+        return jpaRepository.countAllByIds(teamMemberIds) == teamMemberIds.size();
+    }
+
+    public List<Long> findIdsByProjectIds(Collection<Long> projectIds) {
+        return jpaRepository.findIdsByProjectIds(projectIds);
     }
 }
