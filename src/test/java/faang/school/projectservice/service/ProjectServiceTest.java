@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
@@ -10,13 +10,13 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectNameFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectStatusFilter;
-import faang.school.projectservice.mapper.project.ProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.s3.S3ServiceImpl;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.SubProjectValidator;
 import org.junit.jupiter.api.*;
@@ -85,6 +85,7 @@ public class ProjectServiceTest {
     long momentId = 1L;
     long subProjectIdOne = 3L;
     MomentDto momentDto;
+    S3ServiceImpl s3ServiceImpl;
 
 
     @BeforeEach
@@ -148,7 +149,8 @@ public class ProjectServiceTest {
                 projectRepository,
                 subProjectFilters,
                 teamService,
-                filters);
+                filters,
+                s3ServiceImpl);
     }
 
     @Test

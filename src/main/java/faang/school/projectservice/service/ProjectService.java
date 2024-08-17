@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
@@ -8,11 +8,12 @@ import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
-import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
 import faang.school.projectservice.validator.ProjectValidator;
