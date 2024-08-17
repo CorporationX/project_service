@@ -10,17 +10,17 @@ import org.joda.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class IssueDto {
-    String key;
-    long typeId;
+    private String key;
+    private long typeId;
 
     @NonNull
     @Size(min = 1, max = 2000)
-    String summary;
+    private String summary;
 
     @Size(max = 6000)
-    String description;
+    private String description;
 
     @NonNull
     @Future
-    LocalDateTime dueDate;
+    private LocalDateTime dueDate;
 }
