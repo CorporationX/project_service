@@ -164,6 +164,11 @@ public class ProjectService {
     }
 
 
+    @Transactional
+    public Project save(Project project) {
+        return projectRepository.save(project);
+    }
+
     private List<ProjectFilter> getApplicableProjectFilters(ProjectFilterDto projectFilterDto) {
         return filters.stream()
                 .filter(filter -> filter.isApplicable(projectFilterDto))
