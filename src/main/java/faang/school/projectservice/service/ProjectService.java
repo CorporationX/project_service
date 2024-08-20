@@ -1,13 +1,16 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectViewEvent;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectViewMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -26,6 +30,8 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
     private final List<ProjectFilter> filters;
+    private final ProjectViewMessagePublisher projectViewMessagePublisher;
+    private final UserContext userContext;
 
     @Transactional
     public ProjectDto create(Long userId, ProjectDto projectDto) {
@@ -78,6 +84,21 @@ public class ProjectService {
         return filters.stream()
                 .filter(filter -> filter.isApplicable(projectFilterDto))
                 .toList();
+    }
+    @Transactional
+    public ProjectDto getProject(Long projectId) {
+        Project project = getProjectById(projectId);
+        viewProject(projectId);
+        return projectMapper.toDto(project);
+    }
+
+    private void viewProject(Long projectId) {
+        ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
+                .projectId(projectId)
+                .userId(userContext.getUserId())
+                .eventTime(LocalDateTime.now())
+                .build();
+        projectViewMessagePublisher.publish(projectViewEvent);
     }
 
     /**

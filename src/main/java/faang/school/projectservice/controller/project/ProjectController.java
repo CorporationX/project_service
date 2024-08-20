@@ -52,4 +52,9 @@ public class ProjectController {
                                 @Validated @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.findById(userId, projectFilterDto);
     }
+
+    @GetMapping("/{projectId}")
+    public ProjectDto getProject(@PathVariable Long projectId) {
+        return projectService.getProject(projectId);
+    }
 }
