@@ -1,9 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectViewEvent;
+import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
+import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
@@ -47,6 +50,8 @@ public class ProjectService {
     private final List<ProjectFilter> filters;
     private final ProjectViewMessagePublisher projectViewMessagePublisher;
     private final UserContext userContext;
+    private final S3ServiceImpl s3Service;
+
 
     @Transactional
     public SubProjectDto createSubProject(SubProjectDto subProjectDto) {

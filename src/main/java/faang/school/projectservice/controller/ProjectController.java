@@ -35,7 +35,7 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.addImage(projectId, file));
     }
 
-    @GetMapping("{projectId}")
+    @GetMapping("{projectId}/image")
     public ResponseEntity<?> getImage(@PathVariable long projectId) {
         val body = projectService.getImage(projectId);
 
