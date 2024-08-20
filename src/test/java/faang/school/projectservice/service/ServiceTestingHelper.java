@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.teamrole.TeamRoleDto;
+import faang.school.projectservice.dto.TeamRoleDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.Team;

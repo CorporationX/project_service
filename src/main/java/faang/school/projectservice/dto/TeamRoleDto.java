@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.teamrole;
+package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.TeamRole;
 import jakarta.validation.constraints.NotEmpty;
