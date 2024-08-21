@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.project.ProjectFilter;
@@ -11,6 +12,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -34,10 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -48,6 +47,8 @@ class ProjectServiceTest {
     private ProjectService projectService;
     @Mock
     private ProjectValidator projectValidator;
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Mock
@@ -69,7 +70,7 @@ class ProjectServiceTest {
         List<ProjectFilter> projectFilters = List.of(projectFilter);
 
         projectService = new ProjectService(projectRepository, projectMapper,
-                userContext, projectValidator, projectFilters, teamMemberRepository);
+                userContext, projectValidator, projectFilters, teamMemberRepository, projectViewEventPublisher);
 
 
         long id = 1L;
@@ -111,7 +112,10 @@ class ProjectServiceTest {
         when(projectRepository.existsById(anyLong())).thenReturn(true);
         when(projectRepository.getProjectById(anyLong())).thenReturn(project);
         when(projectMapper.toDto(project)).thenReturn(projectDto);
+        doNothing().when(projectViewEventPublisher).publish(any(ProjectViewEvent.class));
+
         ProjectDto result = projectService.findById(1L);
+
         assertNotNull(result);
         assertEquals(projectDto, result);
     }
