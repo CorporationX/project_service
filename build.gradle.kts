@@ -11,6 +11,9 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://packages.atlassian.com/maven/repository/public")
+    }
 }
 
 dependencies {
@@ -48,6 +51,7 @@ dependencies {
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-joda:2.14.2")
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.6")
     implementation("org.projectlombok:lombok:1.18.26")
@@ -55,6 +59,13 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4")
+    compileOnly("io.atlassian.fugue:fugue:5.0.0")
+    implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
+    implementation("org.glassfish.jersey.core:jersey-client:2.34")
+    implementation("org.glassfish.jersey.core:jersey-common:2.34")
+    implementation("org.glassfish.jersey.media:jersey-media-json-jackson:2.34")
+    implementation("org.glassfish.jersey.inject:jersey-hk2:2.34")
 
     /**
      * Test containers
@@ -96,7 +107,7 @@ val jacocoInclude = listOf(
     "**/projectservice/validator/**",
     "**/projectservice/filter/**",
     "**/projectservice/controller/**"
-    )
+)
 jacoco {
     toolVersion = "0.8.9"
     reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
