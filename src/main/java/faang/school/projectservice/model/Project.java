@@ -1,9 +1,5 @@
 package faang.school.projectservice.model;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,6 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "project")
@@ -90,13 +90,6 @@ public class Project {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
         status = ProjectStatus.CREATED;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

@@ -21,10 +21,12 @@ public class SubProjectController {
     public ProjectDto createSubProject(@Valid @RequestBody CreateSubProjectDto subProjectDto) {
         return subProjectService.createSubProject(subProjectDto);
     }
+
     @PutMapping
     public ProjectDto updateSubProject(@RequestBody UpdateSubProjectDto subProjectDto) {
         return subProjectService.updateProject(subProjectDto);
     }
+
     @GetMapping("/{id}")
     public List<ProjectDto> getSubProjects(@RequestBody SubProjectDtoFilter filter, @PathVariable Long id) {
         return subProjectService.getProjects(filter, id);
