@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.SubProjectDtoFilter;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.service.SubProjectService;
@@ -18,17 +18,17 @@ public class SubProjectController {
     private final SubProjectService subProjectService;
 
     @PostMapping
-    public ProjectDto createSubProject(@Valid @RequestBody CreateSubProjectDto subProjectDto) {
+    public SubProjectDto createSubProject(@Valid @RequestBody CreateSubProjectDto subProjectDto) {
         return subProjectService.createSubProject(subProjectDto);
     }
 
     @PutMapping
-    public ProjectDto updateSubProject(@RequestBody UpdateSubProjectDto subProjectDto) {
+    public SubProjectDto updateSubProject(@RequestBody UpdateSubProjectDto subProjectDto) {
         return subProjectService.updateProject(subProjectDto);
     }
 
     @GetMapping("/{id}")
-    public List<ProjectDto> getSubProjects(@RequestBody SubProjectDtoFilter filter, @PathVariable Long id) {
+    public List<SubProjectDto> getSubProjects(@RequestBody SubProjectDtoFilter filter, @PathVariable Long id) {
         return subProjectService.getProjects(filter, id);
     }
 }

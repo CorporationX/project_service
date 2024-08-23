@@ -2,7 +2,7 @@ package faang.school.projectservice.mapper;
 
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ProjectMapper {
+public interface SubProjectMapper {
 
     @Mapping(target = "parentProjectId", source = "parentProject.id")
     @Mapping(target = "childrenIds", source = "children")
@@ -25,7 +25,7 @@ public interface ProjectMapper {
     @Mapping(target = "stageIds", source = "stages")
     @Mapping(target = "vacancyIds", source = "vacancies")
     @Mapping(target = "momentIds", source = "moments")
-    ProjectDto toDTO(Project project);
+    SubProjectDto toDTO(Project project);
 
     default List<Long> mapChildrenIds(List<Project> children) {
         return children.stream().map(Project::getId).collect(Collectors.toList());
@@ -64,7 +64,7 @@ public interface ProjectMapper {
     @Mapping(target = "stages", ignore = true)
     @Mapping(target = "vacancies", ignore = true)
     @Mapping(target = "moments", ignore = true)
-    Project toEntity(ProjectDto projectDTO);
+    Project toEntity(SubProjectDto subProjectDTO);
 
     @Mapping(target = "parentProject.id", source = "parentId")
     Project toEntity(CreateSubProjectDto projectDTO);

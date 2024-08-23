@@ -1,14 +1,14 @@
 package faang.school.projectservice.dto.project;
 
-import faang.school.projectservice.model.*;
-import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Data;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 @Data
-public class ProjectDto {
+public class SubProjectDto {
     private Long id;
     private String name;
     private String description;

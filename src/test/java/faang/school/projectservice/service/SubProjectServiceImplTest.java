@@ -1,11 +1,11 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.SubProjectDto;
 import faang.school.projectservice.dto.project.SubProjectDtoFilter;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.filter.SubProjectFilter;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -31,7 +31,7 @@ class SubProjectServiceImplTest {
     private ProjectRepository projectRepository;
 
     @Mock
-    private ProjectMapper projectMapper;
+    private SubProjectMapper subProjectMapper;
 
     @Mock
     private List<SubProjectFilter> subProjectFilters;
@@ -62,17 +62,17 @@ class SubProjectServiceImplTest {
         Project subProject = new Project();
         subProject.setId(2L);
 
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setId(2L);
+        SubProjectDto subProjectDto = new SubProjectDto();
+        subProjectDto.setId(2L);
 
-        when(projectMapper.toEntity(createSubProjectDto)).thenReturn(subProject);
+        when(subProjectMapper.toEntity(createSubProjectDto)).thenReturn(subProject);
         when(projectRepository.getProjectById(1L)).thenReturn(parentProject);
         when(projectRepository.save(subProject)).thenReturn(subProject);
-        when(projectMapper.toDTO(subProject)).thenReturn(projectDto);
+        when(subProjectMapper.toDTO(subProject)).thenReturn(subProjectDto);
 
-        ProjectDto result = subProjectService.createSubProject(createSubProjectDto);
+        SubProjectDto result = subProjectService.createSubProject(createSubProjectDto);
 
-        assertEquals(projectDto, result);
+        assertEquals(subProjectDto, result);
         verify(projectRepository, times(1)).save(subProject);
     }
 
@@ -85,21 +85,21 @@ class SubProjectServiceImplTest {
         Project project = new Project();
         project.setId(1L);
         project.setChildren(Collections.emptyList());
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setId(1L);
+        SubProjectDto subProjectDto = new SubProjectDto();
+        subProjectDto.setId(1L);
         Team team = new Team();
         TeamMember teamMember = new TeamMember();
         teamMember.setId(1L);
         team.setTeamMembers(new ArrayList<>(List.of(teamMember)));
         project.setTeams(new ArrayList<>(List.of(team)));
-        when(projectMapper.toEntity(updateSubProjectDto)).thenReturn(project);
+        when(subProjectMapper.toEntity(updateSubProjectDto)).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.toDTO(project)).thenReturn(projectDto);
+        when(subProjectMapper.toDTO(project)).thenReturn(subProjectDto);
         when(projectRepository.getProjectById(updateSubProjectDto.getId())).thenReturn(project);
 
-        ProjectDto result = subProjectService.updateProject(updateSubProjectDto);
+        SubProjectDto result = subProjectService.updateProject(updateSubProjectDto);
 
-        assertEquals(projectDto, result);
+        assertEquals(subProjectDto, result);
         verify(projectRepository, times(1)).save(project);
     }
 
@@ -111,20 +111,20 @@ class SubProjectServiceImplTest {
         Project project = new Project();
         project.setId(1L);
         project.setChildren(new ArrayList<>(List.of(new Project())));
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setId(1L);
+        SubProjectDto subProjectDto = new SubProjectDto();
+        subProjectDto.setId(1L);
 
         SubProjectFilter filter = mock(SubProjectFilter.class);
         when(subProjectFilters.stream()).thenReturn(Stream.of(filter));
         when(filter.isAcceptable(filters)).thenReturn(true);
         when(projectRepository.findAll()).thenReturn(Collections.singletonList(project));
         when(filter.apply(any(), eq(filters))).thenReturn(Stream.of(project));
-        when(projectMapper.toDTO(project)).thenReturn(projectDto);
+        when(subProjectMapper.toDTO(project)).thenReturn(subProjectDto);
         when(projectRepository.getProjectById(1L)).thenReturn(project);
-        List<ProjectDto> result = subProjectService.getProjects(filters,1L);
+        List<SubProjectDto> result = subProjectService.getProjects(filters, 1L);
 
         assertEquals(1, result.size());
-        assertEquals(projectDto, result.get(0));
+        assertEquals(subProjectDto, result.get(0));
     }
 
     @Test
