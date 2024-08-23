@@ -19,3 +19,7 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V012_create_moment_users.sql
   - include:
       file: db/changelog/changeset/project_V013_create_initiative.sql
+  - include:
+      file: db/changelog/changeset/project_V014_resource.sql
+  - include:
+      file: db/changelog/changeset/project_V015_create_meet.sql
