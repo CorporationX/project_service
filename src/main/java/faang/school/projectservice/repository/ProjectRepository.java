@@ -15,7 +15,7 @@ public class ProjectRepository {
 
     public Project getProjectById(Long projectId) {
         return projectJpaRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
+            () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
         );
     }
 
