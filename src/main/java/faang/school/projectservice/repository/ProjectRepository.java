@@ -38,4 +38,8 @@ public class ProjectRepository {
     public boolean existsById(Long id) {
         return projectJpaRepository.existsById(id);
     }
+
+    public List<Project> getAllSubProjectsFor(long parentProjectId) {
+        return projectJpaRepository.getAllSubProjectsFor(parentProjectId);
+    }
 }

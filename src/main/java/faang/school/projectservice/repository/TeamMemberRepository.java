@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class TeamMemberRepository {
@@ -16,11 +18,24 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
+
     public void save(TeamMember teamMember) {
         jpaRepository.save(teamMember);
     }
 
     public boolean existsById(Long id) {
         return jpaRepository.existsById(id);
+    }  
+
+    public List<TeamMember> findByUserId(Long id) {
+        return jpaRepository.findByUserId(id);
+    }
+
+    public List<TeamMember> findByTeamId(Long teamId) {
+        return jpaRepository.findByTeamId(teamId);
+    }
+
+    public List<TeamMember> findByProjectId(Long projectId) {
+        return jpaRepository.findByProjectId(projectId);
     }
 }
