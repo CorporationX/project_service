@@ -38,15 +38,12 @@ public class ResourceServiceImpl implements ResourceService {
     public ResourceDto addResource(MultipartFile file, Long projectId, Long currentMemberId) {
         Project project = projectRepository.getProjectById(projectId);
         BigInteger newStorageSize = BigInteger.valueOf(file.getSize()).add(project.getStorageSize());
-        checkSize(newStorageSize, project.getMaxStorageSize());
+        checkStorageHasEnoughSize(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getName() + project.getId();
 
         Resource resource = s3Service.upload(file, folder);
-        TeamMember teamMember = teamMemberRepository.findById(currentMemberId);
-        resource.setUpdatedBy(teamMember);
-        resource.setAllowedRoles(teamMember.getRoles());
-        resource.setProject(project);
+        updateResource(resource, currentMemberId, project);
         resourceRepository.save(resource);
 
         project.setStorageSize(newStorageSize);
@@ -74,7 +71,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     }
 
-    private void checkSize(BigInteger newProjectSize, BigInteger maxProjectSize) {
+    private void checkStorageHasEnoughSize(BigInteger newProjectSize, BigInteger maxProjectSize) {
         if (newProjectSize.compareTo(maxProjectSize) > 0) {
             throw new InvalidParameterException(String.format("Project size must be greater than or equal to max project(%d)", maxProjectSize.intValue()));
         }
@@ -97,5 +94,12 @@ public class ResourceServiceImpl implements ResourceService {
 
         log.error("Resource not allowed to be deleted. Resource - {}, TeamMember - {}", resource, teamMember);
         throw new ResourceException("You are not allowed to delete this resource");
+    }
+
+    private void updateResource(Resource resource, Long currentMemberId, Project project) {
+        TeamMember teamMember = teamMemberRepository.findById(currentMemberId);
+        resource.setUpdatedBy(teamMember);
+        resource.setAllowedRoles(teamMember.getRoles());
+        resource.setProject(project);
     }
 }
