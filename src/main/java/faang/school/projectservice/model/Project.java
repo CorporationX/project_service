@@ -1,9 +1,5 @@
 package faang.school.projectservice.model;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,6 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "project")
@@ -87,4 +87,9 @@ public class Project {
 
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
+
+    @PrePersist
+    protected void onCreate() {
+        status = ProjectStatus.CREATED;
+    }
 }

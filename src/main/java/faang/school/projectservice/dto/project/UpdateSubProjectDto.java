@@ -4,26 +4,24 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+import java.math.BigInteger;
 @Data
-public class ProjectDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class UpdateSubProjectDto {
+    private long id;
     @NotNull
-    private Long id;
     @NotBlank
     private String name;
-    @NotNull
     private String description;
     private Long ownerId;
-    private ProjectStatus status;
-    private LocalDateTime updatedAt;
+    @NotNull
     private ProjectVisibility visibility;
+    private ProjectStatus status;
+
 }
