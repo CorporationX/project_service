@@ -1,8 +1,10 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectViewEventDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -14,6 +16,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.ProjectViewMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.io.ByteArrayOutputStream;
@@ -44,8 +48,9 @@ public class ProjectService {
     private final List<SubProjectFilter> subProjectFilters;
     private final TeamService teamService;
     private final List<ProjectFilter> filters;
+    private final ProjectViewMessagePublisher projectViewMessagePublisher;
+    private final UserContext userContext;
     private final S3ServiceImpl s3Service;
-
 
 
     @Transactional
@@ -127,6 +132,22 @@ public class ProjectService {
                     log.info("Project with id {} not found", projectFilterDto.getIdPattern());
                     return new DataValidationException("Project not found");
                 }));
+    }
+
+    @Transactional
+    public ProjectDto getProject(Long projectId) {
+        Project project = getProjectById(projectId);
+        viewProject(projectId);
+        return projectMapper.toDto(project);
+    }
+
+    private void viewProject(Long projectId) {
+        ProjectViewEventDto projectViewEvent = ProjectViewEventDto.builder()
+                .projectId(projectId)
+                .userId(userContext.getUserId())
+                .eventTime(LocalDateTime.now())
+                .build();
+        projectViewMessagePublisher.publish(projectViewEvent);
     }
 
     /**
