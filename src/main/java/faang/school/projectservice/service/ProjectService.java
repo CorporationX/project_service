@@ -4,7 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.dto.project.ProjectViewEvent;
+import faang.school.projectservice.dto.project.ProjectViewEventDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -142,7 +142,7 @@ public class ProjectService {
     }
 
     private void viewProject(Long projectId) {
-        ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
+        ProjectViewEventDto projectViewEvent = ProjectViewEventDto.builder()
                 .projectId(projectId)
                 .userId(userContext.getUserId())
                 .eventTime(LocalDateTime.now())

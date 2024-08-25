@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Builder
 @Data
-public class ProjectViewEvent {
+public class ProjectViewEventDto {
     private long userId;
     private long projectId;
     private LocalDateTime eventTime;
