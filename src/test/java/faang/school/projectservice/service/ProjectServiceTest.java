@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -15,6 +16,7 @@ import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 
+import faang.school.projectservice.publisher.ProjectViewMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -86,6 +88,8 @@ public class ProjectServiceTest {
     long subProjectIdOne = 3L;
     MomentDto momentDto;
     S3ServiceImpl s3ServiceImpl;
+    ProjectViewMessagePublisher projectViewMessagePublisher;
+    UserContext userContext;
 
 
     @BeforeEach
@@ -149,6 +153,8 @@ public class ProjectServiceTest {
                 projectRepository,
                 subProjectFilters,
                 filters,
+                projectViewMessagePublisher,
+                userContext,
                 s3ServiceImpl);
     }
 

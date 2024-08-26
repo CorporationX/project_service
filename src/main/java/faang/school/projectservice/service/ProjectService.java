@@ -1,5 +1,7 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
+
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.util.List;
@@ -41,6 +44,9 @@ public class ProjectService {
     private final List<SubProjectFilter> subProjectFilters;
     private final List<ProjectFilter> filters;
     private final S3ServiceImpl s3Service;
+    private final ProjectViewMessagePublisher projectViewMessagePublisher;
+    private final UserContext userContext;
+
 
 
     @Transactional
@@ -72,8 +78,7 @@ public class ProjectService {
         if (project.getVisibility() == null) {
             project.setVisibility(ProjectVisibility.PUBLIC);
         }
-        Project resultProject = projectRepository.save(project);
-        return projectMapper.toDto(resultProject);
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Transactional
@@ -122,6 +127,22 @@ public class ProjectService {
                     log.info("Project with id {} not found", projectFilterDto.getIdPattern());
                     return new DataValidationException("Project not found");
                 }));
+    }
+
+    @Transactional
+    public ProjectDto getProject(Long projectId) {
+        Project project = getProjectById(projectId);
+        viewProject(projectId);
+        return projectMapper.toDto(project);
+    }
+
+    private void viewProject(Long projectId) {
+        ProjectViewEventDto projectViewEvent = ProjectViewEventDto.builder()
+                .projectId(projectId)
+                .userId(userContext.getUserId())
+                .eventTime(LocalDateTime.now())
+                .build();
+        projectViewMessagePublisher.publish(projectViewEvent);
     }
 
     /**

@@ -35,7 +35,7 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.addImage(projectId, file));
     }
 
-    @GetMapping("{projectId}")
+    @GetMapping("{projectId}/image")
     public ResponseEntity<?> getImage(@PathVariable long projectId) {
         val body = projectService.getImage(projectId);
 
@@ -77,5 +77,10 @@ public class ProjectController {
     public  ProjectDto findById(@PathVariable Long userId,
                                 @Validated @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.findById(userId, projectFilterDto);
+    }
+
+    @GetMapping("/{projectId}")
+    public ProjectDto getProject(@PathVariable Long projectId) {
+        return projectService.getProject(projectId);
     }
 }
