@@ -24,6 +24,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        team_channel:
+          name: team_channel
   servlet:
     multipart:
       max-request-size: 5MB
@@ -47,7 +49,7 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://127.0.0.1:9000/
+    endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
     isMocked: false

@@ -5,6 +5,8 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TeamMemberService {
@@ -12,5 +14,9 @@ public class TeamMemberService {
 
     public TeamMember findById(Long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId);
+    }
+
+    public List<TeamMember> findByUserIds(List<Long> userIds){
+        return teamMemberRepository.findByUserIds(userIds);
     }
 }

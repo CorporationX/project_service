@@ -148,7 +148,6 @@ public class ProjectServiceTest {
                 projectMapper,
                 projectRepository,
                 subProjectFilters,
-                teamService,
                 filters,
                 s3ServiceImpl);
     }
