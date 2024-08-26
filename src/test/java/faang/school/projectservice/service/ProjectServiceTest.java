@@ -13,18 +13,33 @@ import faang.school.projectservice.filter.subprojectfilter.SubProjectNameFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
-import faang.school.projectservice.model.*;
-import faang.school.projectservice.mapper.moment.MomentMapper;
-
+import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.publisher.ProjectViewMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.SubProjectValidator;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -33,10 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
@@ -54,11 +65,7 @@ public class ProjectServiceTest {
     @Mock
     private List<ProjectFilter> filters;
     @Mock
-    private TeamService teamService;
-    @Mock
     private MomentService momentService;
-    @Mock
-    private MomentMapper momentMapper;
     @Mock
     private SubProjectNameFilter subProjectNameFilter;
     @Mock
@@ -90,6 +97,7 @@ public class ProjectServiceTest {
     S3ServiceImpl s3ServiceImpl;
     ProjectViewMessagePublisher projectViewMessagePublisher;
     UserContext userContext;
+    Moment moment;
 
 
     @BeforeEach
@@ -136,6 +144,8 @@ public class ProjectServiceTest {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
+        moment = Moment.builder()
+                .build();
         subProjectDto = SubProjectDto.builder()
                 .id(subProjectId)
                 .name("test name")
@@ -153,9 +163,9 @@ public class ProjectServiceTest {
                 projectRepository,
                 subProjectFilters,
                 filters,
+                s3ServiceImpl,
                 projectViewMessagePublisher,
-                userContext,
-                s3ServiceImpl);
+                userContext);
     }
 
     @Test
@@ -306,33 +316,12 @@ public class ProjectServiceTest {
         }
     }
 
-    @Nested
-    @DisplayName("updateSubProject")
-    class updateSubProject {
-
-        @Test
-        void testSaveMoment() {
-            when(momentService.addMoment(any())).thenReturn(momentDto);
-            projectService.updateSubProject(subProjectDto);
-            verify(momentService).addMoment(any());
-        }
-
-        @Test
-        void testGetSubProject() {
-            when(momentService.addMoment(any())).thenReturn(momentDto);
-            when(subProjectMapper.toEntity(subProjectDto)).thenReturn(subProject);
-            projectService.updateSubProject(subProjectDto);
-            verify(subProjectMapper).toEntity(subProjectDto);
-        }
-
-        @Test
-        void testSave() {
-            when(momentService.addMoment(any())).thenReturn(momentDto);
-            when(subProjectMapper.toEntity(subProjectDto)).thenReturn(subProject);
-            when(projectRepository.save(subProject)).thenReturn(subProject);
-            projectService.updateSubProject(subProjectDto);
-            verify(projectRepository).save(subProject);
-        }
+    @Test
+    void testUpdateProject() {
+        when(subProjectMapper.toEntity(subProjectDto)).thenReturn(subProject);
+        when(momentService.getMoment(subProject)).thenReturn(moment);
+        when(projectRepository.save(subProject)).thenReturn(subProject);
+        projectService.updateSubProject(subProjectDto);
     }
 
     @Nested

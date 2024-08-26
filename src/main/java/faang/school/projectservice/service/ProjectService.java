@@ -4,6 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectViewEventDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectDto;
 import faang.school.projectservice.dto.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -15,6 +16,7 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectViewMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -63,7 +65,7 @@ public class ProjectService {
     public void updateSubProject(SubProjectDto subProjectDto) {
         Project subProject = subProjectMapper.toEntity(subProjectDto);
         if (subProject.getStatus().equals(ProjectStatus.COMPLETED)) {
-            Moment moment = momentService.getMomentDto(subProject);
+            Moment moment = momentService.getMoment(subProject);
             subProjectDto.setMomentId(moment.getId());
         }
         projectRepository.save(subProject);

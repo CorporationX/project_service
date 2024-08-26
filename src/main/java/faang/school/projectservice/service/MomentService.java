@@ -21,12 +21,7 @@ public class MomentService {
         return momentRepository.save(momentMapper.toEntity(momentDto));
     }
 
-    public MomentDto addMoment(MomentDto momentDto) {
-        Moment moment = momentMapper.toEntity(momentDto);
-        return momentMapper.toDto(momentRepository.save(moment));
-    }
-
-    public Moment getMomentDto(Project subProject) {
+    public Moment getMoment(Project subProject) {
         List<TeamMember> teamMembers = subProject.getTeams()
                 .stream()
                 .flatMap(team -> team.getTeamMembers().stream())

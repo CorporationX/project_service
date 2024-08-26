@@ -7,17 +7,20 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProjectViewMessagePublisher extends MessagePublisher<ProjectViewEventDto> {
+public class ProjectViewMessagePublisher extends GenericMessagePublisher<ProjectViewEventDto> {
+
 
     private final ChannelTopic projectViewTopic;
 
-    public ProjectViewMessagePublisher(RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper, ChannelTopic projectViewTopic) {
+    public ProjectViewMessagePublisher(RedisTemplate<String, Object> redisTemplate,
+                                       ObjectMapper objectMapper,
+                                       ChannelTopic projectViewTopic) {
         super(redisTemplate, objectMapper);
         this.projectViewTopic = projectViewTopic;
     }
 
     @Override
-    protected ChannelTopic getEventTopic() {
+    protected ChannelTopic getTopic() {
         return projectViewTopic;
     }
 }
