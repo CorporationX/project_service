@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TeamController {
     private final TeamService teamService;
 
-    @PostMapping("")
+    @PostMapping
     public TeamDto createTeam(@RequestBody TeamDto teamDto){
         return teamService.createTeam(teamDto);
     }
