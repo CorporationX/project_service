@@ -1,6 +1,5 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

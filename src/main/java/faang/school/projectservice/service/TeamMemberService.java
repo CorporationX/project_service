@@ -15,8 +15,4 @@ public class TeamMemberService {
     public TeamMember findById(Long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId);
     }
-
-    public List<TeamMember> findByUserIds(List<Long> userIds){
-        return teamMemberRepository.findByUserIds(userIds);
-    }
 }
