@@ -17,6 +17,9 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  config:
+    import: classpath:jira.yaml
+
   data:
     redis:
       port: 6379
@@ -24,6 +27,10 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+
+  jira:
+    url: https://crpx.atlassian.net
+    username: vlzh.nik@mail.ru
 
 server:
   port: 8082
@@ -48,3 +55,8 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+google:
+  calendar:
+    application-name: Google Calendar
+    credentials-path: src/main/resources/calendar/credentials.json

@@ -1,7 +1,6 @@
 package faang.school.projectservice.model;
 
-import java.util.List;
-
+import faang.school.projectservice.model.meet.Meet;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,6 +14,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import java.util.List;
 
 
 @Entity
@@ -22,6 +24,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"meets", "teamMembers"})
 @Builder
 public class Team {
     @Id
@@ -35,4 +38,17 @@ public class Team {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    @OneToMany(mappedBy = "team")
+    private List<Meet> meets;
+
+    public void addMeet(Meet meet) {
+        meets.add(meet);
+        meet.setTeam(this);
+    }
+
+    public void removeMeet(Meet meet) {
+        meets.remove(meet);
+        meet.setTeam(null);
+    }
 }
