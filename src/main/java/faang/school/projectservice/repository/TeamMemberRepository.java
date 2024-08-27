@@ -4,6 +4,7 @@ import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -39,7 +40,8 @@ public class TeamMemberRepository {
         return jpaRepository.findByProjectId(projectId);
     }
 
-    public void deleteTeamMember(long idMember) {
-        // логика удаления из БД TeamMember
+    @Modifying
+    public void deleteTeamMember(List<Long> memberId) {
+        jpaRepository.deleteAllByIdInBatch(memberId);
     }
 }
