@@ -15,7 +15,7 @@ public class ProjectRepository {
 
     public Project getProjectById(Long projectId) {
         return projectJpaRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
+            () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
         );
     }
 
@@ -31,11 +31,15 @@ public class ProjectRepository {
         return projectJpaRepository.existsByOwnerIdAndName(userId, name);
     }
 
-    public Project save(Project project){
+    public Project save(Project project) {
         return projectJpaRepository.save(project);
     }
 
-    public boolean existsById(Long id){
+    public boolean existsById(Long id) {
         return projectJpaRepository.existsById(id);
+    }
+
+    public List<Project> getAllSubProjectsFor(long parentProjectId) {
+        return projectJpaRepository.getAllSubProjectsFor(parentProjectId);
     }
 }
