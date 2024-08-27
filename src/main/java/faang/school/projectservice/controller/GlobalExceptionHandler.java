@@ -4,6 +4,7 @@ import com.amazonaws.services.kms.model.NotFoundException;
 import com.atlassian.jira.rest.client.api.RestClientException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.DeniedInAccessException;
+import faang.school.projectservice.exception.IllegalEntityException;
 import faang.school.projectservice.exception.IllegalSubProjectsStatusException;
 import faang.school.projectservice.exception.errorResponse.ErrorResponse;
 import faang.school.projectservice.exception.errorResponse.JiraErrorResponse;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "faang.school.projectservice")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -66,12 +67,6 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(exception.getMessage());
     }
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(EntityNotFoundException exception) {
-        return new ErrorResponse(exception.getMessage());
-    }
-
     @ExceptionHandler(FeignException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleFeignException(FeignException exception) {
@@ -108,5 +103,11 @@ public class GlobalExceptionHandler {
         });
 
         return new JiraErrorResponse(messages, errors);
+    }
+
+    @ExceptionHandler(IllegalEntityException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse illegalEntityException(IllegalEntityException exception) {
+        return new ErrorResponse(exception.getMessage());
     }
 }

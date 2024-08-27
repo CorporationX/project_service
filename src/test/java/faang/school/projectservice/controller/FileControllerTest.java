@@ -2,7 +2,8 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.resource.ResourceDto;
-import faang.school.projectservice.service.FileServiceUpload;
+import faang.school.projectservice.service.FileUploadService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,36 +17,43 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TestFileController {
+public class FileControllerTest {
     @InjectMocks
     private FileController fileController;
 
     @Mock
-    private FileServiceUpload serviceUpload;
+    private FileUploadService fileUploadService;
     @Mock
     private UserContext userContext;
 
-    @Test
-    public void testAddFileWhenValid() {
+    private long userId;
+    private long projectId;
+    private long resourceId;
+
+    @BeforeEach
+    public void setUp() {
         long userId = 1L;
         long projectId = 1L;
+        long resourceId = 1L;
+    }
+
+    @Test
+    public void testAddFileWhenValid() {
         MultipartFile file = mock(MultipartFile.class);
         when(userContext.getUserId()).thenReturn(userId);
-        when(serviceUpload.createFile(file, projectId, userId)).thenReturn(new ResourceDto());
+        when(fileUploadService.createFile(file, projectId, userId)).thenReturn(new ResourceDto());
 
         fileController.addFile(file, projectId);
 
-        verify(serviceUpload, times(1)).createFile(file, projectId, userId);
+        verify(fileUploadService, times(1)).createFile(file, projectId, userId);
     }
 
     @Test
     public void testDeleteFileWhenValid() {
-        long resourceId = 1L;
-        long userId = 1L;
         when(userContext.getUserId()).thenReturn(userId);
 
         fileController.deleteFile(resourceId);
 
-        verify(serviceUpload, times(1)).deleteFile(resourceId, userId);
+        verify(fileUploadService, times(1)).deleteFile(resourceId, userId);
     }
 }

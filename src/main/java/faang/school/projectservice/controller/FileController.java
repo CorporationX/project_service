@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.resource.ResourceDto;
-import faang.school.projectservice.service.FileServiceUpload;
+import faang.school.projectservice.service.FileUploadService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,21 +17,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/avi/v1")
+@RequestMapping("/avi/v1/file")
 public class FileController {
-    private final FileServiceUpload serviceUpload;
+    private final FileUploadService fileUploadService;
     private final UserContext userContext;
 
     @PostMapping("/{projectId}")
     @ResponseStatus(HttpStatus.OK)
     public ResourceDto addFile(@RequestParam("file") MultipartFile file,
                                @PathVariable long projectId) {
-        return serviceUpload.createFile(file, projectId, userContext.getUserId());
+        return fileUploadService.createFile(file, projectId, userContext.getUserId());
     }
 
     @DeleteMapping("/{resourceId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteFile(@PathVariable long resourceId) {
-        serviceUpload.deleteFile(resourceId, userContext.getUserId());
+        fileUploadService.deleteFile(resourceId, userContext.getUserId());
     }
 }

@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.amazon.AmazonS3Service;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.client.resource.MapperResource;
@@ -15,7 +14,6 @@ import faang.school.projectservice.validator.FileServiceValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +22,7 @@ import java.math.BigInteger;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class FileServiceUpload {
+public class FileUploadService {
     private final ResourceRepository resourceRepository;
     private final ProjectRepository projectRepository;
     private final AmazonS3Service s3Service;
@@ -38,15 +36,13 @@ public class FileServiceUpload {
         UserDto userDto = userServiceClient.getUser(userId);
         TeamMember teamMember = teamMemberRepository.findById(userId);
         Project project = projectRepository.getProjectById(projectId);
+
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         fileServiceValidator.checkMemoryAvailability(newStorageSize, userDto);
 
         String nameFolder = project.getName() + projectId;
         Resource resource = s3Service.createFile(file, nameFolder);
-        resource.setProject(project);
-        resource.setAllowedRoles(teamMember.getRoles());
-        resource.setCreatedBy(teamMember);
-        resource.setUpdatedBy(teamMember);
+        addConnectionsResource(resource, project, teamMember);
 
         project.setStorageSize(newStorageSize);
         resourceRepository.save(resource);
@@ -59,9 +55,7 @@ public class FileServiceUpload {
     public void deleteFile(long resourceId, long userId) {
         Resource resource = resourceRepository.getReferenceById(resourceId);
         Project project = projectRepository.getProjectById(resource.getProject().getId());
-        if (project.getOwnerId() != userId || resource.getCreatedBy().getId() != userId) {
-            throw new SecurityException("No access rights to delete file");
-        }
+        fileServiceValidator.checkAccessRights(project.getOwnerId(), resource.getCreatedBy().getId(), userId);
 
         BigInteger newSize = project.getStorageSize().subtract(resource.getSize());
         project.setStorageSize(newSize);
@@ -69,6 +63,13 @@ public class FileServiceUpload {
 
         resource.setUpdatedBy(teamMemberRepository.findById(userId));
         projectRepository.save(project);
-        resourceRepository.delete(resource);
+        resourceRepository.save(resource);
+    }
+
+    private void addConnectionsResource(Resource resource, Project project, TeamMember teamMember) {
+        resource.setProject(project);
+        resource.setAllowedRoles(teamMember.getRoles());
+        resource.setCreatedBy(teamMember);
+        resource.setUpdatedBy(teamMember);
     }
 }

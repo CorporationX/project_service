@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.amazon.AmazonS3Service;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.client.resource.MapperResource;
@@ -19,24 +18,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TestFileService {
+public class FileUploadServiceTest {
     @InjectMocks
-    private FileServiceUpload fileService;
+    private FileUploadService fileService;
     @Mock
     private ResourceRepository resourceRepository;
     @Mock
@@ -78,16 +74,16 @@ public class TestFileService {
         project.setId(1L);
         project.setName("Name");
         project.setOwnerId(1L);
-        project.setStorageSize(new BigInteger("123")); //
+        project.setStorageSize(new BigInteger("123"));
 
         resource = new Resource();
         resource.setId(1L);
         resource.setProject(project);
         resource.setCreatedBy(teamMember);
-        resource.setSize(new BigInteger("12345")); //
+        resource.setSize(new BigInteger("12345"));
     }
 
-    @DisplayName("Когда метод создания файла успешно отработал")
+    @DisplayName("Метод создания файла успешно отработал")
     @Test
     public void testCreateFileWhenValid() {
         String nameFolder = project.getName() + projectId;
@@ -106,44 +102,19 @@ public class TestFileService {
         verify(projectRepository, times(1)).save(project);
     }
 
-    @DisplayName("Если файл пытается удалить не менеджер проекта")
-    @Test
-    public void testDeleteFileWhenUserNotOwner() {
-        project.setOwnerId(2L);
-        when(resourceRepository.getReferenceById(resourceId)).thenReturn(resource);
-        when(projectRepository.getProjectById(resource.getProject().getId())).thenReturn(project);
-
-        assertThrows(SecurityException.class, () -> fileService.deleteFile(resourceId, userId));
-
-        verify(s3Service, never()).deleteFile(resource);
-        verify(projectRepository, never()).save(project);
-        verify(resourceRepository, never()).delete(resource);
-    }
-
-    @DisplayName("Если файл пытается удалить не создатель файла")
-    @Test
-    public void testDeleteFileWhenUserNotCreator() {
-        teamMember.setId(2L);
-        resource.setCreatedBy(teamMember);
-        when(resourceRepository.getReferenceById(resourceId)).thenReturn(resource);
-        when(projectRepository.getProjectById(resource.getProject().getId())).thenReturn(project);
-
-        assertThrows(SecurityException.class, () -> fileService.deleteFile(resourceId, userId));
-
-        verify(s3Service, never()).deleteFile(resource);
-        verify(projectRepository, never()).save(project);
-        verify(resourceRepository, never()).delete(resource);
-    }
-
-    @DisplayName("Когда метод удаления файла успешно отработал")
+    @DisplayName("Метод удаления файла успешно отработал")
     @Test
     public void testDeleteFileWhenValid() {
         when(resourceRepository.getReferenceById(resourceId)).thenReturn(resource);
         when(projectRepository.getProjectById(resource.getProject().getId())).thenReturn(project);
         when(teamMemberRepository.findById(userId)).thenReturn(teamMember);
 
+        fileService.deleteFile(resourceId, userId);
+
+        verify(fileServiceValidator, times(1))
+                .checkAccessRights(project.getOwnerId(), resource.getCreatedBy().getId(), userId);
         verify(s3Service, times(1)).deleteFile(resource);
         verify(projectRepository, times(1)).save(project);
-        verify(resourceRepository, times(1)).delete(resource);
+        verify(resourceRepository, times(1)).save(resource);
     }
 }
