@@ -35,7 +35,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Vacancy {
+    public class Vacancy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,6 +49,7 @@ public class Vacancy {
 
     @ManyToOne
     @JoinColumn(name = "project_id")
+    @NotNull(message = "Project must be specified")
     private Project project;
 
     @OneToMany(mappedBy = "vacancy")
@@ -84,4 +85,11 @@ public class Vacancy {
     @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "skill_id")
     private List<Long> requiredSkillIds;
+
+    @Column(name = "owner_member")
+    private long ownerMember;
+
+    @Column(name = "team_role")
+    @Enumerated(EnumType.STRING)
+    private TeamRole teamRole;
 }
