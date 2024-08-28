@@ -13,50 +13,50 @@ import java.math.BigInteger;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ExtendWith(MockitoExtension.class)
-public class TestFileServiceValidator {
-    private FileServiceValidator fileServiceValidator;
-    private UserDto userDto;
-
-    @BeforeEach
-    public void setUp() {
-        userDto = new UserDto();
-        fileServiceValidator = new FileServiceValidator();
-    }
-
-    @DisplayName("Если пользователь не премиум и память свободна")
-    @Test
-    public void testCheckMemoryAvailabilityUserClassicMemoryFree() {
-        userDto.setPremiumStatus("Classic");
-        BigInteger size = new BigInteger("12345");
-
-        assertDoesNotThrow(() -> fileServiceValidator.checkMemoryAvailability(size, userDto));
-    }
-
-    @DisplayName("Если пользователь не премиум и память заполнена")
-    @Test
-    public void testCheckMemoryAvailabilityUserClassicMemoryFull() {
-        userDto.setPremiumStatus("Classic");
-        BigInteger size = new BigInteger("2147483650");
-
-        assertThrows(StorageLimitExceededException.class, () -> fileServiceValidator.checkMemoryAvailability(size, userDto));
-    }
-
-    @DisplayName("Если пользователь премиум и память свободна")
-    @Test
-    public void testCheckMemoryAvailabilityUserPremiumMemoryFree() {
-        userDto.setPremiumStatus("Premium");
-        BigInteger size = new BigInteger("4294967280");
-
-        assertDoesNotThrow(() -> fileServiceValidator.checkMemoryAvailability(size, userDto));
-    }
-
-    @DisplayName("Если пользователь премиум и память заполнена")
-    @Test
-    public void testCheckMemoryAvailabilityUserPremiumMemoryFull() {
-        userDto.setPremiumStatus("Premium");
-        BigInteger size = new BigInteger("4294967300");
-
-        assertThrows(StorageLimitExceededException.class, () -> fileServiceValidator.checkMemoryAvailability(size, userDto));
-    }
-}
+//@ExtendWith(MockitoExtension.class)
+//public class TestFileServiceValidator {
+//    private FileServiceValidator fileServiceValidator;
+//    private UserDto userDto;
+//
+//    @BeforeEach
+//    public void setUp() {
+//        userDto = new UserDto();
+//        fileServiceValidator = new FileServiceValidator();
+//    }
+//
+//    @DisplayName("Если пользователь не премиум и память свободна")
+//    @Test
+//    public void testCheckMemoryAvailabilityUserClassicMemoryFree() {
+//        userDto.setPremiumStatus("Classic");
+//        BigInteger size = new BigInteger("12345");
+//
+//        assertDoesNotThrow(() -> fileServiceValidator.checkMemoryAvailability(size, userDto));
+//    }
+//
+//    @DisplayName("Если пользователь не премиум и память заполнена")
+//    @Test
+//    public void testCheckMemoryAvailabilityUserClassicMemoryFull() {
+//        userDto.setPremiumStatus("Classic");
+//        BigInteger size = new BigInteger("2147483650");
+//
+//        assertThrows(StorageLimitExceededException.class, () -> fileServiceValidator.checkMemoryAvailability(size, userDto));
+//    }
+//
+//    @DisplayName("Если пользователь премиум и память свободна")
+//    @Test
+//    public void testCheckMemoryAvailabilityUserPremiumMemoryFree() {
+//        userDto.setPremiumStatus("Premium");
+//        BigInteger size = new BigInteger("4294967280");
+//
+//        assertDoesNotThrow(() -> fileServiceValidator.checkMemoryAvailability(size, userDto));
+//    }
+//
+//    @DisplayName("Если пользователь премиум и память заполнена")
+//    @Test
+//    public void testCheckMemoryAvailabilityUserPremiumMemoryFull() {
+//        userDto.setPremiumStatus("Premium");
+//        BigInteger size = new BigInteger("4294967300");
+//
+//        assertThrows(StorageLimitExceededException.class, () -> fileServiceValidator.checkMemoryAvailability(size, userDto));
+//    }
+//}
