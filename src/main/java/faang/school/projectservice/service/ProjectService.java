@@ -1,15 +1,13 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.*;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -19,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +36,7 @@ public class ProjectService {
     private final ProjectValidator projectValidator;
     private final List<ProjectFilter> projectFilters;
     private final TeamMemberRepository teamMemberRepository;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     @Transactional(readOnly = true)
     public List<ProjectDto> findAll() {
@@ -69,6 +69,12 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public ProjectDto findById(Long id) {
         existById(id);
+        projectViewEventPublisher.publish(ProjectViewEvent.builder()
+                .projectId(id)
+                .userId(userContext.getUserId())
+                .receivedAt(LocalDateTime.now())
+                .build());
+
         return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 
