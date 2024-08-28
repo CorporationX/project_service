@@ -10,7 +10,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.validator.FileServiceValidator;
+//import faang.school.projectservice.validator.FileServiceValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

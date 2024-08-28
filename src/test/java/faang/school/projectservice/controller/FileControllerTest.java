@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.resource.ResourceDto;
-import faang.school.projectservice.service.FileUploadService;
+//import faang.school.projectservice.service.FileUploadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

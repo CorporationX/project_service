@@ -10,7 +10,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.validator.FileServiceValidator;
+//import faang.school.projectservice.validator.FileServiceValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
