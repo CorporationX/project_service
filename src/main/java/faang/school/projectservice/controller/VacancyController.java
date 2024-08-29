@@ -48,7 +48,7 @@ public class VacancyController {
     }
 
     @PutMapping("/update/{vacancyId}")
-    public VacancyDto update(@RequestBody UpdateVacancyDto updateVacancyDto, @PathVariable long vacancyId) {
+    public VacancyDto update(@RequestBody @Valid UpdateVacancyDto updateVacancyDto, @PathVariable long vacancyId) {
         return vacancyService.update(updateVacancyDto, vacancyId);
     }
 
