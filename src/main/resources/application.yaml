@@ -51,6 +51,10 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    region: us-east-1
+    storage_size:
+      standard: 2147483648
+      premium: 4294967296
   payment-service:
     host: http://localhost
     port: 9080
