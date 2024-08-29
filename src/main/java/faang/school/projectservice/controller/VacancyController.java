@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.filter.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/vacancy")
+@RequestMapping("v1/vacancy")
 @RequiredArgsConstructor
 public class VacancyController {
     private final VacancyService vacancyService;
@@ -29,25 +31,25 @@ public class VacancyController {
         return vacancyService.create(vacancy);
     }
 
-    @GetMapping
-    public VacancyDto getVacancyById(long vacancyId) {
+    @GetMapping("{vacancyId}")
+    public VacancyDto getVacancyById(@PathVariable long vacancyId) {
         return vacancyService.getVacancyById(vacancyId);
     }
 
-    @DeleteMapping
+    @DeleteMapping({"vacancyId"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteVacancyById(long vacancyId) {
+    public void deleteVacancyById(@PathVariable long vacancyId) {
         vacancyService.deleteVacancyById(vacancyId);
     }
 
     @GetMapping
-    public List<VacancyDto> getAllByFilter(@RequestBody VacancyFilterDto vacancyFilterDto) {
-        return vacancyService.getAllByFilter(vacancyFilterDto);
+    public List<VacancyDto> getFilteredVacancy(@RequestBody VacancyFilterDto vacancyFilterDto) {
+        return vacancyService.getFilteredVacancy(vacancyFilterDto);
     }
 
-    @PutMapping
-    public VacancyDto update(@RequestBody VacancyDto vacancyDto, long vacancyId) {
-        return vacancyService.update(vacancyDto, vacancyId);
+    @PutMapping("/update/{vacancyId}")
+    public VacancyDto update(@RequestBody UpdateVacancyDto updateVacancyDto, @PathVariable long vacancyId) {
+        return vacancyService.update(updateVacancyDto, vacancyId);
     }
 
 }

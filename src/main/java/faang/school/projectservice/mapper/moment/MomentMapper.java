@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @Mapper(componentModel = "spring",
-        uses = {ResourceMapper.class, ProjectMapper.class},
+        uses = {ResourceIdMapper.class, ProjectMapper.class},
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface MomentMapper {

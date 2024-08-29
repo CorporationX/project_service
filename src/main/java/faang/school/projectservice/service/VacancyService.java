@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.filter.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.filter.VacancyFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
@@ -28,7 +29,9 @@ public class VacancyService {
 
     @Transactional
     public VacancyDto create(VacancyDto vacancyDto) {
-        vacancyValidator.validateVacancy(vacancyDto);
+        vacancyValidator.validateExistingOfProject(vacancyDto.getProjectId());
+        vacancyValidator.validateVacancyCreator(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
+
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         return vacancyMapper.toDto(vacancyRepository.save(vacancy));
     }
@@ -59,34 +62,15 @@ public class VacancyService {
     }
 
     @Transactional
-    public VacancyDto update(VacancyDto vacancyDto, long vacancyId) {
+    public VacancyDto update(UpdateVacancyDto updateVacancyDto, long vacancyId) {
         vacancyValidator.checkExistingOfVacancy(vacancyId);
-        vacancyValidator.validateVacancy(vacancyDto);
-
         Vacancy vacancy = vacancyRepository.getReferenceById(vacancyId);
-
-        List<Long> newCandidatesId = vacancyDto.getCandidateIds();
-        List<Long> currentCandidatesId = vacancy.getCandidates().stream()
-                .map(Candidate::getUserId).toList();
-
-        List<Long> updatedCandidatesId = updateCandidates(newCandidatesId, currentCandidatesId);
-
-        vacancyDto.setCandidateIds(updatedCandidatesId);
-        vacancyMapper.updateVacancy(vacancyDto, vacancy);
-        vacancy.setId(vacancyId);
+        vacancyMapper.updateVacancy(updateVacancyDto, vacancy);
         return vacancyMapper.toDto(vacancyRepository.save(vacancy));
     }
 
-    private List<Long> updateCandidates(List<Long> newCandidatesId, List<Long> currentCandidatesId) {
-        return Stream.concat(
-                        newCandidatesId != null ? newCandidatesId.stream() : Stream.empty(),
-                        currentCandidatesId != null ? currentCandidatesId.stream() : Stream.empty())
-                .distinct()
-                .toList();
-    }
-
     @Transactional(readOnly = true)
-    public List<VacancyDto> getAllByFilter(VacancyFilterDto filters) {
+    public List<VacancyDto> getFilteredVacancy(VacancyFilterDto filters) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
         return vacancyFilters.stream()
                 .filter(vacancyFilter -> vacancyFilter.isApplicable(filters))

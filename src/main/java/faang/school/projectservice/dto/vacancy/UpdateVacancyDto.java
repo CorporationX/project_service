@@ -7,27 +7,17 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
-public class VacancyDto {
-    private long id;
+public class UpdateVacancyDto {
     @NotBlank
     private String name;
     @NotBlank
     private String description;
-    @NonNull
-    private long projectId;
     private List<Long> candidateIds;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    @NonNull
-    private long createdBy;
-    private long updatedBy;
     private VacancyStatus status;
     @PositiveOrZero
     private Double salary;
@@ -35,8 +25,5 @@ public class VacancyDto {
     private Integer count;
     @NotEmpty
     private List<Long> requiredSkillIds;
-
-
-
 
 }

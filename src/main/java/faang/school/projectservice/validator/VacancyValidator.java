@@ -1,6 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.LongStream;
 
 @Component
 @RequiredArgsConstructor
@@ -21,20 +23,19 @@ public class VacancyValidator {
     private final TeamMemberRepository teamMemberRepository;
     private final VacancyRepository vacancyRepository;
 
-
-    public void validateVacancy(VacancyDto vacancy) {
-        projectIsExist(vacancy.getProjectId());
-        checkCreatorIsMemberOfTeam(vacancy.getProjectId(), vacancy.getCreatedBy());
-        validateIsProjectOwnerIsCreatingVacancy(vacancy.getCreatedBy(), vacancy.getProjectId());
-        validateStatusOfVacancyCreator(vacancy.getCreatedBy());
-        checkSkills(vacancy.getRequiredSkillIds());
-    }
-
-    private void projectIsExist(long projectId) {
+    public void validateExistingOfProject(long projectId) {
         if (!projectRepository.existsById(projectId)) {
             throw new DataValidationException("The project doesn't exist in the System");
         }
     }
+
+    public void validateVacancyCreator(long authorId, long projectId){
+        long ownerId = projectRepository.getProjectById(projectId).getOwnerId();
+        if (authorId != ownerId) {
+            throw new DataValidationException("Only project owner can create new vacancy");
+        }
+    }
+
 
     private void checkCreatorIsMemberOfTeam(long projectId, long memberId) {
         Project project = projectRepository.getProjectById(projectId);
@@ -67,15 +68,9 @@ public class VacancyValidator {
         }
     }
 
-    private void checkSkills(List<Long> skillsId) {
-        if (skillsId.isEmpty()) {
-            throw new DataValidationException("The list of skills is null");
-        }
-    }
-
     public void checkExistingOfVacancy(long vacancyId) {
         if (!vacancyRepository.existsById(vacancyId)) {
-            throw new DataValidationException("The vacancy doesn't exist in the system ID = " + vacancyId);
+            throw new EntityNotFoundException("The vacancy doesn't exist in the system ID = " + vacancyId);
         }
     }
 }
