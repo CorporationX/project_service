@@ -1,7 +1,8 @@
 package faang.school.projectservice;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.exceptions.DataValidationException;
+
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -149,7 +150,7 @@ public class VacancyServiceTest {
     @DisplayName("Test creating vacancy with non existing project")
     public void testCreateVacancyWithNonExistingProject() {
         String errorMessage = "The project doesn't exist in the System";
-        doThrow(new DataValidationException(errorMessage)).when(vacancyValidator).validateVacancy(vacancyDto);
+        doThrow(new DataValidationException(errorMessage)).when(vacancyValidator).validateExistingOfProject(vacancyDto.getProjectId());
 
         Exception exception = assertThrows(DataValidationException.class, () -> vacancyService.create(vacancyDto));
 
@@ -160,11 +161,11 @@ public class VacancyServiceTest {
     @DisplayName("Test creating vacancy : Creator is not member of the team")
     public void testCreateVacancyCreatorIsNotMemberOfTeam() {
         String errorMessage = "The creator doesn't work on the project";
-        doThrow(new DataValidationException(errorMessage)).when(vacancyValidator).validateVacancy(vacancyDto);
+        doThrow(new DataValidationException(errorMessage)).when(vacancyValidator).validateVacancyCreator(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
 
         Exception exception = assertThrows(DataValidationException.class, () -> vacancyService.create(vacancyDto));
 
-        verify(vacancyValidator, times(1)).validateVacancy(vacancyDto);
+
         verifyNoInteractions(vacancyMapper, vacancyRepository);
 
         assertEquals(errorMessage, exception.getMessage());
@@ -174,7 +175,8 @@ public class VacancyServiceTest {
     @Test
     @DisplayName("Test creating vacancy : Successfully")
     public void testCreateVacancySuccessfully() {
-        doNothing().when(vacancyValidator).validateVacancy(vacancyDto);
+        doNothing().when(vacancyValidator).validateExistingOfProject(vacancyDto.getProjectId());
+        doNothing().when(vacancyValidator).validateVacancyCreator(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
