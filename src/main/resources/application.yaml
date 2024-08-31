@@ -17,8 +17,8 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
-  config:
-    import: classpath:jira.yaml
+#  config:
+#    import: classpath:jira.yaml
 
   data:
     redis:
@@ -66,3 +66,5 @@ google:
   calendar:
     application-name: Google Calendar
     credentials-path: src/main/resources/calendar/credentials.json
+
+api-token: 7

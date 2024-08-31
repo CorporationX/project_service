@@ -51,3 +51,4 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+src/main/resources/calendar/credentials.json
