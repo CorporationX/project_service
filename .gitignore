@@ -5,9 +5,6 @@
 # Ignore Gradle GUI config
 gradle-app.setting
 
-# Ignore google calendar credentials
-resources/calendar/credentials.json
-
 jira.yaml
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
@@ -54,3 +51,4 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+src/main/resources/calendar/credentials.json
