@@ -11,7 +11,7 @@ import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.CampaignRepository;
-import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.CampaignValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -91,7 +91,7 @@ public class CampaignServiceTest {
     }
 
     @Mock
-    private ProjectValidator projectValidator;
+    private CampaignValidator campaignValidator;
 
     @Mock
     private CampaignRepository campaignRepository;
@@ -137,7 +137,6 @@ public class CampaignServiceTest {
                 () -> assertEquals(updateCampaignDto.getTitle(), actualCampaignDto.getTitle())
         );
     }
-
 
 
     @Test
@@ -191,7 +190,7 @@ public class CampaignServiceTest {
     void testGetAllCampaignsByFilter() {
         CampaignFilter campaignFilter = Mockito.mock(CampaignFilter.class);
 
-        campaignService = new CampaignService(campaignRepository, campaignMapper, List.of(campaignFilter), projectValidator);
+        campaignService = new CampaignService(campaignRepository, campaignMapper, List.of(campaignFilter), campaignValidator);
 
         CampaignFiltersDto campaignFiltersDto = new CampaignFiltersDto();
         List<Campaign> campaigns = new ArrayList<>(List.of(Campaign.builder().title("title 2").createdAt(LocalDateTime.now()).build(),
