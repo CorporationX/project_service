@@ -49,13 +49,6 @@ public class Stage {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @ElementCollection
-    @CollectionTable(name = "roles_deficit_mapping",
-            joinColumns = @JoinColumn(name = "project_stage_id"))
-    @MapKeyColumn(name = "team_role")
-    @Column(name = "deficit_count")
-    private Map<TeamRole, Integer> rolesDeficit;
-
     @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
     private List<StageRoles> stageRoles;
 

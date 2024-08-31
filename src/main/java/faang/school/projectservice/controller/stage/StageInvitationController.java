@@ -32,11 +32,11 @@ public class StageInvitationController {
         return stageInvitationService.create(stageInvitationDto);
     }
 
-    @PutMapping("/accept/{id}")
+    @PutMapping("/accept/{invitationId}")
     @Operation(summary = "Accept tage invitation")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public StageInvitationDto acceptStageInvitation(@RequestBody Long id) {
-        return stageInvitationService.acceptStageInvitation(id);
+    public StageInvitationDto acceptStageInvitation(@RequestBody Long invitationId) {
+        return stageInvitationService.acceptStageInvitation(invitationId);
     }
 
     @PutMapping("/reject/{id}")

@@ -2,6 +2,7 @@ package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
@@ -95,26 +96,6 @@ public class StageService {
         stageRepository.delete(stage);
     }
 
-    public Map<String, Integer> getAllRolesDeficit(long stageId) {
-        Stage stage = stageRepository.getById(stageId);
-        Map<TeamRole, Integer> roles = new HashMap<>();
-        Map<String, Integer> rolesDeficit = new HashMap<>();
-
-        for (StageRoles stageRoles : stage.getStageRoles()) {
-            countExecutorsWithRole(roles, stage.getExecutors(), stageRoles.getTeamRole());
-        }
-
-        for (StageRoles stageRoles : stage.getStageRoles()) {
-            TeamRole role = stageRoles.getTeamRole();
-            int roleDeficit = stageRoles.getCount() - roles.get(role);
-            if(roleDeficit > 0) {
-                rolesDeficit.put(role.toString(), roleDeficit);
-            }
-        }
-
-        return rolesDeficit;
-    }
-
     @Transactional
     public void updateStage(long stageId) {
         Stage stage = stageRepository.getById(stageId);
@@ -133,7 +114,7 @@ public class StageService {
         }
     }
 
-    private void countExecutorsWithRole(Map<TeamRole, Integer> roles, List<TeamMember> executors, TeamRole teamRole) {
+    public void countExecutorsWithRole(Map<TeamRole, Integer> roles, List<TeamMember> executors, TeamRole teamRole) {
         int amount = 0;
 
         for (TeamMember executor : executors) {

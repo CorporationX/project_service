@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.stage.StageInvitationFilterDto;
 import faang.school.projectservice.filter.stage.StageInvitationFilter;
 import faang.school.projectservice.mapper.stage.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
@@ -30,6 +29,7 @@ public class StageInvitationService {
     private final List<StageInvitationFilter> stageInvitationFilters;
     private final StageInvitationValidator stageInvitationValidator;
     private final StageRepository stageRepository;
+    private final StageService stageService;
 
     @Transactional
     public StageInvitationDto create(StageInvitationDto stageInvitationDto) {
@@ -43,8 +43,8 @@ public class StageInvitationService {
     }
 
     @Transactional
-    public StageInvitationDto acceptStageInvitation(Long id) {
-        StageInvitation stageInvitation = stageInvitationRepository.findById(id);
+    public StageInvitationDto acceptStageInvitation(Long invitationId) {
+        StageInvitation stageInvitation = stageInvitationRepository.findById(invitationId);
         TeamMember invited = stageInvitation.getInvited();
         stageInvitationValidator.statusPendingCheck(stageInvitation);
 

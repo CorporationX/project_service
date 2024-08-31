@@ -2,13 +2,14 @@ package faang.school.projectservice.controller.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.model.StagePreDestroyAction;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.service.stage.StageRolesService;
 import faang.school.projectservice.service.stage.StageService;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,7 @@ import java.util.Map;
 @RestController
 public class StageController {
     private final StageService stageService;
+    private final StageRolesService stageRolesService;
 
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
@@ -55,7 +57,7 @@ public class StageController {
     @GetMapping("/roles/deficit/{stageId}")
     @ResponseStatus(HttpStatus.OK)
     public Map<String, Integer> getAllRolesDeficit(@PathVariable long stageId) {
-        stageService.getAllRolesDeficit(stageId);
+        return stageRolesService.getAllRolesDeficit(stageId);
     }
 
     @PutMapping("/update/{stageId}")
@@ -75,5 +77,20 @@ public class StageController {
     @ResponseStatus(HttpStatus.OK)
     public StageDto getStage(@PathVariable long stageId) {
         return stageService.getStage(stageId);
+    }
+
+    @PutMapping("/roles/add")
+    public void addStageRoles(StageRolesDto stageRolesDto) {
+        stageRolesService.addStageRoles(stageRolesDto);
+    }
+
+    @PutMapping("/roles/set")
+    public void setStageRoles(StageRolesDto stageRolesDto) {
+        stageRolesService.setStageRoles(stageRolesDto);
+    }
+
+    @GetMapping("/roles/get/{stageId}")
+    public Map<TeamRole, Integer> getAllStageRoles(@PathVariable long stageId) {
+        return stageRolesService.getAllStageRoles(stageId);
     }
 }
