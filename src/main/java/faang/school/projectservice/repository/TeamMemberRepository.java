@@ -4,6 +4,7 @@ import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class TeamMemberRepository {
 
     public boolean existsById(Long id) {
         return jpaRepository.existsById(id);
-    }  
+    }
 
     public List<TeamMember> findByUserId(Long id) {
         return jpaRepository.findByUserId(id);
@@ -37,5 +38,10 @@ public class TeamMemberRepository {
 
     public List<TeamMember> findByProjectId(Long projectId) {
         return jpaRepository.findByProjectId(projectId);
+    }
+
+    @Modifying
+    public void deleteTeamMember(List<Long> memberId) {
+        jpaRepository.deleteAllByIdInBatch(memberId);
     }
 }
