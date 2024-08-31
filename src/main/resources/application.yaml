@@ -26,6 +26,9 @@ spring:
           name: calculations_channel
         project_view_channel:
           name: project_view_channel
+        project_channel:
+          name: project_channel
+
   servlet:
     multipart:
       max-request-size: 5MB

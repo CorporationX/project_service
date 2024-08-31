@@ -19,18 +19,16 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
-    @Value("${spring.data.redis.channels.project_view_channel}")
+    @Value("${spring.data.redis.channels.project_view_channel.name}")
     private String projectViewChannel;
+
+    @Value("${spring.data.redis.channels.project_channel.name}")
+    private String projectCreateChannel;
 
     @Bean
     RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(redisHost, redisPort);
         return new JedisConnectionFactory(redisConfig);
-    }
-
-    @Bean
-    public ChannelTopic projectViewTopic() {
-        return new ChannelTopic(projectViewChannel);
     }
 
     @Bean
@@ -40,5 +38,15 @@ public class RedisConfig {
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new StringRedisSerializer());
         return template;
+    }
+
+    @Bean
+    public ChannelTopic projectViewTopic() {
+        return new ChannelTopic(projectViewChannel);
+    }
+
+    @Bean
+    public ChannelTopic projectChannelTopic() {
+        return new ChannelTopic(projectCreateChannel);
     }
 }

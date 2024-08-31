@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.dto.project.ProjectChannelEventDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectViewEventDto;
@@ -16,6 +17,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.ProjectMessagePublisher;
 import faang.school.projectservice.publisher.ProjectViewMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
@@ -27,11 +29,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -49,6 +51,7 @@ public class ProjectService {
     private final TeamService teamService;
     private final List<ProjectFilter> filters;
     private final ProjectViewMessagePublisher projectViewMessagePublisher;
+    private final ProjectMessagePublisher projectMessagePublisher;
     private final UserContext userContext;
     private final S3ServiceImpl s3Service;
 
@@ -83,7 +86,9 @@ public class ProjectService {
         if (project.getVisibility() == null) {
             project.setVisibility(ProjectVisibility.PUBLIC);
         }
-        return projectMapper.toDto(projectRepository.save(project));
+        Project savedProject = projectRepository.save(project);
+        publishProject(savedProject.getId(), userId);
+        return projectMapper.toDto(savedProject);
     }
 
     @Transactional
@@ -184,7 +189,6 @@ public class ProjectService {
         return s3Service.downloadImage(projectRepository.getProjectById(projectId).getCoverImageId());
     }
 
-
     @Transactional
     public Project save(Project project) {
         return projectRepository.save(project);
@@ -208,5 +212,14 @@ public class ProjectService {
         }
         momentDto.setUserIds(userIds);
         return momentDto;
+    }
+
+    private void publishProject(long projectId, long userId) {
+        ProjectChannelEventDto projectChannelEventDto = ProjectChannelEventDto.builder()
+                .authorId(userId)
+                .projectId(projectId)
+                .build();
+
+        projectMessagePublisher.publish(projectChannelEventDto);
     }
 }
