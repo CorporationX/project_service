@@ -28,11 +28,11 @@ import java.util.List;
 @RequestMapping("/stage")
 @Tag(name = "Stages", description = "Stages handler")
 public class StageController {
-    private StageService service;
-    private StageControllerValidator validator;
+    private final StageService service;
+    private final StageControllerValidator validator;
 
     @Operation(summary = "Create new stage")
-    @PostMapping("/create")
+    @PostMapping
     public StageDto create(@RequestBody StageDto stage) {
         validator.validate(stage);
         return service.createStage(stage);
@@ -57,13 +57,13 @@ public class StageController {
     }
 
     @Operation(summary = "Get all stages of project")
-    @GetMapping("/getAll/{projectId}")
+    @GetMapping("/projects/{projectId}/stages")
     public List<StageDto> getAll(@PathVariable long projectId) {
         return service.getAll(projectId);
     }
 
     @Operation(summary = "Get all stages of project")
-    @GetMapping("/getStage/{stageId}")
+    @GetMapping("/{stageId}")
     public StageDto getById(@PathVariable long stageId) {
         return service.getById(stageId);
     }

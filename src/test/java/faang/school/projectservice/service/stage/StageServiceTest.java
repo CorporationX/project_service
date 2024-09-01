@@ -10,6 +10,7 @@ import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -143,9 +144,7 @@ class StageServiceTest {
 
     @Test
     void createStage() {
-        when(stageMapper.toEntity(any(StageDto.class))).thenReturn(stage);
-        when(projectRepository.getProjectById(any())).thenReturn(project);
-        when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
+        prepareStageAndProject();
         when(stageRepository.save(any(Stage.class))).thenReturn(stage);
         assertEquals(stageService.createStage(stageDto), stageDto);
     }
@@ -169,6 +168,8 @@ class StageServiceTest {
         when(stageRepository.getById(any())).thenReturn(stage);
         stageService.handle(1L, StageWithTasksAction.CLOSE, null);
         verify(taskRepository, times(2)).save(any());
+
+        stage.getTasks().forEach(task -> assertEquals(TaskStatus.DONE, task.getStatus()));
     }
 
     @Test
@@ -181,9 +182,7 @@ class StageServiceTest {
 
     @Test
     void update() {
-        when(stageMapper.toEntity(any(StageDto.class))).thenReturn(stage);
-        when(projectRepository.getProjectById(any())).thenReturn(project);
-        when(stageMapper.toDto(any())).thenReturn(stageDto);
+        prepareStageAndProject();
         when(stageRepository.save(any())).thenReturn(stage);
         assertEquals(stageService.update(1L, 1L, stageDto), stageDto);
     }
@@ -200,5 +199,11 @@ class StageServiceTest {
         when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
         when(stageRepository.getById(any())).thenReturn(stage);
         assertEquals(stageService.getById(1L), stageDto);
+    }
+
+    private void prepareStageAndProject() {
+        when(stageMapper.toEntity(any(StageDto.class))).thenReturn(stage);
+        when(projectRepository.getProjectById(any())).thenReturn(project);
+        when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
     }
 }

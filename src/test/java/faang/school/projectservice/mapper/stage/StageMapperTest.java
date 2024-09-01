@@ -3,7 +3,6 @@ package faang.school.projectservice.mapper.stage;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.dto.team.TeamMemberDto;
-import faang.school.projectservice.mapper.team.TeamMemberMapper;
 import faang.school.projectservice.mapper.team.TeamMemberMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
@@ -16,12 +15,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class StageMapperTest {
