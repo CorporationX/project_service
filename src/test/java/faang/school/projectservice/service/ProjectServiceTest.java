@@ -16,6 +16,7 @@ import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 
+import faang.school.projectservice.publisher.ProjectMessagePublisher;
 import faang.school.projectservice.publisher.ProjectViewMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
@@ -63,6 +64,8 @@ public class ProjectServiceTest {
     private SubProjectNameFilter subProjectNameFilter;
     @Mock
     private SubProjectStatusFilter subProjectStatusFilter;
+    @Mock
+    private ProjectMessagePublisher projectMessagePublisher;
 
     private List<SubProjectFilter> subProjectFilters;
 
@@ -90,6 +93,7 @@ public class ProjectServiceTest {
     S3ServiceImpl s3ServiceImpl;
     ProjectViewMessagePublisher projectViewMessagePublisher;
     UserContext userContext;
+    Project savedProject;
 
 
     @BeforeEach
@@ -98,6 +102,8 @@ public class ProjectServiceTest {
                 .name("test name")
                 .description("test description")
                 .build();
+        savedProject = project;
+        savedProject.setId(projectId);
         projectDto = ProjectDto.builder()
                 .name("test name")
                 .description("test description")
@@ -155,6 +161,7 @@ public class ProjectServiceTest {
                 teamService,
                 filters,
                 projectViewMessagePublisher,
+                projectMessagePublisher,
                 userContext,
                 s3ServiceImpl);
     }
@@ -168,6 +175,7 @@ public class ProjectServiceTest {
 
     @Test
     void createWithValidParametersShouldMapToEntity() {
+        when(projectRepository.save(project)).thenReturn(savedProject);
         when(projectMapper.toEntity(projectDto)).thenReturn(project);
         projectService.create(userId, projectDto);
         verify(projectMapper).toEntity(projectDto);
@@ -175,6 +183,7 @@ public class ProjectServiceTest {
 
     @Test
     void createWithValidParametersShouldSetOwnerId() {
+        when(projectRepository.save(project)).thenReturn(savedProject);
         when(projectMapper.toEntity(projectDto)).thenReturn(project);
         projectService.create(userId, projectDto);
         Assertions.assertEquals(1L, project.getOwnerId());
@@ -182,6 +191,7 @@ public class ProjectServiceTest {
 
     @Test
     void createWithValidParametersShouldSetStatus() {
+        when(projectRepository.save(project)).thenReturn(savedProject);
         when(projectMapper.toEntity(projectDto)).thenReturn(project);
         projectService.create(userId, projectDto);
         Assertions.assertEquals(ProjectStatus.CREATED, project.getStatus());
@@ -189,6 +199,7 @@ public class ProjectServiceTest {
 
     @Test
     void createWithValidParametersAndVisibilityNotExistsShouldSetDefaultVisibility() {
+        when(projectRepository.save(project)).thenReturn(savedProject);
         when(projectMapper.toEntity(projectDto)).thenReturn(project);
         projectService.create(userId, projectDto);
         Assertions.assertEquals(ProjectVisibility.PUBLIC, project.getVisibility());
@@ -196,6 +207,7 @@ public class ProjectServiceTest {
 
     @Test
     void createWithValidParametersShouldSaveProject() {
+        when(projectRepository.save(project)).thenReturn(savedProject);
         when(projectMapper.toEntity(projectDto)).thenReturn(project);
         projectService.create(userId, projectDto);
         verify(projectRepository).save(project);
@@ -203,6 +215,7 @@ public class ProjectServiceTest {
 
     @Test
     void createWithValidParametersShouldReturnProjectDto() {
+        when(projectRepository.save(project)).thenReturn(savedProject);
         when(projectMapper.toEntity(projectDto)).thenReturn(project);
         projectService.create(userId, projectDto);
         verify(projectMapper).toDto(projectRepository.save(project));
