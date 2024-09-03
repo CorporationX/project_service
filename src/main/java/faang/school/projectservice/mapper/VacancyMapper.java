@@ -2,16 +2,16 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.model.Candidate;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface VacancyMapper {
 
     Vacancy toEntity(VacancyDto vacancyDto);
@@ -28,5 +28,4 @@ public interface VacancyMapper {
         }
         return candidates1;
     }
-    List<VacancyDto> toDtoList(List<Vacancy> vacancies);
 }

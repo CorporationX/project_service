@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.MomentDto;
+
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectViewEventDto;
@@ -12,10 +12,10 @@ import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.filter.subprojectfilter.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.publisher.ProjectViewMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
@@ -28,8 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.util.List;
@@ -46,11 +44,11 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
     private final List<SubProjectFilter> subProjectFilters;
-    private final TeamService teamService;
     private final List<ProjectFilter> filters;
+    private final S3ServiceImpl s3Service;
     private final ProjectViewMessagePublisher projectViewMessagePublisher;
     private final UserContext userContext;
-    private final S3ServiceImpl s3Service;
+
 
 
     @Transactional
@@ -65,12 +63,11 @@ public class ProjectService {
 
     @Transactional
     public void updateSubProject(SubProjectDto subProjectDto) {
-        if (subProjectDto.getStatus().equals(ProjectStatus.COMPLETED)) {
-            MomentDto momentDto = getMomentDto(subProjectDto);
-            MomentDto savedMomentDto = momentService.addMoment(momentDto);
-            subProjectDto.setMomentId(savedMomentDto.getId());
-        }
         Project subProject = subProjectMapper.toEntity(subProjectDto);
+        if (subProject.getStatus().equals(ProjectStatus.COMPLETED)) {
+            Moment moment = momentService.getMoment(subProject);
+            subProjectDto.setMomentId(moment.getId());
+        }
         projectRepository.save(subProject);
     }
 
@@ -184,7 +181,6 @@ public class ProjectService {
         return s3Service.downloadImage(projectRepository.getProjectById(projectId).getCoverImageId());
     }
 
-
     @Transactional
     public Project save(Project project) {
         return projectRepository.save(project);
@@ -194,19 +190,5 @@ public class ProjectService {
         return filters.stream()
                 .filter(filter -> filter.isApplicable(projectFilterDto))
                 .toList();
-    }
-
-    private MomentDto getMomentDto(SubProjectDto subProjectDto) {
-        MomentDto momentDto = MomentDto.builder()
-                .name("Выполнены все подпроекты")
-                .projectIds(Collections.singletonList(subProjectDto.getChildrenId()))
-                .build();
-        List<TeamMember> teamMember = teamService.getAllTeamMember(subProjectDto.getId());
-        List<Long> userIds = new ArrayList<>();
-        for (TeamMember tm : teamMember) {
-            userIds.add(tm.getUserId());
-        }
-        momentDto.setUserIds(userIds);
-        return momentDto;
     }
 }

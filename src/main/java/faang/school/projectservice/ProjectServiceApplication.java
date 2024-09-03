@@ -18,6 +18,7 @@ public class ProjectServiceApplication {
                 .bannerMode(Banner.Mode.OFF)
                 .run(args);
     }
+
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();

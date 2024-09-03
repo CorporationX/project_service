@@ -1,6 +1,5 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +17,7 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
+
+    @Query("SELECT tm FROM TeamMember tm WHERE tm.userId IN :userIds")
+    List<TeamMember> findByUserIds(List<Long> userIds);
 }
