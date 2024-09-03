@@ -19,12 +19,6 @@ public class TeamService {
     private final TeamMapper teamMapper;
     private final TeamMessagePublisher teamMessagePublisher;
 
-    @Transactional(readOnly = true)
-    public void getAllTeamMember(Long TeamId) {
-        Team team = teamRepository.findById(TeamId).orElse(null);
-        assert team != null;
-    }
-
     @Transactional
     public Team createTeamEntity(TeamDto teamDto) {
         Team team = teamRepository.save(teamMapper.toEntity(teamDto));
