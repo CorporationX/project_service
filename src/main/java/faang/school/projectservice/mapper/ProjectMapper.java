@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -19,12 +20,26 @@ public interface ProjectMapper {
     default List<ProjectDto> toDtoList(List<Project> projects) {
         return projects.stream()
                 .map(project -> toDto(project))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     default List<Project> toEntityList(List<ProjectDto> projectsDto) {
         return projectsDto.stream()
                 .map(projectDto -> toEntity(projectDto))
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    @Named("toListProjectId")
+    default List<Long> toListProjectId(List<Project> projects) {
+        return projects.stream().map(Project::getId).toList();
+    }
+
+    @Named("toListProject")
+    default List<Project> toListProject(List<Long> projectIds) {
+        return projectIds.stream().map(id -> {
+            Project project = new Project();
+            project.setId(id);
+            return project;
+        }).toList();
     }
 }

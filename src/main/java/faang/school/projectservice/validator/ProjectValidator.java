@@ -31,4 +31,10 @@ public class ProjectValidator {
             throw new DataValidationException("Ошибка: пользователь id" + userId + "не найден");
         } else return true;
     }
+
+    public void existsProject(Long id) {
+        if (!projectRepository.existsById(id)) {
+            throw new DataValidationException(String.format("Project [%s] id doesn't exist", id));
+        }
+    }
 }

@@ -1,13 +1,16 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.mapper.moment.ProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -25,8 +28,8 @@ public class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
-    @Mock
-    private ProjectMapper projectMapper;
+    @Spy
+    private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
 
     @InjectMocks
     private ProjectService projectService;
@@ -42,7 +45,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(anyLong())).thenReturn(project);
         when(projectMapper.toDto(project)).thenReturn(projectDto);
 
-        ProjectDto result = projectService.getProjectDtoById(1L);
+        ProjectDto result = projectService.getProjectById(1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -55,6 +58,6 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(anyLong())).thenThrow(new EmptyResultDataAccessException("Project not found", 1));
 
         assertThrows(EmptyResultDataAccessException.class, () ->
-                projectService.getProjectDtoById(1L));
+                projectService.getProjectById(1L));
     }
 }

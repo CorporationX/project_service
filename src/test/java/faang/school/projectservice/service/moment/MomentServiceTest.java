@@ -10,9 +10,9 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.moment.filter.MomentFilter;
 import faang.school.projectservice.service.moment.filter.impl.MomentDateFilter;
-import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -117,7 +117,7 @@ class MomentServiceTest {
 
     @Test
     void testCreateMoment_Success() {
-        when(projectService.getProjectDtoById(1L)).thenReturn(projectDto);
+        when(projectService.getProjectById(1L)).thenReturn(projectDto);
         when(momentMapper.toEntity(momentDto)).thenReturn(moment);
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
 
@@ -125,7 +125,7 @@ class MomentServiceTest {
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
-        verify(projectService, times(1)).getProjectDtoById(1L);
+        verify(projectService, times(1)).getProjectById(1L);
         verify(momentMapper, times(1)).toEntity(momentDto);
         verify(momentMapper, times(1)).toDto(moment);
     }
@@ -133,10 +133,10 @@ class MomentServiceTest {
     @Test
     void testCreateMoment_ProjectCancelled() {
         projectDto.setStatus(ProjectStatus.CANCELLED);
-        when(projectService.getProjectDtoById(1L)).thenReturn(projectDto);
+        when(projectService.getProjectById(1L)).thenReturn(projectDto);
 
         assertThrows(DataValidationExceptions.class, () -> momentService.createMoment(1L, momentDto));
-        verify(projectService, times(1)).getProjectDtoById(1L);
+        verify(projectService, times(1)).getProjectById(1L);
         verify(momentMapper, times(0)).toEntity(any());
         verify(momentMapper, times(0)).toDto(any());
     }
@@ -145,7 +145,7 @@ class MomentServiceTest {
     void testUpdateMoment_Success() {
         momentDto.setProjectsId(new ArrayList<>(List.of(1L)));
         moment.setProjects(new ArrayList<>(List.of(Project.builder().id(1L).build())));
-        when(projectService.getProjectDtoById(1L)).thenReturn(projectDto);
+        when(projectService.getProjectById(1L)).thenReturn(projectDto);
         when(momentMapper.toEntity(momentDto)).thenReturn(moment);
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
 
@@ -153,7 +153,7 @@ class MomentServiceTest {
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
-        verify(projectService, times(1)).getProjectDtoById(1L);
+        verify(projectService, times(1)).getProjectById(1L);
         verify(momentMapper, times(1)).toEntity(momentDto);
         verify(momentMapper, times(1)).toDto(moment);
     }

@@ -2,20 +2,18 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
-import faang.school.projectservice.filter.ProjectFilter;
-import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -35,7 +33,7 @@ public class ProjectService {
         return projectMapper.toDto(projectRepository.save(projectEntity));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ProjectDto> getProjectsByFilter(ProjectFilterDto filters) {
         List<Project> projectList = projectRepository.findAll();
         log.info("Project stream started filtering {}", projectList);
@@ -70,9 +68,16 @@ public class ProjectService {
                 .map(projectMapper::toDto)
                 .toList();
     }
-
+    @Transactional(readOnly = true)
     public ProjectDto getProjectById(Long projectId) {
         Project event = projectRepository.getProjectById(projectId);
         return projectMapper.toDto(event);
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(Long id) {
+        return projectRepository.existsById(id);
+    }
+
+
 }
