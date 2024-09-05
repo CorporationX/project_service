@@ -59,3 +59,7 @@ coverImage:
   maxsize: 5000000
   maxWidth: 1080
   maxHeight: 566
+
+file:
+  storage:
+    max-size: 2147483648

@@ -36,10 +36,10 @@ public class ProjectDto {
     @Pattern(regexp = DtoValidationConstraints.PROJECT_DESCRIPTION_PATTERN, message = DtoValidationConstraints.PROJECT_DESCRIPTION_CONSTRAINT)
     private String description;
     @Min(value = 0, message = DtoValidationConstraints.PROJECT_STORAGE_SIZE_LOWER_LIMIT)
-    @Max(value = 1024, message = DtoValidationConstraints.PROJECT_STORAGE_SIZE_UPPER_LIMIT)
+    @Max(value = 2048, message = DtoValidationConstraints.PROJECT_STORAGE_SIZE_UPPER_LIMIT)
     private BigInteger storageSize;
     @Min(value = 0, message = DtoValidationConstraints.PROJECT_MAX_STORAGE_SIZE_LOWER_LIMIT)
-    @Max(value = 1024, message = DtoValidationConstraints.PROJECT_MAX_STORAGE_SIZE_UPPER_LIMIT)
+    @Max(value = 2048, message = DtoValidationConstraints.PROJECT_MAX_STORAGE_SIZE_UPPER_LIMIT)
     private BigInteger maxStorageSize;
     private Long ownerId;
     private Long parentProjectId;
