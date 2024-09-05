@@ -19,11 +19,10 @@ import faang.school.projectservice.service.meet.filter.MeetFilter;
 import faang.school.projectservice.service.meet.filter.StartDateFilter;
 import faang.school.projectservice.service.meet.filter.TitleFilter;
 import faang.school.projectservice.service.team.TeamService;
+import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.meet.MeetValidator;
-import faang.school.projectservice.validator.project.ProjectValidator;
 import faang.school.projectservice.validator.team.TeamValidator;
 import faang.school.projectservice.validator.user.UserValidator;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

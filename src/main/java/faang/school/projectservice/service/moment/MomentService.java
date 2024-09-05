@@ -9,8 +9,8 @@ import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.moment.filter.MomentFilter;
-import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -54,7 +54,7 @@ public class MomentService {
 
     @Transactional
     public MomentDto createMoment(long projectId, MomentDto momentDto) {
-        var projectDto = projectService.getProjectDtoById(projectId);
+        var projectDto = projectService.getProjectById(projectId);
         if (projectDto.getStatus() == ProjectStatus.CANCELLED) {
             String errorMessage = "Сan't create moment for a closed project in MomentService class id: " + projectId;
             log.info(errorMessage);
@@ -73,7 +73,7 @@ public class MomentService {
 
     @Transactional
     public MomentDto updateMoment(long projectId, MomentDto momentDto) {
-        ProjectDto projectDto = projectService.getProjectDtoById(projectId);
+        ProjectDto projectDto = projectService.getProjectById(projectId);
         momentDto.getProjectsId().add(projectDto.getId());
         var moment = momentMapper.toEntity(momentDto);
         momentRepository.save(moment);
