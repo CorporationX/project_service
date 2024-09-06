@@ -53,7 +53,7 @@ public class ProjectServiceImpl implements ProjectService {
             throw new PersistenceException(ExceptionMessages.FAILED_PERSISTENCE, e);
         }
 
-        projectEventPublisher.toEventAndPublish(savedProject.getId());
+        projectEventPublisher.publish(mapper.toEvent(savedProject));
         return mapper.toDto(savedProject);
     }
 

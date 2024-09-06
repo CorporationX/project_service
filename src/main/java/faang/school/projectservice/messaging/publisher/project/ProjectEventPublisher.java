@@ -2,7 +2,6 @@ package faang.school.projectservice.messaging.publisher.project;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.event.project.ProjectEvent;
 import faang.school.projectservice.exception.ExceptionMessages;
 import faang.school.projectservice.messaging.publisher.EventPublisher;
@@ -19,7 +18,6 @@ public class ProjectEventPublisher implements EventPublisher<ProjectEvent> {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;
-    private final UserContext userContext;
 
     @Value("${spring.kafka.topics.project_topic}")
     private String projectTopic;
@@ -34,12 +32,5 @@ public class ProjectEventPublisher implements EventPublisher<ProjectEvent> {
         } catch (JsonProcessingException e) {
             log.error(String.format(ExceptionMessages.FAILED_EVENT, event.getEventId()), e);
         }
-    }
-
-    public void toEventAndPublish(long projectId) {
-        publish(ProjectEvent.builder()
-                .projectId(projectId)
-                .authorId(userContext.getUserId())
-                .build());
     }
 }

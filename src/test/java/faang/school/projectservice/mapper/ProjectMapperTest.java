@@ -2,6 +2,7 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
+import faang.school.projectservice.event.project.ProjectEvent;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -12,7 +13,10 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProjectMapperTest {
 
@@ -121,5 +125,23 @@ class ProjectMapperTest {
         List<ProjectDto> mappedDtos = projectMapper.toDtoList(projects);
 
         assertTrue(mappedDtos.isEmpty());
+    }
+
+    @Test
+    void testToEvent() {
+        project.setId(1L);
+        project.setOwnerId(1L);
+
+        var expectedEvent = ProjectEvent.builder()
+                .projectId(project.getId())
+                .authorId(project.getOwnerId())
+                .build();
+
+        var result = projectMapper.toEvent(project);
+
+        assertEquals(expectedEvent.getProjectId(), result.getProjectId());
+        assertEquals(expectedEvent.getAuthorId(), result.getAuthorId());
+        assertNotNull(result.getEventId());
+        assertNotNull(result.getTimeStamp());
     }
 }
