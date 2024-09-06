@@ -9,7 +9,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ResourceMapper {
+public interface ResourceIdMapper {
 
     @Named("toListResourceId")
     default List<Long> toListResourceId(List<Resource> resources) {
