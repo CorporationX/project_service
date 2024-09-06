@@ -11,6 +11,7 @@ import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.filter.project.ProjectTeamMemberFilter;
 import faang.school.projectservice.filter.project.PublicProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.messaging.publisher.project.ProjectEventPublisher;
 import faang.school.projectservice.messaging.publisher.project.ProjectViewEventPublisher;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -36,8 +37,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -60,6 +64,8 @@ class ProjectServiceImplTest {
     private UserContext userContext;
     @Mock
     private ProjectViewEventPublisher projectViewEventPublisher;
+    @Mock
+    private ProjectEventPublisher projectEventPublisher;
     @InjectMocks
     private ProjectServiceImpl sut;
 
@@ -119,10 +125,12 @@ class ProjectServiceImplTest {
         when(mapper.toEntity(projectDto)).thenReturn(project);
         when(mapper.toDto(project)).thenReturn(projectDto);
         when(projectRepository.save(project)).thenReturn(project);
+        doNothing().when(projectEventPublisher).publish(any());
 
         ProjectDto createdProjectDto = sut.createProject(projectDto);
 
         verify(projectRepository, times(1)).save(projectArgumentCaptor.capture());
+        verify(projectEventPublisher).publish(any());
         assertEquals(projectDto, createdProjectDto);
         assertEquals(ProjectStatus.CREATED, projectArgumentCaptor.getValue().getStatus());
     }
@@ -155,10 +163,12 @@ class ProjectServiceImplTest {
         when(mapper.toDto(project)).thenReturn(projectDto);
         when(projectRepository.getProjectById(projectDto.getParentProjectId())).thenReturn(parentProject);
         when(projectRepository.save(project)).thenReturn(project);
+        doNothing().when(projectEventPublisher).publish(any());
 
         ProjectDto createdProjectDto = sut.createProject(projectDto);
 
         verify(projectRepository, times(1)).save(projectArgumentCaptor.capture());
+        verify(projectEventPublisher).publish(any());
         assertEquals(projectDto, createdProjectDto);
         assertEquals(ProjectStatus.CREATED, projectArgumentCaptor.getValue().getStatus());
         assertEquals(parentProject.getId(), createdProjectDto.getParentProjectId());
@@ -342,9 +352,9 @@ class ProjectServiceImplTest {
                 Project.builder().id(2L).name("the most awesome project").visibility(ProjectVisibility.PRIVATE).ownerId(1L).build(),
                 Project.builder().id(22L).name("the most awesome").visibility(ProjectVisibility.PRIVATE).ownerId(1L).build(),
                 Project.builder().id(3L).name("lol").visibility(ProjectVisibility.PRIVATE).teams(
-                        List.of(Team.builder().teamMembers(
-                                List.of(TeamMember.builder().userId(1L).build()))
-                                .build()))
+                                List.of(Team.builder().teamMembers(
+                                                List.of(TeamMember.builder().userId(1L).build()))
+                                        .build()))
                         .build(),
                 Project.builder().id(33L).name("project extra").visibility(ProjectVisibility.PRIVATE).teams(
                                 List.of(Team.builder().teamMembers(
