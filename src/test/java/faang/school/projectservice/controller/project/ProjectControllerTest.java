@@ -73,8 +73,8 @@ class ProjectControllerTest extends BaseControllerTest {
         var dto = ProjectDto.builder()
                 .name("aasfasgagb")
                 .description("asdghkjwnegjnosdnousdogeg")
-                .storageSize(BigInteger.valueOf(2000L))
-                .maxStorageSize(BigInteger.valueOf(2000L))
+                .storageSize(BigInteger.valueOf(3000L))
+                .maxStorageSize(BigInteger.valueOf(3000L))
                 .build();
 
         mockMvc.perform(post(ApiPath.PROJECTS_PATH)
@@ -167,8 +167,8 @@ class ProjectControllerTest extends BaseControllerTest {
         var updateDto = ProjectUpdateDto.builder()
                 .name("Project Name")
                 .description("Project Description")
-                .storageSize(BigInteger.valueOf(2000L))
-                .maxStorageSize(BigInteger.valueOf(2000L))
+                .storageSize(BigInteger.valueOf(3000L))
+                .maxStorageSize(BigInteger.valueOf(3000L))
                 .build();
 
         mockMvc.perform(put(ApiPath.PROJECTS_PATH + "/1")

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 
@@ -25,30 +24,9 @@ public class S3Service {
     private String bucketName;
 
     public String uploadFile(MultipartFile file, String folder) {
-        long fileSize = file.getSize();
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(fileSize);
-        objectMetadata.setContentType(file.getContentType());
-
+        ObjectMetadata objectMetadata = getMetadata(file);
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-        try {
-            PutObjectRequest request = new PutObjectRequest(
-                    bucketName, key, file.getInputStream(), objectMetadata);
-            amazonS3.putObject(request);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("Failed uploading file: " + file.getOriginalFilename());
-        }
-
-//        Resource resource = new Resource();
-//        resource.setKey(key);
-//        resource.setName(file.getOriginalFilename());
-//        resource.setSize(BigInteger.valueOf(fileSize));
-//        resource.setCreatedAt(LocalDateTime.now());
-//        resource.setUpdatedAt(LocalDateTime.now());
-//        resource.setStatus(ResourceStatus.ACTIVE);
-//        resource.setType(ResourceType.getResourceType(file.getContentType()));
-
+        uploadToS3(file, key, objectMetadata);
         return key;
     }
 
@@ -64,17 +42,9 @@ public class S3Service {
 
     public String putIntoBucket(MultipartFile multipartFile) {
         ObjectMetadata objectMetadata = getMetadata(multipartFile);
-
-        try {
-            String key = System.currentTimeMillis() + multipartFile.getOriginalFilename();
-            PutObjectRequest request = new PutObjectRequest(bucketName, key,
-                    multipartFile.getInputStream(), objectMetadata);
-            amazonS3.putObject(request);
-
-            return key;
-        } catch (IOException e) {
-            throw new RuntimeException("Failed uploading file: " + multipartFile.getOriginalFilename());
-        }
+        String key = System.currentTimeMillis() + multipartFile.getOriginalFilename();
+        uploadToS3(multipartFile, key, objectMetadata);
+        return key;
     }
 
     private ObjectMetadata getMetadata(MultipartFile multipartFile) {
@@ -88,5 +58,16 @@ public class S3Service {
     public void deleteFromBucket(String key) {
         DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucketName, key);
         amazonS3.deleteObject(deleteObjectRequest);
+    }
+
+    private void uploadToS3(MultipartFile file, String key, ObjectMetadata objectMetadata) {
+        try {
+            PutObjectRequest request = new PutObjectRequest(
+                    bucketName, key, file.getInputStream(), objectMetadata);
+            amazonS3.putObject(request);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException("Failed uploading file: " + file.getOriginalFilename());
+        }
     }
 }
