@@ -17,7 +17,6 @@ public class ResourcePermissionValidator {
         Resource resource = resourceRepository.getReferenceById(resourceId);
 
         Project project = resource.getProject();
-        project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
 
         if (resource.getCreatedBy().getUserId().equals(userId)) {
             return resource;

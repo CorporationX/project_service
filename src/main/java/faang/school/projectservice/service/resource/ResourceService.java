@@ -1,17 +1,16 @@
 package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.resource.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceStatus;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.resource.ResourcePermissionValidator;
 import faang.school.projectservice.validator.resource.ResourceSizeValidator;
@@ -25,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 @Service
 @Slf4j
@@ -33,8 +33,6 @@ public class ResourceService {
     private final ResourceRepository resourceRepository;
     private final ProjectRepository projectRepository;
     private final ResourceSizeValidator sizeValidator;
-    private final ProjectService projectService;
-    private final ProjectMapper projectMapper;
     private final ResourceMapper resourceMapper;
     private final S3Service s3Service;
     private final UserContext userContext;
@@ -51,18 +49,17 @@ public class ResourceService {
         sizeValidator.validateSize(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
-        Resource resource = s3Service.uploadFile(file, folder);
-        resource.setProject(project);
+        String key = s3Service.uploadFile(file, folder);
 
+        Resource resource = createResource(file, project, key);
         Long userId = userContext.getUserId();
         TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
         resource.setCreatedBy(teamMember);
-
         resourceRepository.save(resource);
 
         project.setStorageSize(newStorageSize);
-        ProjectUpdateDto projectUpdateDto = projectMapper.toUpdateDto(project, newStorageSize);
-        projectService.updateProject(projectId, projectUpdateDto);
+        projectRepository.save(project);
+
         return resourceMapper.toDto(resource);
     }
 
@@ -74,23 +71,34 @@ public class ResourceService {
     }
 
     @Transactional
-    public void deleteResource(Long resourceId, Long userId) {
+    public void deleteResource(Long resourceId) {
+        Long userId = userContext.getUserId();
         Resource resource = resourcePermissionValidator.getResourceWithPermission(resourceId, userId);
+
+        Project project = resource.getProject();
+        project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
+
         s3Service.deleteFromBucket(resource.getKey());
         resourceRepository.deleteById(resourceId);
     }
 
     @Transactional
-    public ResourceDto updateResource(Long resourceId, Long userId, MultipartFile file) {
+    public ResourceDto updateResource(Long resourceId, MultipartFile file) {
+        Long userId = userContext.getUserId();
         Resource resourceFromDb = resourcePermissionValidator.getResourceWithPermission(resourceId, userId);
         Project project = resourceFromDb.getProject();
 
-        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
+        BigInteger newStorageSize = project.getStorageSize()
+                .add(BigInteger.valueOf(file.getSize()))
+                .subtract(resourceFromDb.getSize());
         sizeValidator.validateSize(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
         s3Service.deleteFromBucket(resourceFromDb.getKey());
-        Resource resource = s3Service.uploadFile(file, folder);
+
+        String key = s3Service.uploadFile(file, folder);
+        Resource resource = createResource(file, project, key);
+
         resourceFromDb.setKey(resource.getKey());
         resourceFromDb.setName(resource.getName());
         resourceFromDb.setSize(resource.getSize());
@@ -99,8 +107,21 @@ public class ResourceService {
         resourceRepository.save(resourceFromDb);
 
         project.setStorageSize(newStorageSize);
-        ProjectUpdateDto projectUpdateDto = projectMapper.toUpdateDto(project, newStorageSize);
-        projectService.updateProject(project.getId(), projectUpdateDto);
+        projectRepository.save(project);
+
         return resourceMapper.toDto(resource);
+    }
+
+    private Resource createResource(MultipartFile file, Project project, String key) {
+        Resource resource = new Resource();
+        resource.setKey(key);
+        resource.setName(file.getOriginalFilename());
+        resource.setSize(BigInteger.valueOf(file.getSize()));
+        resource.setCreatedAt(LocalDateTime.now());
+        resource.setUpdatedAt(LocalDateTime.now());
+        resource.setStatus(ResourceStatus.ACTIVE);
+        resource.setType(ResourceType.getResourceType(file.getContentType()));
+        resource.setProject(project);
+        return resource;
     }
 }

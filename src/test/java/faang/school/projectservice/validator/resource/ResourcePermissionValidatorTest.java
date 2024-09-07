@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,9 +34,7 @@ class ResourcePermissionValidatorTest {
 
         Resource resource = new Resource();
         Project project = new Project();
-        project.setStorageSize(BigInteger.TEN);
         resource.setProject(project);
-        resource.setSize(BigInteger.TEN);
 
         TeamMember creator = new TeamMember();
         creator.setUserId(userId);
@@ -49,7 +46,6 @@ class ResourcePermissionValidatorTest {
 
         assertEquals(resource, result);
         verify(resourceRepository, times(1)).getReferenceById(resourceId);
-        assertEquals(BigInteger.ZERO, project.getStorageSize());
     }
 
     @Test
@@ -59,9 +55,7 @@ class ResourcePermissionValidatorTest {
 
         Resource resource = new Resource();
         Project project = new Project();
-        project.setStorageSize(BigInteger.TEN);
         resource.setProject(project);
-        resource.setSize(BigInteger.TEN);
 
         TeamMember creator = new TeamMember();
         creator.setUserId(3L);
@@ -82,7 +76,6 @@ class ResourcePermissionValidatorTest {
 
         assertEquals(resource, result);
         verify(resourceRepository, times(1)).getReferenceById(resourceId);
-        assertEquals(BigInteger.ZERO, project.getStorageSize());
     }
 
     @Test
@@ -92,9 +85,7 @@ class ResourcePermissionValidatorTest {
 
         Resource resource = new Resource();
         Project project = new Project();
-        project.setStorageSize(BigInteger.TEN);
         resource.setProject(project);
-        resource.setSize(BigInteger.TEN);
 
         TeamMember creator = new TeamMember();
         creator.setUserId(3L);

@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller.resource;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +27,6 @@ public class ResourceControllerTest {
     private ResourceController resourceController;
     @Mock
     private ResourceService resourceService;
-    @Mock
-    private UserContext userContext;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -46,7 +43,7 @@ public class ResourceControllerTest {
         ResourceDto resourceDto = new ResourceDto();
         when(resourceService.addResource(eq(projectId), any())).thenReturn(resourceDto);
 
-        mockMvc.perform(multipart("/resources/{projectId}/add", projectId)
+        mockMvc.perform(multipart("/resources/{projectId}", projectId)
                         .file(file))
                 .andExpect(status().isOk());
 
@@ -75,13 +72,11 @@ public class ResourceControllerTest {
     @Test
     void updateResourceTest() throws Exception {
         Long resourceId = 1L;
-        Long userId = 2L;
         MockMultipartFile file = new MockMultipartFile("file", "update.txt",
                 "text/plain", "Updated content".getBytes());
         ResourceDto resourceDto = new ResourceDto();
 
-        when(userContext.getUserId()).thenReturn(userId);
-        when(resourceService.updateResource(resourceId, userId, file)).thenReturn(resourceDto);
+        when(resourceService.updateResource(resourceId, file)).thenReturn(resourceDto);
 
         mockMvc.perform(multipart("/resources/{resourceId}", resourceId)
                         .file(file)
@@ -91,20 +86,17 @@ public class ResourceControllerTest {
                         }))
                 .andExpect(status().isOk());
 
-        verify(resourceService, times(1)).updateResource(eq(resourceId), eq(userId), any());
+        verify(resourceService, times(1)).updateResource(eq(resourceId), any());
     }
 
     @Test
     void deleteResourceTest() throws Exception {
         Long resourceId = 1L;
-        Long userId = 2L;
-
-        when(userContext.getUserId()).thenReturn(userId);
 
         mockMvc.perform(delete("/resources/{resourceId}", resourceId))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Resource deleted successfully."));
 
-        verify(resourceService, times(1)).deleteResource(resourceId, userId);
+        verify(resourceService, times(1)).deleteResource(resourceId);
     }
 }

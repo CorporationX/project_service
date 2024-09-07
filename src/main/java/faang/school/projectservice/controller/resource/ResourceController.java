@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller.resource;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +27,8 @@ import java.io.InputStream;
 @RequestMapping("/resources")
 public class ResourceController {
     private final ResourceService resourceService;
-    private final UserContext userContext;
 
-    @PostMapping("/{projectId}/add")
+    @PostMapping("/{projectId}")
     public ResourceDto addResource(@PathVariable Long projectId, @RequestParam("file") MultipartFile file) {
         return resourceService.addResource(projectId, file);
     }
@@ -51,12 +49,12 @@ public class ResourceController {
 
     @PutMapping("/{resourceId}")
     public ResourceDto updateResource(@PathVariable Long resourceId, @RequestParam("file") MultipartFile file) {
-        return resourceService.updateResource(resourceId, userContext.getUserId(), file);
+        return resourceService.updateResource(resourceId, file);
     }
 
     @DeleteMapping("/{resourceId}")
     public ResponseEntity<String> deleteResource(@PathVariable Long resourceId) {
-        resourceService.deleteResource(resourceId, userContext.getUserId());
+        resourceService.deleteResource(resourceId);
         return ResponseEntity.ok("Resource deleted successfully.");
     }
 }
