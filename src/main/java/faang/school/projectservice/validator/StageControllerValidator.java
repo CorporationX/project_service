@@ -10,7 +10,7 @@ public class StageControllerValidator {
             throw new IllegalArgumentException("stage does not have a name");
         }
 
-        if (stageDto.getRolesMap().isEmpty()) {
+        if (stageDto.getStageRoles().isEmpty()) {
             throw new IllegalArgumentException("do not have roles to stage");
         }
     }
