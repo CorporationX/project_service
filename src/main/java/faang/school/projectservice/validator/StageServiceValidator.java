@@ -2,6 +2,8 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
+import faang.school.projectservice.exceptions.project.ProjectNotExistException;
+import faang.school.projectservice.exceptions.stage.StageNotHaveProjectException;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -20,7 +22,7 @@ public class StageServiceValidator {
 
     public void validateStageDto(StageDto stageDto) {
         if (!projectRepository.existsById(stageDto.getProjectId())) {
-            throw new IllegalArgumentException("stage do not have a project");
+            throw new StageNotHaveProjectException();
         }
         validateExecutorsStageRoles(stageDto);
     }
@@ -39,7 +41,7 @@ public class StageServiceValidator {
 
     public void validateProject(Long id) {
         if (projectRepository.existsById(id)) {
-            throw new IllegalArgumentException("project with id = " + id + " does not exist");
+            throw new ProjectNotExistException();
         }
 
         if (projectRepository.getProjectById(id).getStatus().equals(ProjectStatus.CANCELLED)) {

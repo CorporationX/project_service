@@ -1,17 +1,19 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.exceptions.stage.StageNotHaveNameException;
+import faang.school.projectservice.exceptions.stage.StageHaveNoRolesException;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StageControllerValidator {
-    public void validatorStageDto(StageDto stageDto) {
+    public void validateStageDto(StageDto stageDto) {
         if (stageDto.getStageName() == null) {
-            throw new IllegalArgumentException("stage does not have a name");
+            throw new StageNotHaveNameException();
         }
 
         if (stageDto.getStageRoles().isEmpty()) {
-            throw new IllegalArgumentException("do not have roles to stage");
+            throw new StageHaveNoRolesException();
         }
     }
 
@@ -21,3 +23,4 @@ public class StageControllerValidator {
         }
     }
 }
+

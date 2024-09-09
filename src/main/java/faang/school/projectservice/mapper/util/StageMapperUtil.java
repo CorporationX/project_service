@@ -1,6 +1,5 @@
 package faang.school.projectservice.mapper.util;
 
-import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -16,13 +15,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StageMapperUtil {
     private final ProjectRepository projectRepository;
-    private final StageRolesRepository stageRolesRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-
     @Named("toExecutorsIds")
-    private List<Long> toExecutorsIds(List<TeamMember> members) {
-        return members.stream()
+    public List<Long> toExecutorsIds(List<TeamMember> executors){
+        return executors.stream()
                 .map(TeamMember::getId)
                 .toList();
     }
@@ -32,7 +29,7 @@ public class StageMapperUtil {
         return projectRepository.getProjectById(id);
     }
 
-    @Named("getStageRolesById")
+    @Named("getExecutorsByIds")
     public List<TeamMember> getExecutorsByIds(List<Long> ids) {
         return ids.stream()
                 .map(teamMemberRepository::findById)

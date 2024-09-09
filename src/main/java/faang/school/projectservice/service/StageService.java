@@ -39,7 +39,7 @@ public class StageService {
 
     public void deleteStage(StageDto stageDto) {
         validator.validateStageDto(stageDto);
-        stageRepository.deleteById(stageDto.getId());
+        stageRepository.deleteById(stageDto.getStageId());
     }
 
     public List<StageDto> getFilteredStages(Long projectId, StageFilterDto filterDto) {
@@ -52,5 +52,9 @@ public class StageService {
                 .flatMap(stageFilter -> stageFilter.apply(stageStream, filterDto))
                 .map(mapper::toDto)
                 .toList();
+    }
+
+    public void updateStage(StageDto stageDto) {
+
     }
 }
