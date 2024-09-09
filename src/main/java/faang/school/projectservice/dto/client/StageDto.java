@@ -11,6 +11,7 @@ import java.util.Map;
 public class StageDto {
     private final long id;
     private final long projectId;
+    private final String stageName;
     private final Map<Long, Integer> rolesMap;//ключ - id роли, значение - нужное количество человек
     private List<Long> executorsIds;
 }

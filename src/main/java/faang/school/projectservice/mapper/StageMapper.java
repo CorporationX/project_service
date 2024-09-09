@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
         uses = StageMapperUtil.class)
 public interface StageMapper {
@@ -19,5 +21,7 @@ public interface StageMapper {
     @Mapping(target = "stageRoles", source = "rolesMap", qualifiedByName = {"StageMapperUtil", "getStageRolesByIds"})
     @Mapping(target = "executors", source = "executorsIds", qualifiedByName = {"StageMapperUtil", "getExecutorsByIds"} )
     Stage toStage(StageDto stageDto);
+
+    List<StageDto> toDtoList(List<Stage> stages);
 
 }
