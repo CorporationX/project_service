@@ -12,5 +12,6 @@ public class StageDto {
     private final String stageName;
     private final long projectId;
     private final List<StageRolesDto> stageRoles;
-    private List<Long> executorsIds;
+    private List<TeamMemberDto> executorsDtos;
 }
+

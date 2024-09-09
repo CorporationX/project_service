@@ -37,4 +37,9 @@ public class StageController {
         validator.validateId(projectId);
         return service.getFilteredStages(projectId, filterDto);
     }
+
+    public void update(StageDto dto) {
+        validator.validateStageDto(dto);
+        service.updateStage(dto);
+    }
 }

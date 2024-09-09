@@ -1,5 +1,6 @@
 package faang.school.projectservice.mapper.util;
 
+import faang.school.projectservice.dto.TeamMemberDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -17,22 +18,15 @@ public class StageMapperUtil {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-    @Named("toExecutorsIds")
-    public List<Long> toExecutorsIds(List<TeamMember> executors){
-        return executors.stream()
-                .map(TeamMember::getId)
-                .toList();
-    }
-
     @Named("getProjectById")
     public Project getProjectById(Long id) {
         return projectRepository.getProjectById(id);
     }
 
-    @Named("getExecutorsByIds")
-    public List<TeamMember> getExecutorsByIds(List<Long> ids) {
-        return ids.stream()
-                .map(teamMemberRepository::findById)
+    @Named("getExecutors")
+    public List<TeamMember> getExecutors(List<TeamMemberDto> dtos) {
+        return dtos.stream()
+                .map(dto -> teamMemberRepository.findById(dto.id()))
                 .toList();
     }
 }

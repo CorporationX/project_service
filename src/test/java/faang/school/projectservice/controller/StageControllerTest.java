@@ -95,4 +95,14 @@ class StageControllerTest {
         Mockito.verify(service, Mockito.times(1))
                 .getFilteredStages(projectId, null);
     }
+
+    @Test
+    void testUpdate() {
+        controller.update(stageDto);
+
+        Mockito.verify(service)
+                .updateStage(stageDto);
+        Mockito.verify(validator)
+                .validateStageDto(stageDto);
+    }
 }
