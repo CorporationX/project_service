@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.StageDto;
+import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.validator.StageControllerValidator;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +26,9 @@ public class StageController {
     public StageDto getStageById(Long id) {
         validator.validateId(id);
         return service.getStageById(id);
+    }
+
+    public void deleteStage(StageDto stageDto) {
+        service.deleteStage(stageDto);
     }
 }

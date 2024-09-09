@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +12,6 @@ public class StageDto {
     private final long id;
     private final long projectId;
     private final String stageName;
-    private final Map<Long, Integer> rolesMap;//ключ - id роли, значение - нужное количество человек
+    private final List<StageRolesDto> stageRoles;
     private List<Long> executorsIds;
 }
