@@ -23,10 +23,9 @@ public class S3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public String uploadFile(MultipartFile file, String folder) {
-        ObjectMetadata objectMetadata = getMetadata(file);
+    public String putIntoBucketFolder(MultipartFile file, String folder) {
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-        uploadToS3(file, key, objectMetadata);
+        uploadToS3(file, key);
         return key;
     }
 
@@ -41,9 +40,8 @@ public class S3Service {
     }
 
     public String putIntoBucket(MultipartFile multipartFile) {
-        ObjectMetadata objectMetadata = getMetadata(multipartFile);
         String key = System.currentTimeMillis() + multipartFile.getOriginalFilename();
-        uploadToS3(multipartFile, key, objectMetadata);
+        uploadToS3(multipartFile, key);
         return key;
     }
 
@@ -60,7 +58,8 @@ public class S3Service {
         amazonS3.deleteObject(deleteObjectRequest);
     }
 
-    private void uploadToS3(MultipartFile file, String key, ObjectMetadata objectMetadata) {
+    private void uploadToS3(MultipartFile file, String key) {
+        ObjectMetadata objectMetadata = getMetadata(file);
         try {
             PutObjectRequest request = new PutObjectRequest(
                     bucketName, key, file.getInputStream(), objectMetadata);

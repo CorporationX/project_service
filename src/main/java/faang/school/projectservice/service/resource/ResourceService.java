@@ -49,7 +49,7 @@ public class ResourceService {
         sizeValidator.validateSize(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
-        String key = s3Service.uploadFile(file, folder);
+        String key = s3Service.putIntoBucketFolder(file, folder);
 
         Resource resource = createResource(file, project, key);
         Long userId = userContext.getUserId();
@@ -96,7 +96,7 @@ public class ResourceService {
         String folder = project.getId() + project.getName();
         s3Service.deleteFromBucket(resourceFromDb.getKey());
 
-        String key = s3Service.uploadFile(file, folder);
+        String key = s3Service.putIntoBucketFolder(file, folder);
         Resource resource = createResource(file, project, key);
 
         resourceFromDb.setKey(resource.getKey());

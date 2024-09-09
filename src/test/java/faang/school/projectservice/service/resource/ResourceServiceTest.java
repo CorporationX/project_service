@@ -80,7 +80,7 @@ public class ResourceServiceTest {
         ResourceDto resourceDto = new ResourceDto();
 
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
-        when(s3Service.uploadFile(any(), anyString())).thenReturn("testKey");
+        when(s3Service.putIntoBucketFolder(any(), anyString())).thenReturn("testKey");
         when(userContext.getUserId()).thenReturn(userId);
         when(teamMemberRepository.findByUserIdAndProjectId(userId, projectId)).thenReturn(teamMember);
         when(resourceMapper.toDto(any(Resource.class))).thenReturn(resourceDto);
@@ -88,7 +88,7 @@ public class ResourceServiceTest {
         ResourceDto result = resourceService.addResource(projectId, file);
 
         verify(sizeValidator, times(1)).checkNullSizeOfProject(project);
-        verify(s3Service, times(1)).uploadFile(any(), anyString());
+        verify(s3Service, times(1)).putIntoBucketFolder(any(), anyString());
         verify(resourceRepository, times(1)).save(any(Resource.class));
         verify(projectRepository, times(1)).save(project);
         assertEquals(resourceDto, result);
@@ -165,13 +165,13 @@ public class ResourceServiceTest {
 
         when(userContext.getUserId()).thenReturn(userId);
         when(resourcePermissionValidator.getResourceWithPermission(resourceId, userId)).thenReturn(resourceFromDb);
-        when(s3Service.uploadFile(file, project.getId() + project.getName())).thenReturn("newKey");
+        when(s3Service.putIntoBucketFolder(file, project.getId() + project.getName())).thenReturn("newKey");
         when(resourceMapper.toDto(any(Resource.class))).thenReturn(resourceDto);
 
         ResourceDto result = resourceService.updateResource(resourceId, file);
 
         verify(s3Service, times(1)).deleteFromBucket("oldKey");
-        verify(s3Service, times(1)).uploadFile(file, project.getId() + project.getName());
+        verify(s3Service, times(1)).putIntoBucketFolder(file, project.getId() + project.getName());
         verify(resourceRepository, times(1)).save(resourceFromDb);
         verify(projectRepository, times(1)).save(project);
 
