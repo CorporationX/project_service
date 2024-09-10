@@ -9,7 +9,7 @@ import lombok.Data;
 public class CreateSubProjectDto {
     private Long id;
     private String name;
-    private ProjectStatus status;
+    private ProjectStatus status = ProjectStatus.CREATED;
     private ProjectVisibility visibility;
     private Project parentProject;
     private Long ownerId;

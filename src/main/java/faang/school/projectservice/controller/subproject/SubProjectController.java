@@ -2,19 +2,22 @@ package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.dto.client.subproject.ProjectDto;
 import faang.school.projectservice.service.subproject.ProjectService;
-import faang.school.projectservice.validator.ValidatorSubProjectController;
+import faang.school.projectservice.validator.subproject.ValidatorSubProjectController;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping
+@RequestMapping("/subproject")
 public class SubProjectController {
     private final ValidatorSubProjectController validatorSubProjectController;
     private final ProjectService projectService;
 
-    public ProjectDto createSubProject(ProjectDto projectDto) {
+    @PostMapping("/create-subproject")
+    public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
         validatorSubProjectController.isProjectDtoNull(projectDto);
         validatorSubProjectController.isProjectNameNull(projectDto);
         validatorSubProjectController.isProjectStatusNull(projectDto);

@@ -4,16 +4,15 @@ import faang.school.projectservice.dto.client.subproject.ProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.validator.subproject.ValidatorSubProjectController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.ion.NullValueException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static reactor.core.publisher.Mono.when;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ExtendWith(MockitoExtension.class)
 class ValidatorSubProjectControllerTest {
     private ValidatorSubProjectController validatorSubProjectController = new ValidatorSubProjectController();
     private ProjectDto projectDto;

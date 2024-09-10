@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.dto.client.subproject.ProjectDto;
 import org.springframework.stereotype.Component;
