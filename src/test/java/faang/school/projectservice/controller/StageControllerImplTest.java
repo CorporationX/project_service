@@ -1,7 +1,6 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.filter.StageFilterDto;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.validator.StageControllerValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-class StageControllerTest {
+class StageControllerImplTest {
     @Mock
     private StageService service;
     @Mock

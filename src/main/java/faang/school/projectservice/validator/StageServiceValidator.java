@@ -7,7 +7,6 @@ import faang.school.projectservice.exceptions.project.ProjectNotExistException;
 import faang.school.projectservice.exceptions.stage.StageNotHaveProjectException;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +16,10 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class StageServiceValidator {
-    private final ProjectRepository projectRepository;
-
-    public void validateStageDto(StageDto stageDto) {
-        if (!projectRepository.existsById(stageDto.getProjectId())) {
+    public void validateProjectExisting(boolean isExist) {
+        if (isExist) {
             throw new StageNotHaveProjectException();
         }
-        validateExecutorsStageRoles(stageDto);
     }
 
     public void validateExecutorsStageRoles(StageDto stageDto) {
@@ -39,13 +35,13 @@ public class StageServiceValidator {
         }
     }
 
-    public void validateProject(Long id) {
-        if (projectRepository.existsById(id)) {
+    public void validateProject(boolean isExisting, ProjectStatus status) {
+        if (!isExisting) {
             throw new ProjectNotExistException();
         }
 
-        if (projectRepository.getProjectById(id).getStatus().equals(ProjectStatus.CANCELLED)) {
-            throw new IllegalArgumentException("project id = " + id + " was canceled");
+        if (status.equals(ProjectStatus.CANCELLED)) {
+            throw new IllegalArgumentException("project was canceled");
         }
     }
 

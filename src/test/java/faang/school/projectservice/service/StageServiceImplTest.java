@@ -9,17 +9,15 @@ import faang.school.projectservice.validator.StageServiceValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class StageServiceTest {
+public class StageServiceImplTest {
     @Mock
     private StageRepository stageRepository;
     @Mock
@@ -31,7 +29,7 @@ public class StageServiceTest {
     @Mock
     private List<StageFilter> filters;
     @InjectMocks
-    private StageService service;
+    private StageServiceImpl service;
 
     private StageDto stageDto;
 
@@ -48,7 +46,7 @@ public class StageServiceTest {
         service.create(stageDto);
 
         Mockito.verify(validator, Mockito.times(1))
-                .validateStageDto(stageDto);
+                .validateProjectExisting(projectRepository.existsById(stageDto.getProjectId()));
         Mockito.verify(mapper, Mockito.times(1))
                 .toStage(stageDto);
         Mockito.verify(stageRepository, Mockito.times(1))
@@ -72,7 +70,7 @@ public class StageServiceTest {
 
     @Test
     void testDeleteStage(StageDto stageDto) {
-        validator.validateStageDto(stageDto);
+        //validator.validateProjectExisting(stageDto);
         stageRepository.deleteById(stageDto.getStageId());
 
 
