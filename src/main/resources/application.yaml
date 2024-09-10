@@ -4,6 +4,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
+  profiles:
+    active: local
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -33,10 +35,6 @@ spring:
 
 server:
   port: 8082
-
-logging:
-  level:
-    root: info
 
 calculations_messages_processing:
   enabled: true
