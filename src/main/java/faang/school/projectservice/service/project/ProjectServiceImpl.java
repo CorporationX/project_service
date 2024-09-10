@@ -7,6 +7,7 @@ import faang.school.projectservice.exception.ExceptionMessages;
 import faang.school.projectservice.filter.project.DefaultProjectFilter;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.messaging.publisher.project.ProjectEventPublisher;
 import faang.school.projectservice.messaging.publisher.project.ProjectViewEventPublisher;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -31,6 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final List<ProjectFilter> userDefinedProjectFilters;
     private final List<DefaultProjectFilter> defaultProjectFilters;
     private final ProjectViewEventPublisher projectViewEventPublisher;
+    private final ProjectEventPublisher projectEventPublisher;
 
     @Override
     @Transactional
@@ -50,6 +52,8 @@ public class ProjectServiceImpl implements ProjectService {
         } catch (DataIntegrityViolationException e) {
             throw new PersistenceException(ExceptionMessages.FAILED_PERSISTENCE, e);
         }
+
+        projectEventPublisher.publish(mapper.toEvent(savedProject));
         return mapper.toDto(savedProject);
     }
 
