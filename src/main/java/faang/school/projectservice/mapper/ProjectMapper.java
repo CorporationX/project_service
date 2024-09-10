@@ -9,6 +9,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,9 @@ public interface ProjectMapper {
     Project toEntity(ProjectDto projectDto);
 
     Project update(ProjectUpdateDto projectUpdateDto, @MappingTarget Project project);
+
+    @Mapping(target = "storageSize", source = "newStorageSize")
+    ProjectUpdateDto toUpdateDto(Project project, BigInteger newStorageSize);
 
     @Named("mapChildren")
     default List<Long> mapChildren(List<Project> childrenProjects) {
