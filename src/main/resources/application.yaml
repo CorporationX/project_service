@@ -4,6 +4,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
+  profiles:
+    active: local
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -40,10 +42,6 @@ spring:
 server:
   port: 8082
 
-logging:
-  level:
-    root: info
-
 calculations_messages_processing:
   enabled: true
 
@@ -65,3 +63,7 @@ coverImage:
   maxsize: 5000000
   maxWidth: 1080
   maxHeight: 566
+
+file:
+  storage:
+    max-size: 2147483648
