@@ -20,5 +20,6 @@ public class SubProjectController {
         validatorSubProjectController.isProjectStatusNull(projectDto);
         validatorSubProjectController.isProjectVisibilityNull(projectDto);
         return projectService.create(projectDto);
+
     }
 }
