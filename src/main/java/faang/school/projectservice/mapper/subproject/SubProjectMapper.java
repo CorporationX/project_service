@@ -2,20 +2,38 @@ package faang.school.projectservice.mapper.subproject;
 
 import faang.school.projectservice.dto.client.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.client.subproject.ProjectDto;
+import faang.school.projectservice.dto.client.subproject.SubProjectFilterDto;
 import faang.school.projectservice.model.Project;
+import jdk.jfr.Name;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SubProjectMapper {
 
-    @Mapping(target = "status",ignore = true)
+    @Mapping(target = "status", ignore = true)
     CreateSubProjectDto mapToSubDto(ProjectDto projectDto);
 
     Project mapToEntity(CreateSubProjectDto createSubProjectDto);
 
+    //    @Mapping(source = "children", target = "childrenIds", qualifiedByName = "mapChildrenToChildrenIds")
+//    @Mapping(target = "childrenIds", source = "children", ignore = true)
     ProjectDto mapToProjectDto(Project project);
+
+    SubProjectFilterDto mapToProjectDto(ProjectDto projectDto);
+
+    @Named("mapChildrenToChildrenIds")
+    static List<Long> mapChildrenToChildrenIds(List<Project> children) {
+        return children.stream()
+                .map(child -> child.getId())
+                .toList();
+    }
+
+    SubProjectFilterDto mapToSubProjectFilterDto(SubProjectFilterDto subProjectFilterDto);
 }
 
 
