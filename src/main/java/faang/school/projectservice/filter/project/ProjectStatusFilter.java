@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 @Component
 public class ProjectStatusFilter implements ProjectFilter {
+
     @Override
     public boolean isApplicable(ProjectFilterDto filters) {
         return filters.projectStatus() != null;

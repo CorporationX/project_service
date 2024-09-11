@@ -63,7 +63,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectDto findProjectById(Long projectId) {
         if (projectId < 0) {
-            throw new DataValidationException("Project with id %d cannot be negative".formatted(projectId));
+            throw new DataValidationException("Project id %d cannot be negative".formatted(projectId));
         }
         Project project = projectRepository.getProjectById(projectId);
         return projectMapper.toProjectDto(project);
