@@ -33,6 +33,7 @@ public class SubProjectController {
         validatorSubProjectController.isProjectDtoNull(projectDto);
 //        validatorSubProjectController.isProjectNameNull(projectDto);
 //        validatorSubProjectController.isProjectStatusNull(projectDto);
+
         return projectService.getFilteredSubProjects(projectDto);
     }
 }

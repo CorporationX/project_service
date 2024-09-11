@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.client.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.client.subproject.ProjectDto;
 import faang.school.projectservice.dto.client.subproject.SubProjectFilterDto;
 import faang.school.projectservice.model.Project;
-import jdk.jfr.Name;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -20,8 +19,8 @@ public interface SubProjectMapper {
 
     Project mapToEntity(CreateSubProjectDto createSubProjectDto);
 
-    //    @Mapping(source = "children", target = "childrenIds", qualifiedByName = "mapChildrenToChildrenIds")
-//    @Mapping(target = "childrenIds", source = "children", ignore = true)
+//    @Mapping(source = "children", target = "childrenIds", qualifiedByName = "mapChildrenToChildrenIds")
+    @Mapping(target ="childrenIds", ignore = true)
     ProjectDto mapToProjectDto(Project project);
 
     SubProjectFilterDto mapToProjectDto(ProjectDto projectDto);
@@ -29,7 +28,7 @@ public interface SubProjectMapper {
     @Named("mapChildrenToChildrenIds")
     static List<Long> mapChildrenToChildrenIds(List<Project> children) {
         return children.stream()
-                .map(child -> child.getId())
+                .map(Project::getId)
                 .toList();
     }
 
