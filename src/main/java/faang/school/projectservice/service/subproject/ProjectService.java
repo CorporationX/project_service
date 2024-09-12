@@ -27,7 +27,7 @@ public class ProjectService {
     private final List<SubProjectFilter> filters;
 
     public ProjectDto create(ProjectDto projectDto) {
-        //TODO create tests
+
         CreateSubProjectDto subProjectDto = subProjectMapper.mapToSubDto(projectDto);
         subProjectDto.setStatus(ProjectStatus.CREATED);
         validatorService.isProjectExists(subProjectDto.getParentProjectId());
@@ -44,36 +44,31 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getFilteredSubProjects(ProjectDto projectDto) {
-
-        // TODO
-        /* create tests         */
         validatorService.isProjectExists(projectDto.getId());
         List<Project> allChildren = projectRepository.findAll();
         List<Project> allSubProjects = allChildren.stream()
                 .filter(project -> project.getParentProject() != null)
                 .filter(project -> Objects.equals(project.getParentProject().getId(), projectDto.getId()))
                 .toList();
-
         if (allSubProjects.isEmpty()) {
             return new ArrayList<>();
         }
-
         SubProjectFilterDto subProjectFilterDto = subProjectMapper.mapToProjectDto(projectDto);
+        System.out.println(subProjectFilterDto);
         List<Project> allFilteredProjects = filters.stream()
                 .filter(filter -> filter.isApplicable(subProjectFilterDto))
                 .reduce(allSubProjects.stream(), (stream, filter) -> filter.apply(stream, subProjectFilterDto),
                         (s1, s2) -> s1)
                 .filter(project -> project.getVisibility() != ProjectVisibility.PRIVATE)
                 .toList();
-
+        System.out.println("allfilter "+allFilteredProjects.size());
         return allFilteredProjects.stream()
                 .map(subProjectMapper::mapToProjectDto)
                 .toList();
     }
 
     public ProjectDto updateSubProject(ProjectDto projectDto) {
-        // TODO
-        /* create tests */
+
         System.out.println(projectDto.getId());
         validatorService.isProjectExists(projectDto.getId());
         Project updateProject = projectRepository.findById(projectDto.getId());
