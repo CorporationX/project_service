@@ -31,9 +31,15 @@ public class SubProjectController {
     @GetMapping("/get-subprojects")
     public List<ProjectDto> getSubProjects(@RequestBody ProjectDto projectDto) {
         validatorSubProjectController.isProjectDtoNull(projectDto);
+        return projectService.getFilteredSubProjects(projectDto);
+    }
+
+    @PostMapping("/update-subproject")
+    public ProjectDto updateSubProject(@RequestBody ProjectDto projectDto) {
+        validatorSubProjectController.isProjectDtoNull(projectDto);
 //        validatorSubProjectController.isProjectNameNull(projectDto);
 //        validatorSubProjectController.isProjectStatusNull(projectDto);
-
-        return projectService.getFilteredSubProjects(projectDto);
+//        validatorSubProjectController.isProjectVisibilityNull(projectDto);
+        return projectService.updateSubProject(projectDto);
     }
 }

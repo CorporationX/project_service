@@ -14,13 +14,14 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SubProjectMapper {
 
-    @Mapping(target = "status", ignore = true)
+//    @Mapping(target = "status", ignore = true)
     CreateSubProjectDto mapToSubDto(ProjectDto projectDto);
 
     Project mapToEntity(CreateSubProjectDto createSubProjectDto);
 
 //    @Mapping(source = "children", target = "childrenIds", qualifiedByName = "mapChildrenToChildrenIds")
-    @Mapping(target ="childrenIds", ignore = true)
+//    @Mapping(target ="childrenIds", ignore = true)
+    @Mapping(source = "parentProject.id", target = "parentProjectId")
     ProjectDto mapToProjectDto(Project project);
 
     SubProjectFilterDto mapToProjectDto(ProjectDto projectDto);

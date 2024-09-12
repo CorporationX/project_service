@@ -13,7 +13,8 @@ public class CreateSubProjectDto {
     private String name;
     private ProjectStatus status;
     private ProjectVisibility visibility;
-    private Project parentProject;
+//    private Project parentProject;
+    private Long parentProjectId;
     private Long ownerId;
 //    private List<Long> childrenIds;
 }

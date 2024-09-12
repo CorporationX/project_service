@@ -13,7 +13,7 @@ public class ValidatorSubProjectController {
     }
 
     public void isParentProjectNull(ProjectDto projectDto) {
-        if (projectDto.getParentProject() == null) {
+        if (projectDto.getParentProjectId() == null) {
             throw new NullValueException("ParentProject is null");
         }
     }

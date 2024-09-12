@@ -24,18 +24,18 @@ class SubProjectMapperTest {
     void mapToSubDto() {
         projectDto.setId(1L);
         projectDto.setName("name");
-        projectDto.setParentProject(new Project());
+        projectDto.setParentProjectId(new Project().getId());
         projectDto.setVisibility(ProjectVisibility.PUBLIC);
         projectDto.setStatus(ProjectStatus.ON_HOLD);
 
         CreateSubProjectDto createSubProjectDto = subProjectMapper.mapToSubDto(projectDto);
-
+        System.out.println(projectDto.getStatus());
         assertAll(
                 () -> assertEquals(projectDto.getId(), createSubProjectDto.getId()),
                 () -> assertEquals(projectDto.getName(), createSubProjectDto.getName()),
-                () -> assertEquals(projectDto.getParentProject().getId(), createSubProjectDto.getParentProject().getId()),
+                () -> assertEquals(projectDto.getParentProjectId(), createSubProjectDto.getParentProjectId()),
                 () -> assertEquals(projectDto.getVisibility(), createSubProjectDto.getVisibility()),
-                () -> assertEquals(ProjectStatus.CREATED, createSubProjectDto.getStatus())
+                () -> assertEquals(ProjectStatus.ON_HOLD, createSubProjectDto.getStatus())
         );
     }
 
@@ -44,7 +44,7 @@ class SubProjectMapperTest {
         CreateSubProjectDto subProjectDto = new CreateSubProjectDto();
         subProjectDto.setId(1L);
         subProjectDto.setName("name");
-        subProjectDto.setParentProject(new Project());
+        subProjectDto.setParentProjectId(new Project().getId());
         subProjectDto.setVisibility(ProjectVisibility.PUBLIC);
         subProjectDto.setStatus(ProjectStatus.ON_HOLD);
 

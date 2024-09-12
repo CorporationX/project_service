@@ -1,10 +1,9 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.subproject;
 
 import faang.school.projectservice.dto.client.subproject.ProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.validator.subproject.ValidatorSubProjectController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.ion.NullValueException;
@@ -38,7 +37,7 @@ class ValidatorSubProjectControllerTest {
 
     @Test
     void testIsParentProjectNull() {
-        projectDto.setParentProject(null);
+        projectDto.setParentProjectId(null);
 
         NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.isParentProjectNull(projectDto));
         assertEquals(exception.getMessage(), "ParentProject is null");
@@ -46,7 +45,7 @@ class ValidatorSubProjectControllerTest {
 
     @Test
     void testIsParentProjectNotNull() {
-        projectDto.setParentProject(new Project());
+        projectDto.setParentProjectId(new Project().getId());
 
         assertDoesNotThrow(() -> validatorSubProjectController.isParentProjectNull(projectDto));
     }

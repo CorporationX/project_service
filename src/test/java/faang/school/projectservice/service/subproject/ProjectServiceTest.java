@@ -6,9 +6,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
-
     //TODO create tests
     @Test
-    void create() {
+    void testCreate() {
+    }
+
+
+
+    @Test
+    void testGetFilteredSubProjects() {
+    }
+
+    @Test
+    void testUpdateSubProject() {
     }
 }

@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class ValidatorServiceTest {
     ///TODO create tests
     @Test
-    void isParentProjectExists() {
+    void isProjectExists() {
     }
 
     @Test
-    void isProjectExists() {
+    void isProjectExistsByName() {
     }
 }
