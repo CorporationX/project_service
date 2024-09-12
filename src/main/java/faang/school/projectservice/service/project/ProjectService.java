@@ -15,14 +15,12 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.project.filter.ProjectFilter;
 import faang.school.projectservice.service.project.updater.ProjectUpdater;
-import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.service.subproject.filter.SubProjectFilter;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -161,5 +159,16 @@ public class ProjectService {
                 .filter(filteredProject -> validator.userHasAccessToProject(userId, filteredProject))
                 .map(projectMapper::toDto)
                 .toList();
+    }
+
+    public ProjectDto projectToDto(Project project) {
+        return projectMapper.toDto(project);
+    }
+    public Project projectToEntity(ProjectDto projectDto) {
+        return projectMapper.toEntity(projectDto);
+    }
+
+    public List<Project> getAllProjectsByStatus(ProjectStatus status) {
+        return projectRepository.findAllByStatus(status);
     }
 }

@@ -1,11 +1,10 @@
 package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.controller.stage.StageWithTasksAction;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.dto.team.TeamMemberDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -14,20 +13,21 @@ import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.stageinvitation.StageInvitationService;
+import faang.school.projectservice.service.task.TaskService;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.stage.StageServiceValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -44,15 +44,15 @@ class StageServiceTest {
     @Mock
     StageRepository stageRepository;
     @Mock
-    TaskRepository taskRepository;
+    TaskService taskService;
     @Mock
-    ProjectRepository projectRepository;
+    ProjectService projectService;
     @Mock
-    TeamMemberRepository teamMemberRepository;
+    TeamMemberService teamMemberService;
     @Mock
     StageMapper stageMapper;
     @Mock
-    StageInvitationRepository stageInvitationRepository;
+    StageInvitationService stageInvitationService;
     @Mock
     StageServiceValidator stageServiceValidator;
     @InjectMocks
@@ -61,6 +61,7 @@ class StageServiceTest {
     Stage stage;
     Stage stage2;
     Project project;
+    ProjectDto projectDto;
     Team team;
     TeamMember teamMember;
     ProjectStatus projectStatus = ProjectStatus.IN_PROGRESS;
@@ -140,6 +141,8 @@ class StageServiceTest {
                 .stages(List.of(stage))
                 .teams(List.of(team))
                 .build();
+        projectDto = ProjectDto.builder().id(1L)
+                .build();
     }
 
     @Test
@@ -151,7 +154,7 @@ class StageServiceTest {
 
     @Test
     void getAllByStatus() {
-        when(projectRepository.findAllByStatus(any(ProjectStatus.class))).thenReturn(List.of(project));
+        when(projectService.getAllProjectsByStatus(any(ProjectStatus.class))).thenReturn(List.of(project));
         when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
         assertEquals(stageService.getAllByStatus(projectStatus), List.of(stageDto));
     }
@@ -160,14 +163,14 @@ class StageServiceTest {
     void handleCascade() {
         when(stageRepository.getById(any())).thenReturn(stage);
         stageService.handle(1L, StageWithTasksAction.CASCADE, null);
-        verify(taskRepository, times(2)).delete(any());
+        verify(taskService, times(2)).delete(any());
     }
 
     @Test
     void handleClose() {
         when(stageRepository.getById(any())).thenReturn(stage);
         stageService.handle(1L, StageWithTasksAction.CLOSE, null);
-        verify(taskRepository, times(2)).save(any());
+        verify(taskService, times(2)).save(any());
 
         stage.getTasks().forEach(task -> assertEquals(TaskStatus.DONE, task.getStatus()));
     }
@@ -190,7 +193,8 @@ class StageServiceTest {
     @Test
     void getAll() {
         when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
-        when(projectRepository.getProjectById(any())).thenReturn(project);
+        when(projectService.getProjectById(any())).thenReturn(projectDto);
+        when(projectService.projectToEntity(any())).thenReturn(project);
         assertEquals(stageService.getAll(1L), List.of(stageDto));
     }
 
@@ -203,7 +207,8 @@ class StageServiceTest {
 
     private void prepareStageAndProject() {
         when(stageMapper.toEntity(any(StageDto.class))).thenReturn(stage);
-        when(projectRepository.getProjectById(any())).thenReturn(project);
+        when(projectService.getProjectById(any())).thenReturn(projectDto);
+        when(projectService.projectToEntity(any())).thenReturn(project);
         when(stageMapper.toDto(any(Stage.class))).thenReturn(stageDto);
     }
 }

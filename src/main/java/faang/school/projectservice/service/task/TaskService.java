@@ -105,4 +105,12 @@ public class TaskService {
             task.setLinkedTasks(linkedTasks);
         }
     }
+
+    public void delete(Task task) {
+        taskRepository.delete(task);
+    }
+
+    public void save(Task task) {
+        taskRepository.save(task);
+    }
 }
