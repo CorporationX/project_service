@@ -38,7 +38,8 @@ public class InternshipValidator {
     private void validateMentor(Long mentorId, Long projectId) {
         TeamMember mentor = teamMemberRepository.findById(mentorId);
         if (mentor.getTeam() == null || !mentor.getTeam().getProject().getId().equals(projectId)) {
-            throw new EntityNotFoundException(String.format("Mentor with id: %s is not a member of the project with id: %s", mentorId, projectId));
+            throw new EntityNotFoundException(String.format(
+                    "Mentor with id: %s is not a member of the project with id: %s", mentorId, projectId));
         }
     }
 

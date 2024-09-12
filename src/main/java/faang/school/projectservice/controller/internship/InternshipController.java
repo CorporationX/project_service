@@ -19,36 +19,35 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/internship")
-
+@RequestMapping("/internship/")
 public class InternshipController {
     private final InternshipService internshipService;
 
-    @PostMapping("/")
+    @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public InternshipDto create(@Valid @RequestBody InternshipDto internshipDto) {
         return internshipService.createInternship(internshipDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public InternshipDto updateInternship(@PathVariable long id, @Valid @RequestBody InternshipDto internshipDto) {
         return internshipService.updateInternship(id, internshipDto);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("filter")
     @ResponseStatus(HttpStatus.OK)
     public List<InternshipDto> getInternshipByFilter(@RequestBody InternshipFilterDto internshipFilterDto) {
         return internshipService.getInternshipByFilter(internshipFilterDto);
     }
 
-    @GetMapping("/")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<InternshipDto> getAllInternships() {
         return internshipService.getAllInternships();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public InternshipDto getInternshipById(@PathVariable long id) {
         return internshipService.getInternshipById(id);

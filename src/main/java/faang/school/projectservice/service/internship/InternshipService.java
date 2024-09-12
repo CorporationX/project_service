@@ -37,7 +37,8 @@ public class InternshipService {
 
     @Transactional
     public InternshipDto updateInternship(Long id, InternshipDto internshipDto) {
-        Internship internship = internshipRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Internship not found"));
+        Internship internship = internshipRepository.findById(id).orElseThrow(()
+                -> new EntityNotFoundException("Internship not found"));
         internshipValidator.validateInternship(internshipDto);
         if (internship.getStatus() == InternshipStatus.IN_PROGRESS) {
             internship.setStatus(InternshipStatus.valueOf(internshipDto.getStatus()));
@@ -53,7 +54,8 @@ public class InternshipService {
         List<Internship> internships = internshipRepository.findAll();
         return internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(internshipFilterDto))
-                .reduce(internships.stream(), (stream, filter) -> filter.apply(stream, internshipFilterDto), Stream::concat)
+                .reduce(internships.stream(), (stream, filter)
+                        -> filter.apply(stream, internshipFilterDto), Stream::concat)
                 .map(internshipMapper::toDto)
                 .toList();
     }
@@ -67,7 +69,8 @@ public class InternshipService {
 
     @Transactional(readOnly = true)
     public InternshipDto getInternshipById(Long id) {
-        return internshipMapper.toDto(internshipRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Internship not found")));
+        return internshipMapper.toDto(internshipRepository.findById(id).orElseThrow(()
+                -> new EntityNotFoundException("Internship not found")));
     }
 
     private void handleCompletedInternship(Internship internship) {
