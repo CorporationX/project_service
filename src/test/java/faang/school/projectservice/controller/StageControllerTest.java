@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-class StageControllerImplTest {
+class StageControllerTest {
     @Mock
     private StageService service;
     @Mock

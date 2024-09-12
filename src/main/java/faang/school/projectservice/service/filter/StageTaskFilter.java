@@ -18,15 +18,18 @@ public class StageTaskFilter implements StageFilter {
     public Stream<Stage> apply(Stream<Stage> stageStream, StageFilterDto stageFilterDto) {
         if (stageFilterDto.getRoleFilterEnum() == TaskFilterEnum.ANY) {
             return stageStream.filter( stage ->
-                    stage.getTasks().stream().anyMatch(task -> task.getStage().equals(stage))
+                    stage.getTasks().stream().anyMatch(task -> task.getStatus().equals(
+                            stageFilterDto.getStatus()))
             );
         } else if (stageFilterDto.getRoleFilterEnum() == TaskFilterEnum.ALL){
             return stageStream.filter( stage ->
-                    stage.getTasks().stream().allMatch(task -> task.getStage().equals(stage))
+                    stage.getTasks().stream().allMatch(task -> task.getStatus().equals(
+                            stageFilterDto.getStatus()))
             );
         } else {
             return stageStream.filter( stage ->
-                    stage.getTasks().stream().noneMatch(task -> task.getStage().equals(stage))
+                    stage.getTasks().stream().noneMatch(task -> task.getStatus().equals(
+                            stageFilterDto.getStatus()))
             );
         }
     }

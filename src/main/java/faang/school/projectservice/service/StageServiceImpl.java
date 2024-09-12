@@ -37,8 +37,7 @@ public class StageServiceImpl implements StageService {
 
     @Override
     public List<StageDto> getAllStages(Long projectId) {
-        validator.validateProject(projectRepository.existsById(projectId),
-                projectRepository.getProjectById(projectId).getStatus());
+        validator.validateProject(projectRepository.getProjectById(projectId).getStatus());
         return mapper.toStageDtoList(projectRepository.getProjectById(projectId).getStages());
     }
 
@@ -56,10 +55,10 @@ public class StageServiceImpl implements StageService {
 
     @Override
     public List<StageDto> getFilteredStages(Long projectId, StageFilterDto filterDto) {
-        validator.validateProject(projectRepository.existsById(projectId),
-                projectRepository.getProjectById(projectId).getStatus());
-
         Project project = projectRepository.getProjectById(projectId);
+        validator.validateProject(project.getStatus());
+
+
         Stream<Stage> stageStream = project.getStages().stream();
         return filters.stream()
                 .filter(stageFilter -> stageFilter.isApplicable(filterDto))
@@ -76,7 +75,7 @@ public class StageServiceImpl implements StageService {
                 stageDto);
     }
 
-    private Map<TeamRole, Long> getNumberOfRolesInvolved(StageDto stageDto) {
+    public Map<TeamRole, Long> getNumberOfRolesInvolved(StageDto stageDto) {
         return stageDto.getExecutorsDtos().stream()
                 .flatMap(teamMemberDto -> teamMemberDto.stageRoles().stream())
                 .collect(Collectors.groupingBy(
@@ -85,7 +84,7 @@ public class StageServiceImpl implements StageService {
                 ));
     }
 
-    private void sentInvitationToNeededExecutors
+    public void sentInvitationToNeededExecutors
             (Map<TeamRole, Long> mapRolesInvolved, StageDto stageDto) {
         for (StageRolesDto dto : stageDto.getStageRoles()) {
             if (dto.count() > mapRolesInvolved.get(dto.role())) {

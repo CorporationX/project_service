@@ -3,7 +3,6 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.dto.TeamMemberDto;
-import faang.school.projectservice.exceptions.project.ProjectNotExistException;
 import faang.school.projectservice.exceptions.stage.StageNotHaveProjectException;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamRole;
@@ -35,11 +34,7 @@ public class StageServiceValidator {
         }
     }
 
-    public void validateProject(boolean isExisting, ProjectStatus status) {
-        if (!isExisting) {
-            throw new ProjectNotExistException();
-        }
-
+    public void validateProject(ProjectStatus status) {
         if (status.equals(ProjectStatus.CANCELLED)) {
             throw new IllegalArgumentException("project was canceled");
         }
