@@ -19,7 +19,7 @@ class ProjectServiceImplTest {
     private ProjectRepository projectRepository;
 
     @InjectMocks
-    private ProjectServiceImpl projectServiceImpl;
+    private ProjectServiceImpl projectService;
 
     private final long id = 1L;
 
@@ -27,7 +27,7 @@ class ProjectServiceImplTest {
     void existsProjectById_ExistsProject() {
         when(projectRepository.existsById(id)).thenReturn(true);
 
-        boolean exists = projectServiceImpl.existsProjectById(id);
+        boolean exists = projectService.existsProjectById(id);
 
         assertTrue(exists);
         verify(projectRepository).existsById(id);
@@ -37,7 +37,7 @@ class ProjectServiceImplTest {
     void existsProjectById_NotExistsProject() {
         when(projectRepository.existsById(id)).thenReturn(false);
 
-        boolean exists = projectServiceImpl.existsProjectById(id);
+        boolean exists = projectService.existsProjectById(id);
 
         assertFalse(exists);
         verify(projectRepository).existsById(id);
