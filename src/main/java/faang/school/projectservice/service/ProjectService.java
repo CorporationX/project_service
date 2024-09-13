@@ -1,6 +1,8 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -20,15 +23,16 @@ public class ProjectService {
 
     private final ProjectMapper projectMapper;
 
+    private final List<ProjectFilter> projectsFilter;
+
     public ProjectDto createProject(ProjectDto projectDto) {
         validateProjectDto(projectDto);
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(),projectDto.getProjectName())){
+        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getProjectName())) {
             throw new IllegalArgumentException("Project with this name already exists for the owner");
         }
-        projectDto.setProjectStatus(ProjectStatus.CREATED);
         Project project = projectMapper.toEntity(projectDto);
-        project = projectRepository.save(project);
-        return projectMapper.toDto(project);
+        project.setStatus(ProjectStatus.CREATED);
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     public ProjectDto updateProject(long id, ProjectDto projectDto) {
@@ -37,26 +41,30 @@ public class ProjectService {
             throw new IllegalArgumentException("This project doesn't exist");
         }
         Project project = projectMapper.toEntity(projectDto);
-        project.setDescription(project.getDescription());
-        project.setStatus(projectDto.getProjectStatus());
+        if (projectDto.getProjectDescription() != null) {
+            project.setDescription(projectDto.getProjectDescription());
+        }
+        if (projectDto.getProjectStatus() != null) {
+            project.setStatus(projectDto.getProjectStatus());
+        }
         project.setUpdatedAt(LocalDateTime.now());
-        project = projectRepository.save(project);
-        return projectMapper.toDto(project);
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
-    public List<ProjectDto> getAllProjectsByFilter(String projectName, ProjectStatus projectStatus) {
-        return projectRepository.findAll().stream()
-                .filter(project -> {
-                    boolean isVisible = project.getVisibility() == ProjectVisibility.PUBLIC;
-                    if (!isVisible) {
-                        return false;
+    public List<ProjectDto> getAllProjectsByFilter(ProjectFilterDto filterDto) {
+        Stream<Project> projects = projectRepository.findAll().stream();
+        projectsFilter.stream()
+                .filter(projectFilter -> projectFilter.isApplicable(filterDto))
+                .forEach(projectFilter -> projectFilter.apply(projects, filterDto));
+        return projects.filter(project -> {
+                    if (project.getVisibility() == ProjectVisibility.PRIVATE) {
+                        return project.getTeams().contains(filterDto.getTeamMember().getTeam());
                     }
-                    return projectName == null || project.getName().contains(projectName) &&
-                            projectStatus == null || project.getStatus().equals(projectStatus);
-                })
+                    return true;})
                 .map(projectMapper::toDto)
                 .toList();
     }
+
     public List<ProjectDto> getAllProjects() {
         return projectMapper.toDtoList(projectRepository.findAll());
     }

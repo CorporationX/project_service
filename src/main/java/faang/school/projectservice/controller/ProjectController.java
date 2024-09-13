@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,8 @@ public class ProjectController {
         return ResponseEntity.ok(updatedProject);
     }
 
-    public ResponseEntity<List<ProjectDto>> getAllProjectsByFilter(String name, ProjectStatus projectStatus) {
-        List<ProjectDto> projects = projectService.getAllProjectsByFilter(name, projectStatus);
+    public ResponseEntity<List<ProjectDto>> getAllProjectsByFilter(ProjectFilterDto filters) {
+        List<ProjectDto> projects = projectService.getAllProjectsByFilter(filters);
         return ResponseEntity.ok(projects);
     }
 
