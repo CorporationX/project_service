@@ -19,7 +19,7 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
-public class ProjectService {
+public class SubProjectService {
     private final SubProjectMapper subProjectMapper;
     private final ValidatorService validatorService;
     private final ProjectRepository projectRepository;

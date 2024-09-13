@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.dto.client.subproject.ProjectDto;
-import faang.school.projectservice.service.subproject.ProjectService;
+import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.ValidatorSubProjectController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/subproject")
 public class SubProjectController {
     private final ValidatorSubProjectController validatorSubProjectController;
-    private final ProjectService projectService;
+    private final SubProjectService subProjectService;
 
     @PostMapping("/create-subproject")
     public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
@@ -25,18 +25,18 @@ public class SubProjectController {
         validatorSubProjectController.isProjectNameNull(projectDto);
         validatorSubProjectController.isProjectStatusNull(projectDto);
         validatorSubProjectController.isProjectVisibilityNull(projectDto);
-        return projectService.create(projectDto);
+        return subProjectService.create(projectDto);
     }
 
     @GetMapping("/get-subprojects")
     public List<ProjectDto> getSubProjects(@RequestBody ProjectDto projectDto) {
         validatorSubProjectController.isProjectDtoNull(projectDto);
-        return projectService.getFilteredSubProjects(projectDto);
+        return subProjectService.getFilteredSubProjects(projectDto);
     }
 
     @PostMapping("/update-subproject")
     public ProjectDto updateSubProject(@RequestBody ProjectDto projectDto) {
         validatorSubProjectController.isProjectDtoNull(projectDto);
-        return projectService.updateSubProject(projectDto);
+        return subProjectService.updateSubProject(projectDto);
     }
 }
