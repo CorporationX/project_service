@@ -54,22 +54,19 @@ public class ProjectService {
             return new ArrayList<>();
         }
         SubProjectFilterDto subProjectFilterDto = subProjectMapper.mapToProjectDto(projectDto);
-        System.out.println(subProjectFilterDto);
         List<Project> allFilteredProjects = filters.stream()
                 .filter(filter -> filter.isApplicable(subProjectFilterDto))
                 .reduce(allSubProjects.stream(), (stream, filter) -> filter.apply(stream, subProjectFilterDto),
                         (s1, s2) -> s1)
                 .filter(project -> project.getVisibility() != ProjectVisibility.PRIVATE)
                 .toList();
-        System.out.println("allfilter "+allFilteredProjects.size());
+        System.out.println("allfilter " + allFilteredProjects.size());
         return allFilteredProjects.stream()
                 .map(subProjectMapper::mapToProjectDto)
                 .toList();
     }
 
     public ProjectDto updateSubProject(ProjectDto projectDto) {
-
-        System.out.println(projectDto.getId());
         validatorService.isProjectExists(projectDto.getId());
         Project updateProject = projectRepository.findById(projectDto.getId());
         if (projectDto.getStatus() != null) {

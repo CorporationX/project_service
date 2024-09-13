@@ -16,6 +16,6 @@ public class SubProjectNameFilter implements SubProjectFilter {
     @Override
     public Stream<Project> apply(Stream<Project> projects, SubProjectFilterDto subProjectFilterDto) {
         return projects
-                .filter(project -> project.getName().contains(subProjectFilterDto.getName()));
+                .filter(project -> project.getName().toLowerCase().contains(subProjectFilterDto.getName().toLowerCase()));
     }
 }

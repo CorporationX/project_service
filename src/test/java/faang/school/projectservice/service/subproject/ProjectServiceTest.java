@@ -12,6 +12,7 @@ import faang.school.projectservice.service.subproject.filters.SubProjectNameFilt
 import faang.school.projectservice.service.subproject.filters.SubProjectStatusFilter;
 import faang.school.projectservice.validator.subproject.ValidatorService;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.stereotype.Component;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
@@ -52,9 +54,62 @@ class ProjectServiceTest {
     @InjectMocks
     ProjectService projectService;
 
+    Long parentProjectId;
+    private Project parentProject;
+    Project firstProject;
+    Project secondProject;
+    ProjectDto projectDto;
+
+    @BeforeEach
+    void setUp() {
+        parentProjectId = 10L;
+        parentProject = new Project();
+        parentProject.setId(parentProjectId);
+        firstProject = new Project();
+        secondProject = new Project();
+        firstProject.setParentProject(parentProject);
+        secondProject.setParentProject(parentProject);
+        projectDto = new ProjectDto();
+        projectDto.setId(parentProjectId);
+    }
+
+
+    @Test
+    void testGetFilteredNameSubProjects() {
+        firstProject.setName("Name1");
+        secondProject.setName("Project2");
+        projectDto.setName("name");
+
+        ReflectionTestUtils.setField(projectService, "filters", filters);
+
+        when(projectRepository.findAll()).thenReturn(List.of(firstProject, secondProject));
+
+        List<ProjectDto> resultDtos = projectService.getFilteredSubProjects(projectDto);
+        assertAll(
+                () -> assertEquals(1, resultDtos.size()),
+                () -> assertEquals(firstProject.getName(), resultDtos.get(0).getName())
+        );
+    }
+
+    @Test
+    void testGetFilteredStatusSubProjects() {
+        firstProject.setStatus(ProjectStatus.CANCELLED);
+        secondProject.setStatus(ProjectStatus.CREATED);
+        projectDto.setStatus(ProjectStatus.CREATED);
+
+        ReflectionTestUtils.setField(projectService, "filters", filters);
+
+        when(projectRepository.findAll()).thenReturn(List.of(firstProject, secondProject));
+
+        List<ProjectDto> resultDtos = projectService.getFilteredSubProjects(projectDto);
+        assertAll(
+                () -> assertEquals(1, resultDtos.size()),
+                () -> assertEquals(secondProject.getStatus(), resultDtos.get(0).getStatus())
+        );
+    }
+
     @Test
     void testCreate() {
-        Long parentProjectId = 10L;
         Project project = new Project();
         project.setId(parentProjectId);
         project.setVisibility(ProjectVisibility.PUBLIC);
@@ -74,45 +129,8 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testGetFilteredSubProjects() {
-        Long parentProjectId = 10L;
-        Project parentProject = new Project();
-        parentProject.setId(parentProjectId);
-
-        Project firstProject = new Project();
-        firstProject.setId(parentProjectId);
-        firstProject.setStatus(ProjectStatus.CANCELLED);
-        firstProject.setParentProject(parentProject);
-
-        Project secondProject = new Project();
-        secondProject.setId(parentProjectId);
-        secondProject.setStatus(ProjectStatus.CREATED);
-        secondProject.setParentProject(parentProject);
-
-        ProjectDto projectDto = new ProjectDto();
-        projectDto.setStatus(ProjectStatus.CREATED);
-        projectDto.setId(parentProjectId);
-
-
-        when(projectRepository.findAll()).thenReturn(List.of(firstProject, secondProject));
-
-        List<ProjectDto> resultDtos = projectService.getFilteredSubProjects(projectDto);
-        assertAll(
-                () -> assertEquals(1, resultDtos.size()),
-                () -> assertEquals(secondProject.getStatus(), resultDtos.get(0).getStatus())
-        );
-    }
-
-    @Test
     void testGetFilteredSubProjectsEmptyList() {
-        Long parentProjectId = 10L;
-
-        Project firstProject = new Project();
-        firstProject.setId(parentProjectId);
         firstProject.setStatus(ProjectStatus.CANCELLED);
-
-        Project secondProject = new Project();
-        secondProject.setId(parentProjectId);
         secondProject.setStatus(ProjectStatus.IN_PROGRESS);
 
         ProjectDto projectDto = new ProjectDto();
