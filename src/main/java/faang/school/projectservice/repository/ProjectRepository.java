@@ -2,6 +2,7 @@ package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -37,5 +38,9 @@ public class ProjectRepository {
 
     public boolean existsById(Long id){
         return projectJpaRepository.existsById(id);
+    }
+
+    public List<Project> findAllByStatus(ProjectStatus status) {
+        return projectJpaRepository.findAllByStatus(status);
     }
 }

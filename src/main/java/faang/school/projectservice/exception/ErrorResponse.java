@@ -21,4 +21,8 @@ public class ErrorResponse {
     public ErrorResponse(LocalDateTime now, String message) {
         this.message = message;
     }
+    public ErrorResponse( LocalDateTime timestamp, String message) {
+        this.timestamp = timestamp;
+        this.message = message;
+    }
 }
