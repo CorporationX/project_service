@@ -9,7 +9,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.service.MomentServiceImpl;
 import faang.school.projectservice.validator.MomentValidator;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -100,16 +99,17 @@ public class MomentServiceImplTest {
         long momentId = 1L;
         List<Long> addedProjectIds = new ArrayList<>(List.of(1L, 2L));
         List<Long> addedUserIds = new ArrayList<>(List.of(1L, 2L));
-        addedProjectIds.clear();
         Moment moment = new Moment();
         moment.setId(momentId);
         moment.setUserIds(new ArrayList<>());
+        moment.setProjects(List.of(new Project()));
         Team team = new Team();
         team.setId(1L);
         TeamMember teamMember = new TeamMember();
         teamMember.setTeam(team);
         when(momentRepository.findById(momentId)).thenReturn(Optional.of(moment));
         when(teamMemberRepository.findByAllId(addedUserIds)).thenReturn(List.of(teamMember));
+
 
         MomentDto dto = momentServiceImpl.updateMoment(momentId, addedProjectIds, addedUserIds);
 

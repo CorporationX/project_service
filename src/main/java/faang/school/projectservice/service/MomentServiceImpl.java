@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,6 +35,7 @@ public class MomentServiceImpl implements MomentService {
         momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
+
     @Override
     public MomentDto updateMoment(long momentId, List<Long> addedProjectIds, List<Long> addedUserIds) {
         Moment moment = momentRepository.findById(momentId).orElseThrow();
@@ -80,22 +82,26 @@ public class MomentServiceImpl implements MomentService {
     private void addProjectFromUserToMoment(Moment moment, TeamMember user) {
         Team team = user.getTeam();
         Project project = team.getProject();
-        moment.getProjects().add(project);
+        List<Project> projects = new ArrayList<>(moment.getProjects());
+        projects.add(project);
+        moment.setProjects(projects);
     }
+
     @Override
     public List<MomentDto> getAllProjectMomentsByDate(Long projectId, LocalDateTime month) {
         LocalDateTime endDate = month.plusMonths(1).minusDays(1);
         List<Moment> filteredMoments = projectRepository.getProjectById(projectId).getMoments().stream()
                 .filter(moment -> moment.getCreatedAt().isAfter(month) && moment.getCreatedAt().isBefore(endDate))
                 .toList();
-        //фильтрация по проектам партнерам
         return momentMapper.toDtoList(filteredMoments);
     }
+
     @Override
     public List<MomentDto> getAllMoments() {
         List<Moment> moments = momentRepository.findAll();
         return momentMapper.toDtoList(moments);
     }
+
     @Override
     public MomentDto getMomentById(Long momentId) {
         Moment moment = momentRepository.findById(momentId).orElseThrow();

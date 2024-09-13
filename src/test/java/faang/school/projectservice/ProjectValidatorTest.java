@@ -6,6 +6,7 @@ import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.common.DataValidationException;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -20,14 +21,14 @@ public class ProjectValidatorTest {
         Project project = new Project();
         project.setStatus(ProjectStatus.CANCELLED);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {projectValidator.validateProject(project);});
+        Assertions.assertThrows(DataValidationException.class, () -> {projectValidator.validateProject(project);});
     }
     @Test
     public void testValidateProjectCompleted() {
         Project project = new Project();
         project.setStatus(ProjectStatus.COMPLETED);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {projectValidator.validateProject(project);});
+        Assertions.assertThrows(DataValidationException.class, () -> {projectValidator.validateProject(project);});
     }
     @Test
     public void testValidateProject() {

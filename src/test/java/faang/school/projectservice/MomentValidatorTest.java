@@ -5,6 +5,7 @@ import faang.school.projectservice.validator.MomentValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.common.DataValidationException;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,14 +20,16 @@ public class MomentValidatorTest {
         Moment moment = new Moment();
         moment.setName(" ");
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> momentValidator.validateMoment(moment));
+        Assertions.assertThrows(DataValidationException.class, () -> momentValidator.validateMoment(moment));
     }
     @Test
     public void testValidateMomentWithEmptyName() {
         Moment moment = new Moment();
         moment.setName("");
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> momentValidator.validateMoment(moment));
+        momentValidator.validateMoment(moment);
+
+        Assertions.assertThrows(DataValidationException.class, () -> momentValidator.validateMoment(moment));
     }
     @Test
     public void testValidateMoment() {
