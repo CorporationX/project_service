@@ -21,7 +21,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static reactor.core.publisher.Mono.when;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
+//import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceTest {
@@ -34,13 +39,13 @@ public class ServiceTest {
     @Spy
     private ProjectMapper mapper;
 
-    @Test
+        @Test
     public void testValidationIsNullName() {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
-        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        Assertions.assertThrows(NoSuchElementException.class, () -> projectService.validationName(projectDto));
+        assertThrows(NoSuchElementException.class, () -> projectService.validationName(projectDto));
     }
 
     @Test
@@ -48,18 +53,18 @@ public class ServiceTest {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
         projectEntity.setName("  ");
-        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        Assertions.assertThrows(NoSuchElementException.class, () -> projectService.validationName(projectDto));
+        assertThrows(NoSuchElementException.class, () -> projectService.validationName(projectDto));
     }
 
     @Test
     public void testValidationIsNullDescription() {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
-        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        Assertions.assertThrows(NoSuchElementException.class, () -> projectService.validationDescription(projectDto));
+        assertThrows(NoSuchElementException.class, () -> projectService.validationDescription(projectDto));
     }
 
     @Test
@@ -67,9 +72,9 @@ public class ServiceTest {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
         projectEntity.setDescription("  ");
-        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        Assertions.assertThrows(NoSuchElementException.class, () -> projectService.validationDescription(projectDto));
+        assertThrows(NoSuchElementException.class, () -> projectService.validationDescription(projectDto));
     }
 
     @Test
@@ -84,11 +89,11 @@ public class ServiceTest {
 
         projectDto.setName("Second test name");
 
-        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
-        Mockito.when(projectRepository.findProjectByNameAndOwnerId(projectDto.getName(), projectEntity.getOwnerId()))
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(projectRepository.findProjectByNameAndOwnerId(projectDto.getName(), projectEntity.getOwnerId()))
                 .thenReturn(existingProject);
 
-        Assertions.assertThrows(NoSuchElementException.class,
+        assertThrows(NoSuchElementException.class,
                 () -> projectService.validationDuplicateProjectNames(projectDto));
     }
 
@@ -97,9 +102,9 @@ public class ServiceTest {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
         ProjectStatus status = ProjectStatus.CANCELLED;
-        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        Assertions.assertThrows(NoSuchElementException.class, () -> projectService.updateStatus(projectDto, status));
+        assertThrows(NoSuchElementException.class, () -> projectService.updateStatus(projectDto, status));
     }
 
     @Test
@@ -107,19 +112,19 @@ public class ServiceTest {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
         ProjectStatus status = ProjectStatus.CANCELLED;
-        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
-        Mockito.when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
 
-        Assertions.assertDoesNotThrow(() -> projectService.updateStatus(projectDto, status));
+        assertDoesNotThrow(() -> projectService.updateStatus(projectDto, status));
     }
 
     @Test
     public void testUpdateDescriptionGetException() {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
-        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        Assertions.assertThrows(NoSuchElementException.class,
+        assertThrows(NoSuchElementException.class,
                 () -> projectService.updateDescription(projectDto, "description"));
     }
 
@@ -128,10 +133,10 @@ public class ServiceTest {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
         projectEntity.setDescription("Start description");
-        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
-        Mockito.when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
 
-        Assertions.assertDoesNotThrow(
+        assertDoesNotThrow(
                 () -> projectService.updateDescription(projectDto, "Finish description"));
     }
 
@@ -147,7 +152,7 @@ public class ServiceTest {
         firstProject.setName("Name first");
         secondProject.setName("Name second");
 
-        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        when(projectRepository.findAll()).thenReturn(projects);
         ProjectService service = new ProjectService(projectRepository, mapper, filters);
 
         List<ProjectDto> result = service.getProjectsFilters(filterDto);
@@ -167,13 +172,13 @@ public class ServiceTest {
         projectsDto.add(firstProjectDto);
         projectsDto.add(secondProjectDto);
 
-        Mockito.when(projectRepository.findAll()).thenReturn(projects);
-        Mockito.when(mapper.toDto(firstProject)).thenReturn(firstProjectDto);
-        Mockito.when(mapper.toDto(secondProject)).thenReturn(secondProjectDto);
+        when(projectRepository.findAll()).thenReturn(projects);
+        when(mapper.toDto(firstProject)).thenReturn(firstProjectDto);
+        when(mapper.toDto(secondProject)).thenReturn(secondProjectDto);
 
         List<ProjectDto> result = projectService.getProjects();
 
-        Assertions.assertEquals(projectsDto, result);
+        assertEquals(projectsDto, result);
     }
 
     @Test
@@ -184,10 +189,12 @@ public class ServiceTest {
         ProjectDto projectDto = new ProjectDto();
         projectDto.setId(1l);
 
-        Mockito.when(projectRepository.findById(id)).thenReturn(project);
-        Mockito.when(mapper.toDto(project)).thenReturn(projectDto);
+        when(projectRepository.findById(id)).thenReturn(project);
+        when(mapper.toDto(project)).thenReturn(projectDto);
         ProjectDto result = projectService.findById(id);
 
-        Assertions.assertEquals(result, projectDto);
+        assertEquals(result, projectDto);
     }
+
+
 }
