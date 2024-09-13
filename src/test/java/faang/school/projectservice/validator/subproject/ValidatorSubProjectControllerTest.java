@@ -45,7 +45,9 @@ class ValidatorSubProjectControllerTest {
 
     @Test
     void testIsParentProjectNotNull() {
-        projectDto.setParentProjectId(new Project().getId());
+        Project project = new Project();
+        project.setId(1L);
+        projectDto.setParentProjectId(project.getId());
 
         assertDoesNotThrow(() -> validatorSubProjectController.isParentProjectNull(projectDto));
     }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject.filters;
 
-import faang.school.projectservice.dto.client.subproject.SubProjectFilterDto;
+import faang.school.projectservice.dto.client.subproject.ProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.AllArgsConstructor;
@@ -10,19 +10,21 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @AllArgsConstructor
 class SubProjectStatusFilterTest {
     private SubProjectStatusFilter filter;
-    private SubProjectFilterDto filterDto;
+    private ProjectDto filterDto;
 
     @BeforeEach
     void setUp() {
         filter = new SubProjectStatusFilter();
-        filterDto = new SubProjectFilterDto();
+        filterDto = new ProjectDto();
     }
-
 
     @Test
     void isApplicableTrue() {

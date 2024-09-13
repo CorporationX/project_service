@@ -1,8 +1,7 @@
 package faang.school.projectservice.service.subproject.filters;
 
-import faang.school.projectservice.dto.client.subproject.SubProjectFilterDto;
+import faang.school.projectservice.dto.client.subproject.ProjectDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
 import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,19 +9,21 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @AllArgsConstructor
 class SubProjectNameFilterTest {
     private SubProjectNameFilter filter;
-    private SubProjectFilterDto filterDto;
+    private ProjectDto filterDto;
 
     @BeforeEach
     void setUp() {
         filter = new SubProjectNameFilter();
-        filterDto = new SubProjectFilterDto();
+        filterDto = new ProjectDto();
     }
-
 
     @Test
     void isApplicableTrue() {
@@ -45,7 +46,6 @@ class SubProjectNameFilterTest {
         projects.get(2).setName("testName2");
         filterDto.setName("testName");
 
-
         List<Project> filteredProjects = filter.apply(projects.stream(), filterDto).toList();
 
         assertAll(
@@ -53,15 +53,4 @@ class SubProjectNameFilterTest {
                 () -> assertEquals(filterDto.getName(), filteredProjects.get(0).getName())
         );
     }
-
-
-//       requestFilterDto.setStatusPattern(RequestStatus.PENDING);
-//    Stream<RecommendationRequest> recommendationRequests = getRecommendationRequestStream();
-//
-//    List<RecommendationRequest> resultRecommendationRequests = recommendationRequestStatusFilter.apply(recommendationRequests, requestFilterDto).toList();
-//
-//        Assertions.assertAll(
-//                () -> assertEquals(resultRecommendationRequests.get(0).getStatus(), requestFilterDto.getStatusPattern()),
-//            () -> assertEquals(1, resultRecommendationRequests.size())
-//            );
 }

@@ -2,7 +2,6 @@ package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.client.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.client.subproject.ProjectDto;
-import faang.school.projectservice.dto.client.subproject.SubProjectFilterDto;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -27,15 +26,12 @@ public class ProjectService {
     private final List<SubProjectFilter> filters;
 
     public ProjectDto create(ProjectDto projectDto) {
-
         CreateSubProjectDto subProjectDto = subProjectMapper.mapToSubDto(projectDto);
         subProjectDto.setStatus(ProjectStatus.CREATED);
         validatorService.isProjectExists(subProjectDto.getParentProjectId());
         Project parentProject = projectRepository.findById(subProjectDto.getParentProjectId());
         validatorService.isProjectExistsByName(subProjectDto.getName());
         validatorService.isVisibilityRight(parentProject.getVisibility(), subProjectDto.getVisibility());
-
-
         Project projectToSaveDb = subProjectMapper.mapToEntity(subProjectDto);
         projectToSaveDb.setParentProject(parentProject);
         Project result = projectRepository.save(projectToSaveDb);
@@ -53,14 +49,12 @@ public class ProjectService {
         if (allSubProjects.isEmpty()) {
             return new ArrayList<>();
         }
-        SubProjectFilterDto subProjectFilterDto = subProjectMapper.mapToProjectDto(projectDto);
         List<Project> allFilteredProjects = filters.stream()
-                .filter(filter -> filter.isApplicable(subProjectFilterDto))
-                .reduce(allSubProjects.stream(), (stream, filter) -> filter.apply(stream, subProjectFilterDto),
+                .filter(filter -> filter.isApplicable(projectDto))
+                .reduce(allSubProjects.stream(), (stream, filter) -> filter.apply(stream, projectDto),
                         (s1, s2) -> s1)
                 .filter(project -> project.getVisibility() != ProjectVisibility.PRIVATE)
                 .toList();
-        System.out.println("allfilter " + allFilteredProjects.size());
         return allFilteredProjects.stream()
                 .map(subProjectMapper::mapToProjectDto)
                 .toList();
@@ -69,12 +63,10 @@ public class ProjectService {
     public ProjectDto updateSubProject(ProjectDto projectDto) {
         validatorService.isProjectExists(projectDto.getId());
         Project updateProject = projectRepository.findById(projectDto.getId());
-        if (projectDto.getStatus() != null) {
-            updateProject = updateProjectStatus(updateProject, projectDto.getStatus());
-
-            //TODO получаем Moment
-        } else if (projectDto.getVisibility() != null) {
+        if (projectDto.getVisibility() != null) {
             updateProject = updateProjectVisibility(updateProject, projectDto.getVisibility());
+        } else if (projectDto.getStatus() != null) {
+            updateProject = updateProjectStatus(updateProject, projectDto.getStatus());
         }
         return subProjectMapper.mapToProjectDto(projectRepository.save(updateProject));
     }
@@ -100,9 +92,12 @@ public class ProjectService {
         }
         for (var childProject : project.getChildren()) {
             if (!childProject.getStatus().equals(projectStatus)) {
-                throw new IllegalStateException("Can't close project, because children project still open");
+                throw new IllegalStateException("Can't close project with id " + project.getId() + ", because children project still open");
             }
         }
+
+        //TODO получаем Moment
+
         project.setStatus(projectStatus);
         project.setUpdatedAt(LocalDateTime.now());
         return project;

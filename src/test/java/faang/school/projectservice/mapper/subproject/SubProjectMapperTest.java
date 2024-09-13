@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class SubProjectMapperTest {
-    ProjectDto projectDto = new ProjectDto();
+    final ProjectDto projectDto = new ProjectDto();
 
     @Spy
-    SubProjectMapperImpl subProjectMapper = new SubProjectMapperImpl();
+    private SubProjectMapperImpl subProjectMapper = new SubProjectMapperImpl();
 
     @Test
     void mapToSubDto() {

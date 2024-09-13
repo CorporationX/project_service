@@ -28,6 +28,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,9 +38,7 @@ import static org.mockito.Mockito.when;
 @Component
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
-    //TODO create tests
-
-    private List<SubProjectFilter> filters = initializeSubProjectFilters();
+    final List<SubProjectFilter> filters = initializeSubProjectFilters();
 
     @Spy
     private SubProjectMapper subProjectMapper = new SubProjectMapperImpl();
@@ -49,16 +48,16 @@ class ProjectServiceTest {
     private ProjectRepository projectRepository;
 
     @Captor
-    ArgumentCaptor<Project> projectCaptor;
+    private ArgumentCaptor<Project> projectCaptor;
 
     @InjectMocks
-    ProjectService projectService;
+    private ProjectService projectService;
 
-    Long parentProjectId;
+    private Long parentProjectId;
     private Project parentProject;
-    Project firstProject;
-    Project secondProject;
-    ProjectDto projectDto;
+    private Project firstProject;
+    private Project secondProject;
+    private ProjectDto projectDto;
 
     @BeforeEach
     void setUp() {
@@ -72,7 +71,6 @@ class ProjectServiceTest {
         projectDto = new ProjectDto();
         projectDto.setId(parentProjectId);
     }
-
 
     @Test
     void testGetFilteredNameSubProjects() {
@@ -132,7 +130,6 @@ class ProjectServiceTest {
     void testGetFilteredSubProjectsEmptyList() {
         firstProject.setStatus(ProjectStatus.CANCELLED);
         secondProject.setStatus(ProjectStatus.IN_PROGRESS);
-
         ProjectDto projectDto = new ProjectDto();
         projectDto.setStatus(ProjectStatus.CREATED);
         projectDto.setParentProjectId(parentProjectId);
@@ -143,7 +140,52 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testUpdateSubProject() {
+    void testUpdateSubProjectVisibility() {
+        firstProject.setVisibility(ProjectVisibility.PRIVATE);
+        secondProject.setVisibility(ProjectVisibility.PRIVATE);
+        projectDto.setVisibility(ProjectVisibility.PRIVATE);
+        parentProject.setVisibility(ProjectVisibility.PUBLIC);
+        parentProject.setChildren(List.of(firstProject, secondProject));
+        when(projectRepository.findById(parentProjectId)).thenReturn(parentProject);
+
+        projectService.updateSubProject(projectDto);
+
+        verify(projectRepository, times(1)).save(projectCaptor.capture());
+        Project savedProject = projectCaptor.getValue();
+        assertEquals(projectDto.getVisibility(), savedProject.getVisibility());
+    }
+
+    @Test
+    void testUpdateSubProjectStatusUnSuccess() {
+        firstProject.setStatus(ProjectStatus.COMPLETED);
+        secondProject.setStatus(ProjectStatus.IN_PROGRESS);
+        projectDto.setStatus(ProjectStatus.COMPLETED);
+        parentProject.setStatus(ProjectStatus.IN_PROGRESS);
+        parentProject.setVisibility(ProjectVisibility.PUBLIC);
+        parentProject.setChildren(List.of(firstProject, secondProject));
+        when(projectRepository.findById(parentProjectId)).thenReturn(parentProject);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> projectService.updateSubProject(projectDto));
+
+        assertEquals("Can't close project with id " + projectDto.getId() + ", because children project still open", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateSubProjectStatusSuccess() {
+        firstProject.setStatus(ProjectStatus.COMPLETED);
+        secondProject.setStatus(ProjectStatus.COMPLETED);
+        projectDto.setStatus(ProjectStatus.COMPLETED);
+        parentProject.setStatus(ProjectStatus.IN_PROGRESS);
+        parentProject.setVisibility(ProjectVisibility.PUBLIC);
+        parentProject.setChildren(List.of(firstProject, secondProject));
+        when(projectRepository.findById(parentProjectId)).thenReturn(parentProject);
+
+        projectService.updateSubProject(projectDto);
+
+        verify(projectRepository, times(1)).save(projectCaptor.capture());
+        Project savedProject = projectCaptor.getValue();
+        assertEquals(projectDto.getStatus(), savedProject.getStatus());
     }
 
     List<SubProjectFilter> initializeSubProjectFilters() {
@@ -152,5 +194,4 @@ class ProjectServiceTest {
                 new SubProjectStatusFilter()
         );
     }
-
 }

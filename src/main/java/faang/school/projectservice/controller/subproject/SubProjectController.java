@@ -37,9 +37,6 @@ public class SubProjectController {
     @PostMapping("/update-subproject")
     public ProjectDto updateSubProject(@RequestBody ProjectDto projectDto) {
         validatorSubProjectController.isProjectDtoNull(projectDto);
-//        validatorSubProjectController.isProjectNameNull(projectDto);
-//        validatorSubProjectController.isProjectStatusNull(projectDto);
-//        validatorSubProjectController.isProjectVisibilityNull(projectDto);
         return projectService.updateSubProject(projectDto);
     }
 }

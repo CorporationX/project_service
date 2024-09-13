@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject.filters;
 
-import faang.school.projectservice.dto.client.subproject.SubProjectFilterDto;
+import faang.school.projectservice.dto.client.subproject.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
@@ -10,13 +10,13 @@ import java.util.stream.Stream;
 public class SubProjectStatusFilter implements SubProjectFilter {
 
     @Override
-    public boolean isApplicable(SubProjectFilterDto subProjectFilterDto) {
-        return subProjectFilterDto.getStatus() != null;
+    public boolean isApplicable(ProjectDto projectDto) {
+        return projectDto.getStatus() != null;
     }
 
     @Override
-    public Stream<Project> apply(Stream<Project> projects, SubProjectFilterDto subProjectFilterDto) {
+    public Stream<Project> apply(Stream<Project> projects, ProjectDto projectDto) {
         return projects
-                .filter(project -> project.getStatus() == subProjectFilterDto.getStatus());
+                .filter(project -> project.getStatus() == projectDto.getStatus());
     }
 }
