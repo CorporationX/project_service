@@ -13,7 +13,5 @@ public interface MomentMapper {
 
     Moment toEntity(MomentDto momentDto);
 
-    List<Moment> toEntityList(List<MomentDto> momentDtoList);
-
     List<MomentDto> toDtoList(List<Moment> momentList);
 }

@@ -1,7 +1,8 @@
 package faang.school.projectservice;
 
 import faang.school.projectservice.controller.MomentController;
-import faang.school.projectservice.service.MomentService;
+import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.service.MomentServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,17 +18,17 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 public class MomentControllerTest {
     @Mock
-    private MomentService momentService;
+    private MomentServiceImpl momentServiceImpl;
     @InjectMocks
     private MomentController momentController;
 
     @Test
     public void createMoment() {
-        long momentId = 1L;
+        Moment moment = new Moment();
 
-        momentController.createMoment(momentId);
+        momentController.createMoment(moment);
 
-        verify(momentService,times(1)).createMoment(momentId);
+        verify(momentServiceImpl,times(1)).createMoment(moment);
     }
 
     @Test
@@ -36,7 +37,7 @@ public class MomentControllerTest {
 
         momentController.getMoment(momentId);
 
-        verify(momentService,times(1)).getMomentById(momentId);
+        verify(momentServiceImpl,times(1)).getMomentById(momentId);
     }
 
     @Test
@@ -47,14 +48,14 @@ public class MomentControllerTest {
 
         momentController.updateMoment(momentId, addedProjectIds, addedUserIds);
 
-        verify(momentService,times(1)).updateMoment(momentId, addedProjectIds, addedUserIds);
+        verify(momentServiceImpl,times(1)).updateMoment(momentId, addedProjectIds, addedUserIds);
     }
 
     @Test
     public void getAllMoments() {
-       momentService.getAllMoments();
+       momentServiceImpl.getAllMoments();
 
-       verify(momentService,times(1)).getAllMoments();
+       verify(momentServiceImpl,times(1)).getAllMoments();
     }
 
     @Test
@@ -62,8 +63,8 @@ public class MomentControllerTest {
         Long projectId = 1L;
         LocalDateTime month = LocalDateTime.of(2020, 1, 1, 1, 1);
 
-        momentService.getAllProjectMomentsByDate(projectId, month);
+        momentServiceImpl.getAllProjectMomentsByDate(projectId, month);
 
-        verify(momentService,times(1)).getAllProjectMomentsByDate(projectId, month);
+        verify(momentServiceImpl,times(1)).getAllProjectMomentsByDate(projectId, month);
     }
 }

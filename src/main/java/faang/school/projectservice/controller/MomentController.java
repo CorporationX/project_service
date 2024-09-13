@@ -16,8 +16,8 @@ import java.util.List;
 public class MomentController {
     private final MomentService momentService;
 
-    public MomentDto createMoment(long momentId) {
-        return momentService.createMoment(momentId);
+    public MomentDto createMoment(Moment moment) {
+        return momentService.createMoment(moment);
     }
 
     public List<MomentDto> getAllProjectMomentsByDate(Long projectId, LocalDateTime month) {
