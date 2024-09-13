@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StageServiceValidator {
     public void validateProjectExisting(boolean isExist) {
-        if (isExist) {
+        if (!isExist) {
             throw new StageNotHaveProjectException();
         }
     }
@@ -26,7 +26,7 @@ public class StageServiceValidator {
                 .map(StageRolesDto::role).collect(Collectors.toSet());//роли в этапе
 
         for (TeamMemberDto dto : stageDto.getExecutorsDtos()) {
-            if (dto.stageRoles().stream()
+            if (!dto.stageRoles().stream()
                     .anyMatch(roles::contains)) {
                 throw new IllegalArgumentException("executor id = " + dto.id()
                         + " excess in this stage");
