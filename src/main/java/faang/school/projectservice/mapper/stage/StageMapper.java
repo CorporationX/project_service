@@ -1,9 +1,7 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -22,6 +20,4 @@ public interface StageMapper {
     Stage toEntity(StageDto stageDto);
 
     List<StageDto> toStageDtos(List<Stage> stageRoles);
-
-//    List<StageRoles> toStageRolesEntities(List<StageRolesDto> stageRolesDtos);
 }

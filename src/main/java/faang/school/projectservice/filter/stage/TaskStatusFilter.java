@@ -17,7 +17,7 @@ public class TaskStatusFilter implements StageFilter {
     @Override
     public Stream<Stage> apply(Stream<Stage> stages, StageFilterDto filters) {
         return stages.filter(stage -> stage.getTasks()
-                .stream().
-                anyMatch(task -> task.getStatus() == filters.taskStatus()));
+                .stream()
+                .anyMatch(task -> task.getStatus() == filters.taskStatus()));
     }
 }

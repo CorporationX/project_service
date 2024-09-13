@@ -2,29 +2,35 @@ package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.filter.stage.StageFilter;
-import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.jpa.TaskRepository;
+import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.stage.StageValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class StageServiceImpl implements StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
-    private List<StageFilter> stageFilters;
+    private final List<StageFilter> stageFilters;
     private final StageValidator validator;
     private final StageMapper stageMapper;
+    private final TaskRepository taskRepository;
+    private final StageInvitationRepository stageInvitationRepository;
 
     @Override
     public StageDto createStage(@Valid StageDto stageDto) {
@@ -55,11 +61,52 @@ public class StageServiceImpl implements StageService {
     @Override
     public void deleteStage(long stageId) {
         Stage stage = stageRepository.getById(stageId);
-        //Жду ответа по каскаду
+
+        List<Task> tasks = stage.getTasks();
+
+        taskRepository.deleteAll(tasks);
+        stageRepository.delete(stage);
     }
 
     @Override
-    public StageDto updateStage(long stageId) {
-        return null;
+    public StageDto updateStage(long stageId, StageRolesDto stageRolesDto) {
+        Stage stage = stageRepository.getById(stageId);
+
+        long neededMembers = getAmountOfMissingMembersWithNeededRole(stage.getExecutors(), stageRolesDto);
+
+        if (neededMembers > 0) {
+            stage.getProject().getTeams()
+                    .stream()
+                    .flatMap(team -> team.getTeamMembers().stream())
+                    .filter(member -> member.getRoles().contains(stageRolesDto.teamRole()))
+                    .limit(neededMembers)
+                    .forEach(member -> sendInvitation(StageInvitation.builder().stage(stage).build()));
+        }
+
+        return stageMapper.toDto(stage);
+    }
+
+    @Override
+    public List<StageDto> getStages(long projectId) {
+        return stageMapper.toStageDtos(projectRepository.getProjectById(projectId).getStages());
+    }
+
+    @Override
+    public StageDto getSpecificStage(long stageId) {
+        return stageMapper.toDto(stageRepository.getById(stageId));
+    }
+
+    private void sendInvitation(StageInvitation invitation) {
+        stageInvitationRepository.save(invitation);
+    }
+
+    private long getAmountOfMissingMembersWithNeededRole(List<TeamMember> executors, StageRolesDto stageRolesDto) {
+        long stageMembers = executors
+                .stream()
+                .filter(teamMember -> teamMember.getRoles()
+                        .contains(stageRolesDto.teamRole()))
+                .count();
+
+        return stageRolesDto.count() - stageMembers;
     }
 }

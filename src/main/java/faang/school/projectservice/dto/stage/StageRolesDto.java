@@ -7,14 +7,10 @@ import lombok.Builder;
 
 @Builder
 public record StageRolesDto(
-//        Long id,
-
         @NotNull
         TeamRole teamRole,
 
         @PositiveOrZero
-        Integer count/*,
-
-        Long stageId*/
+        Integer count
 ) {
 }
