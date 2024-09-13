@@ -11,10 +11,9 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,16 +24,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StageServiceImpl implements StageService {
     private final StageRepository stageRepository;
-    private final ProjectRepository projectRepository;
     private final List<StageFilter> stageFilters;
-    private final StageValidator validator;
+    private final ProjectService projectService;
     private final StageMapper stageMapper;
     private final TaskRepository taskRepository;
     private final StageInvitationRepository stageInvitationRepository;
 
     @Override
     public StageDto createStage(@Valid StageDto stageDto) {
-        validator.validateProject(stageDto.projectId());
+        projectService.getProject(stageDto.projectId());
 
         Stage stage = stageMapper.toEntity(stageDto);
 
@@ -43,7 +41,7 @@ public class StageServiceImpl implements StageService {
 
     @Override
     public List<StageDto> getProjectStages(long projectId, StageFilterDto filterDto) {
-        Project project = projectRepository.getProjectById(projectId);
+        Project project = projectService.getProject(projectId);
 
         List<Stage> stages = project.getStages();
 
@@ -88,7 +86,7 @@ public class StageServiceImpl implements StageService {
 
     @Override
     public List<StageDto> getStages(long projectId) {
-        return stageMapper.toStageDtos(projectRepository.getProjectById(projectId).getStages());
+        return stageMapper.toStageDtos(projectService.getProject(projectId).getStages());
     }
 
     @Override
