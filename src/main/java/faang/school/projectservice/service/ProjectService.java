@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -56,5 +58,31 @@ public class ProjectService {
         validationCreateProject(projectDto);
         project.setStatus(ProjectStatus.CREATED);
         projectRepository.save(project);
+    }
+
+    public void updateStatus(ProjectDto projectDto, ProjectStatus status) {
+        Project project = mapper.toEntity(projectDto);
+
+        if (!projectRepository.existsById(project.getId())) {
+            throw new NoSuchElementException("The project does not exist");
+        }
+
+        project.setStatus(status);
+    }
+
+    public void updateDescription(ProjectDto projectDto, String description) {
+        Project project = mapper.toEntity(projectDto);
+
+        if (!projectRepository.existsById(project.getId())) {
+            throw new NoSuchElementException("The project does not exist");
+        }
+
+        project.setDescription(description);
+    }
+    ///////////////////////////////////////////////////////////////////
+
+    public List<Project> getProjects(ProjectFilterDto filterDto) {
+        List<Project> projects = projectRepository.findAll();
+        return projects;
     }
 }

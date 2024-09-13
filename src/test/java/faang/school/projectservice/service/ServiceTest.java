@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -82,5 +83,48 @@ public class ServiceTest {
 
         Assertions.assertThrows(NoSuchElementException.class,
                 () -> projectService.validationDuplicateProjectNames(projectDto));
+    }
+
+    @Test
+    public void testUpdateStatusGetException() {
+        ProjectDto projectDto = new ProjectDto();
+        Project projectEntity = new Project();
+        ProjectStatus status = ProjectStatus.CANCELLED;
+        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+
+        Assertions.assertThrows(NoSuchElementException.class, () -> projectService.updateStatus(projectDto, status));
+    }
+
+    @Test
+    public void testUpdateStatus() {
+        ProjectDto projectDto = new ProjectDto();
+        Project projectEntity = new Project();
+        ProjectStatus status = ProjectStatus.CANCELLED;
+        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        Mockito.when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
+
+        Assertions.assertDoesNotThrow(() -> projectService.updateStatus(projectDto, status));
+    }
+
+    @Test
+    public void testUpdateDescriptionGetException() {
+        ProjectDto projectDto = new ProjectDto();
+        Project projectEntity = new Project();
+        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+
+        Assertions.assertThrows(NoSuchElementException.class,
+                () -> projectService.updateDescription(projectDto, "description"));
+    }
+
+    @Test
+    public void testUpdateDescription() {
+        ProjectDto projectDto = new ProjectDto();
+        Project projectEntity = new Project();
+        projectEntity.setDescription("Start description");
+        Mockito.when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        Mockito.when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
+
+        Assertions.assertDoesNotThrow(
+                () -> projectService.updateDescription(projectDto, "Finish description"));
     }
 }
