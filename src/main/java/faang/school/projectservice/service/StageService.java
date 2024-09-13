@@ -1,9 +1,11 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.taskActionAfterDeletingStage.TaskActionAfterDeletingStage;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -40,5 +42,32 @@ public class StageService {
         savedStage.setStageRoles(createdStageRoles);
 
         return stageMapper.toDto(savedStage);
+    }
+
+
+    public List<StageDto> getFilteredStagesByRolesAndStatus(
+            Long projectId,
+            List<TeamRole> roles,
+            List<TaskStatus> taskStatuses) {
+
+        return stageMapper.toDtos(
+                stageRepository.findStagesByProjectAndFilters(
+                        projectId, roles, taskStatuses)
+        );
+    }
+
+    @Transactional
+    public void deleteStage(Long stageId, TaskActionAfterDeletingStage taskAction) {
+
+    }
+
+
+    public List<StageDto> getAllStagesByProjectId(Long projectId) {
+        List<Stage> stagesDto = stageRepository.findAllStagesByProjectId(projectId);
+        return stageMapper.toDtos(stagesDto);
+    }
+
+    public StageDto getStageById(Long stageId) {
+        return stageMapper.toDto(stageRepository.getById(stageId));
     }
 }
