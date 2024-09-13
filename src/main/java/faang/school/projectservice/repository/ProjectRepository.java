@@ -56,4 +56,8 @@ public class ProjectRepository {
         }
         return null;
     }
+
+    public Project findById(long id) {
+        return projectJpaRepository.getById(id);
+    }
 }

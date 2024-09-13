@@ -1,6 +1,8 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.client.ProjectFilterDto;
+import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -14,8 +16,11 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static reactor.core.publisher.Mono.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +29,8 @@ public class ServiceTest {
     private ProjectService projectService;
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private List<ProjectFilters> filters;
     @Spy
     private ProjectMapper mapper;
 
@@ -126,5 +133,61 @@ public class ServiceTest {
 
         Assertions.assertDoesNotThrow(
                 () -> projectService.updateDescription(projectDto, "Finish description"));
+    }
+
+    @Test
+    public void testGetProjectsFilters() {
+        ProjectFilterDto filterDto = new ProjectFilterDto();
+        filterDto.setName("Name");
+
+        List<Project> projects = new ArrayList<>();
+
+        Project firstProject = new Project();
+        Project secondProject = new Project();
+        firstProject.setName("Name first");
+        secondProject.setName("Name second");
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        ProjectService service = new ProjectService(projectRepository, mapper, filters);
+
+        List<ProjectDto> result = service.getProjectsFilters(filterDto);
+        assertThat(result).isEqualTo(projects);
+    }
+
+    @Test
+    public void testGetProjects() {
+        List<ProjectDto> projectsDto = new ArrayList<>();
+        List<Project> projects = new ArrayList<>();
+        ProjectDto firstProjectDto = new ProjectDto();
+        ProjectDto secondProjectDto = new ProjectDto();
+        Project firstProject = new Project();
+        Project secondProject = new Project();
+        projects.add(firstProject);
+        projects.add(secondProject);
+        projectsDto.add(firstProjectDto);
+        projectsDto.add(secondProjectDto);
+
+        Mockito.when(projectRepository.findAll()).thenReturn(projects);
+        Mockito.when(mapper.toDto(firstProject)).thenReturn(firstProjectDto);
+        Mockito.when(mapper.toDto(secondProject)).thenReturn(secondProjectDto);
+
+        List<ProjectDto> result = projectService.getProjects();
+
+        Assertions.assertEquals(projectsDto, result);
+    }
+
+    @Test
+    public void testFindById() {
+        long id = 1l;
+        Project project = new Project();
+        project.setId(1l);
+        ProjectDto projectDto = new ProjectDto();
+        projectDto.setId(1l);
+
+        Mockito.when(projectRepository.findById(id)).thenReturn(project);
+        Mockito.when(mapper.toDto(project)).thenReturn(projectDto);
+        ProjectDto result = projectService.findById(id);
+
+        Assertions.assertEquals(result, projectDto);
     }
 }
