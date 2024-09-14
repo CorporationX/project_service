@@ -38,11 +38,8 @@ public class StageInvitationService {
     public StageInvitationDto declineInvitation(Long id, String reason) {
         StageInvitation invitation = repository.findById(id);
         invitation.setStatus(StageInvitationStatus.REJECTED);
-        invitation.setDescription(reason);  // Причина отказа сохраняется в поле description
+        invitation.setDescription(reason);
         repository.save(invitation);
-        System.out.println(invitation);
-        StageInvitationDto test = mapper.toDto(invitation);
-        System.out.println(test);
         return mapper.toDto(invitation);
     }
 

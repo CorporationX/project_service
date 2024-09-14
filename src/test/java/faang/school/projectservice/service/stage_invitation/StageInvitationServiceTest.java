@@ -1,16 +1,17 @@
 package faang.school.projectservice.service.stage_invitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import faang.school.projectservice.mapper.StageInvitationMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,8 +25,8 @@ public class StageInvitationServiceTest {
     @Mock
     private StageInvitationRepository repository;
 
-    @Mock
-    private StageInvitationMapper mapper;
+    @Spy
+    private StageInvitationMapperImpl mapper;
 
     @InjectMocks
     private StageInvitationService service;
@@ -59,10 +60,8 @@ public class StageInvitationServiceTest {
 
 
     @Test
-    void testSendInvitation() {
-        when(mapper.toEntity(any(StageInvitationDto.class))).thenReturn(invitation);
+    void testSendInvitation() {;
         when(repository.save(any(StageInvitation.class))).thenReturn(invitation);
-        when(mapper.toDto(any(StageInvitation.class))).thenReturn(invitationDto);
 
         StageInvitationDto result = service.sendInvitation(invitationDto);
 
@@ -77,7 +76,6 @@ public class StageInvitationServiceTest {
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
         when(repository.findById(1L)).thenReturn(invitation);
         when(repository.save(any(StageInvitation.class))).thenReturn(invitation);
-        when(mapper.toDto(any(StageInvitation.class))).thenReturn(invitationDto);
 
         StageInvitationDto result = service.acceptInvitation(1L);
 
@@ -93,7 +91,6 @@ public class StageInvitationServiceTest {
         invitation.setDescription("Reason for decline");
         when(repository.findById(1L)).thenReturn(invitation);
         when(repository.save(any(StageInvitation.class))).thenReturn(invitation);
-        when(mapper.toDto(any(StageInvitation.class))).thenReturn(invitationDto);
 
         StageInvitationDto result = service.declineInvitation(1L, "Reason for decline");
 
@@ -107,7 +104,6 @@ public class StageInvitationServiceTest {
     @Test
     void testGetUserInvitations() {
         when(repository.findAll()).thenReturn(Collections.singletonList(invitation));
-        when(mapper.toDtoList(anyList())).thenReturn(Collections.singletonList(invitationDto));
 
         List<StageInvitationDto> result = service.getUserInvitations(2L);
 
