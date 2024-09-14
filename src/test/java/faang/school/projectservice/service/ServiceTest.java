@@ -52,7 +52,7 @@ public class ServiceTest {
     public void testValidationNameIsBlank() {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
-        projectEntity.setName("asda");
+        projectEntity.setName("  ");
         when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
         assertThrows(NoSuchElementException.class, () -> projectService.validationName(projectDto));
