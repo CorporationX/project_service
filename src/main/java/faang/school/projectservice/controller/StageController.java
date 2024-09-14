@@ -46,14 +46,15 @@ public class StageController {
         return stageService.getFilteredStagesByRolesAndStatus(projectId, roles, taskStatuses);
     }
 
-    @DeleteMapping("/stage/{stageId}")
-    public void deleteStage(@PathVariable Long stageId,
-                            @RequestParam TaskActionAfterDeletingStage taskAction) {
+    @DeleteMapping("/stage/{providerStageId}")
+    public void deleteStage(@PathVariable Long providerStageId,
+                            @RequestParam TaskActionAfterDeletingStage taskAction,
+                            @RequestParam Long consumerStageId) {
 
-        entityValidator.validateIdForIncorrect(stageId, "Stage");
+        entityValidator.validateIdForIncorrect(providerStageId, "Stage");
         taskActionValidator.validateIsItTaskActionsAfterDeletingStage(taskAction);
 
-        stageService.deleteStage(stageId, taskAction);
+        stageService.deleteStage(providerStageId, taskAction, consumerStageId);
     }
 
     @GetMapping("/project/{projectId}/stages")
@@ -62,11 +63,18 @@ public class StageController {
         return stageService.getAllStagesByProjectId(projectId);
     }
 
-
     @GetMapping("stage/{stageId}")
     public StageDto getStageById(@PathVariable Long stageId) {
         entityValidator.validateIdForIncorrect(stageId, "Stage");
         return stageService.getStageById(stageId);
+    }
+
+    @PutMapping("/stage")
+    public StageDto updateStage(@RequestBody StageDto stageDto) {
+        entityValidator.validateIdForIncorrect(stageDto.stageId(), "Stage");
+        stageRolesValidator.validateRolesWithAmount(stageDto.rolesWithAmount());
+        entityValidator.validateStringAtributeForIncorrect(stageDto.stageName(), "Stage name");
+        return stageService.updateStage(stageDto);
     }
 
 
