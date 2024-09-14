@@ -4,14 +4,19 @@ import faang.school.projectservice.model.TeamMember;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateInternshipDto {
 
     @Length(max = 128, message = "The name cannot be longer than 128 characters")
@@ -23,14 +28,15 @@ public class CreateInternshipDto {
     private String description;
 
     @NotNull(message = "The internship cannot be outside the project")
+    @Positive(message = "Internship cannot be negative")
     private Long projectId;
 
     @NotNull(message = "Interns list is required")
     @Size(min = 1, message = "At least one intern is required")
-    private List<TeamMember> interns;
+    private List<Long> internIds;
 
     @NotBlank(message = "Mentor cannot be blank")
-    private TeamMember mentorId;
+    private Long mentorId;
 
     private final LocalDateTime startDate = LocalDateTime.now();
 

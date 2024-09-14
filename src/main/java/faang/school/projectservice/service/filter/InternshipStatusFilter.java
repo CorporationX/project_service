@@ -7,6 +7,7 @@ import faang.school.projectservice.model.Internship;
 import java.util.stream.Stream;
 
 public class InternshipStatusFilter implements InternshipFilter {
+
     @Override
     public boolean isApplicable(InternshipFilterDto filters) {
         return filters.getStatus() != null;

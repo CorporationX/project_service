@@ -38,7 +38,7 @@ public class InternshipServiceImpl implements InternshipService {
     @Override
     public InternshipDto createInternship(CreateInternshipDto internship) {
         if (!isProjectHaveIntern(internship.getProjectId())) {
-            throw new EntityNotFoundException("No interns");
+            throw new EntityNotFoundException("No interns in project: id %d".formatted(internship.getProjectId()));
         }
         long internshipDuration = ChronoUnit.MONTHS.between(internship.getStartDate(), internship.getEndDate());
         if (internshipDuration > maxInternshipDurationMonth) {
@@ -46,7 +46,7 @@ public class InternshipServiceImpl implements InternshipService {
                     .formatted(maxInternshipDurationMonth));
         }
         if (!isMentorInProject(internship.getProjectId(), internship.getMentorId())) {
-            throw new EntityNotFoundException("This mentor is not in this project");
+            throw new EntityNotFoundException("This mentor is not in project: id %d ".formatted(internship.getProjectId()));
         }
         Internship newInternship = internshipMapper.createInternshipDtoToInternship(internship);
         internshipRepository.save(newInternship);
@@ -57,9 +57,9 @@ public class InternshipServiceImpl implements InternshipService {
     @Override
     public void updateInternship(Long internshipId, TeamRoleDto teamRole) {
         Internship internshipForUpdate = internshipRepository.findById(internshipId)
-                .orElseThrow(() -> new EntityNotFoundException("Internship not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Internship %d not found".formatted(internshipId)));
         if (internshipForUpdate.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
-            throw new InternshipUpdateException("This internship is in progress");
+            throw new InternshipUpdateException("This internship %d is in progress".formatted(internshipId));
         }
         if (internshipForUpdate.getStatus().equals(InternshipStatus.COMPLETED)) {
             List<TeamMember> interns = internshipForUpdate.getInterns();
@@ -123,22 +123,22 @@ public class InternshipServiceImpl implements InternshipService {
         return internshipMapper.internshipToInternshipDto(internship);
     }
 
-    private boolean isMentorInProject(Long projectId, TeamMember mentor) {
+    private boolean isMentorInProject(Long projectId, Long mentorId) {
         Project project = projectRepository.getProjectById(projectId);
         if (project == null) {
-            throw new EntityNotFoundException("Project not found");
+            throw new EntityNotFoundException("Project %d not found".formatted(projectId));
         } else {
             return project.getTeams().stream()
                     .flatMap(team -> team.getTeamMembers().stream())
                     .filter(teamMember -> !teamMember.getRoles().contains(TeamRole.INTERN))
-                    .anyMatch(teamMember -> teamMember.getId().equals(mentor.getId()));
+                    .anyMatch(teamMember -> teamMember.getId().equals(mentorId));
         }
     }
 
     private boolean isProjectHaveIntern(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
         if (project == null) {
-            throw new EntityNotFoundException("Project not found");
+            throw new EntityNotFoundException("Project %d not found".formatted(projectId));
         } else {
             return project.getTeams().stream()
                     .flatMap(team -> team.getTeamMembers().stream())
@@ -150,7 +150,7 @@ public class InternshipServiceImpl implements InternshipService {
         Internship thisInternship = internshipRepository.findById(internshipId).orElse(null);
         TeamRole newInternRole = internshipMapper.teamRoleDtoToTeamRole(teamRoleDto);
         if (thisInternship == null) {
-            throw new EntityNotFoundException("No internship");
+            throw new EntityNotFoundException("Internship with id %d not found".formatted(internshipId));
         } else {
             TeamMember intern = thisInternship.getInterns().stream()
                     .filter(teamMember -> teamMember.getId().equals(teamMemberId))
