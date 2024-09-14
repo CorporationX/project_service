@@ -148,7 +148,7 @@ public class InternshipServiceImpl implements InternshipService {
 
     private void addInternNewRole(Long internshipId, Long teamMemberId, TeamRoleDto teamRoleDto) {
         Internship thisInternship = internshipRepository.findById(internshipId).orElse(null);
-        TeamRole newInternRole = internshipMapper.teamRoleDtoToTeamRole(teamRoleDto);
+        TeamRole newInternRole = internshipMapper.teamRoleDtoToStringTeamRole(teamRoleDto);
         if (thisInternship == null) {
             throw new EntityNotFoundException("Internship with id %d not found".formatted(internshipId));
         } else {

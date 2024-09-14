@@ -28,15 +28,15 @@ public interface InternshipMapper {
 
     List<InternshipDto> internshipsToInternshipDtos(List<Internship> internships);
 
-    default TeamRole teamRoleDtoToTeamRole(TeamRoleDto teamRoleDto) {
+    default TeamRole teamRoleDtoToStringTeamRole(TeamRoleDto teamRoleDto) {
         return TeamRole.valueOf(teamRoleDto.role());
     }
 
-    default Long map(TeamMember teamMember) {
+    default Long teamMemberToLong(TeamMember teamMember) {
         return teamMember != null ? teamMember.getId() : null;
     }
 
-    default TeamMember map(Long mentorId) {
+    default TeamMember longToTeamMember(Long mentorId) {
         if (mentorId == null) {
             return null;
         }
