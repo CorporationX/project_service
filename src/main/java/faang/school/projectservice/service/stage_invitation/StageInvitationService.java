@@ -40,6 +40,9 @@ public class StageInvitationService {
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(reason);  // Причина отказа сохраняется в поле description
         repository.save(invitation);
+        System.out.println(invitation);
+        StageInvitationDto test = mapper.toDto(invitation);
+        System.out.println(test);
         return mapper.toDto(invitation);
     }
 
