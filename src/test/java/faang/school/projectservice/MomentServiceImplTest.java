@@ -10,6 +10,7 @@ import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.MomentServiceImpl;
+import faang.school.projectservice.validator.DataValidationException;
 import faang.school.projectservice.validator.MomentValidator;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
@@ -46,7 +47,7 @@ public class MomentServiceImplTest {
 
 
     @Test
-    public void testCreateMoment() {
+    public void testCreateMoment() throws DataValidationException {
         Long momentId = 1L;
         List<Project> projects = List.of(new Project(), new Project());
         Moment moment = new Moment();
@@ -59,7 +60,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-    public void testUpdateMomentAllEmpty() {
+    public void testUpdateMomentAllEmpty() throws DataValidationException {
         long momentId = 1L;
         List<Long> addedProjectIds = new ArrayList<>(List.of(1L, 2L));
         List<Long> addedUserIds = new ArrayList<>(List.of(1L, 2L));
@@ -78,7 +79,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-    public void testUpdateMomentWithNewProject() {
+    public void testUpdateMomentWithNewProject() throws DataValidationException {
         long momentId = 1L;
         List<Long> addedProjectIds = new ArrayList<>(List.of(1L, 2L));
         List<Long> addedUserIds = new ArrayList<>(List.of(1L, 2L));
@@ -95,7 +96,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-    public void testUpdateMomentWithNewUser() {
+    public void testUpdateMomentWithNewUser() throws DataValidationException {
         long momentId = 1L;
         List<Long> addedProjectIds = new ArrayList<>(List.of(1L, 2L));
         List<Long> addedUserIds = new ArrayList<>(List.of(1L, 2L));

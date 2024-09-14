@@ -1,11 +1,11 @@
 package faang.school.projectservice;
 
 import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.validator.DataValidationException;
 import faang.school.projectservice.validator.MomentValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.common.DataValidationException;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -23,11 +23,9 @@ public class MomentValidatorTest {
         Assertions.assertThrows(DataValidationException.class, () -> momentValidator.validateMoment(moment));
     }
     @Test
-    public void testValidateMomentWithEmptyName() {
+    public void testValidateMomentWithEmptyName() throws faang.school.projectservice.validator.DataValidationException {
         Moment moment = new Moment();
         moment.setName("");
-
-        momentValidator.validateMoment(moment);
 
         Assertions.assertThrows(DataValidationException.class, () -> momentValidator.validateMoment(moment));
     }

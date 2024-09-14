@@ -3,6 +3,7 @@ package faang.school.projectservice;
 import faang.school.projectservice.controller.MomentController;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.service.MomentServiceImpl;
+import faang.school.projectservice.validator.DataValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +24,7 @@ public class MomentControllerTest {
     private MomentController momentController;
 
     @Test
-    public void createMoment() {
+    public void createMoment() throws DataValidationException {
         Moment moment = new Moment();
 
         momentController.createMoment(moment);
@@ -41,7 +42,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void updateMoment() {
+    public void updateMoment() throws DataValidationException {
         long momentId = 1L;
         java.util.List<Long> addedProjectIds = List.of(1L, 2L);
         List<Long> addedUserIds = List.of(1L, 2L);

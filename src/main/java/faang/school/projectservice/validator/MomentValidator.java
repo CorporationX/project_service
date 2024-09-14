@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class MomentValidator {
-    public void validateMoment(Moment moment) {
+    public void validateMoment(Moment moment) throws DataValidationException {
         if (moment.getName() == null) {
-            throw new ValidationException("Moment's name is required");
+            throw new DataValidationException("Moment's name is required");
         }
         if (moment.getName().isBlank()) {
-            throw new ValidationException("Имя момента пустое");
+            throw new DataValidationException("Имя момента пустое");
         }
     }
 }
