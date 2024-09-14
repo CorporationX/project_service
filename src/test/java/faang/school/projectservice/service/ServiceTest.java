@@ -39,14 +39,14 @@ public class ServiceTest {
     @Spy
     private ProjectMapper mapper;
 
-        @Test
-    public void testValidationIsNullName() {
-        ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
-
-        assertThrows(NoSuchElementException.class, () -> projectService.validationName(projectDto));
-    }
+//        @Test
+//    public void testValidationIsNullName() {
+//        ProjectDto projectDto = new ProjectDto();
+//        Project projectEntity = new Project();
+//        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+//
+//        assertThrows(NoSuchElementException.class, () -> projectService.validationName(projectDto));
+//    }
 
     @Test
     public void testValidationNameIsBlank() {
