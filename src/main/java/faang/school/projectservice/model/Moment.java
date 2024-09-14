@@ -12,16 +12,19 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Data
 @Entity
-@Table(name = "moment")
+@Table(name = "faang/school/projectservice/dto/moment")
 public class Moment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,4 +73,8 @@ public class Moment {
 
     @Column(name = "updated_by")
     private Long updatedBy;
+
+    public Collection<Object> getPartnerProjectIds() {
+        return projects.stream().map(Project::getId).collect(Collectors.toList());
+    }
 }
