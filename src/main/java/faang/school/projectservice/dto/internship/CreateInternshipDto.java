@@ -35,7 +35,7 @@ public class CreateInternshipDto {
     @Size(min = 1, message = "At least one intern is required")
     private List<Long> internIds;
 
-    @NotBlank(message = "Mentor cannot be blank")
+    @NotNull(message = "Mentor ID cannot be blank")
     private Long mentorId;
 
     private final LocalDateTime startDate = LocalDateTime.now();
