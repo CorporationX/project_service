@@ -7,15 +7,13 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import org.junit.jupiter.api.Assertions;
+import faang.school.projectservice.validation.ValidationProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,12 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-//import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @ExtendWith(MockitoExtension.class)
 public class ServiceTest {
     @InjectMocks
     private ProjectService projectService;
+    @InjectMocks
+    private ValidationProject validation;
     @Mock
     private ProjectRepository projectRepository;
     @Mock
@@ -45,7 +43,7 @@ public class ServiceTest {
         Project projectEntity = new Project();
         when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        assertThrows(NoSuchElementException.class, () -> projectService.validationName(projectDto));
+        assertThrows(NoSuchElementException.class, () -> validation.validationName(projectDto));
     }
 
     @Test
@@ -55,7 +53,7 @@ public class ServiceTest {
         projectEntity.setName("  ");
         when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        assertThrows(NoSuchElementException.class, () -> projectService.validationName(projectDto));
+        assertThrows(NoSuchElementException.class, () -> validation.validationName(projectDto));
     }
 
     @Test
@@ -64,7 +62,7 @@ public class ServiceTest {
         Project projectEntity = new Project();
         when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        assertThrows(NoSuchElementException.class, () -> projectService.validationDescription(projectDto));
+        assertThrows(NoSuchElementException.class, () -> validation.validationDescription(projectDto));
     }
 
     @Test
@@ -74,7 +72,7 @@ public class ServiceTest {
         projectEntity.setDescription("  ");
         when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
-        assertThrows(NoSuchElementException.class, () -> projectService.validationDescription(projectDto));
+        assertThrows(NoSuchElementException.class, () -> validation.validationDescription(projectDto));
     }
 
     @Test
@@ -94,7 +92,7 @@ public class ServiceTest {
                 .thenReturn(existingProject);
 
         assertThrows(NoSuchElementException.class,
-                () -> projectService.validationDuplicateProjectNames(projectDto));
+                () -> validation.validationDuplicateProjectNames(projectDto));
     }
 
     @Test
@@ -153,7 +151,7 @@ public class ServiceTest {
         secondProject.setName("Name second");
 
         when(projectRepository.findAll()).thenReturn(projects);
-        ProjectService service = new ProjectService(projectRepository, mapper, filters);
+        ProjectService service = new ProjectService(projectRepository, mapper, filters, validation);
 
         List<ProjectDto> result = service.getProjectsFilters(filterDto);
         assertThat(result).isEqualTo(projects);
