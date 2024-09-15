@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 public class MomentProjectFilter implements MomentFilter {
     @Override
     public boolean isApplicable(MomentFilterDto filters) {
-        return !filters.getProjectId().isEmpty();
+        return filters.getProjectId() != null;
     }
 
     @Override

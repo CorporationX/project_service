@@ -28,6 +28,7 @@ public class MomentServiceImpl implements MomentService {
 
     @Override
     public MomentDto createMoment(MomentDto momentDto) {
+        momentValidator.validateMomentDto(momentDto);
         log.info("Creating moment with DTO = {}", momentDto);
 
         List<Project> projects = getProjects(momentDto);
@@ -64,11 +65,11 @@ public class MomentServiceImpl implements MomentService {
     }
 
     private Moment getMoment(MomentDto momentDto) {
-        return momentValidator.validateExistingMoment(momentDto.getMomentId());
+        return momentValidator.validateExistingMoment(momentDto.getId());
     }
 
     private List<Project> getProjects(MomentDto momentDto) {
-        return momentValidator.validateProjectsByIdAndStatus(momentDto.getProjectIds());
+        return momentValidator.validateProjectsByIdAndStatus(momentDto);
     }
 
     private Moment saveMoment(Moment moment, List<Project> projects) {

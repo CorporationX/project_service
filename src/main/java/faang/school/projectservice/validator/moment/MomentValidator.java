@@ -1,5 +1,6 @@
 package faang.school.projectservice.validator.moment;
 
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -19,11 +20,18 @@ public class MomentValidator {
     private final ProjectRepository projectRepository;
     private final MomentRepository momentRepository;
 
-    public List<Project> validateProjectsByIdAndStatus(List<Long> projectIds) {
-        List<Project> projects = projectRepository.findAllByIds(projectIds);
+    public void validateMomentDto(MomentDto momentDto) {
+        if (momentDto.getName() == null || momentDto.getName().isEmpty() || momentDto.getName().isBlank()) {
+            log.error("The name field is empty {}", momentDto);
+            throw new DataValidationException("The name cannot be empty");
+        }
+    }
+
+    public List<Project> validateProjectsByIdAndStatus(MomentDto momentDto) {
+        List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectIds());
 
         if (projects.isEmpty()) {
-            log.error("the project list is empty for these IDs " + projectIds);
+            log.error("the project list is empty for these IDs " + momentDto.getProjectIds());
             throw new DataValidationException("The list of projects was not found");
         }
 
@@ -55,7 +63,6 @@ public class MomentValidator {
             log.error("User with ID " + userId + " there is no project");
             throw new DataValidationException("The project was not found by user with ID " + userId);
         }
-
         return projects;
     }
 }

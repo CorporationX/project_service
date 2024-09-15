@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,13 +37,15 @@ public class MomentController {
     }
 
     @PutMapping("/userId/{userId}")
-    public ResponseEntity<MomentDto> updateMomentByUser(@Positive long userId, @RequestBody @Validated MomentDto momentDto) {
+    public ResponseEntity<MomentDto> updateMomentByUser(@PathVariable("userId") @Positive long userId,
+                                                        @RequestBody @Validated MomentDto momentDto) {
         MomentDto updateMoment = momentService.updateMomentByUser(userId, momentDto);
         return ResponseEntity.ok(updateMoment);
     }
 
     @GetMapping("/projectId/{projectId}")
-    public ResponseEntity<List<MomentDto>> getMomentsByFilters(@Positive long projectId, @RequestBody MomentFilterDto filterDto) {
+    public ResponseEntity<List<MomentDto>> getMomentsByFilters(@PathVariable("projectId") @Positive long projectId,
+                                                               @RequestBody MomentFilterDto filterDto) {
         List<MomentDto> moments = momentService.getMomentsByFilters(projectId, filterDto);
         return ResponseEntity.ok(moments);
     }
@@ -54,7 +57,7 @@ public class MomentController {
     }
 
     @GetMapping("/momentId/{momentId}")
-    public ResponseEntity<MomentDto> getMomentById(@Positive long momentId) {
+    public ResponseEntity<MomentDto> getMomentById(@PathVariable("momentId") @Positive long momentId) {
         MomentDto moment = momentService.getMomentById(momentId);
         return ResponseEntity.ok(moment);
     }
