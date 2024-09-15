@@ -31,7 +31,7 @@ public class StageServiceImpl implements StageService {
     private final StageInvitationRepository stageInvitationRepository;
 
     @Override
-    public StageDto createStage(@Valid StageDto stageDto) {
+    public StageDto createStage(StageDto stageDto) {
         projectService.getProject(stageDto.projectId());
 
         Stage stage = stageMapper.toEntity(stageDto);
