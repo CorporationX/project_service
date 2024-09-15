@@ -26,7 +26,7 @@ class ProjectDtoValidatorTest {
     @Mock
     private ProjectRepository projectRepository;
 
-    private static final long USER_ID = 1;
+    private static final long USER_ID = 1L;
     private static final String PROJECT_NAME = "name";
     private static final String PROJECT_DESCRIPTION = "description";
 
@@ -44,8 +44,7 @@ class ProjectDtoValidatorTest {
 
             projectDtoValidator.validateIfOwnerAlreadyExistProjectWithName(projectDto);
 
-            verify(projectRepository, times(1))
-                    .existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
+            verify(projectRepository).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
         }
 
         @Test
@@ -57,8 +56,7 @@ class ProjectDtoValidatorTest {
 
             projectDtoValidator.validateIfProjectIsExistInDb(projectDto.getId());
 
-            verify(projectRepository, times(1))
-                    .existsById(projectDto.getId());
+            verify(projectRepository).existsById(projectDto.getId());
         }
     }
 

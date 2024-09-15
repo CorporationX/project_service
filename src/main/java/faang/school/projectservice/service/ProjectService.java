@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -73,6 +74,9 @@ public class ProjectService {
     }
 
     public ProjectDto getProject(Long id) {
+        if (id == null) {
+            throw new DataValidationException("Field id cannot be null");
+        }
         projectDtoValidator.validateIfProjectIsExistInDb(id);
 
         return projectMapper.toDto(projectRepository.getProjectById(id));

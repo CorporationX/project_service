@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProjectMapperTest {
 
     private final ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
-    private static final long ID = 1;
+    private static final long ID = 1L;
 
     @Test
     @DisplayName("Успех маппинга project в projectDto")

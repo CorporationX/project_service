@@ -17,8 +17,9 @@ public class ProjectDtoValidator {
     private final ProjectRepository projectRepository;
 
     public void validateIfProjectNameOrDescriptionIsBlank(ProjectDto projectDto) {
-        if (projectDto.getName().isBlank() || projectDto.getDescription().isBlank()) {
-            throw new DataValidationException("Field name or description can not be empty");
+        if (projectDto.getName().isBlank() || projectDto.getName() == null
+                || projectDto.getDescription().isBlank() || projectDto.getDescription() == null) {
+            throw new DataValidationException("Field name or description cannot be empty or null");
         }
     }
 
@@ -42,8 +43,9 @@ public class ProjectDtoValidator {
     }
 
     public void validateIfProjectDescriptionAndStatusIsBlank(ProjectDto projectDto) {
-        if (projectDto.getName().isBlank() && projectDto.getDescription().isBlank()) {
-            throw new DataValidationException("Field name and description can not be empty");
+        if ((projectDto.getName().isBlank() || projectDto.getName() == null)
+                && (projectDto.getDescription().isBlank() || projectDto.getDescription() == null)) {
+            throw new DataValidationException("Field name and description cannot be empty or null");
         }
     }
 }

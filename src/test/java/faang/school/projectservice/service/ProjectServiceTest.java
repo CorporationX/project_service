@@ -36,9 +36,10 @@ class ProjectServiceTest {
     private ProjectMapperImpl projectMapper;
     private List<ProjectFilter> filters;
 
-    private static final long ID = 1;
+    private static final long ID = 1L;
     private static final String PROJECT_NAME = "name";
     private static final String PROJECT_DESCRIPTION = "description";
+    private static final int PROJECT_DTOS_SIZE = 2;
 
     @Nested
     class PositiveTests {
@@ -75,11 +76,11 @@ class ProjectServiceTest {
             assertEquals(PROJECT_NAME, createdProjectDto.getName());
             assertEquals(PROJECT_DESCRIPTION, createdProjectDto.getDescription());
             assertEquals(ProjectStatus.CREATED, createdProjectDto.getStatus());
-            verify(projectDtoValidator, times(1))
+            verify(projectDtoValidator)
                     .validateIfProjectNameOrDescriptionIsBlank(projectDto);
-            verify(projectDtoValidator, times(1))
+            verify(projectDtoValidator)
                     .validateIfOwnerAlreadyExistProjectWithName(projectDto);
-            verify(projectRepository, times(1)).save(projectEntity);
+            verify(projectRepository).save(projectEntity);
         }
 
         @Test
@@ -102,11 +103,11 @@ class ProjectServiceTest {
             assertNotNull(updatedProjectDto);
             assertEquals(PROJECT_DESCRIPTION, updatedProjectDto.getDescription());
             assertEquals(ProjectStatus.IN_PROGRESS, updatedProjectDto.getStatus());
-            verify(projectDtoValidator, times(1)).validateIfProjectIsExistInDb(projectDto.getId());
-            verify(projectRepository, times(1)).getProjectById(projectDto.getId());
-            verify(projectDtoValidator, times(1))
+            verify(projectDtoValidator).validateIfProjectIsExistInDb(projectDto.getId());
+            verify(projectRepository).getProjectById(projectDto.getId());
+            verify(projectDtoValidator)
                     .validateIfDtoContainsExistedProjectStatus(projectDto.getStatus());
-            verify(projectRepository, times(1)).save(projectEntity);
+            verify(projectRepository).save(projectEntity);
         }
 
         @Test
@@ -120,9 +121,9 @@ class ProjectServiceTest {
             List<ProjectDto> resultProjectDtos = projectService.getAllProject();
 
             assertNotNull(resultProjectDtos);
-            assertEquals(2, resultProjectDtos.size());
-            verify(projectRepository, times(1)).findAll();
-            verify(projectMapper, times(1)).toDtos(projects);
+            assertEquals(PROJECT_DTOS_SIZE, resultProjectDtos.size());
+            verify(projectRepository).findAll();
+            verify(projectMapper).toDtos(projects);
         }
 
         @Test
@@ -139,8 +140,8 @@ class ProjectServiceTest {
 
             assertNotNull(existedProjectDto);
             assertEquals(ID, existedProjectDto.getId());
-            verify(projectDtoValidator, times(1)).validateIfProjectIsExistInDb(ID);
-            verify(projectRepository, times(1)).getProjectById(ID);
+            verify(projectDtoValidator).validateIfProjectIsExistInDb(ID);
+            verify(projectRepository).getProjectById(ID);
         }
 
         @Test
@@ -170,10 +171,10 @@ class ProjectServiceTest {
 
             List<ProjectDto> projectDtos = projectService.getProjectByNameAndStatus(projectFilterDto);
 
-            assertEquals(2, projectDtos.size());
-            verify(projectDtoValidator, times(1))
+            assertEquals(PROJECT_DTOS_SIZE, projectDtos.size());
+            verify(projectDtoValidator)
                     .validateIfDtoContainsExistedProjectStatus(firstDto.getStatus());
-            verify(projectRepository, times(1)).findAll();
+            verify(projectRepository).findAll();
             verify(projectMapper).toDto(first);
         }
     }

@@ -22,7 +22,7 @@ public class ProjectController {
         return projectService.update(projectDto);
     }
 
-    public List<ProjectDto> getProjectByNameAndStatus(ProjectFilterDto filterDto) {
+    public List<ProjectDto> getProjectsByNameAndStatus(ProjectFilterDto filterDto) {
         return projectService.getProjectByNameAndStatus(filterDto);
     }
 
