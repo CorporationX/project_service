@@ -21,22 +21,22 @@ public class SubProjectController {
 
     @PostMapping("/create-subproject")
     public ProjectDto createSubProject(@RequestBody ProjectDto projectDto) {
-        validatorSubProjectController.isProjectDtoNull(projectDto);
-        validatorSubProjectController.isProjectNameNull(projectDto);
-        validatorSubProjectController.isProjectStatusNull(projectDto);
-        validatorSubProjectController.isProjectVisibilityNull(projectDto);
+        validatorSubProjectController.validateProjectDtoNotNull(projectDto);
+        validatorSubProjectController.validateProjectNameNotNull(projectDto);
+        validatorSubProjectController.validateProjectStatusNotNull(projectDto);
+        validatorSubProjectController.validateProjectVisibilityNotNull(projectDto);
         return subProjectService.create(projectDto);
     }
 
     @GetMapping("/get-subprojects")
     public List<ProjectDto> getSubProjects(@RequestBody ProjectDto projectDto) {
-        validatorSubProjectController.isProjectDtoNull(projectDto);
+        validatorSubProjectController.validateProjectDtoNotNull(projectDto);
         return subProjectService.getFilteredSubProjects(projectDto);
     }
 
     @PostMapping("/update-subproject")
     public ProjectDto updateSubProject(@RequestBody ProjectDto projectDto) {
-        validatorSubProjectController.isProjectDtoNull(projectDto);
-        return subProjectService.updateSubProject(projectDto);
+        validatorSubProjectController.validateProjectDtoNotNull(projectDto);
+        return subProjectService.updatingSubProject(projectDto);
     }
 }

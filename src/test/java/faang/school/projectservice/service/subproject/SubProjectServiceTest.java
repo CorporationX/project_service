@@ -140,7 +140,7 @@ class SubProjectServiceTest {
     }
 
     @Test
-    void testUpdateSubProjectVisibility() {
+    void testUpdatingSubProjectVisibility() {
         firstProject.setVisibility(ProjectVisibility.PRIVATE);
         secondProject.setVisibility(ProjectVisibility.PRIVATE);
         projectDto.setVisibility(ProjectVisibility.PRIVATE);
@@ -148,7 +148,7 @@ class SubProjectServiceTest {
         parentProject.setChildren(List.of(firstProject, secondProject));
         when(projectRepository.findById(parentProjectId)).thenReturn(parentProject);
 
-        subProjectService.updateSubProject(projectDto);
+        subProjectService.updatingSubProject(projectDto);
 
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         Project savedProject = projectCaptor.getValue();
@@ -156,7 +156,7 @@ class SubProjectServiceTest {
     }
 
     @Test
-    void testUpdateSubProjectStatusUnSuccess() {
+    void testUpdatingSubProjectStatusUnSuccess() {
         firstProject.setStatus(ProjectStatus.COMPLETED);
         secondProject.setStatus(ProjectStatus.IN_PROGRESS);
         projectDto.setStatus(ProjectStatus.COMPLETED);
@@ -166,13 +166,13 @@ class SubProjectServiceTest {
         when(projectRepository.findById(parentProjectId)).thenReturn(parentProject);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> subProjectService.updateSubProject(projectDto));
+                () -> subProjectService.updatingSubProject(projectDto));
 
         assertEquals("Can't close project with id " + projectDto.getId() + ", because children project still open", exception.getMessage());
     }
 
     @Test
-    void testUpdateSubProjectStatusSuccess() {
+    void testUpdatingSubProjectStatusSuccess() {
         firstProject.setStatus(ProjectStatus.COMPLETED);
         secondProject.setStatus(ProjectStatus.COMPLETED);
         projectDto.setStatus(ProjectStatus.COMPLETED);
@@ -181,7 +181,7 @@ class SubProjectServiceTest {
         parentProject.setChildren(List.of(firstProject, secondProject));
         when(projectRepository.findById(parentProjectId)).thenReturn(parentProject);
 
-        subProjectService.updateSubProject(projectDto);
+        subProjectService.updatingSubProject(projectDto);
 
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         Project savedProject = projectCaptor.getValue();

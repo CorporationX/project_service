@@ -24,22 +24,22 @@ class ValidatorSubProjectControllerTest {
 
     @Test
     void testIsProjectDtoNotNull() {
-        assertDoesNotThrow(() -> validatorSubProjectController.isProjectDtoNull(projectDto));
+        assertDoesNotThrow(() -> validatorSubProjectController.validateProjectDtoNotNull(projectDto));
     }
 
     @Test
-    void testIsProjectDtoNull() {
+    void testValidateProjectDtoNotNull() {
         projectDto = null;
 
-        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.isProjectDtoNull(projectDto));
+        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.validateProjectDtoNotNull(projectDto));
         assertEquals(exception.getMessage(), "ProjectDto is null");
     }
 
     @Test
-    void testIsParentProjectNull() {
+    void testValidateParentProjectNull() {
         projectDto.setParentProjectId(null);
 
-        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.isParentProjectNull(projectDto));
+        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.validateParentProjectNull(projectDto));
         assertEquals(exception.getMessage(), "ParentProject is null");
     }
 
@@ -49,12 +49,12 @@ class ValidatorSubProjectControllerTest {
         project.setId(1L);
         projectDto.setParentProjectId(project.getId());
 
-        assertDoesNotThrow(() -> validatorSubProjectController.isParentProjectNull(projectDto));
+        assertDoesNotThrow(() -> validatorSubProjectController.validateParentProjectNull(projectDto));
     }
 
     @Test
-    void testIsProjectNameNull() {
-        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.isProjectNameNull(projectDto));
+    void testValidateProjectNameNotNull() {
+        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.validateProjectNameNotNull(projectDto));
         assertEquals(exception.getMessage(), "NameProject is null");
     }
 
@@ -62,12 +62,12 @@ class ValidatorSubProjectControllerTest {
     void testIsProjectNameNotNull() {
         projectDto.setName("Some name");
 
-        assertDoesNotThrow(() -> validatorSubProjectController.isProjectNameNull(projectDto));
+        assertDoesNotThrow(() -> validatorSubProjectController.validateProjectNameNotNull(projectDto));
     }
 
     @Test
-    void testIsProjectStatusNull() {
-        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.isProjectStatusNull(projectDto));
+    void testValidateProjectStatusNotNull() {
+        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.validateProjectStatusNotNull(projectDto));
 
         assertEquals(exception.getMessage(), "StatusProject is null");
     }
@@ -76,12 +76,12 @@ class ValidatorSubProjectControllerTest {
     void testIsProjectStatusNotNull() {
         projectDto.setStatus(ProjectStatus.ON_HOLD);
 
-        assertDoesNotThrow(() -> validatorSubProjectController.isProjectStatusNull(projectDto));
+        assertDoesNotThrow(() -> validatorSubProjectController.validateProjectStatusNotNull(projectDto));
     }
 
     @Test
-    void testIsProjectVisibilityNull() {
-        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.isProjectVisibilityNull(projectDto));
+    void testValidateProjectVisibilityNotNull() {
+        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.validateProjectVisibilityNotNull(projectDto));
 
         assertEquals(exception.getMessage(), "VisibilityProject is null");
     }
@@ -90,12 +90,12 @@ class ValidatorSubProjectControllerTest {
     void testIsProjectVisibilityNotNull() {
         projectDto.setVisibility(ProjectVisibility.PUBLIC);
 
-        assertDoesNotThrow(() -> validatorSubProjectController.isProjectVisibilityNull(projectDto));
+        assertDoesNotThrow(() -> validatorSubProjectController.validateProjectVisibilityNotNull(projectDto));
     }
 
     @Test
-    void testIsProjectOwnerNull() {
-        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.isProjectOwnerNull(projectDto));
+    void testValidateProjectOwnerNull() {
+        NullValueException exception = assertThrows(NullValueException.class, () -> validatorSubProjectController.validateProjectOwnerNull(projectDto));
 
         assertEquals(exception.getMessage(), "OwnerProject is null");
     }
@@ -104,6 +104,6 @@ class ValidatorSubProjectControllerTest {
     void testIsProjectOwnerNotNull() {
         projectDto.setOwnerId(10L);
 
-        assertDoesNotThrow(() -> validatorSubProjectController.isProjectOwnerNull(projectDto));
+        assertDoesNotThrow(() -> validatorSubProjectController.validateProjectOwnerNull(projectDto));
     }
 }

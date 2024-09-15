@@ -60,7 +60,7 @@ public class SubProjectService {
                 .toList();
     }
 
-    public ProjectDto updateSubProject(ProjectDto projectDto) {
+    public ProjectDto updatingSubProject(ProjectDto projectDto) {
         validatorService.isProjectExists(projectDto.getId());
         Project updateProject = projectRepository.findById(projectDto.getId());
         if (projectDto.getVisibility() != null) {
