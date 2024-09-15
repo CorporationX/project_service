@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface ThrowingConsumer<T> {
     void accept(T t) throws ChildrenNotFinishedException;
+
 }
 
 //public static <T> Consumer<T> wrap(ThrowingConsumer<T> throwingConsumer) {
