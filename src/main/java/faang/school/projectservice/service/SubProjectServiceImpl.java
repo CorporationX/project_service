@@ -4,10 +4,10 @@ import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.util.ChildrenNotFinishedException;
-import faang.school.projectservice.util.ThrowingConsumer;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static faang.school.projectservice.model.ProjectStatus.CANCELLED;
@@ -29,7 +27,7 @@ public class SubProjectServiceImpl implements SubProjectService {
     private ProjectRepository repository;
     private ProjectMapper projectMapper;
 
-
+    @Override
     public CreateSubProjectDto createSubProject(Project project) {
         repository.getProjectById(project.getParentProject().getId());
         var savedProject = repository.save(project);
@@ -43,25 +41,26 @@ public class SubProjectServiceImpl implements SubProjectService {
         var project = ifStatusIsComletedCheckThatChildrensAreCompleted
                 .andThen(setStatusAndTime)
                 .andThen(assignTeamMemberMoment)
+                .andThen(setVisibility)
                 .apply(subproject);
 
-
         return projectMapper.toDTO(repository.save(project));
+
     }
 
-    private static List<Project> getAllProjects(Project project) {
+    private static List<Project> getAllSubProjects(Project project) {
         return Stream.concat(
-                Stream.of(project),  // Добавляем текущий проект
-                Optional.ofNullable(project.getChildren())  // Handle the case where getChildren() might be null
-                        .orElse(Collections.emptyList())    // If null, return an empty list
+                Stream.of(project),
+                Optional.ofNullable(project.getChildren())
+                        .orElse(Collections.emptyList())
                         .stream()
-                        .flatMap(child -> getAllProjects(child).stream())
+                        .flatMap(child -> getAllSubProjects(child).stream())
         ).toList();
     }
 
-    private Function<Project, Project> ifStatusIsComletedCheckThatChildrensAreCompleted = (project) -> {
+    private final Function<Project, Project> ifStatusIsComletedCheckThatChildrensAreCompleted = (project) -> {
         if (project.getStatus() == ProjectStatus.COMPLETED) {
-            var notFinishedChildren = getAllProjects(project).stream()
+            var notFinishedChildren = getAllSubProjects(project).stream()
                     .filter(child -> child.getStatus() != COMPLETED && child.getStatus() != CANCELLED).toList();
 
             if (!notFinishedChildren.isEmpty()) {
@@ -75,13 +74,13 @@ public class SubProjectServiceImpl implements SubProjectService {
         return project;
     };
 
-    private Function<Project, Project> setStatusAndTime = (project) -> {
+    private final Function<Project, Project> setStatusAndTime = (project) -> {
         project.setStatus(project.getStatus());
         project.setUpdatedAt(LocalDateTime.now());
         return project;
     };
 
-    private Function<Project, Project> assignTeamMemberMoment = (project) -> {
+    private final Function<Project, Project> assignTeamMemberMoment = (project) -> {
         var teamMembers = Optional.ofNullable(project.getTeams())
                 .orElseGet(Collections::emptyList)
                 .stream()
@@ -95,6 +94,17 @@ public class SubProjectServiceImpl implements SubProjectService {
                 .forEach(moment -> {
                     moment.setUserIds(teamMembers);
                 });
+        return project;
+    };
+
+    private final Function<Project, Project> setVisibility = project -> {
+        if (project.getVisibility() == ProjectVisibility.PRIVATE) {
+            getAllSubProjects(project).forEach(proj -> {
+                proj.setVisibility(ProjectVisibility.PRIVATE);
+            });
+        } else {
+            project.setVisibility(project.getVisibility());
+        }
         return project;
     };
 }

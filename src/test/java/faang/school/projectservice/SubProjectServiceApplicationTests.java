@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 //import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -178,6 +179,40 @@ class SubProjectServiceApplicationTests {
         assertThat(result.getMoments()).hasSize(2);
         result.getMoments().forEach(moment -> {
             assertThat(moment.getUserIds()).containsExactlyInAnyOrderElementsOf(expectedTeamMemberIds);
+        });
+    }
+
+    @Test
+    public void testSetVisibility_PrivateVisibility_ShouldSetSubprojectsToPrivate() {
+        Project subProject1 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
+        Project subProject2 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
+        Project mainProject = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE)
+                .children(List.of(subProject1, subProject2))
+                .build();
+
+        Project resultProject = service.getSetVisibility().apply(mainProject);
+
+        assertEquals(ProjectVisibility.PRIVATE, resultProject.getVisibility());
+        resultProject.getChildren().forEach(subProject -> {
+            assertEquals(ProjectVisibility.PRIVATE, subProject.getVisibility());
+        });
+    }
+
+    @Test
+    public void testSetVisibility_PublicVisibility_ShouldKeepVisibilityUnchanged() {
+        Project subProject1 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
+        Project subProject2 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
+        Project mainProject = Project.builder()
+                .visibility(ProjectVisibility.PUBLIC)
+                .children(List.of(subProject1, subProject2))
+                .build();
+
+        Project resultProject = service.getSetVisibility().apply(mainProject);
+
+        assertEquals(ProjectVisibility.PUBLIC, resultProject.getVisibility());
+        resultProject.getChildren().forEach(subProject -> {
+            assertEquals(ProjectVisibility.PUBLIC, subProject.getVisibility());
         });
     }
 
