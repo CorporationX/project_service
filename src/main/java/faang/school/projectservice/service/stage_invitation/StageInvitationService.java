@@ -47,7 +47,7 @@ public class StageInvitationService {
         return repository.findAll().stream()
                 .filter(invitation -> invitation.getInvited() != null && invitation.getInvited().getId().equals(userId))
                 .map(mapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 }
 
