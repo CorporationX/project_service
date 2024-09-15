@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.filter.moment.MomentFilterDto;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
@@ -31,10 +32,10 @@ public class MomentService {
 
 
     public MomentDto create(MomentDto momentDto) {
-        List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectIds());
+        List<Project> projects = projectRepository.findAllByIds(momentDto.projectIds());
         for (Project project : projects) {
             if (project.getStatus() == ProjectStatus.COMPLETED) {
-                throw new RuntimeException("Момент можно создать только для незакрытого проекта");
+                throw new DataValidationException("Момент можно создать только для незакрытого проекта");
             }
         }
         Moment moment = momentRepository.save(mapper.toEntity(momentDto));
@@ -42,7 +43,7 @@ public class MomentService {
     }
 
     public MomentDto update(MomentDto momentDto) {
-        Optional<Moment> momentOpt = momentRepository.findById(momentDto.getId());
+        Optional<Moment> momentOpt = momentRepository.findById(momentDto.id());
         if (momentOpt.isEmpty()) {
             return create(momentDto);
         }
@@ -86,7 +87,8 @@ public class MomentService {
         if (projects != null) {
             moment.getProjects().addAll(projects);
         }
-        return mapper.toDto(moment);
+
+        return mapper.toDto(momentRepository.save(moment));
     }
 
     public List<MomentDto> getMoments(MomentFilterDto filterDto) {

@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.moment.MomentFilterDto;
 import faang.school.projectservice.service.MomentService;
 import lombok.RequiredArgsConstructor;
@@ -34,18 +35,18 @@ public class MomentController {
 
     public MomentDto getMoment(long id) {
         if (id < 1) {
-            throw new RuntimeException("Передан некорректный id");
+            throw new DataValidationException("Передан некорректный id");
         }
 
         return service.getMoment(id);
     }
 
     private void validateMomentDto(MomentDto momentDto) {
-        if (momentDto.getName() == null) {
-            throw new RuntimeException("Наименование момента не может быть пустым");
+        if (momentDto.name() == null) {
+            throw new DataValidationException("Наименование момента не может быть пустым");
         }
-        if (momentDto.getProjectIds() == null || momentDto.getProjectIds().isEmpty()) {
-            throw new RuntimeException("Момент должен относиться к какому-нибудь проекту");
+        if (momentDto.projectIds() == null || momentDto.projectIds().isEmpty()) {
+            throw new DataValidationException("Момент должен относиться к какому-нибудь проекту");
         }
     }
 }

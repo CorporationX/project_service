@@ -20,18 +20,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class MomentDto {
-    private Long id;
-    private String name;
-    private String description;
-    private LocalDateTime date;
-    private List<Long> projectIds;
-    private List<Long> userIds;
-    private String imageId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-}
+
+public record MomentDto (
+    Long id,
+    String name,
+    String description,
+    LocalDateTime date,
+    List<Long> projectIds,
+    List<Long> userIds,
+    String imageId,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
+) {}
