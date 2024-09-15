@@ -23,7 +23,7 @@ import java.util.List;
 public class InternshipController {
     private final InternshipServiceImpl internshipService;
 
-    @PostMapping()
+    @PostMapping
     public InternshipDto createInternship(@RequestBody CreateInternshipDto createInternshipDto) {
         return internshipService.createInternship(createInternshipDto);
     }
@@ -33,14 +33,14 @@ public class InternshipController {
         internshipService.updateInternship(internshipId, teamRole);
     }
 
-    @GetMapping()
+    @GetMapping
     public List<InternshipDto> getAllInternships(@RequestBody InternshipFilterDto filters) {
         return internshipService.getAllInternships(filters);
     }
 
     @GetMapping("/{projectId}")
     public List<InternshipDto> getAllInternshipsOnProject(@PathVariable Long projectId) {
-        return internshipService.getAllInternshipsOnProject(projectId);
+        return internshipService.getAllInternshipsByProjectId(projectId);
     }
 
     @GetMapping("/{internshipId}")

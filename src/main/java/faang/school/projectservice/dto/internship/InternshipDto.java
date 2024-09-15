@@ -4,7 +4,8 @@ import faang.school.projectservice.model.InternshipStatus;
 
 import java.time.LocalDateTime;
 
-public record InternshipDto(String internshipName,
+public record InternshipDto(Long id,
+                            String name,
                             String description,
                             Long mentorId,
                             Long projectId,

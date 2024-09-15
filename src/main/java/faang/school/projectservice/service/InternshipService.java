@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.TeamRoleDto;
-import faang.school.projectservice.model.TeamRole;
 
 import java.util.List;
 
@@ -13,7 +12,7 @@ public interface InternshipService {
 
     void updateInternship(Long internshipId, TeamRoleDto teamRole);
 
-    List<InternshipDto> getAllInternshipsOnProject(Long projectId);
+    List<InternshipDto> getAllInternshipsByProjectId(Long projectId);
 
     InternshipDto getInternshipById(Long internshipId);
 

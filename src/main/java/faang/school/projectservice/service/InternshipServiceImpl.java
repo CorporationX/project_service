@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.internship.InternshipFilter;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.TeamRoleDto;
 import faang.school.projectservice.exception.internship.EntityNotFoundException;
@@ -17,6 +16,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filter.InternshipFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Slf4j
 public class InternshipServiceImpl implements InternshipService {
-    private final static int maxInternshipDurationMonth = 3;
+    private final static int MAX_INTERNSHIP_DURATION_MONTH = 3;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> internshipFilters;
     private final InternshipRepository internshipRepository;
@@ -41,9 +41,9 @@ public class InternshipServiceImpl implements InternshipService {
             throw new EntityNotFoundException("No interns in project: id %d".formatted(internship.getProjectId()));
         }
         long internshipDuration = ChronoUnit.MONTHS.between(internship.getStartDate(), internship.getEndDate());
-        if (internshipDuration > maxInternshipDurationMonth) {
+        if (internshipDuration > MAX_INTERNSHIP_DURATION_MONTH) {
             throw new IncorrectInternshipDateTimeException("The internship period cannot be longer than %d months"
-                    .formatted(maxInternshipDurationMonth));
+                    .formatted(MAX_INTERNSHIP_DURATION_MONTH));
         }
         if (!isMentorInProject(internship.getProjectId(), internship.getMentorId())) {
             throw new EntityNotFoundException("This mentor is not in project: id %d ".formatted(internship.getProjectId()));
@@ -58,68 +58,65 @@ public class InternshipServiceImpl implements InternshipService {
     public void updateInternship(Long internshipId, TeamRoleDto teamRole) {
         Internship internshipForUpdate = internshipRepository.findById(internshipId)
                 .orElseThrow(() -> new EntityNotFoundException("Internship %d not found".formatted(internshipId)));
-        if (internshipForUpdate.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
-            throw new InternshipUpdateException("This internship %d is in progress".formatted(internshipId));
+        if (!internshipForUpdate.getStatus().equals(InternshipStatus.COMPLETED)) {
+            throw new InternshipUpdateException("This internship %d is not yet completed".formatted(internshipId));
         }
-        if (internshipForUpdate.getStatus().equals(InternshipStatus.COMPLETED)) {
-            List<TeamMember> interns = internshipForUpdate.getInterns();
-            interns.forEach(intern -> {
-                boolean passed = intern.getStages().stream()
-                        .flatMap(stage -> stage.getTasks().stream())
-                        .allMatch(task -> task.getStatus().equals(TaskStatus.DONE));
-                if (passed) {
-                    addInternNewRole(internshipId, intern.getId(), teamRole);
-                } else {
-                    intern.setTeam(null);
-                    intern.setRoles(null);
-                }
-            });
-        }
+        List<TeamMember> interns = internshipForUpdate.getInterns();
+        interns.forEach(intern -> {
+            boolean passed = isAllInternshipTasksDone(intern);
+            if (passed) {
+                addInternNewRole(internshipId, intern.getId(), teamRole);
+            } else {
+                interns.remove(intern);
+                intern.setTeam(null);
+                intern.setRoles(null);
+            }
+        });
         internshipRepository.save(internshipForUpdate);
         log.info("Internship updated: {}", internshipId);
     }
 
     @Override
     public List<InternshipDto> getAllInternships(InternshipFilterDto filters) {
-        if (filters == null) {
-            filters = new InternshipFilterDto();
-        }
         List<Internship> internships = internshipRepository.findAll();
+        if (filters == null) {
+            return internshipMapper.internshipsToInternshipDtos(internships);
+        }
         if (internships.isEmpty()) {
             throw new EntityNotFoundException("No internships");
-        } else {
-            Stream<Internship> filteredInternships = internships.stream();
-            for (InternshipFilter filter : internshipFilters) {
-                if (filter.isApplicable(filters)) {
-                    filteredInternships = filter.apply(filteredInternships, filters);
-                }
-            }
-            List<InternshipDto> result = filteredInternships.map(internshipMapper::internshipToInternshipDto)
-                    .toList();
-            log.info("Returned {} filtered internships", result.size());
-            return result;
         }
+        Stream<Internship> filteredInternships = internships.stream();
+        for (InternshipFilter filter : internshipFilters) {
+            if (filter.isApplicable(filters)) {
+                filteredInternships = filter.apply(filteredInternships, filters);
+            }
+        }
+        List<InternshipDto> result = filteredInternships.map(internshipMapper::internshipToInternshipDto)
+                .toList();
+        log.debug("Returned {} filtered internships", result.size());
+        return result;
+
     }
 
     @Override
-    public List<InternshipDto> getAllInternshipsOnProject(Long projectId) {
+    public List<InternshipDto> getAllInternshipsByProjectId(Long projectId) {
         List<Internship> internships = internshipRepository.findAll();
         if (internships.isEmpty()) {
             throw new EntityNotFoundException("No internships");
-        } else {
-            log.info("Returned {} internships on project {}", internships.size(), projectId);
-            return internships.stream()
-                    .filter(internship -> internship.getProject().getId().equals(projectId))
-                    .map(internshipMapper::internshipToInternshipDto)
-                    .toList();
         }
+        log.debug("Returned {} internships on project {}", internships.size(), projectId);
+        return internships.stream()
+                .filter(internship -> internship.getProject().getId().equals(projectId))
+                .map(internshipMapper::internshipToInternshipDto)
+                .toList();
+
     }
 
     @Override
     public InternshipDto getInternshipById(Long internshipId) {
         Internship internship = internshipRepository.findById(internshipId)
                 .orElseThrow(() -> new EntityNotFoundException("Internship not found"));
-        log.info("Returned internship by ID: {}", internshipId);
+        log.debug("Returned internship by ID: {}", internshipId);
         return internshipMapper.internshipToInternshipDto(internship);
     }
 
@@ -158,5 +155,11 @@ public class InternshipServiceImpl implements InternshipService {
             intern.getRoles().add(newInternRole);
             intern.getRoles().removeIf(role -> role.equals(TeamRole.INTERN));
         }
+    }
+
+    private boolean isAllInternshipTasksDone(TeamMember intern) {
+        return intern.getStages().stream()
+                .flatMap(stage -> stage.getTasks().stream())
+                .allMatch(task -> task.getStatus().equals(TaskStatus.DONE));
     }
 }
