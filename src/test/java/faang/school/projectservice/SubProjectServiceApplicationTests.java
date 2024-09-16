@@ -45,15 +45,6 @@ class SubProjectServiceApplicationTests {
     private ProjectMapperImpl mapper = new ProjectMapperImpl();
     @InjectMocks
     private SubProjectServiceImpl service;
-    CreateSubProjectDto dto;
-    private Project subProject;
-    private Project childProject1;
-    private Project childProject2;
-
-    @BeforeEach
-    public void setUp() {
-        dto = CreateSubProjectDto.builder().id(1L).parentProjectId(1L).build();
-    }
 
     /**
      * если валидация прошла то должна сохранится в базу
@@ -80,16 +71,16 @@ class SubProjectServiceApplicationTests {
     @Test
     public void shouldThrowChildrenNotFinishedException_WhenChildProjectsNotCompleted() {
 
-        childProject1 = Project.builder()
+        Project childProject1 = Project.builder()
                 .id(2L)
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
 
-        childProject2 = Project.builder()
+        Project childProject2 = Project.builder()
                 .id(3L)
                 .status(ProjectStatus.COMPLETED)
                 .build();
-        subProject = Project.builder()
+         Project subProject = Project.builder()
                 .id(1L)
                 .status(ProjectStatus.COMPLETED)
                 .children(List.of(childProject1, childProject2))
@@ -115,16 +106,16 @@ class SubProjectServiceApplicationTests {
     @Test
     public void shouldSaveProject_WhenAllChildProjectsAreCompleted() throws ChildrenNotFinishedException {
 
-        childProject1 = Project.builder()
+        Project childProject1 = Project.builder()
                 .id(2L)
                 .status(ProjectStatus.COMPLETED)
                 .build();
 
-        childProject2 = Project.builder()
+        Project childProject2 = Project.builder()
                 .id(3L)
                 .status(ProjectStatus.COMPLETED)
                 .build();
-        subProject = Project.builder()
+        Project subProject = Project.builder()
                 .id(1L)
                 .status(ProjectStatus.COMPLETED)
                 .children(List.of(childProject1, childProject2))
