@@ -276,4 +276,36 @@ class SubProjectServiceApplicationTests {
         verify(repository, never()).save(any(Project.class));
     }
 
+    /** Получить все подпроекты проекта с фильтром по названию и статусу */
+    @Test
+    public void testGetAllSubProjectsWithFiltr_Case1_ProjectMatchesAllFilters() {
+        Long childId1 = 1L;
+
+        CreateSubProjectDto parentProjectDto = CreateSubProjectDto.builder()
+                .children(List.of(childId1))
+                .build();
+
+        ProjectStatus statusFilter = ProjectStatus.IN_PROGRESS;
+        String nameFilter = "Test Project";
+
+        Project mockedChildResponse = Project.builder()
+                .id(childId1)
+                .name(nameFilter)
+                .status(statusFilter)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+
+        CreateSubProjectDto expectedDto = CreateSubProjectDto.builder().children(List.of())
+                .status(statusFilter).visibility(ProjectVisibility.PUBLIC)
+                .id(childId1)
+                .name(nameFilter)
+                .build();
+
+        when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(List.of(mockedChildResponse));
+
+        List<CreateSubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
+
+        assertEquals(1, result.size());
+        assertEquals(List.of(expectedDto), result);
+    }
 }

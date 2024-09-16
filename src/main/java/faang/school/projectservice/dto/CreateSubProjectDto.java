@@ -13,14 +13,14 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateSubProjectDto {
-    private List<CreateSubProjectDto> children;
+    private List<Long> children;
     private Long id;
     private String name;
     private String description;
     private BigInteger storageSize;
     private BigInteger maxStorageSize;
     private Long ownerId;
-    private Long parentProjectId; // Reference to parent project as ID
+    private Long parentProjectId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private ProjectStatus status;

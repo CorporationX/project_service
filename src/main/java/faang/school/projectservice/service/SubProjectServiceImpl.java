@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -61,6 +62,15 @@ public class SubProjectServiceImpl implements SubProjectService {
 
         return projectMapper.toDTO(repository.save(project));
 
+    }
+
+    @Override
+    public List<CreateSubProjectDto> getAllSubProjectsWithFiltr(CreateSubProjectDto project, String nameFilter, ProjectStatus statusFilter) {
+        var result = repository.findAllByIds(project.getChildren()).stream().filter(child -> Objects.equals(nameFilter, child.getName())
+                && statusFilter == child.getStatus() && child.getVisibility() != ProjectVisibility.PRIVATE).map(filteredProject -> {
+            return projectMapper.toDTO(filteredProject);
+        }).toList();
+        return result;
     }
 
     private static List<Project> getAllSubProjects(Project project) {
