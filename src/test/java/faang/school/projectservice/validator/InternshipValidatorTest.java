@@ -10,6 +10,7 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.intership.InternshipValidator;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipValidatorTest {
+
     @InjectMocks
     private InternshipValidator internshipValidator;
     @Mock
@@ -51,7 +53,8 @@ public class InternshipValidatorTest {
     @Nested
     class PositiveTests {
         @Test
-        public void validateInternshipExistsDoNotThrowExceptionTest() {
+        @DisplayName("If internship exists don't throw exception")
+        public void whenInternshipExistsThenDoesNotThrowException() {
             when(internshipRepository.findById(INTERNSHIP_ID_IS_ONE))
                     .thenReturn(Optional.of(Internship.builder().build()));
 
@@ -59,7 +62,8 @@ public class InternshipValidatorTest {
         }
 
         @Test
-        public void validateInternshipHaveProjectAndInternsDoNotThrowExceptionTest() {
+        @DisplayName("When internship has project then don't throw exception")
+        public void whenInternshipProjectIsValidThenDoesNotThrowException() {
             internshipDto = InternshipDto.builder()
                     .project(ProjectDto.builder().build())
                     .interns(List.of(TeamMemberDto.builder().build()))
@@ -69,7 +73,8 @@ public class InternshipValidatorTest {
         }
 
         @Test
-        public void validateInternshipDurationDoNotThrowExceptionTest() {
+        @DisplayName("If internship duration is less than 3 months don't throw exception")
+        public void whenInternshipDurationIsValidThenDoesNotThrowException() {
             internshipDto = InternshipDto.builder()
                     .startDate(VALID_START_DATE)
                     .endDate(VALID_END_DATE)
@@ -79,7 +84,8 @@ public class InternshipValidatorTest {
         }
 
         @Test
-        public void validateInternshipGotMentorDoNotThrowExceptionTest() {
+        @DisplayName("If internship has existing mentor don't throw exception")
+        public void whenInternshipHasExistingMentorThenDoesNotThrowException() {
             internshipDto = InternshipDto.builder()
                     .mentorId(TeamMemberDto.builder().id(MENTOR_ID_ONE).build())
                     .build();
@@ -93,7 +99,8 @@ public class InternshipValidatorTest {
     @Nested
     class NegativeTests {
         @Test
-        public void validateInternshipExistsThrowExceptionTest() {
+        @DisplayName("If Internship isn't in DB then throw exception")
+        public void whenInternshipDoesNotExistThenThrowException() {
             when(internshipRepository.findById(INTERNSHIP_ID_IS_ONE)).thenReturn(Optional.empty());
 
             assertThrows(InternshipValidationException.class, () ->
@@ -101,7 +108,8 @@ public class InternshipValidatorTest {
         }
 
         @Test
-        public void validateInternshipHaveNullProjectOrEmptyInternsThrowsExceptionTest() {
+        @DisplayName("If internship has null project field and/or empty Interns list then throw exception")
+        public void whenInternshipProjectIsNullAndOrInternsListIsEmptyThenThrowException() {
             InternshipDto internshipDtoNullProject = InternshipDto.builder()
                     .interns(List.of(TeamMemberDto.builder().build()))
                     .build();
@@ -115,7 +123,8 @@ public class InternshipValidatorTest {
         }
 
         @Test
-        public void validateInternshipDurationThrowExceptionTest() {
+        @DisplayName("If internship duration is more than 3 months throw exception")
+        public void whenInternshipDurationIsMoreThanThreeMonthsThenThrowException() {
             internshipDto = InternshipDto.builder()
                     .startDate(INVALID_START_DATE)
                     .endDate(INVALID_END_DATE)
@@ -126,7 +135,8 @@ public class InternshipValidatorTest {
         }
 
         @Test
-        public void validateInternshipGotMentorThrowExceptionTest() {
+        @DisplayName("If internship hasn't got existing mentor throw exception")
+        public void whenInternshipHasNotGotExistingMentorThenThrowException() {
             internshipDto = InternshipDto.builder()
                     .mentorId(TeamMemberDto.builder().build())
                     .build();

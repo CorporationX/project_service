@@ -11,6 +11,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class InternshipController {
+
     private final InternshipService internshipService;
 
     public InternshipDto createInternship(InternshipDto internshipDto) {

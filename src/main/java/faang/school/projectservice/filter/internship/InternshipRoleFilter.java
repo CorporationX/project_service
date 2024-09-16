@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 @Component
 class InternshipRoleFilter implements InternshipFilter {
+
     @Override
     public boolean isApplicable(InternshipFilterDto filters) {
         return filters.getRole() != null;

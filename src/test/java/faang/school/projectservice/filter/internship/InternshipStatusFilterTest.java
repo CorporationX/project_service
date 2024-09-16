@@ -3,6 +3,7 @@ package faang.school.projectservice.filter.internship;
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipStatusFilterTest {
+
     @InjectMocks
     private InternshipStatusFilter internshipStatusFilter;
     private InternshipFilterDto internshipFilterDto;
@@ -27,7 +29,8 @@ public class InternshipStatusFilterTest {
     @Nested
     class PositiveTests {
         @Test
-        public void validateInternshipFilterDtoStatusNotNullTest() {
+        @DisplayName("When filter status field not null return true")
+        public void whenInternshipFilterDtoStatusIsNotNullThenReturnTrue() {
             internshipFilterDto = InternshipFilterDto.builder()
                     .status(STATUS_IN_PROGRESS)
                     .build();
@@ -36,7 +39,8 @@ public class InternshipStatusFilterTest {
         }
 
         @Test
-        public void validateInternshipFilterDtoReturnsFilteredListTest() {
+        @DisplayName("When filter status field is valid return filtered list")
+        public void whenInternshipFilterDtoStatusIsValidThenReturnFilteredDtoList() {
             Stream<Internship> internships = Stream.of(Internship.builder()
                             .status(STATUS_IN_PROGRESS)
                             .build(),
@@ -59,15 +63,13 @@ public class InternshipStatusFilterTest {
 
     @Nested
     class NegativeTests {
-        @Nested
-        class isApplicable {
-            @Test
-            public void validateInternshipStatusFilterIsNullTest() {
-                internshipFilterDto = InternshipFilterDto.builder()
-                        .status(null)
-                        .build();
-                assertFalse(internshipStatusFilter.isApplicable(internshipFilterDto));
-            }
+        @Test
+        @DisplayName("When filter status is null return false")
+        public void whenInternshipFilterDtoStatusIsNullThenReturnFalse() {
+            internshipFilterDto = InternshipFilterDto.builder()
+                    .status(null)
+                    .build();
+            assertFalse(internshipStatusFilter.isApplicable(internshipFilterDto));
         }
     }
 }

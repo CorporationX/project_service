@@ -7,6 +7,7 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
+
     ProjectDto toDto(Project project);
 
     Project toEntity(ProjectDto projectDto);

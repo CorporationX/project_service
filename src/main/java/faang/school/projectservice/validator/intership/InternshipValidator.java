@@ -15,6 +15,7 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 @RequiredArgsConstructor
 public class InternshipValidator {
+
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipRepository internshipRepository;
 

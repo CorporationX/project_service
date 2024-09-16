@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipRoleFilterTest {
+
     @InjectMocks
     private InternshipRoleFilter internshipRoleFilter;
     private InternshipFilterDto internshipFilterDto;
@@ -28,7 +30,8 @@ public class InternshipRoleFilterTest {
     @Nested
     class PositiveTests {
         @Test
-        public void validateInternshipFilterDtoRoleNotNullTest() {
+        @DisplayName("When filter is not null return true")
+        public void whenInternshipFilterDtoRoleNotNullThenReturnTrue() {
             internshipFilterDto = InternshipFilterDto.builder()
                     .role(INTERN)
                     .build();
@@ -37,7 +40,8 @@ public class InternshipRoleFilterTest {
         }
 
         @Test
-        public void validateInternshipFilterDtoReturnsFilteredListTest() {
+        @DisplayName("When filter role field is valid return filtered list")
+        public void whenInternshipFilterRoleIsValidThenReturnFilteredDtoList() {
             Stream<Internship> internships = Stream.of(Internship.builder()
                             .interns(List.of(TeamMember.builder()
                                     .roles(List.of(INTERN))
@@ -65,16 +69,14 @@ public class InternshipRoleFilterTest {
 
     @Nested
     class NegativeTests {
-        @Nested
-        class isApplicable {
-            @Test
-            public void validateRoleIsNullTest() {
-                internshipFilterDto = InternshipFilterDto.builder()
-                        .role(null)
-                        .build();
+        @Test
+        @DisplayName("When filter role field is null return false")
+        public void whenInternshipFilterDtoRoleIsNullTheReturnFalse() {
+            internshipFilterDto = InternshipFilterDto.builder()
+                    .role(null)
+                    .build();
 
-                assertFalse(internshipRoleFilter.isApplicable(internshipFilterDto));
-            }
+            assertFalse(internshipRoleFilter.isApplicable(internshipFilterDto));
         }
     }
 }

@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipControllerTest {
+
     @InjectMocks
     private InternshipController internshipController;
     @Mock
@@ -31,7 +32,7 @@ public class InternshipControllerTest {
     class ControllerCallsTests {
         @Test
         @DisplayName("Controllers calls service.create one time return saved dto")
-        public void createCallsOneTimeReturnDtoTest() {
+        public void whenControllerCallsServiceCreateOneTimeThenReturnSavedDto() {
             internshipDto = InternshipDto.builder()
                     .id(INTERNSHIP_ID_IS_ONE)
                     .build();
@@ -49,7 +50,7 @@ public class InternshipControllerTest {
 
         @Test
         @DisplayName("Controller calls service.update one time and return updated dto")
-        public void updateCallsOneTimeAndReturnUpdatedDtoTest() {
+        public void whenControllerCallsServiceUpdateOneTimeThenReturnUpdatedDto() {
             internshipDto = InternshipDto.builder()
                     .id(INTERNSHIP_ID_IS_ONE)
                     .name(INTERNSHIP_NAME)
@@ -67,7 +68,7 @@ public class InternshipControllerTest {
 
         @Test
         @DisplayName("Controller calls service.getFilteredInternship one time and return filtered dto list")
-        public void filterInternshipCallsOneTimeAndReturnListTest() {
+        public void whenControllerCallsServiceGetFilteredInternshipOneTimeThenReturnFilteredDtoList() {
             InternshipFilterDto filterDto = InternshipFilterDto.builder().build();
             List<InternshipDto> internships = List.of(InternshipDto.builder().build());
 
@@ -81,7 +82,7 @@ public class InternshipControllerTest {
 
         @Test
         @DisplayName("Controllers calls service.getAllInternships and return list of dtos")
-        public void getInternshipsCallsOneTimeAndReturnListTest() {
+        public void whenControllerCallsServiceGetAllInternshipOneTimeThenReturnDtoList() {
             List<InternshipDto> internships = List.of(InternshipDto.builder().build(), InternshipDto.builder().build());
             when(internshipService.getAllInternship()).thenReturn(internships);
             internshipController.getInternships();
@@ -93,7 +94,7 @@ public class InternshipControllerTest {
 
         @Test
         @DisplayName("Controller calls service.getInternship and returns one Dto by it's id")
-        public void getInternship() {
+        public void whenControllerCallsServiceGetInternshipOneTimeThenReturnDto() {
             when(internshipService.getInternship(INTERNSHIP_ID_IS_ONE)).thenReturn(internshipDto);
             internshipController.getInternship(INTERNSHIP_ID_IS_ONE);
             verify(internshipService)

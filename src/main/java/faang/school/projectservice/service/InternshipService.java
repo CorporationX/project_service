@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
+
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
     private final InternshipValidator internshipValidator;
