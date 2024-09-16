@@ -47,6 +47,12 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
     /**
+     * Swagger
+     */
+    implementation("io.swagger.core.v3:swagger-annotations:2.1.6")
+    implementation("org.springdoc:springdoc-openapi-ui:1.5.2")
+
+    /**
      * Test containers
      */
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))

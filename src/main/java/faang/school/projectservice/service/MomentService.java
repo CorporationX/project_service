@@ -15,9 +15,11 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -45,7 +47,7 @@ public class MomentService {
     public MomentDto update(MomentDto momentDto) {
         Optional<Moment> momentOpt = momentRepository.findById(momentDto.id());
         if (momentOpt.isEmpty()) {
-            return create(momentDto);
+            throw new DataValidationException("Переданного момента не существует в бд");
         }
 
         Moment moment = mapper.toEntity(momentDto);
@@ -85,14 +87,15 @@ public class MomentService {
         }
 
         if (projects != null) {
-            moment.getProjects().addAll(projects);
+            List<Project> projectsToAdd = Stream.concat(moment.getProjects().stream(), projects.stream()).toList();
+            moment.setProjects(projectsToAdd);
         }
-
         return mapper.toDto(momentRepository.save(moment));
     }
 
     public List<MomentDto> getMoments(MomentFilterDto filterDto) {
         List<Moment> moments = momentRepository.findAll();
+        System.out.println(moments);
         for (MomentFilter filter : momentFilters) {
             if (filter.isApplicable(filterDto)) {
                 moments = filter.apply(filterDto, moments);

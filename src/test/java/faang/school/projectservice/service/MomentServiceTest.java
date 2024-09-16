@@ -2,7 +2,10 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.filter.moment.MomentFilterDto;
+import faang.school.projectservice.filter.moment.MomentFilterMonth;
+import faang.school.projectservice.filter.moment.MomentFilterProjects;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
@@ -54,7 +57,7 @@ public class MomentServiceTest {
     private MomentRepository momentRepository;
     @Mock
     private TeamMemberJpaRepository teamMemberRepository;
-    @Spy
+    private List<MomentFilter> momentFilters;
     private MomentMapper mapper = Mappers.getMapper(MomentMapper.class);
     @Captor
     ArgumentCaptor<Moment> captorMoment;
@@ -63,6 +66,19 @@ public class MomentServiceTest {
 
     @BeforeEach
     public void setup() {
+        momentFilters = new ArrayList<>(
+            List.of (
+                    new MomentFilterMonth(),
+                    new MomentFilterProjects()
+            )
+        );
+        service = new MomentService(
+            projectRepository,
+            momentRepository,
+            teamMemberRepository,
+            mapper,
+            momentFilters
+        );
         momentDto = new MomentDto(
                 1L,
                 "Moment",
@@ -82,8 +98,8 @@ public class MomentServiceTest {
                 new ArrayList<>(List.of(1L, 2L, 3L)),
                 new ArrayList<>(List.of(1L, 2L, 3L)),
                 "imageId1",
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                momentDto.createdAt(),
+                momentDto.updatedAt()
         );
         momentDtoToReturn = new MomentDto(
                 1L,
@@ -93,8 +109,8 @@ public class MomentServiceTest {
                 new ArrayList<>(List.of(1L, 2L, 3L)),
                 new ArrayList<>(List.of(1L, 2L, 3L)),
                 "imageId1",
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                momentDto.createdAt(),
+                momentDto.updatedAt()
         );
         momentToReturn = new Moment();
         momentToReturn.setId(1L);
@@ -168,36 +184,31 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testUpdate_create() {
+    public void testUpdate_momentNotExist() {
         // Arrange
         when(momentRepository.findById(momentDto.id())).thenReturn(Optional.empty());
-        when(service.create(momentDto)).thenReturn(momentDtoToReturn);
 
         // Act and Assert
-        MomentDto returnMomentDto = service.update(momentDto);
-        verify(service, times(1)).create(captorMomentDto.capture());
-        Assertions.assertEquals(expectedMomentDto, captorMomentDto.capture());
-        Assertions.assertEquals(expectedMomentDto, returnMomentDto);
+        Exception exception = Assertions.assertThrows(DataValidationException.class, () -> service.update(momentDto));
+        Assertions.assertEquals("Переданного момента не существует в бд", exception.getMessage());
     }
 
     @Test
     public void testUpdate_NotNewProjectAndTeamMember() {
         // Arrange
-        momentToReturn.setDescription("newDescription");
-        expectedMoment.setDescription("newDescription");
         expectedMomentDto = new MomentDto(
                 1L,
                 "Moment",
-                "newDescription",
+                "description",
                 LocalDateTime.of(2024, 12, 31, 12, 0, 0),
                 new ArrayList<>(List.of(1L, 2L, 3L)),
                 new ArrayList<>(List.of(1L, 2L, 3L)),
                 "imageId1",
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                momentDto.createdAt(),
+                momentDto.updatedAt()
         );
         when(momentRepository.findById(momentDto.id())).thenReturn(Optional.of(momentToReturn));
-
+        when(momentRepository.save(any())).thenReturn(momentToReturn);
 
         // Act and Assert
         MomentDto returnMomentDto = service.update(momentDto);
@@ -208,9 +219,7 @@ public class MomentServiceTest {
     @Test
     public void testUpdate_NewProject() {
         // Arrange
-        momentToReturn.setDescription("newDescription");
         momentToReturn.setProjects(new ArrayList<>(List.of(Project.builder().id(1L).build())));
-        expectedMoment.setDescription("newDescription");
         expectedMomentDto = new MomentDto(
                 1L,
                 "Moment",
@@ -246,6 +255,26 @@ public class MomentServiceTest {
         );
         when(projectRepository.findAllByIds(any())).thenReturn(newProject);
         expectedMoment.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)));
+        Moment momentToReturn =  new Moment(
+
+        );
+        momentToReturn = new Moment();
+        momentToReturn.setId(1L);
+        momentToReturn.setName("Moment");
+        momentToReturn.setDescription("newDescription");
+        momentToReturn.setDate(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        momentToReturn.setProjects( new ArrayList<>(
+                List.of(
+                        Project.builder().id(1L).build(),
+                        Project.builder().id(2L).build(),
+                        Project.builder().id(3L).build()
+                )
+        ));
+        momentToReturn.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)));
+        momentToReturn.setImageId("imageId1");
+        momentToReturn.setCreatedAt(momentDto.createdAt());
+        momentToReturn.setUpdatedAt(momentDto.updatedAt());
+        when(momentRepository.save(any())).thenReturn(momentToReturn);
 
         // Act and Assert
         MomentDto returnMomentDto = service.update(momentDto);
@@ -257,17 +286,24 @@ public class MomentServiceTest {
     @Test
     public void testUpdate_NewUsers() {
         // Arrange
-        momentToReturn.setDescription("newDescription");
         momentToReturn.setUserIds(new ArrayList<>(List.of(1L)));
-        expectedMoment.setDescription("newDescription");
-        expectedMoment.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)));
+        expectedMoment.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L)));
+        expectedMoment.setProjects(new ArrayList<>(
+                List.of(
+                        Project.builder().id(1L).build(),
+                        Project.builder().id(2L).build(),
+                        Project.builder().id(3L).build(),
+                        Project.builder().id(10L).build(),
+                        Project.builder().id(20L).build()
+                )
+        ));
         expectedMomentDto = new MomentDto(
                 1L,
                 "Moment",
-                "newDescription",
+                "description",
                 LocalDateTime.of(2024, 12, 31, 12, 0, 0),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
                 new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)),
+                new ArrayList<>(List.of(1L, 2L, 3L)),
                 "imageId1",
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -295,6 +331,7 @@ public class MomentServiceTest {
                 )
         );
         when(teamMemberRepository.findAllById(any())).thenReturn(newTeamMembers);
+        when(momentRepository.save(any())).thenReturn(expectedMoment);
 
         // Act and Assert
         MomentDto returnMomentDto = service.update(momentDto);
@@ -310,15 +347,33 @@ public class MomentServiceTest {
         Moment momentOne = new Moment();
         momentOne.setId(1L);
         momentOne.setDate(LocalDateTime.of(2024, 8, 1, 1, 1, 1));
-        momentOne.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L)));
+        momentOne.setProjects(new ArrayList<>(
+                List.of(
+                        Project.builder().id(1L).build(),
+                        Project.builder().id(2L).build(),
+                        Project.builder().id(3L).build()
+                )
+        ));
         Moment momentTwo = new Moment();
         momentTwo.setId(2L);
         momentTwo.setDate(LocalDateTime.of(2024, 8, 1, 1, 1, 1));
-        momentTwo.setUserIds(new ArrayList<>(List.of(10L, 2L, 3L)));
+        momentTwo.setProjects(new ArrayList<>(
+                List.of(
+                        Project.builder().id(10L).build(),
+                        Project.builder().id(2L).build(),
+                        Project.builder().id(3L).build()
+                )
+        ));
         Moment momentThree = new Moment();
         momentThree.setId(3L);
         momentThree.setDate(LocalDateTime.of(2024, 9, 1, 1, 1, 1));
-        momentThree.setUserIds(new ArrayList<>(List.of(1L, 2L, 33L)));
+        momentThree.setProjects(new ArrayList<>(
+                List.of(
+                        Project.builder().id(1L).build(),
+                        Project.builder().id(2L).build(),
+                        Project.builder().id(33L).build()
+                )
+        ));
         List<Moment> moments = new ArrayList<>(
                 List.of(
                         momentOne, momentTwo, momentThree
@@ -368,8 +423,8 @@ public class MomentServiceTest {
                                 null,
                                 null,
                                 LocalDateTime.of(2024, 8, 1, 1, 1, 1),
-                                new ArrayList<>(List.of(1L, 2L, 3L)),
                                 null,
+                                new ArrayList<>(List.of(1L, 2L, 3L)),
                                 null,
                                 null,
                                 null
@@ -379,8 +434,8 @@ public class MomentServiceTest {
                                 null,
                                 null,
                                 LocalDateTime.of(2024, 8, 1, 1, 1, 1),
-                                new ArrayList<>(List.of(10L, 2L, 3L)),
                                 null,
+                                new ArrayList<>(List.of(10L, 2L, 3L)),
                                 null,
                                 null,
                                 null

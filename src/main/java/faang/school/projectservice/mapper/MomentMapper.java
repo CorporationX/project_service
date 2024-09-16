@@ -20,6 +20,9 @@ public interface MomentMapper {
 
     @Named("mapToProjectIds")
     default List<Long> mapToProjectIds(List<Project> projects) {
+        if (projects == null) {
+            return null;
+        }
         return projects.stream()
                 .map(Project::getId)
                 .toList();
@@ -30,6 +33,9 @@ public interface MomentMapper {
 
     @Named("mapToProjects")
     default List<Project> mapToProjects(List<Long> projectIds) {
+        if (projectIds == null) {
+            return null;
+        }
         return projectIds.stream()
                 .map(projectId -> Project.builder().id(projectId).build())
                 .toList();
