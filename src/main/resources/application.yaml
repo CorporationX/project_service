@@ -17,6 +17,10 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  mvc:
+    servlet:
+      path: /api/v1
+
   data:
     redis:
       port: 6379
@@ -42,9 +46,11 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+
   payment-service:
     host: http://localhost
     port: 9080
+
   user-service:
     host: http://localhost
     port: 8080

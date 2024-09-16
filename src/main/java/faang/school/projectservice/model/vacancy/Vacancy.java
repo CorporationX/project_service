@@ -1,8 +1,11 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.vacancy;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.WorkSchedule;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
