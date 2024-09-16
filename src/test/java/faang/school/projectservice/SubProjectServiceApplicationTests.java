@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 //import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -50,11 +51,13 @@ class SubProjectServiceApplicationTests {
     private Project childProject2;
 
     @BeforeEach
-    public void setUp(){
-         dto = CreateSubProjectDto.builder().id(1L).parentProjectId(1L).build();
+    public void setUp() {
+        dto = CreateSubProjectDto.builder().id(1L).parentProjectId(1L).build();
     }
 
-
+    /**
+     * если валидация прошла то должна сохранится в базу
+     */
     @Test
     public void if_subproject_have_parent_id_repository_must_be_called() throws CannotCreatePrivateProjectForPublicParent, ParentProjectMusNotBeNull, RootProjectsParentMustNotBeNull {
         Project rootParent = Project.builder().id(3L).build();
@@ -70,43 +73,45 @@ class SubProjectServiceApplicationTests {
 
     }
 
+    /**
+     * При этом проверить, все подпроекты текущего подпроекта имеют тот же статус. Т.е. нельзя закрыть проект, если у
+     * него есть все ещё открытые подпроекты. Если так то нужно выкинуть исключение ChildrenNotFinishedException
+     */
     @Test
     public void shouldThrowChildrenNotFinishedException_WhenChildProjectsNotCompleted() {
-        // Create a sub-project with child projects
-
 
         childProject1 = Project.builder()
                 .id(2L)
-                .status(ProjectStatus.IN_PROGRESS) // Child project not completed
+                .status(ProjectStatus.IN_PROGRESS)
                 .build();
 
         childProject2 = Project.builder()
                 .id(3L)
-                .status(ProjectStatus.COMPLETED) // This child is completed
+                .status(ProjectStatus.COMPLETED)
                 .build();
         subProject = Project.builder()
                 .id(1L)
                 .status(ProjectStatus.COMPLETED)
                 .children(List.of(childProject1, childProject2))
                 .build();
-        // Arrange
         CreateSubProjectDto subProjectDto = new CreateSubProjectDto();
         subProjectDto.setId(1L);
 
         when(repository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
 
-        // Act & Assert
         ChildrenNotFinishedException exception = assertThrows(
                 ChildrenNotFinishedException.class,
                 () -> service.refreshSubProject(mapper.toEntity(subProjectDto))
         );
 
-        // Assert exception message contains IDs and status
-
         verify(repository, times(1)).getProjectById(1L);
         verify(repository, times(0)).save(any(Project.class)); // Save should not be called
     }
 
+    /**
+     * При этом проверить, все подпроекты текущего подпроекта имеют тот же статус. Т.е. нельзя закрыть проект, если у
+     * него есть все ещё открытые подпроекты. Нужно сначала закрывать все подпроекты, и только потом родительский проект
+     */
     @Test
     public void shouldSaveProject_WhenAllChildProjectsAreCompleted() throws ChildrenNotFinishedException {
 
@@ -139,6 +144,9 @@ class SubProjectServiceApplicationTests {
         verify(repository, times(1)).save(any(Project.class));
     }
 
+    /**
+     * Обновляется статус и для аудита проставляется TIMESTAMP на последнее изменение проекта.
+     */
     @Test
     public void testSetStatusAndTime() {
 
@@ -154,6 +162,10 @@ class SubProjectServiceApplicationTests {
         assertThat(result.getUpdatedAt()).isEqualToIgnoringSeconds(initialTime);
     }
 
+    /**
+     * Проверить, и если у проекта закрылись все его подпроекты, тогда получаем Moment, а участники проекта становятся
+     * участниками момента. Получается, что у проекта есть момент “Выполнены все подпроекты”.
+     */
     @Test
     public void testAssignTeamMemberMoment() {
         TeamMember member1 = TeamMember.builder().id(1L).userId(101L).build();
@@ -178,6 +190,9 @@ class SubProjectServiceApplicationTests {
         });
     }
 
+    /**
+     * функция setVisibility делает все приватным если нужно
+     */
     @Test
     public void testSetVisibility_PrivateVisibility_ShouldSetSubprojectsToPrivate() {
         Project subProject1 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
@@ -195,6 +210,9 @@ class SubProjectServiceApplicationTests {
         });
     }
 
+    /**
+     * функция setVisibility не делает ничего если не нужно
+     */
     @Test
     public void testSetVisibility_PublicVisibility_ShouldKeepVisibilityUnchanged() {
         Project subProject1 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
@@ -212,6 +230,9 @@ class SubProjectServiceApplicationTests {
         });
     }
 
+    /**
+     * Подпроект ВСЕГДА имеет родительский проект.
+     */
     @Test
     public void testCreateSubProject_ShouldThrowParentProjectMustNotBeNull_WhenParentProjectIsNull() {
         Project project = Project.builder().parentProject(null).build();
@@ -223,6 +244,9 @@ class SubProjectServiceApplicationTests {
         verify(repository, never()).save(any(Project.class));
     }
 
+    /**
+     * Корневой проект не имеет родительского проекта./
+     **/
     @Test
     public void testCreateSubProject_ShouldThrowRootProjectsParentMustNotBeNull_WhenParentHasAParent() {
         Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
@@ -235,7 +259,9 @@ class SubProjectServiceApplicationTests {
         verify(repository, never()).save(any(Project.class));
     }
 
-
+    /**
+     * Нельзя создать приватный подпроект для публичного родительского проекта
+     */
     @Test
     public void testCreateSubProject_ShouldThrowCannotCreatePrivateProjectForPublicParent_WhenParentIsPublicAndProjectIsPrivate() {
         Project rootParent = Project.builder().id(3L).build();
