@@ -16,7 +16,7 @@ public class ProjectNameFilter implements ProjectFilter {
 
     @Override
     public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto filters) {
-        return projects.filter(project -> project.getName().toLowerCase()
-                        .contains(filters.namePattern().toLowerCase()));
+        return projects.filter(project -> project.getName().toLowerCase().trim()
+                        .contains(filters.namePattern().toLowerCase().trim()));
     }
 }
