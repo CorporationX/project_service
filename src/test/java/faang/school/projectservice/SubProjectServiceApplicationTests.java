@@ -276,7 +276,9 @@ class SubProjectServiceApplicationTests {
         verify(repository, never()).save(any(Project.class));
     }
 
-    /** Получить все подпроекты проекта с фильтром по названию и статусу */
+    /**
+     * Получить все подпроекты проекта с фильтром по названию и статусу
+     */
     @Test
     public void testGetAllSubProjectsWithFiltr_Case1_ProjectMatchesAllFilters() {
         Long childId1 = 1L;
@@ -307,5 +309,36 @@ class SubProjectServiceApplicationTests {
 
         assertEquals(1, result.size());
         assertEquals(List.of(expectedDto), result);
+    }
+
+    /**
+     * Не забудьте проверить видимость проекта. Может быть такое, что публичный проект
+     * имеет секретный подпроект, тогда его нельзя показывать другим участникам.
+     */
+    @Test
+    public void testGetAllSubProjectsWithFiltr_Case2_ProjectIsPrivate() {
+        Long childId1 = 1L;
+
+        CreateSubProjectDto parentProjectDto = CreateSubProjectDto.builder()
+                .children(List.of(childId1))
+                .build();
+
+        ProjectStatus statusFilter = ProjectStatus.IN_PROGRESS;
+        String nameFilter = "Test Project";
+
+        Project child1 = Project.builder()
+                .id(childId1)
+                .name("Test Project")
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .build();
+
+        List<Project> mockProjectList = List.of(child1);
+
+        when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(mockProjectList);
+
+        List<CreateSubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
+
+        assertEquals(0, result.size());
     }
 }
