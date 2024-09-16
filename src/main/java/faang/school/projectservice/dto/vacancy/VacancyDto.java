@@ -22,6 +22,7 @@ public record VacancyDto(
         List<Long> candidateIds,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
+        @NotNull
         Long createdBy,
         Long updatedBy,
         @NotBlank(message = "Status must not be blank")

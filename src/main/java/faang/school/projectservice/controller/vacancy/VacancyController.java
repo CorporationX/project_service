@@ -31,10 +31,10 @@ public class VacancyController {
         return vacancyService.create(dto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public VacancyDto update(@PathVariable("id") Long id, @Validated @RequestBody VacancyDto dto) {
-        return vacancyService.update(id, dto);
+    public VacancyDto update(@Validated @RequestBody VacancyDto dto) {
+        return vacancyService.update(dto);
     }
 
     @DeleteMapping("/{id}")

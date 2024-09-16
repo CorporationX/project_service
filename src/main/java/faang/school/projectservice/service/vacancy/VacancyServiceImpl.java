@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.WorkSchedule;
@@ -42,8 +43,8 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     @Transactional
-    public VacancyDto update(Long id, VacancyDto dto) {
-        var vacancy = findVacancyById(id);
+    public VacancyDto update(VacancyDto dto) {
+        var vacancy = findVacancyById(dto.id());
         updateVacancy(dto, vacancy);
         if (vacancy.getCount() <= dto.candidateIds().size()) {
             vacancyValidator.validateCandidates(dto);
@@ -58,10 +59,13 @@ public class VacancyServiceImpl implements VacancyService {
     @Transactional
     public void delete(Long id) {
         var vacancy = findVacancyById(id);
-        vacancy.getCandidates().stream()
+        List<Long> candidatesToDelete = vacancy.getCandidates().stream()
                 .filter(candidate -> !candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
-                .forEach(candidate -> teamMemberRepository.deleteById(candidate.getId()));
-        vacancyRepository.deleteById(id);
+                .map(Candidate::getId)
+                .toList();
+        if (!candidatesToDelete.isEmpty()) {
+            vacancyRepository.deleteAllById(candidatesToDelete);
+        }
     }
 
     @Override

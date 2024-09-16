@@ -38,9 +38,9 @@ class VacancyControllerTest {
         // given
         dto = VacancyDto.builder().build();
         // when
-        vacancyController.update(id, dto);
+        vacancyController.update(dto);
         // then
-        verify(vacancyService).update(id, dto);
+        verify(vacancyService).update(dto);
     }
 
     @Test

@@ -136,7 +136,7 @@ class VacancyServiceImplTest {
         when(vacancyRepository.save(any(Vacancy.class))).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
         // when
-        VacancyDto result = vacancyService.update(vacancyDto.id(), vacancyDto);
+        VacancyDto result = vacancyService.update(vacancyDto);
         // then
         verify(vacancyValidator, never()).validateCandidates(vacancyDto);
         assertThat(vacancy.getStatus()).isEqualTo(VacancyStatus.OPEN);
@@ -149,7 +149,7 @@ class VacancyServiceImplTest {
         // given
         when(vacancyRepository.findById(vacancyDto.id())).thenReturn(Optional.empty());
         // when/then
-        assertThatThrownBy(() -> vacancyService.update(vacancyDto.id(), vacancyDto))
+        assertThatThrownBy(() -> vacancyService.update(vacancyDto))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Vacancy with ID: %d not found".formatted(vacancyDto.id()));
         verify(vacancyRepository, never()).save(any(Vacancy.class));
@@ -160,27 +160,21 @@ class VacancyServiceImplTest {
         // given
         Candidate candidate1 = Candidate.builder()
                 .id(101L)
-                .candidateStatus(CandidateStatus.REJECTED) // Не ACCEPTED
+                .candidateStatus(CandidateStatus.REJECTED)
                 .build();
         Candidate candidate2 = Candidate.builder()
                 .id(102L)
-                .candidateStatus(CandidateStatus.ACCEPTED) // ACCEPTED
-                .build();
-        Candidate candidate3 = Candidate.builder()
-                .id(103L)
-                .candidateStatus(CandidateStatus.REJECTED) // Не ACCEPTED
+                .candidateStatus(CandidateStatus.ACCEPTED)
                 .build();
         vacancy = Vacancy.builder()
-                .candidates(List.of(candidate1, candidate2, candidate3))
+                .candidates(List.of(candidate1, candidate2))
                 .build();
         when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
         // when
         vacancyService.delete(vacancy.getId());
         // then
-        verify(teamMemberRepository).deleteById(candidate1.getId());
-        verify(teamMemberRepository, never()).deleteById(candidate2.getId());
-        verify(teamMemberRepository).deleteById(candidate3.getId());
-        verify(vacancyRepository).deleteById(vacancy.getId());
+        verify(vacancyRepository).deleteAllById(List.of(candidate1.getId()));
+        verify(vacancyRepository, never()).deleteAllById(List.of(candidate2.getId()));
     }
 
     @Test
