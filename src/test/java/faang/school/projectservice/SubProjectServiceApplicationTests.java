@@ -372,4 +372,34 @@ class SubProjectServiceApplicationTests {
         assertEquals(0, result.size());
     }
 
+    /**
+     * если статус не совпадают то этот подпроект не должен вернутся
+     */
+    @Test
+    public void testGetAllSubProjectsWithFiltr_Case4_StatusDoesNotMatch() {
+        Long childId1 = 1L;
+
+        CreateSubProjectDto parentProjectDto = CreateSubProjectDto.builder()
+                .children(List.of(childId1))
+                .build();
+
+        ProjectStatus statusFilter = ProjectStatus.COMPLETED;
+        String nameFilter = "Test Project";
+
+        Project child1 = Project.builder()
+                .id(childId1)
+                .name("Test Project")
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+
+        List<Project> mockProjectList = List.of(child1);
+
+        when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(mockProjectList);
+
+        List<CreateSubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
+
+        assertEquals(0, result.size());
+    }
+
 }
