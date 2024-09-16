@@ -14,6 +14,7 @@ import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.validator.MomentValidator;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,11 +45,21 @@ public class MomentServiceImplTest {
     private ProjectValidator projectValidator;
     @Mock
     private TeamMemberRepository teamMemberRepository;
+    private List<Long> addedProjectIds;
+    private List<Long> addedUserIds;
+    private Long momentId;
+    List<Project> projects;
+
+    @BeforeEach
+    void setUp() {
+        momentId = 1L;
+        addedProjectIds = new ArrayList<>(List.of(1L, 2L));
+        addedUserIds = new ArrayList<>(List.of(1L, 2L));
+        projects = List.of(new Project(), new Project());
+    }
 
     @Test
-     void testCreateMoment() throws DataValidationException {
-        Long momentId = 1L;
-        List<Project> projects = List.of(new Project(), new Project());
+    void testCreateMoment() throws DataValidationException {
         Moment moment = new Moment();
         MomentDto momentDto = new MomentDto();
         moment.setId(momentId);
@@ -61,10 +72,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-     void testUpdateMomentAllEmpty() throws DataValidationException {
-        long momentId = 1L;
-        List<Long> addedProjectIds = new ArrayList<>(List.of(1L, 2L));
-        List<Long> addedUserIds = new ArrayList<>(List.of(1L, 2L));
+    void testUpdateMomentAllEmpty() throws DataValidationException {
         Moment moment = new Moment();
         moment.setId(momentId);
         when(momentRepository.findById(momentId)).thenReturn(Optional.of(moment));
@@ -78,10 +86,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-     void testUpdateMomentWithNewProject() throws DataValidationException {
-        long momentId = 1L;
-        List<Long> addedProjectIds = new ArrayList<>(List.of(1L, 2L));
-        List<Long> addedUserIds = new ArrayList<>(List.of(1L, 2L));
+    void testUpdateMomentWithNewProject() throws DataValidationException {
         addedUserIds.clear();
         Moment moment = new Moment();
         moment.setId(momentId);
@@ -95,10 +100,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-     void testUpdateMomentWithNewUser() throws DataValidationException {
-        long momentId = 1L;
-        List<Long> addedProjectIds = new ArrayList<>(List.of(1L, 2L));
-        List<Long> addedUserIds = new ArrayList<>(List.of(1L, 2L));
+    void testUpdateMomentWithNewUser() throws DataValidationException {
         Moment moment = new Moment();
         moment.setId(momentId);
         moment.setUserIds(new ArrayList<>());
@@ -119,7 +121,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-     void getAllProjectMomentsByDate_Success() {
+    void getAllProjectMomentsByDate_Success() {
         Long projectId = 1L;
         LocalDateTime month = LocalDateTime.of(2024, 9, 11, 14, 30, 0);
         LocalDateTime endDate = month.plusMonths(1).minusDays(1);
@@ -149,7 +151,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-     void getMomentById() {
+    void getMomentById() {
         Long momentId = 1L;
         Moment moment = new Moment();
         moment.setId(momentId);
@@ -161,7 +163,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-     void getAllMoments() {
+    void getAllMoments() {
         Long momentId = 1L;
         Moment moment = new Moment();
         moment.setId(momentId);
@@ -170,9 +172,6 @@ public class MomentServiceImplTest {
         List<MomentDto> dtos = momentServiceImpl.getAllMoments();
 
         Assertions.assertEquals(1, dtos.size());
-    }
-    private void preparedData() {
-
     }
 }
 
