@@ -6,7 +6,7 @@ import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import faang.school.projectservice.validator.DataValidationException;
+import faang.school.projectservice.exceptions.DataValidationException;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 

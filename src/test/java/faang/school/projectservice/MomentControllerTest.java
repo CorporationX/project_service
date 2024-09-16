@@ -1,9 +1,9 @@
 package faang.school.projectservice;
 
 import faang.school.projectservice.controller.MomentController;
-import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.service.MomentServiceImpl;
-import faang.school.projectservice.validator.DataValidationException;
+import faang.school.projectservice.exceptions.DataValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,11 +25,11 @@ public class MomentControllerTest {
 
     @Test
     public void createMoment() throws DataValidationException {
-        Moment moment = new Moment();
+        MomentDto momentDto = new MomentDto();
 
-        momentController.createMoment(moment);
+        momentController.createMoment(momentDto);
 
-        verify(momentServiceImpl,times(1)).createMoment(moment);
+        verify(momentServiceImpl,times(1)).createMoment(momentDto);
     }
 
     @Test

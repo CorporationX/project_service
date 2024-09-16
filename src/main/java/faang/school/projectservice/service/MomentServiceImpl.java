@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.MomentDto;
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -9,7 +10,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.validator.DataValidationException;
 import faang.school.projectservice.validator.MomentValidator;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,29 @@ public class MomentServiceImpl implements MomentService {
     private final TeamMemberRepository teamMemberRepository;
 
     @Override
-    public MomentDto createMoment(Moment moment) throws DataValidationException {
+    public List<MomentDto> getAllMoments() {
+        List<Moment> moments = momentRepository.findAll();
+        return momentMapper.toDtoList(moments);
+    }
+
+    @Override
+    public MomentDto getMomentById(Long momentId) {
+        Moment moment = momentRepository.findById(momentId).orElseThrow();
+        return momentMapper.toDto(moment);
+    }
+
+    @Override
+    public List<MomentDto> getAllProjectMomentsByDate(Long projectId, LocalDateTime month) {
+        LocalDateTime endDate = month.plusMonths(1).minusDays(1);
+        List<Moment> filteredMoments = projectRepository.getProjectById(projectId).getMoments().stream()
+                .filter(moment -> moment.getCreatedAt().isAfter(month) && moment.getCreatedAt().isBefore(endDate))
+                .toList();
+        return momentMapper.toDtoList(filteredMoments);
+    }
+
+    @Override
+    public MomentDto createMoment(MomentDto momentDto) throws DataValidationException {
+        Moment moment = momentMapper.toEntity(momentDto);
         momentValidator.validateMoment(moment);
         moment.getProjects().forEach(project -> {
             try {
@@ -87,31 +109,8 @@ public class MomentServiceImpl implements MomentService {
     }
 
     private void addProjectFromUserToMoment(Moment moment, TeamMember user) {
-        Team team = user.getTeam();
-        Project project = team.getProject();
         List<Project> projects = new ArrayList<>(moment.getProjects());
-        projects.add(project);
+        projects.add(user.getTeam().getProject());
         moment.setProjects(projects);
-    }
-
-    @Override
-    public List<MomentDto> getAllProjectMomentsByDate(Long projectId, LocalDateTime month) {
-        LocalDateTime endDate = month.plusMonths(1).minusDays(1);
-        List<Moment> filteredMoments = projectRepository.getProjectById(projectId).getMoments().stream()
-                .filter(moment -> moment.getCreatedAt().isAfter(month) && moment.getCreatedAt().isBefore(endDate))
-                .toList();
-        return momentMapper.toDtoList(filteredMoments);
-    }
-
-    @Override
-    public List<MomentDto> getAllMoments() {
-        List<Moment> moments = momentRepository.findAll();
-        return momentMapper.toDtoList(moments);
-    }
-
-    @Override
-    public MomentDto getMomentById(Long momentId) {
-        Moment moment = momentRepository.findById(momentId).orElseThrow();
-        return momentMapper.toDto(moment);
     }
 }

@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.model.Moment;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

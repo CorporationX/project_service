@@ -1,20 +1,19 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.MomentDto;
-import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.validator.DataValidationException;
+import faang.school.projectservice.exceptions.DataValidationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface MomentService {
-    List<MomentDto> getAllProjectMomentsByDate(Long projectId, LocalDateTime month);
-
     List<MomentDto> getAllMoments();
 
     MomentDto getMomentById(Long momentId);
 
-    MomentDto createMoment(Moment moment) throws DataValidationException;
+    List<MomentDto> getAllProjectMomentsByDate(Long projectId, LocalDateTime month);
+
+    MomentDto createMoment(MomentDto momentDto) throws DataValidationException;
 
     MomentDto updateMoment(long momentId, List<Long> addedProjectIds, List<Long> addedUserIds) throws DataValidationException;
 }
