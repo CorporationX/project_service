@@ -2,6 +2,7 @@ package faang.school.projectservice.model;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import faang.school.projectservice.model.stage.Stage;
@@ -73,7 +74,7 @@ public class Project {
     @Column(name = "cover_image_id")
     private String coverImageId;
 
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Team> teams;
 
     @OneToOne(mappedBy = "project")
