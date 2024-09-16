@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.filter.internship.InternshipFilter;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public interface InternshipService {
 
     InternshipDto updateInternship(long id, InternshipDto internshipDto);
 
-    List<InternshipDto> getAllInternshipsByFilter(InternshipFilter filter);
+    List<InternshipDto> getAllInternshipsByFilter(InternshipFilterDto filter);
 
     InternshipDto getInternshipById(long id);
 }

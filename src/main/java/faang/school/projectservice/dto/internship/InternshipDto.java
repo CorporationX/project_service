@@ -24,7 +24,7 @@ public record InternshipDto(
         Long mentorId,
 
         @NotEmpty(message = "Interns list mustn't be empty", groups = {CreateGroup.class, UpdateGroup.class})
-        List<Long> internsIds,
+        List<Long> internsId,
 
         @NotBlank(message = "Name mustn't be blank", groups = {CreateGroup.class, UpdateGroup.class})
         String name,
@@ -35,7 +35,7 @@ public record InternshipDto(
         @NotNull(message = "Status mustn't be null", groups = {CreateGroup.class})
         InternshipStatus status,
 
-        @NotNull(message = "Start date mustn't be null" , groups = {CreateGroup.class})
+        @NotNull(message = "Start date mustn't be null", groups = {CreateGroup.class})
         LocalDateTime startDate,
 
         @NotNull(message = "End date mustn't be null", groups = {CreateGroup.class})

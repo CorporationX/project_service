@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.intership;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.filter.internship.InternshipFilter;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.service.internship.InternshipService;
 import faang.school.projectservice.validator.groups.CreateGroup;
 import faang.school.projectservice.validator.groups.UpdateGroup;
@@ -41,8 +41,8 @@ public class InternshipController {
 
     @GetMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
-    public List<InternshipDto> getAllInternshipsByFilter(InternshipFilter filter) {
-        return internshipService.getAllInternshipsByFilter(filter);
+    public List<InternshipDto> getAllInternshipsByFilter(InternshipFilterDto filters) {
+        return internshipService.getAllInternshipsByFilter(filters);
     }
 
     @GetMapping
