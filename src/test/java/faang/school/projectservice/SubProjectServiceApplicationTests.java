@@ -6,7 +6,10 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.SubProjectServiceImpl;
+import faang.school.projectservice.util.CannotCreatePrivateProjectForPublicParent;
 import faang.school.projectservice.util.ChildrenNotFinishedException;
+import faang.school.projectservice.util.ParentProjectMusNotBeNull;
+import faang.school.projectservice.util.RootProjectsParentMustNotBeNull;
 import jakarta.persistence.EntityNotFoundException;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -51,26 +54,19 @@ class SubProjectServiceApplicationTests {
          dto = CreateSubProjectDto.builder().id(1L).parentProjectId(1L).build();
     }
 
-    @Test
-    public void if_subproject_does_not_have_parent_id_exeption_must_thrown(){
-        when(repository.getProjectById(any())).thenThrow(new EntityNotFoundException());
-        dto.setId(1L);
-        dto.setParentProjectId(1L);
-        assertThrows(
-                EntityNotFoundException.class,
-                () -> service.createSubProject(mapper.toEntity(dto))
-        );
-    }
 
     @Test
-    public void if_subproject_have_parent_id_repository_must_be_called(){
+    public void if_subproject_have_parent_id_repository_must_be_called() throws CannotCreatePrivateProjectForPublicParent, ParentProjectMusNotBeNull, RootProjectsParentMustNotBeNull {
+        Project rootParent = Project.builder().id(3L).build();
+        Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
+        parentProject.setParentProject(rootParent);
+        Project subproject1 = Project.builder().parentProject(parentProject).visibility(ProjectVisibility.PUBLIC).build();
+
         when(repository.getProjectById(any())).thenReturn(Project.builder().build());
-        dto.setId(1L);
-        dto.setParentProjectId(1L);
 
-        service.createSubProject(mapper.toEntity(dto));
+        service.createSubProject(subproject1);
 
-        verify(repository).save(mapper.toEntity(dto));
+        verify(repository).save(subproject1);
 
     }
 
@@ -214,6 +210,44 @@ class SubProjectServiceApplicationTests {
         resultProject.getChildren().forEach(subProject -> {
             assertEquals(ProjectVisibility.PUBLIC, subProject.getVisibility());
         });
+    }
+
+    @Test
+    public void testCreateSubProject_ShouldThrowParentProjectMustNotBeNull_WhenParentProjectIsNull() {
+        Project project = Project.builder().parentProject(null).build();
+
+        assertThrows(ParentProjectMusNotBeNull.class, () -> {
+            service.createSubProject(project);
+        });
+
+        verify(repository, never()).save(any(Project.class));
+    }
+
+    @Test
+    public void testCreateSubProject_ShouldThrowRootProjectsParentMustNotBeNull_WhenParentHasAParent() {
+        Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
+        Project subproject1 = Project.builder().parentProject(parentProject).build();
+
+        assertThrows(RootProjectsParentMustNotBeNull.class, () -> {
+            service.createSubProject(subproject1);
+        });
+
+        verify(repository, never()).save(any(Project.class));
+    }
+
+
+    @Test
+    public void testCreateSubProject_ShouldThrowCannotCreatePrivateProjectForPublicParent_WhenParentIsPublicAndProjectIsPrivate() {
+        Project rootParent = Project.builder().id(3L).build();
+        Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
+        parentProject.setParentProject(rootParent);
+        Project subproject1 = Project.builder().parentProject(parentProject).visibility(ProjectVisibility.PRIVATE).build();
+
+        assertThrows(CannotCreatePrivateProjectForPublicParent.class, () -> {
+            service.createSubProject(subproject1);
+        });
+
+        verify(repository, never()).save(any(Project.class));
     }
 
 }

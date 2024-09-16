@@ -7,7 +7,10 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.util.CannotCreatePrivateProjectForPublicParent;
 import faang.school.projectservice.util.ChildrenNotFinishedException;
+import faang.school.projectservice.util.ParentProjectMusNotBeNull;
+import faang.school.projectservice.util.RootProjectsParentMustNotBeNull;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +31,20 @@ public class SubProjectServiceImpl implements SubProjectService {
     private ProjectMapper projectMapper;
 
     @Override
-    public CreateSubProjectDto createSubProject(Project project) {
+    public CreateSubProjectDto createSubProject(Project project) throws RootProjectsParentMustNotBeNull,
+            CannotCreatePrivateProjectForPublicParent, ParentProjectMusNotBeNull {
+        if (project.getParentProject() == null) {
+            throw new ParentProjectMusNotBeNull();
+        }
+        if (project.getParentProject().getParentProject() == null) {
+            throw new RootProjectsParentMustNotBeNull();
+        }
+        if (project.getParentProject().getVisibility() == ProjectVisibility.PUBLIC
+                && project.getVisibility() == ProjectVisibility.PRIVATE) {
+            throw new CannotCreatePrivateProjectForPublicParent();
+        }
         repository.getProjectById(project.getParentProject().getId());
+
         var savedProject = repository.save(project);
         return projectMapper.toDTO(savedProject);
     }
