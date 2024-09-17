@@ -1,7 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.dto.SubProjectDto;
 import faang.school.projectservice.service.SubProjectService;
 import faang.school.projectservice.util.CannotCreatePrivateProjectForPublicParent;
 import faang.school.projectservice.util.ChildrenNotFinishedException;
@@ -12,13 +11,12 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class SubProjectController {
     SubProjectService subProjectService;
-    private ProjectMapper projectMapper;
-    public CreateSubProjectDto createSubProject(CreateSubProjectDto subProjectDto){
-        if (subProjectDto == null|| subProjectDto.getId() == null){
+    public SubProjectDto createSubProject(Long projectId){
+        if (projectId == null){
             throw new NullPointerException();
         }
         try {
-            return subProjectService.createSubProject(projectMapper.toEntity(subProjectDto));
+            return subProjectService.createSubProject(projectId);
         } catch (RootProjectsParentMustNotBeNull e) {
             throw new RuntimeException(e);
         } catch (CannotCreatePrivateProjectForPublicParent e) {
@@ -28,9 +26,9 @@ public class SubProjectController {
         }
     }
 
-    public CreateSubProjectDto refreshSubProject(CreateSubProjectDto subProjectDto){
+    public SubProjectDto updateSubProject(SubProjectDto subProjectDto){
         try {
-            return subProjectService.refreshSubProject(projectMapper.toEntity(subProjectDto));
+            return subProjectService.updateSubProject(subProjectDto);
         } catch (ChildrenNotFinishedException e) {
             throw new RuntimeException(e);
         }

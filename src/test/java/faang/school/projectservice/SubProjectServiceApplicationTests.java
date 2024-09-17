@@ -1,7 +1,6 @@
 package faang.school.projectservice;
 
-import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.dto.SubProjectDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -10,10 +9,8 @@ import faang.school.projectservice.util.CannotCreatePrivateProjectForPublicParen
 import faang.school.projectservice.util.ChildrenNotFinishedException;
 import faang.school.projectservice.util.ParentProjectMusNotBeNull;
 import faang.school.projectservice.util.RootProjectsParentMustNotBeNull;
-import jakarta.persistence.EntityNotFoundException;
-import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeEach;
+import faang.school.projectservice.validator.SubProjectValidator;
+import faang.school.projectservice.validator.SubProjectValidatorImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +19,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 //import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,11 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 //import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +37,8 @@ class SubProjectServiceApplicationTests {
     private ProjectRepository repository;
     @Spy
     private ProjectMapperImpl mapper = new ProjectMapperImpl();
+    @Spy
+    private SubProjectValidator validator = new SubProjectValidatorImpl();
     @InjectMocks
     private SubProjectServiceImpl service;
 
@@ -56,9 +52,9 @@ class SubProjectServiceApplicationTests {
         parentProject.setParentProject(rootParent);
         Project subproject1 = Project.builder().parentProject(parentProject).visibility(ProjectVisibility.PUBLIC).build();
 
-        when(repository.getProjectById(any())).thenReturn(Project.builder().build());
+        when(repository.getProjectById(1L)).thenReturn(subproject1);
 
-        service.createSubProject(subproject1);
+        service.createSubProject(1L);
 
         verify(repository).save(subproject1);
 
@@ -85,14 +81,14 @@ class SubProjectServiceApplicationTests {
                 .status(ProjectStatus.COMPLETED)
                 .children(List.of(childProject1, childProject2))
                 .build();
-        CreateSubProjectDto subProjectDto = new CreateSubProjectDto();
+        SubProjectDto subProjectDto = new SubProjectDto();
         subProjectDto.setId(1L);
 
         when(repository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
 
         ChildrenNotFinishedException exception = assertThrows(
                 ChildrenNotFinishedException.class,
-                () -> service.refreshSubProject(mapper.toEntity(subProjectDto))
+                () -> service.updateSubProject(subProjectDto)
         );
 
         verify(repository, times(1)).getProjectById(1L);
@@ -121,14 +117,14 @@ class SubProjectServiceApplicationTests {
                 .children(List.of(childProject1, childProject2))
                 .build();
 
-        CreateSubProjectDto subProjectDto = new CreateSubProjectDto();
+        SubProjectDto subProjectDto = new SubProjectDto();
         subProjectDto.setId(1L);
 
         when(repository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
         when(repository.save(any(Project.class))).thenReturn(subProject);
 
         // Act
-        service.refreshSubProject(mapper.toEntity(subProjectDto));
+        service.updateSubProject(subProjectDto);
 
         // Assert
         verify(repository, times(1)).getProjectById(1L);
@@ -145,7 +141,7 @@ class SubProjectServiceApplicationTests {
         project.setStatus(ProjectStatus.IN_PROGRESS);
         LocalDateTime initialTime = LocalDateTime.now();
 
-        Project result = service.getSetStatusAndTime().apply(project);
+        Project result = service.getSetTime().apply(project);
 
 
         assertThat(result.getStatus()).isEqualTo(ProjectStatus.IN_PROGRESS);
@@ -228,8 +224,9 @@ class SubProjectServiceApplicationTests {
     public void testCreateSubProject_ShouldThrowParentProjectMustNotBeNull_WhenParentProjectIsNull() {
         Project project = Project.builder().parentProject(null).build();
 
+        when(repository.getProjectById(1L)).thenReturn(project);
         assertThrows(ParentProjectMusNotBeNull.class, () -> {
-            service.createSubProject(project);
+            service.createSubProject(1L);
         });
 
         verify(repository, never()).save(any(Project.class));
@@ -242,9 +239,9 @@ class SubProjectServiceApplicationTests {
     public void testCreateSubProject_ShouldThrowRootProjectsParentMustNotBeNull_WhenParentHasAParent() {
         Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
         Project subproject1 = Project.builder().parentProject(parentProject).build();
-
+        when(repository.getProjectById(1L)).thenReturn(subproject1);
         assertThrows(RootProjectsParentMustNotBeNull.class, () -> {
-            service.createSubProject(subproject1);
+            service.createSubProject(1L);
         });
 
         verify(repository, never()).save(any(Project.class));
@@ -259,9 +256,10 @@ class SubProjectServiceApplicationTests {
         Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
         parentProject.setParentProject(rootParent);
         Project subproject1 = Project.builder().parentProject(parentProject).visibility(ProjectVisibility.PRIVATE).build();
+        when(repository.getProjectById(1L)).thenReturn(subproject1);
 
         assertThrows(CannotCreatePrivateProjectForPublicParent.class, () -> {
-            service.createSubProject(subproject1);
+            service.createSubProject(1L);
         });
 
         verify(repository, never()).save(any(Project.class));
@@ -274,7 +272,7 @@ class SubProjectServiceApplicationTests {
     public void testGetAllSubProjectsWithFiltr_Case1_ProjectMatchesAllFilters() {
         Long childId1 = 1L;
 
-        CreateSubProjectDto parentProjectDto = CreateSubProjectDto.builder()
+        SubProjectDto parentProjectDto = SubProjectDto.builder()
                 .children(List.of(childId1))
                 .build();
 
@@ -288,7 +286,7 @@ class SubProjectServiceApplicationTests {
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
 
-        CreateSubProjectDto expectedDto = CreateSubProjectDto.builder().children(List.of())
+        SubProjectDto expectedDto = SubProjectDto.builder().children(List.of())
                 .status(statusFilter).visibility(ProjectVisibility.PUBLIC)
                 .id(childId1)
                 .name(nameFilter)
@@ -296,7 +294,7 @@ class SubProjectServiceApplicationTests {
 
         when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(List.of(mockedChildResponse));
 
-        List<CreateSubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
+        List<SubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
 
         assertEquals(1, result.size());
         assertEquals(List.of(expectedDto), result);
@@ -310,7 +308,7 @@ class SubProjectServiceApplicationTests {
     public void testGetAllSubProjectsWithFiltr_Case2_ProjectIsPrivate() {
         Long childId1 = 1L;
 
-        CreateSubProjectDto parentProjectDto = CreateSubProjectDto.builder()
+        SubProjectDto parentProjectDto = SubProjectDto.builder()
                 .children(List.of(childId1))
                 .build();
 
@@ -328,7 +326,7 @@ class SubProjectServiceApplicationTests {
 
         when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(mockProjectList);
 
-        List<CreateSubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
+        List<SubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
 
         assertEquals(0, result.size());
     }
@@ -340,7 +338,7 @@ class SubProjectServiceApplicationTests {
     public void testGetAllSubProjectsWithFiltr_Case3_NameDoesNotMatch() {
         Long childId1 = 1L;
 
-        CreateSubProjectDto parentProjectDto = CreateSubProjectDto.builder()
+        SubProjectDto parentProjectDto = SubProjectDto.builder()
                 .children(List.of(childId1))
                 .build();
 
@@ -358,7 +356,7 @@ class SubProjectServiceApplicationTests {
 
         when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(mockProjectList);
 
-        List<CreateSubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
+        List<SubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
 
         assertEquals(0, result.size());
     }
@@ -370,7 +368,7 @@ class SubProjectServiceApplicationTests {
     public void testGetAllSubProjectsWithFiltr_Case4_StatusDoesNotMatch() {
         Long childId1 = 1L;
 
-        CreateSubProjectDto parentProjectDto = CreateSubProjectDto.builder()
+        SubProjectDto parentProjectDto = SubProjectDto.builder()
                 .children(List.of(childId1))
                 .build();
 
@@ -388,7 +386,7 @@ class SubProjectServiceApplicationTests {
 
         when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(mockProjectList);
 
-        List<CreateSubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
+        List<SubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
 
         assertEquals(0, result.size());
     }

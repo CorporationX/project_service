@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.CreateSubProjectDto;
+import faang.school.projectservice.dto.SubProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -11,6 +11,7 @@ import faang.school.projectservice.util.CannotCreatePrivateProjectForPublicParen
 import faang.school.projectservice.util.ChildrenNotFinishedException;
 import faang.school.projectservice.util.ParentProjectMusNotBeNull;
 import faang.school.projectservice.util.RootProjectsParentMustNotBeNull;
+import faang.school.projectservice.validator.SubProjectValidator;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
@@ -30,32 +31,24 @@ import static faang.school.projectservice.model.ProjectStatus.COMPLETED;
 public class SubProjectServiceImpl implements SubProjectService {
     private ProjectRepository repository;
     private ProjectMapper projectMapper;
+    private SubProjectValidator validator;
 
     @Override
-    public CreateSubProjectDto createSubProject(Project project) throws RootProjectsParentMustNotBeNull,
+    public SubProjectDto createSubProject(Long projectId) throws RootProjectsParentMustNotBeNull,
             CannotCreatePrivateProjectForPublicParent, ParentProjectMusNotBeNull {
-        if (project.getParentProject() == null) {
-            throw new ParentProjectMusNotBeNull();
-        }
-        if (project.getParentProject().getParentProject() == null) {
-            throw new RootProjectsParentMustNotBeNull();
-        }
-        if (project.getParentProject().getVisibility() == ProjectVisibility.PUBLIC
-                && project.getVisibility() == ProjectVisibility.PRIVATE) {
-            throw new CannotCreatePrivateProjectForPublicParent();
-        }
-        repository.getProjectById(project.getParentProject().getId());
+        var project = repository.getProjectById(projectId);
+        validator.validate(project);
 
         var savedProject = repository.save(project);
         return projectMapper.toDTO(savedProject);
     }
 
     @Override
-    public CreateSubProjectDto refreshSubProject(Project subProject) throws ChildrenNotFinishedException {
+    public SubProjectDto updateSubProject(SubProjectDto subProject) throws ChildrenNotFinishedException {
         var subproject = repository.getProjectById(subProject.getId());
 
         var project = ifStatusIsComletedCheckThatChildrensAreCompleted
-                .andThen(setStatusAndTime)
+                .andThen(setTime)
                 .andThen(assignTeamMemberMoment)
                 .andThen(setVisibility)
                 .apply(subproject);
@@ -65,11 +58,15 @@ public class SubProjectServiceImpl implements SubProjectService {
     }
 
     @Override
-    public List<CreateSubProjectDto> getAllSubProjectsWithFiltr(CreateSubProjectDto project, String nameFilter, ProjectStatus statusFilter) {
-        var result = repository.findAllByIds(project.getChildren()).stream().filter(child -> Objects.equals(nameFilter, child.getName())
-                && statusFilter == child.getStatus() && child.getVisibility() != ProjectVisibility.PRIVATE).map(filteredProject -> {
-            return projectMapper.toDTO(filteredProject);
-        }).toList();
+    public List<SubProjectDto> getAllSubProjectsWithFiltr(SubProjectDto project, String nameFilter, ProjectStatus statusFilter) {
+        var result = repository.findAllByIds(project.getChildren()).stream()
+                .filter(child ->
+                        Objects.equals(nameFilter, child.getName())
+                                && statusFilter == child.getStatus()
+                                && child.getVisibility() != ProjectVisibility.PRIVATE
+                ).map(filteredProject -> {
+                    return projectMapper.toDTO(filteredProject);
+                }).toList();
         return result;
     }
 
@@ -99,8 +96,7 @@ public class SubProjectServiceImpl implements SubProjectService {
         return project;
     };
 
-    private final Function<Project, Project> setStatusAndTime = (project) -> {
-        project.setStatus(project.getStatus());
+    private final Function<Project, Project> setTime = (project) -> {
         project.setUpdatedAt(LocalDateTime.now());
         return project;
     };
@@ -112,7 +108,6 @@ public class SubProjectServiceImpl implements SubProjectService {
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getId)
                 .toList();
-
 
         Optional.ofNullable(project.getMoments())
                 .orElseGet(Collections::emptyList)
@@ -127,8 +122,6 @@ public class SubProjectServiceImpl implements SubProjectService {
             getAllSubProjects(project).forEach(proj -> {
                 proj.setVisibility(ProjectVisibility.PRIVATE);
             });
-        } else {
-            project.setVisibility(project.getVisibility());
         }
         return project;
     };
