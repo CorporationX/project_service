@@ -74,7 +74,7 @@ class InternshipServiceTest {
                 .id(internshipId)
                 .projectId(projectId)
                 .mentorId(mentorId)
-                .internsId(List.of())
+                .internsId(List.of(1L, 2L))
                 .build();
 
         internshipFilterDto = InternshipFilterDto.builder()
@@ -171,10 +171,49 @@ class InternshipServiceTest {
     }
 
     @Test
-    void getAllInternshipsByFilter() {
+    @DisplayName("Get Internships By Filter - Success")
+    void getAllInternshipsByFilter_Success() {
+        doReturn(internships).when(internshipRepository).findAll();
+        doReturn(true).when(internshipFilter).isApplicable(any(InternshipFilterDto.class));
+        doReturn(internships.stream()).when(internshipFilter).applyFilter(any(), any(InternshipFilterDto.class));
+        doReturn(internshipDto).when(internshipMapper).toDto(any(Internship.class));
+
+        var result = internshipService.getAllInternshipsByFilter(internshipFilterDto);
+
+        verify(internshipRepository).findAll();
+        verify(internshipFilter).isApplicable(any(InternshipFilterDto.class));
+        verify(internshipFilter).applyFilter(any(), any(InternshipFilterDto.class));
+        verify(internshipMapper).toDto(any(Internship.class));
+
+        assertThat(result).isNotNull();
+        assertThat(result).isNotEmpty();
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(internshipDto);
     }
 
     @Test
-    void getInternshipById() {
+    @DisplayName("Get Internship By ID - Success")
+    void getInternshipById_Success() {
+        doReturn(Optional.of(internship)).when(internshipRepository).findById(anyLong());
+        doReturn(internshipDto).when(internshipMapper).toDto(any(Internship.class));
+
+        var result = internshipService.getInternshipById(internshipId);
+
+        verify(internshipRepository).findById(anyLong());
+        verify(internshipMapper).toDto(any(Internship.class));
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(internshipDto);
+    }
+
+    @Test
+    @DisplayName("Get Internship By ID - Not Found")
+    void getInternshipById_NotFound() {
+        doReturn(Optional.empty()).when(internshipRepository).findById(anyLong());
+
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
+                internshipService.getInternshipById(internshipId));
+
+        verify(internshipRepository).findById(anyLong());
     }
 }

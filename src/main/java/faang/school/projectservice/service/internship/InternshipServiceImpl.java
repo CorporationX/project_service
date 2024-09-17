@@ -37,8 +37,10 @@ public class InternshipServiceImpl implements InternshipService {
         internshipValidator.validateDto(internshipDto);
         internshipValidator.validateInternshipDuration(internshipDto);
 
+        var interns = teamMemberRepository.findAllById(internshipDto.internsId());
         var internship = internshipMapper.toEntity(internshipDto);
 
+        internship.setInterns(interns);
         assignProjectAndMentor(internship, internshipDto.projectId(), internshipDto.mentorId());
         return internshipMapper.toDto(internshipRepository.save(internship));
     }
