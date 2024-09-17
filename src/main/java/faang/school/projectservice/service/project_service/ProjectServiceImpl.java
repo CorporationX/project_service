@@ -97,7 +97,6 @@ public class ProjectServiceImpl implements ProjectService {
                 return getProjectsFilters(filterDto);
             }
         }
-
         return null;
     }
 }
