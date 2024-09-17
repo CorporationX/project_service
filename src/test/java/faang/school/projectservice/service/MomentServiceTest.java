@@ -3,7 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.moment.MomentFilter;
-import faang.school.projectservice.filter.moment.MomentFilterDto;
+import faang.school.projectservice.dto.MomentFilterDto;
 import faang.school.projectservice.filter.moment.MomentFilterMonth;
 import faang.school.projectservice.filter.moment.MomentFilterProjects;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
@@ -11,13 +11,10 @@ import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
-import jakarta.validation.OverridesAttribute;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +24,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -228,8 +224,8 @@ public class MomentServiceTest {
                 new ArrayList<>(List.of(1L, 2L, 3L)),
                 new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)),
                 "imageId1",
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                momentToReturn.getCreatedAt(),
+                momentToReturn.getUpdatedAt()
         );
         when(momentRepository.findById(momentDto.id())).thenReturn(Optional.of(momentToReturn));
         List<Project> newProject = new ArrayList<>(
@@ -305,8 +301,8 @@ public class MomentServiceTest {
                 new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)),
                 new ArrayList<>(List.of(1L, 2L, 3L)),
                 "imageId1",
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                momentToReturn.getCreatedAt(),
+                momentToReturn.getUpdatedAt()
         );
         when(momentRepository.findById(momentDto.id())).thenReturn(Optional.of(momentToReturn));
         when(projectRepository.findAllByIds(any())).thenReturn(new ArrayList<>());

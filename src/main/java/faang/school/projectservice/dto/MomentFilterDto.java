@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter.moment;
+package faang.school.projectservice.dto;
 
 
 import lombok.NoArgsConstructor;

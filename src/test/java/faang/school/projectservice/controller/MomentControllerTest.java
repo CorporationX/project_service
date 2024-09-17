@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.moment.MomentFilterDto;
+import faang.school.projectservice.dto.MomentFilterDto;
 import faang.school.projectservice.service.MomentService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
