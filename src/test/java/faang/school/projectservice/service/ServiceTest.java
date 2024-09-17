@@ -2,10 +2,13 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
+import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project_service.ProjectServiceImpl;
 import faang.school.projectservice.validator.ValidatorProject;
@@ -19,11 +22,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,13 +95,15 @@ public class ServiceTest {
 
         Project firstProject = new Project();
         Project secondProject = new Project();
+        TeamMemberDto requester = new TeamMemberDto();
         firstProject.setName("Name first");
         secondProject.setName("Name second");
+        requester.setUserId(1L);
 
         when(projectRepository.findAll()).thenReturn(projects);
         ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, validation);
 
-        List<ProjectDto> result = service.getProjectsFilters(filterDto);
+        List<ProjectDto> result = service.getProjectsFilters(filterDto, requester);
         assertThat(result).isEqualTo(projects);
     }
 
@@ -128,9 +133,9 @@ public class ServiceTest {
     public void testFindById() {
         long id = 1L;
         Project project = new Project();
-        project.setId(1L);
+        project.setId(id);
         ProjectDto projectDto = new ProjectDto();
-        projectDto.setId(1L);
+        projectDto.setId(id);
 
         when(validation.findById(id)).thenReturn(project);
         when(mapper.toDto(project)).thenReturn(projectDto);
@@ -139,5 +144,27 @@ public class ServiceTest {
         assertEquals(result, projectDto);
     }
 
+    @Test
+    public void testCheck() {
+        long requesterId = 123L;
+        long otherId = 456L;
 
+        TeamMember member1 = mock(TeamMember.class);
+        TeamMember member2 = mock(TeamMember.class);
+        Team team1 = mock(Team.class);
+        Team team2 = mock(Team.class);
+        Project project = mock(Project.class);
+
+        when(member1.getUserId()).thenReturn(requesterId);
+        when(member2.getUserId()).thenReturn(otherId);
+
+        when(team1.getTeamMembers()).thenReturn(List.of(member1));
+        when(team2.getTeamMembers()).thenReturn(List.of(member2));
+
+        when(project.getTeams()).thenReturn(List.of(team1, team2));
+
+        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, validation).check(project, requesterId);
+
+        assertTrue(result);
+    }
 }

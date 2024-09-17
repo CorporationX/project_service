@@ -2,13 +2,13 @@ package faang.school.projectservice.service.project_service;
 
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
-import faang.school.projectservice.dto.client.TeamDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.validator.ValidatorProject;
@@ -16,9 +16,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -58,17 +59,6 @@ public class ProjectServiceImpl implements ProjectService {
         project.setUpdatedAt(LocalDateTime.now());
     }
 
-    public List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto) {
-        Stream<Project> projectStream = projectRepository.findAll().stream();
-        return filters.stream()
-                .filter(filter -> filter.isApplicable(filterDto))
-                .reduce(projectStream,
-                        (project, filter) -> filter.apply(project, filterDto),
-                        (s1, s2) -> s1)
-                .map(mapper::toDto)
-                .toList();
-    }
-
     public List<ProjectDto> getProjects() {
         return projectRepository.findAll()
                 .stream()
@@ -81,22 +71,24 @@ public class ProjectServiceImpl implements ProjectService {
         return mapper.toDto(validation.findById(id));
     }
 
-    public List<ProjectDto> checkingVisibility(ProjectFilterDto filterDto, TeamMemberDto requester) {
-        if (filterDto.getVisibility().equals(ProjectVisibility.PUBLIC)) {
-            getProjectsFilters(filterDto);
-        }
-
-        return getPrivateProject(filterDto, requester);
+    public List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto, TeamMemberDto requester) {
+        Stream<Project> projectStream = projectRepository.findAll().stream();
+        return filters.stream()
+                .filter(filter -> filter.isApplicable(filterDto))
+                .reduce(projectStream,
+                        (project, filter) -> filter.apply(project, filterDto),
+                        (s1, s2) -> s1)
+                .filter(project -> project.getVisibility().equals(ProjectVisibility.PRIVATE) && check(project, requester.getUserId()))
+                .map(mapper::toDto)
+                .toList();
     }
 
-    private List<ProjectDto> getPrivateProject(ProjectFilterDto filterDto, TeamMemberDto requester) {
-        List<ProjectDto> privateProjects = getProjectsFilters(filterDto);
+    public boolean check(Project project, long requester) {
+        Set<Long> teamMemberIds = project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .map(TeamMember::getUserId)
+                .collect(Collectors.toSet());
 
-        for (ProjectDto projectDto : privateProjects) {
-            if (projectDto.getTeams().contains(requester.getTeam())) {
-                return getProjectsFilters(filterDto);
-            }
-        }
-        return null;
+        return teamMemberIds.contains(requester);
     }
 }

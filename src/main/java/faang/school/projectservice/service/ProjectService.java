@@ -2,6 +2,8 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
+import faang.school.projectservice.dto.client.TeamMemberDto;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +19,12 @@ public interface ProjectService {
 
     void updateDescription(ProjectDto projectDto, String description);
 
-    List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto);
 
     List<ProjectDto> getProjects();
 
     ProjectDto findById(long id);
+
+    List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto, TeamMemberDto requester);
+
+    boolean check(Project project, long requester);
 }
