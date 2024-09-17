@@ -1,4 +1,4 @@
 package faang.school.projectservice.exception;
 
-public class CannotCreatePrivateProjectForPublicParent extends Exception{
+public class CannotCreatePrivateProjectForPublicParent extends RuntimeException{
 }

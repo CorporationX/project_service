@@ -8,30 +8,24 @@ import faang.school.projectservice.exception.CannotCreatePrivateProjectForPublic
 import faang.school.projectservice.exception.ChildrenNotFinishedException;
 import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
 import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
 
-@Controller
+@RequiredArgsConstructor
+@RestController
 public class SubProjectController {
-    SubProjectService subProjectService;
-    public SubProjectDto createSubProject(Long projectId){
-        if (projectId == null){
-            throw new NullPointerException();
-        }
-        try {
-            return subProjectService.createSubProject(projectId);
-        } catch (RootProjectsParentMustNotBeNull e) {
-            throw new RuntimeException(e);
-        } catch (CannotCreatePrivateProjectForPublicParent e) {
-            throw new RuntimeException(e);
-        } catch (ParentProjectMusNotBeNull e) {
-            throw new RuntimeException(e);
-        }
+    private final SubProjectService subProjectService;
+
+    public SubProjectDto createSubProject(@NotNull Long projectId) {
+        return subProjectService.createSubProject(projectId);
     }
 
-    public SubProjectDto updateSubProject(SubProjectDto subProjectDto){
+    public SubProjectDto updateSubProject(SubProjectDto subProjectDto) {
         try {
             return subProjectService.updateSubProject(subProjectDto);
         } catch (ChildrenNotFinishedException e) {
@@ -40,6 +34,6 @@ public class SubProjectController {
     }
 
     public List<SubProjectDto> getAllSubProjectsWithFiltr(SubProjectDto project, String nameFilter, ProjectStatus statusFilter) {
-        return subProjectService.getAllSubProjectsWithFiltr(project,nameFilter,statusFilter);
+        return subProjectService.getAllSubProjectsWithFiltr(project, nameFilter, statusFilter);
     }
 }

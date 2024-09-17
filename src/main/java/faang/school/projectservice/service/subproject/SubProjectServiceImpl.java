@@ -12,7 +12,9 @@ import faang.school.projectservice.exception.ChildrenNotFinishedException;
 import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
 import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
 import faang.school.projectservice.validator.SubProjectValidator;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,14 +30,14 @@ import static faang.school.projectservice.model.ProjectStatus.COMPLETED;
 
 @Getter
 @Service
+@RequiredArgsConstructor
 public class SubProjectServiceImpl implements SubProjectService {
-    private ProjectRepository repository;
-    private ProjectMapper projectMapper;
-    private SubProjectValidator validator;
+    private final ProjectRepository repository;
+    private final ProjectMapper projectMapper;
+    private final SubProjectValidator validator;
 
     @Override
-    public SubProjectDto createSubProject(Long projectId) throws RootProjectsParentMustNotBeNull,
-            CannotCreatePrivateProjectForPublicParent, ParentProjectMusNotBeNull {
+    public SubProjectDto createSubProject(Long projectId) {
         var project = repository.getProjectById(projectId);
         validator.validate(project);
 
