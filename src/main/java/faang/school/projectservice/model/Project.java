@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.vacancy.Vacancy;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
