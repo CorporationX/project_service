@@ -16,6 +16,8 @@ class SubProjectValidatorImplTest {
 
     @InjectMocks
     private SubProjectValidatorImpl validator;
+    Project parentProject;
+    Project project;
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -33,31 +35,27 @@ class SubProjectValidatorImplTest {
 
     @Test
     public void validate_ShouldThrowCannotCreatePrivateProjectForPublicParent_WhenParentIsPublicAndProjectIsPrivate() {
-        Project parentProject = Project.builder()
-                .visibility(ProjectVisibility.PUBLIC)
-                .parentProject(Project.builder().build())
-                .build();
-
-        Project project = Project.builder()
-                .parentProject(parentProject)
-                .visibility(ProjectVisibility.PRIVATE)
-                .build();
+        createParentProject(ProjectVisibility.PUBLIC,ProjectVisibility.PRIVATE);
 
         assertThrows(CannotCreatePrivateProjectForPublicParent.class, () -> validator.validate(project));
     }
 
     @Test
     public void validate_ShouldPass_WhenValidConditionsAreMet() {
-        Project parentProject = Project.builder()
-                .visibility(ProjectVisibility.PUBLIC)
+        createParentProject(ProjectVisibility.PUBLIC,ProjectVisibility.PUBLIC);
+
+        validator.validate(project);
+    }
+
+    private void createParentProject(ProjectVisibility parentVisibility ,ProjectVisibility visibility) {
+         parentProject = Project.builder()
+                .visibility(parentVisibility)
                 .parentProject(Project.builder().build())
                 .build();
 
-        Project project = Project.builder()
+         project = Project.builder()
                 .parentProject(parentProject)
-                .visibility(ProjectVisibility.PUBLIC)
+                .visibility(visibility)
                 .build();
-
-        validator.validate(project);
     }
 }
