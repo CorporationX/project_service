@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.service.InternshipService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
@@ -14,7 +15,7 @@ public class InternshipController {
 
     private final InternshipService internshipService;
 
-    public InternshipDto createInternship(InternshipDto internshipDto) {
+    public InternshipDto createInternship(@Valid InternshipDto internshipDto) {
         return internshipService.create(internshipDto);
     }
 
