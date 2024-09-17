@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.service.SubProjectService;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.controller.subproject.SubProjectController;
+import faang.school.projectservice.service.subproject.SubProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

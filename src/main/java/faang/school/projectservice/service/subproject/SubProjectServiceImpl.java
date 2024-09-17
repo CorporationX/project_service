@@ -1,16 +1,16 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.SubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.util.CannotCreatePrivateProjectForPublicParent;
-import faang.school.projectservice.util.ChildrenNotFinishedException;
-import faang.school.projectservice.util.ParentProjectMusNotBeNull;
-import faang.school.projectservice.util.RootProjectsParentMustNotBeNull;
+import faang.school.projectservice.exception.CannotCreatePrivateProjectForPublicParent;
+import faang.school.projectservice.exception.ChildrenNotFinishedException;
+import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
+import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
 import faang.school.projectservice.validator.SubProjectValidator;
 import lombok.Getter;
 import org.springframework.stereotype.Service;

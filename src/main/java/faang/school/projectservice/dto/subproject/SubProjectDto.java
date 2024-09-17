@@ -1,10 +1,9 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import lombok.*;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 

@@ -1,11 +1,11 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.SubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.util.CannotCreatePrivateProjectForPublicParent;
-import faang.school.projectservice.util.ChildrenNotFinishedException;
-import faang.school.projectservice.util.ParentProjectMusNotBeNull;
-import faang.school.projectservice.util.RootProjectsParentMustNotBeNull;
+import faang.school.projectservice.exception.CannotCreatePrivateProjectForPublicParent;
+import faang.school.projectservice.exception.ChildrenNotFinishedException;
+import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
+import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
 
 import java.util.List;
 

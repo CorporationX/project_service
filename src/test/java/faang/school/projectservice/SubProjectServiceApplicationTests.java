@@ -1,14 +1,14 @@
 package faang.school.projectservice;
 
-import faang.school.projectservice.dto.SubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.SubProjectServiceImpl;
-import faang.school.projectservice.util.CannotCreatePrivateProjectForPublicParent;
-import faang.school.projectservice.util.ChildrenNotFinishedException;
-import faang.school.projectservice.util.ParentProjectMusNotBeNull;
-import faang.school.projectservice.util.RootProjectsParentMustNotBeNull;
+import faang.school.projectservice.service.subproject.SubProjectServiceImpl;
+import faang.school.projectservice.exception.CannotCreatePrivateProjectForPublicParent;
+import faang.school.projectservice.exception.ChildrenNotFinishedException;
+import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
+import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
 import faang.school.projectservice.validator.SubProjectValidator;
 import faang.school.projectservice.validator.SubProjectValidatorImpl;
 import org.junit.jupiter.api.Test;

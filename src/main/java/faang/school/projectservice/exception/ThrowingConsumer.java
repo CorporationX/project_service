@@ -1,6 +1,4 @@
-package faang.school.projectservice.util;
-
-import java.util.function.Consumer;
+package faang.school.projectservice.exception;
 
 @FunctionalInterface
 public interface ThrowingConsumer<T> {

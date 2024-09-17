@@ -1,4 +1,4 @@
-package faang.school.projectservice.util;
+package faang.school.projectservice.exception;
 
 public class ParentProjectMusNotBeNull extends Exception{
 }

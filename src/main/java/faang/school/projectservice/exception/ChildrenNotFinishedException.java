@@ -1,7 +1,5 @@
-package faang.school.projectservice.util;
+package faang.school.projectservice.exception;
 
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 public class ChildrenNotFinishedException extends RuntimeException{
     public final String message;
 
