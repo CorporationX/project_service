@@ -58,7 +58,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setUpdatedAt(LocalDateTime.now());
     }
 
-    private List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto) {
+    public List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto) {
         Stream<Project> projectStream = projectRepository.findAll().stream();
         return filters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
@@ -72,6 +72,7 @@ public class ProjectServiceImpl implements ProjectService {
     public List<ProjectDto> getProjects() {
         return projectRepository.findAll()
                 .stream()
+                .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC))
                 .map(mapper::toDto)
                 .toList();
     }
@@ -89,26 +90,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private List<ProjectDto> getPrivateProject(ProjectFilterDto filterDto, TeamMemberDto requester) {
-            List<ProjectDto> privateProjects = getProjectsFilters(filterDto);
-            List<List<TeamDto>> teams = new ArrayList<>();
-            List<TeamMemberDto> users = new ArrayList<>();
+        List<ProjectDto> privateProjects = getProjectsFilters(filterDto);
 
-            for (ProjectDto projectDto : privateProjects) {
-                teams.add(projectDto.getTeams());
-            }
-
-            for (List<TeamDto> teamDtos : teams) {
-                for (TeamDto teamDto : teamDtos) {
-                    for (TeamMemberDto userDto : users) {
-                        users.add(userDto);
-                    }
-                }
-            }
-
-            if (users.contains(requester)) {
+        for (ProjectDto projectDto : privateProjects) {
+            if (projectDto.getTeams().contains(requester.getTeam())) {
                 return getProjectsFilters(filterDto);
             }
-            return null;
-    }
+        }
 
+        return null;
+    }
 }

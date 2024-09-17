@@ -26,9 +26,9 @@ public class ProjectController {
         projectService.updateDescription(projectDto, description);
     }
 
-    public List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto) {
-        return projectService.getProjectsFilters(filterDto);
-    }
+//    public List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto) {
+//        return projectService.getProjectsFilters(filterDto);
+//    }
 
     public List<ProjectDto> getProjects() {
         return projectService.getProjects();
