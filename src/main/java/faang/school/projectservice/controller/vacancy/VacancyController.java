@@ -43,7 +43,7 @@ public class VacancyController {
         vacancyService.delete(id);
     }
 
-    @GetMapping
+    @PostMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
     public List<VacancyDto> findAll(@Validated @RequestBody VacancyFilterDto filter) {
         return vacancyService.findAll(filter);
