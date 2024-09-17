@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
+import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project_service.ProjectServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,9 @@ public class ProjectController {
         projectService.updateDescription(projectDto, description);
     }
 
-//    public List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto) {
-//        return projectService.getProjectsFilters(filterDto);
-//    }
+    public List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto, TeamMemberDto teamMemberDto) {
+        return projectService.getProjectsFilters(filterDto, teamMemberDto);
+    }
 
     public List<ProjectDto> getProjects() {
         return projectService.getProjects();
