@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project_service.ProjectServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class ProjectController {
-    private final ProjectService projectService;
+    private final ProjectServiceImpl projectService;
 
     public void createProject(ProjectDto projectDto) {
         projectService.createProject(projectDto);

@@ -7,9 +7,11 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validation.ValidationProject;
+import faang.school.projectservice.service.project_service.ProjectServiceImpl;
+import faang.school.projectservice.validator.ValidatorProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -27,81 +29,24 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ServiceTest {
     @InjectMocks
-    private ProjectService projectService;
-    @InjectMocks
-    private ValidationProject validation;
+    private ProjectServiceImpl projectService;
+    @Mock
+    private ValidatorProject validation;
     @Mock
     private ProjectRepository projectRepository;
     @Mock
     private List<ProjectFilters> filters;
     @Spy
-    private ProjectMapper mapper;
-
-        @Test
-    public void testValidationIsNullName() {
-        ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
-
-        assertThrows(NoSuchElementException.class, () -> validation.validationName(projectDto));
-    }
-
-    @Test
-    public void testValidationNameIsBlank() {
-        ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
-        projectEntity.setName("  ");
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
-
-        assertThrows(NoSuchElementException.class, () -> validation.validationName(projectDto));
-    }
-
-    @Test
-    public void testValidationIsNullDescription() {
-        ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
-
-        assertThrows(NoSuchElementException.class, () -> validation.validationDescription(projectDto));
-    }
-
-    @Test
-    public void testValidationDescriptionIsBlank() {
-        ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
-        projectEntity.setDescription("  ");
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
-
-        assertThrows(NoSuchElementException.class, () -> validation.validationDescription(projectDto));
-    }
-
-    @Test
-    public void testValidationExistingProject() {
-        ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
-        Project existingProject = new Project();
-
-        projectEntity.setId(2L);
-        projectEntity.setOwnerId(1l);
-        existingProject.setId(1L);
-
-        projectDto.setName("Second test name");
-
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
-        when(projectRepository.findProjectByNameAndOwnerId(projectDto.getName(), projectEntity.getOwnerId()))
-                .thenReturn(existingProject);
-
-        assertThrows(NoSuchElementException.class,
-                () -> validation.validationDuplicateProjectNames(projectDto));
-    }
+    private ProjectMapper mapper = Mappers.getMapper(ProjectMapper.class);
 
     @Test
     public void testUpdateStatusGetException() {
         ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
+        Project project = new Project();
+        project.setStatus(ProjectStatus.COMPLETED);
         ProjectStatus status = ProjectStatus.CANCELLED;
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
 
+        when(validation.getEntity(projectDto)).thenReturn(project);
         assertThrows(NoSuchElementException.class, () -> projectService.updateStatus(projectDto, status));
     }
 
@@ -110,7 +55,7 @@ public class ServiceTest {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
         ProjectStatus status = ProjectStatus.CANCELLED;
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(validation.getEntity(projectDto)).thenReturn(projectEntity);
         when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
 
         assertDoesNotThrow(() -> projectService.updateStatus(projectDto, status));
@@ -120,7 +65,7 @@ public class ServiceTest {
     public void testUpdateDescriptionGetException() {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(validation.getEntity(projectDto)).thenReturn(projectEntity);
 
         assertThrows(NoSuchElementException.class,
                 () -> projectService.updateDescription(projectDto, "description"));
@@ -131,7 +76,7 @@ public class ServiceTest {
         ProjectDto projectDto = new ProjectDto();
         Project projectEntity = new Project();
         projectEntity.setDescription("Start description");
-        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(validation.getEntity(projectDto)).thenReturn(projectEntity);
         when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
 
         assertDoesNotThrow(
@@ -151,7 +96,7 @@ public class ServiceTest {
         secondProject.setName("Name second");
 
         when(projectRepository.findAll()).thenReturn(projects);
-        ProjectService service = new ProjectService(projectRepository, mapper, filters, validation);
+        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, validation);
 
         List<ProjectDto> result = service.getProjectsFilters(filterDto);
         assertThat(result).isEqualTo(projects);
@@ -181,13 +126,13 @@ public class ServiceTest {
 
     @Test
     public void testFindById() {
-        long id = 1l;
+        long id = 1L;
         Project project = new Project();
-        project.setId(1l);
+        project.setId(1L);
         ProjectDto projectDto = new ProjectDto();
-        projectDto.setId(1l);
+        projectDto.setId(1L);
 
-        when(projectRepository.findById(id)).thenReturn(project);
+        when(validation.findById(id)).thenReturn(project);
         when(mapper.toDto(project)).thenReturn(projectDto);
         ProjectDto result = projectService.findById(id);
 
