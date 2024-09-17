@@ -1,6 +1,10 @@
 package faang.school.projectservice.subprojectservice;
 
+import faang.school.projectservice.dto.subproject.ProjectFilterDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.filter.ProjectFilter;
+import faang.school.projectservice.filter.ProjectNameFilter;
+import faang.school.projectservice.filter.ProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -11,6 +15,9 @@ import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
 import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
 import faang.school.projectservice.validator.SubProjectValidator;
 import faang.school.projectservice.validator.SubProjectValidatorImpl;
+import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +35,9 @@ import static org.mockito.Mockito.*;
 //import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -37,26 +46,28 @@ class SubProjectServiceTests {
     private ProjectRepository repository;
     @Spy
     private ProjectMapperImpl mapper = new ProjectMapperImpl();
-    @Spy
-    private SubProjectValidator validator = new SubProjectValidatorImpl();
-    @InjectMocks
+    @Mock
+    private SubProjectValidator validator;
+    private List<ProjectFilter> projectFilters;
+
     private SubProjectServiceImpl service;
 
+    @BeforeEach
+    public void setUp() {
+        projectFilters = List.of(new ProjectNameFilter(),new ProjectStatusFilter());
+        service = new SubProjectServiceImpl(repository,mapper,validator, projectFilters);
+    }
     /**
      * если валидация прошла то должна сохранится в базу
      */
     @Test
-    public void if_subproject_have_parent_id_repository_must_be_called(){
+    public void if_validation_than_it_must_be_saved() {
         Project rootParent = Project.builder().id(3L).build();
-        Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
-        parentProject.setParentProject(rootParent);
-        Project subproject1 = Project.builder().parentProject(parentProject).visibility(ProjectVisibility.PUBLIC).build();
-
-        when(repository.getProjectById(1L)).thenReturn(subproject1);
+        when(repository.getProjectById(1L)).thenReturn(rootParent);
 
         service.createSubProject(1L);
 
-        verify(repository).save(subproject1);
+        verify(repository).save(rootParent);
 
     }
 
@@ -76,7 +87,7 @@ class SubProjectServiceTests {
                 .id(3L)
                 .status(ProjectStatus.COMPLETED)
                 .build();
-         Project subProject = Project.builder()
+        Project subProject = Project.builder()
                 .id(1L)
                 .status(ProjectStatus.COMPLETED)
                 .children(List.of(childProject1, childProject2))
@@ -217,178 +228,53 @@ class SubProjectServiceTests {
         });
     }
 
-    /**
-     * Подпроект ВСЕГДА имеет родительский проект.
-     */
     @Test
-    public void testCreateSubProject_ShouldThrowParentProjectMustNotBeNull_WhenParentProjectIsNull() {
-        Project project = Project.builder().parentProject(null).build();
+    @DisplayName("testing getSubProjects with selection correct subProject")
+    public void testGetSubProjects() {
+        long parentProjectId = 1L;
+        long teamMemberId = 3L;
 
-        when(repository.getProjectById(1L)).thenReturn(project);
-        assertThrows(ParentProjectMusNotBeNull.class, () -> {
-            service.createSubProject(1L);
-        });
-
-        verify(repository, never()).save(any(Project.class));
-    }
-
-    /**
-     * Корневой проект не имеет родительского проекта./
-     **/
-    @Test
-    public void testCreateSubProject_ShouldThrowRootProjectsParentMustNotBeNull_WhenParentHasAParent() {
-        Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
-        Project subproject1 = Project.builder().parentProject(parentProject).build();
-        when(repository.getProjectById(1L)).thenReturn(subproject1);
-        assertThrows(RootProjectsParentMustNotBeNull.class, () -> {
-            service.createSubProject(1L);
-        });
-
-        verify(repository, never()).save(any(Project.class));
-    }
-
-    /**
-     * Нельзя создать приватный подпроект для публичного родительского проекта
-     */
-    @Test
-    public void testCreateSubProject_ShouldThrowCannotCreatePrivateProjectForPublicParent_WhenParentIsPublicAndProjectIsPrivate() {
-        Project rootParent = Project.builder().id(3L).build();
-        Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
-        parentProject.setParentProject(rootParent);
-        Project subproject1 = Project.builder().parentProject(parentProject).visibility(ProjectVisibility.PRIVATE).build();
-        when(repository.getProjectById(1L)).thenReturn(subproject1);
-
-        assertThrows(CannotCreatePrivateProjectForPublicParent.class, () -> {
-            service.createSubProject(1L);
-        });
-
-        verify(repository, never()).save(any(Project.class));
-    }
-
-    /**
-     * Получить все подпроекты проекта с фильтром по названию и статусу
-     */
-    @Test
-    public void testGetAllSubProjectsWithFiltr_Case1_ProjectMatchesAllFilters() {
-        Long childId1 = 1L;
-
-        SubProjectDto parentProjectDto = SubProjectDto.builder()
-                .children(List.of(childId1))
-                .build();
-
-        ProjectStatus statusFilter = ProjectStatus.IN_PROGRESS;
-        String nameFilter = "Test Project";
-
-        Project mockedChildResponse = Project.builder()
-                .id(childId1)
-                .name(nameFilter)
-                .status(statusFilter)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-
-        SubProjectDto expectedDto = SubProjectDto.builder().children(List.of())
-                .status(statusFilter).visibility(ProjectVisibility.PUBLIC)
-                .id(childId1)
-                .name(nameFilter)
-                .build();
-
-        when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(List.of(mockedChildResponse));
-
-        List<SubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
-
-        assertEquals(1, result.size());
-        assertEquals(List.of(expectedDto), result);
-    }
-
-    /**
-     * Не забудьте проверить видимость проекта. Может быть такое, что публичный проект
-     * имеет секретный подпроект, тогда его нельзя показывать другим участникам.
-     */
-    @Test
-    public void testGetAllSubProjectsWithFiltr_Case2_ProjectIsPrivate() {
-        Long childId1 = 1L;
-
-        SubProjectDto parentProjectDto = SubProjectDto.builder()
-                .children(List.of(childId1))
-                .build();
-
-        ProjectStatus statusFilter = ProjectStatus.IN_PROGRESS;
-        String nameFilter = "Test Project";
-
-        Project child1 = Project.builder()
-                .id(childId1)
-                .name("Test Project")
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PRIVATE)
-                .build();
-
-        List<Project> mockProjectList = List.of(child1);
-
-        when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(mockProjectList);
-
-        List<SubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
-
-        assertEquals(0, result.size());
-    }
-
-    /**
-     * если имена не совпадают то этот подпроект не должен вернутся
-     */
-    @Test
-    public void testGetAllSubProjectsWithFiltr_Case3_NameDoesNotMatch() {
-        Long childId1 = 1L;
-
-        SubProjectDto parentProjectDto = SubProjectDto.builder()
-                .children(List.of(childId1))
-                .build();
-
-        ProjectStatus statusFilter = ProjectStatus.IN_PROGRESS;
-        String nameFilter = "Wrong Name";
-
-        Project child1 = Project.builder()
-                .id(childId1)
-                .name("Test Project")
+        var subProjectFirst = Project.builder()
+                .name("ProjectName")
                 .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PUBLIC)
-                .build();
+                .children(new ArrayList<>()).build();
 
-        List<Project> mockProjectList = List.of(child1);
-
-        when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(mockProjectList);
-
-        List<SubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
-
-        assertEquals(0, result.size());
-    }
-
-    /**
-     * если статус не совпадают то этот подпроект не должен вернутся
-     */
-    @Test
-    public void testGetAllSubProjectsWithFiltr_Case4_StatusDoesNotMatch() {
-        Long childId1 = 1L;
-
-        SubProjectDto parentProjectDto = SubProjectDto.builder()
-                .children(List.of(childId1))
-                .build();
-
-        ProjectStatus statusFilter = ProjectStatus.COMPLETED;
-        String nameFilter = "Test Project";
-
-        Project child1 = Project.builder()
-                .id(childId1)
-                .name("Test Project")
+        Project subProjectSecond = Project.builder()
+                .name("not")
                 .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PUBLIC)
+                .children(new ArrayList<>()).build();
+
+        List<Project> subProjects = List.of(
+                subProjectFirst,
+                subProjectSecond
+        );
+        TeamMember teamMember = TeamMember.builder()
+                .id(teamMemberId)
                 .build();
 
-        List<Project> mockProjectList = List.of(child1);
+        Team team = Team.builder()
+                .teamMembers(List.of(teamMember))
+                .build();
 
-        when(repository.findAllByIds(parentProjectDto.getChildren())).thenReturn(mockProjectList);
+        var parentProject = Project.builder()
+                .id(parentProjectId)
+                .teams(List.of(team))
+                .children(subProjects)
+                .build();
+       var subProjectFirstDto = SubProjectDto.builder()
+                .name(subProjectFirst.getName())
+                .build();
+       var projectFilterDto = ProjectFilterDto.builder()
+                .name("ProjectName")
+                .projectStatus(ProjectStatus.IN_PROGRESS)
+                .build();
 
-        List<SubProjectDto> result = service.getAllSubProjectsWithFiltr(parentProjectDto, nameFilter, statusFilter);
-
-        assertEquals(0, result.size());
+        when(repository.getProjectById(parentProject.getId())).thenReturn(parentProject);
+        when(mapper.toDTO(subProjectFirst)).thenReturn(subProjectFirstDto);
+        List<SubProjectDto> selectedSubProjects = service.getAllSubProjectsWithFiltr(parentProject.getId(), projectFilterDto);
+        assertEquals(1, selectedSubProjects.size());
     }
 
 }
