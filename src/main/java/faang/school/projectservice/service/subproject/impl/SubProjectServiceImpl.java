@@ -2,6 +2,8 @@ package faang.school.projectservice.service.subproject.impl;
 
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
+import faang.school.projectservice.dto.subproject.request.CreationRequest;
+import faang.school.projectservice.dto.subproject.request.UpdatingRequest;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -31,25 +33,16 @@ public class SubProjectServiceImpl implements SubProjectService {
     private final List<SubProjectFilter> filters;
 
     @Override
-    public SubProjectDto create(SubProjectDto subProjectDto) {
-        Project parentProject = projectRepository.getProjectById(subProjectDto.getParentProjectId());
+    public SubProjectDto create(CreationRequest creationRequest) {
+        Project parentProject = projectRepository.getProjectById(creationRequest.getParentProjectId());
 
-        if (parentProject.getVisibility() == ProjectVisibility.PUBLIC && subProjectDto.getVisibility() == ProjectVisibility.PRIVATE) {
+        if (parentProject.getVisibility() == ProjectVisibility.PUBLIC && creationRequest.getVisibility() == ProjectVisibility.PRIVATE) {
             throw new IllegalArgumentException("You cannot create a private sub-project for a public parent project with id " + parentProject.getId());
         }
 
-        Project subProject = subProjectMapper.toProject(subProjectDto);
+        Project subProject = subProjectMapper.toProjectFromCreationRequest(creationRequest);
         subProject.setParentProject(parentProject);
-        subProject.setCreatedAt(LocalDateTime.now());
-        subProject.setUpdatedAt(LocalDateTime.now());
-
-        if (subProjectDto.getStatus() == null) {
-            subProject.setStatus(ProjectStatus.CREATED);
-        }
-
-        if (subProjectDto.getVisibility() == null) {
-            subProject.setVisibility(ProjectVisibility.PUBLIC);
-        }
+        subProject.setStatus(ProjectStatus.CREATED);
 
         subProject = projectRepository.save(subProject);
         log.info("Created new sub-project with id {}", subProject.getId());
@@ -57,13 +50,16 @@ public class SubProjectServiceImpl implements SubProjectService {
     }
 
     @Override
-    public SubProjectDto update(SubProjectDto subProjectDto) {
-        Project subProject = projectRepository.getProjectById(subProjectDto.getId());
-        subProject.setStatus(subProjectDto.getStatus());
-        subProject.setVisibility(subProjectDto.getVisibility());
+    public SubProjectDto update(Long projectId, UpdatingRequest updatingRequest) {
+        Project subProject = projectRepository.getProjectById(projectId);
+        subProject.setName(updatingRequest.getName());
+        subProject.setDescription(updatingRequest.getDescription());
+        subProject.setStatus(updatingRequest.getStatus());
+        subProject.setVisibility(updatingRequest.getVisibility());
 
-        if (!checkIfAllSubProjectsOfCurrentProjectHaveSameStatus(subProject)) {
-            throw new IllegalArgumentException("You cannot update a project, because the subprojects statuses are not suitable. ID: " + subProjectDto.getId());
+        if (!checkIfAllSubProjectsHaveSameStatus(subProject)) {
+            throw new IllegalArgumentException("You cannot update a project, " +
+                    "because the subprojects statuses are not suitable. ID: " + projectId);
         }
 
         if (checkIfAllSubProjectsAreClosed(subProject)) {
@@ -98,25 +94,25 @@ public class SubProjectServiceImpl implements SubProjectService {
                 .toList();
     }
 
-    private boolean checkIfAllSubProjectsOfCurrentProjectHaveSameStatus(Project subProject) {
-        List<Project> subProjects = subProject.getChildren();
+    private boolean checkIfAllSubProjectsHaveSameStatus(Project project) {
+        List<Project> subProjects = project.getChildren();
         return subProjects.stream()
-                .allMatch(project -> project.getStatus() == subProject.getStatus());
+                .allMatch(p -> p.getStatus() == project.getStatus());
     }
 
-    private boolean checkIfAllSubProjectsAreClosed(Project subProject) {
-        List<Project> subProjects = subProject.getChildren();
+    private boolean checkIfAllSubProjectsAreClosed(Project project) {
+        List<Project> subProjects = project.getChildren();
         boolean childrenStatus = subProjects.stream()
-                .allMatch(project -> project.getStatus() == ProjectStatus.COMPLETED);
+                .allMatch(p -> p.getStatus() == ProjectStatus.COMPLETED);
 
-        return childrenStatus && subProject.getStatus() == ProjectStatus.COMPLETED;
+        return childrenStatus && project.getStatus() == ProjectStatus.COMPLETED;
     }
 
-    private Moment createMomentIfSubProjectClosed(Project subProject) {
+    private Moment createMomentIfSubProjectClosed(Project project) {
         Moment moment = new Moment();
         moment.setName("All projects are completed");
         moment.setDate(LocalDateTime.now());
-        List<Long> userIds = subProject.getTeams().stream()
+        List<Long> userIds = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream()
                         .map(TeamMember::getUserId))
                 .toList();

@@ -2,6 +2,8 @@ package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
+import faang.school.projectservice.dto.subproject.request.CreationRequest;
+import faang.school.projectservice.dto.subproject.request.UpdatingRequest;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -54,17 +56,18 @@ public class SubProjectServiceImplTest {
     private Moment moment;
     private Project subProject;
     private Project parentProject;
-    private SubProjectDto subProjectDto;
     private SubProjectFilterDto subProjectFilterDto;
+    private CreationRequest creationRequest;
+    private UpdatingRequest updatingRequest;
 
     @BeforeEach
     void setUp() {
-        subProjectDto = SubProjectDto.builder()
+        subProject = Project.builder()
                 .id(2L)
                 .name("Test")
                 .description("SomeTest")
                 .ownerId(1L)
-                .parentProjectId(1L)
+                .parentProject(Project.builder().id(1L).build())
                 .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
@@ -72,8 +75,21 @@ public class SubProjectServiceImplTest {
         moment = new Moment();
         moment.setUserIds(List.of(1L));
 
-        subProject = subProjectMapper.toProject(subProjectDto);
+        creationRequest = CreationRequest.builder()
+                .name("Test")
+                .description("SomeTest")
+                .ownerId(1L)
+                .parentProjectId(1L)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
 
+        updatingRequest = UpdatingRequest.builder()
+                .name("Test2")
+                .description("SomeTest2")
+                .status(ProjectStatus.CANCELLED)
+                .visibility(ProjectVisibility.PRIVATE)
+                .build();
+        
         parentProject = subProjectMapper.toProject(SubProjectDto.builder()
                 .id(1L)
                 .visibility(ProjectVisibility.PUBLIC)
@@ -93,28 +109,26 @@ public class SubProjectServiceImplTest {
     public void testCreateSubProjectWithNotFoundParentProject() {
         when(projectRepository.getProjectById(1L)).thenThrow(EntityNotFoundException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> subProjectService.create(subProjectDto));
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.create(creationRequest));
     }
 
     @Test
     @DisplayName("Creating SubProject with different visibility")
     public void testCreateSubProjectWithDifferentVisibility() {
-        subProjectDto.setVisibility(ProjectVisibility.PRIVATE);
+        creationRequest.setVisibility(ProjectVisibility.PRIVATE);
 
         when(projectRepository.getProjectById(1L)).thenReturn(parentProject);
 
-        assertThrows(IllegalArgumentException.class, () -> subProjectService.create(subProjectDto));
+        assertThrows(IllegalArgumentException.class, () -> subProjectService.create(creationRequest));
     }
 
     @Test
     @DisplayName("Creating SubProject success")
     public void testCreateSubProjectSuccess() {
-        subProjectDto.setStatus(null);
-        subProjectDto.setVisibility(null);
         when(projectRepository.getProjectById(1L)).thenReturn(parentProject);
         when(projectRepository.save(any(Project.class))).thenReturn(subProject);
 
-        subProjectService.create(subProjectDto);
+        subProjectService.create(creationRequest);
 
         verify(projectRepository).save(any(Project.class));
     }
@@ -124,7 +138,7 @@ public class SubProjectServiceImplTest {
     public void testUpdateProjectWithProjectNotFound() {
         when(projectRepository.getProjectById(2L)).thenThrow(EntityNotFoundException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> subProjectService.update(subProjectDto));
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.update(2L, updatingRequest));
     }
 
     @Test
@@ -135,10 +149,14 @@ public class SubProjectServiceImplTest {
                 .status(ProjectStatus.IN_PROGRESS)
                 .build());
         subProject.setChildren(List.of(childProject));
+        subProject.setStatus(ProjectStatus.CANCELLED);
+        subProject.setVisibility(ProjectVisibility.PRIVATE);
+        subProject.setName("Test2");
+        subProject.setDescription("SomeTest2");
 
         when(projectRepository.getProjectById(2L)).thenReturn(subProject);
 
-        assertThrows(IllegalArgumentException.class, () -> subProjectService.update(subProjectDto));
+        assertThrows(IllegalArgumentException.class, () -> subProjectService.update(2L, updatingRequest));
     }
 
     @Test
@@ -148,7 +166,7 @@ public class SubProjectServiceImplTest {
         when(projectRepository.getProjectById(2L)).thenReturn(subProject);
         when(projectRepository.save(any(Project.class))).thenReturn(subProject);
 
-        subProjectService.update(subProjectDto);
+        subProjectService.update(2L, updatingRequest);
 
         verify(projectRepository).save(any(Project.class));
     }
@@ -156,7 +174,7 @@ public class SubProjectServiceImplTest {
     @Test
     @DisplayName("Updating SubProject where all subprojects are completed")
     public void testUpdateSubProjectWhereSubProjectsAreCompleted() {
-        subProjectDto.setStatus(ProjectStatus.COMPLETED);
+        updatingRequest.setStatus(ProjectStatus.COMPLETED);
         Team team = new Team();
         team.setTeamMembers(new ArrayList<>());
         subProject.setTeams(List.of(team));
@@ -171,7 +189,7 @@ public class SubProjectServiceImplTest {
         when(momentRepository.save(any(Moment.class))).thenReturn(moment);
         when(projectRepository.save(any(Project.class))).thenReturn(subProject);
 
-        subProjectService.update(subProjectDto);
+        subProjectService.update(2L, updatingRequest);
 
         verify(momentRepository).save(any(Moment.class));
         verify(projectRepository).save(any(Project.class));
@@ -180,17 +198,16 @@ public class SubProjectServiceImplTest {
     @Test
     @DisplayName("Updating SubProject where parent project's visibility is private")
     public void testUpdateSubProjectWhereSubProjectVisibilityIsPrivate() {
-        subProjectDto.setVisibility(ProjectVisibility.PRIVATE);
         Project childProject = subProjectMapper.toProject(SubProjectDto.builder()
                 .id(3L)
-                .status(ProjectStatus.CREATED)
+                .status(ProjectStatus.CANCELLED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build());
         subProject.setChildren(List.of(childProject));
 
         when(projectRepository.getProjectById(2L)).thenReturn(subProject);
         when(projectRepository.save(any(Project.class))).thenReturn(subProject);
-        subProjectService.update(subProjectDto);
+        subProjectService.update(2L, updatingRequest);
 
         assertEquals(ProjectVisibility.PRIVATE, subProject.getChildren().get(0).getVisibility());
     }

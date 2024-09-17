@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper.subproject;
 
 import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.dto.subproject.request.CreationRequest;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,4 +15,7 @@ public interface SubProjectMapper {
 
     @Mapping(source = "parentProjectId", target = "parentProject.id")
     Project toProject(SubProjectDto subProjectDto);
+
+    @Mapping(source = "parentProjectId", target = "parentProject.id")
+    Project toProjectFromCreationRequest(CreationRequest creationRequest);
 }
