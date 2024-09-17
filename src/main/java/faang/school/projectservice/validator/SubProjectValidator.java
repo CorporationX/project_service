@@ -6,6 +6,5 @@ import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
 import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
 
 public interface SubProjectValidator {
-    public void validate(Project project) throws RootProjectsParentMustNotBeNull,
-            CannotCreatePrivateProjectForPublicParent, ParentProjectMusNotBeNull;
+    public void validate(Project project);
 }

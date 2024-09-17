@@ -14,9 +14,6 @@ public class SubProjectValidatorImpl implements SubProjectValidator{
         if (project.getParentProject() == null) {
             throw new ParentProjectMusNotBeNull();
         }
-        if (project.getParentProject().getParentProject() == null) {
-            throw new RootProjectsParentMustNotBeNull();
-        }
         if (project.getParentProject().getVisibility() == ProjectVisibility.PUBLIC
                 && project.getVisibility() == ProjectVisibility.PRIVATE) {
             throw new CannotCreatePrivateProjectForPublicParent();

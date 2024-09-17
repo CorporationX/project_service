@@ -1,4 +1,4 @@
-package faang.school.projectservice;
+package faang.school.projectservice.subprojectservice;
 
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -32,7 +32,7 @@ import java.util.List;
 
 
 @ExtendWith(MockitoExtension.class)
-class SubProjectServiceApplicationTests {
+class SubProjectServiceTests {
     @Mock
     private ProjectRepository repository;
     @Spy
@@ -46,7 +46,7 @@ class SubProjectServiceApplicationTests {
      * если валидация прошла то должна сохранится в базу
      */
     @Test
-    public void if_subproject_have_parent_id_repository_must_be_called() throws CannotCreatePrivateProjectForPublicParent, ParentProjectMusNotBeNull, RootProjectsParentMustNotBeNull {
+    public void if_subproject_have_parent_id_repository_must_be_called(){
         Project rootParent = Project.builder().id(3L).build();
         Project parentProject = Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build();
         parentProject.setParentProject(rootParent);
@@ -86,7 +86,7 @@ class SubProjectServiceApplicationTests {
 
         when(repository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
 
-        ChildrenNotFinishedException exception = assertThrows(
+        assertThrows(
                 ChildrenNotFinishedException.class,
                 () -> service.updateSubProject(subProjectDto)
         );

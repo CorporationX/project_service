@@ -12,9 +12,9 @@ import java.util.List;
 
 public interface SubProjectService {
 
-    public SubProjectDto createSubProject(Long projectId) throws RootProjectsParentMustNotBeNull, CannotCreatePrivateProjectForPublicParent, ParentProjectMusNotBeNull;
+    public SubProjectDto createSubProject(Long projectId);
 
-    public SubProjectDto updateSubProject(SubProjectDto subProjectDto) throws ChildrenNotFinishedException;
+    public SubProjectDto updateSubProject(SubProjectDto subProjectDto);
 
     public List<SubProjectDto> getAllSubProjectsWithFiltr(SubProjectDto project, String nameFilter, ProjectStatus statusFilter);
 }
