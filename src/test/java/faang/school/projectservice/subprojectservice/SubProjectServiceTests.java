@@ -48,15 +48,14 @@ class SubProjectServiceTests {
     private ProjectMapperImpl mapper = new ProjectMapperImpl();
     @Mock
     private SubProjectValidator validator;
-    private List<ProjectFilter> projectFilters;
+    @Spy
+    private ProjectNameFilter nameFilter = new ProjectNameFilter();
+    @Spy
+    private ProjectStatusFilter statusFilter = new ProjectStatusFilter();
 
+    @InjectMocks
     private SubProjectServiceImpl service;
 
-    @BeforeEach
-    public void setUp() {
-        projectFilters = List.of(new ProjectNameFilter(),new ProjectStatusFilter());
-        service = new SubProjectServiceImpl(repository,mapper,validator, projectFilters);
-    }
     /**
      * если валидация прошла то должна сохранится в базу
      */
@@ -231,6 +230,7 @@ class SubProjectServiceTests {
     @Test
     @DisplayName("testing getSubProjects with selection correct subProject")
     public void testGetSubProjects() {
+        service = new SubProjectServiceImpl(repository, mapper, validator, List.of(nameFilter, statusFilter));
         long parentProjectId = 1L;
         long teamMemberId = 3L;
 
@@ -263,10 +263,10 @@ class SubProjectServiceTests {
                 .teams(List.of(team))
                 .children(subProjects)
                 .build();
-       var subProjectFirstDto = SubProjectDto.builder()
+        var subProjectFirstDto = SubProjectDto.builder()
                 .name(subProjectFirst.getName())
                 .build();
-       var projectFilterDto = ProjectFilterDto.builder()
+        var projectFilterDto = ProjectFilterDto.builder()
                 .name("ProjectName")
                 .projectStatus(ProjectStatus.IN_PROGRESS)
                 .build();
