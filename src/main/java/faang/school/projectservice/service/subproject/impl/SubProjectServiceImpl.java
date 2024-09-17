@@ -81,7 +81,7 @@ public class SubProjectServiceImpl implements SubProjectService {
 
     @Override
     public List<SubProjectDto> findSubProjectsByParentId(Long parentId, SubProjectFilterDto subProjectFilter) {
-        Stream<Project> subProjects = projectRepository.getProjectById(parentId).getChildren().stream()
+        Stream<Project> subProjects = projectRepository.findAllByParentId(parentId).stream()
                 .filter(project -> project.getVisibility() != ProjectVisibility.PRIVATE);
 
         return filters.stream()
