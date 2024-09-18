@@ -16,12 +16,14 @@ import java.util.List;
 public interface InternshipMapper {
 
     @Mapping(source = "mentorId", target = "mentorId")
+    @Mapping(source = "project.id", target = "projectId")
     InternshipDto internshipToInternshipDto(Internship internship);
 
     @Mapping(source = "mentorId", target = "mentorId")
     Internship createInternshipDtoToInternship(CreateInternshipDto internshipDto);
 
     @Mapping(source = "mentorId", target = "mentorId")
+    @Mapping(source = "projectId", target = "project.id")
     Internship internshipDtoToInternship(InternshipDto internshipDto);
 
     List<Internship> internshipDtosToInternships(List<InternshipDto> internshipDtos);

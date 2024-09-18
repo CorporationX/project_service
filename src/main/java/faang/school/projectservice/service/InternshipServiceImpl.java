@@ -22,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -62,16 +64,21 @@ public class InternshipServiceImpl implements InternshipService {
             throw new InternshipUpdateException("This internship %d is not yet completed".formatted(internshipId));
         }
         List<TeamMember> interns = internshipForUpdate.getInterns();
+        List<TeamMember> passedInterns = new ArrayList<>();
+
         interns.forEach(intern -> {
             boolean passed = isAllInternshipTasksDone(intern);
             if (passed) {
-                addInternNewRole(internshipId, intern.getId(), teamRole);
+                addInternNewRole(internshipForUpdate, intern.getId(), teamRole);
+                passedInterns.add(intern);
             } else {
-                interns.remove(intern);
                 intern.setTeam(null);
                 intern.setRoles(null);
             }
         });
+        interns.clear();
+        interns.addAll(passedInterns);
+
         internshipRepository.save(internshipForUpdate);
         log.info("Internship updated: {}", internshipId);
     }
@@ -95,7 +102,6 @@ public class InternshipServiceImpl implements InternshipService {
                 .toList();
         log.debug("Returned {} filtered internships", result.size());
         return result;
-
     }
 
     @Override
@@ -109,7 +115,6 @@ public class InternshipServiceImpl implements InternshipService {
                 .filter(internship -> internship.getProject().getId().equals(projectId))
                 .map(internshipMapper::internshipToInternshipDto)
                 .toList();
-
     }
 
     @Override
@@ -143,13 +148,12 @@ public class InternshipServiceImpl implements InternshipService {
         }
     }
 
-    private void addInternNewRole(Long internshipId, Long teamMemberId, TeamRoleDto teamRoleDto) {
-        Internship thisInternship = internshipRepository.findById(internshipId).orElse(null);
+    private void addInternNewRole(Internship internship, Long teamMemberId, TeamRoleDto teamRoleDto) {
         TeamRole newInternRole = internshipMapper.teamRoleDtoToStringTeamRole(teamRoleDto);
-        if (thisInternship == null) {
-            throw new EntityNotFoundException("Internship with id %d not found".formatted(internshipId));
+        if (internship == null) {
+            throw new EntityNotFoundException("Internship with id %d not found".formatted(internship.getId()));
         } else {
-            TeamMember intern = thisInternship.getInterns().stream()
+            TeamMember intern = internship.getInterns().stream()
                     .filter(teamMember -> teamMember.getId().equals(teamMemberId))
                     .findFirst().orElse(null);
             intern.getRoles().add(newInternRole);
