@@ -14,19 +14,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ProjectNameFilterTest {
     private final ProjectFilter projectNameFilter = new ProjectNameFilter();
-    private ProjectFilterDto nullProjectFilterDto;
+    private ProjectFilterDto emptyProjectFilterDto;
     private ProjectFilterDto filterDto;
 
     @BeforeEach
     public void setUp() {
-        nullProjectFilterDto = new ProjectFilterDto(null, null);
+        emptyProjectFilterDto = new ProjectFilterDto(null, null);
         filterDto = new ProjectFilterDto("project", null);
     }
 
     @Test
     @DisplayName("Проверка метода isApplicable с пустым полем namePattern")
     public void testIsApplicableWithNullNamePattern() {
-        boolean result = projectNameFilter.isApplicable(nullProjectFilterDto);
+        boolean result = projectNameFilter.isApplicable(emptyProjectFilterDto);
         assertFalse(result);
     }
 

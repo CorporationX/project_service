@@ -1,9 +1,12 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ForbiddenAccessException;
 import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.filter.project.ProjectNameFilter;
+import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -11,7 +14,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validation.ProjectDtoValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,17 +21,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
@@ -39,17 +45,13 @@ public class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
-    @Spy
-    private ProjectDtoValidator projectDtoValidator;
-
     @InjectMocks
     private ProjectServiceImpl projectService;
 
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
 
-    @Mock
-    private List<ProjectFilter> projectFilters;
+    private final List<ProjectFilter> projectFilters = new ArrayList<>();
 
     private Project privateProject;
 
@@ -63,6 +65,11 @@ public class ProjectServiceTest {
                 .ownerId(5L)
                 .visibility(ProjectVisibility.PRIVATE)
                 .build();
+        ProjectFilter filterFirst = Mockito.mock(ProjectFilter.class);
+        ProjectFilter filterSecond = Mockito.mock(ProjectFilter.class);
+        projectFilters.add(filterFirst);
+        projectFilters.add(filterSecond);
+        projectService = new ProjectServiceImpl(projectRepository, projectMapper, projectFilters);
     }
 
     @Test
@@ -178,7 +185,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    @DisplayName("Получение всех проектов участником команды")
+    @DisplayName("Получение всех проектов участником команды без фильтров")
     public void testFindAllProjectsWithoutFiltersByTeamMember() {
         List<Project> projects = prepareProjects();
         when(projectRepository.findAll()).thenReturn(projects);
@@ -187,12 +194,55 @@ public class ProjectServiceTest {
     }
 
     @Test
-    @DisplayName("Получение всех проектов не участником команды")
+    @DisplayName("Получение всех проектов не участником команды без фильтров")
     public void testFindAllProjectsWithoutFiltersByNotTeamMember() {
         List<Project> projects = prepareProjects();
         when(projectRepository.findAll()).thenReturn(projects);
         List<ProjectDto> result = projectService.findAllProjects(null, 5L);
         assertEquals(2, result.size());
+
+        verify(projectRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("Получение всех проектов с одним фильтром")
+    public void testFindAllProjectsWithOneFilter() {
+        List<Project> projects = prepareProjects();
+        ProjectFilterDto filterDto = new ProjectFilterDto("project", ProjectStatus.CREATED);
+
+        when(projectRepository.findAll()).thenReturn(projects);
+        when(projectFilters.get(0).isApplicable(any(ProjectFilterDto.class))).thenReturn(true);
+        when(projectFilters.get(0).apply(any(), any())).thenReturn(Stream.of(projects.get(0), projects.get(1)));
+        when(projectFilters.get(1).isApplicable(any(ProjectFilterDto.class))).thenReturn(false);
+
+        List<ProjectDto> result = projectService.findAllProjects(filterDto, TEAM_MEMBER_USER_ID);
+        assertEquals(2, result.size());
+
+        verify(projectRepository).findAll();
+        verify(projectFilters.get(0)).isApplicable(any(ProjectFilterDto.class));
+        verify(projectFilters.get(0)).apply(any(), any());
+        verify(projectFilters.get(1)).isApplicable(any(ProjectFilterDto.class));
+    }
+
+    @Test
+    @DisplayName("Получение всех проектов с несколькими фильтрами")
+    public void testFindAllProjectsWithFilters() {
+        List<Project> projects = prepareProjects();
+        ProjectFilterDto filterDto = new ProjectFilterDto("project", ProjectStatus.ON_HOLD);
+
+        when(projectRepository.findAll()).thenReturn(projects);
+        when(projectFilters.get(0).isApplicable(any(ProjectFilterDto.class))).thenReturn(true);
+        when(projectFilters.get(0).apply(any(), any())).thenReturn(Stream.of(projects.get(0), projects.get(1), projects.get(3)));
+        when(projectFilters.get(1).isApplicable(any(ProjectFilterDto.class))).thenReturn(true);
+        when(projectFilters.get(1).apply(any(), any())).thenReturn(Stream.of(projects.get(3)));
+
+        List<ProjectDto> result = projectService.findAllProjects(filterDto, TEAM_MEMBER_USER_ID);
+        assertEquals(1, result.size());
+
+        verify(projectRepository).findAll();
+        verify(projectFilters.get(0)).isApplicable(any(ProjectFilterDto.class));
+        verify(projectFilters.get(0)).apply(any(), any());
+        verify(projectFilters.get(1)).isApplicable(any(ProjectFilterDto.class));
     }
 
     private List<Project> prepareProjects() {
