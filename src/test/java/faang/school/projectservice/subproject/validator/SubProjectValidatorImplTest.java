@@ -1,21 +1,15 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.subproject.validator;
 
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.exception.CannotCreatePrivateProjectForPublicParent;
-import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
-import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.validator.subproject.SubProjectValidatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.common.DataValidationException;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class SubProjectValidatorImplTest {
 

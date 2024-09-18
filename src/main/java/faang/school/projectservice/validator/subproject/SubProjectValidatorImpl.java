@@ -1,10 +1,6 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.subproject;
 
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.exception.CannotCreatePrivateProjectForPublicParent;
-import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
-import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
 import org.springframework.stereotype.Component;
 
 @Component

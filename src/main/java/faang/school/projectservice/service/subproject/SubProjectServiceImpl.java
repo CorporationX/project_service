@@ -1,17 +1,17 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.ProjectFilterDto;
-import faang.school.projectservice.filter.ProjectFilter;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.filter.subproject.ProjectFilter;
+import faang.school.projectservice.mapper.subproject.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.exception.ChildrenNotFinishedException;
-import faang.school.projectservice.validator.SubProjectValidator;
+import faang.school.projectservice.exception.subproject.SubProjectNotFinished;
+import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class SubProjectServiceImpl implements SubProjectService {
     }
 
     @Override
-    public ProjectDto updateSubProject(long projectId, SubProjectDto subProject) throws ChildrenNotFinishedException {
+    public ProjectDto updateSubProject(long projectId, SubProjectDto subProject) throws SubProjectNotFinished {
         var subproject = repository.getProjectById(projectId);
 
         var project = ifStatusIsComletedCheckThatChildrensAreCompleted
@@ -87,7 +87,7 @@ public class SubProjectServiceImpl implements SubProjectService {
                 notFinishedChildren.forEach(child -> {
                     builder.append(child.getId()).append(" status ").append(child.getStatus());
                 });
-                throw new ChildrenNotFinishedException(builder.toString());
+                throw new SubProjectNotFinished(builder.toString());
             }
         }
         return project;

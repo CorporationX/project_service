@@ -1,27 +1,20 @@
-package faang.school.projectservice.subprojectservice;
+package faang.school.projectservice.subproject.subprojectservice;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.ProjectFilterDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
-import faang.school.projectservice.filter.ProjectFilter;
-import faang.school.projectservice.filter.ProjectNameFilter;
-import faang.school.projectservice.filter.ProjectStatusFilter;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
+import faang.school.projectservice.filter.subproject.ProjectNameFilter;
+import faang.school.projectservice.filter.subproject.ProjectStatusFilter;
+import faang.school.projectservice.mapper.subproject.ProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.subproject.SubProjectServiceImpl;
-import faang.school.projectservice.exception.CannotCreatePrivateProjectForPublicParent;
-import faang.school.projectservice.exception.ChildrenNotFinishedException;
-import faang.school.projectservice.exception.ParentProjectMusNotBeNull;
-import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
-import faang.school.projectservice.validator.SubProjectValidator;
-import faang.school.projectservice.validator.SubProjectValidatorImpl;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeEach;
+import faang.school.projectservice.exception.subproject.SubProjectNotFinished;
+import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,7 +84,7 @@ class SubProjectServiceTests {
         when(repository.getProjectById(1L)).thenReturn(subProject);
 
         assertThrows(
-                ChildrenNotFinishedException.class,
+                SubProjectNotFinished.class,
                 () -> service.updateSubProject(1L,subProjectDto)
         );
 
@@ -104,7 +97,7 @@ class SubProjectServiceTests {
      * него есть все ещё открытые подпроекты. Нужно сначала закрывать все подпроекты, и только потом родительский проект
      */
     @Test
-    public void shouldSaveProject_WhenAllChildProjectsAreCompleted() throws ChildrenNotFinishedException {
+    public void shouldSaveProject_WhenAllChildProjectsAreCompleted() throws SubProjectNotFinished {
 
         Project childProject1 = Project.builder()
                 .id(2L)
