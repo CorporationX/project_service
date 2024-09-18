@@ -41,11 +41,7 @@ public class ValidatorProject {
     private List<Project> findByName(String name) {
         List<Project> projects = projectRepository.findAll();
         return projects.stream()
-                .filter(project -> {
-                    System.out.println(project.getName());
-                    System.out.println(name);
-                    return project.getName().equals(name);
-                })
+                .filter(project -> project.getName().equals(name))
                 .toList();
     }
 
@@ -55,7 +51,6 @@ public class ValidatorProject {
 
     private Project findProjectByNameAndOwnerId(String name, Long ownerId) {
         List<Project> projects = findByName(name);
-        System.out.println(projects);
         for (Project project : projects) {
             if (project.getOwnerId().equals(ownerId)) {
                 return project;

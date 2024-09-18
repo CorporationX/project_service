@@ -19,12 +19,11 @@ public interface ProjectService {
 
     void updateDescription(ProjectDto projectDto, String description);
 
-
     List<ProjectDto> getProjects();
 
     ProjectDto findById(long id);
 
     List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto, TeamMemberDto requester);
 
-    boolean check(Project project, long requester);
+    boolean checkUserByPrivateProject(Project project, long requester);
 }

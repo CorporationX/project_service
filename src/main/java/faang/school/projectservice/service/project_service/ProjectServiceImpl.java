@@ -39,7 +39,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     public void updateStatus(ProjectDto projectDto, ProjectStatus status) {
         Project project = validation.getEntity(projectDto);
-        System.out.println(project);
         if (!projectRepository.existsById(project.getId())) {
             throw new NoSuchElementException("The project does not exist");
         }
@@ -78,12 +77,13 @@ public class ProjectServiceImpl implements ProjectService {
                 .reduce(projectStream,
                         (project, filter) -> filter.apply(project, filterDto),
                         (s1, s2) -> s1)
-                .filter(project -> project.getVisibility().equals(ProjectVisibility.PRIVATE) && check(project, requester.getUserId()))
+                .filter(project -> project.getVisibility().equals(ProjectVisibility.PRIVATE)
+                        && checkUserByPrivateProject(project, requester.getUserId()))
                 .map(mapper::toDto)
                 .toList();
     }
 
-    public boolean check(Project project, long requester) {
+    public boolean checkUserByPrivateProject(Project project, long requester) {
         Set<Long> teamMemberIds = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getUserId)

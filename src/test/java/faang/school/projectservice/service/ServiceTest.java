@@ -5,10 +5,7 @@ import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project_service.ProjectServiceImpl;
 import faang.school.projectservice.validator.ValidatorProject;
@@ -19,10 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -115,6 +112,8 @@ public class ServiceTest {
         ProjectDto secondProjectDto = new ProjectDto();
         Project firstProject = new Project();
         Project secondProject = new Project();
+        firstProject.setVisibility(ProjectVisibility.PUBLIC);
+        secondProject.setVisibility(ProjectVisibility.PUBLIC);
         projects.add(firstProject);
         projects.add(secondProject);
         projectsDto.add(firstProjectDto);
@@ -163,7 +162,8 @@ public class ServiceTest {
 
         when(project.getTeams()).thenReturn(List.of(team1, team2));
 
-        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, validation).check(project, requesterId);
+        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, validation)
+                .checkUserByPrivateProject(project, requesterId);
 
         assertTrue(result);
     }
