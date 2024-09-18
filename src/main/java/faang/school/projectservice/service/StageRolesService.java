@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -15,9 +15,9 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -30,11 +30,11 @@ public class StageRolesService {
 
     public List<StageRoles> createStageRolesForStageById(
             @Min(1) Long stageId,
-            Map<TeamRole, Integer> rolesWithAmount) {
-        List<StageRoles> stageRoles = rolesWithAmount.entrySet().stream()
-                .map(entry -> StageRoles.builder()
-                        .teamRole(entry.getKey())
-                        .count(entry.getValue())
+            Set<StageRolesDto> stageRolesDtos) {
+        List<StageRoles> stageRoles = stageRolesDtos.stream()
+                .map(stageRolesDto -> StageRoles.builder()
+                        .teamRole(stageRolesDto.teamRole())
+                        .count(stageRolesDto.count())
                         .stage(Stage.builder().stageId((stageId)).build())
                         .build())
                 .toList();
@@ -43,15 +43,16 @@ public class StageRolesService {
 
     public void sendInvitationsForRole(Stage stage, TeamRole role, long invitationsToSend) {
         List<TeamMember> availableMembers = teamMemberRepository.findByRoleAndProject(role, stage.getProject().getId());
-
+        List<StageInvitation> stageInvitations = new ArrayList<>();
         for (int i = 0; i < invitationsToSend && i < availableMembers.size(); i++) {
             TeamMember member = availableMembers.get(i);
-            sendStageInvitation(stage, member);
+            stageInvitations.add(buildStageInvitation(stage, member));
         }
+        stageInvitationRepository.saveAll(stageInvitations);
     }
 
-    private void sendStageInvitation(Stage stage, TeamMember member) {
-        StageInvitation invitation = StageInvitation.builder()
+    private StageInvitation buildStageInvitation(Stage stage, TeamMember member) {
+        return StageInvitation.builder()
                 .stage(stage)
                 .author(member)
                 .invited(member)
@@ -59,6 +60,5 @@ public class StageRolesService {
                 .description("Приглашение на этап: " + stage.getStageName())
                 .build();
 
-        stageInvitationRepository.save(invitation);
     }
 }

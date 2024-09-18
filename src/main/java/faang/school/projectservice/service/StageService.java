@@ -2,16 +2,13 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.model.taskActionAfterDeletingStage.TaskActionAfterDeletingStage;
+import faang.school.projectservice.model.stage.strategy.delete.DeleteStageStrategy;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.model.taskActionAfterDeletingStage.TaskActionClose;
-import faang.school.projectservice.model.taskActionAfterDeletingStage.TaskActionDelete;
-import faang.school.projectservice.model.taskActionAfterDeletingStage.TaskActionReassign;
+import faang.school.projectservice.model.stage.strategy.delete.TaskActionProcessor;
 import faang.school.projectservice.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -32,9 +29,8 @@ public class StageService {
     private final TeamMemberRepository teamMemberRepository;
     private final StageRolesService stageRolesService;
     private final StageMapper stageMapper;
-    private final TaskActionClose taskActionClose;
-    private final TaskActionDelete taskActionDelete;
-    private final TaskActionReassign taskActionReassign;
+    private final TaskActionProcessor taskActionProcessor;
+
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
@@ -48,7 +44,7 @@ public class StageService {
 
         Stage savedStage = stageRepository.save(stage);
         List<StageRoles> createdStageRoles = stageRolesService.createStageRolesForStageById(
-                savedStage.getStageId(), stageDto.rolesWithAmount());
+                savedStage.getStageId(), stageDto.stageRolesDtos());
 
         savedStage.setStageRoles(createdStageRoles);
 
@@ -68,28 +64,12 @@ public class StageService {
     }
 
     @Transactional
-    public void deleteStage(Long providerStageId, TaskActionAfterDeletingStage taskAction, Long consumerStageId) {
+    public void deleteStage(Long providerStageId, DeleteStageStrategy taskAction, Long consumerStageId) {
         Stage stage = stageRepository.getById(providerStageId);
         if (stage == null) {
             throw new DataValidationException("Stage not found by id: " + providerStageId);
         }
-        switch (taskAction) {
-            case DELETE:
-                taskActionDelete.execute(providerStageId, null);
-                break;
-            case CLOSE:
-                taskActionClose.execute(providerStageId, null);
-                break;
-            case REASSIGN:
-                if (consumerStageId == null) {
-                    throw new IllegalArgumentException("Consumer stage ID must be provided for REASSIGN action.");
-                }
-                taskActionReassign.execute(providerStageId, consumerStageId);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown task action: " + taskAction);
-        }
-
+        taskActionProcessor.process(stage, taskAction, consumerStageId);
 
         stageRepository.delete(stage);
         log.info("Stage with id {} has been deleted", providerStageId);
@@ -106,36 +86,74 @@ public class StageService {
     }
 
     public StageDto updateStage(StageDto stageDto) {
-        Stage stage = stageRepository.getById(stageDto.stageId());
+        Stage stage = findStageById(stageDto.stageId());
+        updateStageName(stage, stageDto.stageName());
+
+        List<Task> tasks = findTasksByIds(stageDto.taskIds());
+        updateStageTasks(stage, tasks);
+
+        Map<TeamRole, Long> currentRoleCountMap = getCurrentRoleCountMap(stage);
+        sendRoleInvitations(stageDto, stage, currentRoleCountMap);
+
+        List<TeamMember> executors = findExecutorsByIds(stageDto.executorIds());
+        updateStageExecutors(stage, executors);
+
+        return saveAndMapStage(stage);
+    }
+
+    private Stage findStageById(Long stageId) {
+        Stage stage = stageRepository.getById(stageId);
         if (stage == null) {
-            throw new DataValidationException("Stage not found by id: " + stageDto.stageId());
+            throw new DataValidationException("Stage not found by id: " + stageId);
         }
+        return stage;
+    }
 
-        stage.setStageName(stageDto.stageName());
+    private void updateStageName(Stage stage, String stageName) {
+        stage.setStageName(stageName);
+    }
 
-        List<Task> tasks = taskRepository.findAllById(stageDto.taskIds());
-        if (tasks.size() != stageDto.taskIds().size()) {
-            throw new DataValidationException("Tasks not found by ids: " + stageDto.taskIds());
+    private List<Task> findTasksByIds(List<Long> taskIds) {
+        List<Task> tasks = taskRepository.findAllById(taskIds);
+        if (tasks.size() != taskIds.size()) {
+            throw new DataValidationException("Tasks not found by ids: " + taskIds);
         }
+        return tasks;
+    }
+
+    private void updateStageTasks(Stage stage, List<Task> tasks) {
         stage.setTasks(tasks);
+    }
 
-        Map<TeamRole, Long> currentRoleCountMap = stage.getExecutors().stream()
+    private Map<TeamRole, Long> getCurrentRoleCountMap(Stage stage) {
+        return stage.getExecutors().stream()
                 .flatMap(executor -> executor.getRoles().stream())
                 .collect(Collectors.groupingBy(role -> role, Collectors.counting()));
+    }
 
-        Stage unsavedStage = stage;
-        stageDto.rolesWithAmount().forEach((role, value) -> {
-            int requiredCount = value;
+    private void sendRoleInvitations(StageDto stageDto, Stage stage, Map<TeamRole, Long> currentRoleCountMap) {
+
+        stageDto.stageRolesDtos().forEach(stageRoleDto -> {
+            TeamRole role = stageRoleDto.teamRole();
+            int requiredCount = stageRoleDto.count();
             long currentRoleCount = currentRoleCountMap.getOrDefault(role, 0L);
             if (currentRoleCount < requiredCount) {
-                stageRolesService.sendInvitationsForRole(unsavedStage, role, requiredCount - currentRoleCount);
+                stageRolesService.sendInvitationsForRole(stage, role, requiredCount - currentRoleCount);
             }
         });
-        List<TeamMember> executors = teamMemberRepository.findAllById(stageDto.executorIds());
-        stage.setExecutors(executors);
+    }
 
-        stage = stageRepository.save(stage);
-        return stageMapper.toDto(stageRepository.save(stage));
+    private List<TeamMember> findExecutorsByIds(List<Long> executorIds) {
+        return teamMemberRepository.findAllById(executorIds);
+    }
+
+    private void updateStageExecutors(Stage stage, List<TeamMember> executors) {
+        stage.setExecutors(executors);
+    }
+
+    private StageDto saveAndMapStage(Stage stage) {
+        Stage savedStage = stageRepository.save(stage);
+        return stageMapper.toDto(savedStage);
     }
 
 }

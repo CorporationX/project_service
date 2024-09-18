@@ -13,7 +13,6 @@ import java.util.List;
 
 @Repository
 public interface StageJpaRepository extends JpaRepository<Stage, Long> {
-    @Modifying
     @Query("""
             SELECT s FROM Stage s
             join s.project p
@@ -40,7 +39,7 @@ public interface StageJpaRepository extends JpaRepository<Stage, Long> {
     @Modifying
     @Query("""
             UPDATE Task t
-            SET t.status = 'CLOSED'
+            SET t.status = faang.school.projectservice.model.TaskStatus.CANCELLED
             WHERE t.stage.stageId = :stageId
             """)
     void closeTasksByStageId(@Param("stageId") Long stageId);

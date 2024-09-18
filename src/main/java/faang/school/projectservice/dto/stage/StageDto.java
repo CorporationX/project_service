@@ -1,17 +1,31 @@
 package faang.school.projectservice.dto.stage;
 
 
-import faang.school.projectservice.model.TeamRole;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 
 public record StageDto(
+        @Positive
         Long stageId,
+
+        @NotBlank
         String stageName,
+
+        @Positive
         Long projectId,
-        Map<TeamRole, Integer> rolesWithAmount,
+
+        @NotNull
+        Set<StageRolesDto> stageRolesDtos,
+
+        @NotNull
         List<Long> taskIds,
+
+        @NotEmpty
         List<Long> executorIds) {
 }

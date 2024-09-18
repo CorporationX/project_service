@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -13,20 +14,21 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
-    @Mapping(source = "project.projectId", target = "projectId")
-    @Mapping(source = "stageRoles", target = "rolesWithAmount", qualifiedByName = "mapStageRolesToRoleIdsWithCount")
+    @Mapping(source = "project.id", target = "projectId")
+    @Mapping(source = "stageRoles", target = "stageRolesDtos", qualifiedByName = "mapStageRolesToDto")
     @Mapping(source = "tasks", target = "taskIds", qualifiedByName = "mapTasksToIds")
     @Mapping(source = "executors", target = "executorIds", qualifiedByName = "mapExecutorsToIds")
     StageDto toDto(Stage stage);
 
     List<StageDto> toDtos(List<Stage> stages);
 
-    @Mapping(source = "projectId", target = "project.projectId")
-    @Mapping(source = "rolesWithAmount", target = "stageRoles", qualifiedByName = "mapRoleIdsWithCountToStageRoles")
+    @Mapping(source = "projectId", target = "project.id")
+    @Mapping(source = "stageRolesDtos", target = "stageRoles", qualifiedByName = "mapDtoToStageRoles")
     @Mapping(source = "taskIds", target = "tasks", qualifiedByName = "mapIdsToTasks")
     @Mapping(source = "executorIds", target = "executors", qualifiedByName = "mapIdsToExecutors")
     Stage toEntity(StageDto stageDto);
@@ -34,40 +36,59 @@ public interface StageMapper {
     List<Stage> toEntities(List<StageDto> stageDtos);
 
 
-    @Named("mapStageRolesToRoleIdsWithCount")
-    default Map<TeamRole, Integer> mapStageRolesToIds(List<StageRoles> stageRoles) {
+    @Named("mapStageRolesToDto")
+    default Set<StageRolesDto> mapStageRolesToDto(List<StageRoles> stageRoles) {
         return stageRoles.stream()
-                .collect(Collectors.toMap(
-                        StageRoles::getTeamRole,
-                        StageRoles::getCount
-                ));
+                .map(stageRole -> new StageRolesDto(
+                        stageRole.getTeamRole(),
+                        stageRole.getCount()))
+                .collect(Collectors.toSet());
     }
 
-    @Named("mapRoleIdsWithCountToStageRoles")
-    default List<StageRoles> mapIdsToStageRoles(Map<TeamRole, Integer> rolesWithAmount) {
-        return null;
+    @Named("mapDtoToStageRoles")
+    default List<StageRoles> mapDtoToStageRoles(Set<StageRolesDto> rolesWithAmount) {
+        return rolesWithAmount.stream()
+                .map(dto -> StageRoles.builder()
+                        .teamRole(dto.teamRole())
+                        .count(dto.count())
+                        .build())
+                .toList();
     }
-
 
     @Named("mapTasksToIds")
     default List<Long> mapTasksToIds(List<Task> tasks) {
-        return tasks.stream().map(Task::getId).toList();
+        return tasks.stream()
+                .map(Task::getId)
+                .toList();
     }
 
     @Named("mapIdsToTasks")
     default List<Task> mapIdsToTasks(List<Long> taskIds) {
-        return null;
+        // Загружаем задачи по ID (пример с подгрузкой задач)
+        return taskIds.stream()
+                .map(taskId -> {
+                    Task task = new Task();
+                    task.setId(taskId);
+                    return task;
+                })
+                .toList();
     }
-
 
     @Named("mapExecutorsToIds")
     default List<Long> mapExecutorsToIds(List<TeamMember> executors) {
-        return executors.stream().map(TeamMember::getUserId).toList();
+        return executors.stream()
+                .map(TeamMember::getUserId)
+                .toList();
     }
-
 
     @Named("mapIdsToExecutors")
     default List<TeamMember> mapIdsToExecutors(List<Long> executorIds) {
-        return null;
+        return executorIds.stream()
+                .map(executorId -> {
+                    TeamMember teamMember = new TeamMember();
+                    teamMember.setUserId(executorId);
+                    return teamMember;
+                })
+                .toList();
     }
 }
