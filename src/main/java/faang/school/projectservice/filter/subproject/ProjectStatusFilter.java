@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 @Component
 public class ProjectStatusFilter implements ProjectFilter {
     public boolean isApplicable(ProjectFilterDto projectFilterDto) {
-        return projectFilterDto.projectStatus() != null;
+        return projectFilterDto.getProjectStatus() != null;
     }
 
     public Stream<Project> filter(Stream<Project> projectStream, ProjectFilterDto projectFilterDto) {
         if (isApplicable(projectFilterDto)) {
-            return projectStream.filter(project -> project.getStatus() == projectFilterDto.projectStatus());
+            return projectStream.filter(project -> project.getStatus() == projectFilterDto.getProjectStatus());
         }
         return projectStream;
     }

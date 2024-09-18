@@ -4,8 +4,11 @@ import faang.school.projectservice.model.ProjectStatus;
 import lombok.*;
 
 import java.util.Objects;
+@Data
 @Builder
-public record ProjectFilterDto(
-        String name,
-        ProjectStatus projectStatus) {
+@AllArgsConstructor
+@NoArgsConstructor
+public class ProjectFilterDto{
+      private  String name;
+      private  ProjectStatus projectStatus;
 }
