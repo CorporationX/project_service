@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.subproject;
 
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
@@ -33,17 +34,17 @@ public class SubProjectServiceImpl implements SubProjectService {
     private final List<ProjectFilter> projectFilters;
 
     @Override
-    public SubProjectDto createSubProject(Long projectId) {
-        var project = repository.getProjectById(projectId);
-        validator.validate(project);
+    public ProjectDto createSubProject(SubProjectDto projectDto) {
+        var project = repository.getProjectById(projectDto.getParentProjectId());
+        validator.validateSubProjectVisibility(project.getVisibility(),projectDto.getVisibility());
 
         var savedProject = repository.save(project);
-        return projectMapper.toDTO(savedProject);
+        return projectMapper.toDto(savedProject);
     }
 
     @Override
-    public SubProjectDto updateSubProject(SubProjectDto subProject) throws ChildrenNotFinishedException {
-        var subproject = repository.getProjectById(subProject.getId());
+    public ProjectDto updateSubProject(long projectId, SubProjectDto subProject) throws ChildrenNotFinishedException {
+        var subproject = repository.getProjectById(projectId);
 
         var project = ifStatusIsComletedCheckThatChildrensAreCompleted
                 .andThen(setTime)
@@ -51,12 +52,11 @@ public class SubProjectServiceImpl implements SubProjectService {
                 .andThen(setVisibility)
                 .apply(subproject);
 
-        return projectMapper.toDTO(repository.save(project));
-
+        return projectMapper.toDto(repository.save(project));
     }
 
     @Override
-    public List<SubProjectDto> getAllSubProjectsWithFiltr(Long projectId, ProjectFilterDto filtrDto) {
+    public List<ProjectDto> getAllSubProjectsWithFiltr(Long projectId, ProjectFilterDto filtrDto) {
         Project project1 = repository.getProjectById(projectId);
         Stream<Project> allMatchedSubProjects = project1.getChildren().stream()
                 .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
@@ -64,7 +64,7 @@ public class SubProjectServiceImpl implements SubProjectService {
         for (ProjectFilter projectFilter : projectFilters) {
             allMatchedSubProjects = projectFilter.filter(allMatchedSubProjects, filtrDto);
         }
-        return allMatchedSubProjects.map(projectMapper::toDTO).toList();
+        return allMatchedSubProjects.map(projectMapper::toDto).toList();
     }
 
     private static List<Project> getAllSubProjects(Project project) {

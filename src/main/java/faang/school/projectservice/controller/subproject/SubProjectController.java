@@ -1,33 +1,38 @@
 package faang.school.projectservice.controller.subproject;
 
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.dto.subproject.ProjectFilterDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.exception.ChildrenNotFinishedException;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/v1/subproject")
 public class SubProjectController {
     private final SubProjectService subProjectService;
 
-    public SubProjectDto createSubProject(@NotNull Long projectId) {
+    @PostMapping()
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProjectDto createSubProject(@RequestBody @Valid SubProjectDto projectId) {
         return subProjectService.createSubProject(projectId);
     }
 
-    public SubProjectDto updateSubProject(SubProjectDto subProjectDto) {
-        try {
-            return subProjectService.updateSubProject(subProjectDto);
-        } catch (ChildrenNotFinishedException e) {
-            throw new RuntimeException(e);
-        }
+    @PutMapping("/{projectId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ProjectDto updateSubProject(@PathVariable @NotNull Long projectId, @RequestBody SubProjectDto subProjectDto) {
+        return subProjectService.updateSubProject(projectId, subProjectDto);
     }
 
-    public List<SubProjectDto> getAllSubProjectsWithFiltr(Long projectId, ProjectFilterDto filtrDto) {
-        return subProjectService.getAllSubProjectsWithFiltr(projectId,filtrDto);
+    @PostMapping("/{projectId}")
+    public List<ProjectDto> getAllSubProjectsWithFiltr(@PathVariable @NotNull Long projectId, @RequestBody ProjectFilterDto filtrDto) {
+        return subProjectService.getAllSubProjectsWithFiltr(projectId, filtrDto);
     }
 }

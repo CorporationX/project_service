@@ -1,5 +1,6 @@
 package faang.school.projectservice.subprojectservice;
 
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.ProjectFilterDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.filter.ProjectFilter;
@@ -63,8 +64,9 @@ class SubProjectServiceTests {
     public void if_validation_than_it_must_be_saved() {
         Project rootParent = Project.builder().id(3L).build();
         when(repository.getProjectById(1L)).thenReturn(rootParent);
-
-        service.createSubProject(1L);
+        mapper.toDto(rootParent);
+        var subrpojectDto = SubProjectDto.builder().parentProjectId(1).description("adf").name("adf").ownerId(1).visibility(ProjectVisibility.PUBLIC).build();
+        service.createSubProject(subrpojectDto);
 
         verify(repository).save(rootParent);
 
@@ -92,13 +94,13 @@ class SubProjectServiceTests {
                 .children(List.of(childProject1, childProject2))
                 .build();
         SubProjectDto subProjectDto = new SubProjectDto();
-        subProjectDto.setId(1L);
+//        subProjectDto.setId(1L);
 
-        when(repository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
+        when(repository.getProjectById(1L)).thenReturn(subProject);
 
         assertThrows(
                 ChildrenNotFinishedException.class,
-                () -> service.updateSubProject(subProjectDto)
+                () -> service.updateSubProject(1L,subProjectDto)
         );
 
         verify(repository, times(1)).getProjectById(1L);
@@ -128,13 +130,13 @@ class SubProjectServiceTests {
                 .build();
 
         SubProjectDto subProjectDto = new SubProjectDto();
-        subProjectDto.setId(1L);
+//        subProjectDto.setId(1L);
 
-        when(repository.getProjectById(subProjectDto.getId())).thenReturn(subProject);
+        when(repository.getProjectById(1L)).thenReturn(subProject);
         when(repository.save(any(Project.class))).thenReturn(subProject);
 
         // Act
-        service.updateSubProject(subProjectDto);
+        service.updateSubProject(1L,subProjectDto);
 
         // Assert
         verify(repository, times(1)).getProjectById(1L);
@@ -272,8 +274,8 @@ class SubProjectServiceTests {
                 .build();
 
         when(repository.getProjectById(parentProject.getId())).thenReturn(parentProject);
-        when(mapper.toDTO(subProjectFirst)).thenReturn(subProjectFirstDto);
-        List<SubProjectDto> selectedSubProjects = service.getAllSubProjectsWithFiltr(parentProject.getId(), projectFilterDto);
+//        when(mapper.toDto(subProjectFirst)).thenReturn(subProjectFirstDto);
+        List<ProjectDto> selectedSubProjects = service.getAllSubProjectsWithFiltr(parentProject.getId(), projectFilterDto);
         assertEquals(1, selectedSubProjects.size());
     }
 
