@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -76,9 +75,7 @@ public class InternshipServiceImpl implements InternshipService {
                 intern.setRoles(null);
             }
         });
-        interns.clear();
-        interns.addAll(passedInterns);
-
+        interns.retainAll(passedInterns);
         internshipRepository.save(internshipForUpdate);
         log.info("Internship updated: {}", internshipId);
     }
@@ -129,36 +126,33 @@ public class InternshipServiceImpl implements InternshipService {
         Project project = projectRepository.getProjectById(projectId);
         if (project == null) {
             throw new EntityNotFoundException("Project %d not found".formatted(projectId));
-        } else {
-            return project.getTeams().stream()
-                    .flatMap(team -> team.getTeamMembers().stream())
-                    .filter(teamMember -> !teamMember.getRoles().contains(TeamRole.INTERN))
-                    .anyMatch(teamMember -> teamMember.getId().equals(mentorId));
         }
+        return project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(teamMember -> !teamMember.getRoles().contains(TeamRole.INTERN))
+                .anyMatch(teamMember -> teamMember.getId().equals(mentorId));
     }
 
     private boolean isProjectHaveIntern(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
         if (project == null) {
             throw new EntityNotFoundException("Project %d not found".formatted(projectId));
-        } else {
-            return project.getTeams().stream()
-                    .flatMap(team -> team.getTeamMembers().stream())
-                    .anyMatch(teamMember -> teamMember.getRoles().contains(TeamRole.INTERN));
         }
+        return project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .anyMatch(teamMember -> teamMember.getRoles().contains(TeamRole.INTERN));
     }
 
     private void addInternNewRole(Internship internship, Long teamMemberId, TeamRoleDto teamRoleDto) {
         TeamRole newInternRole = internshipMapper.teamRoleDtoToStringTeamRole(teamRoleDto);
         if (internship == null) {
             throw new EntityNotFoundException("Internship with id %d not found".formatted(internship.getId()));
-        } else {
-            TeamMember intern = internship.getInterns().stream()
-                    .filter(teamMember -> teamMember.getId().equals(teamMemberId))
-                    .findFirst().orElse(null);
-            intern.getRoles().add(newInternRole);
-            intern.getRoles().removeIf(role -> role.equals(TeamRole.INTERN));
         }
+        TeamMember intern = internship.getInterns().stream()
+                .filter(teamMember -> teamMember.getId().equals(teamMemberId))
+                .findFirst().orElse(null);
+        intern.getRoles().add(newInternRole);
+        intern.getRoles().removeIf(role -> role.equals(TeamRole.INTERN));
     }
 
     private boolean isAllInternshipTasksDone(TeamMember intern) {
