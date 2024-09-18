@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,7 +56,7 @@ class ProjectServiceTest {
 
         @Test
         @DisplayName("Успешное создание проекта")
-        public void testCreateWithSaveProject() {
+        public void whenCreateThenSaveProject() {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setOwnerId(ID);
             projectDto.setName(PROJECT_NAME);
@@ -76,16 +75,13 @@ class ProjectServiceTest {
             assertEquals(PROJECT_NAME, createdProjectDto.getName());
             assertEquals(PROJECT_DESCRIPTION, createdProjectDto.getDescription());
             assertEquals(ProjectStatus.CREATED, createdProjectDto.getStatus());
-            verify(projectDtoValidator)
-                    .validateIfProjectNameOrDescriptionIsBlank(projectDto);
-            verify(projectDtoValidator)
-                    .validateIfOwnerAlreadyExistProjectWithName(projectDto);
+            verify(projectDtoValidator).validateProject(projectDto);
             verify(projectRepository).save(projectEntity);
         }
 
         @Test
         @DisplayName("Успешное обновление описания и статуса проекта")
-        public void testUpdateWithSaveUpdatedProject() {
+        public void whenUpdateThenSaveProject() {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(ID);
             projectDto.setDescription(PROJECT_DESCRIPTION);
@@ -103,16 +99,14 @@ class ProjectServiceTest {
             assertNotNull(updatedProjectDto);
             assertEquals(PROJECT_DESCRIPTION, updatedProjectDto.getDescription());
             assertEquals(ProjectStatus.IN_PROGRESS, updatedProjectDto.getStatus());
-            verify(projectDtoValidator).validateIfProjectIsExistInDb(projectDto.getId());
             verify(projectRepository).getProjectById(projectDto.getId());
-            verify(projectDtoValidator)
-                    .validateIfDtoContainsExistedProjectStatus(projectDto.getStatus());
             verify(projectRepository).save(projectEntity);
+            verify(projectDtoValidator).validateUpdatedFields(projectDto);
         }
 
         @Test
         @DisplayName("Успешное получение всех проектов")
-        public void testGetAllProjectIsSuccessful() {
+        public void whenGetAllProjectsThenSuccess() {
             List<Project> projects = List.of(new Project(), new Project());
             List<ProjectDto> projectDtos = List.of(new ProjectDto(), new ProjectDto());
             when(projectRepository.findAll()).thenReturn(projects);
@@ -128,7 +122,7 @@ class ProjectServiceTest {
 
         @Test
         @DisplayName("Успешное получение проекта")
-        public void testGetProjectIsSuccessful() {
+        public void whenGetProjectThenSuccess() {
             Project projectEntity = new Project();
             projectEntity.setId(ID);
             ProjectDto projectDto = new ProjectDto();
@@ -140,13 +134,12 @@ class ProjectServiceTest {
 
             assertNotNull(existedProjectDto);
             assertEquals(ID, existedProjectDto.getId());
-            verify(projectDtoValidator).validateIfProjectIsExistInDb(ID);
             verify(projectRepository).getProjectById(ID);
         }
 
         @Test
         @DisplayName("Успешное получение проекта ")
-        public void testGetProjectByNameAndStatusIsSuccessful() {
+        public void whenGetProjectByFilterThenSuccess() {
             ProjectFilterDto projectFilterDto = new ProjectFilterDto();
             projectFilterDto.setStatus(ProjectStatus.CREATED);
 
@@ -172,8 +165,6 @@ class ProjectServiceTest {
             List<ProjectDto> projectDtos = projectService.getProjectByNameAndStatus(projectFilterDto);
 
             assertEquals(PROJECT_DTOS_SIZE, projectDtos.size());
-            verify(projectDtoValidator)
-                    .validateIfDtoContainsExistedProjectStatus(firstDto.getStatus());
             verify(projectRepository).findAll();
             verify(projectMapper).toDto(first);
         }

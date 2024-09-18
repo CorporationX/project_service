@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,29 +33,18 @@ class ProjectDtoValidatorTest {
     class PositiveTests {
 
         @Test
-        @DisplayName("Успех если владелец не имеет проекта с таким названием в БД")
-        public void testWhenValidateIfOwnerAlreadyExistProjectWithNameReturnFalse() {
+        @DisplayName("Успех если проект имеет название, описание и владелец еще не имеет проекта с таким названием")
+        public void whenValidateThenSuccess() {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setName(PROJECT_NAME);
+            projectDto.setDescription(PROJECT_DESCRIPTION);
             projectDto.setOwnerId(USER_ID);
             when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
                     .thenReturn(false);
 
-            projectDtoValidator.validateIfOwnerAlreadyExistProjectWithName(projectDto);
+            projectDtoValidator.validateProject(projectDto);
 
             verify(projectRepository).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
-        }
-
-        @Test
-        @DisplayName("Успех если проект существует в БД")
-        public void testWhenValidateIfProjectIsExistInDbReturnTrue() {
-            ProjectDto projectDto = new ProjectDto();
-            projectDto.setId(USER_ID);
-            when(projectRepository.existsById(projectDto.getId())).thenReturn(true);
-
-            projectDtoValidator.validateIfProjectIsExistInDb(projectDto.getId());
-
-            verify(projectRepository).existsById(projectDto.getId());
         }
     }
 
@@ -65,57 +53,38 @@ class ProjectDtoValidatorTest {
 
         @Test
         @DisplayName("Ошибка валидации если у проекта нет названия")
-        public void testValidateIfProjectNameAndDescriptionWithNameIsEmpty() {
+        public void whenValidateWithEmptyNameThenException() {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setName(" ");
             projectDto.setDescription(PROJECT_DESCRIPTION);
 
             assertThrows(DataValidationException.class,
-                    () -> projectDtoValidator.validateIfProjectNameOrDescriptionIsBlank(projectDto));
+                    () -> projectDtoValidator.validateProject(projectDto));
         }
 
         @Test
         @DisplayName("Ошибка валидации если у проекта нет описания")
-        public void testValidateIfProjectNameAndDescriptionWithDescriptionIsEmpty() {
+        public void whenValidateWithEmptyDescriptionThenException() {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setName(PROJECT_NAME);
             projectDto.setDescription(" ");
 
             assertThrows(DataValidationException.class,
-                    () -> projectDtoValidator.validateIfProjectNameOrDescriptionIsBlank(projectDto));
+                    () -> projectDtoValidator.validateProject(projectDto));
         }
 
         @Test
         @DisplayName("Ошибка если владелец имеет проект с таким названием в БД")
-        public void testWhenValidateIfOwnerAlreadyExistProjectWithNameReturnTrue() {
+        public void whenValidateWithOwnerHasSameProjectThenException() {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setName(PROJECT_NAME);
+            projectDto.setDescription(PROJECT_DESCRIPTION);
             projectDto.setOwnerId(USER_ID);
             when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
                     .thenReturn(true);
 
             assertThrows(DataValidationException.class,
-                    () -> projectDtoValidator.validateIfOwnerAlreadyExistProjectWithName(projectDto));
-        }
-
-        @Test
-        @DisplayName("Ошибка если проект не существует в БД")
-        public void testWhenValidateIfProjectIsExistInDbReturnFalse() {
-            ProjectDto projectDto = new ProjectDto();
-            projectDto.setId(USER_ID);
-            when(projectRepository.existsById(projectDto.getId())).thenReturn(false);
-
-            assertThrows(DataValidationException.class,
-                    () -> projectDtoValidator.validateIfProjectIsExistInDb(projectDto.getId()));
-        }
-
-        @Test
-        @DisplayName("Ошибка если проект не содержит имеющийся статус")
-        public void testValidateIfDtoContainsExistedProjectStatusWithInvalidProjectStatus() {
-            ProjectDto projectDto = new ProjectDto();
-
-            assertThrows(DataValidationException.class,
-                    () -> projectDtoValidator.validateIfDtoContainsExistedProjectStatus(projectDto.getStatus()));
+                    () -> projectDtoValidator.validateProject(projectDto));
         }
     }
 }

@@ -2,6 +2,8 @@ package faang.school.projectservice.service.filter;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,15 +18,26 @@ class ProjectNameFilterTest {
     private final ProjectNameFilter projectNameFilter = new ProjectNameFilter();
     private final ProjectFilterDto projectFilterDto = new ProjectFilterDto();
 
-    private static final String NAME = "name";
+    private static final String FIRST_NAME = "first";
+    private static final String SECOND_NAME = "second";
+    private static final String THIRD_NAME = "third";
+
+    private final Project first = new Project();
+    private final Project second = new Project();
 
     @Nested
     class PositiveTests {
 
+        @BeforeEach
+        void init() {
+            first.setName(FIRST_NAME);
+            second.setName(SECOND_NAME);
+        }
+
         @Test
         @DisplayName("Возвращает true если имя есть в фильтре")
-        public void testIsApplicableWithName() {
-            projectFilterDto.setName(NAME);
+        public void whenIsApplicableWithNameThenReturnTrue() {
+            projectFilterDto.setName(FIRST_NAME);
             boolean result = projectNameFilter.isApplicable(projectFilterDto);
 
             assertTrue(result);
@@ -32,12 +45,8 @@ class ProjectNameFilterTest {
 
         @Test
         @DisplayName("Возвращает список сущностей если имя совпадает с именем в фильтре")
-        public void testApplyFilterByNameWithNameInFilter() {
-            Project first = new Project();
-            first.setName(NAME);
-            Project second = new Project();
-            second.setName(NAME + 1);
-            projectFilterDto.setName(NAME);
+        public void whenApplyFilterWithNameThenSuccess() {
+            projectFilterDto.setName(FIRST_NAME);
 
             Stream<Project> projectStream = Stream.of(first, second);
             List<Project> projects = projectNameFilter.apply(projectStream, projectFilterDto).toList();
@@ -48,12 +57,8 @@ class ProjectNameFilterTest {
 
         @Test
         @DisplayName("Возвращает пустой список если имя не совпадает с именем в фильтре")
-        public void testApplyFilterByNameWithNameNotExist() {
-            Project first = new Project();
-            first.setName(NAME + 1);
-            Project second = new Project();
-            second.setName(NAME + 2);
-            projectFilterDto.setName(NAME);
+        public void whenApplyFilterWithoutNameThenSuccess() {
+            projectFilterDto.setName(THIRD_NAME);
 
             Stream<Project> projectStream = Stream.of(first, second);
             List<Project> projects = projectNameFilter.apply(projectStream, projectFilterDto).toList();
@@ -67,7 +72,7 @@ class ProjectNameFilterTest {
 
         @Test
         @DisplayName("Возвращает false если имя отсутствует в фильтре")
-        public void testIsApplicableWithoutNameInFilter() {
+        public void whenIsApplicableWithoutNameThenReturnFalse() {
             boolean result = projectNameFilter.isApplicable(projectFilterDto);
 
             assertFalse(result);

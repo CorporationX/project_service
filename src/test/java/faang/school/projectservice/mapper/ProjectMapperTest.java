@@ -19,7 +19,7 @@ class ProjectMapperTest {
 
     @Test
     @DisplayName("Успех маппинга project в projectDto")
-    public void testToDto() {
+    public void whenToDtoThenSuccess() {
         Project project = new Project();
         project.setId(ID);
         project.setName("name");
@@ -42,7 +42,7 @@ class ProjectMapperTest {
 
     @Test
     @DisplayName("Успех маппинга projectDto в project")
-    public void testToEntity() {
+    public void whenToEntityThenSuccess() {
         ProjectDto projectDto = new ProjectDto();
         projectDto.setId(ID);
         projectDto.setName("name");
@@ -65,7 +65,7 @@ class ProjectMapperTest {
 
     @Test
     @DisplayName("Успех маппинга списка projects в список projectDtos")
-    public void testToDtos() {
+    public void whenToDtosThenSuccess() {
         Project first = new Project();
         first.setId(ID);
         Project second = new Project();

@@ -26,7 +26,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
 
     public ProjectDto create(ProjectDto projectDto) {
-        validateProject(projectDto);
+        projectDtoValidator.validateProject(projectDto);
 
         projectDto.setStatus(ProjectStatus.CREATED);
         projectDto.setCreatedAt(LocalDateTime.now());
@@ -37,8 +37,7 @@ public class ProjectService {
     }
 
     public ProjectDto update(ProjectDto projectDto) {
-        projectDtoValidator.validateIfProjectDescriptionAndStatusIsBlank(projectDto);
-        projectDtoValidator.validateIfProjectIsExistInDb(projectDto.getId());
+        projectDtoValidator.validateUpdatedFields(projectDto);
 
         Project existedProject = projectRepository.getProjectById(projectDto.getId());
 
@@ -47,7 +46,6 @@ public class ProjectService {
         }
 
         if (projectDto.getStatus() != null) {
-            projectDtoValidator.validateIfDtoContainsExistedProjectStatus(projectDto.getStatus());
             existedProject.setStatus(projectDto.getStatus());
         }
 
@@ -58,8 +56,6 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getProjectByNameAndStatus(ProjectFilterDto projectFilterDto) {
-        projectDtoValidator.validateIfDtoContainsExistedProjectStatus(projectFilterDto.getStatus());
-
         Stream<Project> projects = projectRepository.findAll().stream();
 
         return projectFilters.stream()
@@ -77,13 +73,7 @@ public class ProjectService {
         if (id == null) {
             throw new DataValidationException("Field id cannot be null");
         }
-        projectDtoValidator.validateIfProjectIsExistInDb(id);
 
         return projectMapper.toDto(projectRepository.getProjectById(id));
-    }
-
-    private void validateProject(ProjectDto projectDto) {
-        projectDtoValidator.validateIfProjectNameOrDescriptionIsBlank(projectDto);
-        projectDtoValidator.validateIfOwnerAlreadyExistProjectWithName(projectDto);
     }
 }

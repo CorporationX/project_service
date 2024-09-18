@@ -26,14 +26,14 @@ class ProjectStatusFilterTest {
     class PositiveTests {
 
         @BeforeEach
-        public void init() {
+        void init() {
             first.setStatus(ProjectStatus.IN_PROGRESS);
             second.setStatus(ProjectStatus.CREATED);
         }
 
         @Test
         @DisplayName("Возвращает true если статус есть в фильтре")
-        public void testIsApplicableWithStatusInFilter() {
+        public void whenIsApplicableWithStatusThenReturnTrue() {
             projectFilterDto.setStatus(ProjectStatus.IN_PROGRESS);
 
             boolean result = projectStatusFilter.isApplicable(projectFilterDto);
@@ -43,7 +43,7 @@ class ProjectStatusFilterTest {
 
         @Test
         @DisplayName("Возвращает список сущностей если статус совпадает со статусом в фильтре")
-        public void testApplyFilterByStatusWithStatusIsExist() {
+        public void whenApplyFilterWithExistedStatusThenSuccess() {
             projectFilterDto.setStatus(ProjectStatus.IN_PROGRESS);
 
             Stream<Project> projectStream = Stream.of(first, second);
@@ -55,7 +55,7 @@ class ProjectStatusFilterTest {
 
         @Test
         @DisplayName("Возвращает пустой список если статус не совпадает со статусом в фильтре")
-        public void testApplyFilterWithStatusNotExist() {
+        public void whenApplyFilterWithStatusNotExistThenSuccess() {
             projectFilterDto.setStatus(ProjectStatus.COMPLETED);
 
             Stream<Project> projectStream = Stream.of(first, second);
@@ -70,7 +70,7 @@ class ProjectStatusFilterTest {
 
         @Test
         @DisplayName("Возвращает false если статус отсутствует в фильтре")
-        public void testIsApplicableWithoutStatusInFilter() {
+        public void whenIsApplicableWithoutStatusThenReturnFalse() {
             boolean result = projectStatusFilter.isApplicable(projectFilterDto);
 
             assertFalse(result);
