@@ -9,16 +9,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SubProjectValidatorImpl implements SubProjectValidator{
-    @Override
-    public void validate(Project project){
-//        if (project.getParentProject() == null) {
-//            throw new ParentProjectMusNotBeNull();
-//        }
-        if (project.getVisibility() == ProjectVisibility.PUBLIC
-                && project.getVisibility() == ProjectVisibility.PRIVATE) {
-            throw new CannotCreatePrivateProjectForPublicParent();
-        }
-    }
     public void validateSubProjectVisibility(ProjectVisibility parentProjectVisibility,
                                              ProjectVisibility childProjectVisibility) {
         if (parentProjectVisibility == ProjectVisibility.PUBLIC &&

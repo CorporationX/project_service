@@ -7,7 +7,6 @@ import faang.school.projectservice.exception.RootProjectsParentMustNotBeNull;
 import faang.school.projectservice.model.ProjectVisibility;
 
 public interface SubProjectValidator {
-    public void validate(Project project);
     public void validateSubProjectVisibility(ProjectVisibility parentProjectVisibility,
                                              ProjectVisibility childProjectVisibility);
 

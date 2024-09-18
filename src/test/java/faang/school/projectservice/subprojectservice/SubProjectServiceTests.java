@@ -1,5 +1,9 @@
 package faang.school.projectservice.subprojectservice;
-
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.subproject.ProjectFilterDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
@@ -25,20 +29,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-//import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-//import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -94,7 +87,6 @@ class SubProjectServiceTests {
                 .children(List.of(childProject1, childProject2))
                 .build();
         SubProjectDto subProjectDto = new SubProjectDto();
-//        subProjectDto.setId(1L);
 
         when(repository.getProjectById(1L)).thenReturn(subProject);
 
@@ -130,15 +122,12 @@ class SubProjectServiceTests {
                 .build();
 
         SubProjectDto subProjectDto = new SubProjectDto();
-//        subProjectDto.setId(1L);
 
         when(repository.getProjectById(1L)).thenReturn(subProject);
         when(repository.save(any(Project.class))).thenReturn(subProject);
 
-        // Act
         service.updateSubProject(1L,subProjectDto);
 
-        // Assert
         verify(repository, times(1)).getProjectById(1L);
         verify(repository, times(1)).save(any(Project.class));
     }
@@ -265,16 +254,12 @@ class SubProjectServiceTests {
                 .teams(List.of(team))
                 .children(subProjects)
                 .build();
-        var subProjectFirstDto = SubProjectDto.builder()
-                .name(subProjectFirst.getName())
-                .build();
         var projectFilterDto = ProjectFilterDto.builder()
                 .name("ProjectName")
                 .projectStatus(ProjectStatus.IN_PROGRESS)
                 .build();
 
         when(repository.getProjectById(parentProject.getId())).thenReturn(parentProject);
-//        when(mapper.toDto(subProjectFirst)).thenReturn(subProjectFirstDto);
         List<ProjectDto> selectedSubProjects = service.getAllSubProjectsWithFiltr(parentProject.getId(), projectFilterDto);
         assertEquals(1, selectedSubProjects.size());
     }
