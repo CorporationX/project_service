@@ -86,10 +86,10 @@ public class SubProjectServiceImplTest {
         updatingRequest = UpdatingRequest.builder()
                 .name("Test2")
                 .description("SomeTest2")
-                .status(ProjectStatus.CANCELLED)
+                .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PRIVATE)
                 .build();
-        
+
         parentProject = subProjectMapper.toProject(SubProjectDto.builder()
                 .id(1L)
                 .visibility(ProjectVisibility.PUBLIC)
@@ -142,17 +142,14 @@ public class SubProjectServiceImplTest {
     }
 
     @Test
-    @DisplayName("Updating subProject with different statuses")
-    public void testUpdateSubProjectWithDifferentChildrenStatuses() {
+    @DisplayName("Updating subProject with completed status where children unclosed")
+    public void testUpdateSubProjectWithUnclosedChildrenStatuses() {
         Project childProject = subProjectMapper.toProject(SubProjectDto.builder()
                 .id(3L)
                 .status(ProjectStatus.IN_PROGRESS)
                 .build());
         subProject.setChildren(List.of(childProject));
-        subProject.setStatus(ProjectStatus.CANCELLED);
-        subProject.setVisibility(ProjectVisibility.PRIVATE);
-        subProject.setName("Test2");
-        subProject.setDescription("SomeTest2");
+        updatingRequest.setStatus(ProjectStatus.COMPLETED);
 
         when(projectRepository.getProjectById(2L)).thenReturn(subProject);
 
@@ -200,7 +197,7 @@ public class SubProjectServiceImplTest {
     public void testUpdateSubProjectWhereSubProjectVisibilityIsPrivate() {
         Project childProject = subProjectMapper.toProject(SubProjectDto.builder()
                 .id(3L)
-                .status(ProjectStatus.CANCELLED)
+                .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build());
         subProject.setChildren(List.of(childProject));
@@ -223,16 +220,15 @@ public class SubProjectServiceImplTest {
                 .build());
         List<Project> subProjects = List.of(subProject, testProject);
         Stream<Project> subProjectStream = subProjects.stream();
-        parentProject.setChildren(subProjects);
 
-        when(projectRepository.getProjectById(1L)).thenReturn(parentProject);
+        when(projectRepository.findAllByParentId(1L)).thenReturn(subProjects);
         when(subProjectFilter.isApplicable(subProjectFilterDto)).thenReturn(true);
         when(subProjectFilter.apply(any(), any(SubProjectFilterDto.class))).thenReturn(subProjectStream);
 
         List<SubProjectDto> result = subProjectService.findSubProjectsByParentId(1L, subProjectFilterDto);
 
         assertEquals(2, result.size());
-        verify(projectRepository).getProjectById(1L);
+        verify(projectRepository).findAllByParentId(1L);
         verify(subProjectFilter).isApplicable(subProjectFilterDto);
         verify(subProjectFilter).apply(any(), any(SubProjectFilterDto.class));
     }

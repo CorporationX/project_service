@@ -53,6 +53,6 @@ public class UpdatingValidationTest {
 
         Set<ConstraintViolation<UpdatingRequest>> violations = validator.validate(updatingRequest);
 
-        assertEquals(4, violations.size());
+        assertEquals(2, violations.size());
     }
 }

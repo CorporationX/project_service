@@ -41,7 +41,7 @@ public class SubProjectController {
 
     @Operation(summary = "Getting sub projects by parentId")
     @PostMapping("/sub-projects-by-filter/{parentId}")
-    public List<SubProjectDto> getSubProjects(@PathVariable @Positive Long parentId, @RequestBody SubProjectFilterDto subProjectFilterDto) {
+    public List<SubProjectDto> getSubProjects(@PathVariable @Positive Long parentId, SubProjectFilterDto subProjectFilterDto) {
         return subProjectService.findSubProjectsByParentId(parentId, subProjectFilterDto);
     }
 }
