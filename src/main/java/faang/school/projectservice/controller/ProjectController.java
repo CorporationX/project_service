@@ -2,10 +2,8 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -16,28 +14,23 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    public ResponseEntity<ProjectDto> createProject(ProjectDto projectDto) {
-        ProjectDto createdProject = projectService.createProject(projectDto);
-        return ResponseEntity.ok(createdProject);
+    public ProjectDto createProject(ProjectDto projectDto) {
+        return projectService.createProject(projectDto);
     }
 
-    public ResponseEntity<ProjectDto> updateProject(long id, ProjectDto projectDto) {
-        ProjectDto updatedProject = projectService.updateProject(id, projectDto);
-        return ResponseEntity.ok(updatedProject);
+    public ProjectDto updateProject(long id, ProjectDto projectDto) {
+        return projectService.updateProject(id, projectDto);
     }
 
-    public ResponseEntity<List<ProjectDto>> getAllProjectsByFilter(ProjectFilterDto filters) {
-        List<ProjectDto> projects = projectService.getAllProjectsByFilter(filters);
-        return ResponseEntity.ok(projects);
+    public List<ProjectDto> getAllProjectsByFilter(ProjectFilterDto filters) {
+        return projectService.getAllProjectsByFilter(filters);
     }
 
-    public ResponseEntity<List<ProjectDto>> getAllProjects() {
-        List<ProjectDto> projects = projectService.getAllProjects();
-        return ResponseEntity.ok(projects);
+    public List<ProjectDto> getAllProjects() {
+        return projectService.getAllProjects();
     }
 
-    public ResponseEntity<ProjectDto> findProjectById(long id) {
-        ProjectDto projectDto = projectService.findProjectById(id);
-        return ResponseEntity.ok(projectDto);
+    public ProjectDto findProjectById(long id) {
+        return projectService.findProjectById(id);
     }
 }

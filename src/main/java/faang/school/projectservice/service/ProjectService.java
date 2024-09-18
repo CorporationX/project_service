@@ -2,13 +2,15 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.ValidationException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,54 +25,56 @@ public class ProjectService {
 
     private final ProjectMapper projectMapper;
 
-    private final List<ProjectFilter> projectsFilter;
+    private final List<ProjectFilter> projectFilters;
 
+    @SneakyThrows
     public ProjectDto createProject(ProjectDto projectDto) {
         validateProjectDto(projectDto);
         if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getProjectName())) {
-            throw new IllegalArgumentException("Project with this name already exists for the owner");
+            throw new ValidationException(
+                    "Project with this" + projectDto.getProjectName() + "and id"
+                            + projectDto.getOwnerId() + "already exists for the owner");
         }
-        Project project = projectMapper.toEntity(projectDto);
+        Project project = projectMapper.toProject(projectDto);
+        project.setCreatedAt(LocalDateTime.now());
+        project.setUpdatedAt(LocalDateTime.now());
         project.setStatus(ProjectStatus.CREATED);
-        return projectMapper.toDto(projectRepository.save(project));
+        return projectMapper.toProjectDto(projectRepository.save(project));
     }
 
+    @SneakyThrows
     public ProjectDto updateProject(long id, ProjectDto projectDto) {
         validateProjectDto(projectDto);
         if (!projectRepository.existsById(id)) {
-            throw new IllegalArgumentException("This project doesn't exist");
+            throw new EntityNotFoundException("Project with this" + id + "doesn't exist");
         }
-        Project project = projectMapper.toEntity(projectDto);
-        if (projectDto.getProjectDescription() != null) {
-            project.setDescription(projectDto.getProjectDescription());
-        }
+        Project project = projectMapper.toProject(projectDto);
+        project.setDescription(projectDto.getProjectDescription());
+
         if (projectDto.getProjectStatus() != null) {
             project.setStatus(projectDto.getProjectStatus());
         }
         project.setUpdatedAt(LocalDateTime.now());
-        return projectMapper.toDto(projectRepository.save(project));
+        return projectMapper.toProjectDto(projectRepository.save(project));
     }
 
     public List<ProjectDto> getAllProjectsByFilter(ProjectFilterDto filterDto) {
         Stream<Project> projects = projectRepository.findAll().stream();
-        projectsFilter.stream()
+        return projectFilters.stream()
                 .filter(projectFilter -> projectFilter.isApplicable(filterDto))
-                .forEach(projectFilter -> projectFilter.apply(projects, filterDto));
-        return projects.filter(project -> {
-                    if (project.getVisibility() == ProjectVisibility.PRIVATE) {
-                        return project.getTeams().contains(filterDto.getTeamMember().getTeam());
-                    }
-                    return true;})
-                .map(projectMapper::toDto)
+                .reduce(projects,
+                        (currentStream, projectFilter) -> projectFilter.apply(currentStream, filterDto),
+                        (s1, s2) -> s1)
+                .map(projectMapper::toProjectDto)
                 .toList();
     }
 
     public List<ProjectDto> getAllProjects() {
-        return projectMapper.toDtoList(projectRepository.findAll());
+        return projectMapper.toProjectDtos(projectRepository.findAll());
     }
 
     public ProjectDto findProjectById(long projectId) {
-        return projectMapper.toDto(projectRepository.getProjectById(projectId));
+        return projectMapper.toProjectDto(projectRepository.getProjectById(projectId));
     }
 
     private void validateProjectDto(ProjectDto projectDto) {

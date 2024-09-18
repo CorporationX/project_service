@@ -10,4 +10,6 @@ public interface ProjectFilter {
     boolean isApplicable(ProjectFilterDto filterDto);
 
     Stream<Project> apply(Stream<Project> projectStream, ProjectFilterDto filterDto);
+
+    boolean filterByVisibility(Project project, ProjectFilterDto filterDto);
 }
