@@ -1,6 +1,7 @@
 package faang.school.projectservice.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -20,7 +21,8 @@ public class StageInvitationRepository {
 
     public StageInvitation findById(Long stageInvitationId) {
         return repository.findById(stageInvitationId).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Stage invitation doesn't exist by id: %s", stageInvitationId))
+                () -> new EntityNotFoundException(String
+                        .format("Stage invitation doesn't exist by id: %s", stageInvitationId))
         );
     }
 
