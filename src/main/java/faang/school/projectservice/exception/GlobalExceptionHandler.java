@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({DataValidationException.class})
+    @ExceptionHandler({DataValidationException.class, IllegalArgumentException.class})
     public ErrorResponse handleValidationExceptions(DataValidationException ex) {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
         final List<Violation> errors = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             errors.add(new Violation(
-                    (((FieldError)error).getField()), error.getDefaultMessage()
+                    (((FieldError) error).getField()), error.getDefaultMessage()
             ));
         });
         return errors;
