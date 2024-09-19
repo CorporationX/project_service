@@ -12,6 +12,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static faang.school.projectservice.exception.ExceptionMessages.EXECUTOR_NOT_FOUNT;
+import static faang.school.projectservice.exception.ExceptionMessages.EXECUTOR_ROLE_NOT_VALID;
 import static faang.school.projectservice.exception.ExceptionMessages.MIGRATE_STAGE_ID_IS_REQUIRED;
 import static faang.school.projectservice.exception.ExceptionMessages.PROJECT_NOT_FOUND;
 import static faang.school.projectservice.exception.ExceptionMessages.WRONG_PROJECT_STATUS;
@@ -86,7 +87,8 @@ public class StageServiceImpl implements StageService {
         if (stageUpdateDto.stageName() != null) {
             stage.setStageName(stageUpdateDto.stageName());
         }
-        List<TeamMember> executors = getExecutors(stageUpdateDto.executorIds());
+        List<TeamMember> executors = teamMemberRepository.findAllByIds(stageUpdateDto.executorIds());
+        validateExecutorsRoles(stage, executors);
         stage.setExecutors(executors);
         checkMemberCountForRole(stage, executors, userId);
         return stageMapper.toStageDto(stageRepository.save(stage));
@@ -133,17 +135,17 @@ public class StageServiceImpl implements StageService {
         stageRepository.delete(stage);
     }
 
-    private List<TeamMember> getExecutors(List<Long> executorIds) {
-        List<TeamMember> executors = new ArrayList<>();
-        for (Long executorId : executorIds) {
-            try {
-                TeamMember executor = teamMemberRepository.findById(executorId);
-                executors.add(executor);
-            } catch (jakarta.persistence.EntityNotFoundException ex) {
-                throw new EntityNotFoundException(EXECUTOR_NOT_FOUNT.getMessage().formatted(executorId));
+    private void validateExecutorsRoles(Stage stage, List<TeamMember> executors) {
+        List<TeamRole> roles = stage.getStageRoles().stream()
+                .map(StageRoles::getTeamRole)
+                .toList();
+        for (TeamMember executor : executors) {
+            if (executor.getRoles().stream()
+                    .noneMatch(roles::contains)) {
+                throw new DataValidationException(EXECUTOR_ROLE_NOT_VALID.getMessage()
+                        .formatted(executor.getId(), stage.getStageId()));
             }
         }
-        return executors;
     }
 
     private void checkMemberCountForRole(Stage stage, List<TeamMember> executors, Long userId) {

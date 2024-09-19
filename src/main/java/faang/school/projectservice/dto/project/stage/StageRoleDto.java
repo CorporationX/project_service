@@ -7,7 +7,6 @@ import lombok.Builder;
 
 @Builder
 public record StageRoleDto(
-
         Long id,
 
         @NotNull(message = "role name is required")
