@@ -83,22 +83,30 @@ tasks.test {
 }
 
 val jacocoIncludePackagesList = listOf(
-    "**/dto/**",
-    "**/model/**",
-    "**/repository/**"
+    "**/controller/**",
+    "**/service/**",
+    "**/mapper/**"
 )
+val jacocoExcludePackAgeList = listOf(
+    "**/model/**",
+    "**/repository/**",
+    "**/dto/**"
+)
+
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
     dependsOn(tasks.jacocoTestCoverageVerification)
 
     reports {
-        xml.required.set(false)
-        csv.required.set(false)
+        xml.required.set(true)
+        csv.required.set(true)
+        html.required.set(true)
     }
 
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
             include(jacocoIncludePackagesList)
+            exclude(jacocoExcludePackAgeList)
         }
     )
 }
@@ -106,10 +114,17 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
-            element = "CLASS"
             limit {
-      //          minimum = "0.5".toBigDecimal()
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.70".toBigDecimal()
             }
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.70".toBigDecimal()
+            }
+
         }
     }
 }
