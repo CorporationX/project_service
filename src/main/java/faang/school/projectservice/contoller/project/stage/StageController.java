@@ -21,17 +21,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/projects/{projectId}")
+@RequestMapping("/projects")
 @RequiredArgsConstructor
 public class StageController {
     private final StageService stageService;
 
-    @PostMapping("/stages")
+    @PostMapping("/{projectId}/stages")
     public StageDto createStage(@RequestBody StageCreateDto stageCreateDto) {
         return stageService.createStage(stageCreateDto);
     }
 
-    @GetMapping("/stages")
+    @GetMapping("/{projectId}/stages")
     public List<StageDto> getStages(@Positive @PathVariable Long projectId,
                                     @RequestBody StageFilterDto stageFilterDto) {
         return stageService.getStages(projectId, stageFilterDto);
