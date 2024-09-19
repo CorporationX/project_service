@@ -78,7 +78,7 @@ class InternshipControllerTest {
         doReturn(internshipDto).when(internshipService).createInternship(any(InternshipDto.class));
         var body = objectMapper.writeValueAsString(internshipDto);
 
-        mockMvc.perform(post("/internships/create")
+        mockMvc.perform(post("/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())

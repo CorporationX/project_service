@@ -26,7 +26,7 @@ import java.util.List;
 public class InternshipController {
     private final InternshipService internshipService;
 
-    @PostMapping("/create")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public InternshipDto createInternship(@RequestBody @Validated(CreateGroup.class) InternshipDto internshipDto) {
         return internshipService.createInternship(internshipDto);
