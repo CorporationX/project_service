@@ -1,6 +1,8 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.stage_invitation.DeclineInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.validation.CreateGroup;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
 import jakarta.validation.constraints.Positive;
@@ -36,14 +38,13 @@ public class StageInvitationController {
     @Operation(summary = "Decline a stage invitation")
     @PostMapping("/{id}/decline")
     public StageInvitationDto declineInvitation(
-            @PathVariable @Positive Long id, @Valid @RequestBody Map<String, String> payload) {
-        String reason = payload.get("reason");
-        return stageInvitationService.declineInvitation(id, reason);
+            @PathVariable @Positive Long id, @Valid @RequestBody DeclineInvitationDto declineInvitationDto) {
+        return stageInvitationService.declineInvitation(id, declineInvitationDto.getReason());
     }
 
-    @Operation(summary = "Get invitations with optional filters")
+    @Operation(summary = "Get invitations with filters")
     @GetMapping
-    public List<StageInvitationDto> getInvitations(@RequestParam Map<String, String> filters) {
-        return stageInvitationService.getInvitations(filters);
+    public List<StageInvitationDto> getInvitations(@Valid StageInvitationFilterDto filterDto) {
+        return stageInvitationService.getInvitations(filterDto);
     }
 }

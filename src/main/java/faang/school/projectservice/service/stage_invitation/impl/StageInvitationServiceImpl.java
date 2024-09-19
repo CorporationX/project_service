@@ -1,6 +1,10 @@
 package faang.school.projectservice.service.stage_invitation.impl;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
+import faang.school.projectservice.filter.StageInvitationFilter;
+import faang.school.projectservice.filter.impl.InvitedIdFilter;
+import faang.school.projectservice.filter.impl.StatusFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -15,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,8 +36,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     @Override
     @Transactional
     public StageInvitationDto sendInvitation(StageInvitationDto invitationDto) {
-        Stage stage = stageRepository.findById(invitationDto.stageId())
-                .orElseThrow(() -> new EntityNotFoundException("Stage not found with id: " + invitationDto.stageId()));
+        Stage stage = stageRepository.getById(invitationDto.stageId());
 
         TeamMember author = teamMemberRepository.findById(invitationDto.authorId());
 
@@ -42,7 +46,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
             throw new IllegalArgumentException("Invitation already exists.");
         }
 
-        StageInvitation invitation = new StageInvitation();
+        StageInvitation invitation = stageInvitationMapper.toStageInvitation(invitationDto);
         invitation.setStage(stage);
         invitation.setAuthor(author);
         invitation.setInvited(invited);
@@ -90,29 +94,31 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     }
 
     @Override
-    public List<StageInvitationDto> getInvitations(Map<String, String> filters) {
+    @Transactional
+    public List<StageInvitationDto> getInvitations(StageInvitationFilterDto filterDto) {
         List<StageInvitation> invitations = stageInvitationRepository.findAll();
 
-        if (filters.containsKey("invitedId")) {
-            Long invitedId = Long.parseLong(filters.get("invitedId"));
-            invitations = invitations.stream()
-                    .filter(invitation -> invitation.getInvited().getId().equals(invitedId))
-                    .collect(Collectors.toList());
-        }
-
-        if (filters.containsKey("status")) {
-            try {
-                StageInvitationStatus status = StageInvitationStatus.valueOf(filters.get("status").toUpperCase());
-                invitations = invitations.stream()
-                        .filter(invitation -> invitation.getStatus() == status)
-                        .collect(Collectors.toList());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid status value: " + filters.get("status"));
-            }
+        List<StageInvitationFilter> filters = createFilters(filterDto);
+        for (StageInvitationFilter filter : filters) {
+            invitations = filter.apply(invitations);
         }
 
         return invitations.stream()
                 .map(stageInvitationMapper::toStageInvitationDto)
                 .collect(Collectors.toList());
+    }
+
+    private List<StageInvitationFilter> createFilters(StageInvitationFilterDto filterDto) {
+        List<StageInvitationFilter> filters = new ArrayList<>();
+
+        if (filterDto.getInvitedId() != null) {
+            filters.add(new InvitedIdFilter(filterDto.getInvitedId()));
+        }
+
+        if (filterDto.getStatus() != null) {
+            filters.add(new StatusFilter(filterDto.getStatus()));
+        }
+
+        return filters;
     }
 }
