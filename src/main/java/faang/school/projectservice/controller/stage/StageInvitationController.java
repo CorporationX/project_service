@@ -13,8 +13,10 @@ import java.util.List;
 @RequestMapping("/api/invitations")
 public class StageInvitationController {
 
-    @Autowired
-    private StageInvitationService invitationService;
+    private final StageInvitationService invitationService;
+    public StageInvitationController(StageInvitationService invitationService) {
+        this.invitationService = invitationService;
+    }
 
     @PostMapping("/send")
     public ResponseEntity<StageInvitationDto> sendInvitation(@RequestBody StageInvitationDto invitationDto) {

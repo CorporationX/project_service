@@ -19,17 +19,20 @@ import java.util.stream.Collectors;
 @Service
 public class StageInvitationService {
 
-    @Autowired
-    private StageInvitationRepository invitationRepository;
+    private final StageInvitationRepository invitationRepository;
+    private final StageInvitationMapper mapper;
+    private final StageRepository stageRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
-    @Autowired
-    private StageInvitationMapper mapper;
-
-    @Autowired
-    private StageRepository stageRepository;
-
-    @Autowired
-    private TeamMemberRepository teamMemberRepository;
+    public StageInvitationService(StageInvitationRepository invitationRepository,
+                                  StageInvitationMapper mapper,
+                                  StageRepository stageRepository,
+                                  TeamMemberRepository teamMemberRepository) {
+        this.invitationRepository = invitationRepository;
+        this.mapper = mapper;
+        this.stageRepository = stageRepository;
+        this.teamMemberRepository = teamMemberRepository;
+    }
 
     public StageInvitationDto sendInvitation(StageInvitationDto invitationDto) {
         if (invitationDto.getStageId() == null || invitationDto.getAuthorId() == null || invitationDto.getInviteeId() == null) {
@@ -95,13 +98,8 @@ public class StageInvitationService {
     }
 
     public List<StageInvitationDto> getInvitationsByUser(Long userId) {
-        List<StageInvitation> allInvitations = invitationRepository.findAll();
-
-        List<StageInvitation> filteredInvitations = allInvitations.stream()
+        return invitationRepository.findAll().stream()
                 .filter(invitation -> invitation.getInvited().getId().equals(userId))
-                .collect(Collectors.toList());
-
-        return filteredInvitations.stream()
                 .map(mapper :: toDto)
                 .collect(Collectors.toList());
     }
