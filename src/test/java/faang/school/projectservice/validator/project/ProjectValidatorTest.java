@@ -43,7 +43,7 @@ class ProjectValidatorTest {
         class ValidateProjectDtoTests {
 
             @Test
-            @DisplayName("Успех если проект имеет название, описание и владелец еще не имеет проекта с таким названием")
+            @DisplayName("Success when project has a name, description, and owner does not have a project with the same name")
             public void whenValidateThenSuccess() {
                 ProjectDto projectDto = new ProjectDto();
                 projectDto.setName(PROJECT_NAME);
@@ -78,7 +78,7 @@ class ProjectValidatorTest {
             }
 
             @Test
-            @DisplayName("Успех если список проектов корректен и не содержит отмененных проектов")
+            @DisplayName("Success when the project list is valid and contains no cancelled projects")
             public void whenValidProjectListThenSuccess() {
                 List<Project> projects = List.of(activeProject1, activeProject2);
 
@@ -94,7 +94,7 @@ class ProjectValidatorTest {
         @DisplayName("ProjectDto Validation Tests")
         class ValidateProjectDtoTests {
             @Test
-            @DisplayName("Ошибка валидации если у проекта нет названия")
+            @DisplayName("Validation error when project name is empty")
             public void whenValidateWithEmptyNameThenException() {
                 ProjectDto projectDto = new ProjectDto();
                 projectDto.setName(" ");
@@ -105,7 +105,7 @@ class ProjectValidatorTest {
             }
 
             @Test
-            @DisplayName("Ошибка валидации если у проекта нет описания")
+            @DisplayName("Validation error when project description is empty")
             public void whenValidateWithEmptyDescriptionThenException() {
                 ProjectDto projectDto = new ProjectDto();
                 projectDto.setName(PROJECT_NAME);
@@ -116,7 +116,7 @@ class ProjectValidatorTest {
             }
 
             @Test
-            @DisplayName("Ошибка если владелец имеет проект с таким названием в БД")
+            @DisplayName("Validation error when the owner has an existing project with the same name in the database")
             public void whenValidateWithOwnerHasSameProjectThenException() {
                 ProjectDto projectDto = new ProjectDto();
                 projectDto.setName(PROJECT_NAME);
@@ -150,7 +150,7 @@ class ProjectValidatorTest {
             }
 
             @Test
-            @DisplayName("Ошибка если список проектов пуст")
+            @DisplayName("Error when the project list is empty")
             public void whenEmptyProjectListThenException() {
                 List<Project> projects = List.of();
 
@@ -163,7 +163,7 @@ class ProjectValidatorTest {
             }
 
             @Test
-            @DisplayName("Успех если список проектов не содержит отмененных проектов")
+            @DisplayName("Success when the project list contains no cancelled projects")
             public void whenNoCancelledProjectsThenSuccess() {
                 List<Project> projects = List.of(activeProject);
 
@@ -171,7 +171,7 @@ class ProjectValidatorTest {
             }
 
             @Test
-            @DisplayName("Ошибка если в списке есть отмененный проект")
+            @DisplayName("Error when the project list contains a cancelled project")
             public void whenCancelledProjectExistsThenException() {
                 List<Project> projects = List.of(activeProject, cancelledProject);
 
