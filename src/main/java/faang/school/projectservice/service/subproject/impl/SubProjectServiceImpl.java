@@ -53,15 +53,15 @@ public class SubProjectServiceImpl implements SubProjectService {
     public SubProjectDto update(Long projectId, UpdatingRequest updatingRequest) {
         Project subProject = projectRepository.getProjectById(projectId);
         subProjectMapper.updateProjectFromUpdateRequest(updatingRequest, subProject);
-        boolean childrenEndedStatus = subProject.getChildren().stream()
-                .allMatch(this::checkIfProjectEnded);
+        boolean allChildrenAreFinished = subProject.getChildren().stream()
+                .allMatch(this::isProjectFinished);
 
-        if (checkIfProjectEnded(subProject) && !childrenEndedStatus) {
-            throw new IllegalArgumentException("You cannot update a project, " +
-                    "because the subprojects statuses are not suitable. ID: " + projectId);
-        }
+        if (isProjectFinished(subProject)) {
+            if (!allChildrenAreFinished) {
+                throw new IllegalArgumentException("You cannot update a project, " +
+                        "because the subprojects statuses are not suitable. ID: " + projectId);
+            }
 
-        if (checkIfProjectEnded(subProject) && childrenEndedStatus) {
             Moment moment = createMoment(subProject);
             subProject.getMoments().add(moment);
         }
@@ -91,7 +91,7 @@ public class SubProjectServiceImpl implements SubProjectService {
                 .toList();
     }
 
-    private boolean checkIfProjectEnded(Project project) {
+    private boolean isProjectFinished(Project project) {
         return project.getStatus() == ProjectStatus.COMPLETED || project.getStatus() == ProjectStatus.CANCELLED;
     }
 
