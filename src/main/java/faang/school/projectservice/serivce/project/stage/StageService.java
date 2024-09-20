@@ -15,7 +15,7 @@ public interface StageService {
 
     StageDto removeStage(Long stageId, RemoveTypeDto removeTypeDto);
 
-    StageDto updateStage(StageUpdateDto stageUpdateDto, Long userId);
+    StageDto updateStage(StageUpdateDto stageUpdateDto, Long userId, Long stageId);
 
     StageDto getStage(Long stageId);
 }
