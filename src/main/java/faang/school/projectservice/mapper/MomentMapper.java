@@ -16,7 +16,7 @@ public interface MomentMapper {
     @Mapping(source = "projects", target = "projectIds", qualifiedByName = "mapToProjectIds")
     MomentDto toDto(Moment moment);
 
-    List<MomentDto> toDto(List<Moment> moments);
+    List<MomentDto> toDtos(List<Moment> moments);
 
     @Named("mapToProjectIds")
     default List<Long> mapToProjectIds(List<Project> projects) {

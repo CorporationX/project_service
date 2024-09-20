@@ -22,7 +22,7 @@ import java.util.List;
 public class MomentController {
     private final MomentService service;
 
-    @PostMapping("/create")
+    @PostMapping("/moment")
     @Operation(
             summary = "Создать момент",
             description = "Позволяет создать момент"
@@ -44,7 +44,7 @@ public class MomentController {
         return service.update(momentDto);
     }
 
-    @PutMapping("/get/moments")
+    @GetMapping("/moments")
     @Operation(
             summary = "Получить моменты по фильтру",
             description = "Позволяет получить моменты по фильтру"

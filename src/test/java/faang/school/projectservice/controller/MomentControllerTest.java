@@ -179,7 +179,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testCreate_captor() {
+    public void testCreate_Success() {
         // Act and Assert
         controller.create(momentDto);
         verify(service, times(1)).create(captor.capture());

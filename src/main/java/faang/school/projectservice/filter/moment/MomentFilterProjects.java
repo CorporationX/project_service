@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
@@ -20,10 +22,10 @@ public class MomentFilterProjects implements MomentFilter {
     @Override
     public Stream<Moment> apply(MomentFilterDto filterDto, Stream<Moment> moments) {
         return moments.filter(moment -> {
-                    List<Long> projectIds = moment.getProjects().stream()
+                    Set<Long> projectIds = moment.getProjects().stream()
                             .map(Project::getId)
-                            .toList();
-                    return new HashSet<>(projectIds).containsAll(filterDto.projectIds());
+                            .collect(Collectors.toSet());
+                    return projectIds.containsAll(filterDto.projectIds());
                 });
     }
 }

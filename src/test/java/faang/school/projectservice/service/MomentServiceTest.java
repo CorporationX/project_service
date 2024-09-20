@@ -15,6 +15,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,86 +61,60 @@ public class MomentServiceTest {
     @Captor
     ArgumentCaptor<MomentDto> captorMomentDto;
 
+    MomentDto createMomentDto(LocalDateTime createdAt, LocalDateTime updatedAt) {
+        return new MomentDto(
+                1L,
+                "Moment",
+                "description",
+                LocalDateTime.of(2024, 12, 31, 12, 0, 0),
+                new ArrayList<>(List.of(1L, 2L, 3L)),
+                new ArrayList<>(List.of(1L, 2L, 3L)),
+                "imageId1",
+                createdAt,
+                updatedAt
+        );
+    }
+
+    Moment createMoment() {
+        Moment moment = new Moment();
+        moment.setId(1L);
+        moment.setName("Moment");
+        moment.setDescription("description");
+        moment.setDate(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        moment.setProjects( new ArrayList<>(
+                List.of(
+                        Project.builder().id(1L).build(),
+                        Project.builder().id(2L).build(),
+                        Project.builder().id(3L).build()
+                )
+        ));
+        moment.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L)));
+        moment.setImageId("imageId1");
+        moment.setCreatedAt(momentDto.createdAt());
+        moment.setUpdatedAt(momentDto.updatedAt());
+        return moment;
+    }
+
     @BeforeEach
     public void setup() {
         momentFilters = new ArrayList<>(
-            List.of (
-                    new MomentFilterMonth(),
-                    new MomentFilterProjects()
-            )
+                List.of(
+                        new MomentFilterMonth(),
+                        new MomentFilterProjects()
+                )
         );
         service = new MomentService(
-            projectRepository,
-            momentRepository,
-            teamMemberRepository,
-            mapper,
-            momentFilters
+                projectRepository,
+                momentRepository,
+                teamMemberRepository,
+                mapper,
+                momentFilters
         );
-        momentDto = new MomentDto(
-                1L,
-                "Moment",
-                "description",
-                LocalDateTime.of(2024, 12, 31, 12, 0, 0),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                "imageId1",
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
-        expectedMomentDto = new MomentDto(
-                1L,
-                "Moment",
-                "description",
-                LocalDateTime.of(2024, 12, 31, 12, 0, 0),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                "imageId1",
-                momentDto.createdAt(),
-                momentDto.updatedAt()
-        );
-        momentDtoToReturn = new MomentDto(
-                1L,
-                "Moment",
-                "description",
-                LocalDateTime.of(2024, 12, 31, 12, 0, 0),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                "imageId1",
-                momentDto.createdAt(),
-                momentDto.updatedAt()
-        );
-        momentToReturn = new Moment();
-        momentToReturn.setId(1L);
-        momentToReturn.setName("Moment");
-        momentToReturn.setDescription("description");
-        momentToReturn.setDate(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
-        momentToReturn.setProjects( new ArrayList<>(
-                List.of(
-                        Project.builder().id(1L).build(),
-                        Project.builder().id(2L).build(),
-                        Project.builder().id(3L).build()
-                )
-        ));
-        momentToReturn.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L)));
-        momentToReturn.setImageId("imageId1");
-        momentToReturn.setCreatedAt(momentDto.createdAt());
-        momentToReturn.setUpdatedAt(momentDto.updatedAt());
-        expectedMoment = new Moment();
-        expectedMoment.setId(1L);
-        expectedMoment.setName("Moment");
-        expectedMoment.setDescription("description");
-        expectedMoment.setDate(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
-        expectedMoment.setProjects( new ArrayList<>(
-                List.of(
-                        Project.builder().id(1L).build(),
-                        Project.builder().id(2L).build(),
-                        Project.builder().id(3L).build()
-                )
-        ));
-        expectedMoment.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L)));
-        expectedMoment.setImageId("imageId1");
-        expectedMoment.setCreatedAt(momentDto.createdAt());
-        expectedMoment.setUpdatedAt(momentDto.updatedAt());
+        momentDto = createMomentDto(LocalDateTime.now(), LocalDateTime.now());
+        expectedMomentDto = createMomentDto(momentDto.createdAt(), momentDto.updatedAt());
+        momentDtoToReturn = createMomentDto(momentDto.createdAt(), momentDto.updatedAt());
+        momentToReturn = createMoment();
+        expectedMoment = createMoment();
     }
 
     @Test
@@ -156,7 +131,8 @@ public class MomentServiceTest {
 
         // Act and Assert
         Exception exception = Assertions.assertThrows(DataValidationException.class,() -> service.create(momentDto));
-        Assertions.assertEquals("Момент можно создать только для незакрытого проекта", exception.getMessage());
+        Assertions.assertEquals("Момент можно создать только для незакрытого проекта\n"
+                +"закрытый проект с id = 3", exception.getMessage());
     }
 
     @Test
@@ -185,8 +161,8 @@ public class MomentServiceTest {
         when(momentRepository.findById(momentDto.id())).thenReturn(Optional.empty());
 
         // Act and Assert
-        Exception exception = Assertions.assertThrows(DataValidationException.class, () -> service.update(momentDto));
-        Assertions.assertEquals("Переданного момента не существует в бд", exception.getMessage());
+        Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () -> service.update(momentDto));
+        Assertions.assertEquals("Переданного момента с id = " + momentDto.id() + " не существует в бд", exception.getMessage());
     }
 
     @Test
@@ -306,25 +282,24 @@ public class MomentServiceTest {
         );
         when(momentRepository.findById(momentDto.id())).thenReturn(Optional.of(momentToReturn));
         when(projectRepository.findAllByIds(any())).thenReturn(new ArrayList<>());
-        List<TeamMember> newTeamMembers = new ArrayList<>(
-                List.of(
-                        TeamMember.builder()
-                                .team(
-                                        Team.builder()
-                                                .project(
-                                                        Project.builder().id(10L).build()
-                                                ).build()
-                                )
-                                .build(),
-                        TeamMember.builder()
-                                .team(
-                                        Team.builder()
-                                                .project(
-                                                        Project.builder().id(20L).build()
-                                                ).build()
-                                )
-                                .build()
+        TeamMember teamMemberOne = TeamMember.builder()
+                .team(
+                        Team.builder()
+                                .project(
+                                        Project.builder().id(10L).build()
+                                ).build()
                 )
+                .build();
+        TeamMember teamMemberTwo = TeamMember.builder()
+                .team(
+                        Team.builder()
+                                .project(
+                                        Project.builder().id(20L).build()
+                                ).build()
+                )
+                .build();
+        List<TeamMember> newTeamMembers = new ArrayList<>(
+                List.of(teamMemberOne, teamMemberTwo)
         );
         when(teamMemberRepository.findAllById(any())).thenReturn(newTeamMembers);
         when(momentRepository.save(any())).thenReturn(expectedMoment);
@@ -454,11 +429,9 @@ public class MomentServiceTest {
         when(momentRepository.findById(id)).thenReturn(Optional.empty());
         expectedMomentDto = null;
 
-        // Act
-        MomentDto returnDto = service.getMoment(id);
-
-        // Assert
-        Assertions.assertEquals(expectedMomentDto, returnDto);
+        // Act and Assert
+        Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () -> service.getMoment(id));
+        Assertions.assertEquals("Момент с id = " + id + " не найден в системе", exception.getMessage());
     }
 
     @Test

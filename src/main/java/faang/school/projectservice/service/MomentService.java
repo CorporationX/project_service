@@ -12,6 +12,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -35,19 +36,23 @@ public class MomentService {
         List<Project> projects = projectRepository.findAllByIds(momentDto.projectIds());
         for (Project project : projects) {
             if (project.getStatus() == ProjectStatus.COMPLETED) {
-                throw new DataValidationException("Момент можно создать только для незакрытого проекта");
+                throw new DataValidationException("Момент можно создать только для незакрытого проекта\n"
+                +"закрытый проект с id = " + project.getId());
             }
         }
         Moment moment = momentRepository.save(mapper.toEntity(momentDto));
         MomentDto returnMomentDto = mapper.toDto(moment);
-        log.info("Create moment with id = " + returnMomentDto.id());
+        log.info("Create moment with id = " + returnMomentDto.id() + "\n" +
+                "for projects with id: " + returnMomentDto.projectIds());
         return returnMomentDto;
     }
 
     public MomentDto update(MomentDto momentDto) {
         Optional<Moment> momentOpt = momentRepository.findById(momentDto.id());
         if (momentOpt.isEmpty()) {
-            throw new DataValidationException("Переданного момента не существует в бд");
+            String message = "Переданного момента с id = " + momentDto.id() + " не существует в бд";
+            log.error(message);
+            throw new EntityNotFoundException(message);
         }
 
         Moment moment = mapper.toEntity(momentDto);
@@ -55,18 +60,13 @@ public class MomentService {
         List<Long> teamMemberIds = getNewTeamMemberIds(moment, momentOld);
         List<Project> projects = getNewProjects(moment, momentOld);
 
-        if (teamMemberIds != null) {
-            moment.getUserIds().addAll(teamMemberIds);
-        }
+        moment.getUserIds().addAll(teamMemberIds);
+        List<Long> projectIds = projects.stream()
+                .map(Project::getId)
+                .toList();
+        List<Project> projectsToAdd = Stream.concat(moment.getProjects().stream(), projects.stream()).toList();
+        moment.setProjects(projectsToAdd);
 
-        List<Long> projectIds = null;
-        if (projects != null) {
-            List<Project> projectsToAdd = Stream.concat(moment.getProjects().stream(), projects.stream()).toList();
-            moment.setProjects(projectsToAdd);
-            projectIds = projects.stream()
-                    .map(Project::getId)
-                    .toList();
-        }
         MomentDto returnMomentDto = mapper.toDto(momentRepository.save(moment));
         log.info("Updated moment with id = " + returnMomentDto.id() +
                 " add new team members with id: " + teamMemberIds +
@@ -83,7 +83,7 @@ public class MomentService {
         for (MomentFilter filter : filters) {
             streamMoments = filter.apply(filterDto, streamMoments);
         }
-        List<MomentDto> momentDtos = mapper.toDto(streamMoments.toList());
+        List<MomentDto> momentDtos = mapper.toDtos(streamMoments.toList());
         List<Long> momentIds = momentDtos.stream()
                         .map(MomentDto::id)
                         .toList();
@@ -92,7 +92,7 @@ public class MomentService {
     }
 
     public List<MomentDto> getAllMoments() {
-        List<MomentDto> momentDtos = mapper.toDto(momentRepository.findAll());
+        List<MomentDto> momentDtos = mapper.toDtos(momentRepository.findAll());
         List<Long> momentIds = momentDtos.stream()
                 .map(MomentDto::id)
                 .toList();
@@ -101,28 +101,23 @@ public class MomentService {
     }
 
     public MomentDto getMoment(long id) {
-        MomentDto momentDto = mapper.toDto(momentRepository.findById(id).orElse(null));
-        if (momentDto == null) {
-            log.info("Returning empty moment");
-        } else {
-            log.info("Returning moment with id = " + momentDto.id());
-        }
+        Optional<Moment> momentOpt = momentRepository.findById(id);
+        MomentDto momentDto = momentOpt.map(mapper::toDto).orElseThrow(() ->
+                new EntityNotFoundException("Момент с id = " + id + " не найден в системе")
+        );
+        log.info("Returning moment with id = " + momentDto.id());
         return momentDto;
     }
 
     private List<Long> getNewTeamMemberIds(Moment moment, Moment momentOld) {
+        List<Long> projectIds = momentOld.getProjects().stream()
+                .map(Project::getId)
+                .toList();
         List<Long> newProjectIds = moment.getProjects().stream()
                 .map(Project::getId)
-                .filter(projectId -> momentOld.getProjects().stream()
-                        .map(Project::getId)
-                        .toList()
-                        .contains(projectId)
-                )
+                .filter(projectId -> !projectIds.contains(projectId))
                 .toList();
         List<Project> newProjects = projectRepository.findAllByIds(newProjectIds);
-        if (newProjects.isEmpty()) {
-            return null;
-        }
         return newProjects.stream()
                     .flatMap(project -> project.getTeams().stream()
                             .flatMap(team -> team.getTeamMembers().stream()
@@ -132,13 +127,11 @@ public class MomentService {
     }
 
     private List<Project> getNewProjects(Moment moment, Moment momentOld) {
+        List<Long> userIds = momentOld.getUserIds();
         List<Long> newUserIds = moment.getUserIds().stream()
-                .filter(userId -> momentOld.getUserIds().contains(userId))
+                .filter(userId -> !userIds.contains(userId))
                 .toList();
         List<TeamMember> newTeamMembers = teamMemberRepository.findAllById(newUserIds);
-        if (newTeamMembers.isEmpty()) {
-            return null;
-        }
 
         return newTeamMembers.stream()
                     .map(teamMember -> teamMember.getTeam().getProject())

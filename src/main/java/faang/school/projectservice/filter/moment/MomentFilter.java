@@ -10,6 +10,4 @@ public interface MomentFilter {
     boolean isApplicable(MomentFilterDto filterDto);
 
     Stream<Moment> apply(MomentFilterDto filterDto, Stream<Moment> moments);
-
-
 }

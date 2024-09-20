@@ -51,4 +51,4 @@ services:
 
 springdoc:
   swagger-ui:
-    path: /swag
+    path: /swagger
