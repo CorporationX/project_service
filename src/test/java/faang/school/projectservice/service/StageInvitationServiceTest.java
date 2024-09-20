@@ -109,12 +109,11 @@ class StageInvitationServiceTest {
         @Test
         @DisplayName("Успех при отклонении приглашения")
         void whenInvitationRejectedThenSuccessSave() {
-            when(stageInvitationDtoMapper.toEntity(stageInvitationDto))
+            when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
                     .thenReturn(stageInvitation);
 
-            stageInvitationService.rejectInvitation(stageInvitationDto);
+            stageInvitationService.rejectInvitation(STAGE_INVITATION_ID);
 
-            verify(stageInvitationDtoMapper).toEntity(any());
             verify(stageInvitationRepository).save(stageInvitation);
         }
 

@@ -16,26 +16,26 @@ public class StageInvitationController {
 
     private final StageInvitationService stageInvitationService;
 
-    @PostMapping("/create")
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public void sendInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
         stageInvitationService.createInvitation(stageInvitationDto);
     }
 
-    @PatchMapping("/accept/{id}")
+    @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void acceptInvitation(@Valid @PathVariable long id) {
         stageInvitationService.acceptInvitation(id);
     }
 
-    @PatchMapping("/reject")
+    @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void rejectInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
-        stageInvitationService.rejectInvitation(stageInvitationDto);
+    public void rejectInvitation(@Valid @PathVariable long id) {
+        stageInvitationService.rejectInvitation(id);
     }
 
-    @GetMapping("/viewAll")
-    public List<StageInvitationDto> getInvitations(@RequestParam StageInvitationFilterDto filter) {
+    @GetMapping
+    public List<StageInvitationDto> getInvitations(@Valid @ModelAttribute StageInvitationFilterDto filter) {
         return stageInvitationService.getInvitations(filter);
     }
 }

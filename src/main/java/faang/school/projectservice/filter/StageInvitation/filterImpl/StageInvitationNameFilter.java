@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class StageInvitationNameFilter implements StageInvitationFilter {
+class StageInvitationNameFilter implements StageInvitationFilter {
     @Override
     public boolean isApplicable(StageInvitationFilterDto stageInvitationFilterDto) {
         return stageInvitationFilterDto.getInvitedStageName() != null &&

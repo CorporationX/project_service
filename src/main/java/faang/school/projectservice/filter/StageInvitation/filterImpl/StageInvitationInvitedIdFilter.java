@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @Component
-public class StageInvitationInvitedIdFilter implements StageInvitationFilter {
+class StageInvitationInvitedIdFilter implements StageInvitationFilter {
 
     @Override
     public boolean isApplicable(StageInvitationFilterDto stageInvitationFilterDto) {
