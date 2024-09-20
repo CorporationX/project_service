@@ -35,7 +35,7 @@ public class StageInvitationController {
     }
 
     @GetMapping("/viewAll")
-    public List<StageInvitationDto> getInvitations(@RequestBody StageInvitationFilterDto filter) {
+    public List<StageInvitationDto> getInvitations(@RequestParam StageInvitationFilterDto filter) {
         return stageInvitationService.getInvitations(filter);
     }
 }

@@ -3,10 +3,12 @@ package faang.school.projectservice.filter.StageInvitation.filterImpl;
 import faang.school.projectservice.dto.client.stage.StageInvitationFilterDto;
 import faang.school.projectservice.filter.StageInvitation.StageInvitationFilter;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.stream.Stream;
 
+@Component
 public class StageInvitationInvitedIdFilter implements StageInvitationFilter {
 
     @Override
