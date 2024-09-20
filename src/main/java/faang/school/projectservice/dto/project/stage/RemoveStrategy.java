@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.project.stage;
 
-public enum RemoveAction {
+public enum RemoveStrategy {
     CASCADE_DELETE,
     CLOSE,
-    MIGRATE
+    MIGRATE,
 }

@@ -16,5 +16,4 @@ public record StageRoleDto(
         @Positive(message = "count for member role must be positive")
         Integer count,
 
-        Long stageId) {
-}
+        Long stageId) {}

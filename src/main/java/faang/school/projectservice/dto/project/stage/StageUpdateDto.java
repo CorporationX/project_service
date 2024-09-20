@@ -16,6 +16,4 @@ public record StageUpdateDto(
         String stageName,
 
         @NotNull(message = "Executor ids is required")
-        List<Long> executorIds) {
-
-}
+        List<Long> executorIds) {}

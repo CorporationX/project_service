@@ -19,5 +19,4 @@ public record StageCreateDto(
         Long projectId,
 
         @NotEmpty(message = "Stage roles is required")
-        List<StageRoleDto> roles) {
-}
+        List<StageRoleDto> roles) {}
