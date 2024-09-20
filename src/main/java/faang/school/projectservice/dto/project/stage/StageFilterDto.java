@@ -5,5 +5,7 @@ import faang.school.projectservice.model.TeamRole;
 import lombok.Builder;
 
 @Builder
-public record StageFilterDto(TeamRole roleFilter, TaskStatus taskStatusFilter) {
-}
+public record StageFilterDto(
+        TeamRole roleFilter,
+        TaskStatus taskStatusFilter,
+        TaskStatusFilterType taskStatusFilterType) {}
