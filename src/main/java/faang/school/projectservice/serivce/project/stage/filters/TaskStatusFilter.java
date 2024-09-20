@@ -12,18 +12,15 @@ public class TaskStatusFilter implements StageFilter {
 
     @Override
     public boolean isApplicable(StageFilterDto filters) {
-        return filters.taskStatusFilter() != null;
+        return filters.taskStatusFilter() != null && filters.taskStatusFilterType() != null;
     }
 
     @Override
     public Stream<Stage> apply(Stream<Stage> stages, StageFilterDto filters) {
-        return switch (filters.taskStatusFilter()) {
-            case TODO -> filterByAnyMatchWithStatus(stages, TaskStatus.TODO);
-            case IN_PROGRESS -> filterByAnyMatchWithStatus(stages, TaskStatus.IN_PROGRESS);
-            case REVIEW -> filterByAnyMatchWithStatus(stages, TaskStatus.REVIEW);
-            case TESTING -> filterByAnyMatchWithStatus(stages, TaskStatus.TESTING);
-            case DONE -> filterByAllMatchWithStatus(stages, TaskStatus.DONE);
-            case CANCELLED -> filterByAllMatchWithStatus(stages, TaskStatus.CANCELLED);
+        return switch (filters.taskStatusFilterType()) {
+            case ALL -> filterByAllMatchWithStatus(stages, filters.taskStatusFilter());
+            case ANY -> filterByAnyMatchWithStatus(stages, filters.taskStatusFilter());
+            case NONE -> filterBuNoneMatchWithStatus(stages, filters.taskStatusFilter());
         };
     }
 
@@ -35,5 +32,10 @@ public class TaskStatusFilter implements StageFilter {
     private Stream<Stage> filterByAllMatchWithStatus(Stream<Stage> stages, TaskStatus status) {
         return stages.filter(stage -> stage.getTasks().stream()
                 .allMatch(task -> task.getStatus().equals(status)));
+    }
+
+    private Stream<Stage> filterBuNoneMatchWithStatus(Stream<Stage> stages, TaskStatus status) {
+        return stages.filter(stage -> stage.getTasks().stream()
+                .noneMatch(task -> task.getStatus().equals(status)));
     }
 }
