@@ -5,15 +5,15 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.model.stage.strategy.delete.DeleteStageStrategy;
+import faang.school.projectservice.model.stage.strategy.delete.DeleteStageTaskStrategy;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.model.stage.strategy.delete.TaskActionProcessor;
+import faang.school.projectservice.model.stage.strategy.delete.DeleteStageProcessor;
 import faang.school.projectservice.repository.*;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -29,16 +29,18 @@ public class StageService {
     private final TeamMemberRepository teamMemberRepository;
     private final StageRolesService stageRolesService;
     private final StageMapper stageMapper;
-    private final TaskActionProcessor taskActionProcessor;
-
+    private final DeleteStageProcessor deleteStageProcessor;
 
     @Transactional
     public StageDto createStage(StageDto stageDto) {
+        log.info("Start create stage for project with id {}", stageDto.projectId());
         Project project = projectRepository.getProjectById(stageDto.projectId());
         if (project == null) {
+            log.error("Project not found by id: {}", stageDto.projectId());
             throw new IllegalArgumentException("Project not found by id: " + stageDto.projectId());
         }
-        Stage stage = stageMapper.toEntity(stageDto);
+
+        Stage stage = stageMapper.toStage(stageDto);
 
         stage.setProject(project);
 
@@ -47,82 +49,81 @@ public class StageService {
                 savedStage.getStageId(), stageDto.stageRolesDtos());
 
         savedStage.setStageRoles(createdStageRoles);
-
-        return stageMapper.toDto(savedStage);
+        log.info("Stage with id {} has been created", savedStage.getStageId());
+        return stageMapper.toStageDto(savedStage);
     }
 
-
+    @Transactional(readOnly = true)
     public List<StageDto> getFilteredStagesByRolesAndStatus(
             Long projectId,
             List<TeamRole> roles,
             List<TaskStatus> taskStatuses) {
 
-        return stageMapper.toDtos(
+        return stageMapper.toStageDtos(
                 stageRepository.findStagesByProjectAndFilters(
                         projectId, roles, taskStatuses)
         );
     }
 
     @Transactional
-    public void deleteStage(Long providerStageId, DeleteStageStrategy taskAction, Long consumerStageId) {
+    public void deleteStage(Long providerStageId, DeleteStageTaskStrategy taskStrategy, Long consumerStageId) {
         Stage stage = stageRepository.getById(providerStageId);
         if (stage == null) {
+            log.error("Stage not found by id: {}", providerStageId);
             throw new DataValidationException("Stage not found by id: " + providerStageId);
         }
-        taskActionProcessor.process(stage, taskAction, consumerStageId);
+        deleteStageProcessor.process(stage, taskStrategy, consumerStageId);
 
         stageRepository.delete(stage);
         log.info("Stage with id {} has been deleted", providerStageId);
     }
 
-
+    @Transactional(readOnly = true)
     public List<StageDto> getAllStagesByProjectId(Long projectId) {
         List<Stage> stagesDto = stageRepository.findAllStagesByProjectId(projectId);
-        return stageMapper.toDtos(stagesDto);
+        return stageMapper.toStageDtos(stagesDto);
     }
 
-    public StageDto getStageById(Long stageId) {
-        return stageMapper.toDto(stageRepository.getById(stageId));
+    @Transactional(readOnly = true)
+    public StageDto getStageDtoById(Long stageId) {
+        return stageMapper.toStageDto(stageRepository.getById(stageId));
     }
 
+    @Transactional
     public StageDto updateStage(StageDto stageDto) {
+        log.info("Start update stage with id {}", stageDto.stageId());
         Stage stage = findStageById(stageDto.stageId());
-        updateStageName(stage, stageDto.stageName());
+
+        stage.setStageName(stageDto.stageName());
 
         List<Task> tasks = findTasksByIds(stageDto.taskIds());
-        updateStageTasks(stage, tasks);
+        stage.setTasks(tasks);
 
-        Map<TeamRole, Long> currentRoleCountMap = getCurrentRoleCountMap(stage);
-        sendRoleInvitations(stageDto, stage, currentRoleCountMap);
+        sendRoleInvitations(stageDto, stage);
 
         List<TeamMember> executors = findExecutorsByIds(stageDto.executorIds());
-        updateStageExecutors(stage, executors);
+        stage.setExecutors(executors);
+        Stage savedStage = stageRepository.save(stage);
+        return stageMapper.toStageDto(savedStage);
 
-        return saveAndMapStage(stage);
     }
 
     private Stage findStageById(Long stageId) {
         Stage stage = stageRepository.getById(stageId);
         if (stage == null) {
+            log.error("Stage not found by id: {}", stageId);
             throw new DataValidationException("Stage not found by id: " + stageId);
         }
         return stage;
     }
 
-    private void updateStageName(Stage stage, String stageName) {
-        stage.setStageName(stageName);
-    }
-
     private List<Task> findTasksByIds(List<Long> taskIds) {
         List<Task> tasks = taskRepository.findAllById(taskIds);
         if (tasks.size() != taskIds.size()) {
+            log.error("Tasks not found by ids: {}", taskIds);
             throw new DataValidationException("Tasks not found by ids: " + taskIds);
         }
         return tasks;
-    }
-
-    private void updateStageTasks(Stage stage, List<Task> tasks) {
-        stage.setTasks(tasks);
     }
 
     private Map<TeamRole, Long> getCurrentRoleCountMap(Stage stage) {
@@ -131,8 +132,8 @@ public class StageService {
                 .collect(Collectors.groupingBy(role -> role, Collectors.counting()));
     }
 
-    private void sendRoleInvitations(StageDto stageDto, Stage stage, Map<TeamRole, Long> currentRoleCountMap) {
-
+    public void sendRoleInvitations(StageDto stageDto, Stage stage) {
+        Map<TeamRole, Long> currentRoleCountMap = getCurrentRoleCountMap(stage);
         stageDto.stageRolesDtos().forEach(stageRoleDto -> {
             TeamRole role = stageRoleDto.teamRole();
             int requiredCount = stageRoleDto.count();
@@ -147,13 +148,6 @@ public class StageService {
         return teamMemberRepository.findAllById(executorIds);
     }
 
-    private void updateStageExecutors(Stage stage, List<TeamMember> executors) {
-        stage.setExecutors(executors);
-    }
 
-    private StageDto saveAndMapStage(Stage stage) {
-        Stage savedStage = stageRepository.save(stage);
-        return stageMapper.toDto(savedStage);
-    }
 
 }

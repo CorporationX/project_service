@@ -19,6 +19,9 @@ import java.util.List;
 @Table(name = "task")
 @Builder
 public class Task {
+    public Task(Long id) {
+        this.id = id;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

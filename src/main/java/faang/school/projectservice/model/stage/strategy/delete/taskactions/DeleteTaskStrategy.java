@@ -1,14 +1,14 @@
 package faang.school.projectservice.model.stage.strategy.delete.taskactions;
 
-import faang.school.projectservice.model.stage.strategy.delete.DeleteStageStrategy;
-import faang.school.projectservice.model.stage.strategy.delete.DeleteStageStrategyAbstract;
+import faang.school.projectservice.model.stage.strategy.delete.DeleteStageTaskStrategy;
+import faang.school.projectservice.model.stage.strategy.delete.DeleteStageStrategyExecutor;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class TaskActionDelete extends DeleteStageStrategyAbstract {
+public class DeleteTaskStrategy extends DeleteStageStrategyExecutor {
     private final StageRepository stageRepository;
 
     @Override
@@ -18,7 +18,7 @@ public class TaskActionDelete extends DeleteStageStrategyAbstract {
     }
 
     @Override
-    public DeleteStageStrategy getMethod() {
-        return DeleteStageStrategy.DELETE;
+    public DeleteStageTaskStrategy getMethod() {
+        return DeleteStageTaskStrategy.DELETE;
     }
 }

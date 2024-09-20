@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.Mapper;
@@ -13,7 +12,6 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,21 +21,24 @@ public interface StageMapper {
     @Mapping(source = "stageRoles", target = "stageRolesDtos", qualifiedByName = "mapStageRolesToDto")
     @Mapping(source = "tasks", target = "taskIds", qualifiedByName = "mapTasksToIds")
     @Mapping(source = "executors", target = "executorIds", qualifiedByName = "mapExecutorsToIds")
-    StageDto toDto(Stage stage);
+    StageDto toStageDto(Stage stage);
 
-    List<StageDto> toDtos(List<Stage> stages);
+    List<StageDto> toStageDtos(List<Stage> stages);
 
     @Mapping(source = "projectId", target = "project.id")
     @Mapping(source = "stageRolesDtos", target = "stageRoles", qualifiedByName = "mapDtoToStageRoles")
     @Mapping(source = "taskIds", target = "tasks", qualifiedByName = "mapIdsToTasks")
     @Mapping(source = "executorIds", target = "executors", qualifiedByName = "mapIdsToExecutors")
-    Stage toEntity(StageDto stageDto);
+    Stage toStage(StageDto stageDto);
 
-    List<Stage> toEntities(List<StageDto> stageDtos);
+    List<Stage> toStages(List<StageDto> stageDtos);
 
 
     @Named("mapStageRolesToDto")
     default Set<StageRolesDto> mapStageRolesToDto(List<StageRoles> stageRoles) {
+        if ( stageRoles == null ) {
+            return null;
+        }
         return stageRoles.stream()
                 .map(stageRole -> new StageRolesDto(
                         stageRole.getTeamRole(),
@@ -47,6 +48,9 @@ public interface StageMapper {
 
     @Named("mapDtoToStageRoles")
     default List<StageRoles> mapDtoToStageRoles(Set<StageRolesDto> rolesWithAmount) {
+        if ( rolesWithAmount == null ) {
+            return null;
+        }
         return rolesWithAmount.stream()
                 .map(dto -> StageRoles.builder()
                         .teamRole(dto.teamRole())
@@ -57,6 +61,9 @@ public interface StageMapper {
 
     @Named("mapTasksToIds")
     default List<Long> mapTasksToIds(List<Task> tasks) {
+        if ( tasks == null ) {
+            return null;
+        }
         return tasks.stream()
                 .map(Task::getId)
                 .toList();
@@ -64,18 +71,19 @@ public interface StageMapper {
 
     @Named("mapIdsToTasks")
     default List<Task> mapIdsToTasks(List<Long> taskIds) {
-        // Загружаем задачи по ID (пример с подгрузкой задач)
+        if ( taskIds == null ) {
+            return null;
+        }
         return taskIds.stream()
-                .map(taskId -> {
-                    Task task = new Task();
-                    task.setId(taskId);
-                    return task;
-                })
+                .map(taskId -> new Task(taskId))
                 .toList();
     }
 
     @Named("mapExecutorsToIds")
     default List<Long> mapExecutorsToIds(List<TeamMember> executors) {
+        if ( executors == null ) {
+            return null;
+        }
         return executors.stream()
                 .map(TeamMember::getUserId)
                 .toList();
@@ -83,6 +91,9 @@ public interface StageMapper {
 
     @Named("mapIdsToExecutors")
     default List<TeamMember> mapIdsToExecutors(List<Long> executorIds) {
+        if ( executorIds == null ) {
+            return null;
+        }
         return executorIds.stream()
                 .map(executorId -> {
                     TeamMember teamMember = new TeamMember();
