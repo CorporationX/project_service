@@ -1,8 +1,9 @@
-package faang.school.projectservice.serivce.project.stage.filters;
+package faang.school.projectservice.service.project.stage.filters;
 
 import faang.school.projectservice.dto.project.stage.StageFilterDto;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
@@ -16,7 +17,7 @@ public class TaskStatusFilter implements StageFilter {
     }
 
     @Override
-    public Stream<Stage> apply(Stream<Stage> stages, StageFilterDto filters) {
+    public Stream<Stage> apply(@NonNull Stream<Stage> stages, @NonNull StageFilterDto filters) {
         return switch (filters.taskStatusFilterType()) {
             case ALL -> filterByAllMatchWithStatus(stages, filters.taskStatusFilter());
             case ANY -> filterByAnyMatchWithStatus(stages, filters.taskStatusFilter());

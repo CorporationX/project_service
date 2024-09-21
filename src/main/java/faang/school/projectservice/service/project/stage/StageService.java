@@ -1,4 +1,4 @@
-package faang.school.projectservice.serivce.project.stage;
+package faang.school.projectservice.service.project.stage;
 
 import faang.school.projectservice.dto.project.stage.RemoveTypeDto;
 import faang.school.projectservice.dto.project.stage.StageCreateDto;

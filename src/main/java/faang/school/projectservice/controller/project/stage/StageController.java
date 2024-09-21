@@ -1,11 +1,11 @@
-package faang.school.projectservice.contoller.project.stage;
+package faang.school.projectservice.controller.project.stage;
 
 import faang.school.projectservice.dto.project.stage.RemoveTypeDto;
 import faang.school.projectservice.dto.project.stage.StageCreateDto;
 import faang.school.projectservice.dto.project.stage.StageDto;
 import faang.school.projectservice.dto.project.stage.StageFilterDto;
 import faang.school.projectservice.dto.project.stage.StageUpdateDto;
-import faang.school.projectservice.serivce.project.stage.StageService;
+import faang.school.projectservice.service.project.stage.StageService;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
