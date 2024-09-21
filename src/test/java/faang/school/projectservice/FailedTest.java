@@ -8,6 +8,6 @@ public class FailedTest {
     @Test
     public void test() {
         var bad = false;
-        Assertions.assertThat(bad).isFalse();
+        Assertions.assertThat(bad).isTrue();
     }
 }
