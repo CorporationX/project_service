@@ -1,9 +1,10 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.internship.ProjectDto;
-import faang.school.projectservice.dto.internship.TeamMemberDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
+import faang.school.projectservice.exception.internship.InternshipValidationException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapperImpl;
 import faang.school.projectservice.mapper.internship.ProjectMapperImpl;
@@ -17,6 +18,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.intership.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -51,6 +54,8 @@ public class InternshipServiceTest {
     private InternshipFilter filter;
     @Mock
     private List<InternshipFilter> internshipFilters;
+    @Mock
+    private TeamMemberService teamMemberService;
     private Internship internship;
     private InternshipDto internshipDto;
     private List<Internship> internships;
@@ -69,7 +74,7 @@ public class InternshipServiceTest {
         internshipFilters = List.of(filter);
         internshipMapper = new InternshipMapperImpl(new TeamMemberMapperImpl(), new ProjectMapperImpl());
         internshipService = new InternshipService(internshipRepository,
-                internshipMapper, internshipValidator, internshipFilters);
+                internshipMapper, internshipValidator, internshipFilters, teamMemberService);
     }
 
     @BeforeEach
@@ -138,11 +143,8 @@ public class InternshipServiceTest {
             internshipService.create(internshipDto);
 
             verify(internshipValidator)
-                    .validateInternshipHaveProjectAndInterns(internshipDto);
-            verify(internshipValidator)
-                    .validateInternshipGotMentor(internshipDto);
-            verify(internshipValidator)
-                    .validateInternshipDuration(internshipDto);
+                    .validateInternship(internshipDto);
+            verify(teamMemberService).getTeamMemberById(MENTOR_ID_ONE);
             verify(internshipMapper)
                     .toEntity(internshipDto);
             verify(internshipMapper)
@@ -177,7 +179,8 @@ public class InternshipServiceTest {
             when(filter.isApplicable(internshipFilterDto))
                     .thenReturn(true);
             when(filter.applyFilter(any(), eq(internshipFilterDto)))
-                    .thenReturn(internships.stream().filter(internship -> internship.getStatus() == INTERNSHIP_STATUS_COMPLETED));
+                    .thenReturn(internships.stream().filter(internship ->
+                            internship.getStatus() == INTERNSHIP_STATUS_COMPLETED));
             List<InternshipDto> result = internshipService.getFilteredInternship(internshipFilterDto);
             assertEquals(1, result.size());
             verify(internshipRepository)
@@ -204,6 +207,25 @@ public class InternshipServiceTest {
             internshipService.getInternship(internship.getId());
             verify(internshipValidator)
                     .validateInternshipExists(internship.getId());
+        }
+
+        @Test
+        @DisplayName("When filters is null then throw exception")
+        public void whenFilterDtoIsNullThenThrowException() {
+            internshipService.getFilteredInternship(internshipFilterDto);
+            assertThrows(InternshipValidationException.class, () ->
+                    internshipService.getFilteredInternship(null));
+        }
+
+        @Test
+        @DisplayName("When internshipDto is null then throw exception")
+        public void whenInternshipDtoIsNullThenThrowException() {
+            when(internshipMapper.toDto(internship)).thenReturn(internshipDto);
+            when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
+            when(internshipRepository.save(internship)).thenReturn(internship);
+            internshipService.create(internshipDto);
+            assertThrows(InternshipValidationException.class, () ->
+                    internshipService.create(null));
         }
     }
 }

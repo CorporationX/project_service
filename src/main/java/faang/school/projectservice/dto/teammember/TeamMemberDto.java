@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.internship;
+package faang.school.projectservice.dto.teammember;
 
 import faang.school.projectservice.model.TeamRole;
 import lombok.AllArgsConstructor;

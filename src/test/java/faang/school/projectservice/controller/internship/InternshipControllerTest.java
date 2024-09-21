@@ -1,8 +1,8 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.service.InternshipService;
+import faang.school.projectservice.service.internship.InternshipService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

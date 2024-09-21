@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper.internship;
 
-import faang.school.projectservice.dto.internship.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

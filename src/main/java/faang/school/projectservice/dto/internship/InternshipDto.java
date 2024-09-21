@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.internship;
 
-import jakarta.validation.constraints.NotNull;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@NotNull
 public class InternshipDto {
     private Long id;
     private ProjectDto project;
