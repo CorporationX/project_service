@@ -14,9 +14,9 @@ import java.util.List;
 public interface MomentMapper {
 
     @Mapping(source = "projects", target = "projectIds", qualifiedByName = "mapToProjectIds")
-    MomentDto toDto(Moment moment);
+    MomentDto toMomentDto(Moment moment);
 
-    List<MomentDto> toDtos(List<Moment> moments);
+    List<MomentDto> toMomentDtos(List<Moment> moments);
 
     @Named("mapToProjectIds")
     default List<Long> mapToProjectIds(List<Project> projects) {

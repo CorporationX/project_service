@@ -5,14 +5,12 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-public class MomentFilterProjects implements MomentFilter {
+public class ProjectsMomentFilter implements MomentFilter {
 
     @Override
     public boolean isApplicable(MomentFilterDto filterDto) {

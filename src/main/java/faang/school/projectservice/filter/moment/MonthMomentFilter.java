@@ -4,11 +4,10 @@ import faang.school.projectservice.dto.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 @Component
-public class MomentFilterMonth implements MomentFilter {
+public class MonthMomentFilter implements MomentFilter {
 
     @Override
     public boolean isApplicable(MomentFilterDto filterDto) {

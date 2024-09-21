@@ -197,7 +197,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testUpdate_captor() {
+    public void testUpdate_Success() {
         // Act and Assert
         controller.update(momentDto);
         verify(service, times(1)).update(captor.capture());
@@ -217,7 +217,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testGetMoments_captor() {
+    public void testGetMoments_Success() {
         // Act and Assert
         controller.getMoments(filterDto);
         verify(service, times(1)).getMoments(captorFilter.capture());
@@ -250,7 +250,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testGetMoment_idIsWrong() {
+    public void testGetMoment_IdIsWrong() {
         // Arrange
         long id = 0;
 
@@ -260,7 +260,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testGetMoment_captor() {
+    public void testGetMoment_Success() {
         // Act and Assert
         service.getMoment(id);
         verify(service, times(1)).getMoment(captorId.capture());

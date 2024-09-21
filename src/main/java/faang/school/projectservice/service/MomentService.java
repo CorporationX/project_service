@@ -41,7 +41,7 @@ public class MomentService {
             }
         }
         Moment moment = momentRepository.save(mapper.toEntity(momentDto));
-        MomentDto returnMomentDto = mapper.toDto(moment);
+        MomentDto returnMomentDto = mapper.toMomentDto(moment);
         log.info("Create moment with id = " + returnMomentDto.id() + "\n" +
                 "for projects with id: " + returnMomentDto.projectIds());
         return returnMomentDto;
@@ -67,7 +67,7 @@ public class MomentService {
         List<Project> projectsToAdd = Stream.concat(moment.getProjects().stream(), projects.stream()).toList();
         moment.setProjects(projectsToAdd);
 
-        MomentDto returnMomentDto = mapper.toDto(momentRepository.save(moment));
+        MomentDto returnMomentDto = mapper.toMomentDto(momentRepository.save(moment));
         log.info("Updated moment with id = " + returnMomentDto.id() +
                 " add new team members with id: " + teamMemberIds +
                 " add new project with id: " + projectIds);
@@ -83,7 +83,7 @@ public class MomentService {
         for (MomentFilter filter : filters) {
             streamMoments = filter.apply(filterDto, streamMoments);
         }
-        List<MomentDto> momentDtos = mapper.toDtos(streamMoments.toList());
+        List<MomentDto> momentDtos = mapper.toMomentDtos(streamMoments.toList());
         List<Long> momentIds = momentDtos.stream()
                         .map(MomentDto::id)
                         .toList();
@@ -92,7 +92,7 @@ public class MomentService {
     }
 
     public List<MomentDto> getAllMoments() {
-        List<MomentDto> momentDtos = mapper.toDtos(momentRepository.findAll());
+        List<MomentDto> momentDtos = mapper.toMomentDtos(momentRepository.findAll());
         List<Long> momentIds = momentDtos.stream()
                 .map(MomentDto::id)
                 .toList();
@@ -102,7 +102,7 @@ public class MomentService {
 
     public MomentDto getMoment(long id) {
         Optional<Moment> momentOpt = momentRepository.findById(id);
-        MomentDto momentDto = momentOpt.map(mapper::toDto).orElseThrow(() ->
+        MomentDto momentDto = momentOpt.map(mapper::toMomentDto).orElseThrow(() ->
                 new EntityNotFoundException("Момент с id = " + id + " не найден в системе")
         );
         log.info("Returning moment with id = " + momentDto.id());

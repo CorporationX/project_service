@@ -4,8 +4,8 @@ import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.dto.MomentFilterDto;
-import faang.school.projectservice.filter.moment.MomentFilterMonth;
-import faang.school.projectservice.filter.moment.MomentFilterProjects;
+import faang.school.projectservice.filter.moment.MonthMomentFilter;
+import faang.school.projectservice.filter.moment.ProjectsMomentFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
@@ -60,47 +60,19 @@ public class MomentServiceTest {
     ArgumentCaptor<Moment> captorMoment;
     @Captor
     ArgumentCaptor<MomentDto> captorMomentDto;
-
-    MomentDto createMomentDto(LocalDateTime createdAt, LocalDateTime updatedAt) {
-        return new MomentDto(
-                1L,
-                "Moment",
-                "description",
-                LocalDateTime.of(2024, 12, 31, 12, 0, 0),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                "imageId1",
-                createdAt,
-                updatedAt
-        );
-    }
-
-    Moment createMoment() {
-        Moment moment = new Moment();
-        moment.setId(1L);
-        moment.setName("Moment");
-        moment.setDescription("description");
-        moment.setDate(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
-        moment.setProjects( new ArrayList<>(
-                List.of(
-                        Project.builder().id(1L).build(),
-                        Project.builder().id(2L).build(),
-                        Project.builder().id(3L).build()
-                )
-        ));
-        moment.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L)));
-        moment.setImageId("imageId1");
-        moment.setCreatedAt(momentDto.createdAt());
-        moment.setUpdatedAt(momentDto.updatedAt());
-        return moment;
-    }
+    private List<Long> defaultProjectIds;
+    private List<Long> defaultUserIds;
+    private String defaultDescription;
 
     @BeforeEach
     public void setup() {
+        defaultProjectIds = new ArrayList<>(List.of(1L, 2L, 3L));
+        defaultUserIds = new ArrayList<>(List.of(1L, 2L, 3L));
+        defaultDescription = "description";
         momentFilters = new ArrayList<>(
                 List.of(
-                        new MomentFilterMonth(),
-                        new MomentFilterProjects()
+                        new MonthMomentFilter(),
+                        new ProjectsMomentFilter()
                 )
         );
         service = new MomentService(
@@ -110,9 +82,9 @@ public class MomentServiceTest {
                 mapper,
                 momentFilters
         );
-        momentDto = createMomentDto(LocalDateTime.now(), LocalDateTime.now());
-        expectedMomentDto = createMomentDto(momentDto.createdAt(), momentDto.updatedAt());
-        momentDtoToReturn = createMomentDto(momentDto.createdAt(), momentDto.updatedAt());
+        momentDto = createMomentDto(defaultProjectIds, defaultUserIds, defaultDescription, LocalDateTime.now(), LocalDateTime.now());
+        expectedMomentDto = createMomentDto(defaultProjectIds, defaultUserIds, defaultDescription, momentDto.createdAt(), momentDto.updatedAt());
+        momentDtoToReturn = createMomentDto(defaultProjectIds, defaultUserIds, defaultDescription, momentDto.createdAt(), momentDto.updatedAt());
         momentToReturn = createMoment();
         expectedMoment = createMoment();
     }
@@ -168,17 +140,7 @@ public class MomentServiceTest {
     @Test
     public void testUpdate_NotNewProjectAndTeamMember() {
         // Arrange
-        expectedMomentDto = new MomentDto(
-                1L,
-                "Moment",
-                "description",
-                LocalDateTime.of(2024, 12, 31, 12, 0, 0),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                "imageId1",
-                momentDto.createdAt(),
-                momentDto.updatedAt()
-        );
+        expectedMomentDto = createMomentDto(defaultProjectIds, defaultUserIds, defaultDescription, momentDto.createdAt(), momentDto.updatedAt());
         when(momentRepository.findById(momentDto.id())).thenReturn(Optional.of(momentToReturn));
         when(momentRepository.save(any())).thenReturn(momentToReturn);
 
@@ -191,55 +153,43 @@ public class MomentServiceTest {
     @Test
     public void testUpdate_NewProject() {
         // Arrange
-        momentToReturn.setProjects(new ArrayList<>(List.of(Project.builder().id(1L).build())));
-        expectedMomentDto = new MomentDto(
-                1L,
-                "Moment",
-                "newDescription",
-                LocalDateTime.of(2024, 12, 31, 12, 0, 0),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)),
-                "imageId1",
-                momentToReturn.getCreatedAt(),
-                momentToReturn.getUpdatedAt()
-        );
+        momentToReturn.setProjects(new ArrayList<>(List.of(createProject(1L))));
+        expectedMomentDto = createMomentDto(defaultProjectIds, new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)), "newDescription", momentToReturn.getCreatedAt(), momentToReturn.getUpdatedAt());
         when(momentRepository.findById(momentDto.id())).thenReturn(Optional.of(momentToReturn));
+        List<Team> teams = new ArrayList<>(
+                List.of(
+                        Team.builder()
+                                .teamMembers(
+                                        new ArrayList<>(
+                                                List.of(
+                                                        TeamMember.builder().id(10L).build(),
+                                                        TeamMember.builder().id(20L).build()
+                                                )
+                                        )
+                                )
+                                .build()
+                )
+        );
         List<Project> newProject = new ArrayList<>(
                 List.of(
                         Project.builder()
                                 .id(2L)
-                                .teams(new ArrayList<>(
-                                        List.of(
-                                                Team.builder()
-                                                .teamMembers(
-                                                        new ArrayList<>(
-                                                                List.of(
-                                                                        TeamMember.builder().id(10L).build(),
-                                                                        TeamMember.builder().id(20L).build()
-                                                                )
-                                                        )
-                                                )
-                                                .build()
-                                        )
-                                ))
+                                .teams(teams)
                                 .build()
                 )
         );
         when(projectRepository.findAllByIds(any())).thenReturn(newProject);
         expectedMoment.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)));
-        Moment momentToReturn =  new Moment(
-
-        );
-        momentToReturn = new Moment();
+        Moment momentToReturn = new Moment();
         momentToReturn.setId(1L);
         momentToReturn.setName("Moment");
         momentToReturn.setDescription("newDescription");
         momentToReturn.setDate(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
         momentToReturn.setProjects( new ArrayList<>(
                 List.of(
-                        Project.builder().id(1L).build(),
-                        Project.builder().id(2L).build(),
-                        Project.builder().id(3L).build()
+                        createProject(1L),
+                        createProject(2L),
+                        createProject(3L)
                 )
         ));
         momentToReturn.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)));
@@ -262,31 +212,21 @@ public class MomentServiceTest {
         expectedMoment.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L)));
         expectedMoment.setProjects(new ArrayList<>(
                 List.of(
-                        Project.builder().id(1L).build(),
-                        Project.builder().id(2L).build(),
-                        Project.builder().id(3L).build(),
-                        Project.builder().id(10L).build(),
-                        Project.builder().id(20L).build()
+                        createProject(1L),
+                        createProject(2L),
+                        createProject(3L),
+                        createProject(10L),
+                        createProject(20L)
                 )
         ));
-        expectedMomentDto = new MomentDto(
-                1L,
-                "Moment",
-                "description",
-                LocalDateTime.of(2024, 12, 31, 12, 0, 0),
-                new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)),
-                new ArrayList<>(List.of(1L, 2L, 3L)),
-                "imageId1",
-                momentToReturn.getCreatedAt(),
-                momentToReturn.getUpdatedAt()
-        );
+        expectedMomentDto = createMomentDto(new ArrayList<>(List.of(1L, 2L, 3L, 10L, 20L)), defaultUserIds, "description", momentToReturn.getCreatedAt(), momentToReturn.getUpdatedAt());
         when(momentRepository.findById(momentDto.id())).thenReturn(Optional.of(momentToReturn));
         when(projectRepository.findAllByIds(any())).thenReturn(new ArrayList<>());
         TeamMember teamMemberOne = TeamMember.builder()
                 .team(
                         Team.builder()
                                 .project(
-                                        Project.builder().id(10L).build()
+                                        createProject(10L)
                                 ).build()
                 )
                 .build();
@@ -294,7 +234,7 @@ public class MomentServiceTest {
                 .team(
                         Team.builder()
                                 .project(
-                                        Project.builder().id(20L).build()
+                                        createProject(20L)
                                 ).build()
                 )
                 .build();
@@ -320,9 +260,9 @@ public class MomentServiceTest {
         momentOne.setDate(LocalDateTime.of(2024, 8, 1, 1, 1, 1));
         momentOne.setProjects(new ArrayList<>(
                 List.of(
-                        Project.builder().id(1L).build(),
-                        Project.builder().id(2L).build(),
-                        Project.builder().id(3L).build()
+                        createProject(1L),
+                        createProject(2L),
+                        createProject(3L)
                 )
         ));
         Moment momentTwo = new Moment();
@@ -330,9 +270,9 @@ public class MomentServiceTest {
         momentTwo.setDate(LocalDateTime.of(2024, 8, 1, 1, 1, 1));
         momentTwo.setProjects(new ArrayList<>(
                 List.of(
-                        Project.builder().id(10L).build(),
-                        Project.builder().id(2L).build(),
-                        Project.builder().id(3L).build()
+                        createProject(10L),
+                        createProject(2L),
+                        createProject(3L)
                 )
         ));
         Moment momentThree = new Moment();
@@ -340,9 +280,9 @@ public class MomentServiceTest {
         momentThree.setDate(LocalDateTime.of(2024, 9, 1, 1, 1, 1));
         momentThree.setProjects(new ArrayList<>(
                 List.of(
-                        Project.builder().id(1L).build(),
-                        Project.builder().id(2L).build(),
-                        Project.builder().id(33L).build()
+                        createProject(1L),
+                        createProject(2L),
+                        createProject(33L)
                 )
         ));
         List<Moment> moments = new ArrayList<>(
@@ -445,5 +385,44 @@ public class MomentServiceTest {
 
         // Assert
         Assertions.assertEquals(expectedMomentDto, returnDto);
+    }
+
+    private MomentDto createMomentDto(List<Long> projectIds, List<Long> userIds,
+                                      String description, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        return new MomentDto(
+                1L,
+                "Moment",
+                description,
+                LocalDateTime.of(2024, 12, 31, 12, 0, 0),
+                projectIds,
+                userIds,
+                "imageId1",
+                createdAt,
+                updatedAt
+        );
+    }
+
+    private Moment createMoment() {
+        Moment moment = new Moment();
+        moment.setId(1L);
+        moment.setName("Moment");
+        moment.setDescription("description");
+        moment.setDate(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        moment.setProjects( new ArrayList<>(
+                List.of(
+                        createProject(1L),
+                        createProject(2L),
+                        createProject(3L)
+                )
+        ));
+        moment.setUserIds(new ArrayList<>(List.of(1L, 2L, 3L)));
+        moment.setImageId("imageId1");
+        moment.setCreatedAt(momentDto.createdAt());
+        moment.setUpdatedAt(momentDto.updatedAt());
+        return moment;
+    }
+    
+    private Project createProject(Long id) {
+        return Project.builder().id(id).build();
     }
 }

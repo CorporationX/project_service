@@ -53,7 +53,7 @@ public class MomentController {
         return service.getMoments(filterDto);
     }
 
-    @GetMapping("/get/all")
+    @GetMapping("/all")
     @Operation(
             summary = "Получить все моменты",
             description = "Позволяет получить все моменты, которые есть в бд"
@@ -62,7 +62,7 @@ public class MomentController {
         return service.getAllMoments();
     }
 
-    @PutMapping("/get/id")
+    @GetMapping("/id")
     @Operation(
             summary = "Получить момент по id",
             description = "Позволяет получить момент по id"
