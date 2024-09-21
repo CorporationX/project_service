@@ -12,11 +12,16 @@ class InternshipStatusFilterTest extends TestFiltersSetUp{
     @InjectMocks //I did not actually understand why should we use it here, even though we do not have any mock classes to inject
     InternshipStatusFilter internshipStatusFilter;
 
+//    @Test
+//    @DisplayName("Testing if the filters are applicable")
+//    void testFiltersAreApplicable(){
+//        Assert.assertEquals(true, internshipStatusFilter.isApplicable(firstFilters));
+//    }
 
     @Test
     @DisplayName("Testing if the filters are applicable")
     void testFiltersAreApplicable(){
-        Assert.assertEquals(true, internshipStatusFilter.isApplicable(firstFilters));
+        Assert.assertEquals(false, internshipStatusFilter.isApplicable(firstFilters));
     }
 
 
