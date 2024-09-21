@@ -1,7 +1,10 @@
 package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.StageJpaRepository;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
+import feign.Param;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -30,4 +33,30 @@ public class StageRepository {
     public List<Stage> findAll() {
         return jpaRepository.findAll();
     }
+
+    public List<Stage> findAllStagesByProjectId(Long projectId) {
+        return jpaRepository.findAllStagesByProjectId(projectId);
+    }
+
+    public List<Stage> findStagesByProjectAndFilters(
+            Long projectId,
+            List<TeamRole> roles,
+            List<TaskStatus> taskStatuses
+    ) {
+        return jpaRepository.findStagesByProjectAndFilters(projectId, roles, taskStatuses);
+    }
+
+    public void deleteAllTasksByStageId(Long stageId) {
+        jpaRepository.deleteAllTasksByStageId(stageId);
+    }
+
+    public void closeTasksByStageId(Long stageId) {
+        jpaRepository.closeTasksByStageId(stageId);
+    }
+
+    public void reassignTasksFromToStage(Long providerStageId, Stage consumerStage) {
+        jpaRepository.reassignTasksFromToStage(providerStageId, consumerStage);
+    }
+
+
 }
