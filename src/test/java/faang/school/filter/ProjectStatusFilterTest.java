@@ -38,7 +38,7 @@ public class ProjectStatusFilterTest {
     }
 
     @Test
-    public void testApply_FiltersProjectsByStatusAndVisibility() {
+    public void testApply_FiltersProjectsByStatus() {
         Project project1 = mock(Project.class);
         Project project2 = mock(Project.class);
         Project project3 = mock(Project.class);
@@ -46,10 +46,6 @@ public class ProjectStatusFilterTest {
         when(project1.getStatus()).thenReturn(ProjectStatus.IN_PROGRESS);
         when(project2.getStatus()).thenReturn(ProjectStatus.COMPLETED);
         when(project3.getStatus()).thenReturn(ProjectStatus.IN_PROGRESS);
-
-        when(project1.getVisibility()).thenReturn(ProjectVisibility.PUBLIC);
-        when(project2.getVisibility()).thenReturn(ProjectVisibility.PRIVATE);
-        when(project3.getVisibility()).thenReturn(ProjectVisibility.PRIVATE);
 
         TeamMember member = mock(TeamMember.class);
         when(member.getId()).thenReturn(1L);
@@ -69,45 +65,5 @@ public class ProjectStatusFilterTest {
 
         assertEquals(2, filteredProjects.size());
         assertTrue(filteredProjects.stream().anyMatch(p -> p.getStatus() == ProjectStatus.IN_PROGRESS));
-    }
-
-    @Test
-    public void testFilterByVisibility_WhenProjectIsPrivateAndMemberIsInTeam_ReturnsTrue() {
-        Project project = mock(Project.class);
-        when(project.getVisibility()).thenReturn(ProjectVisibility.PRIVATE);
-
-        TeamMember member = mock(TeamMember.class);
-        when(member.getId()).thenReturn(1L);
-        Team team = mock(Team.class);
-        when(team.getTeamMembers()).thenReturn(List.of(member));
-        when(project.getTeams()).thenReturn(List.of(team));
-
-        filterDto.setTeamMemberId(1);
-
-        assertTrue(projectStatusFilter.filterByVisibility(project, filterDto));
-    }
-
-    @Test
-    public void testFilterByVisibility_WhenProjectIsPrivateAndMemberIsNotInTeam_ReturnsFalse() {
-        Project project = mock(Project.class);
-        when(project.getVisibility()).thenReturn(ProjectVisibility.PRIVATE);
-
-        TeamMember member = mock(TeamMember.class);
-        when(member.getId()).thenReturn(2L);
-        Team team = mock(Team.class);
-        when(team.getTeamMembers()).thenReturn(List.of(member));
-        when(project.getTeams()).thenReturn(List.of(team));
-
-        filterDto.setTeamMemberId(1);
-
-        assertFalse(projectStatusFilter.filterByVisibility(project, filterDto));
-    }
-
-    @Test
-    public void testFilterByVisibility_WhenProjectIsPublic_ReturnsTrue() {
-        Project project = mock(Project.class);
-        when(project.getVisibility()).thenReturn(ProjectVisibility.PUBLIC);
-
-        assertTrue(projectStatusFilter.filterByVisibility(project, filterDto));
     }
 }

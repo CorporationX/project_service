@@ -11,5 +11,4 @@ public interface ProjectFilter {
 
     Stream<Project> apply(Stream<Project> projectStream, ProjectFilterDto filterDto);
 
-    boolean filterByVisibility(Project project, ProjectFilterDto filterDto);
 }
