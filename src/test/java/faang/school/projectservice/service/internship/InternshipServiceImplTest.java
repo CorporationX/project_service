@@ -31,7 +31,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,8 +46,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipServiceImplTest {
-    private static final int MAX_INTERNSHIP_DURATION_MONTH = 3;
-
+    private static final LocalDateTime START_DATE = LocalDateTime.of(2024, Month.AUGUST, 1, 0, 0);
+    private static final LocalDateTime END_DATE = LocalDateTime.of(2024, Month.OCTOBER, 30, 0, 0);
+    private static final LocalDateTime WRONG_DATE = LocalDateTime.of(2024, Month.DECEMBER, 30, 0, 0);
     @InjectMocks
     private InternshipServiceImpl internshipService;
 
@@ -266,7 +267,7 @@ public class InternshipServiceImplTest {
         Long mentorId = 2L;
         Long projectId = 1L;
 
-        return new CreateInternshipDto("name", "description", projectId, interns, mentorId, LocalDateTime.now().plusMonths(3));
+        return new CreateInternshipDto("name", "description", projectId, interns, mentorId, START_DATE, END_DATE);
     }
 
     private CreateInternshipDto createInternshipDtoWithWrongDuration() {
@@ -274,7 +275,7 @@ public class InternshipServiceImplTest {
         Long mentorId = 2L;
         Long projectId = 1L;
 
-        return new CreateInternshipDto("name", "description", projectId, interns, mentorId, LocalDateTime.now().plusMonths(4));
+        return new CreateInternshipDto("name", "description", projectId, interns, mentorId, START_DATE, WRONG_DATE);
     }
 
     private Project createProjectWithTeam() {
@@ -344,7 +345,6 @@ public class InternshipServiceImplTest {
     }
 
     private List<Internship> createInternships() {
-        LocalDateTime now = LocalDateTime.now();
         TeamMember mentor1 = new TeamMember();
         TeamMember mentor2 = new TeamMember();
         Project project1 = new Project();
@@ -358,7 +358,7 @@ public class InternshipServiceImplTest {
         internship1.setMentorId(mentor1);
         internship1.setProject(project1);
         internship1.setStatus(InternshipStatus.COMPLETED);
-        internship1.setEndDate(now);
+        internship1.setEndDate(END_DATE);
         Internship internship2 = new Internship();
         internship2.setId(2L);
         internship2.setName("name2");
@@ -366,7 +366,7 @@ public class InternshipServiceImplTest {
         internship2.setMentorId(mentor2);
         internship2.setProject(project1);
         internship2.setStatus(InternshipStatus.COMPLETED);
-        internship2.setEndDate(now);
+        internship2.setEndDate(END_DATE);
         return List.of(internship1, internship2);
     }
 

@@ -35,7 +35,7 @@ public class CreateInternshipDto {
     @NotNull(message = "Mentor ID cannot be blank")
     private final Long mentorId;
 
-    private final LocalDateTime startDate = LocalDateTime.now();
+    private LocalDateTime startDate;
 
     @Future(message = "End date must be in the future")
     private final LocalDateTime endDate;
