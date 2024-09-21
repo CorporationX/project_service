@@ -12,18 +12,17 @@ import java.util.List;
 @Component
 public interface ProjectService {
 
-
     void createProject(ProjectDto projectDto);
 
     void updateStatus(ProjectDto projectDto, ProjectStatus status);
 
     void updateDescription(ProjectDto projectDto, String description);
 
-    List<ProjectDto> getProjects();
-
-    ProjectDto findById(long id);
-
     List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto, TeamMemberDto requester);
 
+    List<ProjectDto> getProjects();
+
     boolean checkUserByPrivateProject(Project project, long requester);
+
+    ProjectDto findById(long id);
 }

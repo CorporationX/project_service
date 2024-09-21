@@ -7,7 +7,7 @@ import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project_service.ProjectServiceImpl;
+import faang.school.projectservice.service.project.ProjectServiceImpl;
 import faang.school.projectservice.validator.ValidatorProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,19 +19,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceTest {
     @InjectMocks
     private ProjectServiceImpl projectService;
     @Mock
-    private ValidatorProject validation;
+    private ValidatorProject validator;
     @Mock
     private ProjectRepository projectRepository;
     @Mock
@@ -40,51 +38,66 @@ public class ServiceTest {
     private ProjectMapper mapper = Mappers.getMapper(ProjectMapper.class);
 
     @Test
-    public void testUpdateStatusGetException() {
-        ProjectDto projectDto = new ProjectDto();
-        Project project = new Project();
-        project.setStatus(ProjectStatus.COMPLETED);
-        ProjectStatus status = ProjectStatus.CANCELLED;
+    void testCreateProject() {
+        ProjectDto projectDto = prepareListProjectDto().get(0);
+        Project projectEntity = prepareListProjectEntity().get(0);
 
-        when(validation.getEntity(projectDto)).thenReturn(project);
-        assertThrows(NoSuchElementException.class, () -> projectService.updateStatus(projectDto, status));
+        when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
+        when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
+
+        projectService.createProject(projectDto);
+
+        assertEquals(ProjectStatus.CREATED, projectEntity.getStatus());
+        verify(projectRepository).save(projectEntity);
     }
 
     @Test
-    public void testUpdateStatus() {
-        ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
-        ProjectStatus status = ProjectStatus.CANCELLED;
-        when(validation.getEntity(projectDto)).thenReturn(projectEntity);
-        when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
+    void testUpdateStatus_existingProject() {
+        Project project = prepareListProjectEntity().get(0);
 
-        assertDoesNotThrow(() -> projectService.updateStatus(projectDto, status));
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+
+        assertDoesNotThrow(() -> projectService.updateStatus(mapper.toDto(project), ProjectStatus.CANCELLED));
+        assertEquals(ProjectStatus.CANCELLED, project.getStatus());
+        verify(projectRepository).save(project);
     }
 
     @Test
-    public void testUpdateDescriptionGetException() {
-        ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
-        when(validation.getEntity(projectDto)).thenReturn(projectEntity);
+    void testUpdateDescription() {
+        Project project = prepareListProjectEntity().get(0);
+        project.setDescription("Start description");
 
-        assertThrows(NoSuchElementException.class,
-                () -> projectService.updateDescription(projectDto, "description"));
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+
+        assertDoesNotThrow(() -> projectService.updateDescription(mapper.toDto(project), "Finish description"));
+        verify(projectRepository).save(project);
+    }
+
+
+    private List<ProjectDto> prepareListProjectDto() {
+        List<ProjectDto> projectsDto = new ArrayList<>();
+        ProjectDto firstProjectDto = new ProjectDto();
+        ProjectDto secondProjectDto = new ProjectDto();
+        projectsDto.add(firstProjectDto);
+        projectsDto.add(secondProjectDto);
+
+        return projectsDto;
+    }
+
+    private List<Project> prepareListProjectEntity() {
+        List<Project> projects = new ArrayList<>();
+        Project firstProject = new Project();
+        Project secondProject = new Project();
+        firstProject.setVisibility(ProjectVisibility.PUBLIC);
+        secondProject.setVisibility(ProjectVisibility.PUBLIC);
+        projects.add(firstProject);
+        projects.add(secondProject);
+
+        return projects;
     }
 
     @Test
-    public void testUpdateDescription() {
-        ProjectDto projectDto = new ProjectDto();
-        Project projectEntity = new Project();
-        projectEntity.setDescription("Start description");
-        when(validation.getEntity(projectDto)).thenReturn(projectEntity);
-        when(projectRepository.existsById(projectEntity.getId())).thenReturn(true);
-
-        assertDoesNotThrow(
-                () -> projectService.updateDescription(projectDto, "Finish description"));
-    }
-
-    @Test
-    public void testGetProjectsFilters() {
+    void testGetProjectsFilters() {
         ProjectFilterDto filterDto = new ProjectFilterDto();
         filterDto.setName("Name");
 
@@ -98,7 +111,7 @@ public class ServiceTest {
         requester.setUserId(1L);
 
         when(projectRepository.findAll()).thenReturn(projects);
-        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, validation);
+        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, validator);
 
         List<ProjectDto> result = service.getProjectsFilters(filterDto, requester);
         assertThat(result).isEqualTo(projects);
@@ -106,22 +119,12 @@ public class ServiceTest {
 
     @Test
     public void testGetProjects() {
-        List<ProjectDto> projectsDto = new ArrayList<>();
-        List<Project> projects = new ArrayList<>();
-        ProjectDto firstProjectDto = new ProjectDto();
-        ProjectDto secondProjectDto = new ProjectDto();
-        Project firstProject = new Project();
-        Project secondProject = new Project();
-        firstProject.setVisibility(ProjectVisibility.PUBLIC);
-        secondProject.setVisibility(ProjectVisibility.PUBLIC);
-        projects.add(firstProject);
-        projects.add(secondProject);
-        projectsDto.add(firstProjectDto);
-        projectsDto.add(secondProjectDto);
+        List<Project> projects = prepareListProjectEntity();
+        List<ProjectDto> projectsDto = prepareListProjectDto();
 
         when(projectRepository.findAll()).thenReturn(projects);
-        when(mapper.toDto(firstProject)).thenReturn(firstProjectDto);
-        when(mapper.toDto(secondProject)).thenReturn(secondProjectDto);
+        when(mapper.toDto(projects.get(0))).thenReturn(projectsDto.get(0));
+        when(mapper.toDto(projects.get(1))).thenReturn(projectsDto.get(1));
 
         List<ProjectDto> result = projectService.getProjects();
 
@@ -136,8 +139,7 @@ public class ServiceTest {
         ProjectDto projectDto = new ProjectDto();
         projectDto.setId(id);
 
-        when(validation.findById(id)).thenReturn(project);
-        when(mapper.toDto(project)).thenReturn(projectDto);
+        when(projectService.findById(id)).thenReturn(projectDto);
         ProjectDto result = projectService.findById(id);
 
         assertEquals(result, projectDto);
@@ -162,7 +164,7 @@ public class ServiceTest {
 
         when(project.getTeams()).thenReturn(List.of(team1, team2));
 
-        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, validation)
+        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, validator)
                 .checkUserByPrivateProject(project, requesterId);
 
         assertTrue(result);

@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.project_service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
@@ -28,48 +28,45 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
     private final List<ProjectFilters> filters;
-    private final ValidatorProject validation;
+    private final ValidatorProject validator;
 
+    @Override
     public void createProject(ProjectDto projectDto) {
-        Project project = validation.getEntity(projectDto);
-        validation.validationCreateProject(projectDto);
+        Project project = mapper.toEntity(projectDto);
+        validator.validationCreateProject(projectDto);
         project.setStatus(ProjectStatus.CREATED);
         projectRepository.save(project);
     }
 
+    @Override
     public void updateStatus(ProjectDto projectDto, ProjectStatus status) {
-        Project project = validation.getEntity(projectDto);
-        if (!projectRepository.existsById(project.getId())) {
+        Project project = projectRepository.getProjectById(projectDto.getId());
+
+        if (project == null) {
             throw new NoSuchElementException("The project does not exist");
         }
 
         project.setStatus(status);
         project.setUpdatedAt(LocalDateTime.now());
+
+        projectRepository.save(project);
     }
 
+    @Override
     public void updateDescription(ProjectDto projectDto, String description) {
-        Project project = validation.getEntity(projectDto);
+        Project project = projectRepository.getProjectById(projectDto.getId());
 
-        if (!projectRepository.existsById(project.getId())) {
+        if (project == null) {
             throw new NoSuchElementException("The project does not exist");
         }
 
         project.setDescription(description);
         project.setUpdatedAt(LocalDateTime.now());
+
+        projectRepository.save(project);
     }
 
-    public List<ProjectDto> getProjects() {
-        return projectRepository.findAll()
-                .stream()
-                .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC))
-                .map(mapper::toDto)
-                .toList();
-    }
-
-    public ProjectDto findById(long id) {
-        return mapper.toDto(validation.findById(id));
-    }
-
+    @Override
     public List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto, TeamMemberDto requester) {
         Stream<Project> projectStream = projectRepository.findAll().stream();
         return filters.stream()
@@ -83,6 +80,16 @@ public class ProjectServiceImpl implements ProjectService {
                 .toList();
     }
 
+    @Override
+    public List<ProjectDto> getProjects() {
+        return projectRepository.findAll()
+                .stream()
+                .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC))
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    @Override
     public boolean checkUserByPrivateProject(Project project, long requester) {
         Set<Long> teamMemberIds = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
@@ -90,5 +97,36 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toSet());
 
         return teamMemberIds.contains(requester);
+    }
+
+    @Override
+    public ProjectDto findById(long id) {
+        return mapper.toDto(projectRepository.getProjectById(id));
+    }
+
+    private List<Project> findByName(String name) {
+        List<Project> projects = projectRepository.findAll();
+        return projects.stream()
+                .filter(project -> project.getName().equals(name))
+                .toList();
+    }
+
+    private Project findProjectByNameAndOwnerId(String name, Long ownerId) {
+        List<Project> projects = findByName(name);
+        for (Project project : projects) {
+            if (project.getOwnerId().equals(ownerId)) {
+                return project;
+            }
+        }
+        return null;
+    }
+
+    public void validationDuplicateProjectNames(ProjectDto projectDto) {
+        Project existingProject = findProjectByNameAndOwnerId(projectDto.getName(),
+                projectRepository.getProjectById(projectDto.getId()).getOwnerId());
+
+        if (existingProject != null && existingProject.getId().equals(projectDto.getId())) {
+            throw new NoSuchElementException("This user already has a project with this name");
+        }
     }
 }
