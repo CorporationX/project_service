@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.moment.;
+package faang.school.projectservice.validator.moment;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
