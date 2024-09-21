@@ -3,11 +3,11 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class ProjectService {
 
     private final ProjectValidator projectValidator;
     private final ProjectRepository projectRepository;
-    private final List<ProjectFilter> projectFilters;
+    private final List<Filter<ProjectFilterDto, Project>> projectFilters;
     private final ProjectMapper projectMapper;
 
     public ProjectDto create(ProjectDto projectDto) {
@@ -78,9 +78,6 @@ public class ProjectService {
     }
 
     public List<Project> getProjectByIds(List<Long> ids) {
-        List<Project> projects = projectRepository.findAllByIds(ids);
-        projectValidator.validateProjects(projects);
-
-        return projects;
+        return projectRepository.findAllByIds(ids);
     }
 }

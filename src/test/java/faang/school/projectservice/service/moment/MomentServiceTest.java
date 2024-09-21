@@ -2,7 +2,7 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.filter.moment.MomentFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -10,6 +10,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.validator.moment.MomentValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,10 +44,13 @@ class MomentServiceTest {
     private MomentMapper momentMapper;
 
     @Mock
-    private List<MomentFilter> momentFilters;
+    private List<Filter<MomentFilterDto, Moment>> momentFilters;
 
     @Mock
     private ProjectService projectService;
+
+    @Mock
+    private MomentValidator momentValidator;
 
     @InjectMocks
     private MomentService momentService;
@@ -77,7 +81,6 @@ class MomentServiceTest {
         moment.setProjects(List.of(project));
 
         momentDto = MomentDto.builder()
-                .id(MOMENT_ID)
                 .name(MOMENT_NAME)
                 .projectIds(List.of(PROJECT_ID))
                 .build();
@@ -130,6 +133,11 @@ class MomentServiceTest {
     @DisplayName("Update Moment Tests")
     class UpdateMomentTests {
 
+        @BeforeEach
+        void setUp() {
+            momentDto.setId(MOMENT_ID);
+        }
+
         @Test
         @DisplayName("When valid moment ID and DTO are provided then update the moment")
         void whenValidMomentIdAndDtoProvidedThenUpdateMoment() {
@@ -150,7 +158,7 @@ class MomentServiceTest {
     class FilterMomentsTests {
 
         @Mock
-        private MomentFilter mockMomentFilter;
+        private Filter<MomentFilterDto, Moment> mockMomentFilter;
 
         @Test
         @DisplayName("When applicable filters are provided then apply them to the moments")

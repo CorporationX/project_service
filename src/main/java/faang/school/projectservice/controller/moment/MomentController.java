@@ -1,19 +1,17 @@
 package faang.school.projectservice.controller.moment;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.service.moment.MomentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/v1/moments")
 @AllArgsConstructor
 public class MomentController {
@@ -30,8 +28,8 @@ public class MomentController {
         return momentService.getAll();
     }
 
-    @GetMapping("/filter")
-    public List<MomentDto> filterBy(@RequestParam(value = "projectId") @Positive long projectId,
+    @GetMapping("/projects/{projectId}")
+    public List<MomentDto> filterBy(@PathVariable @Positive long projectId,
                                     @RequestParam(value = "startDate", required = false) LocalDateTime startDate,
                                     @RequestParam(value = "endDate", required = false) LocalDateTime endDate) {
         MomentFilterDto momentFilterDto = new MomentFilterDto(startDate, endDate);

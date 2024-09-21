@@ -2,13 +2,14 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.filter.moment.MomentFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.validator.moment.MomentValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +23,13 @@ public class MomentService {
 
     private final MomentRepository momentRepository;
     private final MomentMapper momentMapper;
-    private final List<MomentFilter> momentFilters;
+    private final List<Filter<MomentFilterDto, Moment>> momentFilters;
+    private final MomentValidator momentValidator;
     private final ProjectService projectService;
 
     @Transactional
     public MomentDto createMoment(MomentDto momentDto) {
-        Moment moment = prepareMoment(momentMapper.toEntity(momentDto), momentDto);
-
-        momentRepository.save(moment);
+        Moment moment = createOrUpdateMoment(momentDto);
 
         return momentMapper.toDto(moment);
     }
@@ -46,37 +46,56 @@ public class MomentService {
 
     @Transactional
     public MomentDto updateMoment(Long momentId, MomentDto momentDto) {
-        Moment moment = prepareMoment(getMomentById(momentId), momentDto);
+        if (momentDto.getId() == null) {
+            momentDto.setId(momentId);
+        } else if (!momentDto.getId().equals(momentId)) {
+            throw new IllegalArgumentException("Moment Id in uri (" + momentId + ") and body (" + momentDto.getId() + ") do not match");
+        }
 
-        momentRepository.save(moment);
+        Moment moment = createOrUpdateMoment(momentDto);
 
         return momentMapper.toDto(moment);
     }
 
     @Transactional
     public List<MomentDto> filterBy(Long projectId, MomentFilterDto filterDto) {
-        List<Moment> moments = momentRepository.findAllByProjectId(projectId);
-
         return momentFilters.stream()
                 .filter(f -> f.isApplicable(filterDto))
-                .reduce(moments.stream(), (stream, filter) -> filter.apply(stream, filterDto), (s1, s2) -> s1)
+                .reduce(
+                        momentRepository.findAllByProjectId(projectId).stream(),
+                        (stream, filter) -> filter.apply(stream, filterDto),
+                        (s1, s2) -> s1
+                )
                 .map(momentMapper::toDto)
                 .toList();
     }
 
-    private Moment prepareMoment(Moment moment, MomentDto momentDto) {
-        List<Project> projects = projectService.getProjectByIds(momentDto.getProjectIds());
+    private Moment createOrUpdateMoment(MomentDto momentDto) {
+        Long momentId = momentDto.getId();
+        Moment moment;
 
+        if (momentId == null) {
+            moment = momentMapper.toEntity(momentDto);
+        } else {
+            moment = getMomentById(momentId);
+            moment.setName(momentDto.getName());
+        }
+
+        updateProjects(moment, momentDto.getProjectIds());
+
+        return momentRepository.save(moment);
+    }
+
+    private void updateProjects(Moment moment, List<Long> projectIds) {
+        List<Project> projects = projectService.getProjectByIds(projectIds);
+        momentValidator.validateNoCancelledProjects(projects);
         moment.setProjects(projects);
         moment.setUserIds(getUserIdsByProjects(projects));
-        moment.setName(momentDto.getName());
-
-        return moment;
     }
 
     private Moment getMomentById(long id) {
         return momentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Moment doesn't exist with this id"));
+                .orElseThrow(() -> new EntityNotFoundException("Moment doesn't exist with this id " + id));
     }
 
     private List<Long> getUserIdsByProjects(List<Project> projects) {

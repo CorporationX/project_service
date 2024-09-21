@@ -1,13 +1,14 @@
 package faang.school.projectservice.filter.project;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
 @Component
-class ProjectStatusFilter implements ProjectFilter {
+class ProjectStatusFilter implements Filter<ProjectFilterDto, Project> {
 
     @Override
     public boolean isApplicable(ProjectFilterDto filterDto) {
