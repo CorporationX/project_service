@@ -13,7 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/setup-java@v4
+        uses: actions/checkout@v4.1.7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4.3.0
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -36,7 +39,7 @@ jobs:
 
       - name: Publish Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.3.6
         with:
           name: 'test-results'
           path: build/tests-results/test
