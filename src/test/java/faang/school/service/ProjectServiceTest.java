@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -94,16 +95,22 @@ public class ProjectServiceTest {
         when(projectDto.getProjectStatus()).thenReturn(ProjectStatus.COMPLETED);
         when(projectDto.getProjectName()).thenReturn(project.getName());
         when(projectRepository.existsById(projectId)).thenReturn(true);
+        when(projectRepository.save(project)).thenAnswer(invocation -> {
+            project.setUpdatedAt(LocalDateTime.now());
+        return project;
+        });
         when(projectMapper.toProject(projectDto)).thenReturn(project);
         when(projectMapper.toProjectDto(any())).thenReturn(projectDto);
 
         ProjectDto updatedProject = projectService.updateProject(projectId, projectDto);
 
         verify(projectRepository, times(1)).save(project);
-        verify(projectDto, times(1)).getProjectUpdatedAt();
+        assertNotNull(project.getUpdatedAt());
+        assertTrue(project.getUpdatedAt().isAfter(LocalDateTime.now().minusSeconds(1)));
         assertNotNull(updatedProject);
         assertEquals(ProjectStatus.COMPLETED, updatedProject.getProjectStatus());
         assertEquals("New description", updatedProject.getProjectDescription());
+
     }
 
     @Test
