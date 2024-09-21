@@ -1,5 +1,6 @@
-package faang.school.projectservice.model.stage.strategy.delete;
+package faang.school.projectservice.service.stage.executor;
 
+import faang.school.projectservice.model.stage.strategy.DeleteStageTaskStrategy;
 import faang.school.projectservice.model.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

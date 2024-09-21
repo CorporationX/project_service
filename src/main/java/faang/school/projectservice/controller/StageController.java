@@ -1,10 +1,10 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.model.stage.strategy.delete.DeleteStageTaskStrategy;
+import faang.school.projectservice.model.stage.strategy.DeleteStageTaskStrategy;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.StageService;
+import faang.school.projectservice.service.stage.StageService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;

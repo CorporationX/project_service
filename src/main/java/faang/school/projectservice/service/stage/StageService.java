@@ -1,14 +1,16 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.model.stage.strategy.delete.DeleteStageTaskStrategy;
+import faang.school.projectservice.model.stage.strategy.DeleteStageTaskStrategy;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.model.stage.strategy.delete.DeleteStageProcessor;
+import faang.school.projectservice.service.stage_invitation.StageInvitationService;
+import faang.school.projectservice.service.stage_roles.StageRolesService;
+import faang.school.projectservice.service.stage.executor.DeleteStageProcessor;
 import faang.school.projectservice.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,17 +19,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class StageService {
+    private final StageRolesService stageRolesService;
+    private final StageInvitationService stageInvitationService;
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final StageRolesService stageRolesService;
+
     private final StageMapper stageMapper;
     private final DeleteStageProcessor deleteStageProcessor;
 
@@ -99,11 +102,12 @@ public class StageService {
         List<Task> tasks = findTasksByIds(stageDto.taskIds());
         stage.setTasks(tasks);
 
-        sendRoleInvitations(stageDto, stage);
+        stageInvitationService.sendRoleInvitationsForNewExecutors(stageDto, stage);
 
         List<TeamMember> executors = findExecutorsByIds(stageDto.executorIds());
         stage.setExecutors(executors);
         Stage savedStage = stageRepository.save(stage);
+        log.info("Stage with id {} has been updated", savedStage.getStageId());
         return stageMapper.toStageDto(savedStage);
 
     }
@@ -126,28 +130,12 @@ public class StageService {
         return tasks;
     }
 
-    private Map<TeamRole, Long> getCurrentRoleCountMap(Stage stage) {
-        return stage.getExecutors().stream()
-                .flatMap(executor -> executor.getRoles().stream())
-                .collect(Collectors.groupingBy(role -> role, Collectors.counting()));
-    }
 
-    public void sendRoleInvitations(StageDto stageDto, Stage stage) {
-        Map<TeamRole, Long> currentRoleCountMap = getCurrentRoleCountMap(stage);
-        stageDto.stageRolesDtos().forEach(stageRoleDto -> {
-            TeamRole role = stageRoleDto.teamRole();
-            int requiredCount = stageRoleDto.count();
-            long currentRoleCount = currentRoleCountMap.getOrDefault(role, 0L);
-            if (currentRoleCount < requiredCount) {
-                stageRolesService.sendInvitationsForRole(stage, role, requiredCount - currentRoleCount);
-            }
-        });
-    }
 
     private List<TeamMember> findExecutorsByIds(List<Long> executorIds) {
-        return teamMemberRepository.findAllById(executorIds);
+        log.debug("Поиск исполнителей по ID: {}", executorIds);
+        List<TeamMember> teamMembers = teamMemberRepository.findAllById(executorIds);
+        log.debug("Найденные исполнители: {}", teamMembers);
+        return teamMembers;
     }
-
-
-
 }

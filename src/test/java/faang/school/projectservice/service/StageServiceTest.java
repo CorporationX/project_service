@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
@@ -11,22 +12,23 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.model.stage.strategy.delete.DeleteStageProcessor;
-import faang.school.projectservice.model.stage.strategy.delete.DeleteStageStrategyExecutor;
-import faang.school.projectservice.model.stage.strategy.delete.DeleteStageTaskStrategy;
+import faang.school.projectservice.service.stage.StageService;
+import faang.school.projectservice.service.stage.executor.DeleteStageProcessor;
+import faang.school.projectservice.service.stage.executor.DeleteStageStrategyExecutor;
+import faang.school.projectservice.model.stage.strategy.DeleteStageTaskStrategy;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import org.apache.catalina.User;
+import faang.school.projectservice.service.stage_invitation.StageInvitationService;
+import faang.school.projectservice.service.stage_roles.StageRolesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,6 +55,8 @@ public class StageServiceTest {
     private TeamMemberRepository teamMemberRepository;
     @Mock
     private StageRolesService stageRolesService;
+    @Mock
+    private StageInvitationService stageInvitationService;
     @Mock
     private DeleteStageProcessor deleteStageProcessor;
     @Mock
@@ -115,6 +119,18 @@ public class StageServiceTest {
     }
 
     @Test
+    void testUnsuccessful_createStage_shouldThrowException_whenProjectIsNotProvided() {
+        when(projectRepository.getProjectById(projectId)).thenReturn(null);
+        IllegalArgumentException thrown = assertThrows(
+                IllegalArgumentException.class,
+                () -> stageService.createStage(stageDto),
+                "Expected createStage() to throw, but it didn't"
+        );
+
+        assertEquals("Project not found by id: " + projectId, thrown.getMessage());
+    }
+
+    @Test
     void createStage_shouldThrowException_whenProjectDoesNotExist() {
         when(projectRepository.getProjectById(projectId)).thenReturn(null);
 
@@ -136,6 +152,18 @@ public class StageServiceTest {
         verify(deleteStageProcessor, times(1)).process(stageCaptor.capture(), any(DeleteStageTaskStrategy.class), any(Long.class));
     }
 
+    @Test
+    void testUnsuccessful_deleteStage_shouldThrowException_whenStageDoesNotExist() {
+        when(stageRepository.getById(stageId)).thenReturn(null);
+
+        DataValidationException thrown = assertThrows(
+                DataValidationException.class,
+                () -> stageService.deleteStage(stageId, DeleteStageTaskStrategy.CLOSE, 1L),
+                "Expected deleteStage() to throw, but it didn't"
+        );
+        assertEquals("Stage not found by id: " + stageId, thrown.getMessage());
+    }
+
 
     @Test
     void testSuccess_getAllStagesByProjectId() {
@@ -149,4 +177,27 @@ public class StageServiceTest {
         assertEquals(List.of(stageDto), result);
     }
 
+
+
+
+    @Test
+    void testSuccess_updateStage() {
+        when(stageRepository.getById(stageId)).thenReturn(stage);
+        when(taskRepository.findAllById(taskIds)).thenReturn(List.of(new Task(), new Task(), new Task()));
+        when(teamMemberRepository.findAllById(executorIds)).thenReturn(List.of(new TeamMember(), new TeamMember(), new TeamMember()));
+        when(stageRepository.save(stage)).thenReturn(stage);
+        when(stageMapper.toStageDto(stage)).thenReturn(stageDto);
+
+
+        StageDto result = stageService.updateStage(stageDto);
+
+        verify(stageRepository).getById(stageId);
+        verify(taskRepository).findAllById(taskIds);
+        verify(teamMemberRepository).findAllById(executorIds);
+        verify(stageRepository).save(stage);
+        verify(stageMapper).toStageDto(stage);
+
+
+
+    }
 }

@@ -1,4 +1,4 @@
-package faang.school.projectservice.model.stage.strategy.delete;
+package faang.school.projectservice.model.stage.strategy;
 
 import java.util.List;
 

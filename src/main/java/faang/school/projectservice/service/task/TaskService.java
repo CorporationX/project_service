@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.task;
 
 import faang.school.projectservice.repository.StageRepository;
 import lombok.AllArgsConstructor;
