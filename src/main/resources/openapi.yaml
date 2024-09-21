@@ -1,0 +1,259 @@
+openapi: 3.0.1
+info:
+  title: Project Service API
+  description: API documentation for ProjectService, including projects, vacancies, subprojects, stages, moments, and internships.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082/api/v1
+
+paths:
+  /project/{projectId}:
+    get:
+      summary: Get project by ID
+      operationId: getProject
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: ID of the project
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Project object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+  /vacancies:
+    post:
+      summary: Create a new vacancy
+      operationId: createVacancy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacancyDto'
+      responses:
+        '201':
+          description: Vacancy created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacancyDto'
+
+    put:
+      summary: Update a vacancy
+      operationId: updateVacancy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacancyDto'
+      responses:
+        '200':
+          description: Vacancy updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacancyDto'
+
+  /vacancies/{id}:
+    delete:
+      summary: Delete a vacancy by ID
+      operationId: deleteVacancy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Vacancy deleted
+
+    get:
+      summary: Get a vacancy by ID
+      operationId: getVacancyById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Vacancy found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacancyDto'
+
+  /vacancies/filter:
+    post:
+      summary: Find vacancies by filter
+      operationId: findVacanciesByFilter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacancyFilterDto'
+      responses:
+        '200':
+          description: List of vacancies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VacancyDto'
+
+  /subproject:
+    post:
+      summary: Create a subproject
+      operationId: createSubProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubProjectDto'
+      responses:
+        '201':
+          description: SubProject created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDto'
+
+  /stages:
+    post:
+      summary: Create a stage
+      operationId: createStage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StageDto'
+      responses:
+        '201':
+          description: Stage created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StageDto'
+
+  /moments:
+    post:
+      summary: Create a moment
+      operationId: createMoment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MomentDto'
+      responses:
+        '201':
+          description: Moment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MomentDto'
+
+  /internships:
+    post:
+      summary: Create an internship
+      operationId: createInternship
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternshipDto'
+      responses:
+        '201':
+          description: Internship created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternshipDto'
+
+components:
+  schemas:
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+
+    VacancyDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+
+    VacancyFilterDto:
+      type: object
+      properties:
+        title:
+          type: string
+
+    SubProjectDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        projectId:
+          type: integer
+        name:
+          type: string
+
+    ProjectDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    StageDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        projectId:
+          type: integer
+        name:
+          type: string
+
+    MomentDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+
+    InternshipDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
