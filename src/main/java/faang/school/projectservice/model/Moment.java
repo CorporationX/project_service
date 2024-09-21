@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @Entity
@@ -37,6 +39,10 @@ public class Moment {
     private String description;
 
     private LocalDateTime date;
+
+    @Getter
+    @Setter
+    private Long projectId;
 
     @ManyToMany
     @JoinTable(
