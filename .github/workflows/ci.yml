@@ -36,7 +36,7 @@ jobs:
 
       - name: Publish Test Results
         if: always()
-        uses: actions/upload-artifact@v4.4.0
+        uses: actions/upload-artifact@v4.3.0
         with:
           name: 'test-results'
           path: build/tests-results/test
