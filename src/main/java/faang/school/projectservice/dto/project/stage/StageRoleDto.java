@@ -8,9 +8,9 @@ import lombok.Builder;
 @Builder
 public record StageRoleDto(
 
-        @NotNull(message = "role name is required")
+        @NotNull(message = "Role name is required")
         TeamRole teamRole,
 
-        @NotNull(message = "count for member role is required")
-        @Positive(message = "count for member role must be positive")
+        @NotNull(message = "Count for member role is required")
+        @Positive(message = "Count for member role must be positive")
         Integer count) {}
