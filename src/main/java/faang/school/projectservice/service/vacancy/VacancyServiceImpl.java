@@ -1,5 +1,6 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.dto.filter.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
@@ -13,28 +14,29 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.filter.VacancyFilter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-public class VacancyService {
+public class VacancyServiceImpl implements VacancyService{
 
     private final VacancyRepository vacancyRepository;
     private final ProjectRepository projectRepository;
     private final CandidateRepository candidateRepository;
-    private final TeamMemberRepository teamMemberRepository;
+    private final TeamRepository teamRepository;
+    private final List<VacancyFilter> vacancyFilters;
     private final VacancyMapper vacancyMapper;
 
+    @Override
     @Transactional
     public VacancyDto create(VacancyDto vacancy) {
         Vacancy vacancyEntity = vacancyMapper.toEntity(vacancy);
@@ -48,6 +50,7 @@ public class VacancyService {
         return vacancy;
     }
 
+    @Override
     @Transactional
     public VacancyDto update(VacancyDto vacancy) {
         if (vacancyRepository.findById(vacancy.getId()).isPresent()) {
@@ -66,8 +69,42 @@ public class VacancyService {
         return vacancy;
     }
 
+    @Override
+    @Transactional
     public VacancyDto delete(VacancyDto vacancy) {
+        Project project = projectRepository.getProjectById(vacancy.getProjectId());
+
+        for (Team team : project.getTeams()) {
+            List<TeamMember> teamMembers = team.getTeamMembers();
+            teamMembers.removeIf(teamMember -> teamMember.getRoles() == null);
+            team.setTeamMembers(teamMembers);
+            teamRepository.save(team);
+        }
+
+        Vacancy vacancyEntity = vacancyMapper.toEntity(vacancy);
+        vacancyRepository.delete(vacancyEntity);
+
         return vacancy;
+    }
+
+    @Override
+    public List<VacancyDto> getVacanciesByFilter(VacancyFilterDto filters) {
+        Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
+        return vacancyFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(vacancies, filters))
+                .map(vacancyMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public VacancyDto getVacancyById(VacancyDto vacancy) {
+        Optional<Vacancy> vacancyEntity =  vacancyRepository.findById(vacancy.getId());
+        if (vacancyEntity.isPresent()) {
+            return vacancyMapper.toDto(vacancyEntity.get());
+        } else {
+            throw new DataValidationException("Vacancies with this id do not exist");
+        }
     }
 
     private void assignRoleToCurator(Long curatorId, Project project) {
@@ -109,7 +146,7 @@ public class VacancyService {
                     throw new DataValidationException("You have already been reviewed");
                 }
 
-                if (!vacancyRepository.findById(vacancy.getId()).isPresent()) {
+                if (vacancyRepository.findById(vacancy.getId()).isEmpty()) {
                     throw new DataValidationException("No such vacancy found in the system");
                 }
             } else {
