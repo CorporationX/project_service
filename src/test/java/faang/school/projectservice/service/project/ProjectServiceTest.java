@@ -110,7 +110,6 @@ public class ProjectServiceTest {
         when(projectRepository.save(any(Project.class))).thenReturn(new Project());
         projectService.update(projectDto);
         verify(projectRepository, times(1)).getProjectById(projectDto.getId());
-        verify(mapper, times(1)).updateProjectFromDto(any(Project.class), any(ProjectDto.class));
         verify(projectRepository, times(1)).save(any(Project.class));
         verify(mapper, times(1)).toDto(any(Project.class));
     }

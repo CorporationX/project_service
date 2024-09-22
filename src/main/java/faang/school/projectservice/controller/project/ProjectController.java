@@ -15,16 +15,12 @@ public class ProjectController {
     private final ProjectService projectService;
 
     public ProjectDto create(ProjectDto projectDto) {
-        if (!isValidProjectDto(projectDto)) {
-            throw new DataValidationException("Project name and description must not be empty");
-        }
+        validateProjectDto(projectDto);
         return projectService.create(projectDto);
     }
 
     public ProjectDto update(ProjectDto projectDto) {
-        if (!isValidProjectDto(projectDto)) {
-            throw new DataValidationException("Project description must not be empty");
-        }
+        validateProjectDto(projectDto);
         return projectService.update(projectDto);
     }
 
@@ -40,9 +36,11 @@ public class ProjectController {
         return projectService.getById(id);
     }
 
-    private boolean isValidProjectDto(ProjectDto projectDto) {
-        return projectDto != null
-                && !projectDto.getName().trim().isBlank()
-                && !projectDto.getDescription().trim().isBlank();
+    private void validateProjectDto(ProjectDto projectDto) {
+        if (projectDto == null
+                || projectDto.getName().trim().isBlank()
+                || projectDto.getDescription().trim().isBlank()) {
+            throw new DataValidationException("Project name and description must not be empty");
+        }
     }
 }

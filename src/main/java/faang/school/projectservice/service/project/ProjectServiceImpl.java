@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final UserContext userContext;
 
     @Transactional
+    @Override
     public ProjectDto create(ProjectDto projectDto) {
         if (projectRepository.existsByOwnerUserIdAndName(
                 projectDto.getOwnerId(),
@@ -39,16 +41,19 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Transactional
+    @Override
     public ProjectDto update(ProjectDto projectDto) {
         if (!projectRepository.existsById(projectDto.getId())) {
             throw new DataValidationException("Project doesn't exist");
         }
         Project project = projectRepository.getProjectById(projectDto.getId());
-        mapper.updateProjectFromDto(project, projectDto);
+        Optional.ofNullable(projectDto.getStatus()).ifPresent(project::setStatus);
+        Optional.ofNullable(projectDto.getDescription()).ifPresent(project::setDescription);
         return mapper.toDto(projectRepository.save(project));
     }
 
     @Transactional
+    @Override
     public List<ProjectDto> getFiltered(ProjectFilterDto filters) {
         Long userId = userContext.getUserId();
         List<Project> projects = projectRepository.findAll();
@@ -63,6 +68,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Transactional
+    @Override
     public List<ProjectDto> getAll() {
         Long userId = userContext.getUserId();
         return projectRepository.findAll()
@@ -72,6 +78,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .toList();
     }
 
+    @Override
     public ProjectDto getById(Long id) {
         return mapper.toDto(projectRepository.getProjectById(id));
     }
