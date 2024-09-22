@@ -134,10 +134,12 @@ public class StageServiceImpl implements StageService {
                 neededRolesCount.put(role.getTeamRole(), neededCount);
             }
         }
+        List<TeamMember> projectTeamMembers = stage.getProject().getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(teamMember -> !executors.contains(teamMember))
+                .toList();
         for (Map.Entry<TeamRole, Long> entry : neededRolesCount.entrySet()) {
-            projectRepository.getProjectById(stage.getProject().getId()).getTeams().stream()
-                    .flatMap(team -> team.getTeamMembers().stream())
-                    .filter(teamMember -> !executors.contains(teamMember))
+            projectTeamMembers.stream()
                     .filter(teamMember -> teamMember.getRoles().contains(entry.getKey()))
                     .limit(entry.getValue())
                     .forEach(teamMember -> sendInvitation(stage, teamMember, userId));

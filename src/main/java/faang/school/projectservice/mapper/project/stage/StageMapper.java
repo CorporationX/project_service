@@ -16,9 +16,6 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
 
-    @Mapping(source = "projectId", target = "project.id")
-    Stage toStage(StageDto stageDto);
-
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "executors", target = "executorIds", qualifiedByName = "getExecutorsIds")
     StageDto toStageDto(Stage stage);
@@ -29,11 +26,7 @@ public interface StageMapper {
     @Mapping(source = "roles", target = "stageRoles")
     Stage toStage(StageCreateDto stageCreateDto);
 
-    @Mapping(source = "stageId", target = "stage.stageId")
     StageRoles toStageRoles(StageRoleDto stageRoleDto);
-
-    @Mapping(source = "stage.stageId", target = "stageId")
-    StageRoleDto toStageRoleDto(StageRoles stageRoles);
 
     List<StageRoles> toStageRoles(List<StageRoleDto> stageRoleDtos);
 
