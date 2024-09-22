@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ProjectDtoValidator {
+public class ProjectValidator {
 
     private final ProjectRepository projectRepository;
 
@@ -41,12 +41,6 @@ public class ProjectDtoValidator {
     private void validateName(ProjectDto projectDto) {
         if (projectDto.getName() == null || projectDto.getName().isBlank()) {
             throw new DataValidationException("Field name cannot be empty or null");
-        }
-    }
-
-    private void validateStatus(ProjectDto projectDto) {
-        if (projectDto.getStatus() == null) {
-            throw new DataValidationException("Field status cannot be null");
         }
     }
 }

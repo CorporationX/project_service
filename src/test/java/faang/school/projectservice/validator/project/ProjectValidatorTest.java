@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -17,10 +17,10 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class ProjectDtoValidatorTest {
+class ProjectValidatorTest {
 
     @InjectMocks
-    private ProjectDtoValidator projectDtoValidator;
+    private ProjectValidator projectValidator;
 
     @Mock
     private ProjectRepository projectRepository;
@@ -42,7 +42,7 @@ class ProjectDtoValidatorTest {
             when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
                     .thenReturn(false);
 
-            projectDtoValidator.validateProject(projectDto);
+            projectValidator.validateProject(projectDto);
 
             verify(projectRepository).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
         }
@@ -59,7 +59,7 @@ class ProjectDtoValidatorTest {
             projectDto.setDescription(PROJECT_DESCRIPTION);
 
             assertThrows(DataValidationException.class,
-                    () -> projectDtoValidator.validateProject(projectDto));
+                    () -> projectValidator.validateProject(projectDto));
         }
 
         @Test
@@ -70,7 +70,7 @@ class ProjectDtoValidatorTest {
             projectDto.setDescription(" ");
 
             assertThrows(DataValidationException.class,
-                    () -> projectDtoValidator.validateProject(projectDto));
+                    () -> projectValidator.validateProject(projectDto));
         }
 
         @Test
@@ -84,7 +84,7 @@ class ProjectDtoValidatorTest {
                     .thenReturn(true);
 
             assertThrows(DataValidationException.class,
-                    () -> projectDtoValidator.validateProject(projectDto));
+                    () -> projectValidator.validateProject(projectDto));
         }
     }
 }

@@ -1,19 +1,19 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.filter.ProjectFilter;
-import faang.school.projectservice.validator.ProjectDtoValidator;
-import org.junit.jupiter.api.BeforeEach;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -25,15 +25,22 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
 
+    @InjectMocks
     private ProjectService projectService;
-    private ProjectDtoValidator projectDtoValidator;
+    @Mock
+    private ProjectValidator projectDtoValidator;
+    @Mock
     private ProjectRepository projectRepository;
-    private ProjectMapperImpl projectMapper;
-    private List<ProjectFilter> filters;
+    @Mock
+    private ProjectMapper projectMapper;
+    @Mock
+    private List<Filter<ProjectFilterDto, Project>> filters;
+    @Mock
+    private Filter<ProjectFilterDto, Project> projectFilter;
+
 
     private static final long ID = 1L;
     private static final String PROJECT_NAME = "name";
@@ -43,19 +50,8 @@ class ProjectServiceTest {
     @Nested
     class PositiveTests {
 
-        @BeforeEach
-        public void init() {
-            projectDtoValidator = Mockito.mock(ProjectDtoValidator.class);
-            projectRepository = Mockito.mock(ProjectRepository.class);
-            projectMapper = Mockito.mock(ProjectMapperImpl.class);
-            ProjectFilter projectFilter = Mockito.mock(ProjectFilter.class);
-            filters = List.of(projectFilter);
-
-            projectService = new ProjectService(projectDtoValidator, projectRepository, filters, projectMapper);
-        }
-
         @Test
-        @DisplayName("Успешное создание проекта")
+        @DisplayName("Successful project creation")
         public void whenCreateThenSaveProject() {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setOwnerId(ID);
@@ -80,7 +76,7 @@ class ProjectServiceTest {
         }
 
         @Test
-        @DisplayName("Успешное обновление описания и статуса проекта")
+        @DisplayName("Successful project description and status update")
         public void whenUpdateThenSaveProject() {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(ID);
@@ -105,7 +101,7 @@ class ProjectServiceTest {
         }
 
         @Test
-        @DisplayName("Успешное получение всех проектов")
+        @DisplayName("Successful retrieval of all projects")
         public void whenGetAllProjectsThenSuccess() {
             List<Project> projects = List.of(new Project(), new Project());
             List<ProjectDto> projectDtos = List.of(new ProjectDto(), new ProjectDto());
@@ -121,7 +117,7 @@ class ProjectServiceTest {
         }
 
         @Test
-        @DisplayName("Успешное получение проекта")
+        @DisplayName("Successful retrieval of a project by ID")
         public void whenGetProjectThenSuccess() {
             Project projectEntity = new Project();
             projectEntity.setId(ID);
@@ -138,7 +134,7 @@ class ProjectServiceTest {
         }
 
         @Test
-        @DisplayName("Успешное получение проекта ")
+        @DisplayName("Successful project retrieval by filter")
         public void whenGetProjectByFilterThenSuccess() {
             ProjectFilterDto projectFilterDto = new ProjectFilterDto();
             projectFilterDto.setStatus(ProjectStatus.CREATED);
@@ -159,8 +155,10 @@ class ProjectServiceTest {
 
             when(projectRepository.findAll()).thenReturn(List.of(first, second));
             when(projectMapper.toDto(first)).thenReturn(firstDto);
-            when(filters.get(0).isApplicable(projectFilterDto)).thenReturn(true);
-            when(filters.get(0).apply(any(Stream.class), eq(projectFilterDto))).thenReturn(Stream.of(first, second));
+
+            when(projectFilter.isApplicable(projectFilterDto)).thenReturn(true);
+            when(projectFilter.apply(any(Stream.class), eq(projectFilterDto))).thenReturn(Stream.of(first, second));
+            when(filters.stream()).thenReturn(Stream.of(projectFilter));
 
             List<ProjectDto> projectDtos = projectService.getProjectByNameAndStatus(projectFilterDto);
 
