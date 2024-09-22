@@ -24,7 +24,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                $ref: '#/components/schemas/ProjectDto'
 
   /vacancies:
     post:
@@ -186,34 +186,101 @@ paths:
 
 components:
   schemas:
-    Project:
+    ProjectDto:
       type: object
+      description: DTO for representing project details
       properties:
         id:
           type: integer
         name:
           type: string
+          description: Name of the project
         description:
           type: string
+          description: Detailed description of the project
+        ownerId:
+          type: integer
+          description: ID of the project owner
+        parentProjectId:
+          type: integer
+          description: ID of the parent project (if applicable)
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the project was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the project was last updated
+        status:
+          type: string
+          description: Current status of the project
+        visibility:
+          type: string
+          description: Visibility level of the project
 
     VacancyDto:
       type: object
+      description: DTO for creating or updating a vacancy
       properties:
         id:
           type: integer
-        title:
+        name:
           type: string
+          description: Name of the vacancy
         description:
           type: string
+          description: Detailed description of the vacancy
+        projectId:
+          type: integer
+          description: ID of the project this vacancy is associated with
+        candidateIds:
+          type: array
+          items:
+            type: integer
+          description: List of candidate IDs for the vacancy
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: integer
+        updatedBy:
+          type: integer
+        status:
+          type: string
+        salary:
+          type: number
+          format: double
+          description: Salary offered for the vacancy
+        workSchedule:
+          type: string
+          description: Work schedule for the vacancy
+        count:
+          type: integer
+          description: Number of positions available
+        requiredSkillIds:
+          type: array
+          items:
+            type: integer
+          description: List of required skill IDs for the vacancy
 
     VacancyFilterDto:
       type: object
+      description: DTO for filtering vacancies
       properties:
-        title:
+        namePattern:
           type: string
+          description: Filter based on vacancy name pattern
+        positionPattern:
+          type: string
+          description: Filter based on position name pattern
 
     SubProjectDto:
       type: object
+      description: DTO for creating or updating subprojects
       properties:
         id:
           type: integer
@@ -221,39 +288,76 @@ components:
           type: integer
         name:
           type: string
-
-    ProjectDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
+          description: Name of the subproject
 
     StageDto:
       type: object
+      description: DTO for creating or updating stages
+      properties:
+        stageId:
+          type: integer
+        stageName:
+          type: string
+          description: Name of the stage
+        projectId:
+          type: integer
+        stageRolesDto:
+          type: array
+          items:
+            $ref: '#/components/schemas/StageRolesDto'
+
+    StageRolesDto:
+      type: object
+      description: DTO for stage roles
+      properties:
+        teamRole:
+          type: string
+          description: Role in the team
+        count:
+          type: integer
+          description: Number of members in the role
+
+    MomentDto:
+      type: object
+      description: DTO for creating or updating moments
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date-time
+        projectIds:
+          type: array
+          items:
+            type: integer
+
+    InternshipDto:
+      type: object
+      description: DTO for creating or updating internships
       properties:
         id:
           type: integer
         projectId:
           type: integer
+        mentorId:
+          type: integer
+        internsId:
+          type: array
+          items:
+            type: integer
         name:
           type: string
-
-    MomentDto:
-      type: object
-      properties:
-        id:
-          type: integer
         description:
           type: string
-
-    InternshipDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        title:
+        status:
           type: string
-        description:
+        startDate:
           type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time

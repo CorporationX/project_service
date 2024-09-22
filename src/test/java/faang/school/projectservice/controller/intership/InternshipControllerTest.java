@@ -78,7 +78,7 @@ class InternshipControllerTest {
         doReturn(internshipDto).when(internshipService).createInternship(any(InternshipDto.class));
         var body = objectMapper.writeValueAsString(internshipDto);
 
-        mockMvc.perform(post("/internships")
+        mockMvc.perform(post("/api/v1/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -93,7 +93,7 @@ class InternshipControllerTest {
         doReturn(internshipDtoAnswer).when(internshipService).updateInternship(anyLong(), any(InternshipDto.class));
         var body = objectMapper.writeValueAsString(internshipDto);
 
-        mockMvc.perform(put("/internships/1")
+        mockMvc.perform(put("/api/v1/internships/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -105,7 +105,7 @@ class InternshipControllerTest {
     void getAllInternshipsByFilter() throws Exception {
         doReturn(List.of(internshipDtoAnswer)).when(internshipService).getAllInternshipsByFilter(any(InternshipFilterDto.class));
 
-        mockMvc.perform(get("/internships/filter")
+        mockMvc.perform(get("/api/v1/internships/filter")
                 .param("projectId", "9"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
@@ -139,7 +139,7 @@ class InternshipControllerTest {
 
         doReturn(List.of(internship1, internship2)).when(internshipService).getAllInternshipsByFilter(any(InternshipFilterDto.class));
 
-        mockMvc.perform(get("/internships/filter"))
+        mockMvc.perform(get("/api/v1/internships/filter"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].name").value("Internship 1"))
@@ -150,7 +150,7 @@ class InternshipControllerTest {
     void testGetInternshipById() throws Exception {
         doReturn(internshipDtoAnswer).when(internshipService).getInternshipById(anyLong());
 
-        mockMvc.perform(get("/internships/1"))
+        mockMvc.perform(get("/api/v1/internships/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Updated Internship"));

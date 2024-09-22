@@ -14,7 +14,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/subproject")
+@RequestMapping("api/v1/subproject")
 public class SubProjectController {
     private final SubProjectService subProjectService;
 

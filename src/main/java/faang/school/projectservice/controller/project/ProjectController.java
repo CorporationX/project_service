@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/project")
+@RequestMapping("/api/v1/project")
 public class ProjectController {
     private final ProjectServiceImpl projectService;
 
