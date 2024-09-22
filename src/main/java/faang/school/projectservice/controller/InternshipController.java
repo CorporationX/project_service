@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.intership.InternshipDto;
 import faang.school.projectservice.dto.intership.InternshipFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.service.internship.InternshipServiceImpl;
+import faang.school.projectservice.service.internship.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
@@ -14,15 +14,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InternshipController {
 
-    private final InternshipServiceImpl internshipServiceImpl;
+    private final InternshipService internshipServiceImpl;
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
-        validateForCreate(internshipDto);
+        validateToStart(internshipDto);
         return internshipServiceImpl.create(internshipDto);
     }
 
     public InternshipDto update(InternshipDto internshipDto) {
-
+        validateToStart(internshipDto);
         return internshipServiceImpl.update(internshipDto);
     }
 
@@ -38,7 +38,7 @@ public class InternshipController {
         return internshipServiceImpl.getInternshipById(internshipDto);
     }
 
-    private void validateForCreate(InternshipDto internshipDto) {
+    private void validateToStart(InternshipDto internshipDto) {
         Period period = Period.between(internshipDto.getStartDate().toLocalDate(), internshipDto.getEndDate().toLocalDate());
         long resultTime = period.getMonths();
         if(internshipDto.getProjectId() == null || internshipDto.getInterns() == null ||

@@ -6,8 +6,5 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface TeamMemberMapper {
-
-    TeamMemberDto toDto(TeamMember teamMember);
-
     TeamMember toEntity(TeamMemberDto teamMemberDto);
 }

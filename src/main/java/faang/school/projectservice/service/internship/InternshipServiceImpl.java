@@ -38,9 +38,11 @@ public class InternshipServiceImpl implements InternshipService {
     @Override
     public InternshipDto create(InternshipDto internshipDto) {
         Internship internship = internshipMapper.toEntity(internshipDto);
+        var project = projectRepository.getProjectById(internshipDto.getProjectId());
+        var mentor = teamMemberMapper.toEntity(internshipDto.getMentor());
         internship.setInterns(internshipDto.getInterns());
-        internship.setMentor(teamMemberMapper.toEntity(internshipDto.getMentor()));
-        internship.setProject(projectRepository.getProjectById(internshipDto.getProjectId()));
+        internship.setMentor(mentor);
+        internship.setProject(project);
         internship.getInterns().forEach(intern -> intern.setRoles(List.of(INTERN)));
         internshipRepository.save(internship);
         return internshipDto;
@@ -56,35 +58,36 @@ public class InternshipServiceImpl implements InternshipService {
 
         if (internship.getStatus() == COMPLETED) {
             for (TeamMember teamMember : teamMembers) {
-                boolean check = checkTasks(teamMember, sortTask(internshipDto));
+                boolean check = checkTasksIsDone(teamMember, sortTask(internshipDto));
                 if (check) {
                     teamMember.setRoles(List.of(DEVELOPER));
+
                 } else {
                     internshipDto.getInterns().remove(teamMember);
                 }
             }
+            internship.setEndDate(internshipDto.getEndDate());
+            internship.setInterns(new ArrayList<>());
         }
 
         if (internship.getStatus() == IN_PROGRESS) {
             for (TeamMember teamMember : teamMembers) {
-                boolean check = checkTasks(teamMember, sortTask(internshipDto));
+                boolean check = checkTasksIsDone(teamMember, sortTask(internshipDto));
                 if (check) {
                     teamMember.setRoles(List.of(DEVELOPER));
+                    internship.setUpdatedAt(LocalDateTime.now());
                 } else {
                     Period period = Period.between(internshipDto.getStartDate().toLocalDate(), LocalDateTime.now().toLocalDate());
-                    long result = period.getDays();
-                    if (result > 30) {
+                    if (period.getDays() > 30) {
                         internshipDto.getInterns().remove(teamMember);
+                        internship.setUpdatedAt(LocalDateTime.now());
                     }
                 }
             }
         }
 
-        internship.setEndDate(internshipDto.getEndDate());
-        internship.setUpdatedAt(LocalDateTime.now());
         internship.setDescription(internshipDto.getDescription());
         internship.setName(internshipDto.getName());
-        internship.setInterns(new ArrayList<>());
 
         internshipRepository.save(internship);
 
@@ -93,7 +96,7 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     public List<InternshipDto> getInternshipByFilter(InternshipFilterDto filters) {
-        Stream<Internship> internshipStream = new ArrayList<>(internshipRepository.findAll()).stream();
+        Stream<Internship> internshipStream = internshipRepository.findAll().stream();
         return internshipMapper.toDtoList(internshipFilters.stream()
                 .filter(f -> f.isApplicable(filters))
                 .reduce(internshipStream,
@@ -109,9 +112,9 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     public InternshipDto getInternshipById(InternshipDto internshipDto) {
-        return internshipMapper.toDto(internshipRepository.
-                findById(internshipDto.getId()).orElseThrow(
-                        () -> new DataValidationException("Стажировка не найдена"))
+        return internshipMapper.toDto(internshipRepository
+                .findById(internshipDto.getId())
+                .orElseThrow(() -> new DataValidationException("Стажировка не найдена"))
         );
     }
 
@@ -140,7 +143,7 @@ public class InternshipServiceImpl implements InternshipService {
         return tasksByUser;
     }
 
-    private boolean checkTasks(TeamMember member, HashMap<TeamMember, List<Task>> tasksByUser) {
+    private boolean checkTasksIsDone(TeamMember member, HashMap<TeamMember, List<Task>> tasksByUser) {
        List<Task> memberTask = tasksByUser.get(member);
 
        for (Task task : memberTask) {

@@ -5,7 +5,8 @@ import faang.school.projectservice.dto.intership.InternshipFilterDto;
 import faang.school.projectservice.dto.intership.TeamMemberDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.service.internship.InternshipServiceImpl;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.service.internship.InternshipService;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +25,7 @@ class InternshipControllerTest {
     InternshipController internshipController;
 
     @Mock
-    InternshipServiceImpl internshipService;
+    InternshipService internshipService;
 
     @Test
     void testCreateInternship() {
@@ -32,7 +33,7 @@ class InternshipControllerTest {
         LocalDateTime endDate = startDate.plusMonths(2);
 
         InternshipDto internshipDto = new InternshipDto(1L, 1L, new TeamMemberDto(1L, 4L),
-                List.of(), startDate, endDate, InternshipStatus.IN_PROGRESS, 999L, "name","description");
+                List.of(new TeamMember()), startDate, endDate, InternshipStatus.IN_PROGRESS, 999L, "name","description");
 
         internshipController.createInternship(internshipDto);
 
@@ -53,7 +54,7 @@ class InternshipControllerTest {
         LocalDateTime endDate = startDate.plusMonths(2);
 
         InternshipDto internshipDto = new InternshipDto(1L, 1L, new TeamMemberDto(1L, 4L),
-                List.of(), startDate, endDate, InternshipStatus.IN_PROGRESS, 999L, "name","description");
+                List.of(new TeamMember()), startDate, endDate, InternshipStatus.IN_PROGRESS, 999L, "name","description");
 
         internshipController.update(internshipDto);
 
