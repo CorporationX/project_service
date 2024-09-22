@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/moments")
+@RequestMapping("/api/v1/moments")
 @RequiredArgsConstructor
 public class MomentController {
     private final MomentServiceImpl momentService;

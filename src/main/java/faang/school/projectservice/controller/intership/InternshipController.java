@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/internships")
+@RequestMapping("/api/v1/internships")
 @RequiredArgsConstructor
 @Validated
 public class InternshipController {

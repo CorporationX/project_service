@@ -14,7 +14,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/subproject")
+@RequestMapping("api/v1/subproject")
 public class SubProjectController {
     private final SubProjectService subProjectService;
 
@@ -30,7 +30,7 @@ public class SubProjectController {
     }
 
     @PostMapping("/{projectId}")
-    public List<ProjectDto> getAllSubProjectsWithFiltr(@PathVariable @NotNull Long projectId, @RequestBody @Valid ProjectFilterDto filtrDto) {
+    public List<ProjectDto> getAllSubProjectsWithFilter(@PathVariable @NotNull Long projectId, @RequestBody @Valid ProjectFilterDto filtrDto) {
         return subProjectService.getAllSubProjectsWithFiltr(projectId, filtrDto);
     }
 }
