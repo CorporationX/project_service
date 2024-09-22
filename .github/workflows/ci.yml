@@ -3,7 +3,7 @@ name: unicorn-ci-project-service
 on:
   pull_request:
     branches:
-      - 'dev'
+      - unicorn-master-stream6
 
 jobs:
   build_and_test:
