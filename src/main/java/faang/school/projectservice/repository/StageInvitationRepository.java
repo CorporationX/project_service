@@ -27,4 +27,8 @@ public class StageInvitationRepository {
     public List<StageInvitation> findAll() {
         return repository.findAll();
     }
+
+    public List<StageInvitation> saveAll(List<StageInvitation> stageInvitations) {
+        return repository.saveAll(stageInvitations);
+    }
 }
