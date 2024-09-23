@@ -111,6 +111,15 @@ public class ProjectServiceImpl implements ProjectService {
                 .toList();
     }
 
+    public void validationDuplicateProjectNames(ProjectDto projectDto) {
+        Project existingProject = findProjectByNameAndOwnerId(projectDto.getName(),
+                projectRepository.getProjectById(projectDto.getId()).getOwnerId());
+
+        if (existingProject != null && existingProject.getId().equals(projectDto.getId())) {
+            throw new NoSuchElementException("This user already has a project with this name");
+        }
+    }
+
     private Project findProjectByNameAndOwnerId(String name, Long ownerId) {
         List<Project> projects = findByName(name);
         for (Project project : projects) {
@@ -119,14 +128,5 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
         return null;
-    }
-
-    public void validationDuplicateProjectNames(ProjectDto projectDto) {
-        Project existingProject = findProjectByNameAndOwnerId(projectDto.getName(),
-                projectRepository.getProjectById(projectDto.getId()).getOwnerId());
-
-        if (existingProject != null && existingProject.getId().equals(projectDto.getId())) {
-            throw new NoSuchElementException("This user already has a project with this name");
-        }
     }
 }

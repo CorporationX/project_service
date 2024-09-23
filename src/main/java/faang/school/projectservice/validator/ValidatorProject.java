@@ -1,6 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -10,7 +11,7 @@ import java.util.NoSuchElementException;
 @Component
 @RequiredArgsConstructor
 public class ValidatorProject {
-    private final ProjectServiceImpl projectService;
+    private final ProjectService projectService;
 
     public void validationName(ProjectDto projectDto) {
         if (projectDto.getName() == null || projectDto.getName().isBlank()) {

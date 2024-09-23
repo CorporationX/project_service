@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 public interface ProjectService {
 
     void createProject(ProjectDto projectDto);
@@ -25,4 +24,6 @@ public interface ProjectService {
     boolean checkUserByPrivateProject(Project project, long requester);
 
     ProjectDto findById(long id);
+
+    public void validationDuplicateProjectNames(ProjectDto projectDto);
 }
