@@ -1,6 +1,6 @@
-package faang.school.projectservice.filter.StageInvitation.filterImpl;
+package faang.school.projectservice.filter.stageInvitation;
 
-import faang.school.projectservice.dto.client.stage.StageInvitationFilterDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +28,7 @@ class StageInvitationStatusFilterTest {
     @Nested
     class  PositiveTests {
         @Test
-        @DisplayName("Если у StageInvitationFilterDto status установлен, возвращаем true")
+        @DisplayName("If StageInvitationFilterDto status is set, return true")
         void whenStageInvitationFilterDtoSpecifiedStatusIsNotNullThenReturnTrue() {
             stageInvitationFilterDto = StageInvitationFilterDto.builder()
                     .status(INVITATION_STATUS)
@@ -38,8 +38,7 @@ class StageInvitationStatusFilterTest {
         }
 
         @Test
-        @DisplayName("Если у StageInvitationFilterDto корректно заполнено поле status " +
-                "возвращаем отфильтрованный список")
+        @DisplayName("If StageInvitationFilterDto has correctly filled status field return the filtered list")
         void whenStageInvitationFilterDtoSpecifiedStatusThenReturnList() {
             Stream<StageInvitation> stageInvitations = Stream.of(
                     StageInvitation.builder()
@@ -66,7 +65,7 @@ class StageInvitationStatusFilterTest {
         class NegativeTests {
 
             @Test
-            @DisplayName("Если у StageInvitationFilterDto поле status null возвращаем false")
+            @DisplayName("If StageInvitationFilterDto has status null field, return false")
             void whenStageInvitationFilterDtoStatusIsNullThenReturnFalse() {
                 stageInvitationFilterDto = StageInvitationFilterDto.builder()
                         .status(null)

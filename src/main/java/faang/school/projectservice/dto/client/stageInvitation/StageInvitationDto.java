@@ -1,15 +1,13 @@
-package faang.school.projectservice.dto.client.stage;
+package faang.school.projectservice.dto.client.stageInvitation;
 
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -27,6 +25,7 @@ public class StageInvitationDto {
     private Long stageId;
 
     @Length(max = 128)
+    @NotEmpty
     private String description;
 
     @NotNull

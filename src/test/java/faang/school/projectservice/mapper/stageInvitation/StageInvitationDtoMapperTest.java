@@ -1,11 +1,11 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.stageInvitation;
 
-import faang.school.projectservice.dto.client.stage.StageInvitationDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDto;
+
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +31,6 @@ class StageInvitationDtoMapperTest {
     private final static StageInvitationStatus STAGE_INVITATION_STATUS = StageInvitationStatus.ACCEPTED;
 
     private StageInvitation stageInvitation;
-    private StageInvitationDto stageInvitationDto;
 
     @BeforeEach
     void init() {
@@ -55,15 +54,15 @@ class StageInvitationDtoMapperTest {
     class toEntity {
 
         @Test
-        @DisplayName("Если передали null")
+        @DisplayName("If send null")
         void whenDtoIsNullThenReturnNull() {
             assertNull(mapper.toEntity(null));
         }
 
         @Test
-        @DisplayName("Если передали StageInvitationDto, получим StageInvitationDto entity")
+        @DisplayName("If passed StageInvitationDto, we get StageInvitationDto entity")
         void whenDtoIsNotNullThenReturnEntity() {
-            stageInvitationDto = StageInvitationDto.builder()
+            StageInvitationDto stageInvitationDto = StageInvitationDto.builder()
                     .id(STAGE_ID)
                     .invitedId(STAGE_ID)
                     .stageId(STAGE_ID)
@@ -83,13 +82,13 @@ class StageInvitationDtoMapperTest {
     class toDtos {
 
         @Test
-        @DisplayName("Если передали null")
+        @DisplayName("If passed null")
         void whenListStageInvitationIsNullThenGetNull() {
             assertNull(mapper.toDtos(null));
         }
 
         @Test
-        @DisplayName("Проверяем размер List<StageInvitation>")
+        @DisplayName("Check size List<StageInvitation>")
         void whenListStageInvitationIsNotNullThenReturnListStageInvitationDtos() {
             List<StageInvitation> stageInvitations = List.of(
                     stageInvitation,

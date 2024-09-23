@@ -1,6 +1,6 @@
-package faang.school.projectservice.filter.StageInvitation.filterImpl;
+package faang.school.projectservice.filter.stageInvitation;
 
-import faang.school.projectservice.dto.client.stage.StageInvitationFilterDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
@@ -28,7 +28,7 @@ class StageInvitationIdFilterTest {
     @Nested
     class  PositiveTests {
         @Test
-        @DisplayName("Если у StageInvitationFilterDto invitedId корректно заполнено, возвращаем true")
+        @DisplayName("If StageInvitationFilterDto invitedId is filled in correctly, return true")
         void whenStageInvitationFilterDtoSpecifiedInvitedIdIsNotNullThenReturnTrue() {
             stageInvitationFilterDto = StageInvitationFilterDto.builder()
                     .invitedId(INVITED_ID)
@@ -38,8 +38,8 @@ class StageInvitationIdFilterTest {
         }
 
         @Test
-        @DisplayName("Если у StageInvitationFilterDto корректно заполнено поле invitedId," +
-                " возвращаем отфильтрованный список")
+        @DisplayName("If the invitedId field of StageInvitationFilterDto is filled correctly, " +
+                "we return the filtered list")
         void whenStageInvitationFilterDtoSpecifiedInvitedIdThenReturnList() {
             Stream<StageInvitation> stageInvitations = Stream.of(
                     StageInvitation.builder()
@@ -70,7 +70,7 @@ class StageInvitationIdFilterTest {
         class NegativeTests {
 
             @Test
-            @DisplayName("Если у StageInvitationFilterDto поле invitedId null возвращаем false")
+            @DisplayName("If StageInvitationFilterDto field invitedId null, return false")
             void whenStageInvitationFilterDtoStatusIsNullThenReturnFalse() {
                 stageInvitationFilterDto = StageInvitationFilterDto.builder()
                         .invitedId(null)

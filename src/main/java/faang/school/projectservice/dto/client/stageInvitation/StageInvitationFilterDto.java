@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client.stage;
+package faang.school.projectservice.dto.client.stageInvitation;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import jakarta.validation.constraints.NotNull;

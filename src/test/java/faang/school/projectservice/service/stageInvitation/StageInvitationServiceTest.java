@@ -1,10 +1,9 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.stageInvitation;
 
-import faang.school.projectservice.dto.client.stage.StageInvitationDto;
-import faang.school.projectservice.dto.client.stage.StageInvitationFilterDto;
-import faang.school.projectservice.filter.StageInvitation.StageInvitationFilter;
-import faang.school.projectservice.mapper.StageInvitationDtoMapper;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.mapper.stageInvitation.StageInvitationDtoMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -21,7 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -35,20 +36,24 @@ class StageInvitationServiceTest {
     private StageInvitationRepository stageInvitationRepository;
 
     @Mock
-    private StageInvitationFilter stageInvitationFilter;
+    private Filter<StageInvitationFilterDto, StageInvitation> filters;
+
+    @Mock
+    private List<Filter<StageInvitationFilterDto, StageInvitation>> stageInvitationFilters;
 
     @Mock
     private StageInvitationDtoMapper stageInvitationDtoMapper;
+
+    @Mock
+    private StageInvitation stageInvitation;
 
     private static final Long STAGE_INVITATION_ID = 1L;
     private static final String STAGE_INVITATION_DESCRIPTION = "Smth";
     private static final StageInvitationStatus STAGE_INVITATION_STATUS = StageInvitationStatus.ACCEPTED;
 
-    @Mock
-    private StageInvitation stageInvitation;
+
     private StageInvitationDto stageInvitationDto;
-    private StageInvitationFilterDto stageInvitationFilterDto;
-    private List<StageInvitationFilter> stageInvitationFilterList;
+
 
     @Nested
     class PositiveTests {
@@ -84,7 +89,7 @@ class StageInvitationServiceTest {
         }
 
         @Test
-        @DisplayName("Успех при сохранении")
+        @DisplayName("Success at create")
         void whenInvitationThenSuccessSave() {
             when(stageInvitationDtoMapper.toEntity(stageInvitationDto))
                     .thenReturn(stageInvitation);
@@ -96,100 +101,83 @@ class StageInvitationServiceTest {
         }
 
         @Test
-        @DisplayName("Успех при приглашении")
+        @DisplayName("Success with accept")
         void whenInvitationAcceptThenSuccessSave() {
             when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
                     .thenReturn(stageInvitation);
 
             stageInvitationService.acceptInvitation(STAGE_INVITATION_ID);
 
+            assertEquals(STAGE_INVITATION_STATUS, stageInvitationDto.getStatus());
             verify(stageInvitationRepository).save(stageInvitation);
         }
 
         @Test
-        @DisplayName("Успех при отклонении приглашения")
+        @DisplayName("Success with reject")
         void whenInvitationRejectedThenSuccessSave() {
             when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
                     .thenReturn(stageInvitation);
 
-            stageInvitationService.rejectInvitation(STAGE_INVITATION_ID);
+            stageInvitationService.rejectInvitation(STAGE_INVITATION_ID, STAGE_INVITATION_DESCRIPTION);
 
+            assertEquals(STAGE_INVITATION_DESCRIPTION, stageInvitationDto.getDescription());
+            assertEquals(STAGE_INVITATION_STATUS, stageInvitationDto.getStatus());
             verify(stageInvitationRepository).save(stageInvitation);
         }
 
         @Nested
         class GetInvitationsMethods {
 
-            private List<StageInvitation> stageInvitations;
-
-            @BeforeEach
-            void init() {
-                List<StageInvitation> invitations = new ArrayList<>();
-                invitations.add(StageInvitation.builder()
-                        .id(STAGE_INVITATION_ID)
-                        .build());
-
-                stageInvitations = List.of(StageInvitation.builder()
-                        .id(STAGE_INVITATION_ID)
-                        .invited(TeamMember.builder().id(STAGE_INVITATION_ID).build())
-                        .status(STAGE_INVITATION_STATUS)
-                        .description(STAGE_INVITATION_DESCRIPTION)
-                        .stage(Stage.builder()
-                                .stageId(STAGE_INVITATION_ID)
-                                .stageName(STAGE_INVITATION_DESCRIPTION)
-                                .project(Project.builder().id(STAGE_INVITATION_ID).build())
-                                .stageName(STAGE_INVITATION_DESCRIPTION)
-
-                                .build())
-                        .author(TeamMember.builder().id(STAGE_INVITATION_ID).build())
-                        .build());
-
-                stageInvitationFilterDto = StageInvitationFilterDto.builder()
-                        .invitedId(STAGE_INVITATION_ID)
-                        .build();
-
-                stageInvitationFilterList = List.of(stageInvitationFilter);
-                stageInvitationService = new StageInvitationService(stageInvitationRepository,
-                        stageInvitationDtoMapper,
-                        stageInvitationFilterList);
-            }
-
             @Test
-            @DisplayName("Успех если не null в фильтре")
-            void whenFilterIsNotNullThenSuccess() {
-                when(stageInvitationRepository.findAll())
-                        .thenReturn(stageInvitations);
-                when(stageInvitationFilterList.get(0).isApplicable(stageInvitationFilterDto))
-                        .thenReturn(true);
-                when(stageInvitationFilterList.get(0).apply(any(), eq(stageInvitationFilterDto)))
-                        .thenReturn(stageInvitations.stream().filter(stageInvitation ->
-                                stageInvitation.getStage().getStageName()
-                                        .equals(stageInvitationFilterDto.getInvitedStageName())));
+            @DisplayName("Success in the filter")
+            void whenGetStageInvitationFilterThenSuccess() {
 
-                stageInvitationService.getInvitations(stageInvitationFilterDto);
+                var stageInvitationFilterDto = new StageInvitationFilterDto();
+                var firstDto = new StageInvitationDto();
+                firstDto.setDescription("Smth");
+                firstDto.setStatus(StageInvitationStatus.ACCEPTED);
 
+                var secondDto = new StageInvitationDto();
+                secondDto.setDescription(STAGE_INVITATION_DESCRIPTION);
+                secondDto.setStatus(StageInvitationStatus.ACCEPTED);
+
+                var first = new StageInvitation();
+                first.setId(STAGE_INVITATION_ID);
+
+                var stage = new Stage();
+                first.setStage(stage);
+
+                var author = new TeamMember();
+                first.setAuthor(author);
+                first.setInvited(author);
+                first.setDescription(STAGE_INVITATION_DESCRIPTION);
+                first.setStatus(StageInvitationStatus.ACCEPTED);
+
+                var second = new StageInvitation();
+                second.setDescription(STAGE_INVITATION_DESCRIPTION);
+                second.setStatus(StageInvitationStatus.ACCEPTED);
+
+                when(stageInvitationRepository.findAll()).thenReturn(List.of(first, second));
+                when(stageInvitationDtoMapper.toDto(first)).thenReturn(firstDto);
+                when(filters.isApplicable(stageInvitationFilterDto)).thenReturn(true);
+                when(filters.apply(any(Stream.class),
+                        eq(stageInvitationFilterDto))).thenReturn(Stream.of(first, second));
+                when(stageInvitationFilters.stream()).thenReturn(Stream.of(filters));
+
+                List<StageInvitationDto> result = stageInvitationService.getInvitations(stageInvitationFilterDto);
+
+                assertEquals(2L, result.size());
                 verify(stageInvitationRepository).findAll();
-                verify(stageInvitationDtoMapper).toDtos((anyList()));
-            }
-
-            @Test
-            @DisplayName("Успех если null в фильтре")
-            void whenFilterIsNullThenSuccess() {
-                when(stageInvitationRepository.findAll())
-                        .thenReturn(stageInvitations);
-
-                stageInvitationService.getInvitations(null);
-
-                verify(stageInvitationRepository).findAll();
-                verify(stageInvitationDtoMapper).toDtos(stageInvitations);
+                verify(stageInvitationDtoMapper).toDto(first);
             }
         }
     }
 
     @Nested
     class NegativeTests {
+
         @Test
-        @DisplayName("Ошибка если передали null при приглашении")
+        @DisplayName("Error when passing null in invitation")
         void whenStageInvitationIdIsNullAcceptThenTrowNullPointerException() {
             when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
                     .thenReturn(stageInvitation);

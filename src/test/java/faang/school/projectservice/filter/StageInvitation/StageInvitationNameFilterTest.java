@@ -1,6 +1,6 @@
-package faang.school.projectservice.filter.StageInvitation.filterImpl;
+package faang.school.projectservice.filter.stageInvitation;
 
-import faang.school.projectservice.dto.client.stage.StageInvitationFilterDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +25,7 @@ class StageInvitationNameFilterTest {
     private final static String INVITER_STAGE_NAME_PATTERN = "Smth";
 
     @Test
-    @DisplayName("Если у StageInvitationFilterDto invitedStageName корректно заполнено, возвращаем true")
+    @DisplayName("If StageInvitationFilterDto invitedStageName is filled in correctly, return true")
     void whenStageInvitationFilterDtoSpecifiedInvitedNamePatternIsNotNullThenReturnTrue() {
         stageInvitationFilterDto = StageInvitationFilterDto.builder()
                 .invitedStageName(INVITER_STAGE_NAME_PATTERN)
@@ -35,8 +35,8 @@ class StageInvitationNameFilterTest {
     }
 
     @Test
-    @DisplayName("Если у StageInvitationFilterDto корректно заполнено поле invitedStageName," +
-            " возвращаем отфильтрованный список")
+    @DisplayName("If the invitedStageName field of StageInvitationFilterDto is filled correctly," +
+            " we return the filtered list")
     void whenStageInvitationFilterDtoSpecifiedInvitedIdThenReturnList() {
         Stream<StageInvitation> stageInvitations = Stream.of(
                 StageInvitation.builder()
@@ -70,7 +70,7 @@ class StageInvitationNameFilterTest {
     class NegativeTests {
 
         @Test
-        @DisplayName("Если у StageInvitationFilterDto поле invitedStageName null возвращаем false")
+        @DisplayName("If StageInvitationFilterDto field invitedStageName null, return false")
         void whenStageInvitationFilterDtoStatusIsNullThenReturnFalse() {
             stageInvitationFilterDto = StageInvitationFilterDto.builder()
                     .invitedStageName(null)
@@ -80,7 +80,7 @@ class StageInvitationNameFilterTest {
         }
 
         @Test
-        @DisplayName("Если у StageInvitationFilterDto поле invitedStageName пустое возвращаем false")
+        @DisplayName("If the StageInvitationFilterDto field invitedStageName is empty, return false")
         void whenStageInvitationFilterDtoStatusIsEmptyThenReturnFalse() {
             stageInvitationFilterDto = StageInvitationFilterDto.builder()
                     .invitedStageName("  ")
