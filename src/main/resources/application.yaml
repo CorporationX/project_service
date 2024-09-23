@@ -17,10 +17,6 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
-  mvc:
-    servlet:
-      path: /api/v1
-
   data:
     redis:
       port: 6379
@@ -28,9 +24,10 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
-  mvc:
-    servlet:
-      path: /api/v1
+
+springdoc:
+  api-docs:
+    path: /api-docs
 
 server:
   port: 8082
