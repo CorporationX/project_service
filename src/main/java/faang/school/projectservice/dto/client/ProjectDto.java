@@ -2,7 +2,6 @@ package faang.school.projectservice.dto.client;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Team;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

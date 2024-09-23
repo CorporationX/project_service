@@ -2,7 +2,6 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.service.project.ProjectServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
