@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.internship;
 
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.model.InternshipStatus;
 import lombok.AllArgsConstructor;
