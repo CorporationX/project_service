@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -18,9 +19,11 @@ public class VacancyService {
         if(vacancyDTO.getProject() == null){
             throw new IllegalArgumentException("Вакансия должна быть привязана к проекту");
         }
-        Kurator  = vacancyRepository.findById(vacancyDTO.getCreatedBy())
-                .orElseThrow(() -> new RuntimeException("Куратор не найден"));
-
+        Long kurator  = vacancyDTO.getCreatedBy();
+        if(kurator == null){
+            throw new IllegalArgumentException("Куратор не найден");
+        }
+        if(vacancyDTO.)
     }
     public void updateVacancy(VacancyDTO vacancyDTO){
 
