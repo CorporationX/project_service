@@ -95,10 +95,10 @@ public class InternshipControllerTest {
         @Test
         @DisplayName("Controller calls service.getInternship and returns one Dto by it's id")
         public void whenControllerCallsServiceGetInternshipOneTimeThenReturnDto() {
-            when(internshipService.getInternship(INTERNSHIP_ID_IS_ONE)).thenReturn(internshipDto);
+            when(internshipService.getInternshipById(INTERNSHIP_ID_IS_ONE)).thenReturn(internshipDto);
             internshipController.getInternship(INTERNSHIP_ID_IS_ONE);
             verify(internshipService)
-                    .getInternship(INTERNSHIP_ID_IS_ONE);
+                    .getInternshipById(INTERNSHIP_ID_IS_ONE);
         }
     }
 }

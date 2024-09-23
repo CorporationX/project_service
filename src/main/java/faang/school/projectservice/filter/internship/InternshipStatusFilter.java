@@ -2,12 +2,10 @@ package faang.school.projectservice.filter.internship;
 
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
-import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
-@Component
-class InternshipStatusFilter implements InternshipFilter {
+class InternshipStatusFilter implements Filter<InternshipFilterDto, Internship> {
 
     @Override
     public boolean isApplicable(InternshipFilterDto filters) {
