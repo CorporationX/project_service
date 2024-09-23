@@ -50,7 +50,7 @@ public class VacancyServiceTest {
     private CandidateRepository candidateRepository;
 
     @InjectMocks
-    private VacancyService vacancyService;
+    private VacancyServiceImpl vacancyService;
 
     @BeforeEach
     void setUp() {
@@ -108,7 +108,7 @@ public class VacancyServiceTest {
 
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.DESIGNER, TeamRole.INTERN));
-        when(teamMemberRepository.findById(vacancyDto.getCreated_by())).thenReturn(teamMember);
+        when(teamMemberRepository.findById(vacancyDto.getCreatedBy())).thenReturn(teamMember);
 
         DataValidationException thrown = assertThrows(DataValidationException.class,
                 () -> vacancyService.createVacancy(vacancyDto)
@@ -125,7 +125,7 @@ public class VacancyServiceTest {
 
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.OWNER, TeamRole.INTERN));
-        when(teamMemberRepository.findById(vacancyDto.getCreated_by())).thenReturn(teamMember);
+        when(teamMemberRepository.findById(vacancyDto.getCreatedBy())).thenReturn(teamMember);
 
         when(projectRepository.existsById(vacancyDto.getProjectId())).thenReturn(false);
 
@@ -144,7 +144,7 @@ public class VacancyServiceTest {
 
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.OWNER, TeamRole.INTERN));
-        when(teamMemberRepository.findById(vacancyDto.getCreated_by())).thenReturn(teamMember);
+        when(teamMemberRepository.findById(vacancyDto.getCreatedBy())).thenReturn(teamMember);
 
         when(projectRepository.existsById(vacancyDto.getProjectId())).thenReturn(true);
 
@@ -201,7 +201,7 @@ public class VacancyServiceTest {
 
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.DESIGNER, TeamRole.INTERN));
-        when(teamMemberRepository.findById(vacancyDto.getUpdated_by())).thenReturn(teamMember);
+        when(teamMemberRepository.findById(vacancyDto.getUpdatedBy())).thenReturn(teamMember);
 
         DataValidationException thrown = assertThrows(DataValidationException.class,
                 () -> vacancyService.updateVacancy(vacancyId, vacancyDto)
@@ -218,11 +218,11 @@ public class VacancyServiceTest {
 
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.OWNER, TeamRole.INTERN));
-        when(teamMemberRepository.findById(vacancyDto.getUpdated_by())).thenReturn(teamMember);
+        when(teamMemberRepository.findById(vacancyDto.getUpdatedBy())).thenReturn(teamMember);
 
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
 
-        DataValidationException thrown = assertThrows(DataValidationException.class,
+        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class,
                 () -> vacancyService.updateVacancy(vacancyId, vacancyDto)
         );
 
@@ -238,7 +238,7 @@ public class VacancyServiceTest {
 
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.OWNER, TeamRole.INTERN));
-        when(teamMemberRepository.findById(vacancyDto.getUpdated_by())).thenReturn(teamMember);
+        when(teamMemberRepository.findById(vacancyDto.getUpdatedBy())).thenReturn(teamMember);
 
         Vacancy vacancyToUpdate = new Vacancy();
         vacancyToUpdate.setStatus(VacancyStatus.OPEN);

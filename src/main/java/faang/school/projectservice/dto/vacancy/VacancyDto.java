@@ -18,6 +18,6 @@ public class VacancyDto {
     private WorkSchedule workSchedule;
     private Integer count;
     private List<Long> requiredSkillIds;
-    private Long created_by;
-    private Long updated_by;
+    private Long createdBy;
+    private Long updatedBy;
 }
