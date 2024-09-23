@@ -28,6 +28,5 @@ public class StageInvitationDto {
     @NotEmpty
     private String description;
 
-    @NotNull
     private StageInvitationStatus status;
 }

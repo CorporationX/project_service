@@ -20,10 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,9 +48,7 @@ class StageInvitationServiceTest {
     private StageInvitation stageInvitation;
 
     private static final Long STAGE_INVITATION_ID = 1L;
-    private static final String STAGE_INVITATION_DESCRIPTION = "Smth";
-    private static final StageInvitationStatus STAGE_INVITATION_STATUS = StageInvitationStatus.ACCEPTED;
-
+    private static final String STAGE_INVITATION_DESCRIPTION = "something";
 
     private StageInvitationDto stageInvitationDto;
 
@@ -68,13 +66,12 @@ class StageInvitationServiceTest {
             stageInvitationDto = StageInvitationDto.builder()
                     .stageId(STAGE_INVITATION_ID)
                     .description(STAGE_INVITATION_DESCRIPTION)
-                    .status(STAGE_INVITATION_STATUS)
                     .build();
 
             stageInvitation = StageInvitation.builder()
                     .id(STAGE_INVITATION_ID)
                     .description(STAGE_INVITATION_DESCRIPTION)
-                    .status(STAGE_INVITATION_STATUS)
+                    .status(StageInvitationStatus.PENDING)
                     .author(TeamMember.builder()
                             .id(STAGE_INVITATION_ID)
                             .build())
@@ -96,6 +93,7 @@ class StageInvitationServiceTest {
 
             stageInvitationService.createInvitation(stageInvitationDto);
 
+            assertEquals(StageInvitationStatus.PENDING, stageInvitationDto.getStatus());
             verify(stageInvitationDtoMapper).toEntity(any());
             verify(stageInvitationRepository).save(stageInvitation);
         }
@@ -104,11 +102,11 @@ class StageInvitationServiceTest {
         @DisplayName("Success with accept")
         void whenInvitationAcceptThenSuccessSave() {
             when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
-                    .thenReturn(stageInvitation);
+                    .thenReturn(Optional.ofNullable(stageInvitation));
 
             stageInvitationService.acceptInvitation(STAGE_INVITATION_ID);
 
-            assertEquals(STAGE_INVITATION_STATUS, stageInvitationDto.getStatus());
+            assertEquals(StageInvitationStatus.ACCEPTED, stageInvitation.getStatus());
             verify(stageInvitationRepository).save(stageInvitation);
         }
 
@@ -116,12 +114,12 @@ class StageInvitationServiceTest {
         @DisplayName("Success with reject")
         void whenInvitationRejectedThenSuccessSave() {
             when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
-                    .thenReturn(stageInvitation);
+                    .thenReturn(Optional.ofNullable(stageInvitation));
 
-            stageInvitationService.rejectInvitation(STAGE_INVITATION_ID, STAGE_INVITATION_DESCRIPTION);
+            stageInvitationService.rejectInvitation(STAGE_INVITATION_ID, "smth");
 
-            assertEquals(STAGE_INVITATION_DESCRIPTION, stageInvitationDto.getDescription());
-            assertEquals(STAGE_INVITATION_STATUS, stageInvitationDto.getStatus());
+            assertEquals("smth", stageInvitation.getDescription());
+            assertEquals(StageInvitationStatus.REJECTED, stageInvitation.getStatus());
             verify(stageInvitationRepository).save(stageInvitation);
         }
 
@@ -167,24 +165,17 @@ class StageInvitationServiceTest {
                 List<StageInvitationDto> result = stageInvitationService.getInvitations(stageInvitationFilterDto);
 
                 assertEquals(2L, result.size());
+                assertEquals("Smth",firstDto.getDescription());
+                assertEquals(StageInvitationStatus.ACCEPTED, firstDto.getStatus());
+                assertEquals(1L, first.getId());
+                assertEquals(StageInvitationStatus.ACCEPTED, first.getStatus());
+
+                assertEquals(STAGE_INVITATION_DESCRIPTION, second.getDescription());
+                assertEquals("something", secondDto.getDescription());
                 verify(stageInvitationRepository).findAll();
                 verify(stageInvitationDtoMapper).toDto(first);
             }
         }
     }
 
-    @Nested
-    class NegativeTests {
-
-        @Test
-        @DisplayName("Error when passing null in invitation")
-        void whenStageInvitationIdIsNullAcceptThenTrowNullPointerException() {
-            when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
-                    .thenReturn(stageInvitation);
-
-            assertThrows(NullPointerException.class,
-                    () -> stageInvitationService.acceptInvitation(STAGE_INVITATION_ID),
-                    "Stage invitation is null id: %s" + STAGE_INVITATION_ID);
-        }
-    }
 }

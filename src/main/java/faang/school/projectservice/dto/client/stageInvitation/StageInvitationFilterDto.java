@@ -1,7 +1,6 @@
 package faang.school.projectservice.dto.client.stageInvitation;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,14 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StageInvitationFilterDto {
-
-    @NotNull
     private String invitedStageName;
-
-    @NotNull
     private Long invitedId;
-
-    @NotNull
     private StageInvitationStatus status;
-
 }
