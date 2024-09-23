@@ -24,10 +24,7 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Is filter applicable with filter and type in dto")
     void taskStatusFilter_isFilterApplicableWithFilterAndTypeInDto() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.IN_PROGRESS)
-                .taskStatusFilterType(TaskStatusFilterType.ALL)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.IN_PROGRESS, TaskStatusFilterType.ALL);
 
         boolean result = taskStatusFilter.isApplicable(stageFilterDto);
 
@@ -37,9 +34,7 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Is filter applicable without type in dto")
     void taskStatusFilter_isFilterApplicableWithoutTypeInDto() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.IN_PROGRESS)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.IN_PROGRESS, null);
 
         boolean result = taskStatusFilter.isApplicable(stageFilterDto);
 
@@ -49,9 +44,7 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Is filter applicable without filter in dto")
     void taskStatusFilter_isFilterApplicableWithoutFilterInDto() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilterType(TaskStatusFilterType.ALL)
-                .build();
+        stageFilterDto = initStageFilterDto(null, TaskStatusFilterType.ALL);
 
         boolean result = taskStatusFilter.isApplicable(stageFilterDto);
 
@@ -61,20 +54,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with all done tasks")
     void taskStatusFilter_filteringStageWithAllDoneTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.DONE)
-                .taskStatusFilterType(TaskStatusFilterType.ALL)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.DONE, TaskStatusFilterType.ALL);
 
-        stages = initStagesWithDoneTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(1L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(1L)
-                                .status(TaskStatus.DONE)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.DONE, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(1L, List.of(initTask(1L, TaskStatus.DONE))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -85,32 +68,12 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with any done tasks")
     void taskStatusFilter_filteringStageWithAnyDoneTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.DONE)
-                .taskStatusFilterType(TaskStatusFilterType.ANY)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.DONE, TaskStatusFilterType.ANY);
 
-        stages = initStagesWithDoneTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.DONE)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.DONE)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
+        stages = initStages(TaskStatus.DONE, TaskStatus.TESTING);
+        List<Stage> expected = List.of(
+                initStage(1L, List.of(initTask(1L, TaskStatus.DONE))),
+                initStage(2L, List.of(initTask(2L, TaskStatus.DONE), initTask(3L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -121,20 +84,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with none done tasks")
     void taskStatusFilter_filteringStageWithNoneDoneTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.DONE)
-                .taskStatusFilterType(TaskStatusFilterType.NONE)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.DONE, TaskStatusFilterType.NONE);
 
-        stages = initStagesWithDoneTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(3L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(4L)
-                                .status(TaskStatus.TESTING)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.DONE, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(3L, List.of(initTask(4L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -145,20 +98,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with all cancelled tasks")
     void taskStatusFilter_filteringStageWithAllCancelledTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.CANCELLED)
-                .taskStatusFilterType(TaskStatusFilterType.ALL)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.CANCELLED, TaskStatusFilterType.ALL);
 
-        stages = initStagesWithCancelledTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(1L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(1L)
-                                .status(TaskStatus.CANCELLED)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.CANCELLED, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(1L, List.of(initTask(1L, TaskStatus.CANCELLED))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -169,32 +112,12 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with any cancelled tasks")
     void taskStatusFilter_filteringStageWithAnyCancelledTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.CANCELLED)
-                .taskStatusFilterType(TaskStatusFilterType.ANY)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.CANCELLED, TaskStatusFilterType.ANY);
 
-        stages = initStagesWithCancelledTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.CANCELLED)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.CANCELLED)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
+        stages = initStages(TaskStatus.CANCELLED, TaskStatus.TESTING);
+        List<Stage> expected = List.of(
+                initStage(1L, List.of(initTask(1L, TaskStatus.CANCELLED))),
+                initStage(2L, List.of(initTask(2L, TaskStatus.CANCELLED), initTask(3L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -205,20 +128,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with none cancelled tasks")
     void taskStatusFilter_filteringStageWithNoneCancelledTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.CANCELLED)
-                .taskStatusFilterType(TaskStatusFilterType.NONE)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.CANCELLED, TaskStatusFilterType.NONE);
 
-        stages = initStagesWithCancelledTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(3L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(4L)
-                                .status(TaskStatus.TESTING)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.CANCELLED, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(3L, List.of(initTask(4L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -229,20 +142,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with all TODO tasks")
     void taskStatusFilter_filteringStageWithAllTodoTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.TODO)
-                .taskStatusFilterType(TaskStatusFilterType.ALL)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.TODO, TaskStatusFilterType.ALL);
 
-        stages = initStagesWithTodoTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(1L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(1L)
-                                .status(TaskStatus.TODO)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.TODO, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(1L, List.of(initTask(1L, TaskStatus.TODO))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -253,32 +156,12 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with any TOOD tasks")
     void taskStatusFilter_filteringStageWithAnyTodoTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.TODO)
-                .taskStatusFilterType(TaskStatusFilterType.ANY)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.TODO, TaskStatusFilterType.ANY);
 
-        stages = initStagesWithTodoTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.TODO)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.TODO)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
+        stages = initStages(TaskStatus.TODO, TaskStatus.TESTING);
+        List<Stage> expected = List.of(
+                initStage(1L, List.of(initTask(1L, TaskStatus.TODO))),
+                initStage(2L, List.of(initTask(2L, TaskStatus.TODO), initTask(3L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -289,20 +172,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with none TODO tasks")
     void taskStatusFilter_filteringStageWithNoneTodoTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.TODO)
-                .taskStatusFilterType(TaskStatusFilterType.NONE)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.TODO, TaskStatusFilterType.NONE);
 
-        stages = initStagesWithTodoTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(3L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(4L)
-                                .status(TaskStatus.TESTING)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.TODO, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(3L, List.of(initTask(4L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -313,20 +186,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with all in progress tasks")
     void taskStatusFilter_filteringStageWithAllInProgressTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.IN_PROGRESS)
-                .taskStatusFilterType(TaskStatusFilterType.ALL)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.IN_PROGRESS, TaskStatusFilterType.ALL);
 
-        stages = initStagesWithInProgressTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(1L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(1L)
-                                .status(TaskStatus.IN_PROGRESS)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.IN_PROGRESS, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(1L, List.of(initTask(1L, TaskStatus.IN_PROGRESS))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -337,32 +200,12 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with any in progress tasks")
     void taskStatusFilter_filteringStageWithAnyInProgressTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.IN_PROGRESS)
-                .taskStatusFilterType(TaskStatusFilterType.ANY)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.IN_PROGRESS, TaskStatusFilterType.ANY);
 
-        stages = initStagesWithInProgressTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.IN_PROGRESS)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.IN_PROGRESS)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
+        stages = initStages(TaskStatus.IN_PROGRESS, TaskStatus.TESTING);
+        List<Stage> expected = List.of(
+                initStage(1L, List.of(initTask(1L, TaskStatus.IN_PROGRESS))),
+                initStage(2L, List.of(initTask(2L, TaskStatus.IN_PROGRESS), initTask(3L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -373,20 +216,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with none in progress tasks")
     void taskStatusFilter_filteringStageWithNoneInProgressTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.IN_PROGRESS)
-                .taskStatusFilterType(TaskStatusFilterType.NONE)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.IN_PROGRESS, TaskStatusFilterType.NONE);
 
-        stages = initStagesWithInProgressTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(3L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(4L)
-                                .status(TaskStatus.TESTING)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.IN_PROGRESS, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(3L, List.of(initTask(4L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -397,20 +230,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with all review tasks")
     void taskStatusFilter_filteringStageWithAllReviewTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.REVIEW)
-                .taskStatusFilterType(TaskStatusFilterType.ALL)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.REVIEW, TaskStatusFilterType.ALL);
 
-        stages = initStagesWithReviewTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(1L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(1L)
-                                .status(TaskStatus.REVIEW)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.REVIEW, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(1L, List.of(initTask(1L, TaskStatus.REVIEW))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -421,32 +244,12 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with any review tasks")
     void taskStatusFilter_filteringStageWithAnyReviewTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.REVIEW)
-                .taskStatusFilterType(TaskStatusFilterType.ANY)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.REVIEW, TaskStatusFilterType.ANY);
 
-        stages = initStagesWithReviewTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.REVIEW)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.REVIEW)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
+        stages = initStages(TaskStatus.REVIEW, TaskStatus.TESTING);
+        List<Stage> expected = List.of(
+                initStage(1L, List.of(initTask(1L, TaskStatus.REVIEW))),
+                initStage(2L, List.of(initTask(2L, TaskStatus.REVIEW), initTask(3L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -457,20 +260,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with none review tasks")
     void taskStatusFilter_filteringStageWithNoneReviewTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.REVIEW)
-                .taskStatusFilterType(TaskStatusFilterType.NONE)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.REVIEW, TaskStatusFilterType.NONE);
 
-        stages = initStagesWithReviewTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(3L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(4L)
-                                .status(TaskStatus.TESTING)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.REVIEW, TaskStatus.TESTING);
+        List<Stage> expected = List.of(initStage(3L, List.of(initTask(4L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -481,20 +274,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with all testing tasks")
     void taskStatusFilter_filteringStageWithAllTestingTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.TESTING)
-                .taskStatusFilterType(TaskStatusFilterType.ALL)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.TESTING, TaskStatusFilterType.ALL);
 
-        stages = initStagesWithTestingTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(1L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(1L)
-                                .status(TaskStatus.TESTING)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.TESTING, TaskStatus.DONE);
+        List<Stage> expected = List.of(initStage(1L, List.of(initTask(1L, TaskStatus.TESTING))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -505,32 +288,12 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with any testing tasks")
     void taskStatusFilter_filteringStageWithAnyTestingTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.TESTING)
-                .taskStatusFilterType(TaskStatusFilterType.ANY)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.TESTING, TaskStatusFilterType.ANY);
 
-        stages = initStagesWithTestingTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.TESTING)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.DONE)
-                                        .build()))
-                        .build());
+        stages = initStages(TaskStatus.TESTING, TaskStatus.DONE);
+        List<Stage> expected = List.of(
+                initStage(1L, List.of(initTask(1L, TaskStatus.TESTING))),
+                initStage(2L, List.of(initTask(2L, TaskStatus.TESTING), initTask(3L, TaskStatus.DONE))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -541,20 +304,10 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stage with none testing tasks")
     void taskStatusFilter_filteringStageWithNoneTestingTasks() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.TESTING)
-                .taskStatusFilterType(TaskStatusFilterType.NONE)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.TESTING, TaskStatusFilterType.NONE);
 
-        stages = initStagesWithTestingTasks();
-        List<Stage> expected = List.of(Stage.builder()
-                .stageId(3L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(4L)
-                                .status(TaskStatus.DONE)
-                                .build()))
-                .build());
+        stages = initStages(TaskStatus.TESTING, TaskStatus.DONE);
+        List<Stage> expected = List.of(initStage(3L, List.of(initTask(4L, TaskStatus.DONE))));
 
         List<Stage> result = taskStatusFilter.apply(stages, stageFilterDto).toList();
 
@@ -565,10 +318,7 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering empty list of stages with all type filter")
     void taskStatusFilter_filteringEmptyListWithAllTypeFilter() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.TESTING)
-                .taskStatusFilterType(TaskStatusFilterType.ALL)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.TESTING, TaskStatusFilterType.ALL);
 
         List<Stage> result = taskStatusFilter.apply(Stream.empty(), stageFilterDto).toList();
 
@@ -578,10 +328,7 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering empty list of stages with any type filter")
     void taskStatusFilter_filteringEmptyListWithAnyTypeFilter() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.TESTING)
-                .taskStatusFilterType(TaskStatusFilterType.ANY)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.TESTING, TaskStatusFilterType.ANY);
 
         List<Stage> result = taskStatusFilter.apply(Stream.empty(), stageFilterDto).toList();
 
@@ -591,10 +338,7 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering empty list of stages with none type filter")
     void taskStatusFilter_filteringEmptyListWithNoneTypeFilter() {
-        stageFilterDto = StageFilterDto.builder()
-                .taskStatusFilter(TaskStatus.TESTING)
-                .taskStatusFilterType(TaskStatusFilterType.NONE)
-                .build();
+        stageFilterDto = initStageFilterDto(TaskStatus.TESTING, TaskStatusFilterType.NONE);
 
         List<Stage> result = taskStatusFilter.apply(Stream.empty(), stageFilterDto).toList();
 
@@ -604,203 +348,41 @@ class TaskStatusFilterTest {
     @Test
     @DisplayName("Filtering stages with null arguments")
     void taskStatusFilter_filteringWithNullArguments() {
-        stageFilterDto = StageFilterDto.builder()
-                .build();
+        stageFilterDto = initStageFilterDto(null, null);
         stages = Stream.empty();
         assertThrows(NullPointerException.class, () -> taskStatusFilter.apply(stages, null));
         assertThrows(NullPointerException.class, () -> taskStatusFilter.apply(null, stageFilterDto));
         assertThrows(NullPointerException.class, () -> taskStatusFilter.apply(null, null));
     }
 
-    private Stream<Stage> initStagesWithTodoTasks() {
-        return Stream.of(
-                Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.TODO)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.TODO)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(3L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(4L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
+    private StageFilterDto initStageFilterDto(TaskStatus taskStatus, TaskStatusFilterType filterType) {
+        return StageFilterDto.builder()
+                .taskStatusFilter(taskStatus)
+                .taskStatusFilterType(filterType)
+                .build();
     }
 
-    private Stream<Stage> initStagesWithInProgressTasks() {
-        return Stream.of(
-                Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.IN_PROGRESS)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.IN_PROGRESS)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(3L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(4L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
+    private Stage initStage(Long id, List<Task> tasks) {
+        return Stage.builder()
+                .stageId(id)
+                .tasks(tasks)
+                .build();
     }
 
-    private Stream<Stage> initStagesWithReviewTasks() {
-        return Stream.of(
-                Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.REVIEW)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.REVIEW)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(3L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(4L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
+    private Task initTask(Long id, TaskStatus status) {
+        return Task.builder()
+                .id(id)
+                .status(status)
+                .build();
     }
 
-    private Stream<Stage> initStagesWithTestingTasks() {
+    private Stream<Stage> initStages(TaskStatus neededTask, TaskStatus notNeededTask) {
         return Stream.of(
-                Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.TESTING)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.DONE)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(3L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(4L)
-                                        .status(TaskStatus.DONE)
-                                        .build()))
-                        .build());
-    }
-
-    private Stream<Stage> initStagesWithDoneTasks() {
-        return Stream.of(
-                Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.DONE)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.DONE)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(3L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(4L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
-    }
-
-    private Stream<Stage> initStagesWithCancelledTasks() {
-        return Stream.of(
-                Stage.builder()
-                        .stageId(1L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(1L)
-                                        .status(TaskStatus.CANCELLED)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(2L)
-                                        .status(TaskStatus.CANCELLED)
-                                        .build(),
-                                Task.builder()
-                                        .id(3L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(3L)
-                        .tasks(List.of(
-                                Task.builder()
-                                        .id(4L)
-                                        .status(TaskStatus.TESTING)
-                                        .build()))
-                        .build());
+                initStage(1L, List.of(initTask(1L, neededTask))),
+                initStage(2L, List.of(
+                        initTask(2L, neededTask),
+                        initTask(3L, notNeededTask))),
+                initStage(3L, List.of(initTask(4L, notNeededTask)))
+        );
     }
 }

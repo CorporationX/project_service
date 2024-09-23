@@ -7,6 +7,10 @@ import java.util.List;
 @Builder
 public record StageDto(
         Long stageId,
+
         String stageName,
+
         Long projectId,
-        List<Long> executorIds) {}
+
+        List<Long> executorIds) {
+}

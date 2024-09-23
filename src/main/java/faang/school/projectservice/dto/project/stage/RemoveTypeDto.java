@@ -9,4 +9,5 @@ public record RemoveTypeDto(
         @NotNull(message = "Remove strategy is required")
         RemoveStrategy removeStrategy,
 
-        Long stageForMigrateId) {}
+        Long stageForMigrateId) {
+}

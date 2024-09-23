@@ -7,5 +7,8 @@ import lombok.Builder;
 @Builder
 public record StageFilterDto(
         TeamRole roleFilter,
+
         TaskStatus taskStatusFilter,
-        TaskStatusFilterType taskStatusFilterType) {}
+
+        TaskStatusFilterType taskStatusFilterType) {
+}

@@ -21,7 +21,7 @@ public class TaskStatusFilter implements StageFilter {
         return switch (filters.taskStatusFilterType()) {
             case ALL -> filterByAllMatchWithStatus(stages, filters.taskStatusFilter());
             case ANY -> filterByAnyMatchWithStatus(stages, filters.taskStatusFilter());
-            case NONE -> filterBuNoneMatchWithStatus(stages, filters.taskStatusFilter());
+            case NONE -> filterByNoneMatchWithStatus(stages, filters.taskStatusFilter());
         };
     }
 
@@ -35,7 +35,7 @@ public class TaskStatusFilter implements StageFilter {
                 .allMatch(task -> task.getStatus().equals(status)));
     }
 
-    private Stream<Stage> filterBuNoneMatchWithStatus(Stream<Stage> stages, TaskStatus status) {
+    private Stream<Stage> filterByNoneMatchWithStatus(Stream<Stage> stages, TaskStatus status) {
         return stages.filter(stage -> stage.getTasks().stream()
                 .noneMatch(task -> task.getStatus().equals(status)));
     }

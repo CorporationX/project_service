@@ -13,4 +13,5 @@ public record StageRoleDto(
 
         @NotNull(message = "Count for member role is required")
         @Positive(message = "Count for member role must be positive")
-        Integer count) {}
+        Integer count) {
+}
