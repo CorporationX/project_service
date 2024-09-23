@@ -57,6 +57,9 @@ class StageServiceImplTest {
         );
 
         service = new StageServiceImpl(stageRepository, projectRepository, mapper, validator, filters);
+
+        Mockito.lenient().when(projectRepository.existsById(1L))
+                .thenReturn(true);
     }
 
     private void initRolesAndMembers() {
@@ -77,8 +80,6 @@ class StageServiceImplTest {
 
         service.create(stageDto);
 
-        Mockito.verify(validator, Mockito.times(1))
-                .validateProjectExisting(projectRepository.existsById(stageDto.getProjectId()));
         Mockito.verify(mapper, Mockito.times(1))
                 .toStage(stageDto);
         Mockito.verify(stageRepository, Mockito.times(1))
@@ -104,8 +105,6 @@ class StageServiceImplTest {
     void testDeleteStage() {
         service.deleteStage(stageDto);
 
-        Mockito.verify(validator, Mockito.times(1))
-                .validateProjectExisting(projectRepository.existsById(stageDto.getProjectId()));
         Mockito.verify(validator, Mockito.times(1))
                 .validateExecutorsStageRoles(stageDto);
         Mockito.verify(stageRepository, Mockito.times(1))
@@ -138,7 +137,7 @@ class StageServiceImplTest {
         service.getFilteredStages(projectId, filterDto);
 
         Mockito.verify(validator, Mockito.times(1))
-                .validateProject(project.getStatus());
+                .validateProjectNotCanceled(project.getStatus());
         Mockito.verify(projectRepository, Mockito.times(1))
                 .getProjectById(projectId);
         Mockito.verify(filters.get(0), Mockito.times(1))
@@ -158,8 +157,6 @@ class StageServiceImplTest {
         initRolesAndMembers();
         service.updateStage(stageDto);
 
-        Mockito.verify(validator, Mockito.times(1))
-                .validateProjectExisting(false);
         Mockito.verify(validator, Mockito.times(1))
                 .validateExecutorsStageRoles(stageDto);
     }

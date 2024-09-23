@@ -38,11 +38,6 @@ class StageServiceValidatorTest {
                 new StageDto(1L, "name", 1L, stageRolesDtos);
         stageDto.setExecutorsDtos(memberDtos);
     }
-    @Test
-    void validateProjectExisting_whenNotExist() {
-        Assertions.assertThrows(StageNotHaveProjectException.class,
-                () -> validator.validateProjectExisting(false));
-    }
 
     @Test
     void validateExecutorsStageRoles_whenExecutorExcess() {

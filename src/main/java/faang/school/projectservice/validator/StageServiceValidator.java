@@ -15,26 +15,25 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class StageServiceValidator {
-    public void validateProjectExisting(boolean isExist) {
-        if (!isExist) {
-            throw new StageNotHaveProjectException();
-        }
-    }
-
     public void validateExecutorsStageRoles(StageDto stageDto) {
         Set<TeamRole> roles = stageDto.getStageRoles().stream()
-                .map(StageRolesDto::role).collect(Collectors.toSet());//роли в этапе
+                .map(StageRolesDto::role)
+                .collect(Collectors.toSet());//роли в этапе
 
         for (TeamMemberDto dto : stageDto.getExecutorsDtos()) {
-            if (!dto.stageRoles().stream()
-                    .anyMatch(roles::contains)) {
+            if (isMemberHaveAnyStageRole(dto, roles)) {
                 throw new IllegalArgumentException("executor id = " + dto.id()
                         + " excess in this stage");
             }
         }
     }
 
-    public void validateProject(ProjectStatus status) {
+    private boolean isMemberHaveAnyStageRole(TeamMemberDto memberDto, Set<TeamRole> roles) {
+        return memberDto.stageRoles().stream()
+                .noneMatch(roles::contains);
+    }
+
+    public void validateProjectNotCanceled(ProjectStatus status) {
         if (status.equals(ProjectStatus.CANCELLED)) {
             throw new IllegalArgumentException("project was canceled");
         }

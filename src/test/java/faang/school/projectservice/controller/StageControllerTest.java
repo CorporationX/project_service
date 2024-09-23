@@ -1,8 +1,10 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.exceptions.stage.StageHaveNoRolesException;
+import faang.school.projectservice.exceptions.stage.StageNotHaveNameException;
 import faang.school.projectservice.service.StageService;
-import faang.school.projectservice.validator.StageControllerValidator;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +19,6 @@ import java.util.List;
 class StageControllerTest {
     @Mock
     private StageService service;
-    @Mock
-    private StageControllerValidator validator;
     @InjectMocks
     private StageController controller;
 
@@ -31,13 +31,8 @@ class StageControllerTest {
 
     @Test
     void testCreate() {
-        Mockito.doNothing().when(validator)
-                .validateStageDto(stageDto);
-
         controller.create(stageDto);
 
-        Mockito.verify(validator, Mockito.times(1))
-                .validateStageDto(stageDto);
         Mockito.verify(service, Mockito.times(1))
                 .create(stageDto);
     }
@@ -46,13 +41,9 @@ class StageControllerTest {
     void testGetAllStages() {
         Long projectId = 1L;
 
-        Mockito.doNothing().when(validator)
-                .validateId(projectId);
 
         controller.getAllStages(projectId);
 
-        Mockito.verify(validator, Mockito.times(1))
-                .validateId(projectId);
         Mockito.verify(service, Mockito.times(1))
                 .getAllStages(projectId);
     }
@@ -61,13 +52,9 @@ class StageControllerTest {
     void testGetStageById() {
         Long stageId = 1L;
 
-        Mockito.doNothing().when(validator)
-                .validateId(stageId);
 
         controller.getStageById(stageId);
 
-        Mockito.verify(validator, Mockito.times(1))
-                .validateId(stageId);
         Mockito.verify(service, Mockito.times(1))
                 .getStageById(stageId);
     }
@@ -84,13 +71,9 @@ class StageControllerTest {
     void testGetFilteredStages() {
         Long projectId = 1L;
 
-        Mockito.doNothing().when(validator)
-                .validateId(projectId);
 
         controller.getFilteredStages(projectId, null);
 
-        Mockito.verify(validator, Mockito.times(1))
-                .validateId(projectId);
         Mockito.verify(service, Mockito.times(1))
                 .getFilteredStages(projectId, null);
     }
@@ -101,7 +84,5 @@ class StageControllerTest {
 
         Mockito.verify(service)
                 .updateStage(stageDto);
-        Mockito.verify(validator)
-                .validateStageDto(stageDto);
     }
 }
