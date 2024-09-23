@@ -11,6 +11,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -34,7 +35,7 @@ public interface StageMapper {
     default List<Long> getExecutorsIds(List<TeamMember> executors) {
         // как лучше обработать null здесь?
         if (executors == null) {
-            return null;
+            return new ArrayList<>();
         }
         return executors.stream()
                 .map(TeamMember::getId)

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RolesFilterTest {
+class RolesFilterTest {
     private final StageFilter rolesFilter = new RolesFilter();
     Stream<Stage> stages;
 
@@ -28,9 +28,7 @@ public class RolesFilterTest {
     @Test
     @DisplayName("Is filter applicable with filter in dto")
     void rolesFilterTest_isFilterApplicableWithFilterInDto() {
-        StageFilterDto stageFilterDto = StageFilterDto.builder()
-                .roleFilter(TeamRole.TESTER)
-                .build();
+        StageFilterDto stageFilterDto = initStageFilterDto(TeamRole.TESTER);
 
         boolean result = rolesFilter.isApplicable(stageFilterDto);
 
@@ -40,8 +38,7 @@ public class RolesFilterTest {
     @Test
     @DisplayName("Is filter applicable without filter in dto")
     void rolesFilterTest_isFilterApplicableWithoutFilterInDto() {
-        StageFilterDto stageFilterDto = StageFilterDto.builder()
-                .build();
+        StageFilterDto stageFilterDto = initStageFilterDto(null);
 
         boolean result = rolesFilter.isApplicable(stageFilterDto);
 
@@ -51,9 +48,7 @@ public class RolesFilterTest {
     @Test
     @DisplayName("Filter stages")
     void rolesFilterTest_filterStages() {
-        StageFilterDto stageFilterDto = StageFilterDto.builder()
-                .roleFilter(TeamRole.TESTER)
-                .build();
+        StageFilterDto stageFilterDto = initStageFilterDto(TeamRole.TESTER);
         Stage stage = Stage.builder()
                 .stageId(2L)
                 .stageName("Stage 2")
@@ -74,9 +69,7 @@ public class RolesFilterTest {
     @Test
     @DisplayName("Filter stages from which none match filter")
     void rolesFilterTest_filterStagesFromWhichNoneMatchFilter() {
-        StageFilterDto stageFilterDto = StageFilterDto.builder()
-                .roleFilter(TeamRole.OWNER)
-                .build();
+        StageFilterDto stageFilterDto = initStageFilterDto(TeamRole.OWNER);
 
         var result = rolesFilter.apply(stages, stageFilterDto).toList();
 
@@ -86,9 +79,7 @@ public class RolesFilterTest {
     @Test
     @DisplayName("Filter empty stages")
     void rolesFilterTest_filterEmptyStages() {
-        StageFilterDto stageFilterDto = StageFilterDto.builder()
-                .roleFilter(TeamRole.OWNER)
-                .build();
+        StageFilterDto stageFilterDto = initStageFilterDto(TeamRole.OWNER);
 
         var result = rolesFilter.apply(Stream.empty(), stageFilterDto).toList();
 
@@ -98,9 +89,7 @@ public class RolesFilterTest {
     @Test
     @DisplayName("Filter stages with null arguments")
     void rolesFilterTest_filterStagesWithNullArguments() {
-        StageFilterDto stageFilterDto = StageFilterDto.builder()
-                .roleFilter(TeamRole.OWNER)
-                .build();
+        StageFilterDto stageFilterDto = initStageFilterDto(TeamRole.OWNER);
 
         assertThrows(NullPointerException.class, () -> rolesFilter.apply(null, stageFilterDto));
         assertThrows(NullPointerException.class, () -> rolesFilter.apply(stages, null));
@@ -109,36 +98,30 @@ public class RolesFilterTest {
 
     private Stream<Stage> initStages() {
         return Stream.of(
-                Stage.builder()
-                        .stageId(1L)
-                        .stageName("Stage 1")
-                        .stageRoles(List.of(
-                                StageRoles.builder()
-                                        .id(1L)
-                                        .teamRole(TeamRole.DEVELOPER)
-                                        .count(1)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .stageName("Stage 2")
-                        .stageRoles(List.of(
-                                StageRoles.builder()
-                                        .id(2L)
-                                        .teamRole(TeamRole.TESTER)
-                                        .count(1)
-                                        .build()))
-                        .build(),
-                Stage.builder()
-                        .stageId(3L)
-                        .stageName("Stage 3")
-                        .stageRoles(List.of(
-                                StageRoles.builder()
-                                        .id(3L)
-                                        .teamRole(TeamRole.DESIGNER)
-                                        .count(1)
-                                        .build()))
-                        .build()
-        );
+                initStage(1L, "Stage 1", List.of(initStageRole(1L, TeamRole.DEVELOPER, 1))),
+                initStage(2L, "Stage 2", List.of(initStageRole(2L, TeamRole.TESTER, 1))),
+                initStage(3L, "Stage 3", List.of(initStageRole(3L, TeamRole.DESIGNER, 1))));
+    }
+
+    private StageFilterDto initStageFilterDto(TeamRole teamRole) {
+        return StageFilterDto.builder()
+                .roleFilter(teamRole)
+                .build();
+    }
+
+    private StageRoles initStageRole(Long id, TeamRole role, int count) {
+        return StageRoles.builder()
+                .id(id)
+                .teamRole(role)
+                .count(count)
+                .build();
+    }
+
+    private Stage initStage(Long id, String name, List<StageRoles> stageRoles) {
+        return Stage.builder()
+                .stageId(id)
+                .stageName(name)
+                .stageRoles(stageRoles)
+                .build();
     }
 }

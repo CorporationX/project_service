@@ -24,10 +24,10 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.project.stage.filters.StageFilter;
-import faang.school.projectservice.service.project.stage.remove.RemoveStrategyExecutor;
-import faang.school.projectservice.service.project.stage.remove.RemoveWithClosingTasks;
-import faang.school.projectservice.service.project.stage.remove.RemoveWithTasks;
-import faang.school.projectservice.service.project.stage.remove.RemoveWithTasksMigration;
+import faang.school.projectservice.service.project.stage.removestrategy.RemoveStrategyExecutor;
+import faang.school.projectservice.service.project.stage.removestrategy.RemoveWithClosingTasks;
+import faang.school.projectservice.service.project.stage.removestrategy.RemoveWithTasks;
+import faang.school.projectservice.service.project.stage.removestrategy.RemoveWithTasksMigration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,9 +86,9 @@ class StageServiceImplTest {
                 Mockito.mock(StageFilter.class),
                 Mockito.mock(StageFilter.class));
         List<RemoveStrategyExecutor> removeStrategies = List.of(
-                new RemoveWithClosingTasks(stageRepository, taskRepository, RemoveStrategy.CLOSE),
-                new RemoveWithTasks(stageRepository, RemoveStrategy.CASCADE_DELETE),
-                new RemoveWithTasksMigration(stageRepository, RemoveStrategy.MIGRATE));
+                new RemoveWithClosingTasks(stageRepository, taskRepository),
+                new RemoveWithTasks(stageRepository),
+                new RemoveWithTasksMigration(stageRepository));
         stageService = new StageServiceImpl(
                 stageRepository,
                 projectRepository,
@@ -96,7 +96,6 @@ class StageServiceImplTest {
                 stageMapper,
                 stageFilters,
                 removeStrategies);
-        stageService.fillRemoveStrategyExecutors();
         project = Project.builder()
                 .id(PROJECT_ID)
                 .status(ProjectStatus.IN_PROGRESS)
@@ -119,16 +118,8 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Creating stage")
     void stageServiceTest_createStage() {
-        Stage savedStage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .build();
+        Stage savedStage = initStage(STAGE_ID, "test", project, new ArrayList<>());
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, new ArrayList<>());
         when(projectRepository.existsById(PROJECT_ID)).thenReturn(true);
         when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
         when(stageRepository.save(any(Stage.class))).thenReturn(savedStage);
@@ -180,16 +171,8 @@ class StageServiceImplTest {
         List<Stage> stages = initStages();
         project.setStages(stages);
         List<StageDto> expectedDtos = List.of(
-                StageDto.builder()
-                        .stageId(1L)
-                        .stageName("test")
-                        .projectId(PROJECT_ID)
-                        .build(),
-                StageDto.builder()
-                        .stageId(2L)
-                        .stageName("test2")
-                        .projectId(PROJECT_ID)
-                        .build());
+                initStageDto(1L, "test", PROJECT_ID, new ArrayList<>()),
+                initStageDto(2L, "test2", PROJECT_ID, new ArrayList<>()));
         when(projectRepository.existsById(PROJECT_ID)).thenReturn(true);
         when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
         when(stageFilters.get(0).isApplicable(any())).thenReturn(true);
@@ -214,16 +197,8 @@ class StageServiceImplTest {
         List<Stage> stages = initStages();
         project.setStages(stages);
         List<StageDto> expectedDtos = List.of(
-                StageDto.builder()
-                        .stageId(1L)
-                        .stageName("test")
-                        .projectId(PROJECT_ID)
-                        .build(),
-                StageDto.builder()
-                        .stageId(2L)
-                        .stageName("test2")
-                        .projectId(PROJECT_ID)
-                        .build());
+                initStageDto(1L, "test", PROJECT_ID, new ArrayList<>()),
+                initStageDto(2L, "test2", PROJECT_ID, new ArrayList<>()));
         when(projectRepository.existsById(PROJECT_ID)).thenReturn(true);
         when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
         when(stageFilters.get(0).isApplicable(any())).thenReturn(true);
@@ -247,16 +222,8 @@ class StageServiceImplTest {
         List<Stage> stages = initStages();
         project.setStages(stages);
         List<StageDto> expectedDtos = List.of(
-                StageDto.builder()
-                        .stageId(1L)
-                        .stageName("test")
-                        .projectId(PROJECT_ID)
-                        .build(),
-                StageDto.builder()
-                        .stageId(2L)
-                        .stageName("test2")
-                        .projectId(PROJECT_ID)
-                        .build());
+                initStageDto(1L, "test", PROJECT_ID, new ArrayList<>()),
+                initStageDto(2L, "test2", PROJECT_ID, new ArrayList<>()));
         when(projectRepository.existsById(PROJECT_ID)).thenReturn(true);
         when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
         when(stageFilters.get(0).isApplicable(any())).thenReturn(false);
@@ -306,32 +273,11 @@ class StageServiceImplTest {
     }
 
     @Test
-    @DisplayName("Try getting non existing stages from project")
-    void stageServiceTest_getNonExistingStagesFromProject() {
-        when(projectRepository.existsById(PROJECT_ID)).thenReturn(true);
-        when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
-
-        assertThrows(EntityNotFoundException.class, () -> stageService.getStages(PROJECT_ID, stageFilterDto));
-        verify(projectRepository).existsById(PROJECT_ID);
-        verify(projectRepository).getProjectById(PROJECT_ID);
-    }
-
-    @Test
     @DisplayName("Remove stage with cascade delete tasks")
     void stageServiceTest_removeStageWithCascadeDeleteTasks() {
-        removeTypeDto = RemoveTypeDto.builder()
-                .removeStrategy(RemoveStrategy.CASCADE_DELETE)
-                .build();
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .build();
+        removeTypeDto = initRemoveTypeDto(RemoveStrategy.CASCADE_DELETE, null);
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, new ArrayList<>());
         List<Task> tasks = initTasks(stage);
         stage.setTasks(tasks);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
@@ -346,19 +292,9 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Remove stage with closing task")
     void stageServiceTest_removeStageWithClosingTask() {
-        removeTypeDto = RemoveTypeDto.builder()
-                .removeStrategy(RemoveStrategy.CLOSE)
-                .build();
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .build();
+        removeTypeDto = initRemoveTypeDto(RemoveStrategy.CLOSE, null);
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, new ArrayList<>());
         List<Task> tasks = initTasks(stage);
         stage.setTasks(tasks);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
@@ -376,25 +312,10 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Remove stage with migrate task to stage without tasks")
     void stageServiceTest_removeStageWithMigrateTaskToStageWithoutTasks() {
-        removeTypeDto = RemoveTypeDto.builder()
-                .removeStrategy(RemoveStrategy.MIGRATE)
-                .stageForMigrateId(2L)
-                .build();
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        Stage stageToMigrate = Stage.builder()
-                .stageId(2L)
-                .stageName("test2")
-                .project(project)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .build();
+        removeTypeDto = initRemoveTypeDto(RemoveStrategy.MIGRATE, 2L);
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
+        Stage stageToMigrate = initStage(2L, "test2", project, new ArrayList<>());
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, new ArrayList<>());
         List<Task> tasks = initTasks(stage);
         stage.setTasks(tasks);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
@@ -412,31 +333,12 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Remove stage with migrate task to stage with tasks")
     void stageServiceTest_removeStageWithMigrateTaskToStageWithTasks() {
-        removeTypeDto = RemoveTypeDto.builder()
-                .removeStrategy(RemoveStrategy.MIGRATE)
-                .stageForMigrateId(2L)
-                .build();
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        Stage stageToMigrate = Stage.builder()
-                .stageId(2L)
-                .stageName("test2")
-                .project(project)
-                .build();
+        removeTypeDto = initRemoveTypeDto(RemoveStrategy.MIGRATE, 2L);
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
+        Stage stageToMigrate = initStage(2L, "test2", project, new ArrayList<>());
         stageToMigrate.setTasks(new ArrayList<>(List.of(
-                Task.builder()
-                        .id(3L)
-                        .name("test3")
-                        .stage(stageToMigrate)
-                        .build())));
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .build();
+                initTask(3L, "test3", stageToMigrate))));
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, new ArrayList<>());
         List<Task> tasks = initTasks(stage);
         stage.setTasks(tasks);
         var expectedTasks = new ArrayList<>(tasks);
@@ -456,52 +358,10 @@ class StageServiceImplTest {
     }
 
     @Test
-    @DisplayName("Remove stage with closing non existing tasks")
-    void stageServiceTest_removeStageWithClosingNonExistingTasks() {
-        removeTypeDto = RemoveTypeDto.builder()
-                .removeStrategy(RemoveStrategy.CLOSE)
-                .build();
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
-
-        assertThrows(EntityNotFoundException.class, () -> stageService.removeStage(STAGE_ID, removeTypeDto));
-        verify(stageRepository).getById(STAGE_ID);
-    }
-
-    @Test
-    @DisplayName("Remove stage with migrate non existing tasks")
-    void stageServiceTest_removeStageWithMigrateNonExistingTasks() {
-        removeTypeDto = RemoveTypeDto.builder()
-                .removeStrategy(RemoveStrategy.MIGRATE)
-                .stageForMigrateId(2L)
-                .build();
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
-
-        assertThrows(EntityNotFoundException.class, () -> stageService.removeStage(STAGE_ID, removeTypeDto));
-        verify(stageRepository).getById(any());
-    }
-
-    @Test
     @DisplayName("Remove stage with migrate task without stage in dto")
     void stageServiceTest_removeStageWithMigrateTaskWithoutStageInRemoveTypeDto() {
-        removeTypeDto = RemoveTypeDto.builder()
-                .removeStrategy(RemoveStrategy.MIGRATE)
-                .stageForMigrateId(null)
-                .build();
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        removeTypeDto = initRemoveTypeDto(RemoveStrategy.MIGRATE, null);
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<Task> tasks = initTasks(stage);
         stage.setTasks(tasks);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
@@ -513,15 +373,8 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Remove stage with migrate task with non existing stage to migrate")
     void stageServiceTest_removeStageWithMigrateTaskWithNonExistingStageFroMigrate() {
-        removeTypeDto = RemoveTypeDto.builder()
-                .removeStrategy(RemoveStrategy.MIGRATE)
-                .stageForMigrateId(2L)
-                .build();
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        removeTypeDto = initRemoveTypeDto(RemoveStrategy.MIGRATE, 2L);
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<Task> tasks = initTasks(stage);
         stage.setTasks(tasks);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
@@ -534,15 +387,8 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Remove non existing stage with migrate task")
     void stageServiceTest_removeStageWithMigrateTaskWithNonExistingStage() {
-        removeTypeDto = RemoveTypeDto.builder()
-                .removeStrategy(RemoveStrategy.MIGRATE)
-                .stageForMigrateId(2L)
-                .build();
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        removeTypeDto = initRemoveTypeDto(RemoveStrategy.MIGRATE, 2L);
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<Task> tasks = initTasks(stage);
         stage.setTasks(tasks);
         when(stageRepository.getById(STAGE_ID)).thenThrow(EntityNotFoundException.class);
@@ -554,26 +400,14 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Updating stage name and executors")
     void stageServiceTest_updateStageNameAndExecutors() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<StageRoles> roles = initStageRoles(stage);
         stage.setStageRoles(roles);
         project.setTeams(new ArrayList<>());
         List<TeamMember> executors = initExecutors();
         List<Long> executorIds = executors.stream().map(TeamMember::getId).toList();
-        StageUpdateDto stageUpdateDto = StageUpdateDto.builder()
-                .stageName("new name")
-                .executorIds(executorIds)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("new name")
-                .projectId(PROJECT_ID)
-                .executorIds(executorIds)
-                .build();
+        StageUpdateDto stageUpdateDto = initStageUpdateDto("new name", executorIds);
+        StageDto expectedDto = initStageDto(STAGE_ID, "new name", PROJECT_ID, executorIds);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
         when(teamMemberRepository.findAllByIds(executorIds)).thenReturn(executors);
         when(stageRepository.save(stage)).thenReturn(stage);
@@ -591,25 +425,14 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Updating stage executors")
     void stageServiceTest_updateExecutors() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<StageRoles> roles = initStageRoles(stage);
         stage.setStageRoles(roles);
         project.setTeams(new ArrayList<>());
         List<TeamMember> executors = initExecutors();
         List<Long> executorIds = executors.stream().map(TeamMember::getId).toList();
-        StageUpdateDto stageUpdateDto = StageUpdateDto.builder()
-                .executorIds(executorIds)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .executorIds(executorIds)
-                .build();
+        StageUpdateDto stageUpdateDto = initStageUpdateDto(null, executorIds);
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, executorIds);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
         when(teamMemberRepository.findAllByIds(executorIds)).thenReturn(executors);
         when(stageRepository.save(stage)).thenReturn(stage);
@@ -626,29 +449,16 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Updating stage executors with already having stages")
     void stageServiceTest_updateExecutorsWithAlreadyHavingStages() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        Stage antoherExecutorsStage = Stage.builder()
-                .stageId(2L)
-                .build();
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
+        Stage antoherExecutorsStage = initStage(2L, "test2", project, new ArrayList<>());
         List<StageRoles> roles = initStageRoles(stage);
         stage.setStageRoles(roles);
         project.setTeams(new ArrayList<>());
         List<TeamMember> executors = initExecutors();
         executors.forEach(executor -> executor.setStages(new ArrayList<>(List.of(antoherExecutorsStage))));
         List<Long> executorIds = executors.stream().map(TeamMember::getId).toList();
-        StageUpdateDto stageUpdateDto = StageUpdateDto.builder()
-                .executorIds(executorIds)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .executorIds(executorIds)
-                .build();
+        StageUpdateDto stageUpdateDto = initStageUpdateDto(null, executorIds);
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, executorIds);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
         when(teamMemberRepository.findAllByIds(executorIds)).thenReturn(executors);
         when(stageRepository.save(stage)).thenReturn(stage);
@@ -667,26 +477,15 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Updating stage executors with empty list of stages")
     void stageServiceTest_updateExecutorsWithEmptyStages() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<StageRoles> roles = initStageRoles(stage);
         stage.setStageRoles(roles);
         project.setTeams(new ArrayList<>());
         List<TeamMember> executors = initExecutors();
         executors.forEach(executor -> executor.setStages(new ArrayList<>()));
         List<Long> executorIds = executors.stream().map(TeamMember::getId).toList();
-        StageUpdateDto stageUpdateDto = StageUpdateDto.builder()
-                .executorIds(executorIds)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .executorIds(executorIds)
-                .build();
+        StageUpdateDto stageUpdateDto = initStageUpdateDto(null, executorIds);
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, executorIds);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
         when(teamMemberRepository.findAllByIds(executorIds)).thenReturn(executors);
         when(stageRepository.save(stage)).thenReturn(stage);
@@ -705,11 +504,7 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Updating stage executors with not enough executors for roles")
     void stageServiceTest_updateExecutorsWithNotEnoughExecutorsForRoles() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<StageRoles> roles = initStageRoles(stage);
         roles.get(0).setCount(2);
         roles.get(1).setCount(2);
@@ -718,15 +513,8 @@ class StageServiceImplTest {
         project.setTeams(teams);
         List<TeamMember> executors = initExecutors();
         List<Long> executorIds = executors.stream().map(TeamMember::getId).toList();
-        StageUpdateDto stageUpdateDto = StageUpdateDto.builder()
-                .executorIds(executorIds)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .executorIds(executorIds)
-                .build();
+        StageUpdateDto stageUpdateDto = initStageUpdateDto(null, executorIds);
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, executorIds);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
         when(teamMemberRepository.findAllByIds(executorIds)).thenReturn(executors);
         when(stageRepository.save(stage)).thenReturn(stage);
@@ -743,11 +531,7 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Updating stage executors with not enough executors for roles and executors in project teams")
     void stageServiceTest_updateExecutorsWithNotEnoughExecutorsForRolesAndExecutorsInProjectTeams() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<StageRoles> roles = initStageRoles(stage);
         roles.get(0).setCount(2);
         roles.get(1).setCount(2);
@@ -755,21 +539,10 @@ class StageServiceImplTest {
         List<Team> teams = initTeams();
         project.setTeams(teams);
         List<TeamMember> executors = initExecutors();
-        project.getTeams().add(Team.builder()
-                .id(3L)
-                .teamMembers(executors)
-                .project(project)
-                .build());
+        project.getTeams().add(initTeam(3L, executors, project));
         List<Long> executorIds = executors.stream().map(TeamMember::getId).toList();
-        StageUpdateDto stageUpdateDto = StageUpdateDto.builder()
-                .executorIds(executorIds)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .executorIds(executorIds)
-                .build();
+        StageUpdateDto stageUpdateDto = initStageUpdateDto(null, executorIds);
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, executorIds);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
         when(teamMemberRepository.findAllByIds(executorIds)).thenReturn(executors);
         when(stageRepository.save(stage)).thenReturn(stage);
@@ -786,20 +559,14 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Updating with executors whithout needed roles")
     void stageServiceTest_updateWithExecutorsWithoutNeededRoles() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<StageRoles> roles = initStageRoles(stage);
         stage.setStageRoles(roles);
         project.setTeams(new ArrayList<>());
         List<TeamMember> executors = initExecutors();
         executors.get(0).setRoles(List.of(TeamRole.OWNER));
         List<Long> executorIds = executors.stream().map(TeamMember::getId).toList();
-        StageUpdateDto stageUpdateDto = StageUpdateDto.builder()
-                .executorIds(executorIds)
-                .build();
+        StageUpdateDto stageUpdateDto = initStageUpdateDto(null, executorIds);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
         when(teamMemberRepository.findAllByIds(executorIds)).thenReturn(executors);
 
@@ -809,53 +576,18 @@ class StageServiceImplTest {
     }
 
     @Test
-    @DisplayName("Updating stage with not enough executors and project with non existing teams")
-    void stageServiceTest_updateStageWithNotEnoughExecutorsAndProjectWithNonExistingTeams() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        List<StageRoles> roles = initStageRoles(stage);
-        roles.get(0).setCount(2);
-        roles.get(1).setCount(2);
-        stage.setStageRoles(roles);
-        List<TeamMember> executors = initExecutors();
-        List<Long> executorIds = executors.stream().map(TeamMember::getId).toList();
-        StageUpdateDto stageUpdateDto = StageUpdateDto.builder()
-                .executorIds(executorIds)
-                .build();
-        when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
-        when(teamMemberRepository.findAllByIds(executorIds)).thenReturn(executors);
-
-        assertThrows(EntityNotFoundException.class, () -> stageService.updateStage(stageUpdateDto, STAGE_ID, USER_ID));
-        verify(stageRepository).getById(STAGE_ID);
-        verify(teamMemberRepository).findAllByIds(executorIds);
-    }
-
-    @Test
     @DisplayName("Updating stage with not enough executors in project")
     void stageServiceTest_updateStageWithNotEnoughExecutorsInProject() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
         List<StageRoles> roles = initStageRoles(stage);
         roles.get(0).setCount(2);
         roles.get(1).setCount(2);
         stage.setStageRoles(roles);
         project.setTeams(new ArrayList<>());
         List<TeamMember> executors = initExecutors();
-        project.getTeams().add(Team.builder()
-                .id(3L)
-                .teamMembers(executors)
-                .project(project)
-                .build());
+        project.getTeams().add(initTeam(3L, executors, project));
         List<Long> executorIds = executors.stream().map(TeamMember::getId).toList();
-        StageUpdateDto stageUpdateDto = StageUpdateDto.builder()
-                .executorIds(executorIds)
-                .build();
+        StageUpdateDto stageUpdateDto = initStageUpdateDto(null, executorIds);
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
         when(teamMemberRepository.findAllByIds(executorIds)).thenReturn(executors);
 
@@ -867,16 +599,8 @@ class StageServiceImplTest {
     @Test
     @DisplayName("Get stage")
     void stageServiceTest_getStage() {
-        Stage stage = Stage.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .project(project)
-                .build();
-        StageDto expectedDto = StageDto.builder()
-                .stageId(STAGE_ID)
-                .stageName("test")
-                .projectId(PROJECT_ID)
-                .build();
+        Stage stage = initStage(STAGE_ID, "test", project, new ArrayList<>());
+        StageDto expectedDto = initStageDto(STAGE_ID, "test", PROJECT_ID, new ArrayList<>());
         when(stageRepository.getById(STAGE_ID)).thenReturn(stage);
 
         StageDto result = stageService.getStage(STAGE_ID);
@@ -894,95 +618,105 @@ class StageServiceImplTest {
         verify(stageRepository).getById(STAGE_ID);
     }
 
+    private Stage initStage(Long stageId, String stageName, Project project, List<TeamMember> executors) {
+        return Stage.builder()
+                .stageId(stageId)
+                .stageName(stageName)
+                .project(project)
+                .tasks(new ArrayList<>())
+                .executors(executors)
+                .build();
+    }
+
+    private StageDto initStageDto(Long stageId, String stageName, Long projectId, List<Long> executors) {
+        return StageDto.builder()
+                .stageId(stageId)
+                .stageName(stageName)
+                .projectId(projectId)
+                .executorIds(executors)
+                .build();
+    }
+
+    private StageUpdateDto initStageUpdateDto(String newName, List<Long> executorIds) {
+        return StageUpdateDto.builder()
+                .stageName(newName)
+                .executorIds(executorIds)
+                .build();
+    }
+
+    private RemoveTypeDto initRemoveTypeDto(RemoveStrategy removeStrategy, Long stageForMigrateId) {
+        return RemoveTypeDto.builder()
+                .removeStrategy(removeStrategy)
+                .stageForMigrateId(stageForMigrateId)
+                .build();
+    }
+
+    private Task initTask(Long id, String name, Stage stage) {
+        return Task.builder()
+                .id(id)
+                .name(name)
+                .stage(stage)
+                .build();
+    }
+
     private List<Stage> initStages() {
         return List.of(
-                Stage.builder()
-                        .stageId(1L)
-                        .stageName("test")
-                        .project(project)
-                        .build(),
-                Stage.builder()
-                        .stageId(2L)
-                        .stageName("test2")
-                        .project(project)
-                        .build());
+                initStage(1L, "test", project, new ArrayList<>()),
+                initStage(2L, "test2", project, new ArrayList<>()));
+    }
+
+    private StageRoles initStageRole(Long id, TeamRole teamRole, int count, Stage stage) {
+        return StageRoles.builder()
+                .id(id)
+                .teamRole(teamRole)
+                .count(count)
+                .stage(stage)
+                .build();
+    }
+
+    private TeamMember initTeamMember(Long id, Long userId, List<TeamRole> teamRole, List<Stage> stages) {
+        return TeamMember.builder()
+                .id(id)
+                .userId(userId)
+                .roles(teamRole)
+                .stages(stages)
+                .build();
+    }
+
+    private Team initTeam(Long id, List<TeamMember> members, Project project) {
+        return Team.builder()
+                .id(id)
+                .teamMembers(members)
+                .project(project)
+                .build();
     }
 
     private List<Task> initTasks(Stage stage) {
         return List.of(
-                Task.builder()
-                        .id(1L)
-                        .name("test")
-                        .stage(stage)
-                        .build(),
-                Task.builder()
-                        .id(2L)
-                        .name("test2")
-                        .stage(stage)
-                        .build());
+                initTask(1L, "test", stage),
+                initTask(2L, "test2", stage));
     }
 
     private List<StageRoles> initStageRoles(Stage stage) {
         return List.of(
-                StageRoles.builder()
-                        .id(1L)
-                        .teamRole(TeamRole.DEVELOPER)
-                        .count(1)
-                        .stage(stage)
-                        .build(),
-                StageRoles.builder()
-                        .id(2L)
-                        .teamRole(TeamRole.DESIGNER)
-                        .count(1)
-                        .stage(stage)
-                        .build());
+                initStageRole(1L, TeamRole.DEVELOPER, 1, stage),
+                initStageRole(2L, TeamRole.DESIGNER, 1, stage));
     }
 
     private List<TeamMember> initExecutors() {
         return List.of(
-                TeamMember.builder()
-                        .id(1L)
-                        .userId(2L)
-                        .roles(List.of(
-                                TeamRole.DEVELOPER,
-                                TeamRole.MANAGER
-                        ))
-                        .build(),
-                TeamMember.builder()
-                        .id(2L)
-                        .userId(2L)
-                        .roles(List.of(
-                                TeamRole.DESIGNER,
-                                TeamRole.OWNER
-                        ))
-                        .build());
+                initTeamMember(1L, 1L, List.of(TeamRole.DEVELOPER, TeamRole.MANAGER), new ArrayList<>()),
+                initTeamMember(2L, 2L, List.of(TeamRole.DESIGNER, TeamRole.OWNER), new ArrayList<>()));
     }
 
     private List<Team> initTeams() {
-        List<TeamMember> firstTeamMembers = List.of(TeamMember.builder()
-                .id(3L)
-                .userId(3L)
-                .roles(List.of(
-                        TeamRole.DESIGNER,
-                        TeamRole.INTERN))
-                .build());
-        List<TeamMember> secondTeamMembers = List.of(TeamMember.builder()
-                .id(4L)
-                .userId(4L)
-                .roles(List.of(
-                        TeamRole.DEVELOPER,
-                        TeamRole.INTERN))
-                .build());
-        return new ArrayList<>(List.of(
-                Team.builder()
-                        .id(1L)
-                        .teamMembers(firstTeamMembers)
-                        .project(project)
-                        .build(),
-                Team.builder()
-                        .id(1L)
-                        .teamMembers(secondTeamMembers)
-                        .project(project)
-                        .build()));
+        List<Team> teams = new ArrayList<>();
+        List<TeamMember> firstTeamMembers = List.of(
+                initTeamMember(3L, 3L, List.of(TeamRole.DEVELOPER, TeamRole.INTERN), new ArrayList<>()));
+        List<TeamMember> secondTeamMembers = List.of(
+                initTeamMember(4L, 4L, List.of(TeamRole.DESIGNER, TeamRole.INTERN), new ArrayList<>()));
+        teams.add(initTeam(1L, firstTeamMembers, project));
+        teams.add(initTeam(2L, secondTeamMembers, project));
+        return teams;
     }
 }

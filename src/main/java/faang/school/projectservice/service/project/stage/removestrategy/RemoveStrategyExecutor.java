@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.project.stage.remove;
+package faang.school.projectservice.service.project.stage.removestrategy;
 
 import faang.school.projectservice.dto.project.stage.RemoveStrategy;
 import faang.school.projectservice.dto.project.stage.RemoveTypeDto;
