@@ -37,7 +37,7 @@ public class Resource {
     @Column(name = "name", nullable = false)
     private String name;
 
-    private String key;
+    private String key; 
 
     private BigInteger size;
 
