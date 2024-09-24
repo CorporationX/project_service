@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.TeamRole;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class StageRoleDto {
     private Long id;
-    private TeamRole teamRole;  // Перечисление ролей в команде
-    private Integer count;      // Количество людей с этой ролью
+    @NotNull
+    private TeamRole teamRole;
+    @NotNull
+    private Integer count;
+    private Long stageId;
 }
 
