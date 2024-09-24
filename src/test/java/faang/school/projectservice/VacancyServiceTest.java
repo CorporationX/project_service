@@ -1,6 +1,5 @@
 package faang.school.projectservice;
 
-import faang.school.projectservice.dto.filter.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
@@ -22,20 +21,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.doubleThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -258,7 +251,7 @@ public class VacancyServiceTest {
 
         Project project = new Project();
         Team team = new Team();
-        List teamMembers = new ArrayList<>();
+        List<TeamMember> teamMembers = new ArrayList<>();
         team.setTeamMembers(teamMembers);
         project.setTeams(List.of(team));
 
