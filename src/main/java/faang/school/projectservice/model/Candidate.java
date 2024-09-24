@@ -15,6 +15,8 @@ public class Candidate {
     private Long userId;
     private String resumeDocKey;
     private String coverLetter;
+    
+    @NotNull
     @Enumerated(EnumType.STRING)
     private CandidateStatus candidateStatus;
 
