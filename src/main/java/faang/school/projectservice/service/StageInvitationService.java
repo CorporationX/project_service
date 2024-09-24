@@ -1,43 +1,16 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.stage.StageInvitationDto;
+import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-@Service
-@RequiredArgsConstructor
-public class StageInvitationService {
-    private final StageInvitationRepository stageInvitationRepository;
-
-    public void createStageInvitation(TeamMember invited, Stage stage, StageRoles stageRoles) {
-        StageInvitation stageInvitation = new StageInvitation();
-        String INVITATIONS_MESSAGE = String.format("Invite you to participate in the development stage %s " +
-                        "of the project %s for the role %s",
-                stage.getStageName(), stage.getProject().getName(), stageRoles.getTeamRole());
-        stageInvitation.setDescription(INVITATIONS_MESSAGE);
-        stageInvitation.setStatus(StageInvitationStatus.PENDING);
-        stageInvitation.setAuthor(stage.getExecutors().get(0));
-        stageInvitation.setInvited(invited);
-        stageInvitation.setStage(stage);
-        stageInvitationRepository.save(stageInvitation);
-    }
-}
-
-import faang.school.projectservice.dto.stage.StageInvitationDto;
-import faang.school.projectservice.mapper.StageInvitationMapper;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,22 +18,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class StageInvitationService {
 
     private final StageInvitationRepository invitationRepository;
     private final StageInvitationMapper mapper;
     private final StageRepository stageRepository;
     private final TeamMemberRepository teamMemberRepository;
-
-    public StageInvitationService(StageInvitationRepository invitationRepository,
-                                  StageInvitationMapper mapper,
-                                  StageRepository stageRepository,
-                                  TeamMemberRepository teamMemberRepository) {
-        this.invitationRepository = invitationRepository;
-        this.mapper = mapper;
-        this.stageRepository = stageRepository;
-        this.teamMemberRepository = teamMemberRepository;
-    }
 
     public StageInvitationDto sendInvitation(StageInvitationDto invitationDto) {
         if (invitationDto.getStageId() == null || invitationDto.getAuthorId() == null || invitationDto.getInviteeId() == null) {
@@ -128,7 +92,20 @@ public class StageInvitationService {
     public List<StageInvitationDto> getInvitationsByUser(Long userId) {
         return invitationRepository.findAll().stream()
                 .filter(invitation -> invitation.getInvited().getId().equals(userId))
-                .map(mapper :: toDto)
+                .map(mapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public void createStageInvitation(TeamMember invited, Stage stage, StageRoles stageRoles) {
+        StageInvitation stageInvitation = new StageInvitation();
+        String INVITATIONS_MESSAGE = String.format("Invite you to participate in the development stage %s " +
+                        "of the project %s for the role %s",
+                stage.getStageName(), stage.getProject().getName(), stageRoles.getTeamRole());
+        stageInvitation.setDescription(INVITATIONS_MESSAGE);
+        stageInvitation.setStatus(StageInvitationStatus.PENDING);
+        stageInvitation.setAuthor(stage.getExecutors().get(0));
+        stageInvitation.setInvited(invited);
+        stageInvitation.setStage(stage);
+        invitationRepository.save(stageInvitation);
     }
 }
