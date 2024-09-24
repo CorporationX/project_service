@@ -48,13 +48,10 @@ public class VacancyServiceTest {
     private TeamRepository teamRepository;
     @Mock
     private VacancyMapper vacancyMapper;
-    @Mock
-    private List<VacancyFilter> vacancyFilters;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
     }
 
     @Test
@@ -267,7 +264,9 @@ public class VacancyServiceTest {
     @Test
     public void testGetVacancyById() {
         VacancyDto vacancyDto = new VacancyDto();
+        vacancyDto.setId(1L);
         Vacancy vacancy = new Vacancy();
+
         when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
 
         vacancyService.getVacancyById(vacancyDto);
@@ -293,8 +292,7 @@ public class VacancyServiceTest {
         vacancy.setId(1L);
         vacancy.setStatus(VacancyStatus.CLOSED);
 
-        Candidate candidate = new Candidate();
-        return candidate;
+        return new Candidate();
     }
 
 
