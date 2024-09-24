@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "ProjectController", description = "Controller for working with projects")
 public class ProjectController {
 
-    @Operation(summary = "Upload a file", description = "Upload a file using multipart/form-data.")
+    @Operation(description = "Upload a file using multipart/form-data.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "File uploaded successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid file upload request")
@@ -30,7 +30,7 @@ public class ProjectController {
                     mediaType = "multipart/form-data",
                     schema = @Schema(type = "string", format = "binary")
             ))
-            @RequestParam("file") MultipartFile file) {
+            @RequestPart("file") MultipartFile file) {
 
         // Логика обработки файла
         return ResponseEntity.ok("File uploaded successfully: " + file.getOriginalFilename());
