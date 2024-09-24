@@ -63,18 +63,7 @@ public class InternshipService {
         interns.forEach(team::addMember);
         projectRepository.save(project);
 
-        Internship internship = Internship.builder()
-                .mentor(mentor)
-                .interns(interns)
-                .project(project)
-                .startDate(internshipDto.getStartDate())
-                .endDate(internshipDto.getEndDate())
-                .status(InternshipStatus.PREPARATION)
-                .description(internshipDto.getDescription())
-                .name(internshipDto.getName())
-                .createdBy(internshipDto.getCreatorUserId())
-                .build();
-
+        Internship internship = buildInternship(internshipDto, mentor, interns, project);
         return internshipMapper.toDto(internshipRepository.save(internship));
     }
 
@@ -309,5 +298,22 @@ public class InternshipService {
         return interns.stream()
                 .filter(intern -> !stillInternUserIds.contains(intern.getUserId()))
                 .collect(Collectors.toList());
+    }
+
+    private Internship buildInternship(InternshipDto internshipDto,
+                                       TeamMember mentor,
+                                       List<TeamMember> interns,
+                                       Project project) {
+        return Internship.builder()
+                .mentor(mentor)
+                .interns(interns)
+                .project(project)
+                .startDate(internshipDto.getStartDate())
+                .endDate(internshipDto.getEndDate())
+                .status(InternshipStatus.PREPARATION)
+                .description(internshipDto.getDescription())
+                .name(internshipDto.getName())
+                .createdBy(internshipDto.getCreatorUserId())
+                .build();
     }
 }

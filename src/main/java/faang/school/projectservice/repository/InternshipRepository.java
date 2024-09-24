@@ -19,6 +19,5 @@ public interface InternshipRepository extends JpaRepository<Internship, Long> {
             "AND i.mentor.id = :mentorId " +
             "AND i.status IS NOT NULL " +
             "AND i.status <> faang.school.projectservice.model.InternshipStatus.COMPLETED")
-    boolean existsByProjectIdAndMentorIdAndStatusNotCompleted(@Param("projectId") Long projectId,
-                                                              @Param("mentorId") Long mentorId);
+    boolean existsByProjectIdAndMentorIdAndStatusNotCompleted(Long projectId, Long mentorId);
 }

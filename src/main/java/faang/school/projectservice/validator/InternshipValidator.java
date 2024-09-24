@@ -10,7 +10,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -26,7 +25,6 @@ public class InternshipValidator {
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipRepository internshipRepository;
 
-    @Transactional
     public void validateProjectExists(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
             throw new DataValidationException(String.format("Project not found with id: %s", projectId));
@@ -82,7 +80,6 @@ public class InternshipValidator {
         }
     }
 
-    @Transactional
     public void validateMentorAssignedToProject(Long mentorId, Long projectId) {
         TeamMember mentor = teamMemberRepository.findByUserIdAndProjectId(mentorId, projectId);
         if (mentor == null) {
@@ -90,7 +87,6 @@ public class InternshipValidator {
         }
     }
 
-    @Transactional
     public void validateInternshipNotCreated(Long projectId, Long mentorId, Long mentorUserId) {
         if (internshipRepository.existsByProjectIdAndMentorIdAndStatusNotCompleted(projectId, mentorId)) {
             throw new DataValidationException(
