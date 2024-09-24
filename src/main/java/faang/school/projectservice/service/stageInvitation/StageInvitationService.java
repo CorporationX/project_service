@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -33,37 +31,35 @@ public class StageInvitationService {
 
     @Transactional
     public StageInvitationDto acceptInvitation(long stageInvitationId) {
-        Optional<StageInvitation> stageInvitation = getStageInvitation(stageInvitationId);
-        stageInvitation.get().setStatus(StageInvitationStatus.ACCEPTED);
-        stageInvitation.get().getStage().getExecutors()
-                .add(stageInvitation.get().getInvited());
-        stageInvitationRepository.save(stageInvitation.orElseThrow(
-                () -> new IllegalArgumentException("something went wrong")));
-        return stageInvitationDtoMapper.toDto(stageInvitation.orElseThrow());
+        StageInvitation stageInvitation = getStageInvitation(stageInvitationId);
+        stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
+        stageInvitation.getStage().getExecutors()
+                .add(stageInvitation.getInvited());
+        stageInvitationRepository.save(stageInvitation);
+        return stageInvitationDtoMapper.toDto(stageInvitation);
     }
 
     @Transactional
-    public StageInvitationDto rejectInvitation(long stageInvitationId, String description) {
-        Optional<StageInvitation> stageInvitation = getStageInvitation(stageInvitationId);
-        stageInvitation.get().setStatus(StageInvitationStatus.REJECTED);
-        stageInvitation.get().setDescription(description);
-        stageInvitationRepository.save(stageInvitation.orElseThrow(
-                () -> new IllegalArgumentException("something went wrong")));
-        return stageInvitationDtoMapper.toDto(stageInvitation.orElseThrow());
+    public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto) {
+        stageInvitationDto.setStatus(StageInvitationStatus.REJECTED);
+        StageInvitation stageInvitation = stageInvitationRepository
+                .save(stageInvitationDtoMapper.toEntity(stageInvitationDto));
+        return stageInvitationDtoMapper.toDto(stageInvitation);
     }
 
     @Transactional(readOnly = true)
     public List<StageInvitationDto> getInvitations(StageInvitationFilterDto filter) {
-        Stream<StageInvitation> invitationStream = stageInvitationRepository.findAll().stream();
 
         return stageInvitationFilters.stream()
-                .filter(stageInvitationFilter -> stageInvitationFilter.isApplicable(filter))
-                .flatMap(stageInvitationFilter -> stageInvitationFilter.apply(invitationStream, filter))
+                .filter(f -> f.isApplicable(filter))
+                .reduce(stageInvitationRepository.findAll().stream(),
+                        (s , f) -> f.apply(s, filter),
+                        (s1 , s2) -> s1)
                 .map(stageInvitationDtoMapper::toDto)
                 .toList();
     }
 
-    private Optional<StageInvitation> getStageInvitation(long stageInvitationId) {
+    private StageInvitation getStageInvitation(long stageInvitationId) {
         return stageInvitationRepository.findById(stageInvitationId);
     }
 }

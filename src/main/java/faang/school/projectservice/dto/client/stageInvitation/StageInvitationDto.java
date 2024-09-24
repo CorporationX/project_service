@@ -14,8 +14,6 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StageInvitationDto {
-
-    @NotNull
     private Long id;
 
     @NotNull

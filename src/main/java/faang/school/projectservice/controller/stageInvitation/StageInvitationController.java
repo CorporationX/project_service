@@ -2,15 +2,15 @@ package faang.school.projectservice.controller.stageInvitation;
 
 import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.stageInvitation.StageInvitationService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("v1/stageInvitations")
+@RestController("/api/v1/stageInvitations")
 @RequiredArgsConstructor
 public class StageInvitationController {
 
@@ -18,26 +18,27 @@ public class StageInvitationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public StageInvitationDto sendInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
+    public StageInvitationDto sendInvitation(@RequestBody StageInvitationDto stageInvitationDto) {
         return stageInvitationService.createInvitation(stageInvitationDto);
     }
 
-    @PatchMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping("/a/{id}")
     public StageInvitationDto acceptInvitation(@PathVariable long id) {
         return stageInvitationService.acceptInvitation(id);
     }
 
-    @PatchMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public StageInvitationDto rejectInvitation(@PathVariable long id,
-                                               @Valid @RequestBody String description) {
-        return stageInvitationService.rejectInvitation(id, description);
+    @PutMapping
+    public StageInvitationDto rejectInvitation(@RequestBody StageInvitationDto stageInvitationDto) {
+        return stageInvitationService.rejectInvitation(stageInvitationDto);
     }
 
-    @GetMapping
-    public List<StageInvitationDto> getInvitations(@Valid @RequestParam(required = false)
-                                                       StageInvitationFilterDto filter) {
+    @GetMapping("/f/{invitedId}")
+    public List<StageInvitationDto> getInvitations(@PathVariable long invitedId,
+                                                   @RequestParam(value = "invitedStageName", required = false)
+                                                   String invitedStageName,
+                                                   @RequestParam(value = "status", required = false)
+                                                   StageInvitationStatus status) {
+        StageInvitationFilterDto filter = new StageInvitationFilterDto(invitedId, invitedStageName, status);
         return stageInvitationService.getInvitations(filter);
     }
 }

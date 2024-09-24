@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,7 +50,6 @@ class StageInvitationServiceTest {
     private static final String STAGE_INVITATION_DESCRIPTION = "something";
 
     private StageInvitationDto stageInvitationDto;
-
 
     @Nested
     class PositiveTests {
@@ -102,7 +100,7 @@ class StageInvitationServiceTest {
         @DisplayName("Success with accept")
         void whenInvitationAcceptThenSuccessSave() {
             when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
-                    .thenReturn(Optional.ofNullable(stageInvitation));
+                    .thenReturn(stageInvitation);
 
             stageInvitationService.acceptInvitation(STAGE_INVITATION_ID);
 
@@ -113,13 +111,17 @@ class StageInvitationServiceTest {
         @Test
         @DisplayName("Success with reject")
         void whenInvitationRejectedThenSuccessSave() {
-            when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
-                    .thenReturn(Optional.ofNullable(stageInvitation));
+            when(stageInvitationDtoMapper.toEntity(stageInvitationDto))
+                    .thenReturn(stageInvitation);
 
-            stageInvitationService.rejectInvitation(STAGE_INVITATION_ID, "smth");
+            stageInvitationDto.setDescription("smth");
+            stageInvitationDto.setStatus(StageInvitationStatus.REJECTED);
+            stageInvitationService.rejectInvitation(stageInvitationDto);
 
-            assertEquals("smth", stageInvitation.getDescription());
-            assertEquals(StageInvitationStatus.REJECTED, stageInvitation.getStatus());
+
+            assertEquals("smth", stageInvitationDto.getDescription());
+            assertEquals(StageInvitationStatus.REJECTED, stageInvitationDto.getStatus());
+            verify(stageInvitationDtoMapper).toEntity(any());
             verify(stageInvitationRepository).save(stageInvitation);
         }
 
@@ -132,12 +134,11 @@ class StageInvitationServiceTest {
 
                 var stageInvitationFilterDto = new StageInvitationFilterDto();
                 var firstDto = new StageInvitationDto();
+                firstDto.setId(STAGE_INVITATION_ID);
+                firstDto.setStageId(STAGE_INVITATION_ID);
+                firstDto.setInvitedId(STAGE_INVITATION_ID);
                 firstDto.setDescription("Smth");
                 firstDto.setStatus(StageInvitationStatus.ACCEPTED);
-
-                var secondDto = new StageInvitationDto();
-                secondDto.setDescription(STAGE_INVITATION_DESCRIPTION);
-                secondDto.setStatus(StageInvitationStatus.ACCEPTED);
 
                 var first = new StageInvitation();
                 first.setId(STAGE_INVITATION_ID);
@@ -151,31 +152,22 @@ class StageInvitationServiceTest {
                 first.setDescription(STAGE_INVITATION_DESCRIPTION);
                 first.setStatus(StageInvitationStatus.ACCEPTED);
 
-                var second = new StageInvitation();
-                second.setDescription(STAGE_INVITATION_DESCRIPTION);
-                second.setStatus(StageInvitationStatus.ACCEPTED);
-
-                when(stageInvitationRepository.findAll()).thenReturn(List.of(first, second));
-                when(stageInvitationDtoMapper.toDto(first)).thenReturn(firstDto);
+                when(stageInvitationRepository.findAll()).thenReturn(List.of(first));
                 when(filters.isApplicable(stageInvitationFilterDto)).thenReturn(true);
                 when(filters.apply(any(Stream.class),
-                        eq(stageInvitationFilterDto))).thenReturn(Stream.of(first, second));
+                        eq(stageInvitationFilterDto))).thenReturn(Stream.of(first));
                 when(stageInvitationFilters.stream()).thenReturn(Stream.of(filters));
+                when(stageInvitationDtoMapper.toDto(any(StageInvitation.class))).thenReturn(firstDto);
 
                 List<StageInvitationDto> result = stageInvitationService.getInvitations(stageInvitationFilterDto);
 
-                assertEquals(2L, result.size());
+                assertEquals(1L, result.size());
+                assertEquals(firstDto, result.get(0));
                 assertEquals("Smth",firstDto.getDescription());
                 assertEquals(StageInvitationStatus.ACCEPTED, firstDto.getStatus());
                 assertEquals(1L, first.getId());
                 assertEquals(StageInvitationStatus.ACCEPTED, first.getStatus());
-
-                assertEquals(STAGE_INVITATION_DESCRIPTION, second.getDescription());
-                assertEquals("something", secondDto.getDescription());
-                verify(stageInvitationRepository).findAll();
-                verify(stageInvitationDtoMapper).toDto(first);
             }
         }
     }
-
 }

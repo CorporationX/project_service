@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StageInvitationFilterDto {
+    private Long id;
     private String invitedStageName;
-    private Long invitedId;
     private StageInvitationStatus status;
 }
