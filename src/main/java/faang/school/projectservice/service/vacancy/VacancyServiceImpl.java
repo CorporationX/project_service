@@ -22,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -38,41 +37,41 @@ public class VacancyServiceImpl implements VacancyService{
 
     @Override
     @Transactional
-    public VacancyDto create(VacancyDto vacancy) {
-        Vacancy vacancyEntity = vacancyMapper.toEntity(vacancy);
-        Project project = setProjectById(vacancy, vacancyEntity);
+    public VacancyDto create(VacancyDto vacancyDto) {
+        Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
+        Project project = setProjectById(vacancyDto, vacancy);
 
-        assignRoleToCurator(vacancy.getCreatedBy(), project);
-        isValidCuratorRole(vacancy.getCreatedBy(), project);
+        assignRoleToCurator(vacancyDto.getCreatedBy(), project);
+        isValidCuratorRole(vacancyDto.getCreatedBy(), project);
 
-        vacancyRepository.save(vacancyEntity);
+        vacancyRepository.save(vacancy);
 
-        return vacancy;
+        return vacancyDto;
     }
 
     @Override
     @Transactional
-    public VacancyDto update(VacancyDto vacancy) {
-        if (vacancyRepository.findById(vacancy.getId()).isPresent()) {
-            Vacancy vacancyEntity = vacancyMapper.toEntity(vacancy);
-            setProjectById(vacancy, vacancyEntity);
+    public VacancyDto update(VacancyDto vacancyDto) {
+        if (vacancyRepository.findById(vacancyDto.getId()).isPresent()) {
+            Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
+            setProjectById(vacancyDto, vacancy);
 
-            if (vacancyEntity.getStatus() == VacancyStatus.CLOSED) {
-                validationRequiredCandidates(vacancy);
-                validationCandidates(vacancy);
+            if (vacancy.getStatus() == VacancyStatus.CLOSED) {
+                validationRequiredCandidates(vacancyDto);
+                validationCandidates(vacancyDto);
             }
-            vacancyRepository.save(vacancyEntity);
+            vacancyRepository.save(vacancy);
         } else {
             throw new DataValidationException("Vacancies with given id do not exist");
         }
 
-        return vacancy;
+        return vacancyDto;
     }
 
     @Override
     @Transactional
-    public VacancyDto delete(VacancyDto vacancy) {
-        Project project = projectRepository.getProjectById(vacancy.getProjectId());
+    public VacancyDto delete(VacancyDto vacancyDto) {
+        Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
 
         for (Team team : project.getTeams()) {
             List<TeamMember> teamMembers = team.getTeamMembers();
@@ -81,10 +80,10 @@ public class VacancyServiceImpl implements VacancyService{
             teamRepository.save(team);
         }
 
-        Vacancy vacancyEntity = vacancyMapper.toEntity(vacancy);
-        vacancyRepository.delete(vacancyEntity);
+        Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
+        vacancyRepository.delete(vacancy);
 
-        return vacancy;
+        return vacancyDto;
     }
 
     @Override
@@ -98,13 +97,11 @@ public class VacancyServiceImpl implements VacancyService{
     }
 
     @Override
-    public VacancyDto getVacancyById(VacancyDto vacancy) {
-        Optional<Vacancy> vacancyEntity =  vacancyRepository.findById(vacancy.getId());
-        if (vacancyEntity.isPresent()) {
-            return vacancyMapper.toDto(vacancyEntity.get());
-        } else {
-            throw new DataValidationException("Vacancies with this id do not exist");
-        }
+    public VacancyDto getVacancyById(VacancyDto vacancyDto) {
+        Vacancy vacancy =  vacancyRepository.findById(vacancyDto.getId())
+                .orElseThrow(() -> new DataValidationException("Vacancy is null"));
+
+        return vacancyMapper.toDto(vacancy);
     }
 
     private void assignRoleToCurator(Long curatorId, Project project) {
@@ -118,52 +115,48 @@ public class VacancyServiceImpl implements VacancyService{
     }
 
     private void isValidCuratorRole(Long curatorId, Project project) {
-        TeamMember teamMember = project.getTeams().stream()
+        TeamMember teamMember = project.getTeams()
+                .stream()
                 .flatMap(t -> t.getTeamMembers().stream())
                 .filter(member -> member.getUserId().equals(curatorId))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new DataValidationException("TeamMember is null"));
 
-        if (teamMember == null || !teamMember.getRoles().contains(TeamRole.OWNER)) {
+        if (!teamMember.getRoles().contains(TeamRole.OWNER)) {
             throw new DataValidationException("The Curator must be a member of the team and have the role of owner!");
         }
     }
 
-    private void validationCandidates(VacancyDto vacancy) {
-        for (Long candidateId : vacancy.getCandidateIds()) {
-            Optional<Candidate> candidate = candidateRepository.findById(candidateId);
-            if (candidate.isPresent()) {
-                Candidate candidateEntity = candidate.get();
-                if (candidateEntity.getUserId() == null) {
-                    throw new DataValidationException("User id is null");
-                }
+    private void validationCandidates(VacancyDto vacancyDto) {
+        for (Long candidateId : vacancyDto.getCandidateIds()) {
+            Candidate candidate = candidateRepository.findById(candidateId)
+                    .orElseThrow(() -> new DataValidationException("Candidate is null"));
 
-                if (candidateEntity.getResumeDocKey() == null || candidateEntity.getResumeDocKey().isBlank()) {
-                    throw new DataValidationException("Resume is empty");
-                }
-
-                if (candidateEntity.getCandidateStatus() != CandidateStatus.WAITING_RESPONSE) {
-                    throw new DataValidationException("You have already been reviewed");
-                }
-
-                if (vacancyRepository.findById(vacancy.getId()).isEmpty()) {
-                    throw new DataValidationException("No such vacancy found in the system");
-                }
-            } else {
-                throw new DataValidationException("There is no such candidate");
+            if (candidate.getUserId() == null) {
+                throw new DataValidationException("User id is null");
             }
+
+            if (candidate.getResumeDocKey() == null || candidate.getResumeDocKey().isBlank()) {
+                throw new DataValidationException("Resume is empty");
+            }
+
+            if (candidate.getCandidateStatus() != CandidateStatus.WAITING_RESPONSE) {
+                throw new DataValidationException("You have already been reviewed");
+            }
+
         }
     }
 
-    private void validationRequiredCandidates(VacancyDto vacancy) {
-        if (vacancy.getCount() <= vacancy.getCandidateIds().size()) {
+    private void validationRequiredCandidates(VacancyDto vacancyDto) {
+        vacancyDto.setStatus(VacancyStatus.OPEN);
+        if (vacancyDto.getCount() > vacancyDto.getCandidateIds().size()) {
             throw new DataValidationException("You can't close a vacancy if there are fewer candidates than needed");
         }
     }
 
-    private Project setProjectById(VacancyDto vacancyDto, Vacancy vacancyEntity) {
+    private Project setProjectById(VacancyDto vacancyDto, Vacancy vacancy) {
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
-        vacancyEntity.setProject(project);
+        vacancy.setProject(project);
 
         return project;
     }
