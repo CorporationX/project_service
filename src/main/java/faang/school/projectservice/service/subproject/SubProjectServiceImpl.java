@@ -10,7 +10,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.exception.subproject.SubProjectNotFinished;
+import faang.school.projectservice.exception.subproject.SubProjectNotFinishedException;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class SubProjectServiceImpl implements SubProjectService {
     }
 
     @Override
-    public ProjectDto updateSubProject(long projectId, SubProjectDto subProject) throws SubProjectNotFinished {
+    public ProjectDto updateSubProject(long projectId, SubProjectDto subProject) {
         var subproject = repository.getProjectById(projectId);
 
         var project = ifStatusIsComletedCheckThatChildrensAreCompleted
@@ -87,7 +87,7 @@ public class SubProjectServiceImpl implements SubProjectService {
                 notFinishedChildren.forEach(child -> {
                     builder.append(child.getId()).append(" status ").append(child.getStatus());
                 });
-                throw new SubProjectNotFinished(builder.toString());
+                throw new SubProjectNotFinishedException(builder.toString());
             }
         }
         return project;
