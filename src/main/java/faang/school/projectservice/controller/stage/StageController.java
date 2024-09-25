@@ -22,7 +22,7 @@ public class StageController {
         return stageService.createStage(stageDto);
     }
 
-    @GetMapping("/projects/{id}")
+    @GetMapping("/projects/{projectId}")
     public List<StageDto> getProjectStages(@Positive @PathVariable long projectId, @Valid StageFilterDto filters) {
         return stageService.getProjectStages(projectId, filters);
     }
@@ -32,18 +32,18 @@ public class StageController {
         return stageService.updateStage(stageId, stageRolesDto);
     }
 
-    @GetMapping("/all/projects/{id}")
-    public List<StageDto> getStages(@Positive long projectId){
+    @GetMapping("/all/projects/{projectId}")
+    public List<StageDto> getStages(@PathVariable @Positive long projectId){
         return stageService.getStages(projectId);
     }
 
-    @GetMapping("/{id}")
-    public StageDto getSpecificStage(@Positive long stageId){
+    @GetMapping("/{stageId}")
+    public StageDto getSpecificStage(@PathVariable @Positive long stageId){
         return stageService.getSpecificStage(stageId);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteStage(@Positive long stageId){
+    @DeleteMapping("/{stageId}")
+    public void deleteStage(@PathVariable @Positive long stageId){
         stageService.deleteStage(stageId);
     }
 }
