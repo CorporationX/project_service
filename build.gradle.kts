@@ -89,7 +89,6 @@ jacoco {
     reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
 }
 
-
 tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
