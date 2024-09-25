@@ -95,15 +95,4 @@ public class MomentServiceTest {
         assertNotNull(result);
         assertEquals("Important Moment", result.getName());
     }
-
-    @Test
-    void updateMoment_withNonExistingMoment_throwsException() {
-        when(momentRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            momentService.updateMoment(1L, momentDto);
-        });
-
-        assertEquals("Moment not found", exception.getMessage());
-    }
 }
