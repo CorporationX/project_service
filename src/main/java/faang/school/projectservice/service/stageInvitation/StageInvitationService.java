@@ -1,7 +1,8 @@
 package faang.school.projectservice.service.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoResponse;
 import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoRequest;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationDtoMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -22,15 +23,15 @@ public class StageInvitationService {
     private final List<Filter<StageInvitationFilterDto, StageInvitation>> stageInvitationFilters;
 
     @Transactional
-    public StageInvitationDto createInvitation(StageInvitationDto stageInvitationDto) {
-        stageInvitationDto.setStatus(StageInvitationStatus.PENDING);
+    public StageInvitationDtoResponse createInvitation(StageInvitationDtoRequest stageInvitationDtoRequest) {
+        stageInvitationDtoRequest.setStatus(StageInvitationStatus.PENDING);
         StageInvitation stageInvitation = stageInvitationRepository
-                .save(stageInvitationDtoMapper.toEntity(stageInvitationDto));
+                .save(stageInvitationDtoMapper.toEntity(stageInvitationDtoRequest));
         return stageInvitationDtoMapper.toDto(stageInvitation);
     }
 
     @Transactional
-    public StageInvitationDto acceptInvitation(long stageInvitationId) {
+    public StageInvitationDtoResponse acceptInvitation(long stageInvitationId) {
         StageInvitation stageInvitation = getStageInvitation(stageInvitationId);
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
         stageInvitation.getStage().getExecutors()
@@ -40,16 +41,15 @@ public class StageInvitationService {
     }
 
     @Transactional
-    public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto) {
-        stageInvitationDto.setStatus(StageInvitationStatus.REJECTED);
+    public StageInvitationDtoResponse rejectInvitation(StageInvitationDtoRequest stageInvitationDtoRequest) {
+        stageInvitationDtoRequest.setStatus(StageInvitationStatus.REJECTED);
         StageInvitation stageInvitation = stageInvitationRepository
-                .save(stageInvitationDtoMapper.toEntity(stageInvitationDto));
+                .save(stageInvitationDtoMapper.toEntity(stageInvitationDtoRequest));
         return stageInvitationDtoMapper.toDto(stageInvitation);
     }
 
     @Transactional(readOnly = true)
-    public List<StageInvitationDto> getInvitations(StageInvitationFilterDto filter) {
-
+    public List<StageInvitationDtoResponse> getInvitations(StageInvitationFilterDto filter) {
         return stageInvitationFilters.stream()
                 .filter(f -> f.isApplicable(filter))
                 .reduce(stageInvitationRepository.findAll().stream(),

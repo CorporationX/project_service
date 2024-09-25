@@ -1,7 +1,8 @@
 package faang.school.projectservice.service.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoResponse;
 import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoRequest;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationDtoMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -49,7 +50,8 @@ class StageInvitationServiceTest {
     private static final Long STAGE_INVITATION_ID = 1L;
     private static final String STAGE_INVITATION_DESCRIPTION = "something";
 
-    private StageInvitationDto stageInvitationDto;
+    private StageInvitationDtoResponse stageInvDtoResponse;
+    private StageInvitationDtoRequest sInvRequestDtoRequest;
 
     @Nested
     class PositiveTests {
@@ -61,8 +63,15 @@ class StageInvitationServiceTest {
                     .id(STAGE_INVITATION_ID)
                     .build());
 
-            stageInvitationDto = StageInvitationDto.builder()
-                    .stageId(STAGE_INVITATION_ID)
+            stageInvDtoResponse = StageInvitationDtoResponse.builder()
+                    .id(STAGE_INVITATION_ID)
+                    .stageName(STAGE_INVITATION_DESCRIPTION)
+                    .description(STAGE_INVITATION_DESCRIPTION)
+                    .status(StageInvitationStatus.ACCEPTED)
+                    .build();
+
+            sInvRequestDtoRequest = StageInvitationDtoRequest.builder()
+                    .id(STAGE_INVITATION_ID)
                     .description(STAGE_INVITATION_DESCRIPTION)
                     .build();
 
@@ -86,13 +95,13 @@ class StageInvitationServiceTest {
         @Test
         @DisplayName("Success at create")
         void whenInvitationThenSuccessSave() {
-            when(stageInvitationDtoMapper.toEntity(stageInvitationDto))
+            when(stageInvitationDtoMapper.toEntity(sInvRequestDtoRequest))
                     .thenReturn(stageInvitation);
 
-            stageInvitationService.createInvitation(stageInvitationDto);
+            stageInvitationService.createInvitation(sInvRequestDtoRequest);
 
-            assertEquals(StageInvitationStatus.PENDING, stageInvitationDto.getStatus());
-            verify(stageInvitationDtoMapper).toEntity(any());
+            assertEquals(StageInvitationStatus.PENDING, sInvRequestDtoRequest.getStatus());
+            verify(stageInvitationDtoMapper).toEntity(sInvRequestDtoRequest);
             verify(stageInvitationRepository).save(stageInvitation);
         }
 
@@ -111,17 +120,16 @@ class StageInvitationServiceTest {
         @Test
         @DisplayName("Success with reject")
         void whenInvitationRejectedThenSuccessSave() {
-            when(stageInvitationDtoMapper.toEntity(stageInvitationDto))
+            when(stageInvitationDtoMapper.toEntity(sInvRequestDtoRequest))
                     .thenReturn(stageInvitation);
 
-            stageInvitationDto.setDescription("smth");
-            stageInvitationDto.setStatus(StageInvitationStatus.REJECTED);
-            stageInvitationService.rejectInvitation(stageInvitationDto);
+            sInvRequestDtoRequest.setDescription("smth");
+            sInvRequestDtoRequest.setStatus(StageInvitationStatus.REJECTED);
+            stageInvitationService.rejectInvitation(sInvRequestDtoRequest);
 
-
-            assertEquals("smth", stageInvitationDto.getDescription());
-            assertEquals(StageInvitationStatus.REJECTED, stageInvitationDto.getStatus());
-            verify(stageInvitationDtoMapper).toEntity(any());
+            assertEquals("smth", sInvRequestDtoRequest.getDescription());
+            assertEquals(StageInvitationStatus.REJECTED, sInvRequestDtoRequest.getStatus());
+            verify(stageInvitationDtoMapper).toEntity(sInvRequestDtoRequest);
             verify(stageInvitationRepository).save(stageInvitation);
         }
 
@@ -133,16 +141,8 @@ class StageInvitationServiceTest {
             void whenGetStageInvitationFilterThenSuccess() {
 
                 var stageInvitationFilterDto = new StageInvitationFilterDto();
-                var firstDto = new StageInvitationDto();
-                firstDto.setId(STAGE_INVITATION_ID);
-                firstDto.setStageId(STAGE_INVITATION_ID);
-                firstDto.setInvitedId(STAGE_INVITATION_ID);
-                firstDto.setDescription("Smth");
-                firstDto.setStatus(StageInvitationStatus.ACCEPTED);
-
                 var first = new StageInvitation();
                 first.setId(STAGE_INVITATION_ID);
-
                 var stage = new Stage();
                 first.setStage(stage);
 
@@ -157,14 +157,16 @@ class StageInvitationServiceTest {
                 when(filters.apply(any(Stream.class),
                         eq(stageInvitationFilterDto))).thenReturn(Stream.of(first));
                 when(stageInvitationFilters.stream()).thenReturn(Stream.of(filters));
-                when(stageInvitationDtoMapper.toDto(any(StageInvitation.class))).thenReturn(firstDto);
+                when(stageInvitationDtoMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvDtoResponse);
 
-                List<StageInvitationDto> result = stageInvitationService.getInvitations(stageInvitationFilterDto);
+                List<StageInvitationDtoResponse> result = stageInvitationService.
+                        getInvitations(stageInvitationFilterDto);
 
                 assertEquals(1L, result.size());
-                assertEquals(firstDto, result.get(0));
-                assertEquals("Smth",firstDto.getDescription());
-                assertEquals(StageInvitationStatus.ACCEPTED, firstDto.getStatus());
+                assertEquals(stageInvDtoResponse, result.get(0));
+                assertEquals("something", stageInvDtoResponse.getDescription());
+                assertEquals(StageInvitationStatus.ACCEPTED, stageInvDtoResponse.getStatus());
+                assertEquals("something", stageInvDtoResponse.getStageName());
                 assertEquals(1L, first.getId());
                 assertEquals(StageInvitationStatus.ACCEPTED, first.getStatus());
             }

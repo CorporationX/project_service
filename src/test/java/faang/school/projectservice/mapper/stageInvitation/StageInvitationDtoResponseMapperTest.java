@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoRequest;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -19,7 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class StageInvitationDtoMapperTest {
+class StageInvitationDtoResponseMapperTest {
 
     @Spy
     private StageInvitationDtoMapperImpl mapper;
@@ -54,27 +54,17 @@ class StageInvitationDtoMapperTest {
     class toEntity {
 
         @Test
-        @DisplayName("If send null")
-        void whenDtoIsNullThenReturnNull() {
-            assertNull(mapper.toEntity(null));
-        }
-
-        @Test
         @DisplayName("If passed StageInvitationDto, we get StageInvitationDto entity")
         void whenDtoIsNotNullThenReturnEntity() {
-            StageInvitationDto stageInvitationDto = StageInvitationDto.builder()
+            StageInvitationDtoRequest stageInvitationDtoResponse = StageInvitationDtoRequest.builder()
                     .id(STAGE_ID)
-                    .invitedId(STAGE_ID)
-                    .stageId(STAGE_ID)
                     .description(DESCRIPTION)
                     .status(STAGE_INVITATION_STATUS)
                     .build();
 
-            assertEquals(stageInvitationDto.getId(), stageInvitation.getId());
-            assertEquals(stageInvitationDto.getInvitedId(), stageInvitation.getInvited().getId());
-            assertEquals(stageInvitationDto.getDescription(), stageInvitation.getDescription());
-            assertEquals(stageInvitationDto.getStatus(), stageInvitation.getStatus());
-            assertEquals(stageInvitationDto.getStageId(), stageInvitation.getStage().getStageId());
+            assertEquals(stageInvitationDtoResponse.getId(), stageInvitation.getId());
+            assertEquals(stageInvitationDtoResponse.getDescription(), stageInvitation.getDescription());
+            assertEquals(stageInvitationDtoResponse.getStatus(), stageInvitation.getStatus());
         }
     }
 
@@ -96,9 +86,9 @@ class StageInvitationDtoMapperTest {
                             .id(STAGE_ID)
                             .build());
 
-            List<StageInvitationDto> stageInvitationDtos = mapper.toDtos(stageInvitations);
+            List<StageInvitationDtoRequest> stageInvitationDtoRequests = mapper.toDtos(stageInvitations);
 
-            assertEquals(SIZE_DTOS, stageInvitationDtos.size());
+            assertEquals(SIZE_DTOS, stageInvitationDtoRequests.size());
         }
     }
 }

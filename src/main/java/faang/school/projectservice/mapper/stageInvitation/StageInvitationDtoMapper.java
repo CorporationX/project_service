@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDto;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoResponse;
+import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoRequest;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -10,9 +11,11 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageInvitationDtoMapper {
 
-    StageInvitation toEntity(StageInvitationDto stageInvitationDto);
+    StageInvitation toEntity(StageInvitationDtoResponse stageInvitationDtoResponse);
 
-    StageInvitationDto toDto(StageInvitation stageInvitation);
+    StageInvitation toEntity(StageInvitationDtoRequest stageInvitationDto);
 
-    List<StageInvitationDto> toDtos(List<StageInvitation> stageInvitations);
+    StageInvitationDtoResponse toDto(StageInvitation stageInvitation);
+
+    List<StageInvitationDtoRequest> toDtos(List<StageInvitation> stageInvitations);
 }
