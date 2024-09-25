@@ -29,6 +29,7 @@ public class S3Service {
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
         PutObjectResult putObjectResult;
         System.out.println("Bucket name: " + bucketName);
+        System.out.println("Endpoint "+s3Client.getUrl(bucketName, key).toString());
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, file.getInputStream(), objectMetadata);
             putObjectResult = s3Client.putObject(putObjectRequest);
