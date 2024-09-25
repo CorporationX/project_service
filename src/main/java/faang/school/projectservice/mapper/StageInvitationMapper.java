@@ -1,10 +1,10 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE)
 public interface StageInvitationMapper {
@@ -14,24 +14,8 @@ public interface StageInvitationMapper {
     @Mapping(source = "invited.id", target = "invitedId")
     StageInvitationDto toStageInvitationDto(StageInvitation entity);
 
-    @Mapping(target = "stage", source = "stageId", qualifiedByName = "stageFromId")
-    @Mapping(target = "author", source = "authorId", qualifiedByName = "teamMemberFromId")
-    @Mapping(target = "invited", source = "invitedId", qualifiedByName = "teamMemberFromId")
+    @Mapping(target = "stage.stageId", source = "stageId")
+    @Mapping(target = "author.id", source = "authorId")
+    @Mapping(target = "invited.id", source = "invitedId")
     StageInvitation toStageInvitation(StageInvitationDto dto);
-
-    @Named("teamMemberFromId")
-    default TeamMember teamMemberFromId(Long id) {
-        if (id == null) return null;
-        TeamMember teamMember = new TeamMember();
-        teamMember.setId(id);
-        return teamMember;
-    }
-
-    @Named("stageFromId")
-    default Stage stageFromId(Long id) {
-        if (id == null) return null;
-        Stage stage = new Stage();
-        stage.setStageId(id);
-        return stage;
-    }
 }

@@ -7,12 +7,10 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
-import java.util.Map;
 
 @Validated(CreateGroup.class)
 public interface StageInvitationService {
 
-    @Validated(CreateGroup.class)
     StageInvitationDto sendInvitation(StageInvitationDto invitationDto);
 
     StageInvitationDto acceptInvitation(@Positive Long id);
