@@ -40,10 +40,10 @@ public class StageInvitationController {
     @GetMapping("/{id}/filter")
     public List<StageInvitationDtoResponse> getInvitations(@PathVariable long id,
                                                            @RequestParam(value = "stageName", required = false)
-                                                           String invitedStageName,
+                                                           String stageName,
                                                            @RequestParam(value = "status", required = false)
                                                            StageInvitationStatus status) {
-        var filter = new StageInvitationFilterDto(id, invitedStageName, status);
+        var filter = new StageInvitationFilterDto(id, stageName, status);
         return stageInvitationService.getInvitations(filter);
     }
 }

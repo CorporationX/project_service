@@ -18,7 +18,7 @@ public class StageInvitationDtoResponse {
     private Long id;
 
     @NotNull
-    private String stageName;
+    private Long invitedId;
 
     @Length(max = 128)
     private String description;

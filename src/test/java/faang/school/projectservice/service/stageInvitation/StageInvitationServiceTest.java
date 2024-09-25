@@ -65,7 +65,7 @@ class StageInvitationServiceTest {
 
             stageInvDtoResponse = StageInvitationDtoResponse.builder()
                     .id(STAGE_INVITATION_ID)
-                    .stageName(STAGE_INVITATION_DESCRIPTION)
+                    .invitedId(STAGE_INVITATION_ID)
                     .description(STAGE_INVITATION_DESCRIPTION)
                     .status(StageInvitationStatus.ACCEPTED)
                     .build();
@@ -166,7 +166,7 @@ class StageInvitationServiceTest {
                 assertEquals(stageInvDtoResponse, result.get(0));
                 assertEquals("something", stageInvDtoResponse.getDescription());
                 assertEquals(StageInvitationStatus.ACCEPTED, stageInvDtoResponse.getStatus());
-                assertEquals("something", stageInvDtoResponse.getStageName());
+                assertEquals(1L, stageInvDtoResponse.getInvitedId());
                 assertEquals(1L, first.getId());
                 assertEquals(StageInvitationStatus.ACCEPTED, first.getStatus());
             }

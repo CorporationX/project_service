@@ -29,7 +29,7 @@ class StageInvitationNameFilterTest {
     @DisplayName("If StageInvitationFilterDto invitedStageName is filled in correctly, return true")
     void whenStageInvitationFilterDtoSpecifiedInvitedNamePatternIsNotNullThenReturnTrue() {
         stageInvitationFilterDto = StageInvitationFilterDto.builder()
-                .invitedStageName(INVITER_STAGE_NAME_PATTERN)
+                .stageName(INVITER_STAGE_NAME_PATTERN)
                 .build();
 
         assertTrue(stageInvitationNameFilter.isApplicable(stageInvitationFilterDto));
@@ -52,7 +52,7 @@ class StageInvitationNameFilterTest {
                         .build());
 
         stageInvitationFilterDto = StageInvitationFilterDto.builder()
-                .invitedStageName(INVITER_STAGE_NAME_PATTERN)
+                .stageName(INVITER_STAGE_NAME_PATTERN)
                 .build();
 
 
@@ -74,7 +74,7 @@ class StageInvitationNameFilterTest {
         @DisplayName("If StageInvitationFilterDto field invitedStageName null, return false")
         void whenStageInvitationFilterDtoStatusIsNullThenReturnFalse() {
             stageInvitationFilterDto = StageInvitationFilterDto.builder()
-                    .invitedStageName(null)
+                    .stageName(null)
                     .build();
 
             assertFalse(stageInvitationNameFilter.isApplicable(stageInvitationFilterDto));
@@ -84,7 +84,7 @@ class StageInvitationNameFilterTest {
         @DisplayName("If the StageInvitationFilterDto field invitedStageName is empty, return false")
         void whenStageInvitationFilterDtoStatusIsEmptyThenReturnFalse() {
             stageInvitationFilterDto = StageInvitationFilterDto.builder()
-                    .invitedStageName("  ")
+                    .stageName("  ")
                     .build();
 
             assertFalse(stageInvitationNameFilter.isApplicable(stageInvitationFilterDto));

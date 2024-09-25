@@ -12,8 +12,8 @@ class StageInvitationNameFilter implements Filter<StageInvitationFilterDto, Stag
 
     @Override
     public boolean isApplicable(StageInvitationFilterDto stageInvitationFilterDto) {
-        return stageInvitationFilterDto.getInvitedStageName() != null &&
-                !stageInvitationFilterDto.getInvitedStageName().isBlank();
+        return stageInvitationFilterDto.getStageName() != null &&
+                !stageInvitationFilterDto.getStageName().isBlank();
     }
 
     @Override
@@ -21,6 +21,6 @@ class StageInvitationNameFilter implements Filter<StageInvitationFilterDto, Stag
                                          StageInvitationFilterDto stageInvitationFilterDto) {
         return stageInvitationStream.filter(stageInvitation -> stageInvitation.getStage().getStageName() != null &&
                 stageInvitation.getStage().getStageName()
-                        .contains(stageInvitationFilterDto.getInvitedStageName()));
+                        .contains(stageInvitationFilterDto.getStageName()));
     }
 }
