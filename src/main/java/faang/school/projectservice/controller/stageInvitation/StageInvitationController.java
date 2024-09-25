@@ -29,10 +29,10 @@ public class StageInvitationController {
         return stageInvitationService.acceptInvitation(id);
     }
 
-    @PatchMapping("/reject")
-    public StageInvitationDtoResponse rejectInvitation(
-            @Valid @RequestBody StageInvitationDtoRequest stageInvDtoRequest) {
-        return stageInvitationService.rejectInvitation(stageInvDtoRequest);
+    @PatchMapping("/{id}/reject")
+    public StageInvitationDtoResponse rejectInvitation(@PathVariable long id,
+                                                       @Valid @RequestBody StageInvitationDtoRequest stageInvDtoRequest) {
+        return stageInvitationService.rejectInvitation(id, stageInvDtoRequest);
     }
 
     @GetMapping("/{id}/filter")

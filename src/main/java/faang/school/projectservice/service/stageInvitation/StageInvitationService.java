@@ -41,7 +41,8 @@ public class StageInvitationService {
     }
 
     @Transactional
-    public StageInvitationDtoResponse rejectInvitation(StageInvitationDtoRequest stageInvitationDtoRequest) {
+    public StageInvitationDtoResponse rejectInvitation(long id, StageInvitationDtoRequest stageInvitationDtoRequest) {
+        stageInvitationDtoRequest.setId(id);
         stageInvitationDtoRequest.setStatus(StageInvitationStatus.REJECTED);
         StageInvitation stageInvitation = stageInvitationRepository
                 .save(stageInvitationDtoMapper.toEntity(stageInvitationDtoRequest));

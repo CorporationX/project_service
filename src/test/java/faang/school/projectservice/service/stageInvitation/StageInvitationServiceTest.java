@@ -125,7 +125,7 @@ class StageInvitationServiceTest {
 
             sInvRequestDtoRequest.setDescription("smth");
             sInvRequestDtoRequest.setStatus(StageInvitationStatus.REJECTED);
-            stageInvitationService.rejectInvitation(sInvRequestDtoRequest);
+            stageInvitationService.rejectInvitation(STAGE_INVITATION_ID, sInvRequestDtoRequest);
 
             assertEquals("smth", sInvRequestDtoRequest.getDescription());
             assertEquals(StageInvitationStatus.REJECTED, sInvRequestDtoRequest.getStatus());
