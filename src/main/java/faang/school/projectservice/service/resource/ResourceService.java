@@ -3,6 +3,7 @@ package faang.school.projectservice.service.resource;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,13 @@ public class ResourceService {
         Project project = projectRepository.findById(projectId);
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSize(newStorageSize, project.getStorageSize());
-        s3Service.uploadFile(file, project.getName());
+
+        Resource resource = s3Service.uploadFile(file, project.getName());
+        resource.setProject(project);
+        resourceRepository.save(resource);
+
+        project.setStorageSize(newStorageSize);
+        projectRepository.save(project);
         return null;
     }
 

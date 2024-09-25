@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import software.amazon.ion.NullValueException;
 
 import javax.naming.SizeLimitExceededException;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,9 +90,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(SizeLimitExceededException.class)
-    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    @ResponseStatus(value = HttpStatus.INSUFFICIENT_STORAGE)
     public ErrorResponse handleSizeLimitExceededException(SizeLimitExceededException e) {
-        log.error("Size limit exceeded exception occurred: {}", e.getMessage());
-        return new ErrorResponse(e.getMessage(), LocalDateTime.now());
+        log.error("Size limit exceeded exception occurred", e);
+        return new ErrorResponse("Size limit exceeded exception occurred", e.getMessage());
     }
 }
