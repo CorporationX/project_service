@@ -77,6 +77,7 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
+        log.error("Validation exceptions occurred", ex);
         return ResponseEntity.badRequest().body(errors);
     }
 
