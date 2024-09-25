@@ -108,6 +108,7 @@ tasks.jacocoTestReport {
         }
     )
 }
+
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
@@ -124,4 +125,5 @@ tasks.jacocoTestCoverageVerification {
         }
     }
 }
+
 
