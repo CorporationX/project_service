@@ -5,14 +5,14 @@ import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.dto.TeamMemberDto;
 import faang.school.projectservice.dto.filter.StageFilterDto;
 import faang.school.projectservice.filter.StageFilter;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.filter.ExecutorsRoleFilter;
-import faang.school.projectservice.service.filter.StageTaskFilter;
+import faang.school.projectservice.filter.ExecutorsRoleFilter;
+import faang.school.projectservice.filter.StageTaskFilter;
 import faang.school.projectservice.validator.StageServiceValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +27,8 @@ import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class StageServiceImplTest {
-    private StageRepository stageRepository;
-    private ProjectRepository projectRepository;
+    private StageJpaRepository stageRepository;
+    private ProjectJpaRepository projectRepository;
     private StageMapper mapper;
     private StageServiceValidator validator;
     private StageServiceImpl service;
@@ -45,8 +45,8 @@ class StageServiceImplTest {
         );
         stageDto = new StageDto(1L, "1", 1L, rolesDtos);
 
-        stageRepository = Mockito.mock(StageRepository.class);
-        projectRepository = Mockito.mock(ProjectRepository.class);
+        stageRepository = Mockito.mock(StageJpaRepository.class);
+        projectRepository = Mockito.mock(ProjectJpaRepository.class);
         mapper = Mockito.mock(StageMapper.class);
         validator = Mockito.mock(StageServiceValidator.class);
 
@@ -121,7 +121,7 @@ class StageServiceImplTest {
         Stream<Stage> stageStream = Stream.of(stage, stage, stage);
 
 
-        Mockito.when(projectRepository.getProjectById(projectId))
+        Mockito.when(projectRepository.getReferenceById(projectId))
                 .thenReturn(project);
         Mockito.when(project.getStages())
                 .thenReturn(stages);
@@ -139,7 +139,7 @@ class StageServiceImplTest {
         Mockito.verify(validator, Mockito.times(1))
                 .validateProjectNotCanceled(project.getStatus());
         Mockito.verify(projectRepository, Mockito.times(1))
-                .getProjectById(projectId);
+                .getReferenceById(projectId);
         Mockito.verify(filters.get(0), Mockito.times(1))
                 .isApplicable(filterDto);
         Mockito.verify(filters.get(1), Mockito.times(1))

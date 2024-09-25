@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.filter;
 
 import faang.school.projectservice.dto.filter.StageFilterDto;
+import faang.school.projectservice.filter.StageTaskFilter;
+import faang.school.projectservice.filter.TaskFilterEnum;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;

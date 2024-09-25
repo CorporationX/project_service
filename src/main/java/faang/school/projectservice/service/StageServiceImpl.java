@@ -5,6 +5,8 @@ import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.dto.filter.StageFilterDto;
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.filter.StageFilter;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
@@ -24,8 +26,8 @@ import java.util.zip.DataFormatException;
 @Service
 @RequiredArgsConstructor
 public class StageServiceImpl implements StageService {
-    private final StageRepository stageRepository;
-    private final ProjectRepository projectRepository;
+    private final StageJpaRepository stageRepository;
+    private final ProjectJpaRepository projectRepository;
     private final StageMapper mapper;
     private final StageServiceValidator validator;
     private final List<StageFilter> filters;
@@ -41,7 +43,7 @@ public class StageServiceImpl implements StageService {
 
     @Override
     public List<StageDto> getAllStages(Long projectId) {
-        return mapper.toStageDtoList(projectRepository.getProjectById(projectId).getStages());
+        return mapper.toStageDtoList(projectRepository.getReferenceById(projectId).getStages());
     }
 
     @Override
@@ -57,7 +59,7 @@ public class StageServiceImpl implements StageService {
 
     @Override
     public List<StageDto> getFilteredStages(Long projectId, StageFilterDto filterDto) {
-        Project project = projectRepository.getProjectById(projectId);
+        Project project = projectRepository.getReferenceById(projectId);
         validator.validateProjectNotCanceled(project.getStatus());
 
 

@@ -20,22 +20,22 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@RequestMapping("api/v1/stage")
+@RequestMapping("/api/v1/stage")
 public class StageController {
     private final StageService service;
 
-    @PutMapping("create")
+    @PutMapping("/create")
     public void create(@RequestBody StageDto stageDto) {
         service.create(stageDto);
     }
 
-    @GetMapping("stages/{projectId}")
+    @GetMapping("/stages/{projectId}")
     public List<StageDto> getAllStages(@PathVariable("projectId")
                                        @NotNull Long projectId) {
         return service.getAllStages(projectId);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public StageDto getStageById(@PathVariable("id")
                                  @NotNull Long stageId) {
         return service.getStageById(stageId);
@@ -47,14 +47,14 @@ public class StageController {
         service.deleteStage(stageDto);
     }
 
-    @GetMapping("filter/{projectId}")
+    @GetMapping("/filter/{projectId}")
     public List<StageDto> getFilteredStages(@PathVariable("projectId") @NotNull Long projectId,
                                             @RequestBody StageFilterDto filterDto) {
         return service.getFilteredStages(projectId, filterDto);
     }
 
 
-    @PutMapping("update")
+    @PutMapping("/update")
     public void update(@RequestBody StageDto dto) {
         service.updateStage(dto);
     }

@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.filter;
+package faang.school.projectservice.filter;
 
 /**
  * Используется для фильтров этапов

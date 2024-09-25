@@ -2,7 +2,7 @@ package faang.school.projectservice.dto.filter;
 
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.filter.TaskFilterEnum;
+import faang.school.projectservice.filter.TaskFilterEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

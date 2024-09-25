@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.filter;
 
 import faang.school.projectservice.dto.filter.StageFilterDto;
+import faang.school.projectservice.filter.ExecutorsRoleFilter;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
