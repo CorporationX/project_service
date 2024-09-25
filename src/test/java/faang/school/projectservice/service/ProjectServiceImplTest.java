@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceTest {
+public class ProjectServiceImplTest {
     @InjectMocks
     private ProjectServiceImpl projectService;
     @Mock
@@ -44,6 +44,7 @@ public class ServiceTest {
 
         when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
         when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
+        when(projectRepository.getProjectById(projectDto.getId())).thenReturn(projectEntity);
 
         projectService.createProject(projectDto);
 

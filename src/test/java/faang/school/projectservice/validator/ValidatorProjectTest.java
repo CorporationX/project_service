@@ -25,7 +25,7 @@ public class ValidatorProjectTest {
     public void testValidationIsNullName() {
         ProjectDto projectDto = new ProjectDto();
 
-        assertThrows(NoSuchElementException.class, () -> validator.validationName(projectDto));
+        assertThrows(NoSuchElementException.class, () -> validator.validateProject(projectDto));
     }
 
     @Test
@@ -34,14 +34,14 @@ public class ValidatorProjectTest {
         Project projectEntity = new Project();
         projectEntity.setName("  ");
 
-        assertThrows(NoSuchElementException.class, () -> validator.validationName(projectDto));
+        assertThrows(NoSuchElementException.class, () -> validator.validateProject(projectDto));
     }
 
     @Test
     public void testValidationIsNullDescription() {
         ProjectDto projectDto = new ProjectDto();
 
-        assertThrows(NoSuchElementException.class, () -> validator.validationDescription(projectDto));
+        assertThrows(NoSuchElementException.class, () -> validator.validateProject(projectDto));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ValidatorProjectTest {
         Project projectEntity = new Project();
         projectEntity.setDescription("  ");
 
-        assertThrows(NoSuchElementException.class, () -> validator.validationDescription(projectDto));
+        assertThrows(NoSuchElementException.class, () -> validator.validateProject(projectDto));
     }
 }
 
