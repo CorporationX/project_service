@@ -8,19 +8,18 @@ import faang.school.projectservice.model.TeamRole;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
-import java.util.Objects;
 
 @Component
 public class ResourceValidator {
 
     public void validateStorage(Project project, BigInteger newStorageSize) {
-        if(newStorageSize.compareTo(project.getMaxStorageSize()) > 0){
+        if (newStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
             throw new DataValidationException("Storage size is exceed");
         }
     }
 
     public void validateResourceOwner(Resource resource, TeamMember member) {
-        if(!resource.getCreatedBy().equals(member) && !member.getRoles().contains(TeamRole.MANAGER)){
+        if (!resource.getCreatedBy().equals(member) && !member.getRoles().contains(TeamRole.MANAGER)) {
             throw new DataValidationException("Resource can be deleted only by creator or project owner!");
         }
     }

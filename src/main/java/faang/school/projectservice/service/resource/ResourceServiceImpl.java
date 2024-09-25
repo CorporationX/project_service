@@ -4,11 +4,13 @@ import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.resource.ResourceMapper;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.resource.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
@@ -26,6 +29,7 @@ public class ResourceServiceImpl implements ResourceService {
     private final TeamMemberRepository teamMemberRepository;
     private final S3Service s3Service;
     private final ResourceMapper resourceMapper;
+    private final ProjectRepository projectRepository;
 
 
     @Override
@@ -43,36 +47,48 @@ public class ResourceServiceImpl implements ResourceService {
 
         Resource resource = createResource(file, key, teamMember);
         resource = resourceRepository.save(resource);
-        ResourceDto dto = resourceMapper.toDto(resource);
-        return dto;
+
+        project.setStorageSize(newStorageSize);
+        projectRepository.save(project);
+
+        return resourceMapper.toDto(resource);
     }
 
     @Override
     @Transactional(readOnly = true)
     public InputStreamResource getFile(long projectId, long userId, long resourceId) {
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+        teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
 
         Resource resource = getResource(resourceId);
 
         return s3Service.getFile(resource.getKey());
     }
 
-    /*
-    Удалять файл может только создатель файла или менеджер проекта. При удалении нужно удалять файл из Minio,
-    в Resource обнулять key и size, изменять status на DELETED и обновлять storageSize у Project.
-     */
     @Override
     @Transactional
     public void deleteResource(long projectId, long userId, long resourceId) {
         TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
         Resource resource = getResource(resourceId);
 
+        if (resource.getStatus() == ResourceStatus.DELETED) {
+            log.info("Resource with id {} is deleted already", resourceId);
+            return;
+        }
+
         validator.validateResourceOwner(resource, member);
+        Project project = member.getTeam().getProject();
 
         s3Service.deleteFile(resource.getKey());
 
-        resource.setStatus(ResourceStatus.DELETED);
+        project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
+        projectRepository.save(project);
 
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setKey(null);
+        resource.setSize(BigInteger.ZERO);
+        resource.setUpdatedBy(member);
+
+        resourceRepository.save(resource);
     }
 
     private Resource getResource(long resourceId) {

@@ -6,7 +6,10 @@ import faang.school.projectservice.service.resource.ResourceService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,11 +33,16 @@ public class ResourceController {
     }
 
     @GetMapping("/{projectId}/resources/{resourceId}")
-    public InputStreamResource getFile(@PathVariable @Positive long projectId,
-                                       @PathVariable @Positive long resourceId) {//првоерить контроль аннотации
+    public ResponseEntity<InputStreamResource> getFile(@PathVariable @Positive long projectId,
+                                                       @PathVariable @Positive long resourceId) {
         long userId = userContext.getUserId();
 
-        return resourceService.getFile(projectId, userId, resourceId);
+        InputStreamResource file = resourceService.getFile(projectId, userId, resourceId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+
+        return new ResponseEntity<>(file, headers, HttpStatus.OK);
     }
 
     @PutMapping("/{projectId}/resources/{resourceId}")
