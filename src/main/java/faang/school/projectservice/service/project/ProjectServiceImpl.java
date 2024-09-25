@@ -33,7 +33,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void createProject(ProjectDto projectDto) {
         Project project = mapper.toEntity(projectDto);
-        validator.validationCreateProject(projectDto);
+        validator.validateProject(projectDto);
+        validationDuplicateProjectNames(projectDto);
         project.setStatus(ProjectStatus.CREATED);
         projectRepository.save(project);
     }
@@ -41,10 +42,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void updateStatus(ProjectDto projectDto, ProjectStatus status) {
         Project project = projectRepository.getProjectById(projectDto.getId());
-
-        if (project == null) {
-            throw new NoSuchElementException("The project does not exist");
-        }
 
         project.setStatus(status);
         project.setUpdatedAt(LocalDateTime.now());
@@ -55,10 +52,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void updateDescription(ProjectDto projectDto, String description) {
         Project project = projectRepository.getProjectById(projectDto.getId());
-
-        if (project == null) {
-            throw new NoSuchElementException("The project does not exist");
-        }
 
         project.setDescription(description);
         project.setUpdatedAt(LocalDateTime.now());
@@ -111,7 +104,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .toList();
     }
 
-    public void validationDuplicateProjectNames(ProjectDto projectDto) {
+    private void validationDuplicateProjectNames(ProjectDto projectDto) {
         Project existingProject = findProjectByNameAndOwnerId(projectDto.getName(),
                 projectRepository.getProjectById(projectDto.getId()).getOwnerId());
 

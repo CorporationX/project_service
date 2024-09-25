@@ -23,6 +23,4 @@ public interface ProjectService {
     boolean checkUserByPrivateProject(Project project, long requester);
 
     ProjectDto findById(long id);
-
-    public void validationDuplicateProjectNames(ProjectDto projectDto);
 }
