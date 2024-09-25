@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
-@Mapping("/resource")
+@RequestMapping("/resource")
 @RestController
 @Tag(name = "ResourceController", description = "Controller for working with recources")
 public class ResourceController {
