@@ -11,7 +11,7 @@ import java.security.GeneralSecurityException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/calendar")
+@RequestMapping("/api/v1/calendar")
 public class CalendarController {
     private final CalendarService service;
 
