@@ -29,11 +29,9 @@ public class StageInvitationController {
         return stageInvitationService.acceptInvitation(id);
     }
 
-    @PatchMapping("/{id}/reject")
-    public StageInvitationDtoResponse rejectInvitation(@PathVariable long id,
-                                                       @Valid @RequestBody String description,
-                                                       @RequestBody StageInvitationStatus status) {
-        var stageInvDtoRequest = new StageInvitationDtoRequest(id, description, status);
+    @PatchMapping("/reject")
+    public StageInvitationDtoResponse rejectInvitation(
+            @Valid @RequestBody StageInvitationDtoRequest stageInvDtoRequest) {
         return stageInvitationService.rejectInvitation(stageInvDtoRequest);
     }
 
