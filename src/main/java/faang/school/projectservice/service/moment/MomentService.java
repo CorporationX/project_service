@@ -49,7 +49,8 @@ public class MomentService {
         if (momentDto.getId() == null) {
             momentDto.setId(momentId);
         } else if (!momentDto.getId().equals(momentId)) {
-            throw new IllegalArgumentException("Moment Id in uri (" + momentId + ") and body (" + momentDto.getId() + ") do not match");
+            throw new IllegalArgumentException("Moment Id in uri (" + momentId + ")" +
+                    " and body (" + momentDto.getId() + ") do not match");
         }
 
         Moment moment = createOrUpdateMoment(momentDto);
