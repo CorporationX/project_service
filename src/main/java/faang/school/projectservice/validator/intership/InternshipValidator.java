@@ -18,6 +18,22 @@ public class InternshipValidator {
 
     private static final long INTERNSHIP_MAX_DURATION = 3L;
 
+    public void validateInternship(InternshipDto internshipDto) {
+        validateInternshipDuration(internshipDto);
+        validateInternshipHaveProjectAndInterns(internshipDto);
+    }
+
+    public void validateInternshipProjectAndMentorExist(Project project, TeamMember mentor) {
+        if (project == null) {
+            log.error("Couldn't find project in database!");
+            throw new EntityNotFoundException("Project doesn't exists");
+        }
+        if (mentor == null) {
+            log.error("Couldn't find mentor in database!");
+            throw new EntityNotFoundException("Mentor doesn't exist!");
+        }
+    }
+
     private void validateInternshipHaveProjectAndInterns(InternshipDto internshipDto) {
         if (internshipDto.getProjectId() == null) {
             log.error("Missing project field!");
@@ -35,22 +51,6 @@ public class InternshipValidator {
             log.error("Internship duration is too long!");
             throw new DataValidationException("The duration of internship must be not more than "
                     + INTERNSHIP_MAX_DURATION + " months!");
-        }
-    }
-
-    public void validateInternship(InternshipDto internshipDto) {
-        validateInternshipDuration(internshipDto);
-        validateInternshipHaveProjectAndInterns(internshipDto);
-    }
-
-    public void validateInternshipProjectAndMentorExist(Project project, TeamMember mentor) {
-        if (project == null) {
-            log.error("Couldn't find project in database!");
-            throw new EntityNotFoundException("Project doesn't exists");
-        }
-        if (mentor == null) {
-            log.error("Couldn't find mentor in database!");
-            throw new EntityNotFoundException("Mentor doesn't exist!");
         }
     }
 }

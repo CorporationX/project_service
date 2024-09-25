@@ -79,10 +79,10 @@ public class InternshipService {
             log.error("Filters parameter is null!");
             throw new DataValidationException("Filter can't be null!");
         }
-        Stream<Internship> internships = internshipRepository.findAll().stream();
+        List<Internship> internships = internshipRepository.findAll();
         return internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .flatMap(filter -> filter.applyFilter(internships, filterDto))
+                .flatMap(filter -> filter.applyFilter(internships.stream(), filterDto))
                 .map(internshipMapper::toDto)
                 .collect(Collectors.toList());
     }

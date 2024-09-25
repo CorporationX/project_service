@@ -65,10 +65,7 @@ public class InternshipRoleFilterTest {
 
             assertEquals(filteredInternships, internshipRoleFilter.applyFilter(internships, internshipFilterDto).toList());
         }
-    }
 
-    @Nested
-    class NegativeTests {
         @Test
         @DisplayName("When filter role field is null return false")
         public void whenInternshipFilterDtoRoleIsNullTheReturnFalse() {

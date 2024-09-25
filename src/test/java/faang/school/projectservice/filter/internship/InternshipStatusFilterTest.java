@@ -59,10 +59,7 @@ public class InternshipStatusFilterTest {
             assertEquals(filteredInternships, internshipStatusFilter
                     .applyFilter(internships, internshipFilterDto).toList());
         }
-    }
 
-    @Nested
-    class NegativeTests {
         @Test
         @DisplayName("When filter status is null return false")
         public void whenInternshipFilterDtoStatusIsNullThenReturnFalse() {
