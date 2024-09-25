@@ -16,18 +16,22 @@ import java.math.BigInteger;
 public class ResourceService {
     private final ResourceRepository resourceRepository;
     private final ProjectRepository projectRepository;
+    private final S3Service s3Service;
 
     @Transactional
     public ResourceDto addResource(Long projectId, MultipartFile file) {
         Project project = projectRepository.findById(projectId);
-
-
-
-
+        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
+        checkStorageSize(newStorageSize, project.getStorageSize());
+        s3Service.uploadFile(file, project.getName());
         return null;
     }
 
-    private void checkStorageSize() {
+    private void checkStorageSize(BigInteger storageSize, BigInteger maxStorageSize) {
+        if (storageSize.compareTo(maxStorageSize) > 0) {
+            // TODO think about exception
+//            throw new SizeLimitExceededException("Storage size low", storageSize.longValue(),maxStorageSize.l)
 
+        }
     }
 }

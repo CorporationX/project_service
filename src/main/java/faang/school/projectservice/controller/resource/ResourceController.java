@@ -27,11 +27,12 @@ public class ResourceController {
     })
     @PostMapping(path = "/{projectId}", consumes = {"multipart/form-data"})
     public ResponseEntity<String> uploadFile(
+            @PathVariable Long projectId,
             @Parameter(description = "File to upload", required = true, content = @Content(
                     mediaType = "multipart/form-data",
                     schema = @Schema(type = "string", format = "binary")
             ))
-            @PathVariable Long projectId, @RequestPart("file") MultipartFile file) {
+            @RequestPart("file") MultipartFile file) {
         resourceService.addResource(projectId, file);
         return ResponseEntity.ok("File uploaded successfully: " + file.getOriginalFilename());
     }
