@@ -3,6 +3,7 @@ package faang.school.projectservice.exception;
 import com.amazonaws.services.kms.model.AlreadyExistsException;
 import com.amazonaws.services.kms.model.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +63,13 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getMessage(), LocalDateTime.now());
     }
 
+    @ExceptionHandler(ServletException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public ErrorResponse handleAlreadyExistsException(ServletException e) {
+        log.error("Servlet exception occurred: {}", e.getMessage());
+        return new ErrorResponse(e.getMessage(), LocalDateTime.now());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -72,6 +80,5 @@ public class GlobalExceptionHandler {
         });
         return ResponseEntity.badRequest().body(errors);
     }
-
 }
 
