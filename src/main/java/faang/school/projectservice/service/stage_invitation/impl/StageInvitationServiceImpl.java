@@ -2,6 +2,8 @@ package faang.school.projectservice.service.stage_invitation.impl;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
+import faang.school.projectservice.exception.InvalidInvitationStatusException;
+import faang.school.projectservice.exception.InvitationAlreadyExistsException;
 import faang.school.projectservice.filter.StageInvitationFilter;
 import faang.school.projectservice.filter.impl.InvitedIdFilter;
 import faang.school.projectservice.filter.impl.StatusFilter;
@@ -22,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,8 +41,12 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     public StageInvitationDto sendInvitation(StageInvitationDto invitationDto) {
         log.info("Sending invitation: {}", invitationDto);
 
-        Stage stage = stageRepository.getById(invitationDto.stageId());
+        Stage stage = stageRepository.findById(invitationDto.stageId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Stage not found with id: " + invitationDto.stageId()));
+
         TeamMember author = teamMemberRepository.findById(invitationDto.authorId());
+
         TeamMember invited = teamMemberRepository.findById(invitationDto.invitedId());
 
         if (stageInvitationRepository.existsByAuthorAndInvitedAndStage(author, invited, stage)) {
@@ -49,7 +54,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
                     "Invitation from authorId=%d to invitedId=%d for stageId=%d already exists.",
                     invitationDto.authorId(), invitationDto.invitedId(), invitationDto.stageId());
             log.warn(message);
-            throw new IllegalArgumentException(message);
+            throw new InvitationAlreadyExistsException(message);
         }
 
         StageInvitation invitation = stageInvitationMapper.toStageInvitation(invitationDto);
@@ -75,7 +80,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
                     "Invitation with id=%d cannot be accepted in its current status: %s",
                     id, invitation.getStatus());
             log.warn(message);
-            throw new IllegalStateException(message);
+            throw new InvalidInvitationStatusException(message);
         }
 
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
@@ -103,7 +108,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
                     "Invitation with id=%d cannot be declined in its current status: %s",
                     id, invitation.getStatus());
             log.warn(message);
-            throw new IllegalStateException(message);
+            throw new InvalidInvitationStatusException(message);
         }
 
         invitation.setStatus(StageInvitationStatus.REJECTED);
