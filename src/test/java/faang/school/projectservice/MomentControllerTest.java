@@ -3,7 +3,6 @@ package faang.school.projectservice;
 import faang.school.projectservice.controller.MomentController;
 import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.service.MomentServiceImpl;
-import faang.school.projectservice.exception.DataValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,12 +23,12 @@ public class MomentControllerTest {
     private MomentController momentController;
 
     @Test
-    public void createMoment() throws DataValidationException {
+    public void createMoment() {
         MomentDto momentDto = new MomentDto();
 
         momentController.createMoment(momentDto);
 
-        verify(momentServiceImpl,times(1)).createMoment(momentDto);
+        verify(momentServiceImpl, times(1)).createMoment(momentDto);
     }
 
     @Test
@@ -38,25 +37,25 @@ public class MomentControllerTest {
 
         momentController.getMoment(momentId);
 
-        verify(momentServiceImpl,times(1)).getMomentById(momentId);
+        verify(momentServiceImpl, times(1)).getMomentById(momentId);
     }
 
     @Test
-    public void updateMoment() throws DataValidationException {
+    public void updateMoment() {
         long momentId = 1L;
         java.util.List<Long> addedProjectIds = List.of(1L, 2L);
         List<Long> addedUserIds = List.of(1L, 2L);
 
         momentController.updateMoment(momentId, addedProjectIds, addedUserIds);
 
-        verify(momentServiceImpl,times(1)).updateMoment(momentId, addedProjectIds, addedUserIds);
+        verify(momentServiceImpl, times(1)).updateMoment(momentId, addedProjectIds, addedUserIds);
     }
 
     @Test
     public void getAllMoments() {
-       momentServiceImpl.getAllMoments();
+        momentServiceImpl.getAllMoments();
 
-       verify(momentServiceImpl,times(1)).getAllMoments();
+        verify(momentServiceImpl, times(1)).getAllMoments();
     }
 
     @Test
@@ -66,6 +65,6 @@ public class MomentControllerTest {
 
         momentServiceImpl.getAllProjectMomentsByDate(projectId, month);
 
-        verify(momentServiceImpl,times(1)).getAllProjectMomentsByDate(projectId, month);
+        verify(momentServiceImpl, times(1)).getAllProjectMomentsByDate(projectId, month);
     }
 }

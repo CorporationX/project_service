@@ -27,6 +27,7 @@ dependencies {
      */
     implementation("org.liquibase:liquibase-core")
     implementation("redis.clients:jedis:4.3.2")
+    testImplementation("com.h2database:h2:2.1.214")
     runtimeOnly("org.postgresql:postgresql")
 
     /**

@@ -2,7 +2,6 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.service.MomentService;
-import faang.school.projectservice.exception.DataValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
@@ -14,7 +13,7 @@ import java.util.List;
 public class MomentController {
     private final MomentService momentService;
 
-    public MomentDto createMoment(MomentDto momentDto) throws DataValidationException {
+    public MomentDto createMoment(MomentDto momentDto) {
         return momentService.createMoment(momentDto);
     }
 
@@ -26,7 +25,7 @@ public class MomentController {
         return momentService.getAllMoments();
     }
 
-    public MomentDto updateMoment(long momentId, List<Long> addedProjectIds, List<Long> addedUserIds) throws DataValidationException {
+    public MomentDto updateMoment(long momentId, List<Long> addedProjectIds, List<Long> addedUserIds) {
         return momentService.updateMoment(momentId, addedProjectIds, addedUserIds);
     }
 

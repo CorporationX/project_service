@@ -10,7 +10,6 @@ import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.MomentServiceImpl;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.validator.MomentValidator;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
@@ -27,7 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class MomentServiceImplTest {
@@ -59,7 +60,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-    void testCreateMoment() throws DataValidationException {
+    void testCreateMoment() {
         Moment moment = new Moment();
         MomentDto momentDto = new MomentDto();
         moment.setId(momentId);
@@ -72,7 +73,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-    void testUpdateMomentAllEmpty() throws DataValidationException {
+    void testUpdateMomentAllEmpty() {
         Moment moment = new Moment();
         moment.setId(momentId);
         when(momentRepository.findById(momentId)).thenReturn(Optional.of(moment));
@@ -86,7 +87,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-    void testUpdateMomentWithNewProject() throws DataValidationException {
+    void testUpdateMomentWithNewProject() {
         addedUserIds.clear();
         Moment moment = new Moment();
         moment.setId(momentId);
@@ -100,7 +101,7 @@ public class MomentServiceImplTest {
     }
 
     @Test
-    void testUpdateMomentWithNewUser() throws DataValidationException {
+    void testUpdateMomentWithNewUser() {
         Moment moment = new Moment();
         moment.setId(momentId);
         moment.setUserIds(new ArrayList<>());
