@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -78,12 +78,14 @@ public class InternshipService {
             log.error("Filters parameter is null!");
             throw new DataValidationException("Filter can't be null!");
         }
-        List<Internship> internships = internshipRepository.findAll();
+        Stream<Internship> internships = internshipRepository.findAll().stream();
         return internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .flatMap(filter -> filter.applyFilter(internships.stream(), filterDto))
+                .reduce(internships,
+                        (stream, filter) -> filter.applyFilter(stream, filterDto),
+                        (v1, v2) -> v1)
                 .map(internshipMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<InternshipDto> getAllInternship() {

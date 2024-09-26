@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -67,6 +68,9 @@ public class InternshipServiceTest {
     private InternshipDto internshipDto;
     private List<Internship> internships;
     private InternshipFilterDto internshipFilterDto;
+    private Internship validInternship;
+    private Internship invalidInternship;
+    private Internship invalidInternship1;
     private static final Long INTERNSHIP_ID_ONE = 1L;
     private static final Long PROJECT_ID_ONE = 1L;
     private static final Long MENTOR_ID_ONE = 1L;
@@ -131,23 +135,27 @@ public class InternshipServiceTest {
 
         internshipFilterDto = InternshipFilterDto.builder()
                 .status(InternshipStatus.COMPLETED)
-                .role(TeamRole.INTERN)
+                .role(TeamRole.MANAGER)
                 .build();
 
-        internships = List.of(Internship.builder()
-                        .status(InternshipStatus.IN_PROGRESS)
-                        .interns(List.of(TeamMember.builder()
-                                .roles(List.of(TeamRole.MANAGER)).build()))
-                        .build(),
-                Internship.builder()
-                        .status(InternshipStatus.COMPLETED)
-                        .interns(List.of(TeamMember.builder()
-                                .roles(List.of(TeamRole.INTERN)).build()))
-                        .build(),
-                Internship.builder()
-                        .status(InternshipStatus.COMPLETED)
-                        .interns(interns)
-                        .build());
+        validInternship = Internship.builder()
+                .status(InternshipStatus.COMPLETED)
+                .interns(List.of(TeamMember.builder()
+                        .roles(List.of(TeamRole.MANAGER)).build()))
+                .build();
+        invalidInternship = Internship.builder()
+                .status(InternshipStatus.COMPLETED)
+                .interns(List.of(TeamMember.builder()
+                        .roles(List.of(TeamRole.INTERN)).build()))
+                .build();
+        invalidInternship1 = Internship.builder()
+                .status(InternshipStatus.IN_PROGRESS)
+                .interns(List.of(TeamMember.builder()
+                        .roles(List.of(TeamRole.DEVELOPER))
+                        .build()))
+                .build();
+
+        internships = Arrays.asList(validInternship, invalidInternship, invalidInternship1);
 
     }
 
@@ -191,25 +199,24 @@ public class InternshipServiceTest {
         @DisplayName("When valid filter passed findAll internships filter it and return filtered dto list")
         public void whenValidFilterDtoPassedThenReturnFilteredDtoList() {
             customInternshipService();
+            when(internshipRepository.findAll()).thenReturn(internships);
 
-            when(internshipRepository.findAll())
-                    .thenReturn(internships);
+            when(filterOne.isApplicable(internshipFilterDto)).thenReturn(true);
+            when(filterTwo.isApplicable(internshipFilterDto)).thenReturn(true);
 
-            when(internshipFilters.get(0).isApplicable(internshipFilterDto))
-                    .thenReturn(true);
-            when(internshipFilters.get(0).applyFilter(any(), eq(internshipFilterDto)))
-                    .thenReturn(internships.stream().filter(internship ->
-                            internship.getInterns().get(0).getRoles().get(0) == internshipFilterDto.getRole()));
-            when(internshipFilters.get(1).isApplicable(internshipFilterDto))
-                    .thenReturn(true);
-            when(internshipFilters.get(1).applyFilter(any(), eq(internshipFilterDto)))
-                    .thenReturn(internships.stream().filter(filter ->
-                            internship.getStatus() == internshipFilterDto.getStatus()));
+            when(filterOne.applyFilter(any(), eq(internshipFilterDto)))
+                    .thenReturn(Stream.of(validInternship, invalidInternship));
+            when(filterTwo.applyFilter(any(), eq(internshipFilterDto)))
+                    .thenReturn(Stream.of(validInternship));
 
             List<InternshipDto> result = internshipService.getFilteredInternship(internshipFilterDto);
-            assertEquals(2, result.size());
-            verify(internshipRepository)
-                    .findAll();
+
+            assertEquals(1, result.size());
+            verify(internshipRepository).findAll();
+            verify(filterOne).isApplicable(internshipFilterDto);
+            verify(filterTwo).isApplicable(internshipFilterDto);
+            verify(filterOne).applyFilter(any(), eq(internshipFilterDto));
+            verify(filterTwo).applyFilter(any(), eq(internshipFilterDto));
         }
 
         @Test
