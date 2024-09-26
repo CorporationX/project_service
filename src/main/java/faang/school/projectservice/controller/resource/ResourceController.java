@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.resource;
 
+import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,15 +27,15 @@ public class ResourceController {
             @ApiResponse(responseCode = "400", description = "Invalid file upload request")
     })
     @PostMapping(path = "/{projectId}", consumes = {"multipart/form-data"})
-    public ResponseEntity<String> uploadFile(
+    public ResponseEntity<ResourceDto> uploadFile(
             @PathVariable Long projectId,
             @Parameter(description = "File to upload", required = true, content = @Content(
                     mediaType = "multipart/form-data",
                     schema = @Schema(type = "string", format = "binary")
             ))
             @RequestPart("file") MultipartFile file) {
-        resourceService.addResource(projectId, file);
-        return ResponseEntity.ok("File uploaded successfully: " + file.getOriginalFilename());
+       ResourceDto dto =  resourceService.addResource(projectId, file);
+       return  ResponseEntity.ok(dto);
     }
 
 

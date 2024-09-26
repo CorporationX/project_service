@@ -1,5 +1,7 @@
 package faang.school.projectservice.config.resource;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -12,15 +14,18 @@ public class ResourceConfig {
     @Value("${services.s3.endpoint}")
     private String endpoint;
 
+    @Value("${services.s3.accessKey}")
+    private String accessKey;
+
+    @Value("${services.s3.secretKey}")
+    private String secretKey;
+
     @Bean
     public AmazonS3 amazonS3Client() {
-
-
         AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint,"ru-west-1"))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, "ru-west-1"))
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
                 .build();
-
-
         return s3;
     }
 }

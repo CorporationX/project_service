@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import software.amazon.ion.NullValueException;
 
-import javax.naming.SizeLimitExceededException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,10 +88,10 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("Servlet exception occurred", e.getMessage());
     }
 
-    @ExceptionHandler(SizeLimitExceededException.class)
+    @ExceptionHandler(StorageLimitException.class)
     @ResponseStatus(value = HttpStatus.INSUFFICIENT_STORAGE)
-    public ErrorResponse handleSizeLimitExceededException(SizeLimitExceededException e) {
-        log.error("Size limit exceeded exception occurred", e);
-        return new ErrorResponse("Size limit exceeded exception occurred", e.getMessage());
+    public ErrorResponse handleStorageLimitExceededException(StorageLimitException e) {
+        log.error("Storage limit exception occurred", e);
+        return new ErrorResponse("Storage limit exception occurred", e.getMessage());
     }
 }
