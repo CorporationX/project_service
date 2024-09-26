@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.project;
 
-import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ class ProjectNameFilter implements Filter<ProjectFilterDto, Project> {
     }
 
     @Override
-    public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto filterDto) {
+    public Stream<Project> applyFilter(Stream<Project> projects, ProjectFilterDto filterDto) {
         return projects.filter(project -> project.getName().contains(filterDto.getName()));
     }
 }

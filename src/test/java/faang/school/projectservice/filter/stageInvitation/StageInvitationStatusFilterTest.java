@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.filter.stageinvitation.StageInvitationFilterDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -57,7 +57,7 @@ class StageInvitationStatusFilterTest {
                             .status(INVITATION_STATUS)
                             .build());
 
-            assertEquals(stageInvitationsAfterFilter, stageInvitationStatusFilter.apply(stageInvitations,
+            assertEquals(stageInvitationsAfterFilter, stageInvitationStatusFilter.applyFilter(stageInvitations,
                     stageInvitationFilterDto).toList());
         }
 

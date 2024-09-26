@@ -6,7 +6,7 @@ import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.internship.InternshipMapperImpl;
-import faang.school.projectservice.mapper.internship.TeamMemberMapperImpl;
+import faang.school.projectservice.mapper.teammember.TeamMemberMapperImpl;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;

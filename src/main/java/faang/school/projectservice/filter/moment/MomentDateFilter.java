@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.moment;
 
-import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.dto.filter.moment.MomentFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Moment;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,7 @@ class MomentDateFilter implements Filter<MomentFilterDto, Moment> {
     }
 
     @Override
-    public Stream<Moment> apply(Stream<Moment> momentList, MomentFilterDto momentFilterDto) {
+    public Stream<Moment> applyFilter(Stream<Moment> momentList, MomentFilterDto momentFilterDto) {
         Optional<LocalDateTime> startDate = Optional.ofNullable(momentFilterDto.getStartDate());
         Optional<LocalDateTime> endDate = Optional.ofNullable(momentFilterDto.getEndDate());
 

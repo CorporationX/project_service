@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
@@ -60,7 +60,7 @@ public class ProjectService {
 
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(projectFilterDto))
-                .flatMap(filter -> filter.apply(projects, projectFilterDto))
+                .flatMap(filter -> filter.applyFilter(projects, projectFilterDto))
                 .map(projectMapper::toDto)
                 .toList();
     }
@@ -79,5 +79,9 @@ public class ProjectService {
 
     public List<Project> getProjectByIds(List<Long> ids) {
         return projectRepository.findAllByIds(ids);
+    }
+
+    public Project getProjectById(long id) {
+        return projectRepository.getProjectById(id);
     }
 }

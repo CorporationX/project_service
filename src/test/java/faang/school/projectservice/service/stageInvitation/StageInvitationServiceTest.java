@@ -1,8 +1,8 @@
 package faang.school.projectservice.service.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoResponse;
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoRequest;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoResponse;
+import faang.school.projectservice.dto.filter.stageinvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoRequest;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationDtoMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -154,7 +154,7 @@ class StageInvitationServiceTest {
 
                 when(stageInvitationRepository.findAll()).thenReturn(List.of(first));
                 when(filters.isApplicable(stageInvitationFilterDto)).thenReturn(true);
-                when(filters.apply(any(Stream.class),
+                when(filters.applyFilter(any(Stream.class),
                         eq(stageInvitationFilterDto))).thenReturn(Stream.of(first));
                 when(stageInvitationFilters.stream()).thenReturn(Stream.of(filters));
                 when(stageInvitationDtoMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvDtoResponse);

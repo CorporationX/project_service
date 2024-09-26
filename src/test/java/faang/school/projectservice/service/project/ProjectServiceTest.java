@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -157,7 +157,7 @@ class ProjectServiceTest {
             when(projectMapper.toDto(first)).thenReturn(firstDto);
 
             when(projectFilter.isApplicable(projectFilterDto)).thenReturn(true);
-            when(projectFilter.apply(any(Stream.class), eq(projectFilterDto))).thenReturn(Stream.of(first, second));
+            when(projectFilter.applyFilter(any(Stream.class), eq(projectFilterDto))).thenReturn(Stream.of(first, second));
             when(filters.stream()).thenReturn(Stream.of(projectFilter));
 
             List<ProjectDto> projectDtos = projectService.getProjectByNameAndStatus(projectFilterDto);
