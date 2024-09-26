@@ -3,7 +3,7 @@ package faang.school.projectservice;
 import faang.school.projectservice.controller.MomentController;
 import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.service.MomentServiceImpl;
-import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

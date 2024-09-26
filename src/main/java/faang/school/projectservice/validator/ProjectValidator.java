@@ -4,7 +4,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 
 @Component
 @RequiredArgsConstructor

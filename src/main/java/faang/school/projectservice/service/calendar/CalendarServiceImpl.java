@@ -3,7 +3,12 @@ package faang.school.projectservice.service.calendar;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.Events;
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.EventDto;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.google.DateGoogleConverter;
 import faang.school.projectservice.google.GoggleAuthorizationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +22,40 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CalendarServiceImpl implements CalendarService {
-
     private final GoggleAuthorizationService authorizationService;
+    private final UserServiceClient userServiceClient;
 
     @Override
-    public void create() {
+    public void addEventToCalendar(long eventId, String calendarId) throws GeneralSecurityException, IOException {
+        EventDto eventDto = userServiceClient.getEvent(eventId);
+        if (eventDto.getCalendarEventId() == null) {
+            add(eventDto, calendarId);
+        } else {
+            log.info("event has already added to the calendar");
+        }
+    }
 
+    private void add(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
+        Calendar service = authorizationService.authorizeAndGetCalendar();
+        Event event = new Event()
+                .setStart(DateGoogleConverter.toEventDateTime(eventDto.getStartDate()))
+                .setEnd(DateGoogleConverter.toEventDateTime(eventDto.getEndDate()))
+                .setDescription(eventDto.getDescription())
+                .setAttendees(eventDto.getAttendeeEmails().stream()
+                        .map((email) -> new EventAttendee().setEmail(email))
+                        .toList()
+                )
+                .setSummary(eventDto.getTitle())
+                .setReminders(new Event.Reminders().setUseDefault(true));
+
+        event = service.events().insert(calendarId, event).execute();
+        log.info("Event created: {}", event.getHtmlLink());
+    }
+
+    private void checkIfCalendarAvailable(String calendarId, Calendar service) throws IOException {
+        if (service.calendars().get(calendarId) == null) {
+            throw new DataValidationException("calendar id = " + calendarId + " is not available");
+        }
     }
 
     @Override

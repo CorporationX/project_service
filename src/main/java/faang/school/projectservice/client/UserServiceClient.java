@@ -1,6 +1,8 @@
 package faang.school.projectservice.client;
 
+import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.dto.client.UserDto;
+import jakarta.validation.constraints.Positive;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,4 +19,7 @@ public interface UserServiceClient {
 
     @PostMapping("/users")
     List<UserDto> getUsersByIds(@RequestBody List<Long> ids);
+
+    @GetMapping("/api/v1/event/{{id}}")
+    EventDto getEvent(@PathVariable("id") @Positive long id);
 }

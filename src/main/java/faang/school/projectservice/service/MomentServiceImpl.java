@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.MomentDto;
-import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;

@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.service.MomentService;
-import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 

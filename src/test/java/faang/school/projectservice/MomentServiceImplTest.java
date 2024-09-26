@@ -10,7 +10,7 @@ import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.MomentServiceImpl;
-import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.validator.MomentValidator;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
