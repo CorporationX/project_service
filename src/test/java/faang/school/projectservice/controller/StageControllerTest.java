@@ -1,10 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.exceptions.stage.StageHaveNoRolesException;
-import faang.school.projectservice.exceptions.stage.StageNotHaveNameException;
 import faang.school.projectservice.service.StageService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

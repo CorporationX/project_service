@@ -41,7 +41,6 @@ public class StageController {
         return service.getStageById(stageId);
     }
 
-
     @DeleteMapping
     public void deleteStage(@RequestBody StageDto stageDto) {
         service.deleteStage(stageDto);
@@ -52,7 +51,6 @@ public class StageController {
                                             @RequestBody StageFilterDto filterDto) {
         return service.getFilteredStages(projectId, filterDto);
     }
-
 
     @PutMapping("/update")
     public void update(@RequestBody StageDto dto) {
