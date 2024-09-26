@@ -5,6 +5,7 @@ import com.amazonaws.services.kms.model.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -94,4 +95,12 @@ public class GlobalExceptionHandler {
         log.error("Storage limit exception occurred", e);
         return new ErrorResponse("Storage limit exception occurred", e.getMessage());
     }
+
+    @ExceptionHandler(PermissionDeniedDataAccessException.class)
+    @ResponseStatus(value = HttpStatus.FORBIDDEN)
+    public ErrorResponse handlePermisionDeniedDataAccessException(PermissionDeniedDataAccessException e) {
+        log.error("Permission denied data access exception occurred", e);
+        return new ErrorResponse("Permission denied data access exception occurred", e.getMessage());
+    }
+
 }
