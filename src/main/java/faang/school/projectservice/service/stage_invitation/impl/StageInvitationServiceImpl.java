@@ -16,6 +16,7 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StageInvitationServiceImpl implements StageInvitationService {
 
     private final StageInvitationRepository stageInvitationRepository;
@@ -36,14 +38,18 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     @Override
     @Transactional
     public StageInvitationDto sendInvitation(StageInvitationDto invitationDto) {
+        log.info("Sending invitation: {}", invitationDto);
+
         Stage stage = stageRepository.getById(invitationDto.stageId());
-
         TeamMember author = teamMemberRepository.findById(invitationDto.authorId());
-
         TeamMember invited = teamMemberRepository.findById(invitationDto.invitedId());
 
         if (stageInvitationRepository.existsByAuthorAndInvitedAndStage(author, invited, stage)) {
-            throw new IllegalArgumentException("Invitation already exists.");
+            String message = String.format(
+                    "Invitation from authorId=%d to invitedId=%d for stageId=%d already exists.",
+                    invitationDto.authorId(), invitationDto.invitedId(), invitationDto.stageId());
+            log.warn(message);
+            throw new IllegalArgumentException(message);
         }
 
         StageInvitation invitation = stageInvitationMapper.toStageInvitation(invitationDto);
@@ -52,21 +58,28 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         invitation.setInvited(invited);
         invitation.setStatus(StageInvitationStatus.PENDING);
 
-        StageInvitation savedInvitation = stageInvitationRepository.save(invitation);
-        return stageInvitationMapper.toStageInvitationDto(savedInvitation);
+        invitation = stageInvitationRepository.save(invitation);
+        log.info("Invitation sent successfully: {}", invitation);
+        return stageInvitationMapper.toStageInvitationDto(invitation);
     }
 
     @Override
     @Transactional
     public StageInvitationDto acceptInvitation(Long id) {
+        log.info("Accepting invitation with id: {}", id);
+
         StageInvitation invitation = stageInvitationRepository.findById(id);
 
         if (invitation.getStatus() != StageInvitationStatus.PENDING) {
-            throw new IllegalStateException("Invitation cannot be accepted in its current status.");
+            String message = String.format(
+                    "Invitation with id=%d cannot be accepted in its current status: %s",
+                    id, invitation.getStatus());
+            log.warn(message);
+            throw new IllegalStateException(message);
         }
 
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
-        StageInvitation updatedInvitation = stageInvitationRepository.save(invitation);
+        invitation = stageInvitationRepository.save(invitation);
 
         Stage stage = invitation.getStage();
         TeamMember invited = invitation.getInvited();
@@ -74,28 +87,38 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         stage.getExecutors().add(invited);
         stageRepository.save(stage);
 
-        return stageInvitationMapper.toStageInvitationDto(updatedInvitation);
+        log.info("Invitation accepted: {}", invitation);
+        return stageInvitationMapper.toStageInvitationDto(invitation);
     }
 
     @Override
     @Transactional
     public StageInvitationDto declineInvitation(Long id, String reason) {
+        log.debug("Declining invitation with id: {} for reason: {}", id, reason);
+
         StageInvitation invitation = stageInvitationRepository.findById(id);
 
         if (invitation.getStatus() != StageInvitationStatus.PENDING) {
-            throw new IllegalStateException("Invitation cannot be declined in its current status.");
+            String message = String.format(
+                    "Invitation with id=%d cannot be declined in its current status: %s",
+                    id, invitation.getStatus());
+            log.warn(message);
+            throw new IllegalStateException(message);
         }
 
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(reason);
 
-        StageInvitation updatedInvitation = stageInvitationRepository.save(invitation);
-        return stageInvitationMapper.toStageInvitationDto(updatedInvitation);
+        invitation = stageInvitationRepository.save(invitation);
+        log.info("Invitation declined: {}", invitation);
+        return stageInvitationMapper.toStageInvitationDto(invitation);
     }
 
     @Override
     @Transactional
     public List<StageInvitationDto> getInvitations(StageInvitationFilterDto filterDto) {
+        log.info("Getting invitations with filters: {}", filterDto);
+
         List<StageInvitation> invitations = stageInvitationRepository.findAll();
 
         List<StageInvitationFilter> filters = createFilters(filterDto);
@@ -111,12 +134,12 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private List<StageInvitationFilter> createFilters(StageInvitationFilterDto filterDto) {
         List<StageInvitationFilter> filters = new ArrayList<>();
 
-        if (filterDto.getInvitedId() != null) {
-            filters.add(new InvitedIdFilter(filterDto.getInvitedId()));
+        if (filterDto.invitedId() != null) {
+            filters.add(new InvitedIdFilter(filterDto.invitedId()));
         }
 
-        if (filterDto.getStatus() != null) {
-            filters.add(new StatusFilter(filterDto.getStatus()));
+        if (filterDto.status() != null) {
+            filters.add(new StatusFilter(filterDto.status()));
         }
 
         return filters;

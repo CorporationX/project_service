@@ -23,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/stage-invitations")
 @RequiredArgsConstructor
+@Validated
 public class StageInvitationController {
 
     private final StageInvitationService stageInvitationService;
@@ -30,7 +31,7 @@ public class StageInvitationController {
     @Operation(summary = "Send a new stage invitation")
     @PostMapping
     public StageInvitationDto sendInvitation(
-            @Validated(CreateGroup.class) @RequestBody StageInvitationDto invitationDto) {
+            @Valid @RequestBody StageInvitationDto invitationDto) {
         return stageInvitationService.sendInvitation(invitationDto);
     }
 
@@ -44,7 +45,7 @@ public class StageInvitationController {
     @PutMapping("/{id}/decline")
     public StageInvitationDto declineInvitation(
             @PathVariable @Positive Long id, @Valid @RequestBody DeclineInvitationDto declineInvitationDto) {
-        return stageInvitationService.declineInvitation(id, declineInvitationDto.getReason());
+        return stageInvitationService.declineInvitation(id, declineInvitationDto.reason());
     }
 
     @Operation(summary = "Get invitations with filters")

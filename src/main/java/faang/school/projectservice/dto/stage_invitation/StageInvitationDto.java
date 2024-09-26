@@ -1,18 +1,17 @@
 package faang.school.projectservice.dto.stage_invitation;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-
-import faang.school.projectservice.validation.CreateGroup;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
 public record StageInvitationDto(
         Long id,
-        @NotNull(message = "Stage ID cannot be null", groups = CreateGroup.class)
+        @NotNull(message = "Stage ID cannot be null")
         Long stageId,
-        @NotNull(message = "Author ID cannot be null", groups = CreateGroup.class)
+        @NotNull(message = "Author ID cannot be null")
         Long authorId,
-        @NotNull(message = "Invited ID cannot be null", groups = CreateGroup.class)
+        @NotNull(message = "Invited ID cannot be null")
         Long invitedId,
         StageInvitationStatus status,
         String reason,
