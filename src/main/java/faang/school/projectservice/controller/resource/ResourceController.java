@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,7 +64,7 @@ public class ResourceController {
         return ResponseEntity.ok("Successfully update resource");
     }
 
-    @Operation(description = "Delete  file by id")
+    @Operation(description = "Delete file by id")
     @DeleteMapping(path = "/{resourceId}")
     public ResponseEntity<String> deleteFile(
             @Parameter(description = "Auth header x-user-id, that will be TeamMemberId", required = true, name = "x-user-id")
@@ -72,11 +75,16 @@ public class ResourceController {
         return ResponseEntity.ok("Successfully delete resource");
     }
 
-    @Operation(description = "Download file")
+    @Operation(summary = "Get file by Id")
     @GetMapping("/{resourceId}")
-    public InputStream downloadFile(@PathVariable Long resourceId) {
+    public ResponseEntity<InputStreamResource> downloadFile(@PathVariable Long resourceId) {
         S3Object s3Object = resourceService.getResource(resourceId);
-
-        return s3Object.getObjectContent();
+        InputStream fileStream = s3Object.getObjectContent();
+        InputStreamResource resource = new InputStreamResource(fileStream);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resourceId + "\"")
+                .contentType(MediaType.valueOf(s3Object.getObjectMetadata().getContentType()))
+                .body(resource);
     }
+
 }

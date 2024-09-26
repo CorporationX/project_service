@@ -3,6 +3,7 @@ package faang.school.projectservice.service.resource;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
@@ -56,7 +57,7 @@ public class S3Service {
         s3Client.deleteObject(bucketName, key);
     }
 
-    public Resource getFile(String key) {
-        return null;
+    public S3Object getFile(String key) {
+        return s3Client.getObject(bucketName, key);
     }
 }

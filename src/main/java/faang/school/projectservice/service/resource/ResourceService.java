@@ -37,8 +37,8 @@ public class ResourceService {
     private final TeamMemberRepository teamMemberRepository;
 
     public S3Object getResource(Long resourceId) {
-        // TODO tests
-return null;
+        Resource resourceFromDb = resourceRepository.findById(resourceId).orElseThrow(EntityNotFoundException::new);
+        return s3Service.getFile(resourceFromDb.getKey());
     }
 
     @Transactional
@@ -108,8 +108,6 @@ return null;
 
     private void checkStorageSize(BigInteger storageSize, BigInteger maxStorageSize) {
         if (storageSize.compareTo(maxStorageSize) > 0) {
-            System.out.println(storageSize);
-            System.out.println(maxStorageSize);
             throw new StorageLimitException("Storage limit exceeded");
         }
     }
