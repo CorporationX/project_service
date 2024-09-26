@@ -35,6 +35,8 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationMapper stageInvitationMapper;
     private final StageRepository stageRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final List<StageInvitationFilter> filters;
+
 
     @Override
     @Transactional
@@ -126,27 +128,12 @@ public class StageInvitationServiceImpl implements StageInvitationService {
 
         List<StageInvitation> invitations = stageInvitationRepository.findAll();
 
-        List<StageInvitationFilter> filters = createFilters(filterDto);
         for (StageInvitationFilter filter : filters) {
-            invitations = filter.apply(invitations);
+            invitations = filter.apply(invitations, filterDto);
         }
 
         return invitations.stream()
                 .map(stageInvitationMapper::toStageInvitationDto)
                 .collect(Collectors.toList());
-    }
-
-    private List<StageInvitationFilter> createFilters(StageInvitationFilterDto filterDto) {
-        List<StageInvitationFilter> filters = new ArrayList<>();
-
-        if (filterDto.invitedId() != null) {
-            filters.add(new InvitedIdFilter(filterDto.invitedId()));
-        }
-
-        if (filterDto.status() != null) {
-            filters.add(new StatusFilter(filterDto.status()));
-        }
-
-        return filters;
     }
 }
