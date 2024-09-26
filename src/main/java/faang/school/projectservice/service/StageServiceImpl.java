@@ -3,7 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.dto.filter.StageFilterDto;
-import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.StageFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.jpa.StageJpaRepository;
@@ -11,8 +11,6 @@ import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.StageServiceValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.DataFormatException;
 
 @Service
 @RequiredArgsConstructor

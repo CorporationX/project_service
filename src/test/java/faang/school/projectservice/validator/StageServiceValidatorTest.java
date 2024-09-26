@@ -3,7 +3,6 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRolesDto;
 import faang.school.projectservice.dto.TeamMemberDto;
-import faang.school.projectservice.exceptions.stage.StageNotHaveProjectException;
 import faang.school.projectservice.model.TeamRole;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
