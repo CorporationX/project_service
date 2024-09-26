@@ -2,20 +2,13 @@ package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
-public class ProjectDto {
-    private Long id;
+@NoArgsConstructor
+public class ProjectFilterDto {
     private String name;
-    private String description;
-    private Long ownerId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private ProjectStatus status;
 }
