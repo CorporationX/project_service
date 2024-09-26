@@ -1,6 +1,7 @@
 package faang.school.projectservice.filter.internship;
 
-import faang.school.projectservice.dto.filter.InternshipFilterDto;
+import faang.school.projectservice.dto.filter.internship.InternshipFilterDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Internship;
 
 import java.util.stream.Stream;

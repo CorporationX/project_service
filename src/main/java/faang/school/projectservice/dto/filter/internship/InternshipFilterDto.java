@@ -1,5 +1,6 @@
-package faang.school.projectservice.dto.filter;
+package faang.school.projectservice.dto.filter.internship;
 
+import faang.school.projectservice.dto.filter.FilterDto;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamRole;
 import lombok.AllArgsConstructor;
