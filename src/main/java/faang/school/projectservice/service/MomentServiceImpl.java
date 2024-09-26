@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.MomentDto;
-import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -51,22 +50,16 @@ public class MomentServiceImpl implements MomentService {
     }
 
     @Override
-    public MomentDto createMoment(MomentDto momentDto) throws DataValidationException {
+    public MomentDto createMoment(MomentDto momentDto) {
         Moment moment = momentMapper.toEntity(momentDto);
         momentValidator.validateMoment(moment);
-        moment.getProjects().forEach(project -> {
-            try {
-                projectValidator.validateProject(project);
-            } catch (DataValidationException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        moment.getProjects().forEach(projectValidator::validateProject);
         momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
 
     @Override
-    public MomentDto updateMoment(long momentId, List<Long> addedProjectIds, List<Long> addedUserIds) throws DataValidationException {
+    public MomentDto updateMoment(long momentId, List<Long> addedProjectIds, List<Long> addedUserIds) {
         Moment moment = momentRepository.findById(momentId).orElseThrow();
 
         if (!addedProjectIds.isEmpty()) {
