@@ -25,6 +25,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNullValueException(NullValueException e) {
         log.error("Data validation exception occurred", e);
+        log.error("Data validation exception occurred: ", e);
         return new ErrorResponse("Data validation exception occurred", e.getMessage());
     }
 
@@ -65,8 +66,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ServletException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public ErrorResponse handleServletException(ServletException e) {
-        log.error("Servlet exception occurred", e);
+    public ErrorResponse handleAlreadyExistsException(ServletException e) {
+        log.error("Servlet exception occurred: ", e);
         return new ErrorResponse("Servlet exception occurred", e.getMessage());
     }
 
