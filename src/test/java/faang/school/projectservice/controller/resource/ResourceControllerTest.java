@@ -149,7 +149,6 @@ class ResourceControllerTest {
 
         when(resourceService.getResource(resourceId)).thenReturn(s3Object);
 
-
         mockMvc.perform(MockMvcRequestBuilders.get("/resource/{resourceId}", resourceId))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\""))
