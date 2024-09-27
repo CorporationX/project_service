@@ -40,11 +40,17 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
-    isMocked: false
+    bucketName: corpbucket
+
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+cover-image:
+  maxWidth: 1080
+  maxHeightHorizontal: 566
+  maxHeightSquare: 1080
+  maxFileSize: 5242880
