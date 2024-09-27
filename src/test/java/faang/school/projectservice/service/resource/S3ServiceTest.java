@@ -51,11 +51,12 @@ class S3ServiceTest {
 
     @Test
     void testUploadFile() {
-        byte[] arr = new byte[1024];
-        MultipartFile file = new MockMultipartFile("fileName", "filename", "IMAGE", arr);
+        String content = "some content";
+        MultipartFile file = new MockMultipartFile("fileName", "filename",
+                "IMAGE", content.getBytes());
         Resource resource = new Resource();
         resource.setName(file.getOriginalFilename());
-        resource.setSize(BigInteger.valueOf(arr.length));
+        resource.setSize(BigInteger.valueOf(content.length()));
         resource.setStatus(ResourceStatus.ACTIVE);
         resource.setCreatedAt(LocalDateTime.now());
         resource.setUpdatedAt(LocalDateTime.now());

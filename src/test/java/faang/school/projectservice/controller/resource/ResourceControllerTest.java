@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.resource;
 
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,6 +26,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -135,18 +139,20 @@ class ResourceControllerTest {
         // TODO make this test
         Long resourceId = 15L;
         String content = "some words";
+        String fileName = "testFile.mp3";
         S3Object s3Object = new S3Object();
-        s3Object.setBucketName("someBucket");
-        s3Object.setKey("someKey");
+        s3Object.setBucketName(fileName);
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentType("audio/mpeg");
+        s3Object.setObjectMetadata(objectMetadata);
         s3Object.setObjectContent(new ByteArrayInputStream(content.getBytes()));
 
         when(resourceService.getResource(resourceId)).thenReturn(s3Object);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/resource/{resourceId}", resourceId)
-                        .header("x-user-id", 5L))
-                .andExpect(status().isOk());
-
+        mockMvc.perform(MockMvcRequestBuilders.get("/resource/{resourceId}", resourceId))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\""))
+                .andExpect(content().contentType(new MediaType("audio", "mpeg")))
+                .andExpect(content().string(content));
     }
-
-
 }
