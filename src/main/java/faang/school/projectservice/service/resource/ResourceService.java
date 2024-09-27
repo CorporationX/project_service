@@ -42,8 +42,7 @@ public class ResourceService {
     }
 
     @Transactional
-    public void updateResource(Long resourceId, MultipartFile file) {
-        // TODO tests
+    public ResourceDto updateResource(Long resourceId, MultipartFile file) {
         Resource resourceFromDb = resourceRepository.findById(resourceId).orElseThrow(EntityNotFoundException::new);
         TeamMember teamMember = teamMemberRepository.findById(userContext.getUserId());
         Project project = projectRepository.findById(resourceFromDb.getProject().getId());
@@ -55,18 +54,14 @@ public class ResourceService {
         project.setStorageSize(newStorageSize);
         s3Service.deleteFile(resourceFromDb.getKey());
         resourceFromDb.setKey(newResourceFromS3.getKey());
-        try {
-            resourceFromDb.setSize(newResourceFromS3.getSize());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        resourceFromDb.setSize(newResourceFromS3.getSize());
         resourceFromDb.setUpdatedBy(teamMember);
+        return resourceMapper.mapToResourceDto(resourceFromDb);
     }
 
 
     @Transactional
     public void deleteResource(Long resourceId) {
-        // TODO tests
         Resource resource = resourceRepository.findById(resourceId).orElseThrow(EntityNotFoundException::new);
         TeamMember teamMember = teamMemberRepository.findById(userContext.getUserId());
         checkOwnerOrManager(resource, teamMember);

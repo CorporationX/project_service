@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -93,15 +94,16 @@ class ResourceServiceTest {
         resource.setSize(BigInteger.valueOf(1));
         resource.setKey(key);
 
-        when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
+        lenient().when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
         lenient().when(file.getSize()).thenReturn(200L);
         lenient().when(projectRepository.findById(1L)).thenReturn(project);
-        when(userContext.getUserId()).thenReturn(1L);
+        lenient().when(userContext.getUserId()).thenReturn(1L);
+        lenient().when(s3Service.uploadFile(file, project.getName())).thenReturn(resource);
+
     }
 
     @Test
     void testAddResourceSuccess() {
-        when(s3Service.uploadFile(file, project.getName())).thenReturn(resource);
         when(resourceRepository.save(resource)).thenReturn(resource);
 
         ResourceDto resourceDto = resourceService.addResource(1L, file);
@@ -141,14 +143,31 @@ class ResourceServiceTest {
 //    void testGetResource() {
 //    }
 
-//    @Test
-//    void testUpdateResource() {
-////        when(resourceRepository.findById(anyLong())).thenReturn(Optional.of(resource));
-//        when(teamMemberRepository.findById(anyLong())).thenReturn(teamMember);
-//        when(projectRepository.findById(anyLong())).thenReturn(project);
-//        when(s3Service.uploadFile(multipartFile, anyString())).thenReturn(new Resource());
+    @Test
+    void testUpdateResourceSuccess() {
+        String newKey = "someNewKey";
+        Resource newResource = new Resource();
+        newResource.setKey(newKey);
+        newResource.setSize(BigInteger.valueOf(file.getSize()));
+        when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
+        when(s3Service.uploadFile(file, project.getName())).thenReturn(newResource);
+        doNothing().when(s3Service).deleteFile(resource.getKey());
 
-//    }
+        ResourceDto result = resourceService.updateResource(1L, file);
+
+        verify(s3Service, times(1)).deleteFile(key);
+        verify(resourceRepository, times(1)).findById(1L);
+        verify(teamMemberRepository, times(1)).findById(1L);
+        verify(projectRepository, times(1)).findById(1L);
+        verify(s3Service, times(1)).uploadFile(file, resource.getName());
+        assertAll(
+                () -> assertEquals(file.getName(), result.getName()),
+                () -> assertEquals(file.getSize(), result.getSize().longValue()),
+                () -> assertEquals(newKey, result.getKey()),
+                () -> assertEquals(resource.getId(), result.getId()),
+                () -> assertEquals(resource.getProject().getId(), result.getProjectId())
+        );
+    }
 
     @Test
     void testDeleteResourceSuccessByOwner() {

@@ -51,7 +51,7 @@ public class ResourceController {
 
     @Operation(description = "Update file by id")
     @PutMapping(path = "/{resourceId}", consumes = {"multipart/form-data"})
-    public ResponseEntity<String> updateFile(
+    public ResponseEntity<ResourceDto> updateFile(
             @Parameter(description = "Auth header x-user-id, that will be TeamMemberId", required = true, name = "x-user-id")
             @RequestHeader(value = "x-user-id") Long userId,
             @PathVariable Long resourceId,
@@ -60,8 +60,8 @@ public class ResourceController {
                     schema = @Schema(type = "string", format = "binary")
             ))
             @RequestPart("file") MultipartFile file) {
-        resourceService.updateResource(resourceId, file);
-        return ResponseEntity.ok("Successfully update resource");
+        ResourceDto result = resourceService.updateResource(resourceId, file);
+        return ResponseEntity.ok(result);
     }
 
     @Operation(description = "Delete file by id")
