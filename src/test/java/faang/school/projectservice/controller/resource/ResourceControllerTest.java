@@ -1,32 +1,33 @@
 package faang.school.projectservice.controller.resource;
 
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.io.ByteArrayInputStream;
+
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-@WebMvcTest(controllers = ResourceController.class)
 @RequiredArgsConstructor
 class ResourceControllerTest {
     @Mock
@@ -35,45 +36,116 @@ class ResourceControllerTest {
     @InjectMocks
     private ResourceController resourceController;
 
-    @Autowired
-    private  MockMvc mockMvc;
+    private MockMvc mockMvc;
+    private ResourceDto resultDto;
+    private MockMultipartFile file;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(resourceController).build();
+        file = new MockMultipartFile(
+                "file",
+                "testFile.txt",
+                "text/plain",
+                "something".getBytes()
+        );
+
+        resultDto = new ResourceDto();
+        resultDto.setId(11L);
+        resultDto.setName(file.getOriginalFilename());
+        resultDto.setName(file.getOriginalFilename());
+    }
 
     @Test
     void testUploadFile() throws Exception {
-        MockMultipartFile file = new MockMultipartFile(
-                "file",                     // Имя параметра
-                "testfile.txt",              // Имя файла
-                "text/plain",                // Тип файла
-                "Hello, World!".getBytes()   // Контент файла
-        );
+        Long projectId = 25L;
+        when(resourceService.addResource(projectId, file))
+                .thenReturn(resultDto);
 
-        // Мокаем результат работы сервиса
-        ResourceDto mockResourceDto = new ResourceDto();
-        when(resourceService.addResource(anyLong(), any(MultipartFile.class)))
-                .thenReturn(mockResourceDto);
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/resource/{projectId}", projectId)
+                        .file(file)
+                        .header("x-user-id", 5L)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(resultDto.getId()))
+                .andExpect(jsonPath("$.name").value(resultDto.getName()));
 
-        // Выполняем multipart-запрос
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/{projectId}", 1L)
-                        .file(file) // Добавляем файл в запрос
-                        .header("x-user-id", 123L) // Добавляем заголовок
-                        .contentType(MediaType.MULTIPART_FORM_DATA)) // Указываем тип контента
-                .andExpect(status().isOk()) // Ожидаем статус 200 OK
-                .andExpect(jsonPath("$.id").exists()); // Проверяем, что в ответе есть поле id
-
-        // Проверяем, что метод сервиса был вызван один раз с нужными параметрами
-        verify(resourceService, times(1)).addResource(eq(1L), any(MultipartFile.class));
+        verify(resourceService, times(1)).addResource(projectId, file);
     }
 
     @Test
-    void testUpdateFile() {
+    void testUploadFileNotFound() throws Exception {
+        Long projectId = 25L;
+        MockMultipartFile file = new MockMultipartFile("testName", new byte[34]);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/resurce/{projectId}", projectId)
+                        .file(file)
+                        .header("x-user-id", 5L)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void testDeleteFile() {
+    void testUploadFile404() throws Exception {
+        Long projectId = 25L;
+        MockMultipartFile file = new MockMultipartFile("testName", new byte[34]);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/resource/{projectId}", projectId)
+                        .file(file)
+                        .header("x-user-id", 5L)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testDownloadFile() {
+    void testUpdateFile() throws Exception {
+        Long resourceId = 25L;
+        when(resourceService.updateResource(resourceId, file))
+                .thenReturn(resultDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/resource/{resourceId}", resourceId)
+                        .file(file)
+                        .header("x-user-id", 5L)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(resultDto.getId()))
+                .andExpect(jsonPath("$.name").value(resultDto.getName()));
+
+        verify(resourceService, times(1)).updateResource(resourceId, file);
+    }
+
+    @Test
+    void testDeleteFile() throws Exception {
+        Long resourceId = 15L;
+        doNothing().when(resourceService).deleteResource(resourceId);
+
+        mockMvc.perform(delete("/resource/{resourceId}", resourceId)
+                        .header("x-user-id", 5L))
+                .andExpect(status().isOk());
+
+        verify(resourceService, times(1)).deleteResource(eq(resourceId));
+    }
+
+    @Test
+    void testDownloadFile() throws Exception {
+        // TODO make this test
+        Long resourceId = 15L;
+        String content = "some words";
+        S3Object s3Object = new S3Object();
+        s3Object.setBucketName("someBucket");
+        s3Object.setKey("someKey");
+        s3Object.setObjectContent(new ByteArrayInputStream(content.getBytes()));
+
+        when(resourceService.getResource(resourceId)).thenReturn(s3Object);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/resource/{resourceId}", resourceId)
+                        .header("x-user-id", 5L))
+                .andExpect(status().isOk());
+
     }
 
 

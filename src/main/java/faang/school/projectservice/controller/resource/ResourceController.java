@@ -45,6 +45,8 @@ public class ResourceController {
                     schema = @Schema(type = "string", format = "binary")
             ))
             @RequestPart("file") MultipartFile file) {
+        System.out.println("Before execute");
+
         ResourceDto dto = resourceService.addResource(projectId, file);
         return ResponseEntity.ok(dto);
     }
