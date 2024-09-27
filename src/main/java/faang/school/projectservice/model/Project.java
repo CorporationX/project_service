@@ -40,6 +40,9 @@ public class Project {
     @Column(name = "owner_id")
     private Long ownerId;
 
+    @Column(name = "jira_key", length = 100)
+    private String jiraKey;
+
     @ManyToOne(cascade={CascadeType.ALL})
     @JoinColumn(name="parent_project_id")
     private Project parentProject;

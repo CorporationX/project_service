@@ -2,6 +2,7 @@ package faang.school.projectservice.jpa;
 
 import faang.school.projectservice.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -13,5 +14,12 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
                     "WHERE p.ownerId = :ownerId AND p.name = :name"
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
+
+    @Modifying
+    @Query("""
+        UPDATE Project p SET p.jiraKey = ":jiraKey"
+        WHERE p.id = :id
+        """)
+    Project updateJiraKeyByProjectId(Long id, String jiraKey);
 }
 
