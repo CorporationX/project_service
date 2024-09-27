@@ -55,7 +55,11 @@ public class ResourceService {
         project.setStorageSize(newStorageSize);
         s3Service.deleteFile(resourceFromDb.getKey());
         resourceFromDb.setKey(newResourceFromS3.getKey());
-        resourceFromDb.setSize(newResourceFromS3.getSize());
+        try {
+            resourceFromDb.setSize(newResourceFromS3.getSize());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         resourceFromDb.setUpdatedBy(teamMember);
     }
 
@@ -81,7 +85,6 @@ public class ResourceService {
 
     @Transactional
     public ResourceDto addResource(Long projectId, MultipartFile file) {
-        // TODO tests
         validatorService.isProjectExists(projectId);
         TeamMember teamMember = teamMemberRepository.findById(userContext.getUserId());
         Project project = projectRepository.findById(projectId);
@@ -94,7 +97,6 @@ public class ResourceService {
         resource.setUpdatedBy(teamMember);
         List<TeamRole> teamMemberRoles = new ArrayList<>(teamMember.getRoles());
         resource.setAllowedRoles(teamMemberRoles);
-        System.out.println("resource: " + resource.getAllowedRoles());
         resource = resourceRepository.save(resource);
         project.setStorageSize(newStorageSize);
         return resourceMapper.mapToResourceDto(resource);
