@@ -3,7 +3,6 @@ package faang.school.projectservice.repository;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.model.stage.Stage;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

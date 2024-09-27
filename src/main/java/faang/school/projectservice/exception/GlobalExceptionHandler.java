@@ -66,4 +66,18 @@ public class GlobalExceptionHandler {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvitationAlreadyExistsException.class)
+    public ErrorResponse handleInvitationAlreadyExistsException(InvitationAlreadyExistsException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvalidInvitationStatusException.class)
+    public ErrorResponse handleInvalidInvitationStatusException(InvalidInvitationStatusException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ErrorResponse(ex.getMessage());
+    }
 }
