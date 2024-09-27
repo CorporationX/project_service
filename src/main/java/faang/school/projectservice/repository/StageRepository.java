@@ -3,12 +3,10 @@ package faang.school.projectservice.repository;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.model.stage.Stage;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import static faang.school.projectservice.exception.ExceptionMessages.STAGE_NOT_FOUND;
 
@@ -33,9 +31,5 @@ public class StageRepository {
 
     public List<Stage> findAll() {
         return jpaRepository.findAll();
-    }
-
-    public Optional<Stage> findById(Long aLong) {
-        return jpaRepository.findById(aLong);
     }
 }

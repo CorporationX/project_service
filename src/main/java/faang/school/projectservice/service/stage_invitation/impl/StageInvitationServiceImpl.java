@@ -43,9 +43,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     public StageInvitationDto sendInvitation(StageInvitationDto invitationDto) {
         log.info("Sending invitation: {}", invitationDto);
 
-        Stage stage = stageRepository.findById(invitationDto.stageId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Stage not found with id: " + invitationDto.stageId()));
+        Stage stage = stageRepository.getById(invitationDto.stageId());
 
         TeamMember author = teamMemberRepository.findById(invitationDto.authorId());
 
