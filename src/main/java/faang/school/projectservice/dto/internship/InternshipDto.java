@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.validator.groups.CreateGroup;
 import faang.school.projectservice.validator.groups.UpdateGroup;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -19,9 +16,11 @@ public record InternshipDto(
         Long id,
 
         @NotNull(message = "Project ID can not be null", groups = {CreateGroup.class})
+        @Positive(groups = {CreateGroup.class, UpdateGroup.class})
         Long projectId,
 
         @NotNull(message = "Mentor ID can not be null", groups = {CreateGroup.class})
+        @Positive(groups = {CreateGroup.class, UpdateGroup.class})
         Long mentorId,
 
         @NotEmpty(message = "Interns list mustn't be empty", groups = {CreateGroup.class, UpdateGroup.class})

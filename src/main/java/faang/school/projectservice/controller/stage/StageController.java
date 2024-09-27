@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.service.stage.StageService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
