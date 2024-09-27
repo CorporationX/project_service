@@ -20,7 +20,7 @@ public class ProjectServiceImplTest {
     private ProjectServiceImpl projectService;
 
     @Test
-    void testGetProjectOk(){
+    void testGetProjectOk() {
         projectService.getProject(1L);
 
         verify(validator).validateProject(anyLong());
