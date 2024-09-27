@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.jira;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.jira.Assignee;
 import faang.school.projectservice.dto.jira.IssueDto;
 import faang.school.projectservice.dto.jira.IssueFilterDto;
@@ -114,7 +114,10 @@ class JiraServiceImplTest {
                 .build();
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         project.setJiraKey(jiraKey);
-        ProjectDto correctDto = new ProjectDto(projectId, jiraKey);
+        ProjectDto correctDto = ProjectDto.builder()
+                .id(projectId)
+                .jiraKey(jiraKey)
+                .build();
         when(projectRepository.save(project)).thenReturn(project);
 
         ProjectDto result = jiraService.registrationProjectInJira(projectId, jiraKey);

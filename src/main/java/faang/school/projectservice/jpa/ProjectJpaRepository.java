@@ -21,5 +21,7 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
         WHERE p.id = :id
         """)
     Project updateJiraKeyByProjectId(Long id, String jiraKey);
+
+    Project getById(long id);
 }
 

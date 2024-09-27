@@ -1,15 +1,13 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.client;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectDto {
+@Data
+public class MomentDto {
     private Long id;
-    private String jiraKey;
+    private String name;
 }
