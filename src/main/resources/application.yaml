@@ -41,10 +41,10 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://localhost:9000
+    endpoint: http://127.0.0.1:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     isMocked: false
 
   payment-service:
@@ -54,3 +54,7 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+image:
+  maxWidth: 150
+  maxLength: 150

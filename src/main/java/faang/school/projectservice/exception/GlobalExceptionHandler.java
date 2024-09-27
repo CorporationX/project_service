@@ -40,13 +40,19 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage());
     }
 
+    @ExceptionHandler(FileException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleFileException(FileException exception) {
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> methodArgumentNotValidException(MethodArgumentNotValidException exception) {
         log.error("MethodArgumentNotValidException occurred: {}", exception.getMessage());
         return exception.getBindingResult().getAllErrors().stream()
                 .collect(Collectors.toMap(
-                       error -> ((FieldError)error).getField(),
+                        error -> ((FieldError) error).getField(),
                         error -> Objects.requireNonNullElse(error.getDefaultMessage(), "")
                 ));
     }
