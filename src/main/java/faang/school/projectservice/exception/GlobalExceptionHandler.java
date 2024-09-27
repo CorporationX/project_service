@@ -25,7 +25,6 @@ public class GlobalExceptionHandler {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNullValueException(NullValueException e) {
         log.error("Data validation exception occurred", e);
-        log.error("Data validation exception occurred: ", e);
         return new ErrorResponse("Data validation exception occurred", e.getMessage());
     }
 
