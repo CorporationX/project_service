@@ -1,2 +1,8 @@
 calculations_messages_processing:
   enabled: false
+
+services:
+  user-service:
+    name: User Service
+    host: http://localhost
+    port: 8080
