@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.filter.stageinvitation.StageInvitationFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.springframework.stereotype.Component;
@@ -17,8 +17,8 @@ class StageInvitationNameFilter implements Filter<StageInvitationFilterDto, Stag
     }
 
     @Override
-    public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitationStream,
-                                         StageInvitationFilterDto stageInvitationFilterDto) {
+    public Stream<StageInvitation> applyFilter(Stream<StageInvitation> stageInvitationStream,
+                                               StageInvitationFilterDto stageInvitationFilterDto) {
         return stageInvitationStream.filter(stageInvitation -> stageInvitation.getStage().getStageName() != null &&
                 stageInvitation.getStage().getStageName()
                         .contains(stageInvitationFilterDto.getStageName()));

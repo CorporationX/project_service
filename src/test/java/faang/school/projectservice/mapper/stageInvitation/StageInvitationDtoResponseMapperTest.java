@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoRequest;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoRequest;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;

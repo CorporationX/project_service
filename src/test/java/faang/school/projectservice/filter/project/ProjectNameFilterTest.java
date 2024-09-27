@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.project;
 
-import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +48,7 @@ class ProjectNameFilterTest {
             projectFilterDto.setName(FIRST_NAME);
 
             Stream<Project> projectStream = Stream.of(first, second);
-            List<Project> projects = projectNameFilter.apply(projectStream, projectFilterDto).toList();
+            List<Project> projects = projectNameFilter.applyFilter(projectStream, projectFilterDto).toList();
 
             assertEquals(1, projects.size());
             assertEquals(first, projects.get(0));
@@ -60,7 +60,7 @@ class ProjectNameFilterTest {
             projectFilterDto.setName(THIRD_NAME);
 
             Stream<Project> projectStream = Stream.of(first, second);
-            List<Project> projects = projectNameFilter.apply(projectStream, projectFilterDto).toList();
+            List<Project> projects = projectNameFilter.applyFilter(projectStream, projectFilterDto).toList();
 
             assertEquals(0, projects.size());
         }

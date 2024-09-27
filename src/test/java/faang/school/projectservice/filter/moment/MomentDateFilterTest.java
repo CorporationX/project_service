@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.moment;
 
-import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.dto.filter.moment.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -88,7 +88,7 @@ class MomentDateFilterTest {
             momentFilterDto.setEndDate(END_DATE);
 
             List<Moment> filteredMoments = momentDateFilter
-                    .apply(momentList.stream(), momentFilterDto)
+                    .applyFilter(momentList.stream(), momentFilterDto)
                     .toList();
 
             assertEquals(2, filteredMoments.size(), "The filtered moments should contain 2 elements");
@@ -102,7 +102,7 @@ class MomentDateFilterTest {
             momentFilterDto.setStartDate(LocalDateTime.of(2024, 9, 3, 0, 0));
 
             List<Moment> filteredMoments = momentDateFilter
-                    .apply(momentList.stream(), momentFilterDto)
+                    .applyFilter(momentList.stream(), momentFilterDto)
                     .toList();
 
             assertEquals(2, filteredMoments.size(), "The filtered moments should contain 2 elements");
@@ -116,7 +116,7 @@ class MomentDateFilterTest {
             momentFilterDto.setEndDate(LocalDateTime.of(2024, 9, 7, 0, 0));
 
             List<Moment> filteredMoments = momentDateFilter
-                    .apply(momentList.stream(), momentFilterDto)
+                    .applyFilter(momentList.stream(), momentFilterDto)
                     .toList();
 
             assertEquals(2, filteredMoments.size(), "The filtered moments should contain 2 elements");

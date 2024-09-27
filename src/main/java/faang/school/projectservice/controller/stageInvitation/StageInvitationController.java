@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoResponse;
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoRequest;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoResponse;
+import faang.school.projectservice.dto.filter.stageinvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoRequest;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.stageInvitation.StageInvitationService;
 import jakarta.validation.Valid;
