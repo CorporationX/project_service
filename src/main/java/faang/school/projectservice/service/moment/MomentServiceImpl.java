@@ -65,7 +65,7 @@ public class MomentServiceImpl implements MomentService {
     }
 
     private Moment getMoment(MomentDto momentDto) {
-        return momentValidator.validateExistingMoment(momentDto.getId());
+        return momentValidator.validateExistingMoment(momentDto.Id());
     }
 
     private List<Project> getProjects(MomentDto momentDto) {

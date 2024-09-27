@@ -25,9 +25,9 @@ class MomentControllerTest {
 
     @BeforeEach
     void setUp() {
-        momentDto = new MomentDto();
+        momentDto = MomentDto.builder().build();
         id = 1;
-        filterDto = new MomentFilterDto();
+        filterDto = MomentFilterDto.builder().build();
     }
 
     @Test

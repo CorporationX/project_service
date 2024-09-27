@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.vacancy;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/vacancies")
+@Validated
 public class VacancyController {
 
     private final VacancyService vacancyService;
@@ -39,7 +41,7 @@ public class VacancyController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") Long id) {
+    public void delete(@PathVariable("id") @Positive Long id) {
         vacancyService.delete(id);
     }
 
@@ -51,7 +53,7 @@ public class VacancyController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public VacancyDto findById(@PathVariable("id") Long id) {
+    public VacancyDto findById(@PathVariable("id") @Positive Long id) {
         return vacancyService.findById(id);
     }
 }

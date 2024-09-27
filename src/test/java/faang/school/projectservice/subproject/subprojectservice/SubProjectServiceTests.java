@@ -1,7 +1,7 @@
 package faang.school.projectservice.subproject.subprojectservice;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.subproject.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.exception.subproject.SubProjectNotFinishedException;
 import faang.school.projectservice.filter.subproject.ProjectNameFilter;
@@ -61,8 +61,8 @@ class SubProjectServiceTests {
         Project rootParent = Project.builder().id(3L).build();
         when(repository.getProjectById(1L)).thenReturn(rootParent);
         mapper.toDto(rootParent);
-        var subrpojectDto = SubProjectDto.builder().parentProjectId(1).description("adf").name("adf").ownerId(1).visibility(ProjectVisibility.PUBLIC).build();
-        service.createSubProject(subrpojectDto);
+        var subProjectDto = SubProjectDto.builder().parentProjectId(1L).description("adf").name("adf").ownerId(1L).visibility(ProjectVisibility.PUBLIC).build();
+        service.createSubProject(subProjectDto);
 
         verify(repository).save(rootParent);
 
@@ -89,7 +89,7 @@ class SubProjectServiceTests {
                 .status(ProjectStatus.COMPLETED)
                 .children(List.of(childProject1, childProject2))
                 .build();
-        SubProjectDto subProjectDto = new SubProjectDto();
+        SubProjectDto subProjectDto = SubProjectDto.builder().build();
 
         when(repository.getProjectById(1L)).thenReturn(subProject);
 
@@ -124,7 +124,7 @@ class SubProjectServiceTests {
                 .children(List.of(childProject1, childProject2))
                 .build();
 
-        SubProjectDto subProjectDto = new SubProjectDto();
+        SubProjectDto subProjectDto = SubProjectDto.builder().build();
 
         when(repository.getProjectById(1L)).thenReturn(subProject);
         when(repository.save(any(Project.class))).thenReturn(subProject);
@@ -263,7 +263,7 @@ class SubProjectServiceTests {
                 .build();
 
         when(repository.getProjectById(parentProject.getId())).thenReturn(parentProject);
-        List<ProjectDto> selectedSubProjects = service.getAllSubProjectsWithFiltr(parentProject.getId(), projectFilterDto);
+        List<ProjectDto> selectedSubProjects = service.getAllSubProjectsWithFilter(parentProject.getId(), projectFilterDto);
         assertEquals(1, selectedSubProjects.size());
     }
 

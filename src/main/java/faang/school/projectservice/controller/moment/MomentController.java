@@ -21,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/moments")
 @RequiredArgsConstructor
+@Validated
 public class MomentController {
     private final MomentServiceImpl momentService;
 

@@ -8,14 +8,14 @@ import java.util.stream.Stream;
 public class MomentProjectFilter implements MomentFilter {
     @Override
     public boolean isApplicable(MomentFilterDto filters) {
-        return filters.getProjectId() != null;
+        return filters.projectId() != null;
     }
 
     @Override
     public Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto filters) {
         return moments.filter(moment -> moment.getProjects()
                 .stream()
-                .anyMatch(project -> filters.getProjectId()
+                .anyMatch(project -> filters.projectId()
                         .contains(project.getId())));
     }
 }

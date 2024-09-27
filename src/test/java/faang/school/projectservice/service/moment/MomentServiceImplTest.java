@@ -60,10 +60,13 @@ class MomentServiceImplTest {
     void setUp() {
         moment = new Moment();
         moment.setId(1L);
-        momentDto = new MomentDto();
-        momentDto.setName("boba");
-        momentDto.setId(1L);
-        filterDto = new MomentFilterDto();
+
+        momentDto = MomentDto.builder()
+                .name("boba")
+                .Id(1L)
+                .build();
+
+        filterDto = MomentFilterDto.builder().build();
         teamMember = TeamMember.builder().id(1L).userId(1L).build();
         team = Team.builder().teamMembers(List.of(teamMember)).build();
         project = Project.builder()
@@ -90,7 +93,7 @@ class MomentServiceImplTest {
 
         var result = momentService.createMoment(momentDto);
 
-        assertEquals(momentDto.getName(), result.getName());
+        assertEquals(momentDto.name(), result.name());
         Mockito.verify(momentRepository).save(any(Moment.class));
     }
 
@@ -103,29 +106,34 @@ class MomentServiceImplTest {
         List<Project> projects = Collections.singletonList(project);
 
         when(momentValidator.validateProjectsByIdAndStatus(momentDto)).thenReturn(projects);
-        when(momentValidator.validateExistingMoment(momentDto.getId())).thenReturn(moment);
+        when(momentValidator.validateExistingMoment(momentDto.Id())).thenReturn(moment);
 
         var result = momentService.updateMomentByProjects(momentDto);
 
-        assertEquals(momentDto.getId(), result.getId());
+        assertEquals(momentDto.Id(), result.Id());
         Mockito.verify(momentRepository).save(any(Moment.class));
     }
 
     @Test
     @DisplayName("Проверка обновления момента по user ID и добавление полей к моменту")
     void updateMomentByUser() {
-        momentDto.setProjectIds(List.of(1L));
+        momentDto = MomentDto.builder()
+                .name("boba")
+                .Id(1L)
+                .projectIds(List.of(1L))
+                .build();
+
         when(momentMapper.toMomentDto(moment)).thenReturn(momentDto);
         when(momentRepository.save(any(Moment.class))).thenReturn(moment);
 
         List<Project> projects = Collections.singletonList(project);
 
         when(momentValidator.validateProjectsByUserIdAndStatus(id)).thenReturn(projects);
-        when(momentValidator.validateExistingMoment(momentDto.getId())).thenReturn(moment);
+        when(momentValidator.validateExistingMoment(momentDto.Id())).thenReturn(moment);
 
         var result = momentService.updateMomentByUser(id, momentDto);
 
-        assertEquals(momentDto.getProjectIds().size(), result.getProjectIds().size());
+        assertEquals(momentDto.projectIds().size(), result.projectIds().size());
         Mockito.verify(momentRepository).save(any(Moment.class));
 
     }
@@ -180,7 +188,7 @@ class MomentServiceImplTest {
     @Test
     @DisplayName("Проверка на получения всех существующих моментов")
     void givenValidWhenGetAllMomentsThenReturnListMomentDto() {
-        MomentDto momentDto = new MomentDto();
+        MomentDto momentDto = MomentDto.builder().build();
 
         when(momentRepository.findAll()).thenReturn(Collections.singletonList(moment));
         when(momentMapper.toMomentDto(Collections.singletonList(moment)))
@@ -213,6 +221,6 @@ class MomentServiceImplTest {
 
         var result = momentService.getMomentById(id);
 
-        assertEquals(momentDto.getId(), result.getId());
+        assertEquals(momentDto.Id(), result.Id());
     }
 }

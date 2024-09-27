@@ -1,8 +1,9 @@
 package faang.school.projectservice.subproject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import faang.school.projectservice.controller.subproject.SubProjectController;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.subproject.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -18,10 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,25 +31,30 @@ public class SubProjectControllerTest {
     private SubProjectService subProjectService;
     @InjectMocks
     private SubProjectController subProjectController;
+
     private MockMvc mockMvc;
 
+    private ObjectMapper objectMapper;
+
     private long projectId;
-    private ProjectDto projectDto;
     private ProjectFilterDto projectFilterDto;
     private SubProjectDto createSubProjectDto;
-    private String projectDtoJson;
-    private String projectFilterDtoJson;
-    private String createSubProjectDtoJson;
 
     @BeforeEach
     public void setUp() throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
         long ownerId = 1L;
         projectId = 2L;
-        String description = "descrioption";
+        String description = "description";
         String name = "name";
 
-        projectFilterDto = new ProjectFilterDto("SD",ProjectStatus.COMPLETED);
+        projectFilterDto = ProjectFilterDto.builder()
+                .name("SD")
+                .projectStatus(ProjectStatus.COMPLETED)
+                .build();
+
 
         createSubProjectDto = SubProjectDto.builder()
                 .name("subProjectName")
@@ -60,26 +64,17 @@ public class SubProjectControllerTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
 
-        projectDto = ProjectDto.builder()
-                .ownerId(ownerId)
-                .name(name)
-                .description(description)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-
-        projectDtoJson = objectMapper.writeValueAsString(projectDto);
-        projectFilterDtoJson = objectMapper.writeValueAsString(projectFilterDto);
-        createSubProjectDtoJson = objectMapper.writeValueAsString(createSubProjectDto);
         mockMvc = MockMvcBuilders.standaloneSetup(subProjectController).build();
     }
 
     @Test
     @DisplayName("testing createSubProject")
     public void testCreateSubProject() throws Exception {
+        var body = objectMapper.writeValueAsString(createSubProjectDto);
+
         mockMvc.perform(post("/api/v1/subproject")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(createSubProjectDtoJson))
+                        .content(body))
                 .andExpect(status().isCreated());
         verify(subProjectService, times(1)).createSubProject(createSubProjectDto);
     }
@@ -87,9 +82,11 @@ public class SubProjectControllerTest {
     @Test
     @DisplayName("testing updateSubProjectStatus")
     public void testUpdateSubProject() throws Exception {
+        var body = objectMapper.writeValueAsString(createSubProjectDto);
+
         mockMvc.perform(put("/api/v1/subproject/{projectId}", projectId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(createSubProjectDtoJson))
+                        .content(body))
                 .andExpect(status().isOk());
         verify(subProjectService, times(1)).updateSubProject(projectId, createSubProjectDto);
     }
@@ -97,11 +94,13 @@ public class SubProjectControllerTest {
     @Test
     @DisplayName("testing getSubProjects")
     public void testGetSubProjects() throws Exception {
+        var body = objectMapper.writeValueAsString(projectFilterDto);
+
         mockMvc.perform(post("/api/v1/subproject/{projectId}", projectId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(projectFilterDtoJson))
+                        .content(body))
                 .andExpect(status().isOk());
-        verify(subProjectService, times(1)).getAllSubProjectsWithFiltr(projectId, projectFilterDto);
+        verify(subProjectService, times(1)).getAllSubProjectsWithFilter(projectId, projectFilterDto);
     }
 
 }

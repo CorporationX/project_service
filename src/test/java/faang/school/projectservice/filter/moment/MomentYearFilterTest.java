@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -22,14 +23,16 @@ class MomentYearFilterTest {
     @BeforeEach
     void setUp() {
         momentYearFilter = new MomentYearFilter();
-        filterDto = new MomentFilterDto();
+        filterDto = MomentFilterDto.builder().build();
         moment = new Moment();
         moment.setDate(LocalDateTime.of(2024, 9, 21, 10, 10));
     }
 
     @Test
     void givenValidWhenIsApplicableThenTrue() {
-        filterDto.setYear(2024);
+        filterDto = MomentFilterDto.builder()
+                .year(2024)
+                .build();
 
         var result = momentYearFilter.isApplicable(filterDto);
 
@@ -46,7 +49,9 @@ class MomentYearFilterTest {
 
     @Test
     void givenValidWhenApplyThenReturnMoment() {
-        filterDto.setYear(2024);
+        filterDto = MomentFilterDto.builder()
+                .year(2024)
+                .build();
 
         var result = momentYearFilter.apply(Stream.of(moment), filterDto);
 
@@ -55,7 +60,9 @@ class MomentYearFilterTest {
 
     @Test
     void givenNotValidWhenApplyThenReturnEmpty() {
-        filterDto.setYear(2023);
+        filterDto = MomentFilterDto.builder()
+                .year(2023)
+                .build();
 
         var result = momentYearFilter.apply(Stream.of(moment), filterDto);
 

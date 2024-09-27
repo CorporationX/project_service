@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.service.internship.InternshipService;
 import faang.school.projectservice.validator.groups.CreateGroup;
 import faang.school.projectservice.validator.groups.UpdateGroup;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -51,9 +52,9 @@ public class InternshipController {
         return internshipService.getAllInternships();
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public InternshipDto getInternshipById(@PathVariable long id) {
+    public InternshipDto getInternshipById(@PathVariable @Positive long id) {
         return internshipService.getInternshipById(id);
     }
 }

@@ -21,7 +21,7 @@ class MomentMonthFilterTest {
 
     @BeforeEach
     void setUp() {
-        filterDto = new MomentFilterDto();
+        filterDto = MomentFilterDto.builder().build();
         momentMonthFilter = new MomentMonthFilter();
         moment = new Moment();
         moment.setDate(LocalDateTime.of(2024, 9, 21, 10, 10));
@@ -29,7 +29,9 @@ class MomentMonthFilterTest {
 
     @Test
     void givenNullWhenIsApplicableThenReturnFalse() {
-        filterDto.setMonth(0);
+        filterDto = MomentFilterDto.builder()
+                .month(0)
+                .build();
 
         var result = momentMonthFilter.isApplicable(filterDto);
 
@@ -38,7 +40,9 @@ class MomentMonthFilterTest {
 
     @Test
     void givenValidWhenIsApplicableThenReturnTrue() {
-        filterDto.setMonth(1);
+        filterDto = MomentFilterDto.builder()
+                .month(1)
+                .build();
 
         var result = momentMonthFilter.isApplicable(filterDto);
 
@@ -47,7 +51,9 @@ class MomentMonthFilterTest {
 
     @Test
     void givenValidWhenApplyThenReturnMoment() {
-        filterDto.setMonth(9);
+        filterDto = MomentFilterDto.builder()
+                .month(9)
+                .build();
 
         var result = momentMonthFilter.apply(Stream.of(moment), filterDto);
 
@@ -56,7 +62,9 @@ class MomentMonthFilterTest {
 
     @Test
     void givenNotValidWhenApplyThenReturnEmpty() {
-        filterDto.setMonth(2);
+        filterDto = MomentFilterDto.builder()
+                .month(2)
+                .build();
 
         var result = momentMonthFilter.apply(Stream.of(moment), filterDto);
 
