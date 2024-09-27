@@ -38,7 +38,9 @@ public class ResourceService {
 
     public S3Object getResource(Long resourceId) {
         Resource resourceFromDb = resourceRepository.findById(resourceId).orElseThrow(EntityNotFoundException::new);
-        return s3Service.getFile(resourceFromDb.getKey());
+        S3Object s3Object = s3Service.getFile(resourceFromDb.getKey());
+        s3Object.setBucketName(resourceFromDb.getName());
+        return s3Object;
     }
 
     @Transactional
@@ -56,6 +58,7 @@ public class ResourceService {
         resourceFromDb.setKey(newResourceFromS3.getKey());
         resourceFromDb.setSize(newResourceFromS3.getSize());
         resourceFromDb.setUpdatedBy(teamMember);
+        resourceFromDb.setName(file.getOriginalFilename());
         return resourceMapper.mapToResourceDto(resourceFromDb);
     }
 

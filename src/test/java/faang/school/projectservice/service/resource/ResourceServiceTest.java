@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.resource;
 
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.exception.StorageLimitException;
@@ -12,6 +13,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.subproject.ValidatorService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -75,11 +78,19 @@ class ResourceServiceTest {
     private TeamMember teamMember;
     private Project project;
     private String key;
+    private Long resourceId;
+    private Long projectId;
+    private Long teamMemberId;
 
     @BeforeEach
     public void setUp() {
+        resourceId = 1L;
+        projectId = 1L;
+        teamMemberId = 1L;
+
+
         project = new Project();
-        project.setId(1L);
+        project.setId(projectId);
         project.setStorageSize(BigInteger.valueOf(200));
         project.setMaxStorageSize(BigInteger.valueOf(1000));
 
@@ -94,11 +105,13 @@ class ResourceServiceTest {
         resource.setSize(BigInteger.valueOf(1));
         resource.setKey(key);
 
-        lenient().when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
+
+        lenient().when(teamMemberRepository.findById(teamMemberId)).thenReturn(teamMember);
         lenient().when(file.getSize()).thenReturn(200L);
-        lenient().when(projectRepository.findById(1L)).thenReturn(project);
+        lenient().when(projectRepository.findById(projectId)).thenReturn(project);
         lenient().when(userContext.getUserId()).thenReturn(1L);
         lenient().when(s3Service.uploadFile(file, project.getName())).thenReturn(resource);
+        lenient().when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
 
     }
 
@@ -106,13 +119,13 @@ class ResourceServiceTest {
     void testAddResourceSuccess() {
         when(resourceRepository.save(resource)).thenReturn(resource);
 
-        ResourceDto resourceDto = resourceService.addResource(1L, file);
+        ResourceDto resourceDto = resourceService.addResource(projectId, file);
 
         verify(s3Service, times(1)).uploadFile(file, resource.getName());
         verify(resourceRepository, times(1)).save(resourceCaptor.capture());
-        verify(validatorService, times(1)).isProjectExists(1L);
-        verify(teamMemberRepository, times(1)).findById(1L);
-        verify(projectRepository, times(1)).findById(1L);
+        verify(validatorService, times(1)).isProjectExists(projectId);
+        verify(teamMemberRepository, times(1)).findById(teamMemberId);
+        verify(projectRepository, times(1)).findById(projectId);
 
         Resource result = resourceCaptor.getValue();
         assertAll(
@@ -130,18 +143,38 @@ class ResourceServiceTest {
         when(file.getSize()).thenReturn(900L);
 
         StorageLimitException exception = assertThrows(StorageLimitException.class,
-                () -> resourceService.addResource(1L, file));
+                () -> resourceService.addResource(projectId, file));
 
         assertEquals("Storage limit exceeded", exception.getMessage());
-        verify(validatorService, times(1)).isProjectExists(1L);
-        verify(projectRepository, times(1)).findById(1L);
-        verify(teamMemberRepository, times(1)).findById(1L);
+        verify(validatorService, times(1)).isProjectExists(projectId);
+        verify(projectRepository, times(1)).findById(projectId);
+        verify(teamMemberRepository, times(1)).findById(teamMemberId);
         verify(resourceRepository, never()).save(any(Resource.class));
     }
 
-//    @Test
-//    void testGetResource() {
-//    }
+    @Test
+    void testGetResourceSuccess() {
+        S3Object s3Object = new S3Object();
+        s3Object.setBucketName("BucketName");
+        when(s3Service.getFile(resource.getKey())).thenReturn(s3Object);
+
+        S3Object result = resourceService.getResource(resourceId);
+
+        verify(s3Service, times(1)).getFile(resource.getKey());
+        verify(resourceRepository, times(1)).findById(resourceId);
+        assertEquals(s3Object, result);
+    }
+
+    @Test
+    void testGetResourceNotFound() {
+        doThrow(EntityNotFoundException.class).when(resourceRepository).findById(resourceId);
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> resourceService.getResource(resourceId));
+
+        verify(resourceRepository, times(1)).findById(resourceId);
+        assertEquals(null, exception.getMessage());
+    }
 
     @Test
     void testUpdateResourceSuccess() {
@@ -149,16 +182,15 @@ class ResourceServiceTest {
         Resource newResource = new Resource();
         newResource.setKey(newKey);
         newResource.setSize(BigInteger.valueOf(file.getSize()));
-        when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
         when(s3Service.uploadFile(file, project.getName())).thenReturn(newResource);
         doNothing().when(s3Service).deleteFile(resource.getKey());
 
-        ResourceDto result = resourceService.updateResource(1L, file);
+        ResourceDto result = resourceService.updateResource(resourceId, file);
 
         verify(s3Service, times(1)).deleteFile(key);
-        verify(resourceRepository, times(1)).findById(1L);
-        verify(teamMemberRepository, times(1)).findById(1L);
-        verify(projectRepository, times(1)).findById(1L);
+        verify(resourceRepository, times(1)).findById(resourceId);
+        verify(teamMemberRepository, times(1)).findById(teamMemberId);
+        verify(projectRepository, times(1)).findById(projectId);
         verify(s3Service, times(1)).uploadFile(file, resource.getName());
         assertAll(
                 () -> assertEquals(file.getName(), result.getName()),
@@ -170,11 +202,21 @@ class ResourceServiceTest {
     }
 
     @Test
+    void testUpdateResourceNotFound() {
+        doThrow(EntityNotFoundException.class).when(resourceRepository).findById(resourceId);
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> resourceService.updateResource(resourceId, file));
+
+        verify(resourceRepository, times(1)).findById(resourceId);
+        assertEquals(null, exception.getMessage());
+    }
+
+    @Test
     void testDeleteResourceSuccessByOwner() {
         resource.setCreatedBy(teamMember);
-        when(resourceRepository.findById(1L)).thenReturn(Optional.ofNullable(resource));
 
-        resourceService.deleteResource(1L);
+        resourceService.deleteResource(resourceId);
 
         verify(s3Service, times(1)).deleteFile(key);
     }
@@ -183,9 +225,8 @@ class ResourceServiceTest {
     void testDeleteResourceSuccessByManager() {
         teamMember.setRoles(List.of(TeamRole.MANAGER));
         resource.setCreatedBy(new TeamMember());
-        when(resourceRepository.findById(1L)).thenReturn(Optional.ofNullable(resource));
 
-        resourceService.deleteResource(1L);
+        resourceService.deleteResource(resourceId);
 
         verify(s3Service, times(1)).deleteFile(key);
     }
@@ -193,10 +234,10 @@ class ResourceServiceTest {
     @Test
     void testDeleteResourceNotPermited() {
         resource.setCreatedBy(new TeamMember());
-        when(resourceRepository.findById(1L)).thenReturn(Optional.ofNullable(resource));
+        when(resourceRepository.findById(resourceId)).thenReturn(Optional.ofNullable(resource));
 
         PermissionDeniedDataAccessException exception = assertThrows(PermissionDeniedDataAccessException.class,
-                () -> resourceService.deleteResource(1L));
+                () -> resourceService.deleteResource(resourceId));
 
         assertEquals("You can't delete this file", exception.getMessage());
     }

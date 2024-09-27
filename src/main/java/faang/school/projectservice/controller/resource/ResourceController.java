@@ -82,7 +82,7 @@ public class ResourceController {
         InputStream fileStream = s3Object.getObjectContent();
         InputStreamResource resource = new InputStreamResource(fileStream);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resourceId + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + s3Object.getBucketName() + "\"")
                 .contentType(MediaType.valueOf(s3Object.getObjectMetadata().getContentType()))
                 .body(resource);
     }
