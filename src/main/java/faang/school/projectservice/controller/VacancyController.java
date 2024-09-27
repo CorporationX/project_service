@@ -5,31 +5,41 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.VacancyService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+
 @AllArgsConstructor
+@RestController("/vacancy")
 public class VacancyController {
     private VacancyService vacancyService;
 
-    public ResponseEntity<String> createVacancy(@RequestBody VacancyDTO vacancyDTO){
+    @PostMapping("/create")
+    public ResponseEntity<VacancyDTO> createVacancy(@RequestBody VacancyDTO vacancyDTO){
         vacancyService.createVacancy(vacancyDTO);
-        return ResponseEntity.ok("Вакансия создана");
+        return ResponseEntity.ok(vacancyDTO);
     }
+
+    @PutMapping("/update")
     public ResponseEntity<String> updateVacancy(@RequestBody VacancyDTO vacancyDTO){
         vacancyService.updateVacancy(vacancyDTO);
         return ResponseEntity.ok("Вакансия обновлена");
     }
+
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteVacancy(@PathVariable Long id){
         vacancyService.deleteVacancy(id);
         return ResponseEntity.ok("Вакансия удалена");
     }
 
+    @GetMapping("/getList/{name}")
     public List<Vacancy> findVacancyByName(@PathVariable String name){
         return vacancyService.findVacancyByName(name);
+    }
+
+    @GetMapping("/getVacancy/{id}")
+    public Vacancy getVacancyById(@PathVariable Long id){
+        return vacancyService.getVacancyById(id);
     }
 }
