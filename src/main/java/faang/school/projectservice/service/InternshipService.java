@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.jpa.TaskRepository;

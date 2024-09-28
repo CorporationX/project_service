@@ -8,6 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Builder
+@AllArgsConstructor
 @Entity
 @Table(name = "meet")
 @Getter
@@ -26,6 +28,12 @@ public class Meet {
     @Column(name = "description", length = 512, nullable = false)
     private String description;
 
+    @Column(name = "start_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime startDate;
+
+    @Column(name = "end_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime endDate;
+
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MeetStatus status;
@@ -33,9 +41,12 @@ public class Meet {
     @Column(name = "creator_id", nullable = false)
     private long creatorId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
+
+    @Column(name = "google_event_id", nullable = false)
+    private long googleEventId;
 
     @ElementCollection
     @CollectionTable(name = "meet_participant", joinColumns = @JoinColumn(name = "meet_id"))
