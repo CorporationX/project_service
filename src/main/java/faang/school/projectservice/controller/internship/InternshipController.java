@@ -1,10 +1,7 @@
 package faang.school.projectservice.controller.internship;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.service.InternshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,20 +13,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,18 +43,13 @@ public class InternshipController {
             @PathVariable @NotNull long id, @Valid @RequestBody InternshipDto internshipDto) {
         return internshipService.update(id, internshipDto);
     }
-//TODO переделай на POST
-    @GetMapping("/project/{projectId}")
+
+    @PostMapping("/project/{projectId}")
     @Operation(summary = "Get internships by project ID", description = "Retrieve internships by project ID with optional filtering.")
     public List<InternshipDto> getInternshipsByProject(
             @Parameter(description = "ID of the project", required = true)
             @PathVariable @NotNull Long projectId,
-            @RequestParam(required = false) InternshipStatus statusPattern,
-            @RequestParam(required = false) TeamRole rolePattern) {
-
-        InternshipFilterDto filterDto = new InternshipFilterDto();
-        filterDto.setStatusPattern(statusPattern);
-        filterDto.setRolePattern(rolePattern);
+            @Valid @RequestBody InternshipFilterDto filterDto) {
         return internshipService.getInternshipsByProjectAndFilter(projectId, filterDto);
     }
 
@@ -80,15 +67,4 @@ public class InternshipController {
             @PathVariable Long id) {
         return internshipService.getInternshipById(id);
     }
-//TODO не забудь что появился global exception handler
-    @ExceptionHandler(DataValidationException.class)
-    public String handleDataValidationException(DataValidationException ex) {
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler(NoSuchElementException.class)
-    public String handleNoSuchElementException(NoSuchElementException ex) {
-        return ex.getMessage();
-    }
-
 }

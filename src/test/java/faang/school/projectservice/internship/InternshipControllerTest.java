@@ -3,7 +3,6 @@ package faang.school.projectservice.internship;
 import faang.school.projectservice.controller.internship.InternshipController;
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.InternshipService;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,7 +71,11 @@ class InternshipControllerTest {
         when(internshipService.getInternshipsByProjectAndFilter(anyLong(), any(InternshipFilterDto.class)))
                 .thenReturn(Collections.singletonList(internshipDto));
 
-        List<InternshipDto> internshipDtoList = internshipController.getInternshipsByProject(1L, InternshipStatus.IN_PROGRESS, TeamRole.INTERN);
+        InternshipFilterDto filterDto = new InternshipFilterDto();
+        filterDto.setRolePattern(TeamRole.INTERN);
+        filterDto.setStatusPattern(InternshipStatus.IN_PROGRESS);
+
+        List<InternshipDto> internshipDtoList = internshipController.getInternshipsByProject(1L, filterDto);
 
         assertEquals(1, internshipDtoList.size());
         verify(internshipService, times(1)).getInternshipsByProjectAndFilter(anyLong(), any(InternshipFilterDto.class));
@@ -102,24 +104,6 @@ class InternshipControllerTest {
 
         assertEquals(internshipDto, internshipById);
         verify(internshipService, times(1)).getInternshipById(anyLong());
-    }
-
-    @Test
-    void testHandleDataValidationException_ShouldReturnBadRequest() {
-        DataValidationException exception = new DataValidationException("Validation error");
-
-        String handlerResponse = internshipController.handleDataValidationException(exception);
-
-        assertEquals("Validation error", handlerResponse);
-    }
-
-    @Test
-    void testHandleNoSuchElementException_ShouldReturnNotFound() {
-        NoSuchElementException exception = new NoSuchElementException("Element not found");
-
-        String handlerResponse = internshipController.handleNoSuchElementException(exception);
-
-        assertEquals("Element not found", handlerResponse);
     }
 }
 
