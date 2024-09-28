@@ -42,4 +42,9 @@ public class GlobalExceptionHandler {
         errors.forEach((key, value) -> sb.append("%s; ".formatted(value)));
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), sb.toString());
     }
+    @ExceptionHandler(JiraErrorResponseException.class)
+    public ErrorResponse handleJiraErrorResponseException(JiraErrorResponseException ex) {
+        String error = ex.getMessage() + ex.getErrorResponse().getErrors();
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), error);
+    }
 }
