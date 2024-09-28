@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -77,7 +78,7 @@ public class ResourceController {
 
     @Operation(summary = "Get file by Id")
     @GetMapping("/{resourceId}")
-    public ResponseEntity<InputStreamResource> downloadFile(@PathVariable Long resourceId) {
+    public ResponseEntity<InputStreamResource> downloadFile(@Positive @PathVariable Long resourceId) {
         S3Object s3Object = resourceService.getResource(resourceId);
         InputStream fileStream = s3Object.getObjectContent();
         InputStreamResource resource = new InputStreamResource(fileStream);
@@ -86,5 +87,4 @@ public class ResourceController {
                 .contentType(MediaType.valueOf(s3Object.getObjectMetadata().getContentType()))
                 .body(resource);
     }
-
 }

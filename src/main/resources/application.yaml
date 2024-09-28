@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://192.168.43.78:5432/postgres
+    url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
 
@@ -37,7 +37,7 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://192.168.43.78:9000
+    endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
     bucketName: corpbucket

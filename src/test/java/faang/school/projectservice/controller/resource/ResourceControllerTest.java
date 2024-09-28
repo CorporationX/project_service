@@ -136,7 +136,6 @@ class ResourceControllerTest {
 
     @Test
     void testDownloadFile() throws Exception {
-        // TODO make this test
         Long resourceId = 15L;
         String content = "some words";
         String fileName = "testFile.mp3";
@@ -148,7 +147,6 @@ class ResourceControllerTest {
         s3Object.setObjectContent(new ByteArrayInputStream(content.getBytes()));
 
         when(resourceService.getResource(resourceId)).thenReturn(s3Object);
-
 
         mockMvc.perform(MockMvcRequestBuilders.get("/resource/{resourceId}", resourceId))
                 .andExpect(status().isOk())
