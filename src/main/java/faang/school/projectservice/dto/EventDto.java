@@ -27,5 +27,5 @@ public class EventDto {
     @NotNull
     private UserDto owner;
     private List<String> attendeeEmails;
-    private Long calendarEventId;
+    private String calendarEventId;
 }

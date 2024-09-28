@@ -9,7 +9,7 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.google.DateGoogleConverter;
-import faang.school.projectservice.google.GoggleAuthorizationService;
+import faang.school.projectservice.google.AuthorizationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CalendarServiceImpl implements CalendarService {
-    private final GoggleAuthorizationService authorizationService;
+    private final AuthorizationService authorizationService;
     private final UserServiceClient userServiceClient;
 
     @Override

@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.service.calendar.CalendarService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

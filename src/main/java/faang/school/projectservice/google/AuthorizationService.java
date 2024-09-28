@@ -27,7 +27,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class GoggleAuthorizationService {
+public class AuthorizationService {
     @Value("${google.google_calendar.credentials_file_path}")
     private String credentialsFilePath;
 
