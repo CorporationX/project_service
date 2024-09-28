@@ -6,7 +6,6 @@ import faang.school.projectservice.dto.meet.MeetResponseDto;
 import faang.school.projectservice.filter.meet.MeetFilter;
 import faang.school.projectservice.jpa.MeetRepository;
 import faang.school.projectservice.mapper.meet.MeetMapper;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.meet.Meet;
 import faang.school.projectservice.model.meet.MeetStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -33,18 +31,20 @@ public class MeetServiceImpl implements MeetService {
     @Override
     @Transactional
     public MeetResponseDto create(long creatorId, MeetRequestDto dto) {
-        Meet meetToCreate = meetMapper.toEntity(dto);
+        var meetToCreate = meetMapper.toEntity(dto);
+        var project = projectRepository.findById(dto.projectId());
         meetToCreate.setCreatorId(creatorId);
-        Meet savedMeet = meetRepository.save(meetToCreate);
+        meetToCreate.setProject(project);
+        var savedMeet = meetRepository.save(meetToCreate);
         return meetMapper.toDto(savedMeet);
     }
 
     @Override
     @Transactional
     public MeetResponseDto update(long creatorId, MeetRequestDto dto) {
-        Meet meetToUpdate = findMeetById(dto.id());
+        var meetToUpdate = findMeetById(dto.id());
         meetValidator.validateMeetToUpdate(meetToUpdate, creatorId);
-        List<Meet> meetsByCreatorId = findMeetsByCreatorId(creatorId);
+        var meetsByCreatorId = findMeetsByCreatorId(creatorId);
         meetToUpdate.setUpdatedAt(LocalDateTime.now());
         if (dto.status() == MeetStatus.CANCELLED) {
             meetToUpdate.setStatus(MeetStatus.CANCELLED);
@@ -59,7 +59,7 @@ public class MeetServiceImpl implements MeetService {
     @Override
     @Transactional
     public void delete(long creatorId, Long id) {
-        Meet meetToDelete = findMeetById(id);
+        var meetToDelete = findMeetById(id);
         meetValidator.validateMeetToDelete(meetToDelete, creatorId);
         meetRepository.delete(meetToDelete);
     }
@@ -67,8 +67,8 @@ public class MeetServiceImpl implements MeetService {
     @Override
     @Transactional(readOnly = true)
     public List<MeetResponseDto> findAllByProjectIdFilter(Long projectId, MeetFilterDto filter) {
-        Project project = projectRepository.getProjectById(projectId);
-        Stream<Meet> meets = project.getMeets().stream();
+        var project = projectRepository.getProjectById(projectId);
+        var meets = project.getMeets().stream();
         return meetFilters.stream()
                 .filter(currentFilter -> currentFilter.isApplicable(filter))
                 .reduce(meets, (stream, f) -> f.apply(stream, filter), (s1, s2) -> s1)
@@ -79,7 +79,7 @@ public class MeetServiceImpl implements MeetService {
     @Override
     @Transactional(readOnly = true)
     public MeetResponseDto findById(Long id) {
-        Meet meet = findMeetById(id);
+        var meet = findMeetById(id);
         return meetMapper.toDto(meet);
     }
 
