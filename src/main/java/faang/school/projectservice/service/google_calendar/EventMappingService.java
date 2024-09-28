@@ -38,11 +38,10 @@ public class EventMappingService {
         log.info("Удаление маппинга для eventId '{}'", eventId);
 
         if (eventMappingRepository.existsById(eventId)) {
-            eventMappingRepository.deleteById(eventId);
-            log.info("Маппинг удален");
-        } else {
             throw new NotFoundException("Маппинг для eventId '" + eventId + "' не найден");
         }
+        eventMappingRepository.deleteById(eventId);
+        log.info("Маппинг удален");
     }
 
     private EventMapping createEventMapping(Long eventId, String googleEventId) {

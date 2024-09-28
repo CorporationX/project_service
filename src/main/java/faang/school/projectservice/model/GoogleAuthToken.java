@@ -36,12 +36,6 @@ public class GoogleAuthToken {
     @Column(name = "expires_in", nullable = false)
     private Long expiresIn;
 
-    @Column(name = "token_type", nullable = false)
-    private String tokenType;
-
-    @Column(name = "scope")
-    private String scope;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

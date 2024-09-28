@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.google_calendar;
+package faang.school.projectservice.oauth.google_oauth;
 
 import faang.school.projectservice.model.GoogleAuthToken;
 import faang.school.projectservice.repository.TokenRepository;
@@ -12,12 +12,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TokenServiceTest {
-
     @InjectMocks
     private TokenService tokenService;
 
@@ -32,8 +33,6 @@ public class TokenServiceTest {
         mockToken.setAccessToken("test-access-token");
         mockToken.setRefreshToken("test-refresh-token");
         mockToken.setExpiresIn(3600L);
-        mockToken.setScope("test-scope");
-        mockToken.setTokenType("Bearer");
     }
 
     @Test
@@ -48,8 +47,6 @@ public class TokenServiceTest {
         assertEquals("test-access-token", savedToken.getAccessToken());
         assertEquals("test-refresh-token", savedToken.getRefreshToken());
         assertEquals(3600L, savedToken.getExpiresIn());
-        assertEquals("test-scope", savedToken.getScope());
-        assertEquals("Bearer", savedToken.getTokenType());
     }
 
     @Test
@@ -62,8 +59,32 @@ public class TokenServiceTest {
         assertEquals("test-access-token", latestToken.getAccessToken());
         assertEquals("test-refresh-token", latestToken.getRefreshToken());
         assertEquals(3600L, latestToken.getExpiresIn());
-        assertEquals("test-scope", latestToken.getScope());
-        assertEquals("Bearer", latestToken.getTokenType());
         verify(tokenRepository).findFirstByOrderByCreatedAtDesc();
+    }
+
+    @Test
+    public void testDeleteToken() {
+        when(tokenRepository.findFirstByOrderByCreatedAtDesc()).thenReturn(mockToken);
+
+        tokenService.deleteToken();
+
+        verify(tokenRepository).findFirstByOrderByCreatedAtDesc();
+        verify(tokenRepository).delete(mockToken);
+    }
+
+    @Test
+    public void testDeleteToken_NoToken() {
+        when(tokenRepository.findFirstByOrderByCreatedAtDesc()).thenReturn(null);
+
+        tokenService.deleteToken();
+
+        verify(tokenRepository).findFirstByOrderByCreatedAtDesc();
+        verify(tokenRepository, never()).delete(any(GoogleAuthToken.class));
+    }
+
+    @Test
+    public void testDeleteAllTokens() {
+        tokenService.deleteAllTokens();
+        verify(tokenRepository).deleteAll();
     }
 }

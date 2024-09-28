@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.google_calendar;
 import faang.school.projectservice.service.google_calendar.CalendarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,17 +17,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Google Calendars", description = "Операции для управления календарями Google Calendar")
-@RestController
+@RequiredArgsConstructor
 @RequestMapping("/google-calendar/calendars")
 @Slf4j
+@RestController
 public class CalendarController {
-
     private final CalendarService calendarService;
-
-    @Autowired
-    public CalendarController(CalendarService calendarService) {
-        this.calendarService = calendarService;
-    }
 
     @Operation(summary = "Создать календарь", description = "Создаёт новый календарь в Google Calendar.")
     @PostMapping

@@ -1,4 +1,4 @@
-package faang.school.projectservice.config.context;
+package faang.school.projectservice.config.google_calendar_config;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -7,10 +7,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
+import faang.school.projectservice.exceptions.google_calendar.exceptions.GoogleCalendarException;
 import faang.school.projectservice.model.GoogleAuthToken;
-import faang.school.projectservice.service.google_calendar.TokenService;
+import faang.school.projectservice.oauth.google_oauth.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,11 +24,13 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 @Configuration
 public class GoogleCalendarConfig {
     private static final String APPLICATION_NAME = "CorpX";
+    private static final String ACCESS_TYPE_OFFLINE = "offline";
+    private static final String USER_KEY = "user";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
     @Value("${google.client.id}")
@@ -35,6 +39,7 @@ public class GoogleCalendarConfig {
     @Value("${google.client.secret}")
     private String clientSecret;
 
+    private final DataStoreFactory dataStoreFactory;
     private final TokenService tokenService;
 
     @Bean
@@ -49,7 +54,8 @@ public class GoogleCalendarConfig {
                 JSON_FACTORY,
                 clientSecrets,
                 Arrays.asList(CalendarScopes.CALENDAR, CalendarScopes.CALENDAR_EVENTS))
-                .setAccessType("offline")
+                .setAccessType(ACCESS_TYPE_OFFLINE)
+                .setDataStoreFactory(dataStoreFactory)
                 .build();
     }
 
@@ -81,18 +87,16 @@ public class GoogleCalendarConfig {
 
         if (oAuthToken == null) {
             log.warn("OAuth токены отсутствуют в базе данных");
-            return null;
+            throw new GoogleCalendarException("OAuth токены отсутствуют в базе данных");
         }
 
         TokenResponse tokenResponse = new TokenResponse()
                 .setAccessToken(oAuthToken.getAccessToken())
                 .setRefreshToken(oAuthToken.getRefreshToken())
-                .setExpiresInSeconds(oAuthToken.getExpiresIn())
-                .setScope(oAuthToken.getScope())
-                .setTokenType(oAuthToken.getTokenType());
+                .setExpiresInSeconds(oAuthToken.getExpiresIn());
 
         log.info("Создание учетных данных на основе токенов");
 
-        return flow.createAndStoreCredential(tokenResponse, "user");
+        return flow.createAndStoreCredential(tokenResponse, USER_KEY);
     }
 }

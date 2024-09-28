@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.google_calendar;
+package faang.school.projectservice.oauth.google_oauth;
 
 import faang.school.projectservice.model.GoogleAuthToken;
 import faang.school.projectservice.repository.TokenRepository;
@@ -23,5 +23,20 @@ public class TokenService {
     public GoogleAuthToken getLatestToken() {
         log.info("Получение последнего OAuth токена из базы данных");
         return tokenRepository.findFirstByOrderByCreatedAtDesc();
+    }
+
+    @Transactional
+    public void deleteToken() {
+        log.info("Удаление последнего OAuth токена из базы данных");
+        GoogleAuthToken token = getLatestToken();
+        if (token != null) {
+            tokenRepository.delete(token);
+        }
+    }
+
+    @Transactional
+    public void deleteAllTokens() {
+        log.info("Удаление всех OAuth токенов из базы данных");
+        tokenRepository.deleteAll();
     }
 }
