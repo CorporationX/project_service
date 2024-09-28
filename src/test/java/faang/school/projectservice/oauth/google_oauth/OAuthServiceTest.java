@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -33,7 +34,6 @@ import static org.mockito.Mockito.when;
 public class OAuthServiceTest {
     private static final String REDIRECT_URI = "http://localhost/callback";
     private static final String TEST_CODE = "test-code";
-    private static final String SUCCESS_MESSAGE = "Авторизация успешна. Токены сохранены.";
     private static final String ERROR_MESSAGE = "Ошибка авторизации: ";
     private static final String CALLBACK_ERROR = "Ошибка обработки OAuth callback";
 
@@ -88,11 +88,10 @@ public class OAuthServiceTest {
     @Test
     public void testProcessOAuthCallback_withCode() {
         OAuthService oauthServiceSpy = spy(oauthService);
-        doReturn(SUCCESS_MESSAGE).when(oauthServiceSpy).handleOAuthCallback(TEST_CODE);
+        doNothing().when(oauthServiceSpy).handleOAuthCallback(TEST_CODE);
 
-        String result = oauthServiceSpy.processOAuthCallback(TEST_CODE, null);
+        oauthServiceSpy.processOAuthCallback(TEST_CODE, null);
 
-        assertEquals(SUCCESS_MESSAGE, result);
         verify(oauthServiceSpy).handleOAuthCallback(TEST_CODE);
     }
 
@@ -103,9 +102,8 @@ public class OAuthServiceTest {
         when(tokenRequestMock.execute()).thenReturn(tokenResponseMock);
         when(googleAuthorizationCodeFlowMock.createAndStoreCredential(tokenResponseMock, "user")).thenReturn(credentialMock);
 
-        String result = oauthService.handleOAuthCallback(TEST_CODE);
+        oauthService.handleOAuthCallback(TEST_CODE);
 
-        assertEquals(SUCCESS_MESSAGE, result);
         verify(googleAuthorizationCodeFlowMock).createAndStoreCredential(tokenResponseMock, "user");
     }
 
