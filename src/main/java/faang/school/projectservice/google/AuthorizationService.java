@@ -55,10 +55,6 @@ public class AuthorizationService {
 
     private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         InputStream in = new ByteArrayInputStream(repository.getReferenceById(credentialsId).getJson().getBytes(StandardCharsets.UTF_8));
-        if (in == null) {
-            log.error("Resource not found: id = " + credentialsId);
-            throw new IllegalArgumentException("Resource not found: id = " + credentialsId);
-        }
         GoogleClientSecrets clientSecrets =
                 GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
