@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import com.google.api.services.calendar.model.Event;
 import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.service.calendar.CalendarService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
