@@ -3,7 +3,10 @@ package faang.school.projectservice.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -61,4 +64,8 @@ public class Moment {
 
     @Column(name = "updated_by")
     private Long updatedBy;
+
+    public Collection<Object> getPartnerProjectIds() {
+        return projects.stream().map(Project::getId).collect(Collectors.toList());
+    }
 }
