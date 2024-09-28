@@ -37,7 +37,7 @@ calculations_messages_processing:
 
 google:
   google_calendar:
-    credentials_file_path: src/main/resources/google/credentials.json
+    credentials_id: 1
     scopes: https://www.googleapis.com/auth/calendar.events,https://www.googleapis.com/auth/calendar,https://www.googleapis.com/auth/calendar.acls
 
 

@@ -25,3 +25,46 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V015_resource_roles.sql
   - include:
       file: db/changelog/changeset/project_V016_meet.sql
+  - changeSet:
+      id: 5
+      author: Vanchous
+      changes:
+        - createTable:
+            tableName: authorization_tokens
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: json
+                  type: varchar(256)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 6
+      author: Vanchous
+      changes:
+        - dropColumn:
+            tableName: authorization_tokens
+            columns:
+              - column:
+                  name: json
+                  type: varchar(256)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 7
+      author: Vanchous
+      changes:
+        - addColumn:
+            tableName: authorization_tokens
+            columns:
+              - column:
+                  name: json
+                  type: varchar(512)
+                  constraints:
+                    nullable: false

@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.calendar;
 
 import com.google.api.services.calendar.Calendar;
 import faang.school.projectservice.client.UserServiceClient;
@@ -6,7 +6,6 @@ import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.google.AuthorizationService;
-import faang.school.projectservice.service.calendar.CalendarServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
