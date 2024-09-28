@@ -28,23 +28,14 @@ public class CalendarServiceImpl implements CalendarService {
     private final AuthorizationService authorizationService;
     private final UserServiceClient userServiceClient;
     private final CalendarServiceImplValidator validator;
-    private ExecutorService threadPool;
-
-    private void sendChanges(long eventId, String calendarEventId) {
-        if (threadPool == null || threadPool.isShutdown()) {
-            threadPool = Executors.newSingleThreadExecutor();
-        }
-
-        threadPool.execute(() -> userServiceClient.setCalendarEventId(eventId, calendarEventId));
-    }
 
     @Override
     public void addEventToCalendar(long eventId, String calendarId) throws GeneralSecurityException, IOException {
         EventDto eventDto = userServiceClient.getEvent(eventId);
         if (eventDto.getCalendarEventId() == null) {
             Event event = add(eventDto, calendarId);
+            userServiceClient.setCalendarEventId(eventId, event.getId());
             log.info("Event created: {}", event.getHtmlLink());
-            sendChanges(eventId, event.getId());
         } else {
             log.info("event has already added to the calendar");
         }

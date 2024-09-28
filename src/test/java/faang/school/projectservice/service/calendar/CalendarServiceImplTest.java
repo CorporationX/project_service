@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.google.AuthorizationService;
+import faang.school.projectservice.validator.CalendarServiceImplValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,8 @@ class CalendarServiceImplTest {
     private AuthorizationService authorizationService;
     @Mock
     private UserServiceClient client;
+    @Mock
+    private CalendarServiceImplValidator validator;
     private EventDto eventDto;
     private final long eventId = 1L;
     private final String CALENDAR_ID = "primary";
