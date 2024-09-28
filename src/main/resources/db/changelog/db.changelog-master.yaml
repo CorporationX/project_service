@@ -21,3 +21,11 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V013_create_initiative.sql
   - include:
         file: db/changelog/changeset/project_V014_resource.sql
+  - include:
+        file: db/changelog/changeset/project_V015_create_event_mapping.sql
+  - include:
+        file: db/changelog/changeset/project_V016_alter_event_mapping.sql
+  - include:
+        file: db/changelog/changeset/project_V017_alter_event_mapping.sql
+  - include:
+        file: db/changelog/changeset/project_V018_create_google_auth_token.sql

@@ -1,5 +1,6 @@
 package faang.school.projectservice.client;
 
+import faang.school.projectservice.dto.client.EventDtoForGoogleCalendar;
 import faang.school.projectservice.dto.client.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,4 +18,8 @@ public interface UserServiceClient {
 
     @PostMapping("/users")
     List<UserDto> getUsersByIds(@RequestBody List<Long> ids);
+
+    @GetMapping("/events/google-calendar-event/{id}")
+    EventDtoForGoogleCalendar getEventForGoogleCalendar(@PathVariable("id") Long id);
+
 }

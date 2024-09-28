@@ -48,3 +48,14 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+google:
+  client:
+    id: 534057422646-e8dkdj7hn1bukfch45movmoq0hgecmcb.apps.googleusercontent.com
+    secret: тут должен быть секретный код
+  redirect:
+    uri: http://localhost:8082/oauth/callback
+
+user-service:
+  host: http://localhost
+  port: 8080
