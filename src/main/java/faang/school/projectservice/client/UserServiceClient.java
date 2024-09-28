@@ -7,6 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -20,6 +21,10 @@ public interface UserServiceClient {
     @PostMapping("/users")
     List<UserDto> getUsersByIds(@RequestBody List<Long> ids);
 
-    @GetMapping("/api/v1/event/{{id}}")
+    @GetMapping("/api/v1/event/{id}")
     EventDto getEvent(@PathVariable("id") @Positive long id);
+
+    @PutMapping("/api/v1/event/calendar/event/{eventId}/{calendarEventId}")
+    void setCalendarEventId(@PathVariable("eventId") long eventId,
+                            @PathVariable("calendarEventId") String calendarEventId);
 }

@@ -11,7 +11,7 @@ public class DateGoogleConverter {
         return new EventDateTime()
                 .setDateTime(new DateTime(
                         new Date(
-                                localDateTime.getYear(),
+                                localDateTime.getYear() - 1900,
                                 localDateTime.getMonth().getValue() - 1,
                                 localDateTime.getDayOfMonth(),
                                 localDateTime.getHour(),

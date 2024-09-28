@@ -8,8 +8,9 @@ import com.google.api.services.calendar.model.Events;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.google.DateGoogleConverter;
 import faang.school.projectservice.google.AuthorizationService;
+import faang.school.projectservice.google.DateGoogleConverter;
+import faang.school.projectservice.validator.CalendarServiceImplValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -24,6 +27,16 @@ import java.util.List;
 public class CalendarServiceImpl implements CalendarService {
     private final AuthorizationService authorizationService;
     private final UserServiceClient userServiceClient;
+    private final CalendarServiceImplValidator validator;
+    private ExecutorService threadPool;
+
+    private void sendChanges(long eventId, String calendarEventId) {
+        if (threadPool == null || threadPool.isShutdown()) {
+            threadPool = Executors.newSingleThreadExecutor();
+        }
+
+        threadPool.execute(() -> userServiceClient.setCalendarEventId(eventId, calendarEventId));
+    }
 
     @Override
     public void addEventToCalendar(long eventId, String calendarId) throws GeneralSecurityException, IOException {
@@ -31,15 +44,14 @@ public class CalendarServiceImpl implements CalendarService {
         if (eventDto.getCalendarEventId() == null) {
             Event event = add(eventDto, calendarId);
             log.info("Event created: {}", event.getHtmlLink());
+            sendChanges(eventId, event.getId());
         } else {
             log.info("event has already added to the calendar");
         }
     }
 
-    private Event add(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
-        Calendar service = authorizationService.authorizeAndGetCalendar();
-        checkIsCalendarAvailable(calendarId, service);
-        Event event = new Event()
+    private Event initEvent(EventDto eventDto) {
+        return new Event()
                 .setStart(DateGoogleConverter.toEventDateTime(eventDto.getStartDate()))
                 .setEnd(DateGoogleConverter.toEventDateTime(eventDto.getEndDate()))
                 .setDescription(eventDto.getDescription())
@@ -49,6 +61,15 @@ public class CalendarServiceImpl implements CalendarService {
                 )
                 .setSummary(eventDto.getTitle())
                 .setReminders(new Event.Reminders().setUseDefault(true));
+    }
+
+    private Event add(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
+        Calendar service = authorizationService.authorizeAndGetCalendar();
+        checkIsCalendarAvailable(calendarId, service);
+        Event event = initEvent(eventDto);
+        if (eventDto.getCalendarEventId() != null) {
+            return service.events().patch(calendarId, eventDto.getCalendarEventId(), event).execute();
+        }
         return service.events().insert(calendarId, event).execute();
     }
 
@@ -59,15 +80,19 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public void update(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
+    public Event update(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
+        validator.validateUpdate(eventDto);
         Event event = add(eventDto, calendarId);
         log.info("Event updated: {}", event.getHtmlLink());
+        return event;
     }
 
     @Override
     public void update(long eventId, String calendarId) throws GeneralSecurityException, IOException {
         EventDto eventDto = userServiceClient.getEvent(eventId);
-        update(eventDto, calendarId);
+        validator.validateUpdate(eventDto);
+        Event event = update(eventDto, calendarId);
+        log.info("Event updated: {}", event.getHtmlLink());
     }
 
     @Override
