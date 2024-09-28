@@ -106,7 +106,7 @@ public class EventMappingServiceTest {
 
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
                 eventMappingService.deleteMapping(EVENT_ID));
-        assertEquals(NOT_FOUND_MESSAGE_EVENT, exception.getMessage());
+        assertEquals("Маппинг для eventId '" + EVENT_ID + "' не найден", exception.getMessage());
 
         verify(eventMappingRepository).existsById(EVENT_ID);
         verify(eventMappingRepository, never()).deleteById(EVENT_ID);

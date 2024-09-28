@@ -6,6 +6,7 @@ import faang.school.projectservice.repository.EventMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class EventMappingService {
     private final EventMappingRepository eventMappingRepository;
 
+    @Transactional
     public void saveMapping(Long eventId, String googleEventId) {
         log.info("Сохранение маппинга eventId '{}' с googleEventId '{}'", eventId, googleEventId);
 
@@ -22,22 +24,25 @@ public class EventMappingService {
         log.info("Маппинг сохранен");
     }
 
+    @Transactional(readOnly = true)
     public String getGoogleEventIdByEventId(Long eventId) {
         log.info("Получение googleEventId по eventId '{}'", eventId);
 
         return findMappingByEventId(eventId).getGoogleEventId();
     }
 
+    @Transactional(readOnly = true)
     public Long getEventIdByGoogleEventId(String googleEventId) {
         log.info("Получение eventId по googleEventId '{}'", googleEventId);
 
         return findMappingByGoogleEventId(googleEventId).getEventId();
     }
 
+    @Transactional
     public void deleteMapping(Long eventId) {
         log.info("Удаление маппинга для eventId '{}'", eventId);
 
-        if (eventMappingRepository.existsById(eventId)) {
+        if (!eventMappingRepository.existsById(eventId)) {
             throw new NotFoundException("Маппинг для eventId '" + eventId + "' не найден");
         }
         eventMappingRepository.deleteById(eventId);
