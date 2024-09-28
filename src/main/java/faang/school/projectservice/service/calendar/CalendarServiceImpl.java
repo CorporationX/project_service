@@ -29,62 +29,57 @@ public class CalendarServiceImpl implements CalendarService {
     public void addEventToCalendar(long eventId, String calendarId) throws GeneralSecurityException, IOException {
         EventDto eventDto = userServiceClient.getEvent(eventId);
         if (eventDto.getCalendarEventId() == null) {
-            add(eventDto, calendarId);
+            Event event = add(eventDto, calendarId);
+            log.info("Event created: {}", event.getHtmlLink());
         } else {
             log.info("event has already added to the calendar");
         }
     }
 
-    private void add(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
+    private Event add(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
         Calendar service = authorizationService.authorizeAndGetCalendar();
+        checkIsCalendarAvailable(calendarId, service);
         Event event = new Event()
                 .setStart(DateGoogleConverter.toEventDateTime(eventDto.getStartDate()))
                 .setEnd(DateGoogleConverter.toEventDateTime(eventDto.getEndDate()))
                 .setDescription(eventDto.getDescription())
                 .setAttendees(eventDto.getAttendeeEmails().stream()
-                        .map((email) -> new EventAttendee().setEmail(email))
+                        .map(email -> new EventAttendee().setEmail(email))
                         .toList()
                 )
                 .setSummary(eventDto.getTitle())
                 .setReminders(new Event.Reminders().setUseDefault(true));
-
-        event = service.events().insert(calendarId, event).execute();
-        log.info("Event created: {}", event.getHtmlLink());
+        return service.events().insert(calendarId, event).execute();
     }
 
-    private void checkIfCalendarAvailable(String calendarId, Calendar service) throws IOException {
+    private void checkIsCalendarAvailable(String calendarId, Calendar service) throws IOException {
         if (service.calendars().get(calendarId) == null) {
             throw new DataValidationException("calendar id = " + calendarId + " is not available");
         }
     }
 
     @Override
-    public void update() {
-
+    public void update(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
+        Event event = add(eventDto, calendarId);
+        log.info("Event updated: {}", event.getHtmlLink());
     }
 
     @Override
-    public void view() throws GeneralSecurityException, IOException {
+    public void update(long eventId, String calendarId) throws GeneralSecurityException, IOException {
+        EventDto eventDto = userServiceClient.getEvent(eventId);
+        update(eventDto, calendarId);
+    }
+
+    @Override
+    public List<Event> getEvents(String calendarId) throws GeneralSecurityException, IOException {
         Calendar service = authorizationService.authorizeAndGetCalendar();
         DateTime now = new DateTime(System.currentTimeMillis());
-        Events events = service.events().list("primary")
+        Events events = service.events().list(calendarId)
                 .setMaxResults(10)
                 .setTimeMin(now)
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
                 .execute();
-        List<Event> items = events.getItems();
-        if (items.isEmpty()) {
-            log.info("No upcoming events found.");
-        } else {
-            log.info("Upcoming events");
-            for (Event event : items) {
-                DateTime start = event.getStart().getDateTime();
-                if (start == null) {
-                    start = event.getStart().getDate();
-                }
-                log.info("{} {}\n", event.getSummary(), start);
-            }
-        }
+        return events.getItems();
     }
 }
