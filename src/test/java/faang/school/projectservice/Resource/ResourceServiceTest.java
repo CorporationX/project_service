@@ -8,6 +8,7 @@ import faang.school.projectservice.exception.resource.ResourceDeleteNotAllowedEx
 import faang.school.projectservice.exception.resource.ResourceDeletedException;
 import faang.school.projectservice.exception.resource.ResourceDownloadException;
 import faang.school.projectservice.exception.resource.ResourceUploadException;
+import faang.school.projectservice.exception.resource.S3ServiceException;
 import faang.school.projectservice.exception.resource.StorageLimitExceededException;
 import faang.school.projectservice.exception.resource.UnauthorizedFileUploadException;
 import faang.school.projectservice.jpa.ResourceRepository;
@@ -21,11 +22,13 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.service.resource.S3Service;
+import faang.school.projectservice.validator.ResourceValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -63,6 +66,8 @@ public class ResourceServiceTest {
     private S3Service s3Service;
     @Mock
     private TeamMemberRepository teamMemberRepository;
+    @Spy
+    private ResourceValidator validator;
 
     private Project project;
     private TeamMember teamMember;
@@ -85,6 +90,7 @@ public class ResourceServiceTest {
                 .build());
 
         resource = new Resource();
+        resource.setName("testFile.pdf");
         resource.setKey("test/key");
         resource.setSize(BigInteger.valueOf(100L));
         resource.setCreatedBy(teamMember);
@@ -143,7 +149,7 @@ public class ResourceServiceTest {
     public void testCreateResourceUploadError() {
         when(projectRepository.getProjectById(any())).thenReturn(project);
         when(teamMemberRepository.findById(any())).thenReturn(teamMember);
-        doThrow(new RuntimeException()).when(s3Service).upload(eq(file), any());
+        doThrow(new S3ServiceException(new Exception())).when(s3Service).upload(eq(file), any());
 
         assertThrows(ResourceUploadException.class, () ->
                 resourceService.createResource(file, 1L, 1L)
@@ -197,7 +203,7 @@ public class ResourceServiceTest {
         when(projectRepository.getProjectById(any())).thenReturn(project);
         when(teamMemberRepository.findById(any())).thenReturn(teamMember);
         when(resourceRepository.findById(anyLong())).thenReturn(Optional.ofNullable(resource));
-        doThrow(new RuntimeException()).when(s3Service).upload(eq(file), any());
+        doThrow(new S3ServiceException(new Exception())).when(s3Service).upload(eq(file), any());
 
         assertThrows(ResourceUploadException.class, () ->
                 resourceService.updateResource(file, 1L, 1L)
@@ -262,7 +268,6 @@ public class ResourceServiceTest {
 
         ResourceDownloadDto result = resourceService.downloadResource(1L);
 
-        assertEquals(result.getOriginName(), resource.getName());
         assertEquals(result.getType(), MediaType.parseMediaType(objectMetadata.getContentType()));
         assertNull(result.getBytes());
     }
@@ -280,7 +285,7 @@ public class ResourceServiceTest {
     @Test
     public void testDownloadResourceDownloadError() {
         when(resourceRepository.findById(anyLong())).thenReturn(Optional.ofNullable(resource));
-        doThrow(new RuntimeException()).when(s3Service).download(anyString());
+        doThrow(new S3ServiceException(new Exception())).when(s3Service).download(anyString());
 
         assertThrows(ResourceDownloadException.class, () ->
                 resourceService.downloadResource(1L)

@@ -3,10 +3,9 @@ package faang.school.projectservice.service.resource;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.ResourceDownloadDto;
 import faang.school.projectservice.exception.resource.ResourceDeleteNotAllowedException;
-import faang.school.projectservice.exception.resource.ResourceDeletedException;
 import faang.school.projectservice.exception.resource.ResourceDownloadException;
 import faang.school.projectservice.exception.resource.ResourceUploadException;
-import faang.school.projectservice.exception.resource.StorageLimitExceededException;
+import faang.school.projectservice.exception.resource.S3ServiceException;
 import faang.school.projectservice.exception.resource.UnauthorizedFileUploadException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Project;
@@ -18,14 +17,17 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.validator.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,24 +41,27 @@ public class ResourceService {
     private final ResourceRepository resourceRepository;
     private final S3Service s3Service;
     private final TeamMemberRepository teamMemberRepository;
+    private final ResourceValidator validator;
 
     @Transactional(readOnly = true)
     public ResourceDownloadDto downloadResource(Long id) {
         Resource resource = findResource(id);
 
-        if (resource.getStatus() == ResourceStatus.DELETED) {
-            throw new ResourceDeletedException();
-        }
+        validator.checkIsDeletedResource(resource);
 
         try {
             S3Object fileObject = s3Service.download(resource.getKey());
 
+            ContentDisposition contentDisposition = ContentDisposition.attachment()
+                    .filename(resource.getName())
+                    .build();
+
             return new ResourceDownloadDto(
                     fileObject.getObjectContent().readAllBytes(),
                     MediaType.parseMediaType(fileObject.getObjectMetadata().getContentType()),
-                    resource.getName()
+                    contentDisposition
             );
-        } catch (Exception exception) {
+        } catch (S3ServiceException | IOException exception) {
             log.error("Error download resource {} message {}", resource.getId(), exception.getMessage());
             throw new ResourceDownloadException();
         }
@@ -66,9 +71,7 @@ public class ResourceService {
     public void deleteResource(Long id, Long memberId) {
         Resource resource = findResource(id);
 
-        if (resource.getStatus() == ResourceStatus.DELETED) {
-            throw new ResourceDeletedException();
-        }
+        validator.checkIsDeletedResource(resource);
 
         TeamMember teamMember = teamMemberRepository.findById(memberId);
         if (!resource.getCreatedBy().getId().equals(teamMember.getId())
@@ -90,7 +93,6 @@ public class ResourceService {
         resource.setStatus(ResourceStatus.DELETED);
 
         resourceRepository.save(resource);
-
         projectService.updateStorageSize(project.getId(), newStorageSize);
     }
 
@@ -98,9 +100,7 @@ public class ResourceService {
     public Resource updateResource(MultipartFile file, Long id, Long memberId) {
         Resource resource = findResource(id);
 
-        if (resource.getStatus() == ResourceStatus.DELETED) {
-            throw new ResourceDeletedException();
-        }
+        validator.checkIsDeletedResource(resource);
 
         Project project = projectRepository.getProjectById(resource.getProject().getId());
 
@@ -109,9 +109,7 @@ public class ResourceService {
                 .subtract(resource.getSize())
                 .add(fileSize);
 
-        if (newStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
-            throw new StorageLimitExceededException();
-        }
+        validator.checkStorageLimit(newStorageSize, project.getMaxStorageSize());
 
         String key = makeResourceKey(project, file);
         TeamMember teamMember = teamMemberRepository.findById(memberId);
@@ -121,14 +119,14 @@ public class ResourceService {
         resource.setSize(fileSize);
         resource.setUpdatedBy(teamMember);
         resource.setUpdatedAt(LocalDateTime.now());
+
         resourceRepository.save(resource);
         projectService.updateStorageSize(project.getId(), newStorageSize);
-
         s3Service.delete(resource.getKey());
 
         try {
             s3Service.upload(file, key);
-        } catch (RuntimeException exception) {
+        } catch (S3ServiceException exception) {
             throw new ResourceUploadException();
         }
 
@@ -140,9 +138,7 @@ public class ResourceService {
         Project project = projectRepository.getProjectById(projectId);
         BigInteger newStorageSize = BigInteger.valueOf(file.getSize()).add(project.getStorageSize());
 
-        if (newStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
-            throw new StorageLimitExceededException();
-        }
+        validator.checkStorageLimit(newStorageSize, project.getMaxStorageSize());
 
         TeamMember teamMember = teamMemberRepository.findById(memberId);
 
@@ -152,22 +148,24 @@ public class ResourceService {
 
         String key = makeResourceKey(project, file);
 
-        Resource resource = new Resource();
-        resource.setKey(key);
-        resource.setName(file.getOriginalFilename());
-        resource.setType(ResourceType.getResourceType(file.getContentType()));
-        resource.setStatus(ResourceStatus.ACTIVE);
-        resource.setSize(BigInteger.valueOf(file.getSize()));
-        resource.setAllowedRoles(teamMember.getRoles().isEmpty() ? new ArrayList<>() : teamMember.getRoles());
-        resource.setCreatedBy(teamMember);
-        resource.setProject(project);
-        resource.setCreatedAt(LocalDateTime.now());
+        Resource resource = Resource.builder()
+                .key(key)
+                .name(file.getOriginalFilename())
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .status(ResourceStatus.ACTIVE)
+                .size(BigInteger.valueOf(file.getSize()))
+                .allowedRoles(teamMember.getRoles().isEmpty() ? new ArrayList<>() : teamMember.getRoles())
+                .createdBy(teamMember)
+                .project(project)
+                .createdAt(LocalDateTime.now())
+                .build();
+
         resourceRepository.save(resource);
         projectService.updateStorageSize(projectId, newStorageSize);
 
         try {
             s3Service.upload(file, key);
-        } catch (RuntimeException exception) {
+        } catch (S3ServiceException exception) {
             throw new ResourceUploadException();
         }
 

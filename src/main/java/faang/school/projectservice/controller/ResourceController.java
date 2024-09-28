@@ -45,13 +45,9 @@ public class ResourceController {
     public ResponseEntity<byte[]> getResource(@PathVariable Long id) {
         ResourceDownloadDto dto = resourceService.downloadResource(id);
 
-        ContentDisposition contentDisposition = ContentDisposition.attachment()
-                .filename(dto.getOriginName())
-                .build();
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(dto.getType());
-        headers.setContentDisposition(contentDisposition);
+        headers.setContentDisposition(dto.getContentDisposition());
 
         return new ResponseEntity<>(dto.getBytes(), headers, HttpStatus.OK);
     }

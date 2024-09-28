@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.exception.resource.S3ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +32,7 @@ public class S3Service {
             client.putObject(putObjectRequest);
         } catch (IOException exception) {
             log.error("Error upload file to S3 bucket {} message={}", bucketName, exception.getMessage());
-            throw new RuntimeException(exception);
+            throw new S3ServiceException(exception);
         }
     }
 
@@ -40,7 +41,7 @@ public class S3Service {
             return client.getObject(bucketName, key);
         } catch (Exception exception) {
             log.error("Error download file from S3 bucket {} message={}", bucketName, exception.getMessage());
-            throw new RuntimeException(exception);
+            throw new S3ServiceException(exception);
         }
     }
 
