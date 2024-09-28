@@ -39,13 +39,13 @@ public class CalendarController {
 
     @PutMapping("/event/update/{calendarId}")
     public void updateEvent(@PathVariable("calendarId") @NotBlank String calendarId,
-                            @RequestBody EventDto eventDto) {
+                            @RequestBody EventDto eventDto) throws GeneralSecurityException, IOException {
         service.update(eventDto, calendarId);
     }
 
     @PutMapping("/event/update/{calendarId}/{eventId}")
     public void updateEvent(@PathVariable("calendarId") @NotBlank String calendarId,
-                            @PathVariable("eventId") @Positive long eventId) {
+                            @PathVariable("eventId") @Positive long eventId) throws GeneralSecurityException, IOException {
         service.update(eventId, calendarId);
     }
 }
