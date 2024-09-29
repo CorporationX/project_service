@@ -47,13 +47,13 @@ public class MultiPartFileDecoder implements MultipartFile {
 
     @Override
     @NonNull
-    public byte[] getBytes() throws IOException {
+    public byte[] getBytes() {
         return input;
     }
 
     @Override
     @NonNull
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() {
         return new ByteArrayInputStream(input);
     }
 
