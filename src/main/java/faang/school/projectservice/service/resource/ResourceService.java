@@ -13,6 +13,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validator.resource.ValidatorTeamMember;
 import faang.school.projectservice.validator.subproject.ValidatorService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class ResourceService {
     private final ValidatorService validatorService;
     private final UserContext userContext;
     private final TeamMemberRepository teamMemberRepository;
+    private final ValidatorTeamMember validatorTeamMember;
 
     public S3Object getResource(Long resourceId) {
         Resource resourceFromDb = resourceRepository.findById(resourceId).orElseThrow(EntityNotFoundException::new);
@@ -48,6 +50,7 @@ public class ResourceService {
         Resource resourceFromDb = resourceRepository.findById(resourceId).orElseThrow(EntityNotFoundException::new);
         TeamMember teamMember = teamMemberRepository.findById(userContext.getUserId());
         Project project = projectRepository.findById(resourceFromDb.getProject().getId());
+        validatorTeamMember.isMember(teamMember, project);
 
         Resource newResourceFromS3 = s3Service.uploadFile(file, resourceFromDb.getProject().getName());
         BigInteger newStorageSize = project.getStorageSize()
@@ -78,7 +81,6 @@ public class ResourceService {
 
         s3Service.deleteFile(resource.getKey());
         resource.setKey(null);
-
     }
 
     @Transactional
@@ -86,6 +88,7 @@ public class ResourceService {
         validatorService.isProjectExists(projectId);
         TeamMember teamMember = teamMemberRepository.findById(userContext.getUserId());
         Project project = projectRepository.findById(projectId);
+        validatorTeamMember.isMember(teamMember, project);
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSize(newStorageSize, project.getMaxStorageSize());

@@ -8,10 +8,12 @@ import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.resource.ResourceMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validator.resource.ValidatorTeamMember;
 import faang.school.projectservice.validator.subproject.ValidatorService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +34,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -49,6 +52,9 @@ class ResourceServiceTest {
 
     @Mock
     private ValidatorService validatorService;
+
+    @Mock
+    private ValidatorTeamMember validatorTeamMember;
 
     @Mock
     private ResourceRepository resourceRepository;
@@ -88,7 +94,6 @@ class ResourceServiceTest {
         projectId = 1L;
         teamMemberId = 1L;
 
-
         project = new Project();
         project.setId(projectId);
         project.setStorageSize(BigInteger.valueOf(200));
@@ -97,6 +102,9 @@ class ResourceServiceTest {
         teamMember = new TeamMember();
         teamMember.setId(1L);
         teamMember.setRoles(List.of(TeamRole.ANALYST));
+
+        Team team = new Team();
+        team.setProject(project);
 
         key = "someKey";
         resource = new Resource();
@@ -124,6 +132,7 @@ class ResourceServiceTest {
         verify(s3Service, times(1)).uploadFile(file, resource.getName());
         verify(resourceRepository, times(1)).save(resourceCaptor.capture());
         verify(validatorService, times(1)).isProjectExists(projectId);
+        verify(validatorTeamMember, times(1)).isMember(teamMember,project);
         verify(teamMemberRepository, times(1)).findById(teamMemberId);
         verify(projectRepository, times(1)).findById(projectId);
 
@@ -147,6 +156,7 @@ class ResourceServiceTest {
 
         assertEquals("Storage limit exceeded", exception.getMessage());
         verify(validatorService, times(1)).isProjectExists(projectId);
+        verify(validatorTeamMember, times(1)).isMember(teamMember,project);
         verify(projectRepository, times(1)).findById(projectId);
         verify(teamMemberRepository, times(1)).findById(teamMemberId);
         verify(resourceRepository, never()).save(any(Resource.class));
@@ -173,7 +183,7 @@ class ResourceServiceTest {
                 () -> resourceService.getResource(resourceId));
 
         verify(resourceRepository, times(1)).findById(resourceId);
-        assertEquals(null, exception.getMessage());
+        assertNull(exception.getMessage());
     }
 
     @Test
@@ -209,7 +219,7 @@ class ResourceServiceTest {
                 () -> resourceService.updateResource(resourceId, file));
 
         verify(resourceRepository, times(1)).findById(resourceId);
-        assertEquals(null, exception.getMessage());
+        assertNull(exception.getMessage());
     }
 
     @Test
@@ -241,6 +251,4 @@ class ResourceServiceTest {
 
         assertEquals("You can't delete this file", exception.getMessage());
     }
-
-
 }
