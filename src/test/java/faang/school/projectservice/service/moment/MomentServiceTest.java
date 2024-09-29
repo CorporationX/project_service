@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.dto.filter.moment.MomentFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
@@ -168,7 +168,7 @@ class MomentServiceTest {
 
             when(momentRepository.findAllByProjectId(PROJECT_ID)).thenReturn(moments);
             when(mockMomentFilter.isApplicable(filterDto)).thenReturn(true);
-            when(mockMomentFilter.apply(any(Stream.class), eq(filterDto))).thenReturn(moments.stream());
+            when(mockMomentFilter.applyFilter(any(Stream.class), eq(filterDto))).thenReturn(moments.stream());
             when(momentFilters.stream()).thenReturn(Stream.of(mockMomentFilter));
             when(momentMapper.toDto(any(Moment.class))).thenReturn(momentDto);
 

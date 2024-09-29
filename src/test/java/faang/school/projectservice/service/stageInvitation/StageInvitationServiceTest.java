@@ -1,8 +1,8 @@
 package faang.school.projectservice.service.stageInvitation;
 
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoResponse;
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationFilterDto;
-import faang.school.projectservice.dto.client.stageInvitation.StageInvitationDtoRequest;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoResponse;
+import faang.school.projectservice.dto.filter.stageinvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoRequest;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationDtoMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -109,7 +110,7 @@ class StageInvitationServiceTest {
         @DisplayName("Success with accept")
         void whenInvitationAcceptThenSuccessSave() {
             when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
-                    .thenReturn(stageInvitation);
+                    .thenReturn(Optional.ofNullable(stageInvitation));
 
             stageInvitationService.acceptInvitation(STAGE_INVITATION_ID);
 
@@ -154,7 +155,7 @@ class StageInvitationServiceTest {
 
                 when(stageInvitationRepository.findAll()).thenReturn(List.of(first));
                 when(filters.isApplicable(stageInvitationFilterDto)).thenReturn(true);
-                when(filters.apply(any(Stream.class),
+                when(filters.applyFilter(any(Stream.class),
                         eq(stageInvitationFilterDto))).thenReturn(Stream.of(first));
                 when(stageInvitationFilters.stream()).thenReturn(Stream.of(filters));
                 when(stageInvitationDtoMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvDtoResponse);

@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.project;
 
-import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,7 @@ class ProjectStatusFilterTest {
             projectFilterDto.setStatus(ProjectStatus.IN_PROGRESS);
 
             Stream<Project> projectStream = Stream.of(first, second);
-            List<Project> projects = projectStatusFilter.apply(projectStream, projectFilterDto).toList();
+            List<Project> projects = projectStatusFilter.applyFilter(projectStream, projectFilterDto).toList();
 
             assertEquals(1, projects.size());
             assertEquals(first, projects.get(0));
@@ -59,7 +59,7 @@ class ProjectStatusFilterTest {
             projectFilterDto.setStatus(ProjectStatus.COMPLETED);
 
             Stream<Project> projectStream = Stream.of(first, second);
-            List<Project> projects = projectStatusFilter.apply(projectStream, projectFilterDto).toList();
+            List<Project> projects = projectStatusFilter.applyFilter(projectStream, projectFilterDto).toList();
 
             assertEquals(0, projects.size());
         }

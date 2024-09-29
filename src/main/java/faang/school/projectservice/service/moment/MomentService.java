@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.moment;
 
+import faang.school.projectservice.dto.filter.moment.MomentFilterDto;
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
@@ -64,7 +64,7 @@ public class MomentService {
                 .filter(f -> f.isApplicable(filterDto))
                 .reduce(
                         momentRepository.findAllByProjectId(projectId).stream(),
-                        (stream, filter) -> filter.apply(stream, filterDto),
+                        (stream, filter) -> filter.applyFilter(stream, filterDto),
                         (s1, s2) -> s1
                 )
                 .map(momentMapper::toDto)

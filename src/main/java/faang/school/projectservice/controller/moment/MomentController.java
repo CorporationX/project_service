@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.dto.filter.moment.MomentFilterDto;
 import faang.school.projectservice.service.moment.MomentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;

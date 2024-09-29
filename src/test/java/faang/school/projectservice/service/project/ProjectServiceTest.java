@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -17,9 +17,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -86,7 +88,7 @@ class ProjectServiceTest {
             Project projectEntity = new Project();
             projectEntity.setId(ID);
 
-            when(projectRepository.getProjectById(projectDto.getId())).thenReturn(projectEntity);
+            when(projectRepository.findById(projectDto.getId())).thenReturn(Optional.of(projectEntity));
             when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
             when(projectMapper.toDto(projectEntity)).thenReturn(projectDto);
 
@@ -95,7 +97,7 @@ class ProjectServiceTest {
             assertNotNull(updatedProjectDto);
             assertEquals(PROJECT_DESCRIPTION, updatedProjectDto.getDescription());
             assertEquals(ProjectStatus.IN_PROGRESS, updatedProjectDto.getStatus());
-            verify(projectRepository).getProjectById(projectDto.getId());
+            verify(projectRepository).findById(projectDto.getId());
             verify(projectRepository).save(projectEntity);
             verify(projectDtoValidator).validateUpdatedFields(projectDto);
         }
@@ -108,7 +110,7 @@ class ProjectServiceTest {
             when(projectRepository.findAll()).thenReturn(projects);
             when(projectMapper.toDtos(projects)).thenReturn(projectDtos);
 
-            List<ProjectDto> resultProjectDtos = projectService.getAllProject();
+            List<ProjectDto> resultProjectDtos = projectService.getAllProjectDto();
 
             assertNotNull(resultProjectDtos);
             assertEquals(PROJECT_DTOS_SIZE, resultProjectDtos.size());
@@ -123,14 +125,14 @@ class ProjectServiceTest {
             projectEntity.setId(ID);
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(ID);
-            when(projectRepository.getProjectById(ID)).thenReturn(projectEntity);
+            when(projectRepository.findById(ID)).thenReturn(Optional.of(projectEntity));
             when(projectMapper.toDto(projectEntity)).thenReturn(projectDto);
 
             ProjectDto existedProjectDto = projectService.getProject(ID);
 
             assertNotNull(existedProjectDto);
             assertEquals(ID, existedProjectDto.getId());
-            verify(projectRepository).getProjectById(ID);
+            verify(projectRepository).findById(ID);
         }
 
         @Test
@@ -157,7 +159,7 @@ class ProjectServiceTest {
             when(projectMapper.toDto(first)).thenReturn(firstDto);
 
             when(projectFilter.isApplicable(projectFilterDto)).thenReturn(true);
-            when(projectFilter.apply(any(Stream.class), eq(projectFilterDto))).thenReturn(Stream.of(first, second));
+            when(projectFilter.applyFilter(any(Stream.class), eq(projectFilterDto))).thenReturn(Stream.of(first, second));
             when(filters.stream()).thenReturn(Stream.of(projectFilter));
 
             List<ProjectDto> projectDtos = projectService.getProjectByNameAndStatus(projectFilterDto);
