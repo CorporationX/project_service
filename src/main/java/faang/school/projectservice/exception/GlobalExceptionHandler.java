@@ -4,7 +4,6 @@ import com.amazonaws.services.kms.model.AlreadyExistsException;
 import com.amazonaws.services.kms.model.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.ServletException;
-import jakarta.xml.bind.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -104,8 +103,6 @@ public class GlobalExceptionHandler {
         log.error("Data validation exception", e);
         return new ErrorResponse("Data validation exception", e.getMessage());
     }
-}
-
     @ExceptionHandler(StorageLimitException.class)
     @ResponseStatus(value = HttpStatus.INSUFFICIENT_STORAGE)
     public ErrorResponse handleStorageLimitExceededException(StorageLimitException e) {
@@ -119,5 +116,4 @@ public class GlobalExceptionHandler {
         log.error("Permission denied data access exception occurred", e);
         return new ErrorResponse("Permission denied data access exception occurred", e.getMessage());
     }
-
 }
