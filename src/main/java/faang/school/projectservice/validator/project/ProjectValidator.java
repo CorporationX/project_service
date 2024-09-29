@@ -27,7 +27,7 @@ public class ProjectValidator {
     }
 
     private void validateOwnerHasSameProject(ProjectDto projectDto) {
-        if (projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
+        if (projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("Owner already has a project with name " + projectDto.getName());
         }
     }

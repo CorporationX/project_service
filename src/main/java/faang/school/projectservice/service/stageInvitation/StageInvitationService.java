@@ -1,13 +1,14 @@
 package faang.school.projectservice.service.stageInvitation;
 
-import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoResponse;
 import faang.school.projectservice.dto.filter.stageinvitation.StageInvitationFilterDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoRequest;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoResponse;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationDtoMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,13 +55,14 @@ public class StageInvitationService {
         return stageInvitationFilters.stream()
                 .filter(f -> f.isApplicable(filter))
                 .reduce(stageInvitationRepository.findAll().stream(),
-                        (s , f) -> f.applyFilter(s, filter),
-                        (s1 , s2) -> s1)
+                        (s, f) -> f.applyFilter(s, filter),
+                        (s1, s2) -> s1)
                 .map(stageInvitationDtoMapper::toDto)
                 .toList();
     }
 
     private StageInvitation getStageInvitation(long stageInvitationId) {
-        return stageInvitationRepository.findById(stageInvitationId);
+        return stageInvitationRepository.findById(stageInvitationId).orElseThrow(() ->
+                new EntityNotFoundException("Stage Invitation with id " + stageInvitationId + "does not exist!"));
     }
 }

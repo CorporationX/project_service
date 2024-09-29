@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,12 +39,12 @@ class ProjectValidatorTest {
             projectDto.setName(PROJECT_NAME);
             projectDto.setDescription(PROJECT_DESCRIPTION);
             projectDto.setOwnerId(USER_ID);
-            when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
+            when(projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName()))
                     .thenReturn(false);
 
             projectValidator.validateProject(projectDto);
 
-            verify(projectRepository).existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName());
+            verify(projectRepository).existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName());
         }
     }
 
@@ -80,7 +80,7 @@ class ProjectValidatorTest {
             projectDto.setName(PROJECT_NAME);
             projectDto.setDescription(PROJECT_DESCRIPTION);
             projectDto.setOwnerId(USER_ID);
-            when(projectRepository.existsByOwnerUserIdAndName(projectDto.getOwnerId(), projectDto.getName()))
+            when(projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName()))
                     .thenReturn(true);
 
             assertThrows(DataValidationException.class,
