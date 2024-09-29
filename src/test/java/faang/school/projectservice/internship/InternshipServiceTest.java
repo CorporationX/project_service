@@ -1,6 +1,6 @@
 package faang.school.projectservice.internship;
 
-import faang.school.projectservice.dto.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.filter.InternshipFilterDto;
 import faang.school.projectservice.filter.internship.InternshipStatusFilter;
 import faang.school.projectservice.filter.internship.InternshipTeamRoleFilter;
