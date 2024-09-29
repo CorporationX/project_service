@@ -40,7 +40,6 @@ public class GoogleCalendarConfig {
     private String clientSecret;
 
     private final DataStoreFactory dataStoreFactory;
-    private final TokenService tokenService;
 
     @Bean
     public GoogleAuthorizationCodeFlow googleAuthorizationCodeFlow() throws GeneralSecurityException, IOException {
@@ -64,7 +63,7 @@ public class GoogleCalendarConfig {
     public Calendar googleCalendarClient(GoogleAuthorizationCodeFlow flow) throws IOException, GeneralSecurityException {
         log.info("Настройка клиента Google Calendar");
 
-        Credential credential = loadCredentialFromDatabase(flow);
+        Credential credential = flow.loadCredential(USER_KEY);
 
         if (credential == null) {
             String errorMsg = "OAuth токены отсутствуют. Пожалуйста, авторизуйте приложение.";
@@ -78,25 +77,5 @@ public class GoogleCalendarConfig {
                 credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
-    }
-
-    private Credential loadCredentialFromDatabase(GoogleAuthorizationCodeFlow flow) throws IOException {
-        log.info("Загрузка OAuth токенов из базы данных");
-
-        GoogleAuthToken oAuthToken = tokenService.getLatestToken();
-
-        if (oAuthToken == null) {
-            log.warn("OAuth токены отсутствуют в базе данных");
-            throw new GoogleCalendarException("OAuth токены отсутствуют в базе данных");
-        }
-
-        TokenResponse tokenResponse = new TokenResponse()
-                .setAccessToken(oAuthToken.getAccessToken())
-                .setRefreshToken(oAuthToken.getRefreshToken())
-                .setExpiresInSeconds(oAuthToken.getExpiresIn());
-
-        log.info("Создание учетных данных на основе токенов");
-
-        return flow.createAndStoreCredential(tokenResponse, USER_KEY);
     }
 }
