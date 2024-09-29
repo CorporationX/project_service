@@ -45,10 +45,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ResourceServiceTest {
     @Mock
-    UserContext userContext;
+    private UserContext userContext;
 
     @Mock
-    ValidatorService validatorService;
+    private ValidatorService validatorService;
 
     @Mock
     private ResourceRepository resourceRepository;

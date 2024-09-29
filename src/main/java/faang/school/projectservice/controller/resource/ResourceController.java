@@ -40,7 +40,7 @@ public class ResourceController {
             @Parameter(description = "Auth header x-user-id, that will be TeamMemberId", required = true, name = "x-user-id")
             @RequestHeader(value = "x-user-id") Long userId,
             @Parameter(name = "projectId", description = "ID Project", required = true)
-            @PathVariable Long projectId,
+            @Positive @PathVariable Long projectId,
             @Parameter(description = "File to upload", required = true, content = @Content(
                     mediaType = "multipart/form-data",
                     schema = @Schema(type = "string", format = "binary")
@@ -55,7 +55,7 @@ public class ResourceController {
     public ResponseEntity<ResourceDto> updateFile(
             @Parameter(description = "Auth header x-user-id, that will be TeamMemberId", required = true, name = "x-user-id")
             @RequestHeader(value = "x-user-id") Long userId,
-            @PathVariable Long resourceId,
+            @Positive @PathVariable Long resourceId,
             @Parameter(description = "File to upload", required = true, content = @Content(
                     mediaType = "multipart/form-data",
                     schema = @Schema(type = "string", format = "binary")
@@ -70,7 +70,7 @@ public class ResourceController {
     public ResponseEntity<String> deleteFile(
             @Parameter(description = "Auth header x-user-id, that will be TeamMemberId", required = true, name = "x-user-id")
             @RequestHeader(value = "x-user-id") Long userId,
-            @PathVariable Long resourceId
+            @Positive @PathVariable Long resourceId
     ) {
         resourceService.deleteResource(resourceId);
         return ResponseEntity.ok("Successfully delete resource");
