@@ -2,24 +2,24 @@ package faang.school.projectservice.service.stage_invitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class StageInvitationService {
 
     private final StageInvitationRepository repository;
     private final StageInvitationMapper mapper;
-
-    public StageInvitationService(StageInvitationRepository repository, StageInvitationMapper mapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-    }
+    private final TeamMemberRepository teamMemberRepository;
 
     public StageInvitationDto sendInvitation(StageInvitationDto dto) {
         StageInvitation invitation = mapper.toEntity(dto);
@@ -28,20 +28,40 @@ public class StageInvitationService {
         return mapper.toDto(invitation);
     }
 
-    public StageInvitationDto acceptInvitation(Long id) {
-        StageInvitation invitation = repository.findById(id);
+    public StageInvitationDto acceptInvitation(Long invitationId, Long userId) {
+        StageInvitation invitation = repository.findById(invitationId);
+
+        TeamMember invitedUser = teamMemberRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (!invitation.getInvited().getId().equals(userId)) {
+            throw new IllegalArgumentException("This user was not invited to this stage.");
+        }
+
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
         repository.save(invitation);
+
         return mapper.toDto(invitation);
     }
 
-    public StageInvitationDto declineInvitation(Long id, String reason) {
-        StageInvitation invitation = repository.findById(id);
+
+    public StageInvitationDto declineInvitation(Long invitationId, Long userId, String reason) {
+        StageInvitation invitation = repository.findById(invitationId);
+
+        TeamMember invitedUser = teamMemberRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (!invitation.getInvited().getId().equals(userId)) {
+            throw new IllegalArgumentException("This user was not invited to this stage.");
+        }
+
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(reason);
         repository.save(invitation);
+
         return mapper.toDto(invitation);
     }
+
 
     public List<StageInvitationDto> getUserInvitations(Long userId) {
         return repository.findAll().stream()

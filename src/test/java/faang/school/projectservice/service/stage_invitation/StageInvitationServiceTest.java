@@ -6,6 +6,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -15,6 +16,7 @@ import org.mockito.Spy;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +27,9 @@ public class StageInvitationServiceTest {
     @Mock
     private StageInvitationRepository repository;
 
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
+
     @Spy
     private StageInvitationMapperImpl mapper;
 
@@ -33,13 +38,14 @@ public class StageInvitationServiceTest {
 
     private StageInvitationDto invitationDto;
     private StageInvitation invitation;
+    private TeamMember invitedUser;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        TeamMember invited = new TeamMember();
-        invited.setId(2L);  // Добавляем ID
+        invitedUser = new TeamMember();
+        invitedUser.setId(2L);
 
         invitationDto = StageInvitationDto.builder()
                 .id(1L)
@@ -54,13 +60,12 @@ public class StageInvitationServiceTest {
                 .id(1L)
                 .description("Test invitation")
                 .status(StageInvitationStatus.PENDING)
-                .invited(invited)  // Присваиваем объект invited
+                .invited(invitedUser)
                 .build();
     }
 
-
     @Test
-    void testSendInvitation() {;
+    void testSendInvitation() {
         when(repository.save(any(StageInvitation.class))).thenReturn(invitation);
 
         StageInvitationDto result = service.sendInvitation(invitationDto);
@@ -73,11 +78,11 @@ public class StageInvitationServiceTest {
 
     @Test
     void testAcceptInvitation() {
-        invitation.setStatus(StageInvitationStatus.ACCEPTED);
         when(repository.findById(1L)).thenReturn(invitation);
+        when(teamMemberRepository.findById(2L)).thenReturn(Optional.of(invitedUser));
         when(repository.save(any(StageInvitation.class))).thenReturn(invitation);
 
-        StageInvitationDto result = service.acceptInvitation(1L);
+        StageInvitationDto result = service.acceptInvitation(1L, 2L);
 
         assertNotNull(result);
         assertEquals(StageInvitationStatus.ACCEPTED, result.getStatus());
@@ -87,12 +92,11 @@ public class StageInvitationServiceTest {
 
     @Test
     void testDeclineInvitation() {
-        invitation.setStatus(StageInvitationStatus.REJECTED);
-        invitation.setDescription("Reason for decline");
         when(repository.findById(1L)).thenReturn(invitation);
+        when(teamMemberRepository.findById(2L)).thenReturn(Optional.of(invitedUser));
         when(repository.save(any(StageInvitation.class))).thenReturn(invitation);
 
-        StageInvitationDto result = service.declineInvitation(1L, "Reason for decline");
+        StageInvitationDto result = service.declineInvitation(1L, 2L, "Reason for decline");
 
         assertNotNull(result);
         assertEquals(StageInvitationStatus.REJECTED, result.getStatus());
