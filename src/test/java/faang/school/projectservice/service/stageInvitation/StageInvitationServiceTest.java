@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -109,7 +110,7 @@ class StageInvitationServiceTest {
         @DisplayName("Success with accept")
         void whenInvitationAcceptThenSuccessSave() {
             when(stageInvitationRepository.findById(STAGE_INVITATION_ID))
-                    .thenReturn(stageInvitation);
+                    .thenReturn(Optional.ofNullable(stageInvitation));
 
             stageInvitationService.acceptInvitation(STAGE_INVITATION_ID);
 

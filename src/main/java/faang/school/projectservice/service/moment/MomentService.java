@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.moment;
 
-import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.filter.moment.MomentFilterDto;
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
