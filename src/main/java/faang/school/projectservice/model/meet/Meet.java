@@ -1,5 +1,6 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.meet;
 
+import faang.school.projectservice.model.Project;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +13,8 @@ import java.util.List;
 @Table(name = "meet")
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "id")
 public class Meet {

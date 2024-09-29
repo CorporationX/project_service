@@ -7,10 +7,12 @@ import faang.school.projectservice.exception.FileException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 @Service
@@ -39,5 +41,17 @@ public class S3ServiceImpl implements S3Service {
         }
 
         return key;
+    }
+
+    @Override
+    public InputStreamResource getFile(String key) {
+        InputStream s3ObjectInputStream = s3Client.getObject(bucketName, key).getObjectContent();
+
+        return new InputStreamResource(s3ObjectInputStream);
+    }
+
+    @Override
+    public void deleteFile(String key) {
+        s3Client.deleteObject(bucketName, key);
     }
 }

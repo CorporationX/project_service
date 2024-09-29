@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.error.ErrorResponse;
 import faang.school.projectservice.exception.subproject.SubProjectNotFinishedException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,10 +20,10 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalEntityException.class)
+    @ExceptionHandler({IllegalEntityException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse illegalEntityException(IllegalEntityException exception) {
-        log.error("Illegal Entity Exception occurred: {}", exception.getMessage());
+    public ErrorResponse illegalEntityException(RuntimeException exception) {
+        log.error("Exception occurred: {}", exception.getMessage());
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
     }
 

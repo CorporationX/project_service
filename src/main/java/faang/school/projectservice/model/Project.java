@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import faang.school.projectservice.model.meet.Meet;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.vacancy.Vacancy;
 import jakarta.persistence.*;
