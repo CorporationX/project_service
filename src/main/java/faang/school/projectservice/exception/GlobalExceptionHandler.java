@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
         log.error("MethodArgumentNotValidException occurred: {}", exception.getMessage());
         return exception.getBindingResult().getAllErrors().stream()
                 .collect(Collectors.toMap(
-                       error -> ((FieldError)error).getField(),
+                        error -> ((FieldError) error).getField(),
                         error -> Objects.requireNonNullElse(error.getDefaultMessage(), "")
                 ));
     }

@@ -54,3 +54,7 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+image:
+  maxWidth: 150
+  maxLength: 150
