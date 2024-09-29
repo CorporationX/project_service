@@ -16,7 +16,6 @@ import org.mockito.Spy;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +33,7 @@ public class StageInvitationServiceTest {
     private StageInvitationMapperImpl mapper;
 
     @InjectMocks
-    private StageInvitationService service;
+    private StageInvitationServiceImpl service; // Изменено на StageInvitationServiceImpl
 
     private StageInvitationDto invitationDto;
     private StageInvitation invitation;
@@ -45,7 +44,7 @@ public class StageInvitationServiceTest {
         MockitoAnnotations.openMocks(this);
 
         invitedUser = new TeamMember();
-        invitedUser.setId(2L);
+        invitedUser.setId(2L);  // Добавляем ID
 
         invitationDto = StageInvitationDto.builder()
                 .id(1L)
@@ -79,7 +78,7 @@ public class StageInvitationServiceTest {
     @Test
     void testAcceptInvitation() {
         when(repository.findById(1L)).thenReturn(invitation);
-        when(teamMemberRepository.findById(2L)).thenReturn(Optional.of(invitedUser));
+        when(teamMemberRepository.findById(2L)).thenReturn(java.util.Optional.of(invitedUser));
         when(repository.save(any(StageInvitation.class))).thenReturn(invitation);
 
         StageInvitationDto result = service.acceptInvitation(1L, 2L);
@@ -93,7 +92,7 @@ public class StageInvitationServiceTest {
     @Test
     void testDeclineInvitation() {
         when(repository.findById(1L)).thenReturn(invitation);
-        when(teamMemberRepository.findById(2L)).thenReturn(Optional.of(invitedUser));
+        when(teamMemberRepository.findById(2L)).thenReturn(java.util.Optional.of(invitedUser));
         when(repository.save(any(StageInvitation.class))).thenReturn(invitation);
 
         StageInvitationDto result = service.declineInvitation(1L, 2L, "Reason for decline");
