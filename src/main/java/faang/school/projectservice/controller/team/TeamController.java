@@ -36,7 +36,7 @@ public class TeamController {
     }
 
     @GetMapping("/teamMembers/filter")
-    public List<TeamMemberDto> getTeamMembersByFilter(@RequestBody TeamFilterDto filters) {
+    public List<TeamMemberDto> getTeamMembersByFilter(TeamFilterDto filters) {
         return teamMemberService.getTeamMembersByFilter(filters);
     }
 
