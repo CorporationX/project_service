@@ -35,8 +35,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class S3ServiceTest {
-    // TODO create tests
-
     @Mock
     private AmazonS3 s3Client;
 
