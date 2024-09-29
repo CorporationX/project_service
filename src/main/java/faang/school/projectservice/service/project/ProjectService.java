@@ -80,4 +80,8 @@ public class ProjectService {
     public List<Project> getProjectByIds(List<Long> ids) {
         return projectRepository.findAllByIds(ids);
     }
+
+    public Project getProjectEntity(long id){
+        return projectRepository.getProjectById(id);
+    }
 }
