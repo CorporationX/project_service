@@ -95,11 +95,10 @@ val jacocoExcludePackAgeList = listOf(
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
-    dependsOn(tasks.jacocoTestCoverageVerification)
 
     reports {
         xml.required.set(true)
-        csv.required.set(true)
+        csv.required.set(false)
         html.required.set(true)
     }
 
@@ -117,12 +116,12 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = "0.00".toBigDecimal() // поскольку тестов нет, минимум сбрасываю в 0
+                minimum = "0.70".toBigDecimal()
             }
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = "0.00".toBigDecimal() // поскольку тестов нет, минимум сбрасываю в 0
+                minimum = "0.70".toBigDecimal()
             }
 
         }
