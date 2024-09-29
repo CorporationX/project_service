@@ -4,6 +4,7 @@ import com.amazonaws.services.kms.model.AlreadyExistsException;
 import com.amazonaws.services.kms.model.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.ServletException;
+import jakarta.xml.bind.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import software.amazon.ion.NullValueException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
@@ -50,27 +52,27 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(value = HttpStatus.CONFLICT)
-    public ErrorResponse handleAlreadyExistsException(IllegalStateException e) {
+    public ErrorResponse handleIllegalStateException(IllegalStateException e) {
         log.error("Illegal state exception occurred", e);
         return new ErrorResponse("Illegal state exception occurred", e.getMessage());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public ErrorResponse handleAlreadyExistsException(EntityNotFoundException e) {
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException e) {
         log.error("Entity not found exception occurred", e);
         return new ErrorResponse("Entity not found exception occurred", e.getMessage());
     }
 
     @ExceptionHandler(ServletException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public ErrorResponse handleAlreadyExistsException(ServletException e) {
+    public ErrorResponse handleServletException(ServletException e) {
         log.error("Servlet exception occurred: ", e);
         return new ErrorResponse("Servlet exception occurred", e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Object> handleMethodArgumentNotValidExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -86,6 +88,20 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleException(Exception e) {
         log.error("Servlet exception occurred: ", e);
         return new ErrorResponse("Servlet exception occurred", e.getMessage());
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoSuchElementException(NoSuchElementException e) {
+        log.error("No such element exception occurred", e);
+        return new ErrorResponse("No such element exception occurred", e.getMessage());
+    }
+
+    @ExceptionHandler(DataValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleDataValidationException(DataValidationException e) {
+        log.error("Data validation exception", e);
+        return new ErrorResponse("Data validation exception", e.getMessage());
     }
 }
 
