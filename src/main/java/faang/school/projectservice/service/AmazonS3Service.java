@@ -51,7 +51,7 @@ public class AmazonS3Service {
             log.info("Файл успешно загружен из Minio: key={}", key);
             return s3Object.getObjectContent();
         } catch (Exception e) {
-            log.info("Ошибка при загрузке файла из Minio: key={}, error={}", key, e.getMessage(), e);
+            log.error("Ошибка при загрузке файла из Minio: key={}, error={}", key, e.getMessage(), e);
             throw new RuntimeException("Ошибка при загрузке файла из Minio", e);
         }
     }
@@ -62,7 +62,7 @@ public class AmazonS3Service {
             amazonS3Client.deleteObject(bucketName, key);
             log.info("Файл успешно удален из Minio: key={}", key);
         } catch (Exception e) {
-            log.info("Ошибка при удалении файла из Minio: key={}, error={}", key, e.getMessage(), e);
+            log.error("Ошибка при удалении файла из Minio: key={}, error={}", key, e.getMessage(), e);
             throw new RuntimeException("Ошибка при удалении файла из Minio", e);
         }
     }

@@ -22,17 +22,17 @@ import java.io.InputStream;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @PutMapping("/{projectId}/cover-image/add")
+    @PutMapping("/{projectId}/cover-image")
     public ProjectDto uploadCoverImage(@PathVariable long projectId, @RequestParam @NotNull MultipartFile file) {
         return projectService.uploadCoverImage(projectId, file);
     }
 
-    @GetMapping("/{projectId}/cover-image/download")
+    @GetMapping("/{projectId}/cover-image")
     public InputStream downloadCoverImageBy(@PathVariable long projectId) {
         return projectService.downloadCoverImage(projectId);
     }
 
-    @DeleteMapping("/{projectId}/cover-image/delete")
+    @DeleteMapping("/{projectId}/cover-image")
     public ProjectDto deleteCoverImage(@PathVariable @NotBlank long projectId) {
         return projectService.deleteCoverImage(projectId);
     }
