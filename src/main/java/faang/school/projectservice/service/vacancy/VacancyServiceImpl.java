@@ -18,14 +18,17 @@ import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.filter.VacancyFilter;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class VacancyServiceImpl implements VacancyService{
 
     private final VacancyRepository vacancyRepository;
@@ -37,7 +40,7 @@ public class VacancyServiceImpl implements VacancyService{
 
     @Override
     @Transactional
-    public VacancyDto create(VacancyDto vacancyDto) {
+    public VacancyDto create(@Valid VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         Project project = setProjectById(vacancyDto, vacancy);
 
@@ -51,7 +54,7 @@ public class VacancyServiceImpl implements VacancyService{
 
     @Override
     @Transactional
-    public VacancyDto update(VacancyDto vacancyDto) {
+    public VacancyDto update(@Valid VacancyDto vacancyDto) {
         if (vacancyRepository.findById(vacancyDto.getId()).isPresent()) {
             Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
             setProjectById(vacancyDto, vacancy);
@@ -70,7 +73,7 @@ public class VacancyServiceImpl implements VacancyService{
 
     @Override
     @Transactional
-    public VacancyDto delete(VacancyDto vacancyDto) {
+    public VacancyDto delete(@Valid VacancyDto vacancyDto) {
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
 
         for (Team team : project.getTeams()) {
@@ -87,7 +90,7 @@ public class VacancyServiceImpl implements VacancyService{
     }
 
     @Override
-    public List<VacancyDto> getVacanciesByFilter(VacancyFilterDto filters) {
+    public List<VacancyDto> getVacanciesByFilter(@Valid VacancyFilterDto filters) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
         return vacancyFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
@@ -97,7 +100,7 @@ public class VacancyServiceImpl implements VacancyService{
     }
 
     @Override
-    public VacancyDto getVacancyById(VacancyDto vacancyDto) {
+    public VacancyDto getVacancyById(@Valid VacancyDto vacancyDto) {
         Vacancy vacancy =  vacancyRepository.findById(vacancyDto.getId())
                 .orElseThrow(() -> new DataValidationException("Vacancy is null"));
 
