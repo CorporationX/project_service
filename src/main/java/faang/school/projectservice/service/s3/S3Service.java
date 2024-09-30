@@ -3,8 +3,10 @@ package faang.school.projectservice.service.s3;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,18 +21,21 @@ import java.io.IOException;
 @Slf4j
 public class S3Service {
 
-    @Value("${services.s3.bucketname}")
+    @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    private final AmazonS3 amazonS3;
+    private final AmazonS3 amazonS3Client;
 
     public void saveObject(MultipartFile file, Resource resource) {
         try {
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentLength(file.getResource().contentLength());
+            objectMetadata.setContentType(file.getContentType());
             PutObjectRequest request =
                     new PutObjectRequest(bucketName,
-                            resource.getKey() + "/" + resource.getProject().getId(), file.getInputStream(),
-                            amazonS3.getObjectMetadata(bucketName, resource.getKey()));
-            amazonS3.putObject(request);
+                            resource.getProject().getName() + "/" + resource.getKey(), file.getInputStream(),
+                            objectMetadata);
+            amazonS3Client.putObject(request);
             log.debug("Successfully uploaded file! {}", file.getName());
         } catch (IOException e) {
             log.error("Something's gone wrong while uploading file! {}", (Object) e.getStackTrace());
@@ -38,14 +43,15 @@ public class S3Service {
     }
 
     public void deleteObject(Resource resource) {
-        DeleteObjectRequest request = new DeleteObjectRequest(bucketName,
-                resource.getKey() + "/" + resource.getProject().getId());
-        amazonS3.deleteObject(request);
-        log.debug("Successfully deleted file with id");
+        DeleteObjectRequest request = new DeleteObjectRequest(bucketName, resource.getProject().getName() +
+                "/" + resource.getKey());
+        amazonS3Client.deleteObject(request);
+        log.debug("Successfully deleted file with key {}", resource.getKey());
     }
 
     public S3Object getObject(Resource resource) {
-        return amazonS3.getObject(new GetObjectRequest(bucketName,
-                resource.getKey() + "/" + resource.getProject().getId()));
+        GetObjectRequest request = new GetObjectRequest(bucketName, resource.getProject().getName() + "/" +
+                resource.getKey());
+        return amazonS3Client.getObject(request);
     }
 }

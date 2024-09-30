@@ -1,7 +1,6 @@
 package faang.school.projectservice.mapper.resource;
 
 import faang.school.projectservice.dto.resource.ResourceResponseDto;
-import faang.school.projectservice.dto.resource.ResourceUpdateDto;
 import faang.school.projectservice.model.Resource;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,6 +12,4 @@ public interface ResourceMapper {
     @Mapping(source = "updatedBy.id", target = "updatedById")
     @Mapping(source = "project.id", target = "projectId")
     ResourceResponseDto toResponseDto(Resource resource);
-
-    Resource toEntity(ResourceUpdateDto resourceUpdateDto);
 }

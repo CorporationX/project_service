@@ -25,14 +25,13 @@ public class ResourceController {
 
     @PutMapping("/{projectId}/upload/{memberId}")
     public ResourceResponseDto upload(@RequestParam("file") MultipartFile file,
-                                         @PathVariable Long projectId, @PathVariable Long memberId) {
-        return resourceService.saveResource(file , projectId, memberId);
+                                      @PathVariable Long projectId, @PathVariable Long memberId) {
+        return resourceService.saveResource(file, projectId, memberId);
     }
 
-    @PostMapping("/update/{teamMemberId}")
-    public ResourceResponseDto reload(@RequestBody ResourceUpdateDto resourceUpdateDto,
-                                      @PathVariable Long teamMemberId) {
-        return resourceService.updateFileInfo(resourceUpdateDto, teamMemberId);
+    @PostMapping("/update")
+    public ResourceResponseDto reload(@RequestBody ResourceUpdateDto resourceUpdateDto) {
+        return resourceService.updateFileInfo(resourceUpdateDto);
     }
 
     @DeleteMapping("/{resourceId}/{teamMemberId}")
@@ -41,8 +40,8 @@ public class ResourceController {
         return ResponseEntity.ok("File was successfully deleted!");
     }
 
-    @GetMapping("/{id}")
-    public MultipartFile getResource(Long resourceId) {
+    @GetMapping("/{resourceId}")
+    public MultipartFile getResource(@PathVariable Long resourceId) {
         return resourceService.downloadFile(resourceId);
     }
 }
