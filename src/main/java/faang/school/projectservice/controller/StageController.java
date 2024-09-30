@@ -25,7 +25,7 @@ public class StageController {
     private final StageService service;
 
     @PutMapping("/create")
-    public void create(@RequestBody StageDto stageDto) {
+    public void create(@Valid@RequestBody StageDto stageDto) {
         service.create(stageDto);
     }
 
@@ -42,18 +42,18 @@ public class StageController {
     }
 
     @DeleteMapping
-    public void deleteStage(@RequestBody StageDto stageDto) {
+    public void deleteStage(@Valid@RequestBody StageDto stageDto) {
         service.deleteStage(stageDto);
     }
 
     @GetMapping("/filter/{projectId}")
     public List<StageDto> getFilteredStages(@PathVariable("projectId") @NotNull Long projectId,
-                                            @RequestBody StageFilterDto filterDto) {
+                                            @Valid@RequestBody StageFilterDto filterDto) {
         return service.getFilteredStages(projectId, filterDto);
     }
 
     @PutMapping("/update")
-    public void update(@RequestBody StageDto dto) {
+    public void update(@Valid@RequestBody StageDto dto) {
         service.updateStage(dto);
     }
 }
