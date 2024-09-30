@@ -80,4 +80,11 @@ public class GlobalExceptionHandler {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
     }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ResourceHandlingException.class)
+    public ErrorResponse handleResourceHandlingException(ResourceHandlingException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ErrorResponse(ex.getMessage());
+    }
 }

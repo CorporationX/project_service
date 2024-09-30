@@ -1,6 +1,5 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +15,16 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
         "AND t.project.id = :projectId"
     )
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
+
+    @Query(
+            """
+                    SELECT CASE WHEN COUNT(tm) > 0 THEN TRUE ELSE FALSE END\
+                    FROM TeamMember tm JOIN tm.team t \
+                    WHERE tm.userId = :userId \
+                    AND t.project.id = :projectId
+            """
+    )
+    boolean existsByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
 }
