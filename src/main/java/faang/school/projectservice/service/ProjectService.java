@@ -1,5 +1,10 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.client.ProjectFilterDto;
+import faang.school.projectservice.dto.client.TeamMemberDto;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.FilterSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
@@ -8,6 +13,21 @@ import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import java.util.List;
 
 public interface ProjectService {
+
+    void createProject(ProjectDto projectDto);
+
+    void updateStatus(ProjectDto projectDto, ProjectStatus status);
+
+    void updateDescription(ProjectDto projectDto, String description);
+
+    List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto, TeamMemberDto requester);
+
+    List<ProjectDto> getProjects();
+
+    boolean checkUserByPrivateProject(Project project, long requester);
+
+    ProjectDto findById(long id);
+
     ProjectDto createSubProject(long ownerId, CreateSubProjectDto createSubProjectDto);
 
     ProjectDto updateSubProject(long userId, UpdateSubProjectDto updateSubProjectDto);

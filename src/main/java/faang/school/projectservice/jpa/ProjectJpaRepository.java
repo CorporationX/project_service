@@ -14,5 +14,7 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long>, Quer
                     "WHERE p.ownerId = :ownerId AND p.name = :name"
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
+
+    Project getById(long id);
 }
 
