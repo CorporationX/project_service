@@ -48,7 +48,7 @@ class ResourceServiceImplTest {
     ResourceMapper resourceMapper;
 
     @Test
-    void addResource() throws IOException, ImageReadException {
+    void testAddResource_Success() throws IOException, ImageReadException {
         Long projectId = 1L;
         Project project = new Project();
         project.setId(projectId);
@@ -90,7 +90,7 @@ class ResourceServiceImplTest {
     }
 
     @Test
-    void updateResource() throws IOException, ImageReadException  {
+    void testUpdateResource_Success() throws IOException, ImageReadException  {
         Long userDtoId = 1L;
         Long projectId = 1L;
         Long resourceId = 123L;
@@ -149,7 +149,7 @@ class ResourceServiceImplTest {
     }
 
     @Test
-    void deleteResource() {
+    void testDeleteResource_Success() {
         Resource resource = new Resource();
         resourceRepository.delete(resource);
         verify(resourceRepository, times(1)).delete(resource);

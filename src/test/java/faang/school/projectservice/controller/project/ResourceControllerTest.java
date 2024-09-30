@@ -51,14 +51,14 @@ class ResourceControllerTest {
     }
 
     @Test
-    void addResource() throws IOException, ImageReadException {
+    void testAddResource_Success() throws IOException, ImageReadException {
         long projectId = 1L;
         resourceService.addResource(projectId, file);
         verify(resourceService).addResource(projectId, file);
     }
 
     @Test
-    void deleteResource() {
+    void testUpdateResource_Success() {
         long projectId = 1L;
         long userId = 1L;
         resourceService.deleteResource(projectId, userId);
@@ -66,7 +66,7 @@ class ResourceControllerTest {
     }
 
     @Test
-    void updateResource() throws IOException, ImageReadException {
+    void testDeleteResource_Success() throws IOException, ImageReadException {
         long resourceId = 1L;
         long userId = 1L;
         resourceService.updateResource(resourceId, userId, file);
