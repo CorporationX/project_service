@@ -1,8 +1,8 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.meet;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
-import faang.school.projectservice.exception.MeetValidationException;
+import faang.school.projectservice.exception.meet.MeetValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

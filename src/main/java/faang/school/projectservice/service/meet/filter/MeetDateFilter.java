@@ -1,6 +1,5 @@
-package faang.school.projectservice.service.filter;
+package faang.school.projectservice.service.meet.filter;
 
-import faang.school.projectservice.dto.MeetFilters;
 import faang.school.projectservice.model.Meet;
 import org.springframework.stereotype.Component;
 

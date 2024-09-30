@@ -1,5 +1,6 @@
 package faang.school.projectservice.exception;
 
+import faang.school.projectservice.exception.meet.MeetValidationException;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;

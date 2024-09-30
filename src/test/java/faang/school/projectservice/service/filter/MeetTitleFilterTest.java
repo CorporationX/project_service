@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.filter;
 
+import faang.school.projectservice.service.meet.filter.MeetTitleFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

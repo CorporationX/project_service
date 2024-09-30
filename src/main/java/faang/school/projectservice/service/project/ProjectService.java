@@ -20,4 +20,9 @@ public class ProjectService {
 
         projectRepository.save(project);
     }
+
+    @Transactional(readOnly = true)
+    public Project getProjectById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
 }

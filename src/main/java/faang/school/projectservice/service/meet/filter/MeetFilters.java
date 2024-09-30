@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.service.meet.filter;
 
 import lombok.Data;
 

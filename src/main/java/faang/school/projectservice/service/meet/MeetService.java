@@ -1,12 +1,13 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.meet;
 
-import faang.school.projectservice.dto.MeetFilters;
+import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.meet.filter.MeetFilters;
 import faang.school.projectservice.jpa.MeetRepository;
-import faang.school.projectservice.mapper.MeetMapper;
+import faang.school.projectservice.mapper.meet.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
-import faang.school.projectservice.service.filter.MeetFilter;
-import faang.school.projectservice.validator.MeetValidator;
+import faang.school.projectservice.service.meet.filter.MeetFilter;
+import faang.school.projectservice.validator.meet.MeetValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

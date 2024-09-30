@@ -1,12 +1,12 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.meet;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.CreateMeetDto;
-import faang.school.projectservice.dto.MeetDto;
-import faang.school.projectservice.dto.MeetFilters;
-import faang.school.projectservice.dto.UpdateMeetDto;
-import faang.school.projectservice.mapper.MeetMapper;
-import faang.school.projectservice.service.MeetService;
+import faang.school.projectservice.dto.meet.CreateMeetDto;
+import faang.school.projectservice.dto.meet.MeetDto;
+import faang.school.projectservice.service.meet.filter.MeetFilters;
+import faang.school.projectservice.dto.meet.UpdateMeetDto;
+import faang.school.projectservice.mapper.meet.MeetMapper;
+import faang.school.projectservice.service.meet.MeetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;

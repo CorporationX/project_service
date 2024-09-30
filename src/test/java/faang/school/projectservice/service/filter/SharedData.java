@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.filter;
 
-import faang.school.projectservice.dto.MeetFilters;
 import faang.school.projectservice.model.Meet;
+import faang.school.projectservice.service.meet.filter.MeetFilters;
 import lombok.Data;
 
 import java.time.LocalDateTime;

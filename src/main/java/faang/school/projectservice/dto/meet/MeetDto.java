@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.meet;
 
 import faang.school.projectservice.model.MeetStatus;
 import lombok.Data;

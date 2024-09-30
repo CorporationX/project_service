@@ -1,8 +1,8 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.meet;
 
-import faang.school.projectservice.dto.CreateMeetDto;
-import faang.school.projectservice.dto.MeetDto;
-import faang.school.projectservice.dto.UpdateMeetDto;
+import faang.school.projectservice.dto.meet.CreateMeetDto;
+import faang.school.projectservice.dto.meet.MeetDto;
+import faang.school.projectservice.dto.meet.UpdateMeetDto;
 import faang.school.projectservice.model.Meet;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;

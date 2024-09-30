@@ -1,4 +1,4 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.exception.meet;
 
 public class MeetValidationException extends RuntimeException {
     public MeetValidationException(String format, Object... args) {
