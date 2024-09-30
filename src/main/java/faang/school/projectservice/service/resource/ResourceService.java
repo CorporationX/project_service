@@ -1,9 +1,9 @@
 package faang.school.projectservice.service.resource;
 
-import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.repository.ResourceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
