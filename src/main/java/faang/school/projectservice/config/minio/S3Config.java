@@ -1,4 +1,4 @@
-package faang.school.projectservice.config.context;
+package faang.school.projectservice.config.minio;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -27,6 +27,7 @@ public class S3Config {
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, null))
+                .withPathStyleAccessEnabled(true)
                 .build();
     }
 }
