@@ -20,7 +20,6 @@ public class InternshipValidator {
 
     public void validateInternship(InternshipDto internshipDto) {
         validateInternshipDuration(internshipDto);
-        validateInternshipHaveProjectAndInterns(internshipDto);
     }
 
     public void validateInternshipProjectAndMentorExist(Project project, TeamMember mentor) {
@@ -31,17 +30,6 @@ public class InternshipValidator {
         if (mentor == null) {
             log.error("Couldn't find mentor in database!");
             throw new EntityNotFoundException("Mentor doesn't exist!");
-        }
-    }
-
-    private void validateInternshipHaveProjectAndInterns(InternshipDto internshipDto) {
-        if (internshipDto.getProjectId() == null) {
-            log.error("Missing project field!");
-            throw new DataValidationException("Internship project field can't be null!");
-        }
-        if (internshipDto.getInterns() == null || internshipDto.getInterns().isEmpty()) {
-            log.error("Missing interns field!");
-            throw new DataValidationException("Internship can't be created without interns!");
         }
     }
 

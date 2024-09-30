@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,8 +15,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ProjectDto {
     private Long id;
+
+    @NotBlank(message = "Field name cannot be empty or null")
     private String name;
+
+    @NotBlank(message = "Field description cannot be empty or null")
     private String description;
+
     private Long ownerId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

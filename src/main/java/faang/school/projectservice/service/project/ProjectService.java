@@ -53,14 +53,8 @@ public class ProjectService {
         Project existedProject = projectRepository.findById(projectDto.getId()).orElseThrow(() ->
                 new EntityNotFoundException("Project with id" + projectDto.getId() + "does not exist"));
 
-        if (projectDto.getDescription() != null && !projectDto.getDescription().isBlank()) {
-            existedProject.setDescription(projectDto.getDescription());
-        }
-
-        if (projectDto.getStatus() != null) {
-            existedProject.setStatus(projectDto.getStatus());
-        }
-
+        existedProject.setDescription(projectDto.getDescription());
+        existedProject.setStatus(projectDto.getStatus());
         existedProject.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(existedProject);
 

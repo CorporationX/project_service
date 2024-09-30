@@ -3,14 +3,10 @@ package faang.school.projectservice.controller.internship;
 import faang.school.projectservice.dto.filter.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.service.internship.InternshipService;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -42,7 +38,7 @@ public class InternshipController {
     }
 
     @GetMapping("/{id}")
-    public InternshipDto getInternship(@PathVariable Long id) {
+    public InternshipDto getInternship(@PathVariable("id") @Positive Long id) {
         return internshipService.getInternshipById(id);
     }
 }

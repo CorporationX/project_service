@@ -38,10 +38,11 @@ public class InternshipService {
     private final ProjectService projectService;
 
     public InternshipDto create(InternshipDto internshipDto) {
-        if (internshipDto == null) {
-            log.error("Passing null internship body!");
-            throw new DataValidationException("Null internship object passed!");
-        }
+        // нужна ли эта проверка если у нас есть @RequestBody?
+        //        if (internshipDto == null) {
+//            log.error("Passing null internship body!");
+//            throw new DataValidationException("Null internship object passed!");
+//        }
         internshipValidator.validateInternship(internshipDto);
         Project project = projectService.getProjectById(internshipDto.getProjectId());
         TeamMember mentor = teamMemberService.getTeamMemberById(internshipDto.getMentorId().getId());
@@ -74,10 +75,10 @@ public class InternshipService {
     }
 
     public List<InternshipDto> getFilteredInternship(InternshipFilterDto filterDto) {
-        if (filterDto == null) {
-            log.error("Filters parameter is null!");
-            throw new DataValidationException("Filter can't be null!");
-        }
+//        if (filterDto == null) {
+//            log.error("Filters parameter is null!");
+//            throw new DataValidationException("Filter can't be null!");
+//        }
         Stream<Internship> internships = internshipRepository.findAll().stream();
         return internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))

@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoRequest
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.stageInvitation.StageInvitationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +26,12 @@ public class StageInvitationController {
     }
 
     @PatchMapping("/{id}/accept")
-    public StageInvitationDtoResponse acceptInvitation(@PathVariable long id) {
+    public StageInvitationDtoResponse acceptInvitation(@PathVariable("id") @Positive long id) {
         return stageInvitationService.acceptInvitation(id);
     }
 
     @PatchMapping("/{id}/reject")
-    public StageInvitationDtoResponse rejectInvitation(@PathVariable long id,
+    public StageInvitationDtoResponse rejectInvitation(@PathVariable("id") @Positive long id,
                                                        @Valid @RequestBody StageInvitationDtoRequest stageInvDtoRequest) {
         return stageInvitationService.rejectInvitation(id, stageInvDtoRequest);
     }
