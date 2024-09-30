@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class VacancyFilterDto {
 
     @NotBlank
-    @Size(max = 50)
+    @Size(max = 255)
     private String namePattern;
     private VacancyStatus statusPattern;
 }
