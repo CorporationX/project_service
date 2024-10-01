@@ -34,7 +34,7 @@ dependencies {
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
     implementation("org.apache.commons:commons-imaging:1.0-alpha3")
-
+    implementation("org.springframework:spring-mock:2.0.8")
     /**
      * Utils & Logging
      */

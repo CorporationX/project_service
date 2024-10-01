@@ -10,6 +10,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import org.apache.commons.imaging.ImageReadException;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,75 +48,70 @@ class ResourceServiceImplTest {
     @Mock
     ResourceMapper resourceMapper;
 
-    @Test
-    void testAddResource_Success() throws IOException, ImageReadException {
-        Long projectId = 1L;
-        Project project = new Project();
-        project.setId(projectId);
-        project.setName("testProject");
-        project.setStorageSize(BigInteger.ZERO);
-        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+    MultipartFile file;
+    Project project = new Project();
+    Resource resourceFromBD = new Resource();
+    TeamMember teamMember = new TeamMember();
+    Resource uploadedResource = new Resource();
+    Resource resource = new Resource();
+    Long userDtoId = 1L;
+    Long projectId = 1L;
+    Long resourceId = 123L;
 
-        Resource resource = new Resource();
-        resource.setId(123L);
-        when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
-
-        Resource uploadedResource = new Resource();
-        uploadedResource.setName("test.jpg");
-        uploadedResource.setKey("test.jpg");
-        uploadedResource.setSize(BigInteger.valueOf(1024));
-        uploadedResource.setType(ResourceType.IMAGE);
-        when(s3Service.uploadFile(any(MultipartFile.class), anyString())).thenReturn(uploadedResource);
-
-        ResourceDto resourceDto = new ResourceDto();
-        when(resourceMapper.toDto(any(Resource.class))).thenReturn(resourceDto);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
-        ImageIO.write(image, "jpg", baos);
-        byte[] fileContent = baos.toByteArray();
-        MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", fileContent); //  Имитация файла
-
-        ResourceDto result = resourceService.addResource(projectId, file);
-
-        verify(projectRepository, times(1)).getProjectById(anyLong());
-        verify(resourceRepository, times(1)).save(any(Resource.class));
-        verify(s3Service, times(1)).uploadFile(file, projectId + "testProject");
-
-        verify(projectRepository, times(1)).save(project);
-        assertEquals(BigInteger.valueOf(823), project.getStorageSize());
-        assertEquals(String.valueOf(resource.getId()), project.getCoverImageId());
-
-        assertEquals(resourceDto, result);
-    }
-
-    @Test
-    void testUpdateResource_Success() throws IOException, ImageReadException  {
-        Long userDtoId = 1L;
-        Long projectId = 1L;
-        Long resourceId = 123L;
-
-        Project project = new Project();
+    @BeforeEach
+    void setUp() throws IOException {
         project.setId(projectId);
         project.setName("testProject");
         project.setStorageSize(BigInteger.ZERO);
 
-        Resource resourceFromBD = new Resource();
         resourceFromBD.setId(resourceId);
         resourceFromBD.setKey("old_key.jpg");
         resourceFromBD.setSize(BigInteger.valueOf(512));
         resourceFromBD.setProject(project);
 
-        TeamMember teamMember = new TeamMember();
         teamMember.setUserId(userDtoId);
         resourceFromBD.setCreatedBy(teamMember);
 
-        Resource uploadedResource = new Resource();
+        resource.setId(123L);
+
         uploadedResource.setName("test.jpg");
         uploadedResource.setKey("new_key.jpg");
         uploadedResource.setSize(BigInteger.valueOf(1024));
         uploadedResource.setType(ResourceType.IMAGE);
 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        ImageIO.write(image, "jpg", baos);
+        byte[] fileContent = baos.toByteArray();
+        file = new MockMultipartFile("file", "test.jpg", "image/jpeg", fileContent);
+    }
+
+    @Test
+    void testAddResource_Success() throws IOException, ImageReadException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        ImageIO.write(image, "jpg", baos);
+        byte[] fileContent = baos.toByteArray();
+        MultipartFile file1 = new MockMultipartFile("file", "test.jpg", "image/jpeg", fileContent);
+        ResourceDto resourceDto = new ResourceDto();
+
+        when(projectRepository.getProjectById(anyLong())).thenReturn(project);
+        when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
+        when(s3Service.uploadFile(any(MultipartFile.class), eq(projectId + "testProject"))).thenReturn(uploadedResource);
+        when(resourceMapper.toDto(any(Resource.class))).thenReturn(resourceDto);
+        ResourceDto result = resourceService.addResource(projectId, file1);
+
+        verify(projectRepository, times(1)).getProjectById(anyLong());
+        verify(resourceRepository, times(1)).save(any(Resource.class));
+        verify(s3Service, times(1)).uploadFile(file1, projectId + "testProject");
+        verify(projectRepository, times(1)).save(project);
+        assertEquals(BigInteger.valueOf(823), project.getStorageSize());
+        assertEquals(String.valueOf(resource.getId()), project.getCoverImageId());
+        assertEquals(resourceDto, result);
+    }
+
+    @Test
+    void testUpdateResource_Success() throws IOException, ImageReadException  {
         when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resourceFromBD));
         when(s3Service.uploadFile(any(MultipartFile.class), anyString())).thenReturn(uploadedResource);
         when(resourceRepository.save(any(Resource.class))).thenReturn(resourceFromBD);
@@ -124,27 +120,17 @@ class ResourceServiceImplTest {
         ResourceDto resourceDto = new ResourceDto();
         when(resourceMapper.toDto(any(Resource.class))).thenReturn(resourceDto);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
-        ImageIO.write(image, "jpg", baos);
-        byte[] fileContent = baos.toByteArray();
-        MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", fileContent);
-
-
         ResourceDto result = resourceService.updateResource(resourceId, userDtoId, file);
 
         verify(resourceRepository, times(1)).findById(resourceId);
         verify(s3Service, times(1)).uploadFile(file, projectId + "testProject");
         verify(resourceRepository, times(1)).save(resourceFromBD);
         verify(projectRepository, times(1)).save(project);
-
         assertEquals(uploadedResource.getKey(), resourceFromBD.getKey());
         assertEquals(uploadedResource.getSize(), resourceFromBD.getSize());
         assertEquals(uploadedResource.getName(), resourceFromBD.getName());
         assertEquals(uploadedResource.getType(), resourceFromBD.getType());
-
         assertEquals(BigInteger.valueOf(823), project.getStorageSize());
-
         assertEquals(resourceDto, result);
     }
 
@@ -153,5 +139,15 @@ class ResourceServiceImplTest {
         Resource resource = new Resource();
         resourceRepository.delete(resource);
         verify(resourceRepository, times(1)).delete(resource);
+    }
+
+    @Test
+    void testNotPermissions_Exception() {
+        when(resourceRepository.findById(resourceId)).thenReturn(Optional.ofNullable(resource));
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            Long userId = 2L;
+            resourceService.deleteResource(project.getId(), userId);
+        });
     }
 }

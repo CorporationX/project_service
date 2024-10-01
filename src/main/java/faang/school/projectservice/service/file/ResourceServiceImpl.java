@@ -12,10 +12,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.imaging.ImageInfo;
 import org.apache.commons.imaging.ImageReadException;
 import org.apache.commons.imaging.Imaging;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -35,10 +40,10 @@ public class ResourceServiceImpl implements ResourceService {
         var project = projectRepository.getProjectById(projectId);
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
-        checkResourceSize(file);
+        MultipartFile newFile = checkResourceSize(file);
 
         String folder = project.getId() + project.getName();
-        Resource resource = s3Service.uploadFile(file, folder);
+        Resource resource = s3Service.uploadFile(newFile, folder);
         resource.setProject(project);
         resource = resourceRepository.save(resource);
 
@@ -55,7 +60,7 @@ public class ResourceServiceImpl implements ResourceService {
         var project = resourceFromBD.getProject();
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
-        checkResourceSize(file);
+        MultipartFile newFile = checkResourceSize(file);
 
         String folder = project.getId() + project.getName();
         s3Service.deleteFile(resourceFromBD.getKey());
@@ -95,7 +100,7 @@ public class ResourceServiceImpl implements ResourceService {
         }
     }
 
-    private void checkResourceSize(MultipartFile file) throws IOException, ImageReadException {
+    private MultipartFile checkResourceSize(MultipartFile file) throws IOException, ImageReadException {
         long fileSize = file.getSize();
         long maxSizeByte = 5242880;
         if (fileSize > maxSizeByte) {
@@ -103,22 +108,51 @@ public class ResourceServiceImpl implements ResourceService {
         }
 
         String fileName = file.getOriginalFilename();
-        InputStream inputStream = file.getInputStream();
-        ImageInfo imageInfo = Imaging.getImageInfo(inputStream, fileName);
+
+        ImageInfo imageInfo;
+        try (InputStream inputStream = file.getInputStream()) {
+            imageInfo = Imaging.getImageInfo(inputStream, fileName);
+        }
 
         int width = imageInfo.getWidth();
         int height = imageInfo.getHeight();
 
         if(width == height) {
             if(width > 1080) {
-                throw new IllegalArgumentException("The file resolution is more than 1080 by 1080");
+            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+            BufferedImage lala = resizeImage(bufferedImage, 1080, 1080);
+            return convertBufferedImageToMultipartFile(lala, file.getOriginalFilename(), file.getContentType());
             }
         } else if(width > height) {
             if (width > 1080 || height > 566) {
-                throw new IllegalArgumentException("The file resolution is more than 566 by 1080");
+                BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+                BufferedImage lala = resizeImage(bufferedImage, 1080, 566);
+                return convertBufferedImageToMultipartFile(lala, file.getOriginalFilename(), file.getContentType());
             }
         } else {
             throw new IllegalArgumentException("the file format is not supported");
         }
+        return file;
+    }
+
+    private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics2D = resizedImage.createGraphics();
+        graphics2D.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
+        graphics2D.dispose();
+        return resizedImage;
+    }
+
+    private MultipartFile convertBufferedImageToMultipartFile(BufferedImage image, String originalFilename, String contentType) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "jpg", baos);
+            baos.flush();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to convert image", e);
+        }
+
+        byte[] imageBytes = baos.toByteArray();
+        return new MockMultipartFile(originalFilename, originalFilename, contentType, imageBytes);
     }
 }
