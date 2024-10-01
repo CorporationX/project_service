@@ -50,8 +50,7 @@ public class Resource {
     @Enumerated(EnumType.STRING)
     private List<TeamRole> allowedRoles;
 
-    @Enumerated(EnumType.STRING)
-    private ResourceType type;
+    private String type;
 
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;

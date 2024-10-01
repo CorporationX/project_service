@@ -15,23 +15,16 @@ import java.util.stream.Collectors;
 public class TeamService {
     private final TeamRepository teamRepository;
 
-
-    public Team getTeamById(Long teamId) {
-        return teamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("Team doesn't exist by id: " + teamId));
-    }
-
     public Map<Boolean, TeamMember> checkParticipationUserInTeams(Long userId, List<Team> teams) {
         return teams.stream()
                 .map(team -> checkParticipationUserInTeam(userId, team))
                 .flatMap(map -> map.entrySet().stream())
+                .filter(Map.Entry::getKey)
                 .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (existing, replacement) -> replacement
+                        booleanTeamMemberEntry -> true,
+                        Map.Entry::getValue
                 ));
     }
-
 
     public Map<Boolean, TeamMember> checkParticipationUserInTeam(Long userId, Team team) {
         return team.getTeamMembers().stream()

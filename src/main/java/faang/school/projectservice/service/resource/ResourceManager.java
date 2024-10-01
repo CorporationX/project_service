@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Objects;
 
@@ -31,23 +32,19 @@ public class ResourceManager {
     }
 
     @Transactional
-    public void uploadFileToProject(MultipartFile file, String directoryPath, Project project, TeamMember teamMember) {
+    public Resource uploadFileToProject(MultipartFile file, String directoryPath, Project project, TeamMember teamMember) {
         String path = generateFullPath(file, directoryPath);
         ObjectMetadata metadata = generateMetadata(file);
         log.info("Uploading file: {} to bucket: {}", file.getOriginalFilename(), projectBucket);
         try {
             s3Client.putObject(projectBucket, path, file.getInputStream(), metadata);
-            Resource resource = createAndSaveProjectResource(file, path, project, teamMember);
-            updateProjectStorageSize(project,resource);
+            return createAndSaveProjectResource(file, path, project, teamMember);
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file to S3", e);
         }
     }
 
-    //TODO: add locking
-    private void updateProjectStorageSize(Project project, Resource resource) {
-        project.setStorageSize(BigInteger.valueOf(project.getStorageSize().longValue() + resource.getSize().longValue()));
-    }
 
     private String generateUniqueFileName(String originalFilename) {
         String extension = "";
@@ -59,8 +56,7 @@ public class ResourceManager {
             extension = originalFilename.substring(dotIndex);
         }
         String baseName = originalFilename.substring(0, dotIndex > 0 ? dotIndex : originalFilename.length());
-        String newFileName = baseName + "_" + System.currentTimeMillis() + extension;
-        return newFileName;
+        return baseName + "_" + System.currentTimeMillis() + extension;
     }
 
     private Resource createAndSaveProjectResource(MultipartFile file, String pathKey, Project project, TeamMember teamMember) {
@@ -68,13 +64,12 @@ public class ResourceManager {
                 .key(pathKey)
                 .name(generateResourceNameByProjectName(file, project))
                 .size(BigInteger.valueOf(file.getSize()))
-                .type(ResourceType.getResourceType(file.getContentType()))
+                .type(file.getContentType())
                 .status(ResourceStatus.ACTIVE)
                 .createdBy(teamMember)
                 .updatedBy(teamMember)
                 .project(project)
                 .build();
-
         return resourceRepository.save(resource);
     }
 
@@ -92,5 +87,18 @@ public class ResourceManager {
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());
         return metadata;
+    }
+
+    public Resource getResourceById(Long resourceId) {
+        return resourceRepository.findById(resourceId)
+                .orElseThrow(() -> new IllegalArgumentException("Resource not found"));
+    }
+
+    public void deleteFileFromProject(Resource resource) {
+        s3Client.deleteObject(projectBucket, resource.getKey());
+    }
+
+    public InputStream getFileFromProject(Resource resource) {
+        return s3Client.getObject(projectBucket, resource.getKey()).getObjectContent();
     }
 }
