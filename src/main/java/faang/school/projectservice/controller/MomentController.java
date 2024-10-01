@@ -1,25 +1,23 @@
-package faang.school.projectservice.controller.momentController;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.repository.MomentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 
 @RestController
-@RequestMapping ("/moments")
+@RequestMapping ("/moment")
 @RequiredArgsConstructor
 public class MomentController {
     private final MomentService momentService;
 
     @PostMapping
-    public ResponseEntity<MomentDto> createMoment(@RequestBody @Validated MomentDto momentDto) {
-        MomentDto result = momentService.createMoment(momentDto);
-        return ResponseEntity.ok(result);
+    public MomentDto createMoment(@RequestBody @Valid MomentDto momentDto) {
+        return momentService.createMoment(momentDto);
     }
 
     @PutMapping("/{id}")
@@ -29,7 +27,7 @@ public class MomentController {
     }
 
     @GetMapping("/{id}")
-    public  ResponseEntity<MomentDto> getMomentById(@PathVariable Long id){
+    public  ResponseEntity<MomentDto> getMoment(@PathVariable Long id){
         MomentDto moment = momentService.getMomentById(id);
         return ResponseEntity.ok(moment);
     }

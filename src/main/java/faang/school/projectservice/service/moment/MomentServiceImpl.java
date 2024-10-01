@@ -1,11 +1,13 @@
 package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.MomentService;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,21 +17,17 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class MomentService {
+public class MomentServiceImpl implements MomentService {
 
     private final MomentRepository momentRepository;
     private final ProjectRepository projectRepository;
     private final MomentMapper momentMapper;
 
     public MomentDto createMoment(MomentDto momentDto) {
-        if (momentDto.getName() == null || momentDto.getName().isEmpty()) {
-            throw new IllegalArgumentException("Moment must have a name");
-        }
-
         List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectIds());
         if (projects.stream()
                 .anyMatch(this::isProjectClosed)) {
-            throw new IllegalArgumentException("Moment can only be created for open projects");
+            throw new DataValidationException("Moment can only be created for open projects"    );
         }
 
         Moment moment = momentMapper.toEntity(momentDto);
@@ -70,9 +68,7 @@ public class MomentService {
     }
 
     private boolean isProjectClosed(Project project) {
-      return project.getStatus() == ProjectStatus.COMPLETED ||
-              project.getStatus() == ProjectStatus.CANCELLED;
+        return project.getStatus() == ProjectStatus.COMPLETED ||
+                project.getStatus() == ProjectStatus.CANCELLED;
     }
-
-
 }

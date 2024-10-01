@@ -21,6 +21,8 @@ public interface MomentMapper {
 
     @Named("map")
     default List<Long> map(List<Project> projects) {
-        return projects.stream().map(Project::getId).toList();
+        return projects.stream()
+                .map(Project::getId)
+                .toList();
     }
 }
