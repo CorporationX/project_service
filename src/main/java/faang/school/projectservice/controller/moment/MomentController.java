@@ -3,6 +3,8 @@ package faang.school.projectservice.controller.moment;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.service.moment.MomentServiceImpl;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,27 +28,27 @@ public class MomentController {
     private final MomentServiceImpl momentService;
 
     @PostMapping
-    public ResponseEntity<MomentDto> createMoment(@RequestBody @Validated MomentDto momentDto) {
+    public ResponseEntity<MomentDto> createMoment(@RequestBody @NotNull @Valid MomentDto momentDto) {
         MomentDto createMoment = momentService.createMoment(momentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createMoment);
     }
 
     @PutMapping
-    public ResponseEntity<MomentDto> updateMomentByProjects(@RequestBody @Validated MomentDto momentDto) {
+    public ResponseEntity<MomentDto> updateMomentByProjects(@RequestBody @NotNull @Valid MomentDto momentDto) {
         MomentDto updateMoment = momentService.updateMomentByProjects(momentDto);
         return ResponseEntity.ok(updateMoment);
     }
 
     @PutMapping("/userId/{userId}")
     public ResponseEntity<MomentDto> updateMomentByUser(@PathVariable("userId") @Positive long userId,
-                                                        @RequestBody @Validated MomentDto momentDto) {
+                                                        @RequestBody @Valid @NotNull MomentDto momentDto) {
         MomentDto updateMoment = momentService.updateMomentByUser(userId, momentDto);
         return ResponseEntity.ok(updateMoment);
     }
 
     @GetMapping("/projectId/{projectId}")
     public ResponseEntity<List<MomentDto>> getMomentsByFilters(@PathVariable("projectId") @Positive long projectId,
-                                                               @RequestBody MomentFilterDto filterDto) {
+                                                               @RequestBody @NotNull MomentFilterDto filterDto) {
         List<MomentDto> moments = momentService.getMomentsByFilters(projectId, filterDto);
         return ResponseEntity.ok(moments);
     }

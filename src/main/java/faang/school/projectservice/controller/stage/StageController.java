@@ -4,6 +4,8 @@ import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.service.stage.StageService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -19,17 +21,17 @@ public class StageController {
     private final StageService stageService;
 
     @PostMapping
-    public StageDto createStage(@Validated StageDto stageDto) {
+    public StageDto createStage(@Valid @NotNull StageDto stageDto) {
         return stageService.createStage(stageDto);
     }
 
     @GetMapping("/projects/{projectId}")
-    public List<StageDto> getProjectStages(@Positive @PathVariable long projectId, @Validated StageFilterDto filters) {
+    public List<StageDto> getProjectStages(@PathVariable @Positive long projectId, @Valid @NotNull StageFilterDto filters) {
         return stageService.getProjectStages(projectId, filters);
     }
 
     @PatchMapping("/{stageId}")
-    public StageDto updateStage(@Positive @PathVariable long stageId, @Validated StageRolesDto stageRolesDto){
+    public StageDto updateStage(@PathVariable @Positive long stageId, @Valid @NotNull StageRolesDto stageRolesDto){
         return stageService.updateStage(stageId, stageRolesDto);
     }
 
