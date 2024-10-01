@@ -7,7 +7,6 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
-import faang.school.projectservice.repository.MomentService;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,9 +24,12 @@ public class MomentServiceImpl implements MomentService {
 
     public MomentDto createMoment(MomentDto momentDto) {
         List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectIds());
-        if (projects.stream()
-                .anyMatch(this::isProjectClosed)) {
-            throw new DataValidationException("Moment can only be created for open projects"    );
+        List<Project> closedProjects = projects.stream()
+                .filter(this::isProjectClosed)
+                .toList();
+
+        if (!closedProjects.isEmpty()) {
+            throw new DataValidationException("Moment can only be created for open projects. Closed projects: " + closedProjects);
         }
 
         Moment moment = momentMapper.toEntity(momentDto);

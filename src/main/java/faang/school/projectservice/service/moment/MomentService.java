@@ -1,4 +1,4 @@
-package faang.school.projectservice.repository;
+package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 

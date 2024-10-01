@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.repository.MomentService;
+import faang.school.projectservice.service.moment.MomentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping ("/moment")
+@RequestMapping ("/api/v1/moment")
 @RequiredArgsConstructor
 public class MomentController {
     private final MomentService momentService;
