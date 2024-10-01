@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.task.TaskDto;
+import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
@@ -12,6 +13,7 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TaskMapper {
@@ -31,6 +33,11 @@ public interface TaskMapper {
     @Mapping(source = "stage.stageId", target = "stageId")
     TaskDto toDto(Task task);
 
+
+    @Mapping(source = "status", target = "status", qualifiedByName = "convertEnumToStatus")
+    @Mapping(source = "project.id", target = "projectId")
+    List<TaskDto> toDto(List<Task> tasks);
+
     @Named("convertStatusToEnum")
     default TaskStatus convertStatusToEnum(String status) {
         return TaskStatus.valueOf(status);
@@ -48,6 +55,8 @@ public interface TaskMapper {
 
     @Named("convertIdsToLinkedTasks")
     default List<Task> convertIdsToLinkedTasks(List<Long> tasksId) {
+        if (tasksId == null)
+            return null;
         List<Task> linkedTasks = new ArrayList<>();
         tasksId.forEach(id -> {
             Task task = new Task();
@@ -79,11 +88,16 @@ public interface TaskMapper {
 
     @Named("convertLinkedTasksToIds")
     default List<Long> convertLinkedTasksToIds(List<Task> linkedTasks) {
+        if (linkedTasks == null)
+            return null;
+
         List<Long> linkedTasksId = new ArrayList<>();
         linkedTasks.forEach(task -> {
-            linkedTasksId.add(task.getId());
+            if (task != null)
+                linkedTasksId.add(task.getId());
         });
 
         return linkedTasksId;
     }
+
 }

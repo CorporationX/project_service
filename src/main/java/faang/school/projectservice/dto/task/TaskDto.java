@@ -1,10 +1,12 @@
 package faang.school.projectservice.dto.task;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -26,7 +28,7 @@ public class TaskDto {
 
     private LocalDateTime createdAt;
     private Long parentTaskId;
-    private List<Long> linkedTasksId;
+    private List<Long> linkedTasksId = null;
 
     @NotNull
     private Long projectId;

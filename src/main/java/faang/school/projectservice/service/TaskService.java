@@ -1,11 +1,13 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.filter.TaskFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,8 @@ public class TaskService {
     private final UserServiceClient userServiceClient;
     private final ProjectRepository projectRepository;
     private final StageRepository stageRepository;
+    private final List<TaskFilter> taskFilters;
+
 
     public Task createTask(Task tempTask) {
         validateParameters(tempTask);
@@ -32,7 +36,7 @@ public class TaskService {
                     });
         }
 
-        if (!tempTask.getLinkedTasks().isEmpty()) {
+        if (tempTask.getLinkedTasks() != null && !tempTask.getLinkedTasks().isEmpty()) {
             List<Task> linkedTasks = new ArrayList<>();
             tempTask.getLinkedTasks().forEach(linkedTask -> {
                 taskRepository.findById(linkedTask.getId()).ifPresentOrElse(
@@ -57,6 +61,22 @@ public class TaskService {
         return taskRepository.save(tempTask);
     }
 
+    public List<Task> getFilteredTasks(Long requestingUserId, TaskFilterDto filters) {
+
+        //todo: допустим, что пользователя проверили
+
+        List<Task> tasks = taskRepository.findAll();
+
+        List<TaskFilter> applicableFilters = taskFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .toList();
+
+        return tasks.stream()
+                .filter(task -> applicableFilters.stream()
+                        .allMatch(internshipFilter -> internshipFilter.apply(task, filters)))
+                .toList();
+    }
+
     private void validateParameters(Task tempTask) {
         if (tempTask.getName().isBlank()) {
             throw new IllegalArgumentException("Task name cannot be blank");
@@ -79,4 +99,6 @@ public class TaskService {
             throw new IllegalArgumentException("Project does not exist");
         }
     }
+
+
 }
