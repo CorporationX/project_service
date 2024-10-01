@@ -57,7 +57,7 @@ class SubProjectControllerTest {
         when(userContext.getUserId()).thenReturn(userId);
         when(projectService.createSubProject(eq(userId), any(CreateSubProjectDto.class))).thenReturn(projectDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/project/subproject/create")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1//project/subproject/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createSubProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
@@ -71,7 +71,7 @@ class SubProjectControllerTest {
         UpdateSubProjectDto updateSubProjectDto = UpdateSubProjectDto.builder().projectId(projectId).build();
         when(userContext.getUserId()).thenReturn(userId);
         when(projectService.updateSubProject(eq(userId), any(UpdateSubProjectDto.class))).thenReturn(projectDto);
-        mockMvc.perform(MockMvcRequestBuilders.patch("/project/subproject/update")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1//project/subproject/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateSubProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -86,7 +86,7 @@ class SubProjectControllerTest {
         when(projectService.getSubProjects(anyLong(), any(FilterSubProjectDto.class), anyInt(), anyInt()))
                 .thenReturn(projectDtos);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/project/subproject/{projectId}", projectId)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1//project/subproject/{projectId}", projectId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("from", "0")
                         .param("size", "10")
