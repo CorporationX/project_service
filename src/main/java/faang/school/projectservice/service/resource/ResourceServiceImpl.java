@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.file;
+package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
@@ -41,15 +41,17 @@ public class ResourceServiceImpl implements ResourceService {
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         MultipartFile newFile = checkResourceSize(file);
+        log.info("The file {}has been successfully verified for add", newFile.getOriginalFilename());
 
         String folder = project.getId() + project.getName();
         Resource resource = s3Service.uploadFile(newFile, folder);
         resource.setProject(project);
         resource = resourceRepository.save(resource);
-
+        log.info("The resource with {}id has been successfully saved in repository", resource.getId());
         project.setStorageSize(newStorageSize);
         project.setCoverImageId(String.valueOf(resource.getId()));
         projectRepository.save(project);
+        log.info("The project with {}id has been successfully saved in repository", project.getId());
 
         return resourceMapper.toDto(resource);
     }
@@ -57,23 +59,26 @@ public class ResourceServiceImpl implements ResourceService {
     @Transactional
     public ResourceDto updateResource(Long resourceId, Long userDtoId, MultipartFile file) throws IOException, ImageReadException  {
         Resource resourceFromBD = getResourceWithCheckedPermissions(resourceId, userDtoId);
+        log.info("User with {}id has permissions to update the file", userDtoId);
         var project = resourceFromBD.getProject();
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         MultipartFile newFile = checkResourceSize(file);
+        log.info("The file {}has been successfully verified for update", newFile.getOriginalFilename());
 
         String folder = project.getId() + project.getName();
         s3Service.deleteFile(resourceFromBD.getKey());
-        Resource resource = s3Service.uploadFile(file, folder);
+        Resource resource = s3Service.uploadFile(newFile, folder);
         resourceFromBD.setKey(resource.getKey());
         resourceFromBD.setSize(resource.getSize());
         resourceFromBD.setUpdatedAt(resource.getUpdatedAt());
         resourceFromBD.setName(resource.getName());
         resourceFromBD.setType(resource.getType());
         resourceRepository.save(resourceFromBD);
-
+        log.info("The resource with {}id has been successfully update", resourceFromBD.getId());
         project.setStorageSize(newStorageSize);
         projectRepository.save(project);
+        log.info("The project with {}id has been successfully update", project.getId());
 
         return resourceMapper.toDto(resource);
     }
@@ -81,8 +86,10 @@ public class ResourceServiceImpl implements ResourceService {
     @Transactional
     public void deleteResource(Long resourceId, Long userId) {
         Resource resource = getResourceWithCheckedPermissions(resourceId, userId);
+        log.info("User with {}id has permissions to delete the file", userId);
         s3Service.deleteFile(resource.getKey());
         resourceRepository.delete(resource);
+        log.info("The file {}has been successfully deleted from the repository", resource.getName());
     }
 
     private Resource getResourceById(Long resourceId) {

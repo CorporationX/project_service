@@ -2,7 +2,7 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.service.file.ResourceService;
+import faang.school.projectservice.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.imaging.ImageReadException;
 import org.springframework.web.bind.annotation.*;

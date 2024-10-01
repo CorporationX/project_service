@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.file;
+package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
 import org.apache.commons.imaging.ImageReadException;

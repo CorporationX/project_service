@@ -1,9 +1,7 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.service.file.ResourceService;
-import faang.school.projectservice.service.file.ResourceServiceImpl;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.resource.ResourceService;
 import org.apache.commons.imaging.ImageReadException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -20,7 +17,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)

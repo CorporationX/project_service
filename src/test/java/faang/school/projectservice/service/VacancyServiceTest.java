@@ -1,4 +1,4 @@
-package faang.school.projectservice;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;

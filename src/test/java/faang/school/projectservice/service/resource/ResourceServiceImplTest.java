@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.file;
+package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
@@ -54,6 +54,7 @@ class ResourceServiceImplTest {
     TeamMember teamMember = new TeamMember();
     Resource uploadedResource = new Resource();
     Resource resource = new Resource();
+    ResourceDto resourceDto = new ResourceDto();
     Long userDtoId = 1L;
     Long projectId = 1L;
     Long resourceId = 123L;
@@ -73,6 +74,8 @@ class ResourceServiceImplTest {
         resourceFromBD.setCreatedBy(teamMember);
 
         resource.setId(123L);
+        resource.setCreatedBy(teamMember);
+        resource.setProject(project);
 
         uploadedResource.setName("test.jpg");
         uploadedResource.setKey("new_key.jpg");
@@ -88,22 +91,15 @@ class ResourceServiceImplTest {
 
     @Test
     void testAddResource_Success() throws IOException, ImageReadException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
-        ImageIO.write(image, "jpg", baos);
-        byte[] fileContent = baos.toByteArray();
-        MultipartFile file1 = new MockMultipartFile("file", "test.jpg", "image/jpeg", fileContent);
-        ResourceDto resourceDto = new ResourceDto();
-
         when(projectRepository.getProjectById(anyLong())).thenReturn(project);
         when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
         when(s3Service.uploadFile(any(MultipartFile.class), eq(projectId + "testProject"))).thenReturn(uploadedResource);
         when(resourceMapper.toDto(any(Resource.class))).thenReturn(resourceDto);
-        ResourceDto result = resourceService.addResource(projectId, file1);
+        ResourceDto result = resourceService.addResource(projectId, file);
 
         verify(projectRepository, times(1)).getProjectById(anyLong());
         verify(resourceRepository, times(1)).save(any(Resource.class));
-        verify(s3Service, times(1)).uploadFile(file1, projectId + "testProject");
+        verify(s3Service, times(1)).uploadFile(file, projectId + "testProject");
         verify(projectRepository, times(1)).save(project);
         assertEquals(BigInteger.valueOf(823), project.getStorageSize());
         assertEquals(String.valueOf(resource.getId()), project.getCoverImageId());
@@ -111,7 +107,7 @@ class ResourceServiceImplTest {
     }
 
     @Test
-    void testUpdateResource_Success() throws IOException, ImageReadException  {
+    void testUpdateResource_Success() throws IOException, ImageReadException {
         when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resourceFromBD));
         when(s3Service.uploadFile(any(MultipartFile.class), anyString())).thenReturn(uploadedResource);
         when(resourceRepository.save(any(Resource.class))).thenReturn(resourceFromBD);
@@ -143,11 +139,20 @@ class ResourceServiceImplTest {
 
     @Test
     void testNotPermissions_Exception() {
-        when(resourceRepository.findById(resourceId)).thenReturn(Optional.ofNullable(resource));
-
+        Long userId = 2L;
+        when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            Long userId = 2L;
-            resourceService.deleteResource(project.getId(), userId);
+            MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", new byte[1024]);
+            resourceService.updateResource(resource.getId(), userId, file);
+        });
+    }
+
+    @Test
+    void testFileIsTooBig_Exception() {
+        when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", new byte[6000000]);
+            resourceService.updateResource(resource.getId(), userDtoId, file);
         });
     }
 }

@@ -40,6 +40,7 @@ public class S3ServiceImpl implements S3Service {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucketName, key, file.getInputStream(), objectMetadata);
             s3Client.putObject(putObjectRequest);
+            log.info("Uploaded file {} to bucket {}", key, bucketName);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
@@ -60,5 +61,6 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public void deleteFile(String key) {
         s3Client.deleteObject(new DeleteObjectRequest(bucketName, key));
+        log.info("Deleted file {}", key);
     }
 }
