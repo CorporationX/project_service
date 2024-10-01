@@ -14,14 +14,14 @@ import java.io.InputStream;
 
 @Getter
 public class MultipartImage implements MultipartFile {
-    BufferedImage image;
-    byte[] bytes;
-    String name;
-    String originalFilename;
-    String contentType;
-    String imageType;
-    boolean isEmpty;
-    long size;
+    private final BufferedImage image;
+    private final byte[] bytes;
+    private final String name;
+    private final String originalFilename;
+    private final String contentType;
+    private final String imageType;
+    private final boolean isEmpty;
+    private final long size;
 
     public MultipartImage(BufferedImage image, String name, String originalFilename, String contentType)
             throws IOException {
