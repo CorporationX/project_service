@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/project/subproject")
+@RequestMapping(value = "/api/v1/project/subproject")
 @RequiredArgsConstructor
 public class SubProjectController {
     private final UserContext userContext;

@@ -1,6 +1,8 @@
 package faang.school.projectservice.dto.project;
 
+import faang.school.projectservice.dto.client.TeamDto;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -15,5 +17,7 @@ public record ProjectDto(Long id,
                          List<ProjectDto> children,
                          LocalDateTime createdAt,
                          LocalDateTime updatedAt,
-                         ProjectStatus status) {
+                         ProjectStatus status,
+                         ProjectVisibility visibility,
+                         List<TeamDto> teams) {
 }

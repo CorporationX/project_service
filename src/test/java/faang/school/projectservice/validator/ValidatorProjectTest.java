@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
@@ -23,14 +23,14 @@ public class ValidatorProjectTest {
 
     @Test
     public void testValidationIsNullName() {
-        ProjectDto projectDto = new ProjectDto();
+        ProjectDto projectDto = ProjectDto.builder().build();
 
         assertThrows(NoSuchElementException.class, () -> validator.validateProject(projectDto));
     }
 
     @Test
     public void testValidationNameIsBlank() {
-        ProjectDto projectDto = new ProjectDto();
+        ProjectDto projectDto = ProjectDto.builder().build();
         Project projectEntity = new Project();
         projectEntity.setName("  ");
 
@@ -39,14 +39,14 @@ public class ValidatorProjectTest {
 
     @Test
     public void testValidationIsNullDescription() {
-        ProjectDto projectDto = new ProjectDto();
+        ProjectDto projectDto = ProjectDto.builder().build();
 
         assertThrows(NoSuchElementException.class, () -> validator.validateProject(projectDto));
     }
 
     @Test
     public void testValidationDescriptionIsBlank() {
-        ProjectDto projectDto = new ProjectDto();
+        ProjectDto projectDto = ProjectDto.builder().build();
         Project projectEntity = new Project();
         projectEntity.setDescription("  ");
 
