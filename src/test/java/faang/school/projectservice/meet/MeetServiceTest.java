@@ -1,12 +1,14 @@
 package faang.school.projectservice.meet;
 
+import faang.school.projectservice.config.app.AppConfig;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.google.calendar.CalendarEventDto;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
 import faang.school.projectservice.google.calendar.GoogleCalendarService;
 import faang.school.projectservice.jpa.MeetRepository;
-import faang.school.projectservice.mapper.CalendarEventMapper;
 import faang.school.projectservice.mapper.MeetMapper;
+import faang.school.projectservice.mapper.calendar.CalendarMeetDtoEventDtoMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -23,6 +25,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +61,7 @@ class MeetServiceTest {
     private MeetMapper meetMapper;
 
     @Mock
-    private CalendarEventMapper calendarEventMapper;
+    private CalendarMeetDtoEventDtoMapper calendarMeetDtoEventDtoMapper;
 
     @Mock
     private MeetValidator meetValidator;
@@ -65,24 +69,27 @@ class MeetServiceTest {
     @Mock
     private UserContext userContext;
 
+    @Mock
+    private AppConfig appConfig;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testCreateMeet() {
+    void testCreateMeet() throws GeneralSecurityException, IOException {
         MeetDto meetDto = new MeetDto();
         meetDto.setCreatorId(1L);
         meetDto.setProjectId(1L);
 
         Project project = new Project();
-        long googleEventId = 123L;
 
         when(projectRepository.findById(meetDto.getProjectId())).thenReturn(project);
-        when(googleCalendarService.createEvent(any())).thenReturn(googleEventId);
+        when(googleCalendarService.createEvent(any())).thenReturn(new CalendarEventDto());
         when(meetRepository.save(any(Meet.class))).thenReturn(new Meet());
         when(userContext.getUserId()).thenReturn(1L);
+        when(appConfig.getTimeZone()).thenReturn("Europe/Moscow");
 
         meetService.create(meetDto);
 
@@ -92,7 +99,7 @@ class MeetServiceTest {
     }
 
     @Test
-    void testUpdate_WhenAllFieldsTheSame() {
+    void testUpdate_WhenAllFieldsTheSame() throws GeneralSecurityException, IOException {
         long meetId = 1L;
         MeetDto meetDto = new MeetDto();
         meetDto.setId(meetId);
@@ -118,7 +125,7 @@ class MeetServiceTest {
     }
 
     @Test
-    void testUpdate_WhenAllFieldsDifferent() {
+    void testUpdate_WhenAllFieldsDifferent() throws GeneralSecurityException, IOException {
         long meetId = 1L;
         MeetDto meetDto = new MeetDto();
         meetDto.setId(meetId);
@@ -148,7 +155,7 @@ class MeetServiceTest {
     }
 
     @Test
-    void testDelete() {
+    void testDelete() throws GeneralSecurityException, IOException {
         long meetId = 1L;
         Meet meet = new Meet();
         meet.setCreatorId(1L);
@@ -160,7 +167,7 @@ class MeetServiceTest {
 
         verify(meetValidator).validateUser(anyLong());
         verify(meetValidator).validateUserIsCreator(anyLong(), anyLong());
-        verify(googleCalendarService).delete(meet.getGoogleEventId());
+        verify(googleCalendarService).delete(meet.getCalendarEventId());
         verify(meetRepository).delete(meet);
     }
 

@@ -1,7 +1,26 @@
 package faang.school.projectservice.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -45,8 +64,8 @@ public class Meet {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @Column(name = "google_event_id", nullable = false)
-    private long googleEventId;
+    @Column(name = "calendar_event_id", length = 64, nullable = false)
+    private String calendarEventId;
 
     @ElementCollection
     @CollectionTable(name = "meet_participant", joinColumns = @JoinColumn(name = "meet_id"))

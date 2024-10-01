@@ -1,12 +1,16 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.app.AppConfig;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.dto.google.calendar.CalendarEventDto;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
 import faang.school.projectservice.google.calendar.GoogleCalendarService;
 import faang.school.projectservice.jpa.MeetRepository;
-import faang.school.projectservice.mapper.CalendarEventMapper;
 import faang.school.projectservice.mapper.MeetMapper;
+import faang.school.projectservice.mapper.calendar.CalendarMeetDtoEventDtoMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
@@ -22,6 +26,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -35,26 +41,34 @@ public class MeetService {
 
     private final UserContext userContext;
     private final MeetValidator validator;
-    private final GoogleCalendarService googleCalendarService;
+    private final GoogleCalendarService
+            googleCalendarService;
     private final MeetRepository meetRepository;
     private final ProjectRepository projectRepository;
     private final MeetMapper meetMapper;
-    private final CalendarEventMapper calendarEventMapper;
+    private final CalendarMeetDtoEventDtoMapper calendarMeetDtoEventDtoMapper;
+    private final UserServiceClient userServiceClient;
+    private final AppConfig appConfig;
 
     @Transactional
-    public MeetDto create(MeetDto meetDto) {
+    public MeetDto create(MeetDto meetDto) throws GeneralSecurityException, IOException {
         long userId = userContext.getUserId();
         validator.validateUser(userId);
         validator.validateUserIsCreator(userId, meetDto.getCreatorId());
 
+        if (meetDto.getUserIds() != null && !meetDto.getUserIds().isEmpty()) {
+            setAttendeeEmails(meetDto);
+        }
+        meetDto.setTimeZone(appConfig.getTimeZone());
+
         Project project = projectRepository.findById(meetDto.getProjectId());
-        long googleEventId = googleCalendarService.createEvent(calendarEventMapper.toCalendarEventDto(meetDto));
-        Meet meet = buildMeet(meetDto, project, googleEventId);
+        CalendarEventDto calendarEventDto = googleCalendarService.createEvent(calendarMeetDtoEventDtoMapper.toCalendarEventDto(meetDto));
+        Meet meet = buildMeet(meetDto, project, calendarEventDto.getId());
         return meetMapper.toDto(meetRepository.save(meet));
     }
 
     @Transactional
-    public MeetDto update(long meetId, MeetDto meetDto) {
+    public MeetDto update(long meetId, MeetDto meetDto) throws GeneralSecurityException, IOException {
         long userId = userContext.getUserId();
         validator.validateUser(userId);
         validator.validateUserIsCreator(userId, meetDto.getCreatorId());
@@ -66,7 +80,7 @@ public class MeetService {
             return meetDto;
         }
 
-        googleCalendarService.update(calendarEventMapper.toCalendarEventDto(meetDto));
+        googleCalendarService.update(calendarMeetDtoEventDtoMapper.toCalendarEventDto(meetDto));
 
         meet.setTitle(meetDto.getTitle());
         meet.setDescription(meetDto.getDescription());
@@ -80,12 +94,12 @@ public class MeetService {
     }
 
     @Transactional
-    public void delete(Long meetId) {
+    public void delete(Long meetId) throws GeneralSecurityException, IOException {
         long userId = userContext.getUserId();
         validator.validateUser(userId);
 
         Meet meet = findMeet(meetId);
-        googleCalendarService.delete(meet.getGoogleEventId());
+        googleCalendarService.delete(meet.getCalendarEventId());
         validator.validateUserIsCreator(userId, meet.getCreatorId());
         meetRepository.delete(meet);
     }
@@ -116,7 +130,7 @@ public class MeetService {
         return meetMapper.toDto(meet);
     }
 
-    private Meet buildMeet(MeetDto meetDto, Project project, long googleEventId) {
+    private Meet buildMeet(MeetDto meetDto, Project project, String calendarEventId) {
         return Meet.builder()
                 .title(meetDto.getTitle())
                 .description(meetDto.getDescription())
@@ -124,15 +138,23 @@ public class MeetService {
                 .endDate(meetDto.getEndDate())
                 .project(project)
                 .creatorId(meetDto.getCreatorId())
-                .status(MeetStatus.PENDING)
+                .status(MeetStatus.TENTATIVE)
                 .userIds(meetDto.getUserIds())
-                .googleEventId(googleEventId)
+                .calendarEventId(calendarEventId)
                 .build();
     }
 
     private Meet findMeet(long meetId) {
         return meetRepository.findById(meetId).orElseThrow(
                 () -> new NoSuchElementException(String.format("Meet with id = %d not found", meetId)));
+    }
+
+    private void setAttendeeEmails(MeetDto meetDto) {
+        List<UserDto> users = userServiceClient.getUsersByIds(meetDto.getUserIds());
+        List<String> usersEmails = users.stream()
+                .map(UserDto::getEmail)
+                .toList();
+        meetDto.setAttendeeEmails(usersEmails);
     }
 }
 

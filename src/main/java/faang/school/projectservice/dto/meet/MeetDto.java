@@ -29,6 +29,8 @@ public class MeetDto {
     private Long creatorId;
     @NotNull
     private long projectId;
-    private long googleEventId;
+    private String calendarEventId;
     private List<Long> userIds;
+    private List<String> attendeeEmails;
+    private String timeZone;
 }

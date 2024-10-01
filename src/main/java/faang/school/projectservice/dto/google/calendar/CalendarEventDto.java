@@ -6,19 +6,23 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 public class CalendarEventDto {
-    private long id;
+    private String id;
     @NotBlank
-    private String title;
+    private String summary;
     @NotBlank
     private String description;
     @NotNull
     private LocalDateTime startDate;
     @NotNull
     private LocalDateTime endDate;
-
-    //TODO еще будут поля скорее всего, разберусь с этим при реализации интеграции
+    @NotNull
+    private String timeZone;
+    private List<String> attendeeEmails;
+    private CalendarEventStatus status;
+    private String location;
 }
