@@ -3,32 +3,22 @@ package faang.school.projectservice.service.vacancy;
 import faang.school.projectservice.dto.filter.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
-import faang.school.projectservice.model.Candidate;
-import faang.school.projectservice.model.CandidateStatus;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.filter.VacancyFilter;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-@Validated
 public class VacancyServiceImpl implements VacancyService{
 
     private final VacancyRepository vacancyRepository;
@@ -40,7 +30,7 @@ public class VacancyServiceImpl implements VacancyService{
 
     @Override
     @Transactional
-    public VacancyDto create(@Valid VacancyDto vacancyDto) {
+    public VacancyDto create(VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         Project project = setProjectById(vacancyDto, vacancy);
 
@@ -54,7 +44,7 @@ public class VacancyServiceImpl implements VacancyService{
 
     @Override
     @Transactional
-    public VacancyDto update(@Valid VacancyDto vacancyDto) {
+    public VacancyDto update(VacancyDto vacancyDto) {
         if (vacancyRepository.findById(vacancyDto.getId()).isPresent()) {
             Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
             setProjectById(vacancyDto, vacancy);
@@ -73,7 +63,7 @@ public class VacancyServiceImpl implements VacancyService{
 
     @Override
     @Transactional
-    public VacancyDto delete(@Valid VacancyDto vacancyDto) {
+    public VacancyDto delete(VacancyDto vacancyDto) {
         Project project = projectRepository.getProjectById(vacancyDto.getProjectId());
 
         for (Team team : project.getTeams()) {
@@ -90,7 +80,7 @@ public class VacancyServiceImpl implements VacancyService{
     }
 
     @Override
-    public List<VacancyDto> getVacanciesByFilter(@Valid VacancyFilterDto filters) {
+    public List<VacancyDto> getVacanciesByFilter(VacancyFilterDto filters) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
         return vacancyFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
@@ -100,7 +90,7 @@ public class VacancyServiceImpl implements VacancyService{
     }
 
     @Override
-    public VacancyDto getVacancyById(@Valid VacancyDto vacancyDto) {
+    public VacancyDto getVacancyById(VacancyDto vacancyDto) {
         Vacancy vacancy =  vacancyRepository.findById(vacancyDto.getId())
                 .orElseThrow(() -> new DataValidationException("Vacancy is null"));
 
