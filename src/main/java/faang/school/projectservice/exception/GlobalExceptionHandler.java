@@ -4,7 +4,6 @@ import com.amazonaws.services.kms.model.AlreadyExistsException;
 import com.amazonaws.services.kms.model.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.ServletException;
-import jakarta.xml.bind.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import software.amazon.ion.NullValueException;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -102,6 +103,20 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleDataValidationException(DataValidationException e) {
         log.error("Data validation exception", e);
         return new ErrorResponse("Data validation exception", e.getMessage());
+    }
+
+    @ExceptionHandler(GeneralSecurityException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGeneralSecurityException(GeneralSecurityException e) {
+        log.error("General security exception", e);
+        return new ErrorResponse("General security exception", e.getMessage());
+    }
+
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleIOException(IOException e) {
+        log.error("IO exception", e);
+        return new ErrorResponse("IO exception", e.getMessage());
     }
 }
 

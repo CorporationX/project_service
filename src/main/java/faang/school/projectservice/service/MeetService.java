@@ -5,9 +5,9 @@ import faang.school.projectservice.config.app.AppConfig;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.google.calendar.CalendarEventDto;
+import faang.school.projectservice.dto.google.calendar.ZonedDateTimeDto;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
-import faang.school.projectservice.google.calendar.GoogleCalendarService;
 import faang.school.projectservice.jpa.MeetRepository;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.mapper.calendar.CalendarMeetDtoEventDtoMapper;
@@ -59,7 +59,6 @@ public class MeetService {
         if (meetDto.getUserIds() != null && !meetDto.getUserIds().isEmpty()) {
             setAttendeeEmails(meetDto);
         }
-        meetDto.setTimeZone(appConfig.getTimeZone());
 
         Project project = projectRepository.findById(meetDto.getProjectId());
         CalendarEventDto calendarEventDto = googleCalendarService.createEvent(calendarMeetDtoEventDtoMapper.toCalendarEventDto(meetDto));
@@ -81,11 +80,12 @@ public class MeetService {
         }
 
         googleCalendarService.update(calendarMeetDtoEventDtoMapper.toCalendarEventDto(meetDto));
-
+        ZonedDateTimeDto startDate = meetDto.getStartDate();
+        ZonedDateTimeDto endDate = meetDto.getEndDate();
         meet.setTitle(meetDto.getTitle());
         meet.setDescription(meetDto.getDescription());
-        meet.setStartDate(meetDto.getStartDate());
-        meet.setEndDate(meetDto.getEndDate());
+        meet.setStartDate(startDate.getLocalDateTime());
+        meet.setEndDate(endDate.getLocalDateTime());
         meet.setStatus(meetDto.getStatus());
         meet.setUserIds(meetDto.getUserIds());
         log.info(String.format("Meet id = %d, title = \"%s\" was updated at %s",
@@ -131,11 +131,13 @@ public class MeetService {
     }
 
     private Meet buildMeet(MeetDto meetDto, Project project, String calendarEventId) {
+        ZonedDateTimeDto startDate = meetDto.getStartDate();
+        ZonedDateTimeDto endDate = meetDto.getEndDate();
         return Meet.builder()
                 .title(meetDto.getTitle())
                 .description(meetDto.getDescription())
-                .startDate(meetDto.getStartDate())
-                .endDate(meetDto.getEndDate())
+                .startDate(startDate.getLocalDateTime())
+                .endDate(endDate.getLocalDateTime())
                 .project(project)
                 .creatorId(meetDto.getCreatorId())
                 .status(MeetStatus.TENTATIVE)

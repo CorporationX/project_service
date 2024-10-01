@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -17,11 +16,9 @@ public class CalendarEventDto {
     @NotBlank
     private String description;
     @NotNull
-    private LocalDateTime startDate;
+    private ZonedDateTimeDto startDate;
     @NotNull
-    private LocalDateTime endDate;
-    @NotNull
-    private String timeZone;
+    private ZonedDateTimeDto endDate;
     private List<String> attendeeEmails;
     private CalendarEventStatus status;
     private String location;

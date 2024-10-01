@@ -18,4 +18,7 @@ public class AppConfig {
 
     @Value("${calendar.type-of-send-updates}")
     private String typeOfSendUpdates;
+
+    @Value("${calendar.oauth.local.server.port}")
+    private int calendarOauthLocalServerPort;
 }

@@ -1,13 +1,16 @@
 package faang.school.projectservice.meet;
 
+import faang.school.projectservice.config.app.AppConfig;
 import faang.school.projectservice.dto.meet.MeetDto;
-import faang.school.projectservice.mapper.MeetMapper;
+import faang.school.projectservice.mapper.MeetMapperImpl;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -15,14 +18,21 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 class MeetMapperTest {
 
-    private MeetMapper meetMapper;
+    @Mock
+    private AppConfig appConfig;
+
+    @InjectMocks
+    private MeetMapperImpl meetMapper;
 
     @BeforeEach
     void setUp() {
-        meetMapper = Mappers.getMapper(MeetMapper.class);
+        MockitoAnnotations.openMocks(this);
+
+        when(appConfig.getTimeZone()).thenReturn("UTC");
     }
 
     @Test
@@ -49,8 +59,8 @@ class MeetMapperTest {
         assertEquals(1L, meetDto.getId());
         assertEquals("Test Title", meetDto.getTitle());
         assertEquals("Test Description", meetDto.getDescription());
-        assertEquals(LocalDateTime.of(2023, 9, 27, 10, 0), meetDto.getStartDate());
-        assertEquals(LocalDateTime.of(2023, 9, 27, 12, 0), meetDto.getEndDate());
+        assertEquals(LocalDateTime.of(2023, 9, 27, 10, 0), meetDto.getStartDate().getLocalDateTime());
+        assertEquals(LocalDateTime.of(2023, 9, 27, 12, 0), meetDto.getEndDate().getLocalDateTime());
         assertEquals(MeetStatus.TENTATIVE, meetDto.getStatus());
         assertEquals(100L, meetDto.getCreatorId());
         assertEquals("event id", meetDto.getCalendarEventId());
@@ -101,8 +111,8 @@ class MeetMapperTest {
         assertEquals(1L, meetDto1.getId());
         assertEquals("Test Title 1", meetDto1.getTitle());
         assertEquals("Test Description 1", meetDto1.getDescription());
-        assertEquals(LocalDateTime.of(2023, 9, 27, 10, 0), meetDto1.getStartDate());
-        assertEquals(LocalDateTime.of(2023, 9, 27, 12, 0), meetDto1.getEndDate());
+        assertEquals(LocalDateTime.of(2023, 9, 27, 10, 0), meetDto1.getStartDate().getLocalDateTime());
+        assertEquals(LocalDateTime.of(2023, 9, 27, 12, 0), meetDto1.getEndDate().getLocalDateTime());
         assertEquals(MeetStatus.TENTATIVE, meetDto1.getStatus());
         assertEquals(100L, meetDto1.getCreatorId());
         assertEquals("event id 1", meetDto1.getCalendarEventId());
@@ -113,8 +123,8 @@ class MeetMapperTest {
         assertEquals(2L, meetDto2.getId());
         assertEquals("Test Title 2", meetDto2.getTitle());
         assertEquals("Test Description 2", meetDto2.getDescription());
-        assertEquals(LocalDateTime.of(2023, 9, 28, 10, 0), meetDto2.getStartDate());
-        assertEquals(LocalDateTime.of(2023, 9, 28, 12, 0), meetDto2.getEndDate());
+        assertEquals(LocalDateTime.of(2023, 9, 28, 10, 0), meetDto2.getStartDate().getLocalDateTime());
+        assertEquals(LocalDateTime.of(2023, 9, 28, 12, 0), meetDto2.getEndDate().getLocalDateTime());
         assertEquals(MeetStatus.CONFIRMED, meetDto2.getStatus());
         assertEquals(101L, meetDto2.getCreatorId());
         assertEquals("event id 2", meetDto2.getCalendarEventId());

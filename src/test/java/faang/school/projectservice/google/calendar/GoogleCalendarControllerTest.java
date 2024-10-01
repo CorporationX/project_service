@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import faang.school.projectservice.controller.calendar.GoogleCalendarController;
 import faang.school.projectservice.dto.google.calendar.CalendarEventDto;
+import faang.school.projectservice.dto.google.calendar.ZonedDateTimeDto;
+import faang.school.projectservice.service.GoogleCalendarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -51,9 +53,8 @@ public class GoogleCalendarControllerTest {
         eventDto.setId("1");
         eventDto.setSummary("Test Event");
         eventDto.setDescription("This is a test event");
-        eventDto.setStartDate(LocalDateTime.now());
-        eventDto.setEndDate(LocalDateTime.now().plusHours(1));
-        eventDto.setTimeZone("UTC");
+        eventDto.setStartDate(new ZonedDateTimeDto(LocalDateTime.now(), "UTC"));
+        eventDto.setEndDate(new ZonedDateTimeDto(LocalDateTime.now().plusHours(1), "UTC"));
 
         when(googleCalendarService.createEvent(any(CalendarEventDto.class))).thenReturn(eventDto);
 
@@ -72,9 +73,8 @@ public class GoogleCalendarControllerTest {
         eventDto.setId("1");
         eventDto.setSummary("Updated Event");
         eventDto.setDescription("This is an updated event");
-        eventDto.setStartDate(LocalDateTime.now());
-        eventDto.setEndDate(LocalDateTime.now().plusHours(1));
-        eventDto.setTimeZone("UTC");
+        eventDto.setStartDate(new ZonedDateTimeDto(LocalDateTime.now(), "UTC"));
+        eventDto.setEndDate(new ZonedDateTimeDto(LocalDateTime.now().plusHours(1), "UTC"));
 
         when(googleCalendarService.update(any(CalendarEventDto.class))).thenReturn(eventDto);
 

@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.calendar;
 
 import faang.school.projectservice.dto.google.calendar.CalendarEventDto;
-import faang.school.projectservice.google.calendar.GoogleCalendarService;
+import faang.school.projectservice.service.GoogleCalendarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;

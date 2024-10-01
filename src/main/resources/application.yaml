@@ -56,3 +56,7 @@ app:
 calendar:
   id: "de9c98cdcc71d25dd223e774d3bd25efbd9a1b11f35db7d8db6d404e466f5d43@group.calendar.google.com"
   type-of-send-updates: "all"
+  oauth:
+    local:
+      server:
+        port: 8888

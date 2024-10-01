@@ -3,6 +3,7 @@ package faang.school.projectservice.meet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import faang.school.projectservice.controller.calendar.MeetController;
+import faang.school.projectservice.dto.google.calendar.ZonedDateTimeDto;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
 import faang.school.projectservice.model.MeetStatus;
@@ -59,8 +60,8 @@ public class MeetControllerTest {
         MeetDto meetDto = new MeetDto();
         meetDto.setTitle("Team Meeting");
         meetDto.setDescription("Description of the meeting");
-        meetDto.setStartDate(LocalDateTime.now());
-        meetDto.setEndDate(LocalDateTime.now().plusHours(1));
+        meetDto.setStartDate(new ZonedDateTimeDto(LocalDateTime.now(), "UTC"));
+        meetDto.setEndDate(new ZonedDateTimeDto(LocalDateTime.now().plusHours(1), "UTC"));
         meetDto.setStatus(MeetStatus.CONFIRMED);
         meetDto.setCreatorId(1L);
         meetDto.setProjectId(1L);

@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.meet;
 
+import faang.school.projectservice.dto.google.calendar.ZonedDateTimeDto;
 import faang.school.projectservice.model.MeetStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -20,9 +20,9 @@ public class MeetDto {
     @NotBlank
     private String description;
     @NotNull
-    private LocalDateTime startDate;
+    private ZonedDateTimeDto startDate;
     @NotNull
-    private LocalDateTime endDate;
+    private ZonedDateTimeDto endDate;
     @NotNull
     private MeetStatus status;
     @NotNull
@@ -32,5 +32,4 @@ public class MeetDto {
     private String calendarEventId;
     private List<Long> userIds;
     private List<String> attendeeEmails;
-    private String timeZone;
 }

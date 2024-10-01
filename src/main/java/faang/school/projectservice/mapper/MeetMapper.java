@@ -1,19 +1,38 @@
 package faang.school.projectservice.mapper;
 
+import faang.school.projectservice.config.app.AppConfig;
+import faang.school.projectservice.dto.google.calendar.ZonedDateTimeDto;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.model.Meet;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface MeetMapper {
+public abstract class MeetMapper {
+
+    @Autowired
+    protected AppConfig appConfig;
 
     @Mapping(source = "project.id", target = "projectId")
-    MeetDto toDto(Meet meet);
+    @Mapping(source = "startDate", target = "startDate", qualifiedByName = "toZonedDateTimeDto")
+    @Mapping(source = "endDate", target = "endDate", qualifiedByName = "toZonedDateTimeDto")
+    public abstract MeetDto toDto(Meet meet);
 
-    List<MeetDto> toDtoList(List<Meet> meets);
+    public abstract List<MeetDto> toDtoList(List<Meet> meets);
+
+    @Named("toZonedDateTimeDto")
+    ZonedDateTimeDto toZonedDateTimeDto(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return null;
+        }
+        return new ZonedDateTimeDto(localDateTime, appConfig.getTimeZone());
+    }
 }
+
 

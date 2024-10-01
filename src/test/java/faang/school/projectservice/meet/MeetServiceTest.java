@@ -3,15 +3,16 @@ package faang.school.projectservice.meet;
 import faang.school.projectservice.config.app.AppConfig;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.google.calendar.CalendarEventDto;
+import faang.school.projectservice.dto.google.calendar.ZonedDateTimeDto;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
-import faang.school.projectservice.google.calendar.GoogleCalendarService;
 import faang.school.projectservice.jpa.MeetRepository;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.mapper.calendar.CalendarMeetDtoEventDtoMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.GoogleCalendarService;
 import faang.school.projectservice.service.MeetService;
 import faang.school.projectservice.validator.MeetValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,6 +83,8 @@ class MeetServiceTest {
         MeetDto meetDto = new MeetDto();
         meetDto.setCreatorId(1L);
         meetDto.setProjectId(1L);
+        meetDto.setStartDate(new ZonedDateTimeDto(LocalDateTime.now(), "UTC"));
+        meetDto.setEndDate(new ZonedDateTimeDto(LocalDateTime.now().plusHours(1), "UTC"));
 
         Project project = new Project();
 
@@ -131,11 +134,15 @@ class MeetServiceTest {
         meetDto.setId(meetId);
         meetDto.setCreatorId(1L);
         meetDto.setTitle("New title");
+        meetDto.setStartDate(new ZonedDateTimeDto(LocalDateTime.now(), "UTC"));
+        meetDto.setEndDate(new ZonedDateTimeDto(LocalDateTime.now().plusHours(1), "UTC"));
 
         Meet meet = new Meet();
         meet.setId(meetId);
         meet.setCreatorId(1L);
         meet.setTitle("Old title");
+        meetDto.setStartDate(new ZonedDateTimeDto(LocalDateTime.now(), "UTC"));
+        meetDto.setEndDate(new ZonedDateTimeDto(LocalDateTime.now().plusHours(1), "UTC"));
         MeetDto oldMeetDto = new MeetDto();
         oldMeetDto.setId(meetId);
         oldMeetDto.setCreatorId(1L);
