@@ -3,6 +3,7 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -11,10 +12,15 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.ValidatorProject;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -25,10 +31,13 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
+    private static final BigInteger MAX_COVER_IMAGE_SIZE = BigInteger.valueOf(5 * 1024 * 1024);
+
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
     private final List<ProjectFilters> filters;
     private final ValidatorProject validator;
+    private final S3Service s3Service;
 
     @Override
     public void createProject(ProjectDto projectDto) {
@@ -95,6 +104,73 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectDto findById(long id) {
         return mapper.toDto(projectRepository.getProjectById(id));
+    }
+
+    @Override
+    public void addCoverImage(Long projectId, MultipartFile coverImage) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new EntityNotFoundException("Project not found");
+        }
+        if (BigInteger.valueOf(coverImage.getSize()).compareTo(MAX_COVER_IMAGE_SIZE) > 0) {
+            throw new DataValidationException("The size of cover image is greater than " + MAX_COVER_IMAGE_SIZE);
+        }
+
+        Project project = projectRepository.getProjectById(projectId);
+
+        String folder = project.getName() + projectId + "coverImage";
+        String key = s3Service.upload(coverImage, folder);
+
+        project.setCoverImageId(key);
+        projectRepository.save(project);
+    }
+
+    @Override
+    public void updateCoverImage(Long projectId, MultipartFile coverImage) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new EntityNotFoundException("Project not found");
+        }
+        if (BigInteger.valueOf(coverImage.getSize()).compareTo(MAX_COVER_IMAGE_SIZE) > 0) {
+            throw new DataValidationException("The size of cover image is greater than " + MAX_COVER_IMAGE_SIZE.longValue());
+        }
+
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+
+        if (key != null) {
+            s3Service.delete(key);
+        }
+
+        String folder = project.getName() + projectId + "coverImage";
+        String newKey = s3Service.upload(coverImage, folder);
+
+        project.setCoverImageId(newKey);
+        projectRepository.save(project);
+    }
+
+    @Override
+    public InputStream getCoverImage(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new EntityNotFoundException("Project not found");
+        }
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+
+        return s3Service.download(key);
+    }
+
+    @Override
+    public void deleteCoverImage(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new EntityNotFoundException("Project not found");
+        }
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+
+        if (key != null) {
+            s3Service.delete(key);
+            project.setCoverImageId(null);
+            projectRepository.save(project);
+        }
     }
 
     private List<Project> findByName(String name) {

@@ -7,11 +7,16 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/project")
 public class ProjectController {
     private final ProjectService projectService;
 
@@ -37,5 +42,25 @@ public class ProjectController {
 
     public ProjectDto findById(long id) {
         return projectService.findById(id);
+    }
+
+    @PostMapping("/{id}/image")
+    public void addCoverImage(@PathVariable Long id, @RequestBody MultipartFile coverImage) {
+        projectService.addCoverImage(id, coverImage);
+    }
+
+    @PutMapping("/{id}/image")
+    public void updateCoverImage(@PathVariable Long id, @RequestBody MultipartFile coverImage) {
+        projectService.updateCoverImage(id, coverImage);
+    }
+
+    @GetMapping("/{id}/image")
+    public InputStream getCoverImage(@PathVariable Long id) {
+        return projectService.getCoverImage(id);
+    }
+
+    @DeleteMapping("/{id}/image")
+    public void deleteCoverImage(@PathVariable Long id) {
+        projectService.deleteCoverImage(id);
     }
 }
