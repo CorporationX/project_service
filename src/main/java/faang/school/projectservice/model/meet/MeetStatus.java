@@ -1,4 +1,4 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.meet;
 
 public enum MeetStatus {
     PENDING, COMPLETED, CANCELLED
