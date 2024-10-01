@@ -71,5 +71,4 @@ public class TeamMemberRoleFilterTest {
         List<TeamMember> filteredMembers = result.toList();
         assertThat(filteredMembers).isEmpty();
     }
-
 }

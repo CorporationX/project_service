@@ -11,7 +11,7 @@ public class TeamMemberRoleFilter implements TeamMemberFilter{
 
     @Override
     public boolean isApplicable(TeamFilterDto teamFilterDto) {
-        return teamFilterDto != null;
+        return teamFilterDto != null && teamFilterDto.getTeamRole() != null;
     }
 
     @Override

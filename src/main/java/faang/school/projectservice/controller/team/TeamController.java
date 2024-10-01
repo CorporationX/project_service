@@ -2,9 +2,12 @@ package faang.school.projectservice.controller.team;
 
 import faang.school.projectservice.dto.team.TeamFilterDto;
 import faang.school.projectservice.dto.team.TeamMemberDto;
-import faang.school.projectservice.service.TeamMemberServiceImpl;
+import faang.school.projectservice.service.TeamMemberService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,37 +19,37 @@ import java.util.List;
 @Validated
 public class TeamController {
 
-    private final TeamMemberServiceImpl teamMemberService;
+    private final TeamMemberService teamMemberService;
 
-    @PostMapping("/{id}/teamMembers")
-    public TeamMemberDto addTeamMember(@Positive @PathVariable long id,
+    @PostMapping("/{id}/members")
+    public TeamMemberDto addTeamMember(@Positive @PathVariable long teamId,
                                        @RequestBody TeamMemberDto teamMemberDto) {
-        return teamMemberService.addTeamMember(id, teamMemberDto);
+        return teamMemberService.addTeamMember(teamId, teamMemberDto);
     }
 
-    @PutMapping("/teamMembers/{id}")
-    public TeamMemberDto updateTeamMember(@Positive @PathVariable long id,
+    @PutMapping("/members/{id}")
+    public TeamMemberDto updateTeamMember(@Positive @PathVariable long teamId,
                                           @RequestBody TeamMemberDto teamMemberDto) {
-        return teamMemberService.updateTeamMember(id, teamMemberDto);
+        return teamMemberService.updateTeamMember(teamId, teamMemberDto);
     }
 
-    @DeleteMapping("/teamMembers/{id}")
-    public void deleteTeamMember(@Positive @PathVariable long id) {
-        teamMemberService.deleteTeamMember(id);
+    @DeleteMapping("/members/{id}")
+    public void deleteTeamMember(@Positive @PathVariable long userId, @Positive @PathVariable long teamId) {
+        teamMemberService.deleteTeamMember(userId, teamId);
     }
 
-    @GetMapping("/teamMembers/filter")
-    public List<TeamMemberDto> getTeamMembersByFilter(TeamFilterDto filters) {
-        return teamMemberService.getTeamMembersByFilter(filters);
+    @GetMapping("/members/filter")
+    public List<TeamMemberDto> getTeamMembersByFilter(@Positive @PathVariable long teamId, TeamFilterDto filters) {
+        return teamMemberService.getTeamMembersByFilter(teamId, filters);
     }
 
-    @GetMapping("/teamMembers/all")
-    public List<TeamMemberDto> getAllTeamMembers() {
-        return teamMemberService.getAllTeamMembers();
+    @GetMapping("/members/all")
+    public Page<TeamMemberDto> getAllTeamMembers(@PageableDefault Pageable pageable) {
+        return teamMemberService.getAllTeamMembers(pageable);
     }
 
-    @GetMapping("/teamMembers/{id}")
-    public TeamMemberDto getTeamMemberById(@Positive @PathVariable long id) {
-        return teamMemberService.getTeamMemberById(id);
+    @GetMapping("/members/{id}")
+    public TeamMemberDto getTeamMemberById(@Positive @PathVariable long teamId) {
+        return teamMemberService.getTeamMemberById(teamId);
     }
 }

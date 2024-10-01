@@ -26,7 +26,7 @@ public class TeamMember {
     @ElementCollection(targetClass = TeamRole.class)
     @CollectionTable(name = "team_member_roles",
             joinColumns = @JoinColumn(name = "team_member_id"))
-    @Column(name = "role")
+    @Column(name = "roles")
     @Enumerated(EnumType.STRING)
     private List<TeamRole> roles;
 
