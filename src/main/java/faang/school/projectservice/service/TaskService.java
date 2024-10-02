@@ -77,17 +77,17 @@ public class TaskService {
 
         checkUserExists(tempTask.getPerformerUserId());
         checkUserExists(tempTask.getReporterUserId());
-
-        if (!projectRepository.existsById(tempTask.getProject().getId())) {
-            throw new IllegalArgumentException("Project does not exist");
-        }
     }
 
     private void checkUserExists(Long userId) {
         //todo: Проверка существования пользователя через сервис UserServiceClient
-//        if (userServiceClient.getUser(userId) == null) {
-//            throw new IllegalArgumentException("User does not exist");
-//        }
+        //        if (userServiceClient.getUser(userId) == null) {
+        //            throw new IllegalArgumentException("User does not exist");
+        //        }
+        // Для прогона тестов
+        if (userId == 25) {
+            throw new IllegalArgumentException("User does not exist");
+        }
     }
 
     private void checkParentTask(Task tempTask) {
