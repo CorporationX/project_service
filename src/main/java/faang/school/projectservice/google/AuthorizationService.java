@@ -51,7 +51,9 @@ public class AuthorizationService {
 
 
     private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
-        InputStream in = new ByteArrayInputStream(repository.getReferenceById(credentialsId).getJson().getBytes(StandardCharsets.UTF_8));
+        String credentials = repository.getReferenceById(credentialsId).getJson();
+        InputStream in = new ByteArrayInputStream(credentials.getBytes(StandardCharsets.UTF_8));
+
         GoogleClientSecrets clientSecrets =
                 GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 

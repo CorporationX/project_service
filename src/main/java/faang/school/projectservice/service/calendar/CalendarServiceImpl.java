@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -38,35 +36,6 @@ public class CalendarServiceImpl implements CalendarService {
             log.info("Event created: {}", event.getHtmlLink());
         } else {
             log.info("event has already added to the calendar");
-        }
-    }
-
-    private Event initEvent(EventDto eventDto) {
-        return new Event()
-                .setStart(DateGoogleConverter.toEventDateTime(eventDto.getStartDate()))
-                .setEnd(DateGoogleConverter.toEventDateTime(eventDto.getEndDate()))
-                .setDescription(eventDto.getDescription())
-                .setAttendees(eventDto.getAttendeeEmails().stream()
-                        .map(email -> new EventAttendee().setEmail(email))
-                        .toList()
-                )
-                .setSummary(eventDto.getTitle())
-                .setReminders(new Event.Reminders().setUseDefault(true));
-    }
-
-    private Event add(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
-        Calendar service = authorizationService.authorizeAndGetCalendar();
-        checkIsCalendarAvailable(calendarId, service);
-        Event event = initEvent(eventDto);
-        if (eventDto.getCalendarEventId() != null) {
-            return service.events().patch(calendarId, eventDto.getCalendarEventId(), event).execute();
-        }
-        return service.events().insert(calendarId, event).execute();
-    }
-
-    private void checkIsCalendarAvailable(String calendarId, Calendar service) throws IOException {
-        if (service.calendars().get(calendarId) == null) {
-            throw new DataValidationException("calendar id = " + calendarId + " is not available");
         }
     }
 
@@ -97,5 +66,34 @@ public class CalendarServiceImpl implements CalendarService {
                 .setSingleEvents(true)
                 .execute();
         return events.getItems();
+    }
+
+    private Event initEvent(EventDto eventDto) {
+        return new Event()
+                .setStart(DateGoogleConverter.toEventDateTime(eventDto.getStartDate()))
+                .setEnd(DateGoogleConverter.toEventDateTime(eventDto.getEndDate()))
+                .setDescription(eventDto.getDescription())
+                .setAttendees(eventDto.getAttendeeEmails().stream()
+                        .map(email -> new EventAttendee().setEmail(email))
+                        .toList()
+                )
+                .setSummary(eventDto.getTitle())
+                .setReminders(new Event.Reminders().setUseDefault(true));
+    }
+
+    private Event add(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
+        Calendar service = authorizationService.authorizeAndGetCalendar();
+        checkIsCalendarAvailable(calendarId, service);
+        Event event = initEvent(eventDto);
+        if (eventDto.getCalendarEventId() != null) {
+            return service.events().patch(calendarId, eventDto.getCalendarEventId(), event).execute();
+        }
+        return service.events().insert(calendarId, event).execute();
+    }
+
+    private void checkIsCalendarAvailable(String calendarId, Calendar service) throws IOException {
+        if (service.calendars().get(calendarId) == null) {
+            throw new DataValidationException("calendar id = " + calendarId + " is not available");
+        }
     }
 }
