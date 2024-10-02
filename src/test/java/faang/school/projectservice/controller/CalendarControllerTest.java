@@ -57,7 +57,7 @@ class CalendarControllerTest {
         controller.updateEvent(CALENDAR_ID, eventDto);
 
         Mockito.verify(service, Mockito.times(1))
-                .update(eventDto, CALENDAR_ID);
+                .updateEvent(eventDto, CALENDAR_ID);
     }
 
     @Test
@@ -65,6 +65,6 @@ class CalendarControllerTest {
         controller.updateEvent(CALENDAR_ID, 1L);
 
         Mockito.verify(service, Mockito.times(1))
-                .update(1L, CALENDAR_ID);
+                .updateEvent(1L, CALENDAR_ID);
     }
 }

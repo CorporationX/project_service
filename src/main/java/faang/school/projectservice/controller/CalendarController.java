@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import com.google.api.services.calendar.model.Event;
 import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.service.calendar.CalendarService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -40,12 +39,12 @@ public class CalendarController {
     @PutMapping("/event/update/{calendarId}")
     public void updateEvent(@PathVariable("calendarId") @NotBlank String calendarId,
                             @RequestBody EventDto eventDto) throws GeneralSecurityException, IOException {
-        service.update(eventDto, calendarId);
+        service.updateEvent(eventDto, calendarId);
     }
 
     @PutMapping("/event/update/{calendarId}/{eventId}")
     public void updateEvent(@PathVariable("calendarId") @NotBlank String calendarId,
                             @PathVariable("eventId") @Positive long eventId) throws GeneralSecurityException, IOException {
-        service.update(eventId, calendarId);
+        service.updateEvent(eventId, calendarId);
     }
 }

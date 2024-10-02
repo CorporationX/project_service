@@ -10,9 +10,9 @@ import java.util.List;
 public interface CalendarService {
     void addEventToCalendar(long eventId, String calendarId) throws GeneralSecurityException, IOException;
 
-    Event update(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException;
+    Event updateEvent(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException;
 
-    void update(long eventId, String calendarId) throws GeneralSecurityException, IOException;
+    void updateEvent(long eventId, String calendarId) throws GeneralSecurityException, IOException;
 
     List<Event> getEvents(String calendarId) throws GeneralSecurityException, IOException;
 }

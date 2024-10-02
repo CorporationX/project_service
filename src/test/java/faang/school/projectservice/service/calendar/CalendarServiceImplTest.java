@@ -5,7 +5,7 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.google.AuthorizationService;
+import faang.school.projectservice.google.AuthorizationServiceImpl;
 import faang.school.projectservice.validator.CalendarServiceImplValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ class CalendarServiceImplTest {
     @InjectMocks
     private CalendarServiceImpl calendarService;
     @Mock
-    private AuthorizationService authorizationService;
+    private AuthorizationServiceImpl authorizationServiceImpl;
     @Mock
     private UserServiceClient client;
     @Mock
@@ -49,7 +49,7 @@ class CalendarServiceImplTest {
 
         Mockito.lenient().when(client.getEvent(eventId))
                 .thenReturn(eventDto);
-        Mockito.lenient().when(authorizationService.authorizeAndGetCalendar())
+        Mockito.lenient().when(authorizationServiceImpl.authorizeAndGetCalendar())
                 .thenReturn(calendarMock);
         Mockito.lenient().when(calendarMock.calendars())
                 .thenReturn(calendarsMock);
@@ -61,7 +61,7 @@ class CalendarServiceImplTest {
     void addEventToCalendar_whenNothingInCalendar() throws GeneralSecurityException, IOException {
         Assertions.assertThrows(DataValidationException.class, () -> calendarService.addEventToCalendar(eventId, "1"));
 
-        Mockito.verify(authorizationService, Mockito.times(1))
+        Mockito.verify(authorizationServiceImpl, Mockito.times(1))
                 .authorizeAndGetCalendar();
         Mockito.verify(client, Mockito.times(1))
                 .getEvent(eventId);
@@ -72,7 +72,7 @@ class CalendarServiceImplTest {
         eventDto.setCalendarEventId("first");
 
         calendarService.addEventToCalendar(eventId, "1");
-        Mockito.verify(authorizationService, Mockito.never())
+        Mockito.verify(authorizationServiceImpl, Mockito.never())
                 .authorizeAndGetCalendar();
         Mockito.verify(client, Mockito.times(1))
                 .getEvent(eventId);
@@ -80,19 +80,19 @@ class CalendarServiceImplTest {
 
     @Test
     void updateByEventDtoTest_whenOk() throws GeneralSecurityException, IOException {
-        Assertions.assertThrows(DataValidationException.class, () -> calendarService.update(eventDto, CALENDAR_ID));
+        Assertions.assertThrows(DataValidationException.class, () -> calendarService.updateEvent(eventDto, CALENDAR_ID));
 
-        Mockito.verify(authorizationService, Mockito.times(1))
+        Mockito.verify(authorizationServiceImpl, Mockito.times(1))
                 .authorizeAndGetCalendar();
     }
 
     @Test
     void updateById_whenOk() throws GeneralSecurityException, IOException {
-        Assertions.assertThrows(DataValidationException.class, () -> calendarService.update(eventId, CALENDAR_ID));
+        Assertions.assertThrows(DataValidationException.class, () -> calendarService.updateEvent(eventId, CALENDAR_ID));
 
         Mockito.verify(client, Mockito.times(1))
                 .getEvent(eventId);
-        Mockito.verify(authorizationService, Mockito.times(1))
+        Mockito.verify(authorizationServiceImpl, Mockito.times(1))
                 .authorizeAndGetCalendar();
     }
 
@@ -100,7 +100,7 @@ class CalendarServiceImplTest {
     void getEvents_whenOk() throws GeneralSecurityException, IOException {
         Assertions.assertThrows(NullPointerException.class, () -> calendarService.getEvents(CALENDAR_ID));
 
-        Mockito.verify(authorizationService, Mockito.times(1))
+        Mockito.verify(authorizationServiceImpl, Mockito.times(1))
                 .authorizeAndGetCalendar();
     }
 }

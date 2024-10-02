@@ -8,7 +8,7 @@ import com.google.api.services.calendar.model.Events;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.google.AuthorizationService;
+import faang.school.projectservice.google.AuthorizationServiceImpl;
 import faang.school.projectservice.google.DateGoogleConverter;
 import faang.school.projectservice.validator.CalendarServiceImplValidator;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CalendarServiceImpl implements CalendarService {
-    private final AuthorizationService authorizationService;
+    private final AuthorizationServiceImpl authorizationService;
     private final UserServiceClient userServiceClient;
     private final CalendarServiceImplValidator validator;
 
@@ -40,7 +40,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public Event update(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
+    public Event updateEvent(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
         validator.validateUpdate(eventDto);
         Event event = add(eventDto, calendarId);
         log.info("Event updated: {}", event.getHtmlLink());
@@ -48,10 +48,10 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public void update(long eventId, String calendarId) throws GeneralSecurityException, IOException {
+    public void updateEvent(long eventId, String calendarId) throws GeneralSecurityException, IOException {
         EventDto eventDto = userServiceClient.getEvent(eventId);
         validator.validateUpdate(eventDto);
-        Event event = update(eventDto, calendarId);
+        Event event = updateEvent(eventDto, calendarId);
         log.info("Event updated: {}", event.getHtmlLink());
     }
 
@@ -86,9 +86,13 @@ public class CalendarServiceImpl implements CalendarService {
         checkIsCalendarAvailable(calendarId, service);
         Event event = initEvent(eventDto);
         if (eventDto.getCalendarEventId() != null) {
-            return service.events().patch(calendarId, eventDto.getCalendarEventId(), event).execute();
+            return service.events()
+                    .patch(calendarId, eventDto.getCalendarEventId(), event)
+                    .execute();
         }
-        return service.events().insert(calendarId, event).execute();
+        return service.events()
+                .insert(calendarId, event)
+                .execute();
     }
 
     private void checkIsCalendarAvailable(String calendarId, Calendar service) throws IOException {
