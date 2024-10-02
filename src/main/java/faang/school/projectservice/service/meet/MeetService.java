@@ -10,6 +10,7 @@ import faang.school.projectservice.service.meet.filter.MeetFilter;
 import faang.school.projectservice.validator.meet.MeetValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MeetService {
@@ -33,6 +35,7 @@ public class MeetService {
         meetValidator.validateParticipants(meet.getUserIds());
         meet.setCreatorId(userId);
         meet.setProject(project);
+        log.info("New Meet was created: {}.", meet);
         return meetRepository.save(meet);
     }
 
@@ -42,13 +45,17 @@ public class MeetService {
         meetValidator.validateEditPermission(userId, foundEntity.getCreatorId());
         meetValidator.validateParticipants(meet.getUserIds());
         foundEntity = meetMapper.updateEntity(meet, foundEntity);
+        log.info("Meet with id={} updated. New Meet={}.", meetId, foundEntity);
         return meetRepository.save(foundEntity);
     }
 
     @Transactional(readOnly = true)
     public Meet getMeetById(Long userId, Long id) {
         meetValidator.validateUser(userId);
-        return meetRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Meet not found"));
+        return meetRepository.findById(id).orElseThrow(() -> {
+            log.debug("Meet with id={} not found.", id);
+            return new EntityNotFoundException("Meet not found");
+        });
     }
 
     @Transactional(readOnly = true)
@@ -64,6 +71,7 @@ public class MeetService {
         meetValidator.validateEditPermission(userId, foundMeet.getCreatorId());
         foundMeet.setStatus(MeetStatus.CANCELLED);
         meetRepository.save(foundMeet);
+        log.info("Meet with id={} canceled.", meetId);
     }
 
     @Transactional(readOnly = true)
@@ -86,5 +94,6 @@ public class MeetService {
         var foundMeet = getMeetById(userId, meetId);
         meetValidator.validateEditPermission(userId, foundMeet.getCreatorId());
         meetRepository.deleteById(meetId);
+        log.info("Meet with id={} deleted.", meetId);
     }
 }

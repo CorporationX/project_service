@@ -1,6 +1,5 @@
-package faang.school.projectservice.service.filter;
+package faang.school.projectservice.service.meet.filter;
 
-import faang.school.projectservice.service.meet.filter.MeetTitleFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +22,8 @@ class MeetTitleFilterTest {
 
     @Test
     void testIsApplicable() {
-        assertTrue(meetTitleFilter.isApplicable(sharedData.getMeetFilters()));
+        var result = meetTitleFilter.isApplicable(sharedData.getMeetFilters());
+        assertTrue(result);
     }
 
     @Test

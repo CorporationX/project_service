@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.meet;
 
 import faang.school.projectservice.exception.meet.MeetValidationException;
 import faang.school.projectservice.jpa.MeetRepository;
@@ -6,7 +6,6 @@ import faang.school.projectservice.mapper.meet.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.service.meet.MeetService;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.meet.MeetValidator;
 import feign.FeignException;

@@ -64,7 +64,7 @@ public class MeetController {
         return meetMapper.toDtos(meets);
     }
 
-    @PostMapping("/{projectId}/meets/filter")
+    @PostMapping("/{projectId}/filter")
     public Collection<MeetDto> getMeetsByProjectIdFiltered(@PathVariable Long projectId,
                                                            @RequestBody @Valid MeetFilters meetFilters) {
         var userId = userContext.getUserId();
