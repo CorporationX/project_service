@@ -28,10 +28,29 @@ public class TaskController {
         return taskMapper.toDto(originalTask);
     }
 
+    @PutMapping()
+    TaskDto updateTask(@RequestParam @NotNull Long taskId, @RequestBody @Validated TaskDto taskDto) {
+        taskDto.setTaskId(taskId);
+        Task tempTask = taskMapper.toEntity(taskDto);
+        Task originalTask = taskService.updateTask(tempTask);
+        return taskMapper.toDto(originalTask);
+    }
 
     @PostMapping("/filters")
     public List<TaskDto> getFilteredTasks(@RequestParam @NotNull Long requestingUserId, @RequestBody TaskFilterDto filters) {
         List<Task> tasks = taskService.getFilteredTasks(requestingUserId, filters);
         return taskMapper.toDto(tasks);
+    }
+
+    @GetMapping("/all")
+    public List<TaskDto> getAllTasksByProject(@RequestParam @NotNull Long userId, @RequestParam @NotNull Long projectId) {
+        List<Task> tasks = taskService.getAllTasksByProject(userId, projectId);
+        return taskMapper.toDto(tasks);
+    }
+
+    @GetMapping("/id")
+    public TaskDto getTaskById(@RequestParam @NotNull Long taskId, @RequestParam @NotNull Long userId) {
+        Task task = taskService.getTaskById(taskId, userId);
+        return taskMapper.toDto(task);
     }
 }

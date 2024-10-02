@@ -1,12 +1,11 @@
 package faang.school.projectservice.dto.task;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -15,12 +14,13 @@ public class TaskDto {
     private Long taskId;
 
     @NotNull
+    @NotBlank
     private String name;
     @NotNull
     private String description;
 
     @NotNull
-    private String status;
+    private String status = "TODO";
     @NotNull
     private Long performerUserId;
     @NotNull

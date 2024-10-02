@@ -18,9 +18,10 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TaskMapper {
 
+    @Mapping(source = "taskId", target = "id")
     @Mapping(source = "status", target = "status", qualifiedByName = "convertStatusToEnum")
     @Mapping(source = "parentTaskId", target = "parentTask", qualifiedByName = "convertTaskIdToParentTask")
-    @Mapping(source = "linkedTasksId", target = "linkedTasks", qualifiedByName = "convertIdsToLinkedTasks")
+//    @Mapping(source = "linkedTasksId", target = "linkedTasks", qualifiedByName = "convertIdsToLinkedTasks")
     @Mapping(source = "projectId", target = "project", qualifiedByName = "convertIdToProject")
     @Mapping(source = "stageId", target = "stage", qualifiedByName = "convertIdToStage")
     Task toEntity(TaskDto taskDto);
@@ -28,7 +29,7 @@ public interface TaskMapper {
     @Mapping(source = "task.id", target = "taskId")
     @Mapping(source = "status", target = "status", qualifiedByName = "convertEnumToStatus")
     @Mapping(source = "parentTask.id", target = "parentTaskId")
-    @Mapping(source = "linkedTasks", target = "linkedTasksId", qualifiedByName = "convertLinkedTasksToIds")
+  //  @Mapping(source = "linkedTasks", target = "linkedTasksId", qualifiedByName = "convertLinkedTasksToIds")
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "stage.stageId", target = "stageId")
     TaskDto toDto(Task task);
@@ -88,7 +89,7 @@ public interface TaskMapper {
 
     @Named("convertLinkedTasksToIds")
     default List<Long> convertLinkedTasksToIds(List<Task> linkedTasks) {
-        if (linkedTasks == null)
+        if (linkedTasks == null || linkedTasks.isEmpty())
             return null;
 
         List<Long> linkedTasksId = new ArrayList<>();
