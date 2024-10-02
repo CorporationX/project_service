@@ -4,8 +4,8 @@ import com.amazonaws.services.kms.model.AlreadyExistsException;
 import com.amazonaws.services.kms.model.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.ServletException;
-import jakarta.xml.bind.ValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -25,14 +25,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullValueException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNullValueException(NullValueException e) {
-        log.error("Data validation exception occurred: ", e);
+        log.error("Data validation exception occurred", e);
         return new ErrorResponse("Data validation exception occurred", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException e) {
-        log.error("Not found exception occurred: ", e);
+        log.error("Not found exception occurred", e);
         return new ErrorResponse("Not found exception occurred", e.getErrorMessage());
     }
 
@@ -103,5 +103,17 @@ public class GlobalExceptionHandler {
         log.error("Data validation exception", e);
         return new ErrorResponse("Data validation exception", e.getMessage());
     }
-}
+    @ExceptionHandler(StorageLimitException.class)
+    @ResponseStatus(value = HttpStatus.INSUFFICIENT_STORAGE)
+    public ErrorResponse handleStorageLimitExceededException(StorageLimitException e) {
+        log.error("Storage limit exception occurred", e);
+        return new ErrorResponse("Storage limit exception occurred", e.getMessage());
+    }
 
+    @ExceptionHandler(PermissionDeniedDataAccessException.class)
+    @ResponseStatus(value = HttpStatus.FORBIDDEN)
+    public ErrorResponse handlePermisionDeniedDataAccessException(PermissionDeniedDataAccessException e) {
+        log.error("Permission denied data access exception occurred", e);
+        return new ErrorResponse("Permission denied data access exception occurred", e.getMessage());
+    }
+}
