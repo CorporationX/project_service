@@ -12,7 +12,7 @@ import java.util.List;
 public record StageDto(
         Long stageId,
 
-        @NotBlank
+        @NotBlank(message = "Stage name can not be null or empty")
         String stageName,
 
         @Positive

@@ -1,14 +1,13 @@
 package faang.school.projectservice.dto.moment;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-public class MomentFilterDto {
-    private long month;
-    private long year;
-    private List<Long> projectId;
+@Builder
+public record MomentFilterDto(
+        long month,
+        long year,
+        List<Long> projectId
+) {
 }

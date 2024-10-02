@@ -8,11 +8,11 @@ import java.util.stream.Stream;
 public class MomentYearFilter implements MomentFilter{
     @Override
     public boolean isApplicable(MomentFilterDto filters) {
-        return filters.getYear() > 0;
+        return filters.year() > 0;
     }
 
     @Override
     public Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto filters) {
-        return moments.filter(moment -> moment.getDate().getYear() == filters.getYear());
+        return moments.filter(moment -> moment.getDate().getYear() == filters.year());
     }
 }

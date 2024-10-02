@@ -21,7 +21,7 @@ class MomentProjectFilterTest {
     @BeforeEach
     void setUp() {
         momentProjectFilter = new MomentProjectFilter();
-        filterDto = new MomentFilterDto();
+        filterDto = MomentFilterDto.builder().build();
         moment = new Moment();
         moment.setProjects(List.of(Project.builder()
                 .id(2L)
@@ -30,7 +30,9 @@ class MomentProjectFilterTest {
 
     @Test
     void givenValidWhenIsApplicableThenReturnTrue() {
-        filterDto.setProjectId(List.of(2L));
+        filterDto = MomentFilterDto.builder()
+                .projectId(List.of(2L))
+                .build();
 
         var result = momentProjectFilter.isApplicable(filterDto);
 
@@ -47,7 +49,9 @@ class MomentProjectFilterTest {
 
     @Test
     void givenValidWhenApplyThenReturnMoment() {
-        filterDto.setProjectId(List.of(2L));
+        filterDto = MomentFilterDto.builder()
+                .projectId(List.of(2L))
+                .build();
 
         var result = momentProjectFilter.apply(Stream.of(moment), filterDto);
 
@@ -56,7 +60,9 @@ class MomentProjectFilterTest {
 
     @Test
     void givenNotValidWhenApplyThenReturnEmpty() {
-        filterDto.setProjectId(List.of(3L));
+        filterDto = MomentFilterDto.builder()
+                .projectId(List.of(3L))
+                .build();
 
         var result = momentProjectFilter.apply(Stream.of(moment), filterDto);
 
