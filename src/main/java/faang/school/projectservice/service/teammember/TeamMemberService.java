@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +19,7 @@ public class TeamMemberService {
                 new EntityNotFoundException("Team member with id " + id + " does not exist!"));
     }
 
-    public List<TeamMember> getAllById (List<Long> teamMembers){
+    public List<TeamMember> getAllById(List<Long> teamMembers) {
         return teamMemberRepository.findAllById(teamMembers);
     }
 }

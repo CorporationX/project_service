@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.stage;
 
+import faang.school.projectservice.dto.filter.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageCreateDto;
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.filter.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.service.stage.StageService;
 import jakarta.validation.Valid;
