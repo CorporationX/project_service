@@ -38,9 +38,9 @@ public class AuthorizationService {
     @Value("${google.google_calendar.scopes}")
     private List<String> scopes;
 
-    private final String TOKENS_DIRECTORY_PATH = "tokens";
+    private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
-    private final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     public Calendar authorizeAndGetCalendar() throws IOException, GeneralSecurityException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
