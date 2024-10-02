@@ -1,6 +1,5 @@
 package faang.school.projectservice.service.project;
 
-import com.amazonaws.services.s3.AmazonS3;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
@@ -18,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.util.Map;
 
+
 @Slf4j
 @Service
 public class ProjectService {
@@ -26,21 +26,20 @@ public class ProjectService {
     private final TeamService teamService;
     private final String DIRECTORY_NAME;
     private final long MAX_STORAGE_SIZE;
-    private final AmazonS3 s3client;
 
 
     public ProjectService(ProjectRepository projectRepository,
                           ResourceManager resourceManager,
                           TeamService teamService,
                           @Value("${project-service.directory}") String DIRECTORY_NAME,
-                          @Value("${project-service.max_storage_size_no_subscription}") long MAX_STORAGE_SIZE, AmazonS3 s3client) {
+                          @Value("${project-service.max_storage_size_no_subscription}") long MAX_STORAGE_SIZE) {
         this.projectRepository = projectRepository;
         this.resourceManager = resourceManager;
         this.teamService = teamService;
         this.MAX_STORAGE_SIZE = MAX_STORAGE_SIZE;
         this.DIRECTORY_NAME = DIRECTORY_NAME;
-        this.s3client = s3client;
     }
+
 
     public TeamMember checkUserParticipationInProjectTeams(Long userId, Project project) {
         Map<Boolean, TeamMember> isItTeamMember = teamService.checkParticipationUserInTeams(userId, project.getTeams());
@@ -59,7 +58,7 @@ public class ProjectService {
         TeamMember teamMember = checkUserParticipationInProjectTeams(userId, project);
         String directoryPath = generateDirectoriesForUserFiles(projectId, userId);
         Resource resource = resourceManager.uploadFileToProject(file, directoryPath, project, teamMember);
-        updateProjectStorageSize(project, resource);
+        updateUpProjectStorageSize(project, resource);
         projectRepository.save(project);
         return resource;
     }
@@ -70,13 +69,12 @@ public class ProjectService {
         TeamMember teamMember = checkUserParticipationInProjectTeams(userId, project);
         allowedToDeleteFile(project, resource, teamMember);
         resourceManager.deleteFileFromProject(resource);
-        updateProjectStorageSize(project, resource);
+        updateDownProjectStorageSize(project, resource);
         projectRepository.save(project);
     }
 
     private void allowedToDeleteFile(Project project, Resource resource, TeamMember teamMember) {
         log.info("Deleting file: {} from project: {}", resource.getKey(), project.getId());
-        log.info("{} {}", teamMember.getId(), resource.getCreatedBy().getId());
         if (!teamMember.equals(resource.getCreatedBy())
                 && !teamMember.getRoles().contains(TeamRole.MANAGER)) {
             throw new IllegalArgumentException("User is not allowed to delete this file");
@@ -87,8 +85,11 @@ public class ProjectService {
         }
     }
 
-    private void updateProjectStorageSize(Project project, Resource resource) {
+    private void updateUpProjectStorageSize(Project project, Resource resource) {
         project.setStorageSize(project.getStorageSize().add(resource.getSize()));
+    }
+    private void updateDownProjectStorageSize(Project project, Resource resource) {
+        project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
     }
 
     private String generateDirectoriesForUserFiles(Long projectId, Long userId) {
