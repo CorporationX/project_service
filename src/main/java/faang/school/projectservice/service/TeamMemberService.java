@@ -13,7 +13,7 @@ public interface TeamMemberService {
 
     TeamMemberDto updateTeamMember(long id, TeamMemberDto teamMemberDto);
 
-    void deleteTeamMember(long teamId, long userId);
+    void deleteTeamMember(long teamMemberId);
 
     List<TeamMemberDto> getTeamMembersByFilter(long id, TeamFilterDto filters);
 

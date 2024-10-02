@@ -34,8 +34,8 @@ public class TeamController {
     }
 
     @DeleteMapping("/members/{id}")
-    public void deleteTeamMember(@Positive @PathVariable long userId, @Positive @PathVariable long teamId) {
-        teamMemberService.deleteTeamMember(userId, teamId);
+    public void deleteTeamMember(@Positive @PathVariable long teamMemberId) {
+        teamMemberService.deleteTeamMember(teamMemberId);
     }
 
     @GetMapping("/members/filter")

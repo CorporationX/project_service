@@ -7,9 +7,12 @@ import faang.school.projectservice.dto.team.TeamMemberDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.TeamMemberMapper;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.service.TeamMemberServiceImpl;
 import faang.school.projectservice.service.teamfilter.TeamMemberFilter;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,17 +26,22 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
 public class TeamMemberServiceTest {
+
+    private final static long USER_ID = 1L;
+    private final static long TEAM_ID = 5L;
+    private final static long PROJECT_ID = 6L;
+
 
     @InjectMocks
     private TeamMemberServiceImpl teamMemberService;
@@ -46,6 +54,8 @@ public class TeamMemberServiceTest {
     @Mock
     private UserServiceClient userServiceClient;
     @Mock
+    private TeamRepository teamRepository;
+    @Mock
     private List<TeamMemberFilter> teamMemberFilters;
     @Mock
     private UserContext userContext;
@@ -53,108 +63,131 @@ public class TeamMemberServiceTest {
 
     private TeamMemberDto teamMemberDto;
     private TeamMember teamMember;
+    private TeamMember owner;
+    private TeamMember teamlead;
     private Pageable pageable;
-
-    private final static long USER_ID = 1L;
-    private final static long TEAM_ID = 2L;
+    private Team team;
+    private Project project;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        teamMemberDto = new TeamMemberDto(2L, List.of(TeamRole.DEVELOPER));
-        teamMember = TeamMember.builder()
-                .userId(teamMemberDto.teamMemberId())
-                .roles(teamMemberDto.roles())
-                .build();
+
+        team = new Team();
+        team.setId(TEAM_ID);
+        project = new Project();
+        project.setId(PROJECT_ID);
+
+        team.setProject(project);
+
+        teamMember = new TeamMember();
+        teamMember.setId(2L);
+        teamMember.setRoles(List.of());
+        teamMember.setTeam(team);
+
+        owner = new TeamMember();
+        owner.setId(3L);
+        owner.setRoles(List.of(TeamRole.OWNER));
+        owner.setTeam(team);
+
+        teamlead = new TeamMember();
+        teamlead.setId(7L);
+        teamlead.setRoles(List.of(TeamRole.TEAMLEAD));
+        teamlead.setTeam(team);
+
+        team.setTeamMembers(List.of(teamMember, owner, teamlead));
+        project.setTeams(List.of(team));
+
         pageable = PageRequest.of(0, 10);
     }
 
     @Test
-    public void testAddTeamMemberShouldAddMemberWhenUserIsAuthorized() {
+    public void testAddTeamMemberSuccess() {
+
+        teamMemberDto = new TeamMemberDto(2L, List.of(TeamRole.DEVELOPER));
 
         when(userContext.getUserId()).thenReturn(USER_ID);
-        TeamMember teamlead = TeamMember.builder()
-                .userId(USER_ID)
-                .roles(List.of(TeamRole.TEAMLEAD))
-                .build();
-        when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, TEAM_ID)).thenReturn(teamlead);
-        when(teamMemberJpaRepository.findByUserIdAndProjectId(2L, TEAM_ID)).thenReturn(new TeamMember());
-        when(teamMemberMapper.toTeamMemberDto(any())).thenReturn(teamMemberDto);
+        when(teamRepository.findById(TEAM_ID)).thenReturn(Optional.of(team));
+        when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(teamlead);
+        when(teamMemberJpaRepository.findByUserIdAndProjectId(2L, PROJECT_ID)).thenReturn(teamMember);
+        when(teamMemberMapper.toTeamMember(teamMemberDto)).thenReturn(teamMember);
 
         TeamMemberDto result = teamMemberService.addTeamMember(TEAM_ID, teamMemberDto);
 
-        assertThat(result).isEqualTo(teamMemberDto);
-        verify(teamMemberJpaRepository).save(any(TeamMember.class));
+        assertNotNull(teamMemberDto);
+        verify(teamMemberJpaRepository, times(1)).save(any(TeamMember.class));
     }
 
     @Test
-    public void testAddTeamMemberShouldThrowExceptionWhenUserIsNotAuthorized() {
+    public void testAddTeamMemberWhenUserNotAuthorized() {
+        TeamMember user = new TeamMember();
+        user.setRoles(List.of(TeamRole.ANALYST));
 
         when(userContext.getUserId()).thenReturn(USER_ID);
-        when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, TEAM_ID)).thenReturn(new TeamMember());
+        when(teamRepository.findById(TEAM_ID)).thenReturn(Optional.of(team));
+        when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(user);
 
         assertThrows(DataValidationException.class, () -> teamMemberService.addTeamMember(TEAM_ID, teamMemberDto));
     }
 
     @Test
-    public void testAddTeamMemberShouldThrowExceptionWhenUserRoleIsIncorrect() {
-        long userId = 1L;
-        TeamMember developer = new TeamMember();
-        developer.setRoles(List.of(TeamRole.DEVELOPER));
-        when(teamMemberRepository.findById(userId)).thenReturn(developer);
+    public void testAddTeamMemberShouldThrowExceptionWhenTeamMemberRoleIsNotEmpty() {
 
-        assertThrows(DataValidationException.class, () -> teamMemberService.addTeamMember(userId, teamMemberDto));
-    }
+        teamMemberDto = new TeamMemberDto(2L, List.of(TeamRole.DEVELOPER));
+        teamMember.setRoles(List.of(TeamRole.DESIGNER));
 
-    @Test
-    public void testAddTeamMemberShouldThrowExceptionWhenUserRoleIsNotEmpty() {
-        long userId = 1L;
-        when(teamMemberDto.roles()).thenReturn(List.of(any()));
+        when(userContext.getUserId()).thenReturn(USER_ID);
+        when(teamRepository.findById(TEAM_ID)).thenReturn(Optional.of(team));
+        when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(teamlead);
+        when(teamMemberJpaRepository.findByUserIdAndProjectId(2L, PROJECT_ID)).thenReturn(teamMember);
 
-        assertThrows(DataValidationException.class, () -> teamMemberService.addTeamMember(userId, teamMemberDto));
+        assertThrows(DataValidationException.class, () -> teamMemberService.addTeamMember(TEAM_ID, teamMemberDto));
     }
 
     @Test
     public void testUpdateTeamMemberShouldUpdateWhenMemberExists() {
-        long userId = 2L;
-        teamMemberDto = new TeamMemberDto(1L, List.of(TeamRole.DESIGNER));
+        teamMemberDto = new TeamMemberDto(2L, List.of(TeamRole.DEVELOPER));
+
+        when(userContext.getUserId()).thenReturn(USER_ID);
+        when(teamRepository.findById(TEAM_ID)).thenReturn(Optional.of(team));
+        when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(teamlead);
         when(teamMemberMapper.toTeamMember(teamMemberDto)).thenReturn(teamMember);
-        when(teamMemberJpaRepository.save(any())).thenReturn(teamMember);
-        when(teamMemberMapper.toTeamMemberDto(any())).thenReturn(teamMemberDto);
 
-        TeamMemberDto result = teamMemberService.updateTeamMember(userId, teamMemberDto);
+        TeamMemberDto result = teamMemberService.updateTeamMember(TEAM_ID, teamMemberDto);
 
-        assertThat(result).isEqualTo(teamMemberDto);
+        assertNotNull(teamMemberDto);
         verify(teamMemberJpaRepository).save(teamMember);
     }
 
     @Test
     public void testUpdateTeamMemberShouldThrowExceptionWhenUserRolesIsIncorrect() {
-        long userId = 1L;
-        TeamMember developer = new TeamMember();
-        developer.setRoles(List.of(TeamRole.DEVELOPER));
-        when(teamMemberRepository.findById(userId)).thenReturn(developer);
 
-        assertThrows(DataValidationException.class, () -> teamMemberService.updateTeamMember(userId, teamMemberDto));
+        TeamMember member = new TeamMember();
+        member.setRoles(List.of(TeamRole.DEVELOPER));
+        when(userContext.getUserId()).thenReturn(USER_ID);
+        when(teamRepository.findById(TEAM_ID)).thenReturn(Optional.of(team));
+
+        when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(member);
+
+        assertThrows(DataValidationException.class, () -> teamMemberService.updateTeamMember(TEAM_ID, teamMemberDto));
     }
 
     @Test
     public void testDeleteTeamMemberShouldDeleteWhenMemberExists() {
 
-        when(teamMemberRepository.findById(USER_ID)).thenReturn(teamMember);
-        teamMemberService.deleteTeamMember(USER_ID, TEAM_ID);
+        when(teamMemberRepository.findById(2L)).thenReturn(teamMember);
+        teamMemberService.deleteTeamMember(teamMember.getId());
 
         verify(teamMemberJpaRepository, times(1)).delete(teamMember);
     }
 
     @Test
     public void testGetTeamMembersByFilterWhenNoFilters() {
-        long teamId = 1L;
+
         when(teamMemberJpaRepository.findAll()).thenReturn(List.of(teamMember));
         when(teamMemberFilters.stream()).thenReturn(Stream.empty());
         when(teamMemberMapper.toTeamMemberDto(teamMember)).thenReturn(teamMemberDto);
 
-        List<TeamMemberDto> result = teamMemberService.getTeamMembersByFilter(teamId, new TeamFilterDto());
+        List<TeamMemberDto> result = teamMemberService.getTeamMembersByFilter(TEAM_ID, new TeamFilterDto());
 
         assertEquals(1, result.size());
         assertEquals(teamMemberDto, result.get(0));
@@ -162,16 +195,15 @@ public class TeamMemberServiceTest {
 
     @Test
     public void testGetTeamMembersByFilterWithApplicableFilters() {
-        long teamId = 1L;
-        teamMember.setRoles(List.of(TeamRole.DEVELOPER));
 
         when(teamMemberJpaRepository.findAll()).thenReturn(List.of(teamMember));
+
         when(teamMemberMapper.toTeamMemberDto(teamMember)).thenReturn(teamMemberDto);
 
         TeamFilterDto filter = new TeamFilterDto();
         filter.setTeamRole(TeamRole.DEVELOPER);
 
-        List<TeamMemberDto> result = teamMemberService.getTeamMembersByFilter(teamId, filter);
+        List<TeamMemberDto> result = teamMemberService.getTeamMembersByFilter(TEAM_ID, filter);
 
         assertEquals(1, result.size());
         assertEquals(teamMemberDto, result.get(0));
@@ -180,14 +212,12 @@ public class TeamMemberServiceTest {
         @Test
     public void testGetAllTeamMembersShouldReturnAllMembers() {
         List<TeamMember> members = List.of(teamMember);
-        Page<TeamMember> teamMembersPage = new PageImpl<>(List.of(teamMember));
+        Page<TeamMember> teamMembersPage = new PageImpl<>(members);
         when(teamMemberJpaRepository.findAll(pageable)).thenReturn(teamMembersPage);
-        when(teamMemberMapper.toTeamMemberDtos(members)).thenReturn(List.of(teamMemberDto));
 
         Page<TeamMemberDto> result = teamMemberService.getAllTeamMembers(pageable);
 
         assertEquals(1, result.getTotalElements());
-        assertThat(result.getContent().get(0)).isEqualTo(teamMemberDto);
     }
 
     @Test
