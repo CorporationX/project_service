@@ -21,19 +21,13 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(DataValidationException.class)
+    @ExceptionHandler({DataValidationException.class, IllegalArgumentException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handlerDataValidationException(DataValidationException e, HttpServletRequest request) {
-        log.error("Data validation exception occurred: {}", e.getMessage(), e);
+    public ErrorResponse handleMultipleExceptions(Exception e, HttpServletRequest request) {
+        log.error("Exception occurred: {}", e.getMessage(), e);
         return returnedErrorResponse(e, request);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handlerIllegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
-        log.error("IllegalArgumentException occurred: {}", e.getMessage(), e);
-        return returnedErrorResponse(e, request);
-    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -62,13 +56,6 @@ public class GlobalExceptionHandler {
                 .toList();
 
         return returnedValidationErrorResponse(e, request, violations);
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handlerRuntimeException(RuntimeException e, HttpServletRequest request) {
-        log.error("RuntimeException occurred: {}", e.getMessage(), e);
-        return returnedErrorResponse(e, request);
     }
 
     @ExceptionHandler(Exception.class)
