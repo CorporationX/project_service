@@ -3,16 +3,16 @@ package faang.school.projectservice.service.project;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.dto.resource.ResourceDownloadDto;
 import faang.school.projectservice.exception.ApiException;
-import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.service.resource.S3Service;
 import faang.school.projectservice.validator.ProjectCoverImageValidator;
 import faang.school.projectservice.validator.ProjectServiceValidator;
-import faang.school.projectservice.validator.util.MultipartImage;
-import lombok.RequiredArgsConstructor;
+import faang.school.projectservice.validator.util.image.MultipartImage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,13 +25,23 @@ import java.math.BigInteger;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ProjectService {
     private final S3Service s3Service;
     private final ProjectRepository projectRepository;
-    private final ResourceRepository resourceRepository;
     private final ProjectCoverImageValidator projectCoverImageValidator;
     private final ProjectServiceValidator projectServiceValidator;
+    private final ResourceService resourceService;
+
+    @Lazy
+    public ProjectService(S3Service s3Service, ProjectRepository projectRepository,
+                          ProjectCoverImageValidator projectCoverImageValidator,
+                          ProjectServiceValidator projectServiceValidator, ResourceService resourceService) {
+        this.s3Service = s3Service;
+        this.projectRepository = projectRepository;
+        this.projectCoverImageValidator = projectCoverImageValidator;
+        this.projectServiceValidator = projectServiceValidator;
+        this.resourceService = resourceService;
+    }
 
     @Transactional
     public void updateStorageSize(Long projectId, BigInteger storageSize) {
@@ -70,7 +80,7 @@ public class ProjectService {
 
         projectServiceValidator.getResourceByKey(project, imageKey).ifPresent(resource -> {
             s3Service.delete(imageKey);
-            resourceRepository.delete(resource);
+            resourceService.deleteResource(resource);
 
             project.setCoverImageId(null);
             long newStorageSize = project.getStorageSize().longValue() - resource.getSize().longValue();
@@ -90,7 +100,7 @@ public class ProjectService {
         Resource projectCoverImageResource = s3Service.uploadProjectCoverImage(multipartImage, project);
         project.setCoverImageId(projectCoverImageResource.getKey());
 
-        resourceRepository.save(projectCoverImageResource);
+        resourceService.saveResource(projectCoverImageResource);
         projectRepository.save(project);
     }
 
@@ -99,7 +109,7 @@ public class ProjectService {
                 resource -> {
                     long newSize = projectServiceValidator.validResourceSize(project, multipartFile, resource);
                     s3Service.delete(resource.getKey());
-                    resourceRepository.delete(resource);
+                    resourceService.deleteResource(resource);
                     project.setStorageSize(BigInteger.valueOf(newSize));
                 }, () -> {
                     long newSize = projectServiceValidator.validResourceSize(project, multipartFile, null);

@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.util;
+package faang.school.projectservice.validator.util.image;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;

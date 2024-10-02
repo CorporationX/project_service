@@ -56,8 +56,11 @@ services:
 
 app:
   project_service:
-    max_cover_image_size: 5_000_000
-    cover_image_types: jpeg/png
-    cover_image_max_width: 1080
-    cover_image_max_height: 566
-    cover_image_folder_name: /cover-image
+    cover_image:
+      max_cover_image_size: 5_000_000
+      cover_image_types: jpeg/png
+      cover_image_horizontal_max_width: 1080
+      cover_image_horizontal_max_height: 566
+      cover_image_square_max_width: 1080
+      cover_image_square_max_height: 1080
+      cover_image_folder_name: /cover-image

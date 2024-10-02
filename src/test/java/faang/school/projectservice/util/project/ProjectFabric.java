@@ -3,7 +3,6 @@ package faang.school.projectservice.util.project;
 import faang.school.projectservice.dto.resource.ResourceDownloadDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.validator.util.MockMultipartFile;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
@@ -85,35 +84,20 @@ public class ProjectFabric {
     }
 
     public static MultipartFile buildMultiPartFile() {
-        return MockMultipartFile
-                .builder()
-                .build();
+        return new MockMultipartFileForTest();
     }
 
     public static MultipartFile buildMultiPartFile(Long size) {
-        return MockMultipartFile
-                .builder()
-                .size(size)
-                .build();
+        return new MockMultipartFileForTest(null, null, null, null, size, null, null);
     }
 
     public static MultipartFile buildMultiPartFile(Long size, String type) {
-        return MockMultipartFile
-                .builder()
-                .size(size)
-                .contentType(type)
-                .build();
+        return new MockMultipartFileForTest(null, null, type, null, size, null, null);
     }
 
     public static MultipartFile buildMultiPartFile(String originalName, Long size, String type,
                                                    InputStream inputStream) {
-        return MockMultipartFile
-                .builder()
-                .originalFileName(originalName)
-                .size(size)
-                .contentType(type)
-                .inputStream(inputStream)
-                .build();
+        return new MockMultipartFileForTest(null, originalName, type, null, size, null, inputStream);
     }
 
     public static ResourceDownloadDto buildResourceDownloadDto(byte[] bytes, String contentType,

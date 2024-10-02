@@ -4,14 +4,14 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.dto.resource.ResourceDownloadDto;
-import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.service.resource.S3Service;
 import faang.school.projectservice.validator.ProjectCoverImageValidator;
 import faang.school.projectservice.validator.ProjectServiceValidator;
-import faang.school.projectservice.validator.util.MultipartImage;
+import faang.school.projectservice.validator.util.image.MultipartImage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,13 +50,13 @@ public class ProjectServiceTest {
     private ProjectRepository projectRepository;
 
     @Mock
-    private ResourceRepository resourceRepository;
-
-    @Mock
     private ProjectCoverImageValidator projectCoverImageValidator;
 
     @Mock
     private ProjectServiceValidator projectServiceValidator;
+
+    @Mock
+    private ResourceService resourceService;
 
     @InjectMocks
     private ProjectService projectService;
@@ -110,7 +110,7 @@ public class ProjectServiceTest {
         projectService.deleteCoverImage(USER_ID, PROJECT_ID);
 
         verify(s3Service).delete(COVER_ID);
-        verify(resourceRepository).delete(resource);
+        verify(resourceService).deleteResource(resource);
         verify(projectRepository).save(project);
     }
 
@@ -130,8 +130,8 @@ public class ProjectServiceTest {
         projectService.addCoverImage(USER_ID, PROJECT_ID, multipartImage);
 
         verify(s3Service).delete(COVER_ID);
-        verify(resourceRepository).delete(resource);
-        verify(resourceRepository).save(resource);
+        verify(resourceService).deleteResource(resource);
+        verify(resourceService).saveResource(resource);
         verify(projectRepository).save(project);
     }
 
@@ -150,7 +150,7 @@ public class ProjectServiceTest {
 
         projectService.addCoverImage(USER_ID, PROJECT_ID, multipartImage);
 
-        verify(resourceRepository).save(resource);
+        verify(resourceService).saveResource(resource);
         verify(projectRepository).save(project);
     }
 }

@@ -29,7 +29,7 @@ public class S3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    @Value("${app.project_service.cover_image_folder_name}")
+    @Value("${app.project_service.cover_image.cover_image_folder_name}")
     private String coverImageFolderName;
 
     public void upload(MultipartFile file, String key) {
