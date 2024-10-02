@@ -1,25 +1,23 @@
 package faang.school.projectservice.service.jira;
 
+import faang.school.projectservice.client.JiraClient;
 import faang.school.projectservice.dto.client.ProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.dto.jira.IssueDto;
 import faang.school.projectservice.dto.jira.IssueFilterDto;
 import faang.school.projectservice.dto.jira.IssueUpdateDto;
 import faang.school.projectservice.dto.jira.JiraResponse;
-import faang.school.projectservice.exception.EntityFieldNotFoundException;
 import faang.school.projectservice.filter.IssueFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.JiraService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,13 +26,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JiraServiceImpl implements JiraService {
 
-    private final WebClient webClient;
+    private final JiraClient jiraClient;
     private final List<IssueFilter> issueFilters;
     private final ProjectJpaRepository projectRepository;
     private final ProjectMapper projectMapper;
 
     @Override
-    public ProjectDto registrationProjectInJira(long id, String jiraKey) {
+    public ProjectDto registrationInJira(long id, String jiraKey) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Project with id %d not found".formatted(id)));
         project.setJiraKey(jiraKey);
@@ -44,8 +42,8 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public List<IssueDto> getAllIssuesByProjectId(long projectId) {
         String jiraProjectKey = getJiraProjectKey(projectId);
-        String jql = "project = \"%s\"".formatted(jiraProjectKey);
-        JiraResponse response = fetchWithJql(jql);
+        String jql = "project = '%s'".formatted(jiraProjectKey);
+        JiraResponse response = jiraClient.getProjectInfoByJql(jql);
 
         return Optional.ofNullable(response)
                 .map(JiraResponse::getIssues)
@@ -54,11 +52,7 @@ public class JiraServiceImpl implements JiraService {
 
     @Override
     public IssueDto getIssueByKey(String issueKey) {
-        return webClient.get()
-                .uri("/issue/{key}", issueKey)
-                .retrieve()
-                .bodyToMono(IssueDto.class)
-                .block();
+        return jiraClient.getIssueByKey(issueKey);
     }
 
     @Override
@@ -70,19 +64,14 @@ public class JiraServiceImpl implements JiraService {
                 .collect(Collectors.joining(" AND "));
         jql += " AND project = '%s'".formatted(jiraProjectKey);
 
-        return Optional.ofNullable(fetchWithJql(jql))
+        return Optional.ofNullable(jiraClient.getProjectInfoByJql(jql))
                 .map(JiraResponse::getIssues)
                 .orElse(Collections.emptyList());
     }
 
     @Override
     public IssueDto createIssue(IssueDto issueDto) {
-        return webClient.post()
-                .uri("/issue")
-                .bodyValue(issueDto)
-                .retrieve()
-                .bodyToMono(IssueDto.class)
-                .block();
+        return jiraClient.createIssue(issueDto);
     }
 
     @Override
@@ -90,48 +79,21 @@ public class JiraServiceImpl implements JiraService {
         IssueUpdateDto.Fields fields = issueDto.getFields();
 
         if (fields != null && fields.getIssueLinks() != null) {
-            fields.getIssueLinks().forEach(issueLink -> webClient.post()
-                    .uri("/issueLink")
-                    .bodyValue(issueLink)
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block()
-            );
+            jiraClient.createIssueLinks(fields.getIssueLinks());
             fields.setIssueLinks(null);
         }
 
         if (issueDto.getTransition() != null) {
-            webClient.post()
-                    .uri("/issue/{issueKey}/transitions", issueKey)
-                    .bodyValue(Map.of("transition", issueDto.getTransition()))
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
+            jiraClient.setTransitionByKey(issueKey, issueDto.getTransition());
             issueDto.setTransition(null);
         }
 
-        webClient.put()
-                .uri("/issue/{key}", issueKey)
-                .bodyValue(issueDto)
-                .retrieve()
-                .toBodilessEntity()
-                .block();
-    }
-
-    private JiraResponse fetchWithJql(String jql) {
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/search")
-                        .queryParam("jql", jql)
-                        .build())
-                .retrieve()
-                .bodyToMono(JiraResponse.class)
-                .block();
+        jiraClient.updateIssueByKey(issueKey, issueDto);
     }
 
     private String getJiraProjectKey(long projectId) {
         return projectRepository.findById(projectId)
                 .map(Project::getJiraKey)
-                .orElseThrow(() -> new EntityFieldNotFoundException("Данный проект не связан с Jira"));
+                .orElseThrow(() -> new EntityNotFoundException("Проект с id %d не связан с Jira".formatted(projectId)));
     }
 }

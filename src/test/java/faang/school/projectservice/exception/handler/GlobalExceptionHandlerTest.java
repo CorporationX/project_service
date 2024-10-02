@@ -13,7 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +33,7 @@ class GlobalExceptionHandlerTest {
     void handleJiraException() throws Exception {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .errorMessages(List.of("Jira error occurredн"))
+                .globalMessage("Jira error occurred")
                 .errors(Map.of("field", "Invalid value"))
                 .build();
 
@@ -42,7 +41,7 @@ class GlobalExceptionHandlerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(errorResponse.getStatus()))
-                .andExpect(jsonPath("$.errorMessages[0]").value("Jira error occurred"))
+                .andExpect(jsonPath("$.globalMessage").value("Jira error occurred"))
                 .andExpect(jsonPath("$.errors.field").value("Invalid value"));
     }
 
@@ -53,7 +52,7 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(get("/entity-field-not-found-exception")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorMessages[0]").value(message));
+                .andExpect(jsonPath("$.globalMessage").value(message));
     }
 
     @Test

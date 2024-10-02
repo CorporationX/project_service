@@ -31,21 +31,21 @@ public class JiraController {
 
     @PostMapping("/project/{id}/jira-key/{key}")
     public ProjectDto registrationProjectInJira(@PathVariable @Positive Long id, @PathVariable @NotNull String key) {
-        return jiraService.registrationProjectInJira(id, key);
+        return jiraService.registrationInJira(id, key);
     }
 
     @PostMapping("/issue")
     @ResponseStatus(HttpStatus.CREATED)
-    public IssueDto createJira(@RequestBody IssueDto issueDto) {
+    public IssueDto createIssue(@RequestBody IssueDto issueDto) {
         return jiraService.createIssue(issueDto);
     }
 
-    @GetMapping("/issues/project/{projectId}")
+    @GetMapping("/issue/project/{projectId}")
     public List<IssueDto> getAllIssuesByProjectId(@PathVariable @NotNull @Positive Long projectId) {
         return jiraService.getAllIssuesByProjectId(projectId);
     }
 
-    @GetMapping("/issues/filter/project/{projectId}")
+    @GetMapping("/issue/filter/project/{projectId}")
     public List<IssueDto> getAllIssuesWithFilterByProjectKey(
             @PathVariable @NotNull @Positive Long projectId,
             @RequestBody IssueFilterDto filter) {

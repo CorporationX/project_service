@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface JiraService {
 
-    ProjectDto registrationProjectInJira(long id, String jiraKey);
+    ProjectDto registrationInJira(long id, String jiraKey);
 
     IssueDto createIssue(IssueDto issueDto);
 

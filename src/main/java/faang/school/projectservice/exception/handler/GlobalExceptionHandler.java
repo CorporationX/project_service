@@ -1,8 +1,8 @@
 package faang.school.projectservice.exception.handler;
 
 import faang.school.projectservice.dto.ErrorResponse;
-import faang.school.projectservice.exception.EntityFieldNotFoundException;
 import faang.school.projectservice.exception.JiraException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,11 +23,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleJiraException(JiraException exception) {
         ErrorResponse errorResponse = exception.getErrorResponse();
 
-        List<String> errorMessages = errorResponse.getErrorMessages();
-        errorMessages.forEach(log::error);
-
+        log.error(errorResponse.getGlobalMessage());
         Optional.ofNullable(errorResponse.getErrors())
-                .ifPresent(errors -> errors.forEach((key, value) -> log.error("{}: {}", key, value)));
+                .ifPresent(errors -> log.error(errors.toString()));
 
         log.error("Http code: {}", exception.getHttpCode().toString(), exception);
 
@@ -37,13 +34,13 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
-    @ExceptionHandler(EntityFieldNotFoundException.class)
+    @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleEntityFieldNotFoundException(EntityFieldNotFoundException exception) {
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException exception) {
         String message = exception.getMessage();
         log.error(message, exception);
         return ErrorResponse.builder()
-                .errorMessages(List.of(message))
+                .globalMessage(message)
                 .build();
     }
 

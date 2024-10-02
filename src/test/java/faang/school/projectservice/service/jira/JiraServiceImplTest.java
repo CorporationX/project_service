@@ -1,12 +1,12 @@
 package faang.school.projectservice.service.jira;
 
+import faang.school.projectservice.client.JiraClient;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.jira.Assignee;
 import faang.school.projectservice.dto.jira.IssueDto;
 import faang.school.projectservice.dto.jira.IssueFilterDto;
 import faang.school.projectservice.dto.jira.IssueUpdateDto;
 import faang.school.projectservice.dto.jira.JiraResponse;
-import faang.school.projectservice.exception.EntityFieldNotFoundException;
 import faang.school.projectservice.filter.IssueAssigneeFilter;
 import faang.school.projectservice.filter.IssueFilter;
 import faang.school.projectservice.filter.IssueStatusFilter;
@@ -29,10 +29,10 @@ import reactor.core.publisher.Mono;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -53,6 +53,9 @@ class JiraServiceImplTest {
 
     @Mock
     private WebClient webClient;
+
+    @Mock
+    private JiraClient jiraClient;
 
     @Mock
     private WebClient.RequestHeadersUriSpec uriSpec;
@@ -105,10 +108,9 @@ class JiraServiceImplTest {
             .status(status)
             .assignee(assignee)
             .build();
-    private final String issueKey = "TEST-123";
 
     @Test
-    void registrationProjectInJira_WhenOk() {
+    void registrationInJira_WhenOk() {
         Project project = Project.builder()
                 .id(projectId)
                 .build();
@@ -120,7 +122,7 @@ class JiraServiceImplTest {
                 .build();
         when(projectRepository.save(project)).thenReturn(project);
 
-        ProjectDto result = jiraService.registrationProjectInJira(projectId, jiraKey);
+        ProjectDto result = jiraService.registrationInJira(projectId, jiraKey);
 
         assertEquals(correctDto, result);
         assertEquals(jiraKey, result.getJiraKey());
@@ -129,12 +131,12 @@ class JiraServiceImplTest {
     }
 
     @Test
-    void registrationProjectInJira_NotExistsProject() {
+    void registrationProjectInJira_NotExists() {
         String correctMessage = "Project with id %d not found".formatted(projectId);
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 
         Throwable exception = assertThrows(EntityNotFoundException.class,
-                () -> jiraService.registrationProjectInJira(projectId, jiraKey));
+                () -> jiraService.registrationInJira(projectId, jiraKey));
 
         assertEquals(correctMessage, exception.getMessage());
         verify(projectRepository, never()).save(any(Project.class));
@@ -144,7 +146,6 @@ class JiraServiceImplTest {
     @MethodSource("provideJiraResponses")
     void getAllIssuesByProjectId(JiraResponse response, List<IssueDto> expectedIssues) {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        mockFetchWithJql(response);
 
         List<IssueDto> result = jiraService.getAllIssuesByProjectId(projectId);
 
@@ -153,10 +154,10 @@ class JiraServiceImplTest {
 
     @Test
     void getAllIssuesByProjectId_getJiraProjectKey_NotExistsJiraKey() {
-        String correctMessage = "Данный проект не связан с Jira";
+        String correctMessage = "Проект с id 1 не связан с Jira";
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 
-        Throwable exception = assertThrows(EntityFieldNotFoundException.class,
+        Throwable exception = assertThrows(EntityNotFoundException.class,
                 () -> jiraService.getAllIssuesByProjectId(projectId));
 
         assertEquals(correctMessage, exception.getMessage());
@@ -168,10 +169,7 @@ class JiraServiceImplTest {
         IssueDto correctDto = IssueDto.builder()
                 .key(issueKey)
                 .build();
-        when(webClient.get()).thenReturn(uriSpec);
-        when(uriSpec.uri(anyString(), eq(issueKey))).thenReturn(headerSpec);
-        when(headerSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(IssueDto.class)).thenReturn(Mono.just(correctDto));
+        when(jiraClient.getIssueByKey(issueKey)).thenReturn(correctDto);
 
         IssueDto result = jiraService.getIssueByKey(issueKey);
 
@@ -184,7 +182,7 @@ class JiraServiceImplTest {
                 .issues(ISSUES)
                 .build();
         mockFilters(filterDto);
-        mockFetchWithJql(response);
+        when(jiraClient.getProjectInfoByJql(anyString())).thenReturn(response);
 
         List<IssueDto> result = jiraService.getAllIssuesWithFilterByProjectId(projectId, filterDto);
 
@@ -195,7 +193,7 @@ class JiraServiceImplTest {
     void getAllIssuesWithFilterByProjectId_WhenIssuesIsNull() {
         JiraResponse response = new JiraResponse();
         mockFilters(filterDto);
-        mockFetchWithJql(response);
+        when(jiraClient.getProjectInfoByJql(anyString())).thenReturn(response);
 
         List<IssueDto> result = jiraService.getAllIssuesWithFilterByProjectId(projectId, filterDto);
 
@@ -205,17 +203,54 @@ class JiraServiceImplTest {
     @Test
     void createIssue() {
         IssueDto issueDto = new IssueDto();
-        var requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-
-        when(webClient.post()).thenReturn(bodyUriSpec);
-        when(bodyUriSpec.uri("/issue")).thenReturn(headerSpec);
-        when(headerSpec.bodyValue(issueDto)).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(IssueDto.class)).thenReturn(Mono.just(issueDto));
+        when(jiraClient.createIssue(issueDto)).thenReturn(issueDto);
 
         IssueDto result = jiraService.createIssue(issueDto);
 
         assertEquals(issueDto, result);
+    }
+
+    @Test
+    void testUpdateIssueWithLinks() {
+        String issueKey = "ISSUE-123";
+        IssueUpdateDto issueDto = new IssueUpdateDto();
+        IssueUpdateDto.Fields fields = new IssueUpdateDto.Fields();
+        var issueLinks = List.of(new IssueUpdateDto.IssueLink(), new IssueUpdateDto.IssueLink());
+        fields.setIssueLinks(issueLinks);
+        issueDto.setFields(fields);
+
+        jiraService.updateIssueByKey(issueKey, issueDto);
+
+        verify(jiraClient).createIssueLinks(issueLinks);
+        verify(jiraClient).updateIssueByKey(issueKey, issueDto);
+        assertNull(fields.getIssueLinks());
+    }
+
+    @Test
+    void testUpdateIssueWithTransition() {
+        String issueKey = "ISSUE-456";
+        IssueUpdateDto.Transition transition = new IssueUpdateDto.Transition();
+        IssueUpdateDto issueDto = new IssueUpdateDto();
+        issueDto.setTransition(transition);
+
+        jiraService.updateIssueByKey(issueKey, issueDto);
+
+        verify(jiraClient).setTransitionByKey(issueKey, transition);
+        verify(jiraClient).updateIssueByKey(issueKey, issueDto);
+        assertNull(issueDto.getTransition());
+    }
+
+    @Test
+    void testUpdateIssueWithoutLinksAndTransition() {
+        String issueKey = "ISSUE-789";
+        IssueUpdateDto issueDto = new IssueUpdateDto();
+        issueDto.setFields(new IssueUpdateDto.Fields());
+
+        jiraService.updateIssueByKey(issueKey, issueDto);
+
+        verify(jiraClient, never()).createIssueLinks(any());
+        verify(jiraClient, never()).setTransitionByKey(anyString(), any());
+        verify(jiraClient).updateIssueByKey(issueKey, issueDto);
     }
 
     private static Stream<Arguments> provideJiraResponses() {
@@ -235,98 +270,5 @@ class JiraServiceImplTest {
         when(issueStatusFilter.createJql(filterDto)).thenReturn("status = status");
         when(issueAssigneeFilter.isApplicable(filterDto)).thenReturn(true);
         when(issueAssigneeFilter.createJql(filterDto)).thenReturn("transition = accountId");
-    }
-
-    private void mockFetchWithJql(JiraResponse response) {
-        var requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-        when(webClient.get()).thenReturn(uriSpec);
-        when(uriSpec.uri(any(Function.class))).thenReturn(headerSpec);
-        when(responseSpec.bodyToMono(JiraResponse.class)).thenReturn(Mono.just(response));
-        when(requestHeadersUriSpec.uri(any(Function.class))).thenAnswer(invocation -> requestHeadersSpec);
-        when(headerSpec.retrieve()).thenReturn(responseSpec);
-    }
-
-    @Test
-    void updateIssueByKey_ShouldCallWebClientForIssueLinks() {
-        IssueUpdateDto issueUpdateDto = new IssueUpdateDto();
-        IssueUpdateDto.Fields fields = new IssueUpdateDto.Fields();
-        fields.setIssueLinks(List.of(new IssueUpdateDto.IssueLink()));
-        issueUpdateDto.setFields(fields);
-        var requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-        var requestBodyUriSpec = mock(WebClient.RequestBodyUriSpec.class);
-
-        when(webClient.post()).thenReturn(bodyUriSpec);
-        when(bodyUriSpec.uri(eq("/issueLink"))).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(any(IssueUpdateDto.IssueLink.class))).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenReturn(Mono.empty());
-
-        when(webClient.put()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/issue/{key}", issueKey)).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.bodyValue(eq(issueUpdateDto))).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(eq(IssueDto.class))).thenReturn(Mono.just(new IssueDto()));
-
-        jiraService.updateIssueByKey(issueKey, issueUpdateDto);
-
-        verify(webClient).post();
-        verify(requestBodyUriSpec).uri("/issue/{key}", issueKey);
-        verify(requestBodySpec).bodyValue(any(IssueUpdateDto.IssueLink.class));
-    }
-
-    @Test
-    void updateIssueByKey_ShouldCallWebClientForTransition() {
-        IssueUpdateDto issueUpdateDto = new IssueUpdateDto();
-        IssueUpdateDto.Fields fields = new IssueUpdateDto.Fields();
-        fields.setIssueLinks(List.of(new IssueUpdateDto.IssueLink()));
-        issueUpdateDto.setFields(fields);
-        WebClient.RequestHeadersUriSpec requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-        WebClient.RequestBodyUriSpec requestBodyUriSpec = mock(WebClient.RequestBodyUriSpec.class);
-
-        when(webClient.post()).thenReturn(bodyUriSpec);
-        when(bodyUriSpec.uri(eq("/issueLink"))).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(any(IssueUpdateDto.IssueLink.class))).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenReturn(Mono.empty());
-
-        when(webClient.put()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/issue/{key}", issueKey)).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.bodyValue(eq(issueUpdateDto))).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(eq(IssueDto.class))).thenReturn(Mono.just(new IssueDto()));
-
-        jiraService.updateIssueByKey(issueKey, issueUpdateDto);
-
-        verify(webClient).post();
-        verify(requestBodyUriSpec).uri("/issue/{key}", issueKey);
-        verify(requestBodySpec).bodyValue(any(IssueUpdateDto.IssueLink.class));
-    }
-
-    @Test
-    void updateIssueByKey_ShouldCallWebClientForUpdateIssue() {
-        WebClient.RequestHeadersUriSpec requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-        WebClient.RequestBodyUriSpec requestBodyUriSpec = mock(WebClient.RequestBodyUriSpec.class);
-        IssueUpdateDto issueUpdateDto = new IssueUpdateDto();
-        IssueUpdateDto.Fields fields = new IssueUpdateDto.Fields();
-        issueUpdateDto.setFields(fields);
-        fields.setIssueLinks(List.of(new IssueUpdateDto.IssueLink()));
-
-        when(webClient.post()).thenReturn(bodyUriSpec);
-        when(bodyUriSpec.uri(eq("/issueLink"))).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(any(IssueUpdateDto.IssueLink.class))).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenReturn(Mono.empty());
-
-        when(webClient.put()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/issue/{key}", issueKey)).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.bodyValue(eq(issueUpdateDto))).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(eq(IssueDto.class))).thenReturn(Mono.just(new IssueDto()));
-
-        jiraService.updateIssueByKey(issueKey, issueUpdateDto);
-
-        verify(webClient).post();
-        verify(requestBodyUriSpec).uri("/issue/{key}", issueKey);
-        verify(requestBodySpec).bodyValue(any(IssueUpdateDto.IssueLink.class));
     }
 }
