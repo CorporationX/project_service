@@ -1,7 +1,4 @@
 DROP INDEX IF EXISTS project_stage_executors_stage_id_idx;
-DROP TABLE IF EXISTS meet_participant;
-DROP TABLE IF EXISTS meet;
-DROP TABLE IF EXISTS resource_allowed_roles;
 DROP TABLE IF EXISTS team_member_roles;
 DROP TABLE IF EXISTS project_stage_executors;
 DROP TABLE IF EXISTS stage_invitation;
