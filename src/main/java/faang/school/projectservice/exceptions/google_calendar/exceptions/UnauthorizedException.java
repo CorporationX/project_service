@@ -1,7 +1,9 @@
 package faang.school.projectservice.exceptions.google_calendar.exceptions;
 
-public class UnauthorizedException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class UnauthorizedException extends GoogleCalendarExceptionTemplate {
     public UnauthorizedException(String message) {
-        super(message);
+        super(HttpStatus.UNAUTHORIZED, message);
     }
 }

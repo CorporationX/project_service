@@ -5,8 +5,6 @@ import faang.school.projectservice.service.google_calendar.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,38 +15,36 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 
-@Tag(name = "Google Calendar Events", description = "Операции для управления мероприятиями Google Calendar")
+
+@Tag(name = "Google Calendar Events", description = "Operations for managing Google Calendar events")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/google-calendar/events")
-@Slf4j
-@RestController
 public class EventController {
     private final EventService eventService;
 
-    @Operation(summary = "Создать мероприятие", description = "Создаёт мероприятие в Google Calendar на основе существующего мероприятия в системе.")
+    @Operation(summary = "Create event", description = "Creates an event in Google Calendar based on an existing event in the system.")
     @PostMapping("/{eventId}")
     public ResponseEntity<String> createEvent(
             @PathVariable Long eventId,
-            @RequestParam(required = false) String calendarId) {
-        log.info("Запрос на создание мероприятия с eventId '{}'", eventId);
+            @RequestParam(required = false) String calendarId) throws IOException {
         String googleEventId = eventService.createEventInGoogleCalendar(eventId, calendarId);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Мероприятие создано с ID: " + googleEventId);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Event created with ID: " + googleEventId);
     }
 
-    @Operation(summary = "Получить мероприятие", description = "Получает мероприятие из Google Calendar по его идентификатору.")
+    @Operation(summary = "Get event", description = "Retrieves an event from Google Calendar by its identifier.")
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventDtoForGoogleCalendar> getEvent(@PathVariable Long eventId) {
-        log.info("Запрос на получение мероприятия с eventId '{}'", eventId);
+    public ResponseEntity<EventDtoForGoogleCalendar> getEvent(@PathVariable Long eventId) throws IOException {
         EventDtoForGoogleCalendar event = eventService.getEventFromGoogleCalendar(eventId);
         return ResponseEntity.ok(event);
     }
 
-    @Operation(summary = "Удалить мероприятие", description = "Удаляет мероприятие из Google Calendar по его идентификатору.")
+    @Operation(summary = "Delete event", description = "Deletes an event from Google Calendar by its identifier.")
     @DeleteMapping("/{eventId}")
-    public ResponseEntity<String> deleteEvent(@PathVariable Long eventId) {
-        log.info("Запрос на удаление мероприятия с eventId '{}'", eventId);
+    public ResponseEntity<String> deleteEvent(@PathVariable Long eventId) throws IOException {
         eventService.deleteEventFromGoogleCalendar(eventId);
-        return ResponseEntity.ok("Мероприятие удалено");
+        return ResponseEntity.ok("Event deleted");
     }
 }

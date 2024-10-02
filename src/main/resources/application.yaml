@@ -52,7 +52,7 @@ services:
 google:
   client:
     id: 534057422646-e8dkdj7hn1bukfch45movmoq0hgecmcb.apps.googleusercontent.com
-    secret: тут должен быть секретный код
+    secret: my_secret_code
   redirect:
     uri: http://localhost:8082/oauth/callback
 

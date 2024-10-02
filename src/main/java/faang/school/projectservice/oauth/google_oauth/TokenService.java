@@ -15,19 +15,17 @@ public class TokenService {
 
     @Transactional
     public void saveToken(GoogleAuthToken token) {
-        log.info("Сохранение OAuth токена в базу данных");
         tokenRepository.save(token);
+        log.info("Token saved");
     }
 
     @Transactional(readOnly = true)
     public GoogleAuthToken getLatestToken() {
-        log.info("Получение последнего OAuth токена из базы данных");
         return tokenRepository.findFirstByOrderByCreatedAtDesc();
     }
 
     @Transactional
     public void deleteToken() {
-        log.info("Удаление последнего OAuth токена из базы данных");
         GoogleAuthToken token = getLatestToken();
         if (token != null) {
             tokenRepository.delete(token);
@@ -36,7 +34,6 @@ public class TokenService {
 
     @Transactional
     public void deleteAllTokens() {
-        log.info("Удаление всех OAuth токенов из базы данных");
         tokenRepository.deleteAll();
     }
 }

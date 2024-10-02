@@ -35,31 +35,26 @@ public class OAuthService {
                 .setApprovalPrompt(APPROVAL_PROMPT_FORCE)
                 .build();
 
-        log.info("Сформирован URL для авторизации: {}", authorizationUrl);
+        log.info("Url authorization: {}", authorizationUrl);
         return authorizationUrl;
     }
 
-    public void processOAuthCallback(String code, String error) {
+    public String processOAuthCallback(String code, String error) {
         if (error != null && !error.isEmpty()) {
-            log.error("Ошибка авторизации: {}", error);
             throw new BadRequestException("Ошибка авторизации: " + error);
         }
-        handleOAuthCallback(code);
+        return handleOAuthCallback(code);
     }
 
-    public void handleOAuthCallback(String code) {
-        log.info("Обработка OAuth callback с кодом: {}", code);
+    public String handleOAuthCallback(String code) {
         try {
             TokenResponse tokenResponse = googleAuthorizationCodeFlow.newTokenRequest(code)
                     .setRedirectUri(redirectUri)
                     .execute();
 
             googleAuthorizationCodeFlow.createAndStoreCredential(tokenResponse, USER_KEY);
-
-            log.info("OAuth токены успешно получены и сохранены через DataStore");
-
+            return "OAuth токены успешно получены и сохранены";
         } catch (IOException e) {
-            log.error("Ошибка при обработке OAuth callback", e);
             throw new GoogleCalendarException("Ошибка обработки OAuth callback", e);
         }
     }

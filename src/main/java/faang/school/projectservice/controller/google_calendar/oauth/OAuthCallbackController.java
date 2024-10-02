@@ -18,12 +18,12 @@ public class OAuthCallbackController {
 
     private final OAuthService oAuthService;
 
-    @Operation(summary = "Обработать OAuth2 Callback",
-            description = "Обрабатывает OAuth2 callback, используя переданный код авторизации.")
+    @Operation(summary = "Handle OAuth2 Callback",
+            description = "Processes the OAuth2 callback using the provided authorization code.")
     @GetMapping("/oauth/callback")
-    public ResponseEntity<Void> callback(@RequestParam(value = "code", required = false) String code,
+    public ResponseEntity<String> callback(@RequestParam(value = "code", required = false) String code,
                                            @RequestParam(value = "error", required = false) String error) {
-        oAuthService.processOAuthCallback(code, error);
-        return ResponseEntity.ok().build();
+        String result = oAuthService.processOAuthCallback(code, error);
+        return ResponseEntity.ok(result);
     }
 }

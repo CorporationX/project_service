@@ -9,44 +9,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
-@Service
 @Slf4j
+@Service
 public class EventMappingService {
     private final EventMappingRepository eventMappingRepository;
 
     @Transactional
     public void saveMapping(Long eventId, String googleEventId) {
-        log.info("Сохранение маппинга eventId '{}' с googleEventId '{}'", eventId, googleEventId);
-
         EventMapping mapping = createEventMapping(eventId, googleEventId);
         eventMappingRepository.save(mapping);
-
-        log.info("Маппинг сохранен");
+        log.info("Save mapping eventId '{}' with googleEventId '{}'", eventId, googleEventId);
     }
 
     @Transactional(readOnly = true)
     public String getGoogleEventIdByEventId(Long eventId) {
-        log.info("Получение googleEventId по eventId '{}'", eventId);
-
         return findMappingByEventId(eventId).getGoogleEventId();
     }
 
     @Transactional(readOnly = true)
     public Long getEventIdByGoogleEventId(String googleEventId) {
-        log.info("Получение eventId по googleEventId '{}'", googleEventId);
-
         return findMappingByGoogleEventId(googleEventId).getEventId();
     }
 
     @Transactional
     public void deleteMapping(Long eventId) {
-        log.info("Удаление маппинга для eventId '{}'", eventId);
-
         if (!eventMappingRepository.existsById(eventId)) {
-            throw new NotFoundException("Маппинг для eventId '" + eventId + "' не найден");
+            throw new NotFoundException("Mapping for eventId '" + eventId + "' not found");
         }
         eventMappingRepository.deleteById(eventId);
-        log.info("Маппинг удален");
+        log.info("Delete mapping for eventId '{}'", eventId);
     }
 
     private EventMapping createEventMapping(Long eventId, String googleEventId) {
@@ -58,11 +49,11 @@ public class EventMappingService {
 
     private EventMapping findMappingByEventId(Long eventId) {
         return eventMappingRepository.findByEventId(eventId)
-                .orElseThrow(() -> new NotFoundException("Маппинг для eventId '" + eventId + "' не найден"));
+                .orElseThrow(() -> new NotFoundException("Mapping for eventId '" + eventId + "' not found"));
     }
 
     private EventMapping findMappingByGoogleEventId(String googleEventId) {
         return eventMappingRepository.findByGoogleEventId(googleEventId)
-                .orElseThrow(() -> new NotFoundException("Маппинг для googleEventId '" + googleEventId + "' не найден"));
+                .orElseThrow(() -> new NotFoundException("Mapping for eventId '" + googleEventId + "' not found"));
     }
 }

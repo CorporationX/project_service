@@ -1,7 +1,6 @@
 package faang.school.projectservice.config.google_calendar_config;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -10,9 +9,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
-import faang.school.projectservice.exceptions.google_calendar.exceptions.GoogleCalendarException;
-import faang.school.projectservice.model.GoogleAuthToken;
-import faang.school.projectservice.oauth.google_oauth.TokenService;
+import faang.school.projectservice.exceptions.google_calendar.exceptions.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,14 +58,14 @@ public class GoogleCalendarConfig {
     @Bean
     @Lazy
     public Calendar googleCalendarClient(GoogleAuthorizationCodeFlow flow) throws IOException, GeneralSecurityException {
-        log.info("Настройка клиента Google Calendar");
+        log.info("Configuring Google Calendar client");
 
         Credential credential = flow.loadCredential(USER_KEY);
 
         if (credential == null) {
-            String errorMsg = "OAuth токены отсутствуют. Пожалуйста, авторизуйте приложение.";
+            String errorMsg = "OAuth tokens are missing. Please authorize the application.";
             log.error(errorMsg);
-            throw new IllegalStateException(errorMsg);
+            throw new UnauthorizedException(errorMsg);
         }
 
         return new Calendar.Builder(

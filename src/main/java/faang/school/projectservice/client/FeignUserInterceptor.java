@@ -19,7 +19,7 @@ public class FeignUserInterceptor implements RequestInterceptor {
         if (requestAttributes instanceof ServletRequestAttributes) {
             String userId = ((ServletRequestAttributes) requestAttributes).getRequest().getHeader("x-user-id");
             if (userId != null) {
-                template.header("x-user-id", userId);
+                template.header("x-user-id", String.valueOf(userContext.getUserId()));
             }
         }
     }

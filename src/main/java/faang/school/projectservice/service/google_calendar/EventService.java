@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @RequiredArgsConstructor
-@Service
 @Slf4j
+@Service
 public class EventService {
     @Lazy
     @Autowired
@@ -26,59 +26,43 @@ public class EventService {
     private final EventMapper eventMapper;
     private static final String DEFAULT_CALENDAR = "primary";
 
-    public String createEventInGoogleCalendar(Long eventId, String calendarId) {
-        log.info("Создание мероприятия в Google Календаре для eventId '{}'", eventId);
-        try {
-            EventDtoForGoogleCalendar eventDto = userServiceClient.getEventForGoogleCalendar(eventId);
-            log.debug("Получены данные мероприятия: {}", eventDto);
+    public String createEventInGoogleCalendar(Long eventId, String calendarId) throws IOException {
+        EventDtoForGoogleCalendar eventDto = userServiceClient.getEventForGoogleCalendar(eventId);
 
-            Event googleEvent = mapToGoogleEvent(eventDto);
-            String resolvedCalendarId = resolveCalendarId(calendarId);
+        Event googleEvent = mapToGoogleEvent(eventDto);
+        String resolvedCalendarId = resolveCalendarId(calendarId);
 
-            Event createdEvent = calendarClient.events().insert(resolvedCalendarId, googleEvent).execute();
-            log.info("Мероприятие создано в Google Календаре с ID: '{}'", createdEvent.getId());
+        Event createdEvent = calendarClient.events()
+                .insert(resolvedCalendarId, googleEvent)
+                .execute();
+        log.info("Create event in Google Calendar with ID: '{}'", createdEvent.getId());
 
-            eventMappingService.saveMapping(eventId, createdEvent.getId());
-            return createdEvent.getId();
-        } catch (IOException e) {
-            log.error("Ошибка при создании мероприятия в Google Календаре", e);
-            throw new GoogleCalendarException("Ошибка при создании мероприятия в Google Календаре", e);
-        }
+        eventMappingService.saveMapping(eventId, createdEvent.getId());
+        return createdEvent.getId();
     }
 
-    public EventDtoForGoogleCalendar getEventFromGoogleCalendar(Long eventId) {
-        log.info("Получение мероприятия из Google Календаря для eventId '{}'", eventId);
-        try {
-            String googleEventId = eventMappingService.getGoogleEventIdByEventId(eventId);
-            Event googleEvent = calendarClient.events().get(DEFAULT_CALENDAR, googleEventId).execute();
-            log.debug("Получено мероприятие из Google Календаря: {}", googleEvent);
+    public EventDtoForGoogleCalendar getEventFromGoogleCalendar(Long eventId) throws IOException {
+        String googleEventId = eventMappingService.getGoogleEventIdByEventId(eventId);
+        Event googleEvent = calendarClient.events()
+                .get(DEFAULT_CALENDAR, googleEventId)
+                .execute();
 
-            return mapToEventDto(googleEvent, googleEventId);
-        } catch (IOException e) {
-            log.error("Ошибка при получении мероприятия из Google Календаря", e);
-            throw new GoogleCalendarException("Ошибка при создании мероприятия в Google Календаре", e);
-        }
+        return mapToEventDto(googleEvent, googleEventId);
     }
 
-    public void deleteEventFromGoogleCalendar(Long eventId) {
-        log.info("Удаление мероприятия из Google Календаря для eventId '{}'", eventId);
-        try {
-            String googleEventId = eventMappingService.getGoogleEventIdByEventId(eventId);
-            calendarClient.events().delete(DEFAULT_CALENDAR, googleEventId).execute();
-            log.info("Мероприятие с googleEventId '{}' удалено из Google Календаря", googleEventId);
+    public void deleteEventFromGoogleCalendar(Long eventId) throws IOException {
+        String googleEventId = eventMappingService.getGoogleEventIdByEventId(eventId);
+        calendarClient.events()
+                .delete(DEFAULT_CALENDAR, googleEventId)
+                .execute();
+        log.info("Event with googleEventId '{}' delete from Google Calendar", googleEventId);
 
-            eventMappingService.deleteMapping(eventId);
-            log.info("Маппинг для eventId '{}' удален", eventId);
-        } catch (IOException e) {
-            log.error("Ошибка при удалении мероприятия из Google Календаря", e);
-            throw new GoogleCalendarException("Ошибка при создании мероприятия в Google Календаре", e);
-        }
+        eventMappingService.deleteMapping(eventId);
     }
 
     private Event mapToGoogleEvent(EventDtoForGoogleCalendar eventDto) {
         Event googleEvent = eventMapper.mapToGoogleEvent(eventDto);
         googleEvent.setId(null);
-        log.debug("Маппинг EventDto на Google Event выполнен");
         return googleEvent;
     }
 
@@ -94,7 +78,7 @@ public class EventService {
             calendarClient.calendars().get(calendarId).execute();
             return true;
         } catch (IOException e) {
-            log.warn("Календарь с ID '{}' не найден", calendarId);
+            log.warn("Calendar with ID '{}' not found", calendarId);
             return false;
         }
     }
@@ -103,7 +87,6 @@ public class EventService {
         Long eventIdForDto = eventMappingService.getEventIdByGoogleEventId(googleEventId);
         EventDtoForGoogleCalendar eventDto = eventMapper.mapToEventDto(googleEvent);
         eventDto.setId(eventIdForDto);
-        log.debug("Маппинг Google Event на EventDto выполнен");
         return eventDto;
     }
 }

@@ -1,10 +1,13 @@
 package faang.school.projectservice.exceptions.google_calendar.exceptions;
 
-public class GoogleCalendarException extends RuntimeException {
-    public GoogleCalendarException(String message, Throwable cause) {
-        super(message, cause);
-    }
+import org.springframework.http.HttpStatus;
+
+public class GoogleCalendarException extends GoogleCalendarExceptionTemplate {
     public GoogleCalendarException(String message) {
-        super(message);
+        super(HttpStatus.INTERNAL_SERVER_ERROR, message);
+    }
+
+    public GoogleCalendarException(String message, Throwable cause) {
+        super(HttpStatus.INTERNAL_SERVER_ERROR, message, cause);
     }
 }

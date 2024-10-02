@@ -1,7 +1,9 @@
 package faang.school.projectservice.exceptions.google_calendar.exceptions;
 
-public class TokenCreatedException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class TokenCreatedException extends GoogleCalendarExceptionTemplate {
     public TokenCreatedException(String message) {
-        super(message);
+        super(HttpStatus.INTERNAL_SERVER_ERROR, message);
     }
 }
