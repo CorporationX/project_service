@@ -12,6 +12,7 @@ import java.util.List;
 @Component
 public class MeetValidator {
     private final UserServiceClient userServiceClient;
+
     public void validateUser(Long userId) {
         userServiceClient.getUser(userId);
     }

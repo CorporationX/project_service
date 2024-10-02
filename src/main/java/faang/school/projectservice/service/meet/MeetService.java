@@ -35,8 +35,10 @@ public class MeetService {
         meetValidator.validateParticipants(meet.getUserIds());
         meet.setCreatorId(userId);
         meet.setProject(project);
-        log.info("New Meet was created: {}.", meet);
-        return meetRepository.save(meet);
+        meet.setStatus(MeetStatus.PENDING);
+        meet = meetRepository.save(meet);
+        log.info("New Meet was created: id={}.", meet.getId());
+        return meet;
     }
 
     @Transactional
@@ -45,7 +47,7 @@ public class MeetService {
         meetValidator.validateEditPermission(userId, foundEntity.getCreatorId());
         meetValidator.validateParticipants(meet.getUserIds());
         foundEntity = meetMapper.updateEntity(meet, foundEntity);
-        log.info("Meet with id={} updated. New Meet={}.", meetId, foundEntity);
+        log.info("Meet with id={} updated.", meetId);
         return meetRepository.save(foundEntity);
     }
 
