@@ -36,6 +36,7 @@ public class OAuthServiceTest {
     private static final String TEST_CODE = "test-code";
     private static final String ERROR_MESSAGE = "Ошибка авторизации: ";
     private static final String CALLBACK_ERROR = "Ошибка обработки OAuth callback";
+    private static final String SUCCESS_MESSAGE = "OAuth токены успешно получены и сохранены";
 
     @InjectMocks
     private OAuthService oauthService;
@@ -88,11 +89,12 @@ public class OAuthServiceTest {
     @Test
     public void testProcessOAuthCallback_withCode() {
         OAuthService oauthServiceSpy = spy(oauthService);
-        doNothing().when(oauthServiceSpy).handleOAuthCallback(TEST_CODE);
+        doReturn(SUCCESS_MESSAGE).when(oauthServiceSpy).handleOAuthCallback(TEST_CODE);
 
-        oauthServiceSpy.processOAuthCallback(TEST_CODE, null);
+        String result = oauthServiceSpy.processOAuthCallback(TEST_CODE, null);
 
         verify(oauthServiceSpy).handleOAuthCallback(TEST_CODE);
+        assertEquals(SUCCESS_MESSAGE, result);
     }
 
     @Test

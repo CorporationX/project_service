@@ -24,8 +24,8 @@ import static org.mockito.Mockito.when;
 public class EventMappingServiceTest {
     private static final Long EVENT_ID = 1L;
     private static final String GOOGLE_EVENT_ID = "google-event-id";
-    private static final String NOT_FOUND_MESSAGE_EVENT = "Маппинг для eventId '" + EVENT_ID + "' не найден";
-    private static final String NOT_FOUND_MESSAGE_GOOGLE_EVENT = "Маппинг для googleEventId '" + GOOGLE_EVENT_ID + "' не найден";
+    private static final String NOT_FOUND_MESSAGE_EVENT = "Mapping for eventId '" + EVENT_ID + "' not found";
+    private static final String NOT_FOUND_MESSAGE_GOOGLE_EVENT = "Mapping for googleEventId '" + GOOGLE_EVENT_ID + "' not found";
 
     @Mock
     private EventMappingRepository eventMappingRepository;
@@ -106,7 +106,7 @@ public class EventMappingServiceTest {
 
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
                 eventMappingService.deleteMapping(EVENT_ID));
-        assertEquals("Маппинг для eventId '" + EVENT_ID + "' не найден", exception.getMessage());
+        assertEquals("Mapping for eventId '" + EVENT_ID + "' not found", exception.getMessage());
 
         verify(eventMappingRepository).existsById(EVENT_ID);
         verify(eventMappingRepository, never()).deleteById(EVENT_ID);

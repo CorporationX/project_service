@@ -3,7 +3,6 @@ package faang.school.projectservice.service.google_calendar;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Acl;
 import com.google.api.services.calendar.model.AclRule;
-import faang.school.projectservice.exceptions.google_calendar.exceptions.GoogleCalendarException;
 import faang.school.projectservice.model.CalendarAclRole;
 import faang.school.projectservice.model.CalendarAclScopeType;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,7 +75,7 @@ public class AclServiceTest {
     public void testGrantAccessToCalendar_IOException() throws IOException {
         when(aclInsert.execute()).thenThrow(new IOException(TEST_IO_EXCEPTION_MESSAGE));
 
-        assertThrows(GoogleCalendarException.class, () ->
+        assertThrows(IOException.class, () ->
                 aclService.grantAccessToCalendar(CALENDAR_ID, USER_EMAIL, ROLE, SCOPE_TYPE));
 
         verify(calendarClient.acl()).insert(eq(CALENDAR_ID), any(AclRule.class));
@@ -107,7 +106,7 @@ public class AclServiceTest {
     public void testGetCalendarAcl_IOException() throws IOException {
         when(aclList.execute()).thenThrow(new IOException(TEST_IO_EXCEPTION_MESSAGE));
 
-        assertThrows(GoogleCalendarException.class, () ->
+        assertThrows(IOException.class, () ->
                 aclService.getCalendarAcl(CALENDAR_ID));
 
         verify(calendarClient.acl()).list(CALENDAR_ID);
@@ -128,7 +127,7 @@ public class AclServiceTest {
     public void testDeleteCalendarAcl_IOException() throws IOException {
         doThrow(new IOException(TEST_IO_EXCEPTION_MESSAGE)).when(aclDelete).execute();
 
-        assertThrows(GoogleCalendarException.class, () ->
+        assertThrows(IOException.class, () ->
                 aclService.deleteCalendarAcl(CALENDAR_ID, RULE_ID));
 
         verify(calendarClient.acl()).delete(CALENDAR_ID, RULE_ID);

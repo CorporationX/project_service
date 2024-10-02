@@ -3,7 +3,6 @@ package faang.school.projectservice.service.google_calendar;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import faang.school.projectservice.dto.client.EventDtoForGoogleCalendar;
-import faang.school.projectservice.exceptions.google_calendar.exceptions.GoogleCalendarException;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.mapper.EventMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -106,7 +105,7 @@ public class EventServiceTest {
         when(eventMapper.mapToGoogleEvent(eventDto)).thenReturn(googleEvent);
         when(insertRequest.execute()).thenThrow(new IOException("Test IOException"));
 
-        assertThrows(GoogleCalendarException.class, () -> eventService.createEventInGoogleCalendar(EVENT_ID, CALENDAR_ID));
+        assertThrows(IOException.class, () -> eventService.createEventInGoogleCalendar(EVENT_ID, CALENDAR_ID));
 
         verify(events).insert(eq(CALENDAR_ID), any(Event.class));
         verify(insertRequest).execute();
@@ -139,7 +138,7 @@ public class EventServiceTest {
         when(eventMappingService.getGoogleEventIdByEventId(EVENT_ID)).thenReturn(GOOGLE_EVENT_ID);
         when(getRequest.execute()).thenThrow(new IOException("Test IOException"));
 
-        assertThrows(GoogleCalendarException.class, () -> eventService.getEventFromGoogleCalendar(EVENT_ID));
+        assertThrows(IOException.class, () -> eventService.getEventFromGoogleCalendar(EVENT_ID));
 
         verify(events).get(CALENDAR_ID, GOOGLE_EVENT_ID);
         verify(getRequest).execute();
@@ -162,7 +161,7 @@ public class EventServiceTest {
         when(eventMappingService.getGoogleEventIdByEventId(EVENT_ID)).thenReturn(GOOGLE_EVENT_ID);
         doThrow(new IOException("Test IOException")).when(deleteRequest).execute();
 
-        assertThrows(GoogleCalendarException.class, () -> eventService.deleteEventFromGoogleCalendar(EVENT_ID));
+        assertThrows(IOException.class, () -> eventService.deleteEventFromGoogleCalendar(EVENT_ID));
 
         verify(events).delete(CALENDAR_ID, GOOGLE_EVENT_ID);
         verify(deleteRequest).execute();

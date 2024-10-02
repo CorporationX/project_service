@@ -54,6 +54,6 @@ public class EventMappingService {
 
     private EventMapping findMappingByGoogleEventId(String googleEventId) {
         return eventMappingRepository.findByGoogleEventId(googleEventId)
-                .orElseThrow(() -> new NotFoundException("Mapping for eventId '" + googleEventId + "' not found"));
+                .orElseThrow(() -> new NotFoundException("Mapping for googleEventId '" + googleEventId + "' not found"));
     }
 }

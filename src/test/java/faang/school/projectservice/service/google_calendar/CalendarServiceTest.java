@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.google_calendar;
 
 import com.google.api.services.calendar.Calendar;
-import faang.school.projectservice.exceptions.google_calendar.exceptions.GoogleCalendarException;
 import faang.school.projectservice.exceptions.google_calendar.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,7 +74,7 @@ public class CalendarServiceTest {
     public void testCreateCalendar_IOException() throws IOException {
         when(insertRequest.execute()).thenThrow(new IOException(TEST_IO_EXCEPTION_MESSAGE));
 
-        assertThrows(GoogleCalendarException.class, () -> calendarService.createCalendar(SUMMARY, TIME_ZONE));
+        assertThrows(IOException.class, () -> calendarService.createCalendar(SUMMARY, TIME_ZONE));
         verify(calendarClient.calendars()).insert(any(com.google.api.services.calendar.model.Calendar.class));
         verify(insertRequest).execute();
     }
@@ -109,7 +108,7 @@ public class CalendarServiceTest {
     public void testGetCalendar_IOException() throws IOException {
         when(getRequest.execute()).thenThrow(new IOException(TEST_IO_EXCEPTION_MESSAGE));
 
-        assertThrows(GoogleCalendarException.class, () -> calendarService.getCalendar(CALENDAR_ID));
+        assertThrows(IOException.class, () -> calendarService.getCalendar(CALENDAR_ID));
         verify(calendarClient.calendars()).get(CALENDAR_ID);
         verify(getRequest).execute();
     }
@@ -128,7 +127,7 @@ public class CalendarServiceTest {
     public void testDeleteCalendar_IOException() throws IOException {
         doThrow(new IOException(TEST_IO_EXCEPTION_MESSAGE)).when(deleteRequest).execute();
 
-        assertThrows(GoogleCalendarException.class, () -> calendarService.deleteCalendar(CALENDAR_ID));
+        assertThrows(IOException.class, () -> calendarService.deleteCalendar(CALENDAR_ID));
         verify(calendarClient.calendars()).delete(CALENDAR_ID);
         verify(deleteRequest).execute();
     }
