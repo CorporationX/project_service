@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class StageInvitationDtoResponseMapperTest {
 
     @Spy
-    private StageInvitationDtoMapperImpl mapper;
+    private StageInvitationDtoMapper mapper;
 
     private final static long STAGE_ID = 1L;
     private final static long  SIZE_DTOS = 2L;

@@ -6,6 +6,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class TeamMemberService {
@@ -15,5 +18,9 @@ public class TeamMemberService {
     public TeamMember getTeamMemberById(long id) {
         return teamMemberRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Team member with id " + id + " does not exist!"));
+    }
+
+    public List<TeamMember> getAllById (List<Long> teamMembers){
+        return teamMemberRepository.findAllById(teamMembers);
     }
 }

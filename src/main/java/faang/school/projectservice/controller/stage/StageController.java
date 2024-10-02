@@ -1,55 +1,49 @@
 package faang.school.projectservice.controller.stage;
 
+import faang.school.projectservice.dto.stage.StageCreateDto;
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.helper.validator.DataValidation;
-import faang.school.projectservice.servise.stage.StageService;
+import faang.school.projectservice.dto.filter.stage.StageFilterDto;
+import faang.school.projectservice.dto.stage.StageUpdateDto;
+import faang.school.projectservice.service.stage.StageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/stage")
 public class StageController {
     private final StageService stageService;
-    private final DataValidation dataValidation;
 
-
-    public void createStage(StageDto stageDto) {
-        validCreate(stageDto);
-        stageService.createStage(stageDto);
+    @PostMapping("/create")
+    public StageCreateDto createStage(@Valid @RequestBody StageCreateDto stageCreateDto) {
+        return stageService.createStage(stageCreateDto);
     }
 
-    public List<StageDto> getStagesByFilters(StageFilterDto stageFilterDto) {
-        dataValidation.checkOneTypeToNull(stageFilterDto);
+    @PostMapping("/getFilter")
+    public List<StageDto> getStagesByFilters(@RequestBody StageFilterDto stageFilterDto) {
         return stageService.getStagesByFilters(stageFilterDto);
     }
 
-    public void deleteStage(long id) {
-        dataValidation.checkOneTypeToNull(id);
+    @DeleteMapping("/delete/{id}")
+    public void deleteStage(@PathVariable long id) {
         stageService.deleteStage(id);
     }
 
-    public void updateStage(StageDto stageDto) {
-        dataValidation.checkOneTypeToNull(stageDto);
-        stageService.updateStage(stageDto);
+    @PostMapping("/updateStage")
+    public StageUpdateDto updateStage(@RequestBody StageUpdateDto stageUpdateDto) {
+        return stageService.updateStage(stageUpdateDto);
     }
 
+    @GetMapping("/getAllStage")
     public List<StageDto> getAllStage() {
         return stageService.getAllStage();
     }
 
-    public StageDto getStageById(long id) {
-        dataValidation.checkOneTypeToNull(id);
+    @GetMapping("/getStage/{id}")
+    public StageDto getStageById(@PathVariable long id) {
         return stageService.getStageById(id);
-    }
-
-    private void validCreate(StageDto stageDto) {
-        dataValidation.checkOneTypeToNull(stageDto);
-        dataValidation.checkOneTypeToNull(stageDto.getStageRoleIds());
-        dataValidation.checkOneTypeToNull(stageDto.getExecutorIds());
-        dataValidation.checkOneTypeToNull(stageDto.getTaskIds());
-        dataValidation.checkOneTypeToNull(stageDto.getProjectId());
     }
 }
