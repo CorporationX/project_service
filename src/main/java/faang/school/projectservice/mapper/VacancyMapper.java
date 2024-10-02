@@ -1,13 +1,13 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.VacancyDTO;
+import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface VacancyMapper {
-    VacancyDTO toVacancyDTO(Vacancy vacancy);
+    VacancyDto toVacancyDto(Vacancy vacancy);
 
-    Vacancy vacancyDTOToVacancy(VacancyDTO vacancyDTO);
+    Vacancy vacancyDtoToVacancy(VacancyDto vacancyDto);
 }
