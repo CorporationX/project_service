@@ -2,7 +2,6 @@ package faang.school.projectservice.google;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.EventDateTime;
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +19,7 @@ class DateGoogleConverterTest {
     private EventDateTime expectedTime1 = new EventDateTime();
     private EventDateTime expectedTime2 = new EventDateTime();
     private EventDateTime expectedTime3 = new EventDateTime();
+
     @BeforeEach
     public void init() {
         Calendar expected1 = Calendar.getInstance();
@@ -33,6 +33,7 @@ class DateGoogleConverterTest {
         expectedTime2.setDateTime(new DateTime(expected2.getTime()));
         expectedTime3.setDateTime(new DateTime(expected3.getTime()));
     }
+
     @Test
     void toEventDateTimeTest() {
         Assertions.assertTrue(isSameDay(expectedTime1.getDateTime(),

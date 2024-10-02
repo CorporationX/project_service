@@ -40,9 +40,6 @@ google:
     credentials_id: 1
     scopes: https://www.googleapis.com/auth/calendar.events,https://www.googleapis.com/auth/calendar,https://www.googleapis.com/auth/calendar.acls
 
-
-
-
 services:
   s3:
     endpoint: http://localhost:9000
