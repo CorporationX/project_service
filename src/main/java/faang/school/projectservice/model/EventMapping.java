@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -21,9 +23,9 @@ import lombok.Setter;
 public class EventMapping {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "event_mapping_seq")
-    @SequenceGenerator(name = "event_mapping_seq", sequenceName = "event_mapping_seq", allocationSize = 1)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
     @Column(name = "event_id", nullable = false)
     private Long eventId;
