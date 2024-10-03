@@ -17,7 +17,7 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @Value("${services.user-service.name}")
+    @Value("${project.service.name}")
     private String serviceName;
 
     @ExceptionHandler({ EntityNotFoundException.class, DataValidationException.class, NoSuchElementException.class, IllegalAccessException.class})
