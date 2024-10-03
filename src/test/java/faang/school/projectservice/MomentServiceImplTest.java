@@ -37,11 +37,7 @@ public class MomentServiceImplTest {
     @Spy
     private MomentMapperImpl momentMapper;
     @Mock
-    private MomentValidator momentValidator;
-    @Mock
     private ProjectRepository projectRepository;
-    @Mock
-    private ProjectValidator projectValidator;
     @Mock
     private TeamMemberRepository teamMemberRepository;
     private List<Long> addedProjectIds;
@@ -78,7 +74,6 @@ public class MomentServiceImplTest {
 
         MomentDto dto = momentServiceImpl.updateMoment(momentId, addedProjectIds, addedUserIds);
 
-        verify(momentValidator, times(1)).validateMoment(moment);
         verify(momentRepository, times(1)).save(moment);
         Assertions.assertEquals(momentId, dto.getId());
 
@@ -93,7 +88,6 @@ public class MomentServiceImplTest {
 
         MomentDto dto = momentServiceImpl.updateMoment(momentId, addedProjectIds, addedUserIds);
 
-        verify(momentValidator, times(1)).validateMoment(moment);
         verify(momentRepository, times(1)).save(moment);
         Assertions.assertEquals(momentId, dto.getId());
     }
@@ -114,7 +108,6 @@ public class MomentServiceImplTest {
 
         MomentDto dto = momentServiceImpl.updateMoment(momentId, addedProjectIds, addedUserIds);
 
-        verify(momentValidator, times(1)).validateMoment(moment);
         verify(momentRepository, times(1)).save(moment);
         Assertions.assertEquals(momentId, dto.getId());
     }

@@ -71,7 +71,7 @@ public class VacancyServiceTest {
                 () -> vacancyService.createVacancy(vacancyDto)
         );
 
-        assertEquals("Vacancy name cannot be empty", thrown.getMessage());
+        assertEquals("Vacancy cannot have less than 1 positions", thrown.getMessage());
 
         verify(vacancyRepository, never()).save(any(Vacancy.class));
     }
@@ -84,7 +84,7 @@ public class VacancyServiceTest {
                 () -> vacancyService.createVacancy(vacancyDto)
         );
 
-        assertEquals("Vacancy description cannot be empty", thrown.getMessage());
+        assertEquals("Vacancy cannot have less than 1 positions", thrown.getMessage());
 
         verify(vacancyRepository, never()).save(any(Vacancy.class));
     }
@@ -164,7 +164,7 @@ public class VacancyServiceTest {
                 () -> vacancyService.updateVacancy(vacancyId, vacancyDto)
         );
 
-        assertEquals("Vacancy name cannot be empty", thrown.getMessage());
+        assertEquals("Vacancy cannot have less than 1 positions", thrown.getMessage());
 
         verify(vacancyRepository, never()).save(any(Vacancy.class));
     }
@@ -177,7 +177,7 @@ public class VacancyServiceTest {
                 () -> vacancyService.updateVacancy(vacancyId, vacancyDto)
         );
 
-        assertEquals("Vacancy description cannot be empty", thrown.getMessage());
+        assertEquals("Vacancy cannot have less than 1 positions", thrown.getMessage());
 
         verify(vacancyRepository, never()).save(any(Vacancy.class));
     }

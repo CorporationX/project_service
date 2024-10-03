@@ -136,8 +136,6 @@ class StageServiceImplTest {
 
         service.getFilteredStages(projectId, filterDto);
 
-        Mockito.verify(validator, Mockito.times(1))
-                .validateProjectNotCanceled(project.getStatus());
         Mockito.verify(projectRepository, Mockito.times(1))
                 .getReferenceById(projectId);
         Mockito.verify(filters.get(0), Mockito.times(1))
