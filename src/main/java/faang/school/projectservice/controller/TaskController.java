@@ -7,6 +7,7 @@ import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.service.TaskService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,37 +21,44 @@ public class TaskController {
     private final TaskMapper taskMapper;
     private final TaskService taskService;
 
-    @PostMapping("/create")
-    TaskDto createTask(@RequestBody @Validated TaskDto taskDto) {
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public TaskDto createTask(@RequestBody @Validated TaskDto taskDto) {
         Task tempTask = taskMapper.toEntity(taskDto);
-        Task originalTask = taskService.createTask(tempTask);
+        Task createdTask = taskService.createTask(tempTask);
 
-        return taskMapper.toDto(originalTask);
+        return taskMapper.toDto(createdTask);
     }
 
-    @PutMapping()
-    TaskDto updateTask(@RequestParam @NotNull Long taskId, @RequestBody @Validated TaskDto taskDto) {
+    @PutMapping("/{taskId}")
+    @ResponseStatus(HttpStatus.OK)
+    public TaskDto updateTask(@PathVariable @NotNull Long taskId,
+                              @RequestBody @Validated TaskDto taskDto) {
         taskDto.setTaskId(taskId);
         Task tempTask = taskMapper.toEntity(taskDto);
-        Task originalTask = taskService.updateTask(tempTask);
-        return taskMapper.toDto(originalTask);
+        Task updatedlTask = taskService.updateTask(tempTask);
+        return taskMapper.toDto(updatedlTask);
     }
 
-    @PostMapping("/filters")
-    public List<TaskDto> getFilteredTasks(@RequestParam @NotNull Long requestingUserId, @RequestBody TaskFilterDto filters) {
-        List<Task> tasks = taskService.getFilteredTasks(requestingUserId, filters);
-        return taskMapper.toDto(tasks);
+    @PostMapping("/{projectId}/filters")
+    public List<TaskDto> getFilteredTasks(@RequestParam @NotNull Long userId,
+                                          @PathVariable @NotNull Long projectId,
+                                          @RequestBody @Validated TaskFilterDto filters) {
+        List<Task> filteredTasks = taskService.getTasks(userId, projectId, filters);
+        return taskMapper.toDto(filteredTasks);
     }
 
-    @GetMapping("/all")
-    public List<TaskDto> getAllTasksByProject(@RequestParam @NotNull Long userId, @RequestParam @NotNull Long projectId) {
-        List<Task> tasks = taskService.getAllTasksByProject(userId, projectId);
-        return taskMapper.toDto(tasks);
+    @GetMapping("/{projectId}/all")
+    public List<TaskDto> getAllTasksByProject(@RequestParam @NotNull Long userId,
+                                              @PathVariable @NotNull Long projectId) {
+        List<Task> projectTasks = taskService.getTasks(userId, projectId, null);
+        return taskMapper.toDto(projectTasks);
     }
 
-    @GetMapping("/id")
-    public TaskDto getTaskById(@RequestParam @NotNull Long taskId, @RequestParam @NotNull Long userId) {
-        Task task = taskService.getTaskById(taskId, userId);
-        return taskMapper.toDto(task);
+    @GetMapping("/{taskId}")
+    public TaskDto getTaskById(@PathVariable @NotNull Long taskId,
+                               @RequestParam @NotNull Long userId) {
+        Task foundTask = taskService.getTaskById(taskId, userId);
+        return taskMapper.toDto(foundTask);
     }
 }

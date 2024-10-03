@@ -13,7 +13,6 @@ import java.util.List;
 public class TaskDto {
     private Long taskId;
 
-    @NotNull
     @NotBlank
     private String name;
     @NotNull

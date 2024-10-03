@@ -29,38 +29,30 @@ public class TaskService {
 
     @Transactional
     public Task createTask(Task tempTask) {
-        Task task = saveTask(tempTask);
-        log.info("Task created by user: {} in {}", task.getReporterUserId(), task.getCreatedAt());
-        return saveTask(task);
+        checkTaskParameters(tempTask);
+        Task createdTask = taskRepository.save(tempTask);
+        log.info("Task created by user: {} in {}", createdTask.getReporterUserId(), createdTask.getCreatedAt());
+        return createdTask;
     }
 
     @Transactional
     public Task updateTask(Task tempTask) {
-        Task task = saveTask(tempTask);
-        log.info("Task updating by user: {} in {}", tempTask.getReporterUserId(), task.getUpdatedAt());
-        return task;
+        checkTaskParameters(tempTask);
+        Task updatedTask = taskRepository.save(tempTask);
+        log.info("Task updating by user: {} in {}", updatedTask.getReporterUserId(), updatedTask.getUpdatedAt());
+        return updatedTask;
     }
 
     @Transactional
-    public List<Task> getFilteredTasks(Long requestingUserId, TaskFilterDto filters) {
-        checkUserExists(requestingUserId);
-
-        List<Task> tasks = taskRepository.findAll();
-        List<TaskFilter> applicableFilters = taskFilters.stream()
-                .filter(filter -> filter.isApplicable(filters))
-                .toList();
-
-        return tasks.stream()
-                .filter(task -> applicableFilters.stream()
-                        .allMatch(internshipFilter -> internshipFilter.apply(task, filters)))
-                .toList();
-    }
-
-    @Transactional
-    public List<Task> getAllTasksByProject(Long userId, Long projectId) {
+    public List<Task> getTasks(Long userId, Long projectId, TaskFilterDto filters) {
         checkUserExists(userId);
+        checkProjectExist(projectId);
 
-        return taskRepository.findAllByProjectId(projectId);
+        if (filters != null) {
+            return getFilteredTasks(projectId, filters);
+        } else {
+            return taskRepository.findAllByProjectId(projectId);
+        }
     }
 
     @Transactional
@@ -70,13 +62,16 @@ public class TaskService {
         return taskRepository.findById(taskId).orElseThrow();
     }
 
-    private void validateParameters(Task tempTask) {
-        if (tempTask.getName().isBlank()) {
-            throw new IllegalArgumentException("Task name cannot be blank");
-        }
+    private List<Task> getFilteredTasks(Long projectId, TaskFilterDto filters) {
+        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        List<TaskFilter> applicableFilters = taskFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .toList();
 
-        checkUserExists(tempTask.getPerformerUserId());
-        checkUserExists(tempTask.getReporterUserId());
+        return tasks.stream()
+                .filter(task -> applicableFilters.stream()
+                        .allMatch(internshipFilter -> internshipFilter.apply(task, filters)))
+                .toList();
     }
 
     private void checkUserExists(Long userId) {
@@ -116,11 +111,15 @@ public class TaskService {
         }
     }
 
-    private void checkProject(Task tempTask) {
-        if (tempTask.getProject().getId() != null) {
-            Project project = projectRepository.getProjectById(tempTask.getProject().getId());
-            tempTask.setProject(project);
+    private void checkProjectExist(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new IllegalArgumentException("Project does not exist");
         }
+    }
+
+    private void fillProjectIfExist(Task tempTask) {
+        Project project = projectRepository.getProjectById(tempTask.getProject().getId());
+        tempTask.setProject(project);
     }
 
     private void checkStage(Task tempTask) {
@@ -130,13 +129,12 @@ public class TaskService {
         }
     }
 
-    private Task saveTask(Task tempTask) {
-        validateParameters(tempTask);
+    private void checkTaskParameters(Task tempTask) {
+        checkUserExists(tempTask.getPerformerUserId());
+        checkUserExists(tempTask.getReporterUserId());
         checkParentTask(tempTask);
         checkLinkedTasks(tempTask);
-        checkProject(tempTask);
+        fillProjectIfExist(tempTask);
         checkStage(tempTask);
-
-        return taskRepository.save(tempTask);
     }
 }

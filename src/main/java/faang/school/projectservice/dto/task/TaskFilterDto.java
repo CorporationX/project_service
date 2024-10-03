@@ -10,7 +10,4 @@ public class TaskFilterDto {
     private String status;
     private String description;
     private Long performerUserId;
-
-    @NotNull
-    private Long projectId;
 }
