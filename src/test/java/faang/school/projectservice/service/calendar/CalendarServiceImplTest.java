@@ -35,7 +35,7 @@ class CalendarServiceImplTest {
     private final String CALENDAR_ID = "primary";
 
     @BeforeEach
-    public void init() throws GeneralSecurityException, IOException, InstantiationException, IllegalAccessException {
+    public void init() throws GeneralSecurityException, IOException{
         eventDto = new EventDto();
         eventDto.setId(eventId);
         eventDto.setTitle("123");
