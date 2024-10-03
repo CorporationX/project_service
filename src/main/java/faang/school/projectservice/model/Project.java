@@ -20,7 +20,6 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,12 +29,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "project")
 @Getter
 @Setter
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -110,4 +109,37 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Meet> meets;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Project project)) return false;
+        return Objects.equals(getId(), project.getId()) && Objects.equals(getName(), project.getName()) &&
+                Objects.equals(getDescription(), project.getDescription()) &&
+                Objects.equals(getStorageSize(), project.getStorageSize()) &&
+                Objects.equals(getMaxStorageSize(), project.getMaxStorageSize()) &&
+                Objects.equals(getOwnerId(), project.getOwnerId()) &&
+                Objects.equals(getParentProject(), project.getParentProject()) &&
+                Objects.equals(getChildren(), project.getChildren()) &&
+                Objects.equals(getTasks(), project.getTasks()) &&
+                Objects.equals(getResources(), project.getResources()) &&
+                Objects.equals(getCreatedAt(), project.getCreatedAt()) &&
+                Objects.equals(getUpdatedAt(), project.getUpdatedAt()) &&
+                getStatus() == project.getStatus() && getVisibility() == project.getVisibility() &&
+                Objects.equals(getCoverImageId(), project.getCoverImageId()) &&
+                Objects.equals(getTeams(), project.getTeams()) &&
+                Objects.equals(getSchedule(), project.getSchedule()) &&
+                Objects.equals(getStages(), project.getStages()) &&
+                Objects.equals(getVacancies(), project.getVacancies()) &&
+                Objects.equals(getMoments(), project.getMoments()) &&
+                Objects.equals(getMeets(), project.getMeets());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getName(), getDescription(), getStorageSize(), getMaxStorageSize(), getOwnerId(),
+                getParentProject(), getChildren(), getTasks(), getResources(), getCreatedAt(), getUpdatedAt(),
+                getStatus(), getVisibility(), getCoverImageId(), getTeams(), getSchedule(), getStages(),
+                getVacancies(), getMoments(), getMeets());
+    }
 }

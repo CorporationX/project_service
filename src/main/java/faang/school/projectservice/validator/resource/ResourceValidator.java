@@ -15,11 +15,16 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Slf4j
 public class ResourceValidator {
-    private static final BigInteger STORAGE_SIZE = new BigInteger(String.valueOf(Math.round(Math.pow(1000, 3))));
 
+    private static final int POWER_OF_THREE = 3;
+    private static final int GIGABYTE_MULTIPLIER_TWO = 2;
+    private static final int THOUSAND_BYTES = 1000;
+    private static final BigInteger STORAGE_SIZE = new BigInteger(String.
+            valueOf(Math.round(Math.pow(THOUSAND_BYTES, POWER_OF_THREE) * GIGABYTE_MULTIPLIER_TWO)));
 
     public void validateTeamMemberBelongsToProject(TeamMember fileOwner, long projectId) {
-        if (!Objects.equals(fileOwner.getTeam().getProject().getId(), projectId)) {
+        long fileOwnersProjectId = fileOwner.getTeam().getProject().getId();
+        if (!Objects.equals(fileOwnersProjectId, projectId)) {
             log.error("TeamMember with id {} , doesn't belongs to project {}!", fileOwner.getId(), projectId);
             throw new DataValidationException("You cannot upload files because you don't belongs to the project!");
         }
@@ -44,6 +49,6 @@ public class ResourceValidator {
     }
 
     public long byteToGigabyteConverter(long size) {
-        return Math.round(size / Math.pow(1000, 3));
+        return Math.round(size / Math.pow(THOUSAND_BYTES, POWER_OF_THREE));
     }
 }

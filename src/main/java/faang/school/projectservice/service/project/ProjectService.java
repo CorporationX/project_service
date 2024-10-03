@@ -87,9 +87,4 @@ public class ProjectService {
         return projectRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Project with id " + id + "does not exist!"));
     }
-
-    public Project getProjectEntity(long id) {
-        return projectRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Project with id " + id + "does not exist!"));
-    }
 }

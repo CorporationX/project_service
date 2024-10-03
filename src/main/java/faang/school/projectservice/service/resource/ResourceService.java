@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,7 +45,7 @@ public class ResourceService {
 
     @Transactional
     public ResourceResponseDto saveResource(MultipartFile file, long projectId, long memberId) {
-        Project project = projectService.getProjectEntity(projectId);
+        Project project = projectService.getProjectById(projectId);
         TeamMember fileOwner = teamMemberService.getTeamMemberById(memberId);
 
         resourceValidator.validateTeamMemberBelongsToProject(fileOwner, projectId);
@@ -97,19 +98,20 @@ public class ResourceService {
 
     public void deleteFile(long resourceId, long teamMemberId) {
         Resource resource = getResourceById(resourceId);
-
+        long resourceCreatorId = resource.getCreatedBy().getId();
+        long projectOwnerId = resource.getProject().getOwnerId();
         TeamMember fileOwner = teamMemberService.getTeamMemberById(teamMemberId);
 
-        if (!Objects.equals(resource.getCreatedBy().getId(), fileOwner.getId()) ||
-                !Objects.equals(resource.getProject().getOwnerId(), fileOwner.getId())) {
-            log.error("TeamMember with id {} , doesn't upload this file {} or not a Manager of the project!",
+        if (!Objects.equals(resourceCreatorId, fileOwner.getId()) ||
+                !Objects.equals(projectOwnerId, fileOwner.getId())) {
+            log.error("TeamMember with id {} , doesn't upload this file {} or not an Owner of the project!",
                     fileOwner.getId(), resource.getId());
             throw new DataValidationException("You don't have rights to delete this file!");
         }
 
         s3Service.deleteObject(resource);
 
-        resource.getProject().setStorageSize(resource.getProject().getStorageSize().add(resource.getSize()));
+        clearProjectStorage(resource);
         resource.getProject().getResources().remove(resource);
         resource.setUpdatedBy(fileOwner);
         resource.setKey("");
@@ -121,21 +123,31 @@ public class ResourceService {
 
     public MultipartFile downloadFile(long resourceId) {
         Resource resource = getResourceById(resourceId);
-
+        log.debug("Downloading file starts");
         S3Object object = s3Service.getObject(resource);
         try {
-            log.debug("Downloading file starts.");
-            return new MultiPartFileDecoder(object.getObjectContent().readAllBytes(),
+            log.debug("Trying to read bytes from object");
+            byte[] content = object.getObjectContent().readAllBytes();
+            return new MultiPartFileDecoder(content,
                     resource.getName(), resource.getKey(), object.getObjectMetadata().getContentType());
-
         } catch (IOException e) {
             log.error("Something's gone wrong while downloading file! {}", (Object) e.getStackTrace());
             throw new RuntimeException(e.getMessage());
+        } finally {
+            try {
+                object.getObjectContent().close();
+            } catch (IOException e) {
+                log.error("Couldn't close s3 object stream! {}", (Object) e.getStackTrace());
+            }
         }
     }
 
     private Resource getResourceById(long resourceId) {
         return resourceRepository.findById(resourceId).orElseThrow(() ->
                 new EntityNotFoundException("Couldn't find resource by " + resourceId + " id"));
+    }
+
+    private void clearProjectStorage(Resource resource) {
+        resource.getProject().setStorageSize(resource.getProject().getStorageSize().add(resource.getSize()));
     }
 }

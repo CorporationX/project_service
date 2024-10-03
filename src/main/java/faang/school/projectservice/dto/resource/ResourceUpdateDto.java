@@ -2,11 +2,15 @@ package faang.school.projectservice.dto.resource;
 
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.TeamRole;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@Builder
 public class ResourceUpdateDto {
     private Long id;
     private String name;

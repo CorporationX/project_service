@@ -3,13 +3,17 @@ package faang.school.projectservice.dto.resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamRole;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Builder
+@Getter
+@Setter
 public class ResourceResponseDto {
     private Long id;
     private String name;

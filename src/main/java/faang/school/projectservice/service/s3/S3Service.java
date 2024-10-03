@@ -1,5 +1,7 @@
 package faang.school.projectservice.service.s3;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -22,6 +24,8 @@ public class S3Service {
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
+    private static final String SDK_ERROR_LOG_MESSAGE = "SdkClientException occurred: {}";
+    private static final String ASE_ERROR_LOG_MESSAGE = "AmazonServiceException occurred: {}";
 
     private final AmazonS3 amazonS3Client;
 
@@ -30,27 +34,50 @@ public class S3Service {
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentLength(file.getResource().contentLength());
             objectMetadata.setContentType(file.getContentType());
-            PutObjectRequest request =
-                    new PutObjectRequest(bucketName,
-                            resource.getProject().getName() + "/" + resource.getKey(), file.getInputStream(),
-                            objectMetadata);
+            PutObjectRequest request = new PutObjectRequest(bucketName,
+                    resource.getProject().getName() + "/" + resource.getKey(),
+                    file.getInputStream(),
+                    objectMetadata);
             amazonS3Client.putObject(request);
             log.debug("Successfully uploaded file! {}", file.getName());
         } catch (IOException e) {
-            log.error("Something's gone wrong while uploading file! {}", (Object) e.getStackTrace());
+            log.error("IOException occurred while uploading file: {}", e.getMessage());
+            throw new RuntimeException("Couldn't upload file", e);
+        } catch (AmazonServiceException e) {
+            log.error(ASE_ERROR_LOG_MESSAGE, e.getMessage());
+            throw new RuntimeException("Couldn't upload file", e);
+        } catch (SdkClientException e) {
+            log.error(SDK_ERROR_LOG_MESSAGE, e.getMessage());
+            throw new RuntimeException("Couldn't upload file", e);
         }
     }
 
     public void deleteObject(Resource resource) {
-        DeleteObjectRequest request = new DeleteObjectRequest(bucketName, resource.getProject().getName() +
-                "/" + resource.getKey());
-        amazonS3Client.deleteObject(request);
-        log.debug("Successfully deleted file with key {}", resource.getKey());
+        try {
+            DeleteObjectRequest request = new DeleteObjectRequest(bucketName, resource.getProject().getName() +
+                    "/" + resource.getKey());
+            amazonS3Client.deleteObject(request);
+            log.debug("Successfully deleted file with key {}", resource.getKey());
+        } catch (AmazonServiceException e) {
+            log.error(ASE_ERROR_LOG_MESSAGE, e.getMessage());
+            throw new RuntimeException("Couldn't delete file", e);
+        } catch (SdkClientException e) {
+            log.error(SDK_ERROR_LOG_MESSAGE, e.getMessage());
+            throw new RuntimeException("Couldn't delete file", e);
+        }
     }
 
     public S3Object getObject(Resource resource) {
-        GetObjectRequest request = new GetObjectRequest(bucketName, resource.getProject().getName() + "/" +
-                resource.getKey());
-        return amazonS3Client.getObject(request);
+        try {
+            GetObjectRequest request = new GetObjectRequest(bucketName, resource.getProject().getName() + "/" +
+                    resource.getKey());
+            return amazonS3Client.getObject(request);
+        } catch (AmazonServiceException e) {
+            log.error(ASE_ERROR_LOG_MESSAGE, e.getMessage());
+            throw new RuntimeException("Couldn't get file", e);
+        } catch (SdkClientException e) {
+            log.error(SDK_ERROR_LOG_MESSAGE, e.getMessage());
+            throw new RuntimeException("Couldn't get file", e);
+        }
     }
 }
