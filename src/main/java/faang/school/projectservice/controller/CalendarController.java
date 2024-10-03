@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import com.google.api.client.auth.oauth2.Credential;
 import faang.school.projectservice.dto.calendar.ACLDto;
 import faang.school.projectservice.dto.calendar.CalendarDto;
 import faang.school.projectservice.dto.calendar.CalendarEventDto;
@@ -37,8 +38,8 @@ public class CalendarController {
     }
     @PostMapping("{projectId}/calendars/auth")
     public String setProjectCredentials(@PathVariable long projectId, @NotBlank @RequestParam String code) {
-        calendarService.auth(projectId, code);
-        return "credential.getAccessToken().toString()";
+        Credential credential = calendarService.auth(projectId, code);
+        return credential.getAccessToken();
     }
 
     @PostMapping("{projectId}/calendars/events")
