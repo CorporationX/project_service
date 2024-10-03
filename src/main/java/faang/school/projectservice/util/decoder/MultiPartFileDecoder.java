@@ -2,7 +2,6 @@ package faang.school.projectservice.util.decoder;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Setter;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.NonNull;
 import org.springframework.web.multipart.MultipartFile;
