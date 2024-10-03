@@ -36,44 +36,35 @@ public class ProjectCoverServiceImpl implements ProjectCoverService {
     @Override
     @Transactional
     public String uploadProjectCover(Long projectId, MultipartFile file) throws Exception {
-        // Проверка размера файла
-        if (file.getSize() > 5 * 1024 * 1024) { // 5 Мб
+        if (file.getSize() > 5 * 1024 * 1024) {
             throw new InvalidFileException("Размер файла превышает 5 Мб");
         }
 
-        // Проверка типа файла (например, только изображения)
         if (!isImageFile(file)) {
             throw new InvalidFileException("Файл должен быть изображением (JPEG, PNG, GIF)");
         }
 
-        // Чтение изображения
         BufferedImage image = ImageIO.read(file.getInputStream());
         if (image == null) {
             throw new InvalidFileException("Невозможно прочитать изображение");
         }
 
-        // Проверка и изменение размера
         BufferedImage resizedImage = resizeImageIfNecessary(image);
 
-        // Преобразование BufferedImage обратно в байты
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         String formatName = getImageFormat(file.getOriginalFilename());
         ImageIO.write(resizedImage, formatName, os);
         byte[] imageBytes = os.toByteArray();
 
-        // Генерация уникального имени файла
         String fileExtension = getFileExtension(file.getOriginalFilename());
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
 
-        // Загрузка файла в S3 (Minio)
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileName,
                 new ByteArrayInputStream(imageBytes), null)
                 .withCannedAcl(com.amazonaws.services.s3.model.CannedAccessControlList.PublicRead);
-        // Публичный доступ, если нужно
 
         amazonS3.putObject(putObjectRequest);
 
-        // Сохранение coverImageId в проекте
         Project project = projectRepository.getProjectById(projectId);
         project.setCoverImageId(fileName);
         projectRepository.save(project);
@@ -94,10 +85,9 @@ public class ProjectCoverServiceImpl implements ProjectCoverService {
         int width = originalImage.getWidth();
         int height = originalImage.getHeight();
 
-        // Определение, является ли изображение квадратным
         boolean isSquare = width == height;
 
-        int maxWidth = isSquare ? 1080 : 1080;
+        int maxWidth = 1080;
         int maxHeight = isSquare ? 1080 : 566;
 
         if (width > maxWidth || height > maxHeight) {
@@ -113,7 +103,7 @@ public class ProjectCoverServiceImpl implements ProjectCoverService {
 
     private String getFileExtension(String filename) {
         if (filename == null) {
-            return "jpg"; // По умолчанию
+            return "jpg";
         }
         String[] parts = filename.split("\\.");
         return parts.length > 1 ? parts[parts.length - 1] : "jpg";
@@ -121,15 +111,10 @@ public class ProjectCoverServiceImpl implements ProjectCoverService {
 
     private String getImageFormat(String filename) {
         String ext = getFileExtension(filename).toLowerCase();
-        switch (ext) {
-            case "png":
-                return "png";
-            case "gif":
-                return "gif";
-            case "jpg":
-            case "jpeg":
-            default:
-                return "jpg";
-        }
+        return switch (ext) {
+            case "png" -> "png";
+            case "gif" -> "gif";
+            default -> "jpg";
+        };
     }
 }

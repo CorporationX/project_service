@@ -82,15 +82,17 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(ex.getMessage());
     }
 
-
-    // TODO переделать и добавить логи
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidFileException.class)
-    public ResponseEntity<String> handleInvalidFileException(InvalidFileException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    public ErrorResponse handleInvalidFileException(InvalidFileException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ErrorResponse(ex.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGeneralException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Внутренняя ошибка сервера");
+    public ErrorResponse handleGeneralException(Exception ex) {
+        log.error(ex.getMessage(), ex);
+        return new ErrorResponse(ex.getMessage());
     }
 }

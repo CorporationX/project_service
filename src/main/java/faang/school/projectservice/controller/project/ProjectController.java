@@ -36,8 +36,6 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ProjectCoverService projectCoverService;
 
-
-    // TODO убрать ResponseEntity
     @PostMapping("/{projectId}/cover")
     public ResponseEntity<String> uploadProjectCover(
             @PathVariable Long projectId,
