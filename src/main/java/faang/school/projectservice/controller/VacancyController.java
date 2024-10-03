@@ -17,11 +17,11 @@ import java.util.List;
 public class VacancyController {
     private final VacancyServiceImpl vacancyService;
 
-    public VacancyDto createVacancy(@Valid VacancyDto vacancyDto) {
+    public VacancyDto createVacancy(VacancyDto vacancyDto) {
         return vacancyService.createVacancy(vacancyDto);
     }
 
-    public VacancyDto updateVacancy(@NotNull Long vacancyId, @Valid VacancyDto vacancyDto) {
+    public VacancyDto updateVacancy(@NotNull Long vacancyId, VacancyDto vacancyDto) {
         return vacancyService.updateVacancy(vacancyId, vacancyDto);
     }
 
@@ -29,7 +29,7 @@ public class VacancyController {
         vacancyService.deleteVacancy(vacancyId);
     }
 
-    public List<VacancyDto> getVacanciesByTitleFilter(@Valid VacancyFilterDto vacancyFilterDto) {
+    public List<VacancyDto> getVacanciesByTitleFilter(VacancyFilterDto vacancyFilterDto) {
         return vacancyService.getVacancies(vacancyFilterDto);
     }
 

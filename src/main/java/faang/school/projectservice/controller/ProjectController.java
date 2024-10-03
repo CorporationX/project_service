@@ -20,19 +20,19 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
 
-    public void createProject(@Valid ProjectDto projectDto) {
+    public void createProject(ProjectDto projectDto) {
         projectService.createProject(projectDto);
     }
 
-    public void updateStatus(@Valid ProjectDto projectDto, @NotNull ProjectStatus status) {
+    public void updateStatus(ProjectDto projectDto, @NotNull ProjectStatus status) {
         projectService.updateStatus(projectDto, status);
     }
 
-    public void updateDescription(@Valid ProjectDto projectDto, @NotBlank String description) {
+    public void updateDescription(ProjectDto projectDto, @NotBlank String description) {
         projectService.updateDescription(projectDto, description);
     }
 
-    public List<ProjectDto> getProjectsFilters(@Valid ProjectFilterDto filterDto, @Valid TeamMemberDto teamMemberDto) {
+    public List<ProjectDto> getProjectsFilters(ProjectFilterDto filterDto, TeamMemberDto teamMemberDto) {
         return projectService.getProjectsFilters(filterDto, teamMemberDto);
     }
 

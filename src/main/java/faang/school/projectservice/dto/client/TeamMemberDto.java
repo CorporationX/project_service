@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.client;
 
-import faang.school.projectservice.model.Team;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;

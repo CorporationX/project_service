@@ -57,8 +57,6 @@ public class StageServiceImpl implements StageService {
     @Override
     public List<StageDto> getFilteredStages(Long projectId, StageFilterDto filterDto) {
         Project project = projectRepository.getReferenceById(projectId);
-        validator.validateProjectNotCanceled(project.getStatus());
-
 
         Stream<Stage> stageStream = project.getStages().stream();
         return filters.stream()

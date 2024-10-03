@@ -2,7 +2,6 @@ package faang.school.projectservice;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.validator.MomentValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

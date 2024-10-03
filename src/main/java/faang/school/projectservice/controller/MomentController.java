@@ -17,7 +17,7 @@ import java.util.List;
 public class MomentController {
     private final MomentService momentService;
 
-    public MomentDto createMoment(@Valid MomentDto momentDto) {
+    public MomentDto createMoment(MomentDto momentDto) {
         return momentService.createMoment(momentDto);
     }
 
