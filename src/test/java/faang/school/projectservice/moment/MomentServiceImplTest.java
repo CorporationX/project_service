@@ -50,8 +50,8 @@ public class MomentServiceImplTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         momentDto = new MomentDto();
-        momentDto.setName("Test Moment");
-        momentDto.setDescription("Test Description");
+        momentDto.setName("Test moment");
+        momentDto.setDescription("Test description");
         String dateString = "2024-10-01";
         LocalDateTime dateTime = LocalDateTime.parse(dateString + "T00:00:00");
         momentDto.setProjectIds(Arrays.asList(1L, 2L));
