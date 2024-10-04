@@ -3,7 +3,9 @@ package faang.school.projectservice.service.teammember;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.team.TeamFilterDto;
+import faang.school.projectservice.dto.team.TeamMemberCreateDto;
 import faang.school.projectservice.dto.team.TeamMemberDto;
+import faang.school.projectservice.dto.team.TeamMemberUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.TeamMemberMapper;
@@ -41,6 +43,8 @@ public class TeamMemberServiceTest {
     private final static long USER_ID = 1L;
     private final static long TEAM_ID = 5L;
     private final static long PROJECT_ID = 6L;
+    private final static long TEAM_MEMBER_ID = 2L;
+
 
 
     @InjectMocks
@@ -61,6 +65,8 @@ public class TeamMemberServiceTest {
     private UserContext userContext;
 
 
+    private TeamMemberCreateDto teamMemberCreateDto;
+    private TeamMemberUpdateDto teamMemberUpdateDto;
     private TeamMemberDto teamMemberDto;
     private TeamMember teamMember;
     private TeamMember owner;
@@ -80,7 +86,7 @@ public class TeamMemberServiceTest {
         team.setProject(project);
 
         teamMember = new TeamMember();
-        teamMember.setId(2L);
+        teamMember.setId(TEAM_MEMBER_ID);
         teamMember.setRoles(List.of());
         teamMember.setTeam(team);
 
@@ -103,17 +109,17 @@ public class TeamMemberServiceTest {
     @Test
     public void testAddTeamMemberSuccess() {
 
-        teamMemberDto = new TeamMemberDto(2L, List.of(TeamRole.DEVELOPER));
+        teamMemberCreateDto = new TeamMemberCreateDto(2L, List.of(TeamRole.DEVELOPER));
 
         when(userContext.getUserId()).thenReturn(USER_ID);
         when(teamRepository.findById(TEAM_ID)).thenReturn(Optional.of(team));
         when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(teamlead);
         when(teamMemberJpaRepository.findByUserIdAndProjectId(2L, PROJECT_ID)).thenReturn(teamMember);
-        when(teamMemberMapper.toTeamMember(teamMemberDto)).thenReturn(teamMember);
+        when(teamMemberMapper.toTeamMember(teamMemberCreateDto)).thenReturn(teamMember);
 
-        TeamMemberDto result = teamMemberService.addTeamMember(TEAM_ID, teamMemberDto);
+        TeamMemberDto result = teamMemberService.addTeamMember(TEAM_ID, teamMemberCreateDto);
 
-        assertNotNull(teamMemberDto);
+        assertNotNull(teamMemberCreateDto);
         verify(teamMemberJpaRepository, times(1)).save(any(TeamMember.class));
     }
 
@@ -126,13 +132,13 @@ public class TeamMemberServiceTest {
         when(teamRepository.findById(TEAM_ID)).thenReturn(Optional.of(team));
         when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(user);
 
-        assertThrows(DataValidationException.class, () -> teamMemberService.addTeamMember(TEAM_ID, teamMemberDto));
+        assertThrows(DataValidationException.class, () -> teamMemberService.addTeamMember(TEAM_ID, teamMemberCreateDto));
     }
 
     @Test
     public void testAddTeamMemberShouldThrowExceptionWhenTeamMemberRoleIsNotEmpty() {
 
-        teamMemberDto = new TeamMemberDto(2L, List.of(TeamRole.DEVELOPER));
+        teamMemberCreateDto = new TeamMemberCreateDto(2L, List.of(TeamRole.DEVELOPER));
         teamMember.setRoles(List.of(TeamRole.DESIGNER));
 
         when(userContext.getUserId()).thenReturn(USER_ID);
@@ -140,21 +146,21 @@ public class TeamMemberServiceTest {
         when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(teamlead);
         when(teamMemberJpaRepository.findByUserIdAndProjectId(2L, PROJECT_ID)).thenReturn(teamMember);
 
-        assertThrows(DataValidationException.class, () -> teamMemberService.addTeamMember(TEAM_ID, teamMemberDto));
+        assertThrows(DataValidationException.class, () -> teamMemberService.addTeamMember(TEAM_ID, teamMemberCreateDto));
     }
 
     @Test
     public void testUpdateTeamMemberShouldUpdateWhenMemberExists() {
-        teamMemberDto = new TeamMemberDto(2L, List.of(TeamRole.DEVELOPER));
+        teamMemberUpdateDto = new TeamMemberUpdateDto(List.of(TeamRole.DEVELOPER));
 
         when(userContext.getUserId()).thenReturn(USER_ID);
         when(teamRepository.findById(TEAM_ID)).thenReturn(Optional.of(team));
         when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(teamlead);
-        when(teamMemberMapper.toTeamMember(teamMemberDto)).thenReturn(teamMember);
+        when(teamMemberJpaRepository.findByUserIdAndProjectId(TEAM_MEMBER_ID, PROJECT_ID)).thenReturn(teamMember);
 
-        TeamMemberDto result = teamMemberService.updateTeamMember(TEAM_ID, teamMemberDto);
+        TeamMemberDto result = teamMemberService.updateTeamMember(TEAM_ID, TEAM_MEMBER_ID, teamMemberUpdateDto);
 
-        assertNotNull(teamMemberDto);
+        assertNotNull(teamMemberUpdateDto);
         verify(teamMemberJpaRepository).save(teamMember);
     }
 
@@ -168,16 +174,15 @@ public class TeamMemberServiceTest {
 
         when(teamMemberJpaRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(member);
 
-        assertThrows(DataValidationException.class, () -> teamMemberService.updateTeamMember(TEAM_ID, teamMemberDto));
+        assertThrows(DataValidationException.class, () -> teamMemberService.updateTeamMember(TEAM_ID, TEAM_MEMBER_ID, teamMemberUpdateDto));
     }
 
     @Test
     public void testDeleteTeamMemberShouldDeleteWhenMemberExists() {
 
-        when(teamMemberRepository.findById(2L)).thenReturn(teamMember);
-        teamMemberService.deleteTeamMember(teamMember.getId());
+        teamMemberService.deleteTeamMember(TEAM_MEMBER_ID);
 
-        verify(teamMemberJpaRepository, times(1)).delete(teamMember);
+        verify(teamMemberJpaRepository, times(1)).deleteById(TEAM_MEMBER_ID);
     }
 
     @Test
