@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.model.Project;
 
 import java.util.List;
 
@@ -15,4 +16,8 @@ public interface ProjectService {
     List<ProjectDto> getAll();
 
     ProjectDto getById(Long id);
+
+    Project getProjectById(Long projectId);
+
+    void save(Project project);
 }

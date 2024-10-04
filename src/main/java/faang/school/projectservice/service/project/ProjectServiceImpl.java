@@ -82,4 +82,14 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectDto getById(Long id) {
         return mapper.toDto(projectRepository.getProjectById(id));
     }
+
+    @Override
+    public Project getProjectById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+
+    @Override
+    public void save(Project project) {
+        projectRepository.save(project);
+    }
 }
