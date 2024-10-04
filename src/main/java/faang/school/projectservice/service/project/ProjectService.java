@@ -36,8 +36,9 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final GigabyteConverter gigabyteConverter;
 
+
     public ProjectDto create(ProjectDto projectDto) {
-        projectValidator.validateProject(projectDto);
+        projectValidator.validateOwnerHasSameProject(projectDto);
 
         projectDto.setStatus(ProjectStatus.CREATED);
         projectDto.setCreatedAt(LocalDateTime.now());
@@ -76,10 +77,6 @@ public class ProjectService {
     }
 
     public ProjectDto getProject(Long id) {
-        if (id == null) {
-            throw new DataValidationException("Field id cannot be null");
-        }
-
         return projectMapper.toDto(getProjectById(id));
     }
 

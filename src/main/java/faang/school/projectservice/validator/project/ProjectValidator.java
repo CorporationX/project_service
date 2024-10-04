@@ -13,17 +13,7 @@ public class ProjectValidator {
 
     private final ProjectRepository projectRepository;
 
-    public void validateProject(ProjectDto projectDto) {
-        validateOwnerHasSameProject(projectDto);
-    }
-
-    public void validateUpdatedFields(ProjectDto projectDto) {
-        if ((projectDto.getStatus() == null)) {
-            throw new DataValidationException("At least one updated field must not be empty");
-        }
-    }
-
-    private void validateOwnerHasSameProject(ProjectDto projectDto) {
+    public void validateOwnerHasSameProject(ProjectDto projectDto) {
         if (projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName())) {
             throw new DataValidationException("Owner already has a project with name " + projectDto.getName());
         }
