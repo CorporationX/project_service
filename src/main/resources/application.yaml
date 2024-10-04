@@ -64,3 +64,14 @@ app:
       cover_image_square_max_width: 1080
       cover_image_square_max_height: 1080
       cover_image_folder_name: /cover-image
+
+google:
+  client:
+    id: 534057422646-e8dkdj7hn1bukfch45movmoq0hgecmcb.apps.googleusercontent.com
+    secret: my_secret_code
+  redirect:
+    uri: http://localhost:8082/oauth/callback
+
+user-service:
+  host: http://localhost
+  port: 8080
