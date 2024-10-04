@@ -22,4 +22,4 @@ databaseChangeLog:
   - include:
         file: db/changelog/changeset/project_V014_resource.sql
   - include:
-      file: db/changelog/changeset/project_V015_create_google_calendar_token.sql
+      file: db/changelog/changeset/project_V017_create_google_calendar_token.sql
