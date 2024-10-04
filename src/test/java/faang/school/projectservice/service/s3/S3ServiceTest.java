@@ -1,8 +1,11 @@
 package faang.school.projectservice.service.s3;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import faang.school.projectservice.dto.image.FileData;
+import faang.school.projectservice.exception.S3Exception;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,7 +60,7 @@ class S3ServiceTest {
             when(s3Object.getObjectContent()).thenReturn(s3InputStream);
             when(s3Object.getObjectMetadata()).thenReturn(metadata);
 
-            FileData result = s3Service.getObjectByKey(TEST_FILE_KEY);
+            FileData result = s3Service.getFileByKey(TEST_FILE_KEY);
 
             assertNotNull(result);
             assertEquals(FILE_CONTENT, new String(result.getData()));
@@ -64,14 +68,44 @@ class S3ServiceTest {
         }
 
         @Test
-        @DisplayName("should return null when an exception occurs")
-        void whenObjectFetchFailsThenReturnNull() {
-            when(amazonS3.getObject(any(GetObjectRequest.class))).thenThrow(new RuntimeException("S3 error"));
+        @DisplayName("should throw S3Exception when an AmazonServiceException occurs")
+        void whenAmazonServiceExceptionThenThrowS3Exception() {
+            when(amazonS3.getObject(any(GetObjectRequest.class))).thenThrow(new AmazonServiceException("S3 error"));
 
-            FileData result = s3Service.getObjectByKey(TEST_FILE_KEY);
+            S3Exception exception = assertThrows(S3Exception.class, () -> {
+                s3Service.getFileByKey(TEST_FILE_KEY);
+            });
 
-            assertNull(result);
-            verify(amazonS3).getObject(any(GetObjectRequest.class));
+            assertEquals("Amazon S3 service error while fetching file for key: test-file", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("should throw S3Exception when an SdkClientException occurs")
+        void whenSdkClientExceptionThenThrowS3Exception() {
+            when(amazonS3.getObject(any(GetObjectRequest.class))).thenThrow(new SdkClientException("S3 error"));
+
+            S3Exception exception = assertThrows(S3Exception.class, () -> {
+                s3Service.getFileByKey(TEST_FILE_KEY);
+            });
+
+            assertEquals("SDK client error while fetching file for key: test-file", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("should throw S3Exception when IOException occurs during stream reading")
+        void whenIOExceptionThenThrowS3Exception() throws Exception {
+            S3Object s3Object = mock(S3Object.class);
+            S3ObjectInputStream s3InputStream = mock(S3ObjectInputStream.class);
+
+            when(amazonS3.getObject(any(GetObjectRequest.class))).thenReturn(s3Object);
+            when(s3Object.getObjectContent()).thenReturn(s3InputStream);
+            when(s3InputStream.readAllBytes()).thenThrow(new IOException("IO error"));
+
+            S3Exception exception = assertThrows(S3Exception.class, () -> {
+                s3Service.getFileByKey(TEST_FILE_KEY);
+            });
+
+            assertEquals("Error reading file content from S3 for key: test-file", exception.getMessage());
         }
     }
 
@@ -82,23 +116,38 @@ class S3ServiceTest {
         @Test
         @DisplayName("should upload successfully and return the file key")
         void whenObjectIsUploadedThenReturnFileKey() {
-            String uniqueFileKey = s3Service.uploadObject(TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
+            String uniqueFileKey = s3Service.uploadFile(TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
 
             assertNotNull(uniqueFileKey);
-            assertTrue(uniqueFileKey.startsWith(String.valueOf(System.currentTimeMillis()).substring(0, 5)));
+            assertTrue(uniqueFileKey.contains(TEST_FILE_NAME));
 
             verify(amazonS3).putObject(any(), eq(uniqueFileKey), eq(fileContentStream), any());
         }
 
         @Test
-        @DisplayName("should return null when upload fails")
-        void whenUploadFailsThenReturnNull() {
-            doThrow(new RuntimeException("S3 error")).when(amazonS3).putObject(anyString(), anyString(), any(InputStream.class), any(ObjectMetadata.class));
+        @DisplayName("should throw S3Exception when AmazonServiceException occurs during upload")
+        void whenAmazonServiceExceptionDuringUploadThenThrowS3Exception() {
+            doThrow(new AmazonServiceException("S3 error")).when(amazonS3).putObject(any(), any(), any(), any());
 
-            String result = s3Service.uploadObject(TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
+            S3Exception exception = assertThrows(S3Exception.class, () -> {
+                s3Service.uploadFile(TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
+            });
 
-            assertNull(result);
-            verify(amazonS3).putObject(any(), anyString(), any(InputStream.class), any(ObjectMetadata.class));
+            assertEquals("Amazon S3 service error while uploading file: " + TEST_FILE_NAME, exception.getMessage());
+            verify(amazonS3).putObject(any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("should throw S3Exception when SdkClientException occurs during upload")
+        void whenSdkClientExceptionDuringUploadThenThrowS3Exception() {
+            doThrow(new SdkClientException("S3 error")).when(amazonS3).putObject(any(), any(), any(), any());
+
+            S3Exception exception = assertThrows(S3Exception.class, () -> {
+                s3Service.uploadFile(TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
+            });
+
+            assertEquals("SDK client error while uploading file: " + TEST_FILE_NAME, exception.getMessage());
+            verify(amazonS3).putObject(any(), any(), any(), any());
         }
     }
 
@@ -109,19 +158,33 @@ class S3ServiceTest {
         @Test
         @DisplayName("should remove object successfully")
         void whenObjectIsRemovedThenRemoveObjectSuccessfully() {
-            s3Service.removeObjectByKey(TEST_FILE_KEY);
+            s3Service.removeFileByKey(TEST_FILE_KEY);
 
             verify(amazonS3).deleteObject(any(), eq(TEST_FILE_KEY));
         }
 
         @Test
-        @DisplayName("should log error when removing fails")
-        void whenRemoveFailsThenLogError() {
-            doThrow(new RuntimeException("S3 error")).when(amazonS3).deleteObject(anyString(), eq(TEST_FILE_KEY));
+        @DisplayName("should throw S3Exception when AmazonServiceException occurs during remove")
+        void whenAmazonServiceExceptionDuringRemoveThenThrowS3Exception() {
+            doThrow(new AmazonServiceException("S3 error")).when(amazonS3).deleteObject(any(), eq(TEST_FILE_KEY));
 
-            s3Service.removeObjectByKey(TEST_FILE_KEY);
+            S3Exception exception = assertThrows(S3Exception.class, () -> {
+                s3Service.removeFileByKey(TEST_FILE_KEY);
+            });
 
-            verify(amazonS3).deleteObject(any(), eq(TEST_FILE_KEY));
+            assertEquals("Amazon S3 service error while removing file for key: " + TEST_FILE_KEY, exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("should throw S3Exception when SdkClientException occurs during remove")
+        void whenSdkClientExceptionDuringRemoveThenThrowS3Exception() {
+            doThrow(new SdkClientException("S3 error")).when(amazonS3).deleteObject(any(), eq(TEST_FILE_KEY));
+
+            S3Exception exception = assertThrows(S3Exception.class, () -> {
+                s3Service.removeFileByKey(TEST_FILE_KEY);
+            });
+
+            assertEquals("SDK client error while removing file for key: " + TEST_FILE_KEY, exception.getMessage());
         }
     }
 }

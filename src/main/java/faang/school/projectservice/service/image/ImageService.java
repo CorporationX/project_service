@@ -1,5 +1,7 @@
 package faang.school.projectservice.service.image;
 
+import faang.school.projectservice.exception.ImageProcessingException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,7 +14,12 @@ import java.io.IOException;
 @Service
 public class ImageService {
     private static final String IMAGE_FILE_FORMAT = "png";
-    private static final Dimension MAX_SIZE = new Dimension(640, 1024);
+
+    @Value("${image.cover.max-resolution.height}")
+    private Long maxHeight;
+
+    @Value("${image.cover.max-resolution.width}")
+    private Long maxWidth;
 
     public byte[] resizeImage(MultipartFile image) {
         try {
@@ -35,20 +42,20 @@ public class ImageService {
 
             return outputStream.toByteArray();
         } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to resize image: " + e.getMessage(), e);
+            throw new ImageProcessingException("Failed to resize image", e);
         }
     }
 
     private Dimension getNewSize(int originalHeight, int originalWidth) {
-        if (originalHeight > MAX_SIZE.height || originalWidth > MAX_SIZE.width) {
+        if (originalHeight > maxHeight || originalWidth > maxWidth) {
             return getProportionalSize(originalHeight, originalWidth);
         }
         return new Dimension(originalWidth, originalHeight);
     }
 
     private Dimension getProportionalSize(int originalHeight, int originalWidth) {
-        double heightRatio = (double) originalHeight / MAX_SIZE.height;
-        double widthRatio = (double) originalWidth / MAX_SIZE.width;
+        double heightRatio = (double) originalHeight / maxHeight;
+        double widthRatio = (double) originalWidth / maxWidth;
         double scaleFactor = Math.max(heightRatio, widthRatio);
 
         int newHeight = (int) (originalHeight / scaleFactor);

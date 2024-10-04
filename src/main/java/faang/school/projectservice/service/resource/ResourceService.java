@@ -17,9 +17,9 @@ public class ResourceService {
 
     private final ResourceRepository resourceRepository;
 
-    public Resource getResourceById(String resourceId) {
-        return resourceRepository.findResourceByKey(resourceId)
-                .orElseThrow(() -> new EntityNotFoundException("Resource with id " + resourceId + " doesn't exist"));
+    public Resource getResourceByKey(String resourceKey) {
+        return resourceRepository.findResourceByKey(resourceKey)
+                .orElseThrow(() -> new EntityNotFoundException("Resource with key " + resourceKey + " doesn't exist"));
     }
 
     public Resource putResource(MultipartFile file, ResourceType resourceType, String key) {
@@ -33,8 +33,8 @@ public class ResourceService {
         return resourceRepository.save(resource);
     }
 
-    public Resource markResourceAsDeleted(String resourceId) {
-        Resource resource = getResourceById(resourceId);
+    public Resource markResourceAsDeleted(String resourceKey) {
+        Resource resource = getResourceByKey(resourceKey);
         resource.setStatus(ResourceStatus.DELETED);
 
         return resourceRepository.save(resource);

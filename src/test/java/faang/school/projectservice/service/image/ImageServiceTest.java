@@ -1,11 +1,13 @@
 package faang.school.projectservice.service.image;
 
+import faang.school.projectservice.exception.ImageProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -32,6 +34,9 @@ class ImageServiceTest {
     @BeforeEach
     void setUp() {
         imageService = new ImageService();
+
+        ReflectionTestUtils.setField(imageService, "maxHeight", 1024L);
+        ReflectionTestUtils.setField(imageService, "maxWidth", 640L);
     }
 
     @Nested
@@ -88,7 +93,7 @@ class ImageServiceTest {
             MultipartFile imageFile = mock(MultipartFile.class);
             when(imageFile.getInputStream()).thenThrow(new IOException("Invalid image"));
 
-            Exception exception = assertThrows(IllegalArgumentException.class, () -> imageService.resizeImage(imageFile));
+            Exception exception = assertThrows(ImageProcessingException.class, () -> imageService.resizeImage(imageFile));
 
             assertTrue(exception.getMessage().contains("Failed to resize image"));
         }

@@ -46,7 +46,7 @@ class ResourceServiceTest {
             resource.setKey(RESOURCE_KEY);
             when(resourceRepository.findResourceByKey(RESOURCE_KEY)).thenReturn(Optional.of(resource));
 
-            Resource result = resourceService.getResourceById(RESOURCE_KEY);
+            Resource result = resourceService.getResourceByKey(RESOURCE_KEY);
 
             assertNotNull(result);
             assertEquals(RESOURCE_KEY, result.getKey());
@@ -58,10 +58,10 @@ class ResourceServiceTest {
             when(resourceRepository.findResourceByKey(RESOURCE_KEY)).thenReturn(Optional.empty());
 
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-                resourceService.getResourceById(RESOURCE_KEY);
+                resourceService.getResourceByKey(RESOURCE_KEY);
             });
 
-            assertEquals("Resource with id 123 doesn't exist", exception.getMessage());
+            assertEquals("Resource with key 123 doesn't exist", exception.getMessage());
         }
     }
 
@@ -117,7 +117,7 @@ class ResourceServiceTest {
                 resourceService.markResourceAsDeleted(RESOURCE_KEY);
             });
 
-            assertEquals("Resource with id 123 doesn't exist", exception.getMessage());
+            assertEquals("Resource with key 123 doesn't exist", exception.getMessage());
         }
     }
 }

@@ -42,7 +42,7 @@ public class ProjectCoverService {
         Project project = projectService.getProjectById(projectId);
         String coverImageId = project.getCoverImageId();
 
-        return coverImageId != null ? s3Service.getObjectByKey(coverImageId) : null;
+        return coverImageId != null ? s3Service.getFileByKey(coverImageId) : null;
     }
 
     @Transactional
@@ -68,7 +68,7 @@ public class ProjectCoverService {
 
     private String uploadCoverFile(MultipartFile imageFile, Project project) {
         byte[] resizedImage = imageService.resizeImage(imageFile);
-        String coverImageId = s3Service.uploadObject(
+        String coverImageId = s3Service.uploadFile(
                 imageFile.getOriginalFilename(),
                 imageFile.getContentType(),
                 resizedImage.length,
@@ -86,7 +86,7 @@ public class ProjectCoverService {
         String coverImageId = project.getCoverImageId();
         if (coverImageId != null) {
             resourceService.markResourceAsDeleted(coverImageId);
-            s3Service.removeObjectByKey(coverImageId);
+            s3Service.removeFileByKey(coverImageId);
         }
     }
 }
