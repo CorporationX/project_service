@@ -24,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,8 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,35 +42,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class JiraServiceImplTest {
 
-    private static final List<IssueDto> ISSUES = List.of(
-            new IssueDto(),
-            new IssueDto(),
-            new IssueDto()
-    );
 
     @Mock
     private WebClient webClient;
 
     @Mock
     private JiraClient jiraClient;
-
-    @Mock
-    private WebClient.RequestHeadersUriSpec uriSpec;
-
-    @Mock
-    private WebClient.RequestBodySpec requestBodySpec;
-
-    @Mock
-    private WebClient.RequestHeadersSpec<?> requestHeadersSpec;
-
-    @Mock
-    private WebClient.RequestBodyUriSpec headerSpec;
-
-    @Mock
-    private WebClient.ResponseSpec responseSpec;
-
-    @Mock
-    private WebClient.RequestBodyUriSpec bodyUriSpec;
 
     @Mock
     private IssueStatusFilter issueStatusFilter;
@@ -108,6 +82,11 @@ class JiraServiceImplTest {
             .status(status)
             .assignee(assignee)
             .build();
+    private static final List<IssueDto> ISSUES = List.of(
+            new IssueDto(),
+            new IssueDto(),
+            new IssueDto()
+    );
 
     @Test
     void registrationInJira_WhenOk() {
@@ -146,6 +125,7 @@ class JiraServiceImplTest {
     @MethodSource("provideJiraResponses")
     void getAllIssuesByProjectId(JiraResponse response, List<IssueDto> expectedIssues) {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(jiraClient.getProjectInfoByJql(anyString())).thenReturn(response);
 
         List<IssueDto> result = jiraService.getAllIssuesByProjectId(projectId);
 
