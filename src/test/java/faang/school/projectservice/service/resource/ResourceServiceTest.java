@@ -92,12 +92,15 @@ public class ResourceServiceTest {
         project.setMaxStorageSize(projectMaxStorageSize);
         project.setId(projectId);
         project.setName(projectName);
+
         when(userContext.getUserId()).thenReturn(userId);
         when(teamMemberRepository.findById(userId)).thenReturn(teamMember);
         when(projectService.getProjectById(projectId)).thenReturn(project);
         when(s3Service.uploadFile(any(MultipartFile.class), any(String.class))).thenReturn(resource);
         when(resourceRepository.save(resource)).thenReturn(resource);
+
         resourceService.addResource(projectId, multipartFile);
+
         verify(resourceRepository).save(resource);
         verify(projectService).save(any(Project.class));
         verify(mapper).toDto(resource);
@@ -116,6 +119,9 @@ public class ResourceServiceTest {
         project.setMaxStorageSize(projectMaxStorageSize);
         project.setId(projectId);
         project.setName(projectName);
+
+        resourceService.addResource(projectId, multipartFile);
+
         verify(resourceRepository, never()).save(resource);
         verify(projectService, never()).save(any(Project.class));
         verify(mapper, never()).toDto(resource);
@@ -129,10 +135,13 @@ public class ResourceServiceTest {
         resource.setProject(project);
         resource.setSize(resourceSize);
         project.setStorageSize(projectStorageSize);
+
         when(resourceRepository.findById(resourceId)).thenReturn(Optional.ofNullable(resource));
         when(userContext.getUserId()).thenReturn(userId);
         when(teamMemberRepository.findById(userId)).thenReturn(teamMember);
+
         resourceService.deleteResource(resourceId);
+
         verify(s3Service).deleteFile(resourceKey);
         verify(projectService).save(any(Project.class));
     }
@@ -141,7 +150,9 @@ public class ResourceServiceTest {
     void deleteResource_noPermissions_throwsSecurityException() {
         teamMember.setId(userId);
         teamMember.setId(invalidUserId);
+
         resource.setCreatedBy(teamMember);
+
         verify(s3Service, never()).deleteFile(resourceKey);
         verify(projectService, never()).save(any(Project.class));
     }
@@ -150,7 +161,9 @@ public class ResourceServiceTest {
     void downloadResource_validRequest_s3serviceCalled() {
         resource.setKey(resourceKey);
         when(resourceRepository.findById(resourceId)).thenReturn(Optional.ofNullable(resource));
+
         resourceService.downloadResource(resourceId);
+
         verify(s3Service).downloadFile(any(String.class));
     }
 }

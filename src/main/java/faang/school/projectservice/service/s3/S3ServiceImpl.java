@@ -33,6 +33,7 @@ public class S3ServiceImpl implements S3Service {
         objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(),file.getOriginalFilename());
+
         log.info("Starting file upload to S3. Bucket: {}, Key: {}", bucketName, key);
         try{
             PutObjectRequest putObjectRequest = new PutObjectRequest(
@@ -44,6 +45,7 @@ public class S3ServiceImpl implements S3Service {
             log.error("Error occurred while uploading file to S3. Key: {}, Error: {}", key, e.getMessage());
             throw new RuntimeException("Failed to upload file to S3", e);
         }
+
         Resource resource = new Resource();
         resource.setKey(key);
         resource.setSize(BigInteger.valueOf(file.getSize()));
@@ -53,6 +55,7 @@ public class S3ServiceImpl implements S3Service {
         resource.setType(ResourceType.getResourceType(file.getContentType()));
         resource.setName(file.getOriginalFilename());
         log.info("Resource created for file. Name: {}, Key: {}, Size: {}", resource.getName(), resource.getKey(), resource.getSize());
+
         return resource;
     }
 

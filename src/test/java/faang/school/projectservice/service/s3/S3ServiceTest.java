@@ -33,8 +33,6 @@ public class S3ServiceTest {
     private String resourceKey = "resourceKey";
     private String bucketName;
 
-
-
     @BeforeEach
     void setUp() {
         fileContent = new byte[2048];

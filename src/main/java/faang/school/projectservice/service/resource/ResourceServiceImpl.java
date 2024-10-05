@@ -65,11 +65,13 @@ public class ResourceServiceImpl implements ResourceService{
     @Transactional
     public void deleteResource(Long resourceId) {
         log.info("Deleting resource with ID: {}", resourceId);
+
         Resource resource = resourceRepository.findById(resourceId).orElseThrow(EntityNotFoundException::new);
         checkPermissions(userContext.getUserId(), resource);
         TeamMember teamMember = teamMemberRepository.findById(userContext.getUserId());
         s3Service.deleteFile(resource.getKey());
         log.debug("File with key {} deleted from S3", resource.getKey());
+
         Project project = resource.getProject();
         BigInteger newStorageSize = project.getStorageSize().subtract(resource.getSize());
         resource.setKey(null);
@@ -78,15 +80,18 @@ public class ResourceServiceImpl implements ResourceService{
         resource.setUpdatedBy(teamMember);
         project.setStorageSize(newStorageSize);
         projectService.save(project);
+
         log.info("Resource with ID {} deleted and project storage size updated", resourceId);
     }
 
     @Override
     public InputStream downloadResource(Long resourceId) {
         log.info("Downloading resource with ID: {}", resourceId);
+
         Resource resource = resourceRepository.findById(resourceId).orElseThrow(EntityNotFoundException::new);
         InputStream fileStream = s3Service.downloadFile(resource.getKey());
         log.info("File for resource ID {} successfully retrieved from S3", resourceId);
+
         return fileStream;
     }
 
@@ -97,6 +102,7 @@ public class ResourceServiceImpl implements ResourceService{
                 .orElseThrow(() -> new EntityNotFoundException("Resource not found with ID: " + resourceId))
                 .getName();
         log.info("Resource name for ID {}: {}", resourceId, resourceName);
+
         return resourceName;
     }
 
