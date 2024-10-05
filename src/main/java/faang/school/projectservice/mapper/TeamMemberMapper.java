@@ -12,7 +12,5 @@ public interface TeamMemberMapper {
 
     TeamMemberDto toTeamMemberDto(TeamMember teamMember);
 
-    TeamMember toTeamMember(TeamMemberDto teamMemberDto);
-
     TeamMember toTeamMember(TeamMemberCreateDto teamMemberCreateDto);
 }
