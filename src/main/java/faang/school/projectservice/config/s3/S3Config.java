@@ -7,27 +7,30 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class S3Config {
-    @Value("${services.s3.accessKey}")
-    private String accessKey;
 
-    @Value("${services.s3.secretKey}")
-    private String secretKey;
+    private final S3Properties s3Properties;
 
-    @Value("${services.s3.region}")
-    private String region;
-
-    @Value("${services.s3.endpoint}")
-    private String endpoint;
+    public S3Config(S3Properties s3Properties) {
+        this.s3Properties = s3Properties;
+    }
 
     @Bean
     public AmazonS3 S3Client() {
+        AwsClientBuilder.EndpointConfiguration configuration = new AwsClientBuilder.EndpointConfiguration(
+                s3Properties.getEndpoint(),
+                s3Properties.getRegion()
+        );
+        BasicAWSCredentials credentials = new BasicAWSCredentials(
+                s3Properties.getAccessKey(),
+                s3Properties.getSecretKey()
+        );
+
         return AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
-                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+                .withEndpointConfiguration(configuration)
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withPathStyleAccessEnabled(true)
                 .build();
     }

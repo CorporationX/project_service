@@ -3,6 +3,7 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.dto.image.FileData;
 import faang.school.projectservice.dto.project.ProjectCoverDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.image.ImageService;
@@ -61,23 +62,25 @@ public class ProjectCoverService {
             removeCoverFile(project);
         }
 
-        String coverImageId = uploadCoverFile(imageFile, project);
+        Long coverImageId = uploadCoverFile(imageFile, project);
 
         return new ProjectCoverDto(project.getId(), coverImageId);
     }
 
-    private String uploadCoverFile(MultipartFile imageFile, Project project) {
+    private Long uploadCoverFile(MultipartFile imageFile, Project project) {
+        Resource resource = resourceService.putResource(imageFile, ResourceType.IMAGE);
+        Long coverImageId = resource.getId();
         byte[] resizedImage = imageService.resizeImage(imageFile);
-        String coverImageId = s3Service.uploadFile(
+        s3Service.uploadFile(
+                resource.getId(),
                 imageFile.getOriginalFilename(),
                 imageFile.getContentType(),
                 resizedImage.length,
                 new ByteArrayInputStream(resizedImage)
         );
 
-        project.setCoverImageId(coverImageId);
+        project.setCoverImageId(String.valueOf(coverImageId));
         projectRepository.save(project);
-        resourceService.putResource(imageFile, ResourceType.IMAGE, coverImageId);
 
         return coverImageId;
     }
@@ -85,8 +88,8 @@ public class ProjectCoverService {
     private void removeCoverFile(Project project) {
         String coverImageId = project.getCoverImageId();
         if (coverImageId != null) {
-            resourceService.markResourceAsDeleted(coverImageId);
-            s3Service.removeFileByKey(coverImageId);
+            resourceService.markResourceAsDeleted(Long.valueOf(coverImageId));
+            s3Service.removeFileById(Long.valueOf(coverImageId));
         }
     }
 }

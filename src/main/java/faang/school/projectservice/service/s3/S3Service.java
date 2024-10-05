@@ -44,15 +44,13 @@ public class S3Service implements FileStorageService {
     }
 
     @Override
-    public String uploadFile(String fileName, String contentType, int fileSize, InputStream stream) {
+    public void uploadFile(Long id, String fileName, String contentType, int fileSize, InputStream stream) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(fileSize);
         metadata.setContentType(contentType);
-        String uniqueFileKey = generateUniqueFileKey(fileName);
 
         try {
-            amazonS3.putObject(bucketName, uniqueFileKey, stream, metadata);
-            return uniqueFileKey;
+            amazonS3.putObject(bucketName, String.valueOf(id), stream, metadata);
         } catch (AmazonServiceException e) {
             throw new S3Exception("Amazon S3 service error while uploading file: " + fileName, e);
         } catch (SdkClientException e) {
@@ -61,17 +59,13 @@ public class S3Service implements FileStorageService {
     }
 
     @Override
-    public void removeFileByKey(String key) {
+    public void removeFileById(Long id) {
         try {
-            amazonS3.deleteObject(bucketName, key);
+            amazonS3.deleteObject(bucketName, String.valueOf(id));
         } catch (AmazonServiceException e) {
-            throw new S3Exception("Amazon S3 service error while removing file for key: " + key, e);
+            throw new S3Exception("Amazon S3 service error while removing file for id: " + id, e);
         } catch (SdkClientException e) {
-            throw new S3Exception("SDK client error while removing file for key: " + key, e);
+            throw new S3Exception("SDK client error while removing file for id: " + id, e);
         }
-    }
-
-    private String generateUniqueFileKey(String fileName) {
-        return System.currentTimeMillis() + "_" + fileName;
     }
 }

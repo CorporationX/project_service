@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ResourceServiceTest {
 
-    private static final String RESOURCE_KEY = "123";
+    private static final Long RESOURCE_ID = 123L;
     private static final String TEST_FILE_NAME = "testFile";
     private static final long TEST_FILE_SIZE = 5000L;
 
@@ -43,25 +43,25 @@ class ResourceServiceTest {
         @DisplayName("should return the resource when it is found")
         void whenResourceIsFoundThenReturnResource() {
             Resource resource = new Resource();
-            resource.setKey(RESOURCE_KEY);
-            when(resourceRepository.findResourceByKey(RESOURCE_KEY)).thenReturn(Optional.of(resource));
+            resource.setId(RESOURCE_ID);
+            when(resourceRepository.findById(RESOURCE_ID)).thenReturn(Optional.of(resource));
 
-            Resource result = resourceService.getResourceByKey(RESOURCE_KEY);
+            Resource result = resourceService.getResourceById(RESOURCE_ID);
 
             assertNotNull(result);
-            assertEquals(RESOURCE_KEY, result.getKey());
+            assertEquals(RESOURCE_ID, result.getId());
         }
 
         @Test
         @DisplayName("should throw EntityNotFoundException when resource is not found")
         void whenResourceIsNotFoundThenThrowEntityNotFoundException() {
-            when(resourceRepository.findResourceByKey(RESOURCE_KEY)).thenReturn(Optional.empty());
+            when(resourceRepository.findById(RESOURCE_ID)).thenReturn(Optional.empty());
 
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-                resourceService.getResourceByKey(RESOURCE_KEY);
+                resourceService.getResourceById(RESOURCE_ID);
             });
 
-            assertEquals("Resource with key 123 doesn't exist", exception.getMessage());
+            assertEquals("Resource with id 123 doesn't exist", exception.getMessage());
         }
     }
 
@@ -73,16 +73,16 @@ class ResourceServiceTest {
         @DisplayName("should save and return the resource")
         void whenNewResourceIsAddedThenSaveAndReturnResource() {
             Resource resource = new Resource();
-            resource.setKey(RESOURCE_KEY);
+            resource.setId(RESOURCE_ID);
 
             when(multipartFile.getName()).thenReturn(TEST_FILE_NAME);
             when(multipartFile.getSize()).thenReturn(TEST_FILE_SIZE);
             when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
 
-            Resource result = resourceService.putResource(multipartFile, ResourceType.IMAGE, RESOURCE_KEY);
+            Resource result = resourceService.putResource(multipartFile, ResourceType.IMAGE);
 
             assertNotNull(result);
-            assertEquals(RESOURCE_KEY, result.getKey());
+            assertEquals(RESOURCE_ID, result.getId());
             verify(resourceRepository).save(any(Resource.class));
         }
     }
@@ -95,13 +95,13 @@ class ResourceServiceTest {
         @DisplayName("should mark the resource as deleted and return it")
         void whenResourceIsDeletedThenReturnUpdatedResource() {
             Resource resource = new Resource();
-            resource.setKey(RESOURCE_KEY);
+            resource.setId(RESOURCE_ID);
             resource.setStatus(ResourceStatus.ACTIVE);
 
-            when(resourceRepository.findResourceByKey(RESOURCE_KEY)).thenReturn(Optional.of(resource));
+            when(resourceRepository.findById(RESOURCE_ID)).thenReturn(Optional.of(resource));
             when(resourceRepository.save(resource)).thenReturn(resource);
 
-            Resource result = resourceService.markResourceAsDeleted(RESOURCE_KEY);
+            Resource result = resourceService.markResourceAsDeleted(RESOURCE_ID);
 
             assertNotNull(result);
             assertEquals(ResourceStatus.DELETED, result.getStatus());
@@ -111,13 +111,13 @@ class ResourceServiceTest {
         @Test
         @DisplayName("should throw EntityNotFoundException when resource is not found")
         void whenResourceIsNotFoundThenThrowEntityNotFoundException() {
-            when(resourceRepository.findResourceByKey(RESOURCE_KEY)).thenReturn(Optional.empty());
+            when(resourceRepository.findById(RESOURCE_ID)).thenReturn(Optional.empty());
 
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-                resourceService.markResourceAsDeleted(RESOURCE_KEY);
+                resourceService.markResourceAsDeleted(RESOURCE_ID);
             });
 
-            assertEquals("Resource with key 123 doesn't exist", exception.getMessage());
+            assertEquals("Resource with id 123 doesn't exist", exception.getMessage());
         }
     }
 }
