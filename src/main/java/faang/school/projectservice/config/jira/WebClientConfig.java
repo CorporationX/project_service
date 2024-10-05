@@ -18,8 +18,8 @@ public class WebClientConfig {
         String basicAuth = "Basic " + Base64.getEncoder().encodeToString((username + ":" + token).getBytes());
 
         HttpClient httpClient = HttpClient.create()
-                .responseTimeout(Duration.ofSeconds(10))
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000);
+                .responseTimeout(Duration.ofSeconds(20))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 20000);
 
         return WebClient.builder()
                 .baseUrl(projectUrl)

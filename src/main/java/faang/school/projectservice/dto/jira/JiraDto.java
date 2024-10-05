@@ -6,6 +6,7 @@ import faang.school.projectservice.validator.groups.CreateGroup;
 import faang.school.projectservice.validator.groups.FilterGroup;
 import faang.school.projectservice.validator.groups.UpdateGroup;
 import faang.school.projectservice.validator.groups.UpdateLinkGroup;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -18,22 +19,28 @@ import java.util.Map;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class JiraDto {
+    @NotNull(groups = UpdateLinkGroup.class)
+    @Valid
     private IssueLinkType type;
+    @NotNull(groups = UpdateLinkGroup.class)
+    @Valid
     private InwardIssue inwardIssue;
+    @NotNull(groups = UpdateLinkGroup.class)
+    @Valid
     private OutwardIssue outwardIssue;
+    @NotNull(groups = CreateGroup.class)
+    @Valid
     private Fields fields;
     private String id;
-    @NotNull(groups = {UpdateGroup.class, ChangeStatusGroup.class, FilterGroup.class})
-    @NotEmpty(groups = {UpdateGroup.class, ChangeStatusGroup.class, FilterGroup.class})
     @NotBlank(groups = {UpdateGroup.class, ChangeStatusGroup.class, FilterGroup.class})
     private String key;
-    @NotNull(groups = ChangeStatusGroup.class)
-    @NotEmpty(groups = ChangeStatusGroup.class)
     @NotBlank(groups = ChangeStatusGroup.class)
     private String status;
     private List<String> errorMessages;
     private Map<String, String> errors;
     private List<JiraIssue> issues;
+    @Valid
+    @NotEmpty(groups = ChangeStatusGroup.class)
     private List<JiraTransitions> transitions;
     private String assignee;
     private String nameUser;
@@ -47,16 +54,19 @@ public class JiraDto {
     @Data
     public static class JiraTransitions {
         private String id;
+        @NotBlank(groups = ChangeStatusGroup.class)
         private String name;
     }
 
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Fields {
-        private Project project;
-        private IssueType issuetype;
         @NotNull(groups = CreateGroup.class)
-        @NotEmpty(groups = CreateGroup.class)
+        @Valid
+        private Project project;
+        @NotNull(groups = CreateGroup.class)
+        @Valid
+        private IssueType issuetype;
         @NotBlank(groups = CreateGroup.class)
         private String summary;
         private String description;
@@ -65,16 +75,12 @@ public class JiraDto {
 
         @Data
         public static class Project {
-            @NotNull(groups = CreateGroup.class)
-            @NotEmpty(groups = CreateGroup.class)
             @NotBlank(groups = CreateGroup.class)
             private String key;
         }
 
         @Data
         public static class IssueType {
-            @NotNull(groups = CreateGroup.class)
-            @NotEmpty(groups = CreateGroup.class)
             @NotBlank(groups = CreateGroup.class)
             private String name;
             private boolean subtask;
@@ -93,25 +99,19 @@ public class JiraDto {
 
     @Data
     public static class IssueLinkType {
-        @NotEmpty(groups = UpdateLinkGroup.class)
         @NotBlank(groups = UpdateLinkGroup.class)
-        @NotNull(groups = UpdateLinkGroup.class)
         private String name;
     }
 
     @Data
     public static class InwardIssue {
-        @NotEmpty(groups = UpdateLinkGroup.class)
         @NotBlank(groups = UpdateLinkGroup.class)
-        @NotNull(groups = UpdateLinkGroup.class)
         private String key;
     }
 
     @Data
     public static class OutwardIssue {
-        @NotEmpty(groups = UpdateLinkGroup.class)
         @NotBlank(groups = UpdateLinkGroup.class)
-        @NotNull(groups = UpdateLinkGroup.class)
         private String key;
     }
 }
