@@ -13,7 +13,7 @@ import java.util.List;
 public class ProjectRepository {
     private final ProjectJpaRepository projectJpaRepository;
 
-    public Project getProjectById(Long projectId) {
+    public Project getProjectByIdOrThrow(Long projectId) {
         return projectJpaRepository.findById(projectId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
         );
