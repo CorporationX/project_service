@@ -1,27 +1,25 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.VacancyService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 
 @AllArgsConstructor
 @RestController("/vacancy")
 public class VacancyController {
-    private VacancyService vacancyService;
+    private final VacancyService vacancyService;
 
-    @PostMapping("/create")
+    @PostMapping
     public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
         return vacancyService.createVacancy(vacancyDto);
     }
 
-    @PutMapping("/update")
-    public void updateVacancy(@RequestBody VacancyDto vacancyDto) {
-        vacancyService.updateVacancy(vacancyDto);
+    @PutMapping("/update/{id}")
+    public void updateVacancy(@PathVariable Long id) {
+        vacancyService.updateVacancy(id);
     }
 
     @DeleteMapping("/delete/{id}")
