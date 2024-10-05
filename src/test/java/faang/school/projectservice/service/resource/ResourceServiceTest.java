@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.exception.StorageSizeExceededException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigInteger;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -108,7 +110,7 @@ public class ResourceServiceTest {
 
     @Test
     void addResource_storageSizeExceeded_throwsStorageSizeExceededException() {
-        byte[] fileContent = new byte[6144];
+        byte[] fileContent = new byte[8192];
         multipartFile = new MockMultipartFile(
                 "file",
                 "testfile.txt",
@@ -120,7 +122,11 @@ public class ResourceServiceTest {
         project.setId(projectId);
         project.setName(projectName);
 
-        resourceService.addResource(projectId, multipartFile);
+        when(userContext.getUserId()).thenReturn(userId);
+        when(teamMemberRepository.findById(userId)).thenReturn(teamMember);
+        when(projectService.getProjectById(projectId)).thenReturn(project);
+
+        assertThrows(StorageSizeExceededException.class, () -> resourceService.addResource(projectId, multipartFile));
 
         verify(resourceRepository, never()).save(resource);
         verify(projectService, never()).save(any(Project.class));
