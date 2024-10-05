@@ -1,19 +1,20 @@
 package faang.school.projectservice.subproject.subprojectservice;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.subproject.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.exception.subproject.SubProjectNotFinishedException;
 import faang.school.projectservice.filter.subproject.ProjectNameFilter;
 import faang.school.projectservice.filter.subproject.ProjectStatusFilter;
 import faang.school.projectservice.mapper.subproject.ProjectMapperImpl;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.subproject.SubProjectServiceImpl;
-import faang.school.projectservice.exception.subproject.SubProjectNotFinished;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -51,8 +61,8 @@ class SubProjectServiceTests {
         Project rootParent = Project.builder().id(3L).build();
         when(repository.getProjectById(1L)).thenReturn(rootParent);
         mapper.toDto(rootParent);
-        var subrpojectDto = SubProjectDto.builder().parentProjectId(1).description("adf").name("adf").ownerId(1).visibility(ProjectVisibility.PUBLIC).build();
-        service.createSubProject(subrpojectDto);
+        var subProjectDto = SubProjectDto.builder().parentProjectId(1L).description("adf").name("adf").ownerId(1L).visibility(ProjectVisibility.PUBLIC).build();
+        service.createSubProject(subProjectDto);
 
         verify(repository).save(rootParent);
 
@@ -79,12 +89,12 @@ class SubProjectServiceTests {
                 .status(ProjectStatus.COMPLETED)
                 .children(List.of(childProject1, childProject2))
                 .build();
-        SubProjectDto subProjectDto = new SubProjectDto();
+        SubProjectDto subProjectDto = SubProjectDto.builder().build();
 
         when(repository.getProjectById(1L)).thenReturn(subProject);
 
         assertThrows(
-                SubProjectNotFinished.class,
+                SubProjectNotFinishedException.class,
                 () -> service.updateSubProject(1L,subProjectDto)
         );
 
@@ -97,7 +107,7 @@ class SubProjectServiceTests {
      * него есть все ещё открытые подпроекты. Нужно сначала закрывать все подпроекты, и только потом родительский проект
      */
     @Test
-    public void shouldSaveProject_WhenAllChildProjectsAreCompleted() throws SubProjectNotFinished {
+    public void shouldSaveProject_WhenAllChildProjectsAreCompleted() throws SubProjectNotFinishedException {
 
         Project childProject1 = Project.builder()
                 .id(2L)
@@ -114,7 +124,7 @@ class SubProjectServiceTests {
                 .children(List.of(childProject1, childProject2))
                 .build();
 
-        SubProjectDto subProjectDto = new SubProjectDto();
+        SubProjectDto subProjectDto = SubProjectDto.builder().build();
 
         when(repository.getProjectById(1L)).thenReturn(subProject);
         when(repository.save(any(Project.class))).thenReturn(subProject);
@@ -253,7 +263,7 @@ class SubProjectServiceTests {
                 .build();
 
         when(repository.getProjectById(parentProject.getId())).thenReturn(parentProject);
-        List<ProjectDto> selectedSubProjects = service.getAllSubProjectsWithFiltr(parentProject.getId(), projectFilterDto);
+        List<ProjectDto> selectedSubProjects = service.getAllSubProjectsWithFilter(parentProject.getId(), projectFilterDto);
         assertEquals(1, selectedSubProjects.size());
     }
 

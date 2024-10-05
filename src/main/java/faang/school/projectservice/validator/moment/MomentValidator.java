@@ -21,17 +21,17 @@ public class MomentValidator {
     private final MomentRepository momentRepository;
 
     public void validateMomentDto(MomentDto momentDto) {
-        if (momentDto.getName() == null || momentDto.getName().isEmpty() || momentDto.getName().isBlank()) {
+        if (momentDto.name() == null || momentDto.name().isEmpty() || momentDto.name().isBlank()) {
             log.error("The name field is empty {}", momentDto);
             throw new DataValidationException("The name cannot be empty");
         }
     }
 
     public List<Project> validateProjectsByIdAndStatus(MomentDto momentDto) {
-        List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectIds());
+        List<Project> projects = projectRepository.findAllByIds(momentDto.projectIds());
 
         if (projects.isEmpty()) {
-            log.error("the project list is empty for these IDs " + momentDto.getProjectIds());
+            log.error("the project list is empty for these IDs " + momentDto.projectIds());
             throw new DataValidationException("The list of projects was not found");
         }
 

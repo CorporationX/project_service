@@ -1,12 +1,10 @@
 package faang.school.projectservice.dto.internship;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.validator.groups.CreateGroup;
 import faang.school.projectservice.validator.groups.UpdateGroup;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -17,10 +15,12 @@ public record InternshipDto(
         @Null(message = "Id must be null", groups = {CreateGroup.class, UpdateGroup.class})
         Long id,
 
-        @NotNull(message = "", groups = {CreateGroup.class})
+        @NotNull(message = "Project ID can not be null", groups = {CreateGroup.class})
+        @Positive(groups = {CreateGroup.class, UpdateGroup.class})
         Long projectId,
 
-        @NotNull(message = "", groups = {CreateGroup.class})
+        @NotNull(message = "Mentor ID can not be null", groups = {CreateGroup.class})
+        @Positive(groups = {CreateGroup.class, UpdateGroup.class})
         Long mentorId,
 
         @NotEmpty(message = "Interns list mustn't be empty", groups = {CreateGroup.class, UpdateGroup.class})
@@ -36,8 +36,10 @@ public record InternshipDto(
         InternshipStatus status,
 
         @NotNull(message = "Start date mustn't be null", groups = {CreateGroup.class})
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
         LocalDateTime startDate,
 
         @NotNull(message = "End date mustn't be null", groups = {CreateGroup.class})
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
         LocalDateTime endDate) {
 }

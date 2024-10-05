@@ -5,6 +5,8 @@ import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.service.internship.InternshipService;
 import faang.school.projectservice.validator.groups.CreateGroup;
 import faang.school.projectservice.validator.groups.UpdateGroup;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -28,20 +30,20 @@ public class InternshipController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public InternshipDto createInternship(@RequestBody @Validated(CreateGroup.class) InternshipDto internshipDto) {
+    public InternshipDto createInternship(@RequestBody @Validated(CreateGroup.class) @NotNull InternshipDto internshipDto) {
         return internshipService.createInternship(internshipDto);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public InternshipDto updateInternship(@PathVariable long id,
-                                          @RequestBody @Validated(UpdateGroup.class) InternshipDto internshipDto) {
+    public InternshipDto updateInternship(@PathVariable @Positive long id,
+                                          @RequestBody @Validated(UpdateGroup.class) @NotNull InternshipDto internshipDto) {
         return internshipService.updateInternship(id, internshipDto);
     }
 
     @GetMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
-    public List<InternshipDto> getAllInternshipsByFilter(InternshipFilterDto filters) {
+    public List<InternshipDto> getAllInternshipsByFilter(@NotNull InternshipFilterDto filters) {
         return internshipService.getAllInternshipsByFilter(filters);
     }
 
@@ -51,9 +53,9 @@ public class InternshipController {
         return internshipService.getAllInternships();
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public InternshipDto getInternshipById(@PathVariable long id) {
+    public InternshipDto getInternshipById(@PathVariable @Positive long id) {
         return internshipService.getInternshipById(id);
     }
 }

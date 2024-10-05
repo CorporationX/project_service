@@ -42,7 +42,7 @@ class MomentValidatorTest {
     @BeforeEach
     void setUp() {
         project = new Project();
-        momentDto = new MomentDto();
+        momentDto = MomentDto.builder().build();
         id = 1L;
     }
 

@@ -1,6 +1,6 @@
 package faang.school.projectservice.subproject.filter;
 
-import faang.school.projectservice.dto.subproject.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.subproject.ProjectStatusFilter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;

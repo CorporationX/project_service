@@ -7,7 +7,7 @@ servers:
   - url: http://localhost:8082/api/v1
 
 paths:
-  /project/{projectId}:
+  /projects/{projectId}:
     get:
       summary: Get project by ID
       operationId: getProject

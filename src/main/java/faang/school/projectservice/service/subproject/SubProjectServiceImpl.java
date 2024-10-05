@@ -2,7 +2,7 @@ package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectDto;
-import faang.school.projectservice.dto.subproject.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.subproject.ProjectFilter;
 import faang.school.projectservice.mapper.subproject.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -10,7 +10,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.exception.subproject.SubProjectNotFinished;
+import faang.school.projectservice.exception.subproject.SubProjectNotFinishedException;
 import faang.school.projectservice.validator.subproject.SubProjectValidator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -35,15 +35,15 @@ public class SubProjectServiceImpl implements SubProjectService {
 
     @Override
     public ProjectDto createSubProject(SubProjectDto projectDto) {
-        var project = repository.getProjectById(projectDto.getParentProjectId());
-        validator.validateSubProjectVisibility(project.getVisibility(),projectDto.getVisibility());
+        var project = repository.getProjectById(projectDto.parentProjectId());
+        validator.validateSubProjectVisibility(project.getVisibility(),projectDto.visibility());
 
         var savedProject = repository.save(project);
         return projectMapper.toDto(savedProject);
     }
 
     @Override
-    public ProjectDto updateSubProject(long projectId, SubProjectDto subProject) throws SubProjectNotFinished {
+    public ProjectDto updateSubProject(long projectId, SubProjectDto subProject) {
         var subproject = repository.getProjectById(projectId);
 
         var project = ifStatusIsComletedCheckThatChildrensAreCompleted
@@ -56,13 +56,13 @@ public class SubProjectServiceImpl implements SubProjectService {
     }
 
     @Override
-    public List<ProjectDto> getAllSubProjectsWithFiltr(Long projectId, ProjectFilterDto filtrDto) {
+    public List<ProjectDto> getAllSubProjectsWithFilter(Long projectId, ProjectFilterDto filterDto) {
         Project project1 = repository.getProjectById(projectId);
         Stream<Project> allMatchedSubProjects = project1.getChildren().stream()
                 .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
 
         for (ProjectFilter projectFilter : projectFilters) {
-            allMatchedSubProjects = projectFilter.filter(allMatchedSubProjects, filtrDto);
+            allMatchedSubProjects = projectFilter.filter(allMatchedSubProjects, filterDto);
         }
         return allMatchedSubProjects.map(projectMapper::toDto).toList();
     }
@@ -87,7 +87,7 @@ public class SubProjectServiceImpl implements SubProjectService {
                 notFinishedChildren.forEach(child -> {
                     builder.append(child.getId()).append(" status ").append(child.getStatus());
                 });
-                throw new SubProjectNotFinished(builder.toString());
+                throw new SubProjectNotFinishedException(builder.toString());
             }
         }
         return project;

@@ -2,38 +2,43 @@ package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
+import faang.school.projectservice.validator.groups.CreateGroup;
+import faang.school.projectservice.validator.groups.UpdateGroup;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 
 @Builder
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Validated
-public class ProjectDto {
-    private long id;
-    @NotEmpty
-    @Size(max = 128, message = "Name must be less than 128 characters")
-    private String name;
-    @NotEmpty
-    @Size(max = 4096, message = "Description must be less than 4096 characters")
-    private String description;
-    @Min(value = 1, message = "Owner id should not be less than 1")
-    private long ownerId;
-    private long parentProjectId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    @NotNull
-    private ProjectStatus status;
-    @NotNull
-    private ProjectVisibility visibility;
+public record ProjectDto(
+
+        @Null(message = "Id must be null", groups = {CreateGroup.class, UpdateGroup.class})
+        Long id,
+
+        @NotBlank(message = "Name can not be null or empty", groups = {CreateGroup.class, UpdateGroup.class})
+        @Size(max = 128, message = "Name must be less than 128 characters", groups = {CreateGroup.class, UpdateGroup.class})
+        String name,
+
+        @NotBlank(groups = {CreateGroup.class, UpdateGroup.class})
+        @Size(max = 4096, message = "Description must be less than 4096 characters", groups = {CreateGroup.class, UpdateGroup.class})
+        String description,
+
+        @NotNull(groups = {CreateGroup.class, UpdateGroup.class})
+        @Positive(groups = {CreateGroup.class, UpdateGroup.class})
+        Long ownerId,
+
+        @NotNull(groups = {CreateGroup.class, UpdateGroup.class})
+        @Positive(groups = {CreateGroup.class, UpdateGroup.class})
+        Long parentProjectId,
+
+        LocalDateTime createdAt,
+
+        LocalDateTime updatedAt,
+
+        @NotNull(groups = {CreateGroup.class})
+        ProjectStatus status,
+
+        @NotNull(groups = {CreateGroup.class, UpdateGroup.class})
+        ProjectVisibility visibility
+) {
 }
