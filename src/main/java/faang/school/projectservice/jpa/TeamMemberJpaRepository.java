@@ -15,16 +15,6 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
         "AND t.project.id = :projectId"
     )
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
-
-    @Query(
-            """
-                    SELECT CASE WHEN COUNT(tm) > 0 THEN TRUE ELSE FALSE END\
-                    FROM TeamMember tm JOIN tm.team t \
-                    WHERE tm.userId = :userId \
-                    AND t.project.id = :projectId
-            """
-    )
-    boolean existsByUserIdAndProjectId(long userId, long projectId);
-
+    
     List<TeamMember> findByUserId(long userId);
 }

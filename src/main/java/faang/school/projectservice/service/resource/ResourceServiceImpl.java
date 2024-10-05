@@ -3,9 +3,9 @@ package faang.school.projectservice.service.resource;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.resource.ResourceDto;
 import faang.school.projectservice.dto.response.ResourceResponseObject;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenAccessException;
 import faang.school.projectservice.exception.StorageSizeExceededException;
-import faang.school.projectservice.exception.UserNotTeamMemberException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
@@ -17,9 +17,9 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,10 +45,17 @@ public class ResourceServiceImpl implements ResourceService {
     public ResourceResponseObject getResourceById(Long resourceId) {
         long userId = userContext.getUserId();
         Resource resource = findResourceById(resourceId);
-        if (teamMemberJpaRepository.existsByUserIdAndProjectId(userId, resource.getProject().getId())) {
-            return s3Service.downloadFile(resource.getKey());
+        TeamMember teamMember = getTeamMemberByUserIdInProject(userId, resource.getProject().getId());
+        boolean hasAllowedRole = teamMember.getRoles()
+                .stream()
+                .anyMatch(role -> resource.getAllowedRoles().contains(role) || role.equals(TeamRole.MANAGER));
+        if (!hasAllowedRole) {
+            throw new ForbiddenAccessException(
+                    "User with id %d cannot access to team files having roles: %s. Allowed roles: %s"
+                            .formatted(userId, teamMember.getRoles(), resource.getAllowedRoles())
+            );
         }
-        throw new ForbiddenAccessException("User with id %d cannot access to team's files".formatted(userId));
+        return s3Service.downloadFile(resource.getKey());
     }
 
     @Override
@@ -57,20 +64,19 @@ public class ResourceServiceImpl implements ResourceService {
         Resource resource = findResourceById(resourceId);
         Project project = resource.getProject();
         TeamMember teamMember = getTeamMemberByUserIdInProject(userId, project.getId());
-        if (teamMember.getRoles().contains(TeamRole.MANAGER) ||
-        resource.getCreatedBy().getUserId().equals(userId)) {
-            s3Service.deleteFile(resource.getKey());
-            resource.setKey(null);
-            BigInteger newStorageSize = project.getStorageSize().subtract(resource.getSize());
-            resource.setSize(null);
-            resource.setStatus(ResourceStatus.DELETED);
-            resource.setUpdatedBy(teamMember);
-            resourceRepository.save(resource);
-            log.info("Resource with id {} deleted successfully", resourceId);
-            updateProjectSize(project, newStorageSize);
-        }else {
+        if (notCreatorOrManager(resource, teamMember)) {
             throw new ForbiddenAccessException("User with id %d cannot delete resource".formatted(userId));
         }
+        BigInteger newStorageSize = project.getStorageSize().subtract(resource.getSize());
+        String key = resource.getKey();
+        resource.setKey(null);
+        resource.setSize(null);
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedBy(teamMember);
+        resourceRepository.save(resource);
+        updateProjectSize(project, newStorageSize);
+        s3Service.deleteFile(key);
+        log.info("Resource with id {} deleted successfully", resourceId);
     }
 
     @Override
@@ -79,18 +85,20 @@ public class ResourceServiceImpl implements ResourceService {
         Resource resource = findResourceById(resourceId);
         BigInteger resourceSize = resource.getSize();
         Project project = resource.getProject();
+        TeamMember teamMember = getTeamMemberByUserIdInProject(userId, project.getId());
+        if (notCreatorOrManager(resource, teamMember)) {
+            throw new ForbiddenAccessException("User with id %d cannot update resource".formatted(userId));
+        }
         BigInteger newStorageSize = project.getStorageSize()
                 .subtract(resourceSize)
                 .add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
-        s3Service.uploadFile(file, resource.getKey());
-        resource.setName(file.getOriginalFilename());
-        resource.setSize(BigInteger.valueOf(file.getSize()));
-        resource.setType(ResourceType.getResourceType(file.getContentType()));
-        resource.setUpdatedBy(getTeamMemberByUserIdInProject(userId, resource.getProject().getId()));
-        Resource updatedResource = resourceRepository.save(resource);
-        log.info("Resource with id {} updated successfully.", updatedResource.getId());
+        Resource updatedResource = getUpdatedResource(resource, file);
+        updatedResource.setCreatedBy(teamMember);
+        resourceRepository.save(updatedResource);
         updateProjectSize(project, newStorageSize);
+        s3Service.uploadFile(file, resource.getKey());
+        log.info("Resource with id {} updated successfully.", updatedResource.getId());
         return resourceMapper.toResourceDto(updatedResource);
     }
 
@@ -100,25 +108,35 @@ public class ResourceServiceImpl implements ResourceService {
         Project project = projectRepository.getProjectById(projectId);
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
-
         String key = generateResourceKey(project, file.getOriginalFilename());
-        s3Service.uploadFile(file, key);
-
-        TeamMember teamMember = getTeamMemberByUserIdInProject(userId, projectId);
-        Resource resource = new Resource();
-        resource.setKey(key);
-        resource.setSize(BigInteger.valueOf(file.getSize()));
-        resource.setStatus(ResourceStatus.ACTIVE);
-        resource.setType(ResourceType.getResourceType(file.getContentType()));
-        resource.setName(file.getOriginalFilename());
-        resource.setProject(project);
-        resource.setCreatedBy(teamMember);
-        resource.setUpdatedBy(teamMember);
-        resource.setAllowedRoles(new ArrayList<>(teamMember.getRoles()));
+        TeamMember teamMember = getTeamMemberByUserIdInProject(userId, project.getId());
+        Resource resource = Resource.builder()
+                .name(file.getOriginalFilename())
+                .size(BigInteger.valueOf(file.getSize()))
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .status(ResourceStatus.ACTIVE)
+                .project(project)
+                .key(key)
+                .createdBy(teamMember)
+                .updatedBy(teamMember)
+                .allowedRoles(new ArrayList<>(teamMember.getRoles()))
+                .build();
         resourceRepository.save(resource);
-        log.info("resource '{}' for project with id {} saved successfully", resource.getKey(), projectId);
         updateProjectSize(project, newStorageSize);
+        s3Service.uploadFile(file, resource.getKey());
+        log.info("resource '{}' for project with id {} saved successfully", resource.getKey(), projectId);
         return resourceMapper.toResourceDto(resource);
+    }
+
+    private boolean notCreatorOrManager(Resource resource, TeamMember teamMember) {
+        return !(resource.getCreatedBy().getUserId().equals(teamMember.getUserId()) || teamMember.getRoles().contains(TeamRole.MANAGER));
+    }
+
+    private Resource getUpdatedResource(Resource resource, MultipartFile file) {
+        resource.setName(file.getOriginalFilename());
+        resource.setSize(BigInteger.valueOf(file.getSize()));
+        resource.setType(ResourceType.getResourceType(file.getContentType()));
+        return resource;
     }
 
     private TeamMember getTeamMemberByUserIdInProject(long userId, long projectId) {

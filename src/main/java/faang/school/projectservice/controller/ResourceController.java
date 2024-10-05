@@ -6,6 +6,8 @@ import faang.school.projectservice.service.resource.ResourceService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,19 +32,18 @@ import java.io.InputStream;
 public class ResourceController {
     private final ResourceService resourceService;
 
-
     @GetMapping("/{resourceId}")
-    public ResponseEntity<byte[]> getResource(@PathVariable @Positive Long resourceId){
+    public ResponseEntity<Resource> getResource(@PathVariable @Positive Long resourceId) {
         ResourceResponseObject object = resourceService.getResourceById(resourceId);
-        byte[] bytes = null;
-        try(InputStream inputStream = object.inputStream()) {
-            bytes = inputStream.readAllBytes();
+        try (InputStream inputStream = object.inputStream()) {
+            var resource = new ByteArrayResource(inputStream.readAllBytes());
+            return ResponseEntity.ok()
+                    .contentLength(resource.contentLength())
+                    .contentType(MediaType.valueOf(object.contentType()))
+                    .body(resource);
         } catch (IOException e) {
-            log.error("Exception thrown: ", e);
+            throw new RuntimeException(e.getMessage());
         }
-        return ResponseEntity.ok()
-                .contentType(MediaType.valueOf(object.contentType()))
-                .body(bytes);
     }
 
     @DeleteMapping("/{resourceId}")
@@ -57,7 +58,7 @@ public class ResourceController {
 
     }
 
-    @PostMapping("/{projectId}/add")
+    @PostMapping("/projects/{projectId}")
     public ResourceDto addResource(@PathVariable @Positive Long projectId,
                                    @RequestBody MultipartFile file) {
         return resourceService.addResourceToProject(projectId, file);
