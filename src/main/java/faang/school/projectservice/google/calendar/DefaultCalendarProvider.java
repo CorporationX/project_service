@@ -13,11 +13,13 @@ import com.google.api.services.calendar.CalendarScopes;
 import faang.school.projectservice.config.app.AppConfig;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.model.GoogleToken;
+import faang.school.projectservice.service.google.credentials.GoogleCredentialService;
 import faang.school.projectservice.service.google.token.DatabaseDataStoreFactory;
 import faang.school.projectservice.service.google.token.GoogleTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,12 +33,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Component
 public class DefaultCalendarProvider implements CalendarProvider {
-    private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-
     private final AppConfig appConfig;
     private final DatabaseDataStoreFactory databaseDataStoreFactory;
     private final GoogleTokenService googleTokenService;
     private final UserContext userContext;
+    private final GoogleCredentialService googleCredentialService;
 
     @Override
     public Calendar getCalendar() throws GeneralSecurityException, IOException {
@@ -89,11 +90,10 @@ public class DefaultCalendarProvider implements CalendarProvider {
     }
 
     private GoogleClientSecrets loadClientSecrets() throws IOException {
-        InputStream in = DefaultCalendarProvider.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-        if (in == null) {
-            throw new FileNotFoundException(String.format("Resource not found: %s", CREDENTIALS_FILE_PATH));
-        }
-        return GoogleClientSecrets.load(GsonFactory.getDefaultInstance(), new InputStreamReader(in));
+        String credentialsJson = googleCredentialService.getCredentialsJson();
+
+        InputStream targetStream = new ByteArrayInputStream(credentialsJson.getBytes());
+        return GoogleClientSecrets.load(GsonFactory.getDefaultInstance(), new InputStreamReader(targetStream));
     }
 
     private List<String> getScopesForUser(Long userId) {
