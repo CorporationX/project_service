@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(RuntimeException exception) {
         String message = exception.getMessage();
-        log.error("Entity not found: {}. Exception: {}", message, exception);
+        log.error("Entity not found: {}", message, exception);
         return ErrorResponse.builder()
                 .serviceName(serviceName)
                 .globalMessage(message)
