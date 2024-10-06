@@ -2,7 +2,7 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.service.resource.ResourceService;
+import faang.school.projectservice.service.resource.CoverOfProjectService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.imaging.ImageReadException;
 import org.springframework.web.bind.annotation.*;
@@ -11,28 +11,28 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/api/v1/project")
+@RequestMapping("/api/v1/project//{projectId}")
 @RequiredArgsConstructor
-public class ResourceController {
+public class CoverOfProjectController {
 
-    private final ResourceService resourceService;
+    private final CoverOfProjectService service;
     private final UserContext userContext;
 
-    @PutMapping("/{projectId}/add")
+    @PostMapping()
     public ResourceDto addResource(@PathVariable Long projectId,
                                    @RequestBody MultipartFile file)
                                    throws IOException, ImageReadException {
-        return resourceService.addResource(projectId, file);
+        return service.addResource(projectId, file);
     }
 
-    @DeleteMapping("/{resourceId}/delete")
+    @DeleteMapping("/{resourceId}")
     public void deleteResource(@PathVariable Long resourceId) {
-        resourceService.deleteResource(resourceId, userContext.getUserId());
+        service.deleteResource(resourceId, userContext.getUserId());
     }
 
-    @PostMapping("/{resourceId}/update")
+    @PutMapping("/{resourceId}")
     public ResourceDto updateResource(@PathVariable Long resourceId,
                                       @RequestBody MultipartFile file) throws IOException, ImageReadException {
-        return resourceService.updateResource(resourceId, userContext.getUserId(), file);
+        return service.updateResource(resourceId, userContext.getUserId(), file);
     }
 }

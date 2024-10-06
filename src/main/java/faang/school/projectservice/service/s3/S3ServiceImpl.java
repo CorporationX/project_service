@@ -31,9 +31,8 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public Resource uploadFile(MultipartFile file, String folder) {
-        long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(fileSize);
+        objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
         try {
@@ -49,7 +48,7 @@ public class S3ServiceImpl implements S3Service {
         Resource resource = new Resource();
         resource.setKey(key);
         resource.setName(file.getOriginalFilename());
-        resource.setSize(BigInteger.valueOf(fileSize));
+        resource.setSize(BigInteger.valueOf(file.getSize()));
         resource.setCreatedAt(LocalDateTime.now());
         resource.setUpdatedAt(LocalDateTime.now());
         resource.setStatus(ResourceStatus.ACTIVE);

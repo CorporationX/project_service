@@ -17,7 +17,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -31,10 +37,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ResourceServiceImplTest {
+class CoverOfProjectServiceImplTest {
 
     @InjectMocks
-    ResourceServiceImpl resourceService;
+    CoverOfProjectServiceImpl service;
 
     @Mock
     ProjectRepository projectRepository;
@@ -95,7 +101,7 @@ class ResourceServiceImplTest {
         when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
         when(s3Service.uploadFile(any(MultipartFile.class), eq(projectId + "testProject"))).thenReturn(uploadedResource);
         when(resourceMapper.toDto(any(Resource.class))).thenReturn(resourceDto);
-        ResourceDto result = resourceService.addResource(projectId, file);
+        ResourceDto result = service.addResource(projectId, file);
 
         verify(projectRepository, times(1)).getProjectById(anyLong());
         verify(resourceRepository, times(1)).save(any(Resource.class));
@@ -116,7 +122,7 @@ class ResourceServiceImplTest {
         ResourceDto resourceDto = new ResourceDto();
         when(resourceMapper.toDto(any(Resource.class))).thenReturn(resourceDto);
 
-        ResourceDto result = resourceService.updateResource(resourceId, userDtoId, file);
+        ResourceDto result = service.updateResource(resourceId, userDtoId, file);
 
         verify(resourceRepository, times(1)).findById(resourceId);
         verify(s3Service, times(1)).uploadFile(file, projectId + "testProject");
@@ -143,7 +149,7 @@ class ResourceServiceImplTest {
         when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", new byte[1024]);
-            resourceService.updateResource(resource.getId(), userId, file);
+            service.updateResource(resource.getId(), userId, file);
         });
     }
 
@@ -152,7 +158,7 @@ class ResourceServiceImplTest {
         when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", new byte[6000000]);
-            resourceService.updateResource(resource.getId(), userDtoId, file);
+            service.updateResource(resource.getId(), userDtoId, file);
         });
     }
 }

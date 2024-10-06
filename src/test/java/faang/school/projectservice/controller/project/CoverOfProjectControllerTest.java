@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.service.resource.ResourceService;
+import faang.school.projectservice.service.resource.CoverOfProjectService;
 import org.apache.commons.imaging.ImageReadException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,16 +20,16 @@ import java.io.IOException;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ResourceControllerTest {
+class CoverOfProjectControllerTest {
 
     @InjectMocks
-    ResourceController resourceController;
+    CoverOfProjectController controller;
 
     @Mock
     UserContext userContext;
 
     @Mock
-    ResourceService resourceService;
+    CoverOfProjectService service;
 
     MultipartFile file;
 
@@ -49,23 +49,23 @@ class ResourceControllerTest {
     @Test
     void testAddResource_Success() throws IOException, ImageReadException {
         long projectId = 1L;
-        resourceService.addResource(projectId, file);
-        verify(resourceService).addResource(projectId, file);
+        service.addResource(projectId, file);
+        verify(service).addResource(projectId, file);
     }
 
     @Test
     void testUpdateResource_Success() {
         long projectId = 1L;
         long userId = 1L;
-        resourceService.deleteResource(projectId, userId);
-        verify(resourceService).deleteResource(projectId, userId);
+        service.deleteResource(projectId, userId);
+        verify(service).deleteResource(projectId, userId);
     }
 
     @Test
     void testDeleteResource_Success() throws IOException, ImageReadException {
         long resourceId = 1L;
         long userId = 1L;
-        resourceService.updateResource(resourceId, userId, file);
-        verify(resourceService).updateResource(resourceId, userId, file);
+        service.updateResource(resourceId, userId, file);
+        verify(service).updateResource(resourceId, userId, file);
     }
 }

@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.imaging.ImageInfo;
 import org.apache.commons.imaging.ImageReadException;
 import org.apache.commons.imaging.Imaging;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +29,18 @@ import java.math.BigInteger;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ResourceServiceImpl implements ResourceService {
+public class CoverOfProjectServiceImpl implements CoverOfProjectService {
+    private static final int MAX_WIDTH_FOR_SQUARE = 1080;
+    private static final int MAX_WIDTH_FOR_RECTANGLE = 1080;
+    private static final int MAX_HEIGHT_FOR_RECTANGLE = 1080;
 
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
     private final S3Service s3Service;
     private final ResourceMapper resourceMapper;
+
+    @Value("${file-size.cover_of_project}")
+    private int maxSizeByte;
 
     @Override
     public ResourceDto addResource(Long projectId, MultipartFile file) throws IOException, ImageReadException{
@@ -57,7 +64,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Transactional
-    public ResourceDto updateResource(Long resourceId, Long userDtoId, MultipartFile file) throws IOException, ImageReadException  {
+    public ResourceDto updateResource(Long resourceId, Long userDtoId, MultipartFile file) {
         Resource resourceFromBD = getResourceWithCheckedPermissions(resourceId, userDtoId);
         log.info("User with {}id has permissions to update the file", userDtoId);
         var project = resourceFromBD.getProject();
@@ -103,14 +110,13 @@ public class ResourceServiceImpl implements ResourceService {
         if (teamMember.getUserId().equals(userDtoId)) {
             return resource;
         } else {
-            throw new IllegalArgumentException("You do not have permission to access this resource");
+            throw new IllegalArgumentException(String.format("User with %sid don't have permissions to update the file with %did", userDtoId, resourceId));
         }
     }
 
-    private MultipartFile checkResourceSize(MultipartFile file) throws IOException, ImageReadException {
+    private MultipartFile checkResourceSize(MultipartFile file) {
         long fileSize = file.getSize();
-        long maxSizeByte = 5242880;
-        if (fileSize > maxSizeByte) {
+        if (fileSize > 5242880) {
             throw new IllegalArgumentException("File is too big");
         }
 
@@ -119,21 +125,33 @@ public class ResourceServiceImpl implements ResourceService {
         ImageInfo imageInfo;
         try (InputStream inputStream = file.getInputStream()) {
             imageInfo = Imaging.getImageInfo(inputStream, fileName);
+        } catch (IOException | ImageReadException e) {
+            throw new RuntimeException(e);
         }
 
         int width = imageInfo.getWidth();
         int height = imageInfo.getHeight();
 
         if(width == height) {
-            if(width > 1080) {
-            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-            BufferedImage lala = resizeImage(bufferedImage, 1080, 1080);
+            if(width > MAX_WIDTH_FOR_SQUARE) {
+                BufferedImage bufferedImage = null;
+                try {
+                    bufferedImage = ImageIO.read(file.getInputStream());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                BufferedImage lala = resizeImage(bufferedImage, MAX_WIDTH_FOR_SQUARE, MAX_WIDTH_FOR_SQUARE);
             return convertBufferedImageToMultipartFile(lala, file.getOriginalFilename(), file.getContentType());
             }
         } else if(width > height) {
-            if (width > 1080 || height > 566) {
-                BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-                BufferedImage lala = resizeImage(bufferedImage, 1080, 566);
+            if (width > MAX_WIDTH_FOR_RECTANGLE || height > MAX_HEIGHT_FOR_RECTANGLE) {
+                BufferedImage bufferedImage;
+                try {
+                    bufferedImage = ImageIO.read(file.getInputStream());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                BufferedImage lala = resizeImage(bufferedImage, MAX_WIDTH_FOR_RECTANGLE, MAX_HEIGHT_FOR_RECTANGLE);
                 return convertBufferedImageToMultipartFile(lala, file.getOriginalFilename(), file.getContentType());
             }
         } else {
