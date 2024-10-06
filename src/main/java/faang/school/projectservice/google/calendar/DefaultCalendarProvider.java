@@ -8,11 +8,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import faang.school.projectservice.config.app.AppConfig;
-import faang.school.projectservice.service.GoogleCalendarService;
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.model.GoogleToken;
+import faang.school.projectservice.service.google.token.DatabaseDataStoreFactory;
+import faang.school.projectservice.service.google.token.GoogleTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,43 +23,84 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
 public class DefaultCalendarProvider implements CalendarProvider {
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-    private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
     private final AppConfig appConfig;
+    private final DatabaseDataStoreFactory databaseDataStoreFactory;
+    private final GoogleTokenService googleTokenService;
+    private final UserContext userContext;
 
     @Override
     public Calendar getCalendar() throws GeneralSecurityException, IOException {
+        Long userId = userContext.getUserId();
         NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         String applicationName = appConfig.getApplicationName();
-        return new Calendar.Builder(HTTP_TRANSPORT, GsonFactory.getDefaultInstance(), getCredentials(HTTP_TRANSPORT))
+        return new Calendar.Builder(HTTP_TRANSPORT, GsonFactory.getDefaultInstance(), getCredentials(HTTP_TRANSPORT, userId))
                 .setApplicationName(applicationName)
                 .build();
     }
 
-    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, Long userId) throws IOException {
+        GoogleClientSecrets clientSecrets = loadClientSecrets();
+
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                HTTP_TRANSPORT, GsonFactory.getDefaultInstance(), clientSecrets, getScopesForUser(userId))
+                .setDataStoreFactory(databaseDataStoreFactory)
+                .setAccessType("offline")
+                .build();
+
+        Credential credential = flow.loadCredential(userId.toString());
+
+        if (credential == null) {
+            return initiateGoogleAuthorization(HTTP_TRANSPORT, userId);
+        }
+
+        if (credential.getExpiresInSeconds() != null && credential.getExpiresInSeconds() <= 0) {
+            boolean success = credential.refreshToken();
+            if (!success) {
+                return initiateGoogleAuthorization(HTTP_TRANSPORT, userId);
+            }
+        }
+
+        return credential;
+    }
+
+    private Credential initiateGoogleAuthorization(final NetHttpTransport HTTP_TRANSPORT, Long userId) throws IOException {
+        GoogleClientSecrets clientSecrets = loadClientSecrets();
+
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                HTTP_TRANSPORT, GsonFactory.getDefaultInstance(), clientSecrets, getScopesForUser(userId))
+                .setDataStoreFactory(databaseDataStoreFactory)
+                .setAccessType("offline")
+                .build();
+
+        int port = appConfig.getCalendarOauthLocalServerPort();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(port).build();
+
+        return new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId.toString());
+    }
+
+    private GoogleClientSecrets loadClientSecrets() throws IOException {
         InputStream in = DefaultCalendarProvider.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
             throw new FileNotFoundException(String.format("Resource not found: %s", CREDENTIALS_FILE_PATH));
         }
-        GoogleClientSecrets clientSecrets =
-                GoogleClientSecrets.load(GsonFactory.getDefaultInstance(), new InputStreamReader(in));
+        return GoogleClientSecrets.load(GsonFactory.getDefaultInstance(), new InputStreamReader(in));
+    }
 
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, GsonFactory.getDefaultInstance(), clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                .setAccessType("offline")
-                .build();
-        int port = appConfig.getCalendarOauthLocalServerPort();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(port).build();
-        //TODO переписать код: в authorize передавать userId, токены сохранять в таблице БД
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+    private List<String> getScopesForUser(Long userId) {
+        Optional<GoogleToken> googleToken = googleTokenService.getTokenByUserId(userId);
+        if (googleToken.isPresent() && googleToken.get().getScope() != null && !googleToken.get().getScope().isEmpty()) {
+            return Arrays.asList(googleToken.get().getScope().split(" "));
+        }
+        return Collections.singletonList(CalendarScopes.CALENDAR);
     }
 }

@@ -125,7 +125,6 @@ public class GlobalExceptionHandler {
         log.error("IO exception", e);
         return new ErrorResponse("IO exception", e.getMessage());
     }
-}
 
     @ExceptionHandler(PermissionDeniedDataAccessException.class)
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
