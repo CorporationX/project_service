@@ -25,7 +25,7 @@ public class JiraWebClientConfig {
     private final JiraContext jiraContext;
     private final TokenGenerator jiraTokenGenerator;
 
-    @Value("${services.jira.base-url}")
+    @Value("${project.jira.base-url}")
     private String jiraBaseUrl;
 
     @Bean

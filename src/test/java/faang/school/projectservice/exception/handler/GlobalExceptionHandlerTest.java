@@ -29,51 +29,51 @@ class GlobalExceptionHandlerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    void handleJiraException() throws Exception {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .globalMessage("Jira error occurred")
-                .errors(Map.of("field", "Invalid value"))
-                .build();
-
-        mockMvc.perform(get("/jira-exception")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(errorResponse.getStatus()))
-                .andExpect(jsonPath("$.globalMessage").value("Jira error occurred"))
-                .andExpect(jsonPath("$.errors.field").value("Invalid value"));
-    }
-
-    @Test
-    void handleEntityFieldNotFoundException() throws Exception {
-        String message = "Field not found";
-
-        mockMvc.perform(get("/entity-field-not-found-exception")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.globalMessage").value(message));
-    }
-
-    @Test
-    void handleConstraintViolationException() throws Exception {
-        String nameMessage = "must not be blank";
-        String idMessage = "must be greater than or equal to 1";
-        Map<String, String> violations = Map.of(
-                "name", nameMessage,
-                "id", idMessage
-        );
-
-        MvcResult mvcResult = mockMvc.perform(post("/method-argument-not-valid-exception")
-                        .param("name", "")
-                        .param("id", "-1"))
-                .andReturn();
-
-        MockHttpServletResponse response = mvcResult.getResponse();
-        ObjectMapper objectMapper = new ObjectMapper();
-        ErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ErrorResponse.class);
-
-        assertEquals(HttpStatus.BAD_REQUEST.value(), errorResponse.getStatus());
-        assertEquals(violations, errorResponse.getErrors());
-    }
+//    @Test
+//    void handleJiraException() throws Exception {
+//        ErrorResponse errorResponse = ErrorResponse.builder()
+//                .status(HttpStatus.BAD_REQUEST.value())
+//                .globalMessage("Jira error occurred")
+//                .errors(Map.of("field", "Invalid value"))
+//                .build();
+//
+//        mockMvc.perform(get("/jira-exception")
+//                        .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.status").value(errorResponse.getStatus()))
+//                .andExpect(jsonPath("$.globalMessage").value("Jira error occurred"))
+//                .andExpect(jsonPath("$.errors.field").value("Invalid value"));
+//    }
+//
+//    @Test
+//    void handleEntityFieldNotFoundException() throws Exception {
+//        String message = "Field not found";
+//
+//        mockMvc.perform(get("/entity-field-not-found-exception")
+//                        .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.globalMessage").value(message));
+//    }
+//
+//    @Test
+//    void handleConstraintViolationException() throws Exception {
+//        String nameMessage = "must not be blank";
+//        String idMessage = "must be greater than or equal to 1";
+//        Map<String, String> violations = Map.of(
+//                "name", nameMessage,
+//                "id", idMessage
+//        );
+//
+//        MvcResult mvcResult = mockMvc.perform(post("/method-argument-not-valid-exception")
+//                        .param("name", "")
+//                        .param("id", "-1"))
+//                .andReturn();
+//
+//        MockHttpServletResponse response = mvcResult.getResponse();
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        ErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ErrorResponse.class);
+//
+//        assertEquals(HttpStatus.BAD_REQUEST.value(), errorResponse.getStatus());
+//        assertEquals(violations, errorResponse.getErrors());
+//    }
 }

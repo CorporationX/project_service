@@ -3,22 +3,19 @@ package faang.school.projectservice.exception.handler;
 
 import faang.school.projectservice.dto.ErrorResponse;
 import faang.school.projectservice.exception.DataValidationException;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import faang.school.projectservice.dto.ErrorResponse;
 import faang.school.projectservice.exception.JiraException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import java.util.NoSuchElementException;
+
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -62,6 +59,9 @@ public class GlobalExceptionHandler {
                 .serviceName(serviceName)
                 .globalMessage(message)
                 .status(HttpStatus.FORBIDDEN.value())
+                .build();
+    }
+
 
     @ExceptionHandler(JiraException.class)
     public ResponseEntity<ErrorResponse> handleJiraException(JiraException exception) {

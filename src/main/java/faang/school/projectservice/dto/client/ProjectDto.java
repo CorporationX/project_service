@@ -40,6 +40,5 @@ public class ProjectDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<TeamDto> teams;
-    private Long id;
     private String jiraKey;
 }
