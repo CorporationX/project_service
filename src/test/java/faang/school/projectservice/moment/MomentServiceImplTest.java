@@ -10,10 +10,12 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
@@ -28,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class MomentServiceImplTest {
     @InjectMocks
     private MomentServiceImpl momentService;
@@ -36,10 +38,10 @@ public class MomentServiceImplTest {
     @Mock
     private ProjectRepository projectRepository;
 
-    @Spy
+    @Mock
     private MomentRepository momentRepository;
 
-    @Spy
+    @Mock
     private MomentMapper momentMapper;
 
     private MomentDto momentDto;
@@ -48,7 +50,6 @@ public class MomentServiceImplTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
         momentDto = new MomentDto();
         momentDto.setName("Test moment");
         momentDto.setDescription("Test description");
@@ -78,7 +79,6 @@ public class MomentServiceImplTest {
     public void updateMoment_success() {
         when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
-        when(momentMapper.toEntity(momentDto)).thenReturn(moment);
         when(momentRepository.save(any(Moment.class))).thenReturn(moment);
 
         momentService.updateMoment(1L, momentDto);
