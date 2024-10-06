@@ -52,3 +52,6 @@ services:
 project:
   service:
     name: project-service
+  jira:
+    base-url: https://faang-school.atlassian.net
+
