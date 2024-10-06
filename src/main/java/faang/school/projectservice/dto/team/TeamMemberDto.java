@@ -19,5 +19,5 @@ public class TeamMemberDto {
 
     private String nickname;
 
-    private List<TeamRole> teamRoles;
+    private List<String> rolesInTeam;
 }

@@ -14,8 +14,9 @@ import java.util.Optional;
 public class TeamMemberRepository {
     private final TeamMemberJpaRepository jpaRepository;
 
-    public Optional<TeamMember> findByUserIdAndProjectId(Long userId, Long projectId) {
-        return Optional.ofNullable(jpaRepository.findByUserIdAndProjectId(userId, projectId));
+    public TeamMember findByUserIdAndProjectId(Long userId, Long projectId) {
+        return jpaRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Member not found for userId and projectId (%s, %s)", userId, projectId)));
     }
 
     public TeamMember findByIdOrThrow(Long id) {

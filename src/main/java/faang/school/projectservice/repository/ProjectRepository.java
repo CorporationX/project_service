@@ -38,4 +38,10 @@ public class ProjectRepository {
     public boolean existsById(Long id){
         return projectJpaRepository.existsById(id);
     }
+
+    public Project findByIdThrowing(Long id){
+        return projectJpaRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Project not found by id: %s", id))
+        );
+    }
 }
