@@ -12,6 +12,7 @@ import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.s3.AmazonS3Service;
 import faang.school.projectservice.validator.resource.ProjectResourceValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
@@ -93,11 +94,11 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
 
     private Resource findResourceById(long id) {
         return resourceRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Resource with id %s not found", id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Resource with id %s not found", id)));
     }
 
     private TeamMember findTeamMemberByUserIdAndProjectId(long userId, long projectId) {
         return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new NotFoundException(String.format("Resource with User ID %s and Project UD %s not found.", userId, projectId)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Resource with User ID %s and Project UD %s not found.", userId, projectId)));
     }
 }
