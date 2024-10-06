@@ -15,6 +15,7 @@ spring:
         format_sql: true
 
   liquibase:
+    enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
   data:
@@ -48,3 +49,22 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+google:
+  calendar_id: kraken.stream6@gmail.com
+  auth_user_id: kraken.stream6@gmail.com
+  tokens_directory_path: tokens
+  credentials_file_path: /google/credentials.json
+  redirect_port: 8888
+  event_popup_time_min: 10
+  event_email_notify_time_min: 1440
+  clientId: 1044491242105-ghlbj5i1bi8bnr5copqsrk6kt2jl2kms.apps.googleusercontent.com
+  clientSecret: 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
+  applicationName: corporationX
+  redirectUri: http://localhost:8888/Callback
+  accessType: offline
+  accessTokenExpiresInSeconds: 1000000000
+
+calendar:
+  event:
+    count_to_return: 10
