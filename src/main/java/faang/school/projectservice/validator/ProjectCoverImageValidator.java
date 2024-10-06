@@ -55,7 +55,8 @@ public class ProjectCoverImageValidator {
 
     private void checkSize(MultipartFile file) {
         if (file.getSize() > maxCoverImageSize) {
-            log.error(String.format(COVER_IMAGE_FILE_SIZE, maxCoverImageSize));
+            String logMessage = String.format(COVER_IMAGE_FILE_SIZE, maxCoverImageSize);
+            log.error(logMessage);
             throw new ApiException(COVER_IMAGE_FILE_SIZE, HttpStatus.BAD_REQUEST, maxCoverImageSize);
         }
     }
@@ -64,7 +65,8 @@ public class ProjectCoverImageValidator {
         String imageType = StringUtils.substringAfter(file.getContentType(), "/");
 
         if (!coverImageTypes.contains(imageType)) {
-            log.error(String.format(COVER_IMAGE_FORMAT, coverImageTypes));
+            String logMessage = String.format(COVER_IMAGE_FORMAT, coverImageTypes);
+            log.error(logMessage);
             throw new ApiException(COVER_IMAGE_FORMAT, HttpStatus.BAD_REQUEST, coverImageTypes);
         }
     }
@@ -85,7 +87,7 @@ public class ProjectCoverImageValidator {
         return switch (imageFormat) {
             case SQUARE -> imageService.resizeImage(image, squareMaxWidth, squareMaxHeight);
             case HORIZONTAL -> imageService.resizeImage(image, horizontalMaxWidth, horizontalMaxHeight);
-            default -> throw new RuntimeException("Wrong image format for resize");
+            default -> throw new RuntimeException("Wrong project cover image format for resize");
         };
     }
 }

@@ -11,14 +11,15 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 @Service
 public class ImageService {
 
     public BufferedImage getImage(MultipartFile file) {
-        try {
-            return ImageIO.read(file.getInputStream());
+        try (InputStream inputStream = file.getInputStream()) {
+            return ImageIO.read(inputStream);
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

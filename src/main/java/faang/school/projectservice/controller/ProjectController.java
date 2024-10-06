@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceDownloadDto;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.project.ProjectImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,20 +22,18 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class ProjectController {
     private final UserContext userContext;
-
-    private final ProjectService resourceService;
-    private final ProjectService projectService;
+    private final ProjectImageService projectImageService;
 
     @PutMapping("/{projectId}/add/cover")
     @ResponseStatus(HttpStatus.CREATED)
     public void addCoverImage(@PathVariable long projectId, @RequestBody MultipartFile file) {
         long ownerId = userContext.getUserId();
-        resourceService.addCoverImage(ownerId, projectId, file);
+        projectImageService.addCoverImage(ownerId, projectId, file);
     }
 
     @GetMapping("/{projectId}/cover-image")
     public ResponseEntity<byte[]> getCoverImage(@PathVariable long projectId) {
-        ResourceDownloadDto dto = resourceService.getCoverImage(projectId);
+        ResourceDownloadDto dto = projectImageService.getCoverImage(projectId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(dto.getType());
@@ -48,6 +46,6 @@ public class ProjectController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCoverImage(@PathVariable long projectId) {
         long ownerId = userContext.getUserId();
-        projectService.deleteCoverImage(ownerId, projectId);
+        projectImageService.deleteCoverImage(ownerId, projectId);
     }
 }

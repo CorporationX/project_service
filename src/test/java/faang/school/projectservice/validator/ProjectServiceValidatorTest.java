@@ -27,7 +27,6 @@ class ProjectServiceValidatorTest {
     private static final long PROJECT_ID = 1L;
     private static final BigInteger MAX_STORAGE_SIZE = BigInteger.valueOf(5);
     private static final BigInteger STORAGE_SIZE = BigInteger.valueOf(1);
-    private static final BigInteger RESOURCE_SIZE = BigInteger.valueOf(1);
     private static final String COVER_ID = "cover";
     private static final String BLANK_COVER_ID = "";
     private static final long PROJECT_NEW_SIZE = 2;
@@ -86,7 +85,7 @@ class ProjectServiceValidatorTest {
         Project project = buildProject(PROJECT_ID, STORAGE_SIZE, MAX_STORAGE_SIZE);
         MultipartFile multipartFile = buildMultiPartFile(PROJECT_NEW_SIZE);
 
-        assertThat(projectServiceValidator.validResourceSize(project, multipartFile, null))
+        assertThat(projectServiceValidator.validResourceSize(project, multipartFile.getSize()))
                 .isEqualTo(STORAGE_SIZE.longValue() + PROJECT_NEW_SIZE);
     }
 
@@ -96,7 +95,7 @@ class ProjectServiceValidatorTest {
         Project project = buildProject(PROJECT_ID, null, MAX_STORAGE_SIZE);
         MultipartFile multipartFile = buildMultiPartFile(PROJECT_NEW_SIZE);
 
-        assertThat(projectServiceValidator.validResourceSize(project, multipartFile, null))
+        assertThat(projectServiceValidator.validResourceSize(project, multipartFile.getSize()))
                 .isEqualTo(PROJECT_NEW_SIZE);
     }
 
@@ -105,11 +104,10 @@ class ProjectServiceValidatorTest {
     void testValidResourceSizeResourceFilled() {
         Project project = buildProject(PROJECT_ID, MAX_STORAGE_SIZE, MAX_STORAGE_SIZE);
         MultipartFile multipartFile = buildMultiPartFile(PROJECT_NEW_SIZE);
-        Resource resource = buildResource(RESOURCE_SIZE);
 
-        assertThatThrownBy(() -> projectServiceValidator.validResourceSize(project, multipartFile, resource))
+        assertThatThrownBy(() -> projectServiceValidator.validResourceSize(project, multipartFile.getSize()))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining(PROJECT_RESOURCE_FILLED, PROJECT_ID, RESOURCE_SIZE.longValue());
+                .hasMessageContaining(PROJECT_RESOURCE_FILLED, PROJECT_ID, 0);
     }
 
     @Test
@@ -117,10 +115,9 @@ class ProjectServiceValidatorTest {
     void testValidResourceSizeSuccessful() {
         Project project = buildProject(PROJECT_ID, STORAGE_SIZE, MAX_STORAGE_SIZE);
         MultipartFile multipartFile = buildMultiPartFile(PROJECT_NEW_SIZE);
-        Resource resource = buildResource(RESOURCE_SIZE);
 
-        assertThat(projectServiceValidator.validResourceSize(project, multipartFile, resource))
-                .isEqualTo((STORAGE_SIZE.longValue() - RESOURCE_SIZE.longValue()) + PROJECT_NEW_SIZE);
+        assertThat(projectServiceValidator.validResourceSize(project, multipartFile.getSize()))
+                .isEqualTo(STORAGE_SIZE.longValue() + PROJECT_NEW_SIZE);
     }
 
     @Test
@@ -128,7 +125,7 @@ class ProjectServiceValidatorTest {
     void testGetCoverImageIdImageIdIsNull() {
         Project project = buildProject(PROJECT_ID);
 
-        assertThatThrownBy(() -> projectServiceValidator.getCoverImageId(project))
+        assertThatThrownBy(() -> projectServiceValidator.coverImageId(project))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining(PROJECT_HAS_NO_COVER, PROJECT_ID);
     }
@@ -138,7 +135,7 @@ class ProjectServiceValidatorTest {
     void testGetCoverImageIdImageIdIsBlank() {
         Project project = buildProjectCoverImageId(PROJECT_ID, BLANK_COVER_ID);
 
-        assertThatThrownBy(() -> projectServiceValidator.getCoverImageId(project))
+        assertThatThrownBy(() -> projectServiceValidator.coverImageId(project))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining(PROJECT_HAS_NO_COVER, PROJECT_ID);
     }
@@ -148,7 +145,7 @@ class ProjectServiceValidatorTest {
     void testGetCoverImageIdSuccessful() {
         Project project = buildProjectCoverImageId(PROJECT_ID, COVER_ID);
 
-        assertThat(projectServiceValidator.getCoverImageId(project))
+        assertThat(projectServiceValidator.coverImageId(project))
                 .isEqualTo(COVER_ID);
     }
 }

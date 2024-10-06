@@ -27,6 +27,14 @@ public class ProjectFabric {
                 .build();
     }
 
+    public static Resource buildResource(String key, BigInteger size) {
+        return Resource
+                .builder()
+                .key(key)
+                .size(size)
+                .build();
+    }
+
     public static Project buildProject(Long id) {
         return Project
                 .builder()
@@ -55,6 +63,17 @@ public class ProjectFabric {
                 .builder()
                 .id(id)
                 .coverImageId(coverImageId)
+                .build();
+    }
+
+    public static Project buildProjectCoverImageId(Long id, String coverImageId, BigInteger storageSize,
+                                                   List<Resource> resources) {
+        return Project
+                .builder()
+                .id(id)
+                .coverImageId(coverImageId)
+                .storageSize(storageSize)
+                .resources(resources)
                 .build();
     }
 

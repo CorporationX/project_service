@@ -6,7 +6,6 @@ import faang.school.projectservice.model.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -20,7 +19,8 @@ public class ProjectServiceValidator {
 
     public void projectOwner(Project project, long ownerId) {
         if (project.getOwnerId() != ownerId) {
-            log.error(String.format(NOT_OWNER_OF_PROJECT, ownerId, project.getOwnerId()));
+            String logMessage = String.format(NOT_OWNER_OF_PROJECT, ownerId, project.getOwnerId());
+            log.error(logMessage);
             throw new ApiException(NOT_OWNER_OF_PROJECT, HttpStatus.BAD_REQUEST, ownerId, project.getOwnerId());
         }
     }
@@ -35,25 +35,25 @@ public class ProjectServiceValidator {
                 .findFirst();
     }
 
-    public long validResourceSize(Project project, MultipartFile file, Resource resource) {
-        long deletedResourceSize = resource == null ? 0 : resource.getSize().longValue();
-        long newFileSize = file.getSize();
+    public long validResourceSize(Project project, long newFileSize) {
         long currentSize = project.getStorageSize() == null ? 0 : project.getStorageSize().longValue();
         long maxStorageSize = project.getMaxStorageSize().longValue();
-        long freeSpace = maxStorageSize - (currentSize - deletedResourceSize);
+        long freeSpace = maxStorageSize - currentSize;
 
         if (newFileSize > freeSpace) {
-            log.error(String.format(PROJECT_RESOURCE_FILLED, project.getId(), freeSpace));
+            String logMessage = String.format(PROJECT_RESOURCE_FILLED, project.getId(), freeSpace);
+            log.error(logMessage);
             throw new ApiException(PROJECT_RESOURCE_FILLED, HttpStatus.BAD_REQUEST, project.getId(), freeSpace);
         }
-        return (currentSize - deletedResourceSize) + newFileSize;
+        return currentSize + newFileSize;
     }
 
-    public String getCoverImageId(Project project) {
+    public String coverImageId(Project project) {
         String imageKey = project.getCoverImageId();
 
         if (imageKey == null || imageKey.isBlank()) {
-            log.error(String.format(PROJECT_HAS_NO_COVER, project.getId()));
+            String logMessage = String.format(PROJECT_HAS_NO_COVER, project.getId());
+            log.error(logMessage);
             throw new ApiException(PROJECT_HAS_NO_COVER, HttpStatus.NOT_FOUND, project.getId());
         }
         return imageKey;
