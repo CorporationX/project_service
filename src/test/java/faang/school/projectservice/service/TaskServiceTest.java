@@ -1,5 +1,7 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.model.Project;
@@ -41,6 +43,7 @@ public class TaskServiceTest {
     private final ProjectRepository projectRepository = mock(ProjectRepository.class);
     private final TaskRepository taskRepository = mock(TaskRepository.class);
     private final StageRepository stageRepository = mock(StageRepository.class);
+    private final UserServiceClient userServiceClient = mock(UserServiceClient.class);
 
     @Test
     @DisplayName("Create task: check name is blank")
@@ -56,7 +59,9 @@ public class TaskServiceTest {
     public void testCreateTaskCheckUserPerformerExists() {
         Task task = new Task();
         task.setName("Not empty");
-        task.setPerformerUserId(25L);
+        UserDto userPerformerDto = new UserDto();
+        userPerformerDto.setId(2L);
+        Mockito.when(userServiceClient.getUser(userPerformerDto.getId())).thenReturn(null);
 
         assertThrows(RuntimeException.class, () -> taskService.createTask(task));
     }
@@ -67,7 +72,10 @@ public class TaskServiceTest {
         Task task = new Task();
         task.setName("Not empty");
         task.setPerformerUserId(1L);
-        task.setReporterUserId(25L);
+
+        UserDto userReporterDto = new UserDto();
+        userReporterDto.setId(2L);
+        Mockito.when(userServiceClient.getUser(userReporterDto.getId())).thenReturn(null);
 
         assertThrows(RuntimeException.class, () -> taskService.createTask(task));
     }
@@ -195,6 +203,10 @@ public class TaskServiceTest {
         Task task = new Task();
         task.setDescription("test description");
 
+        UserDto userPerformerDto = new UserDto();
+        userPerformerDto.setId(1L);
+
+        Mockito.when(userServiceClient.getUser(1)).thenReturn(userPerformerDto);
         Mockito.when(projectRepository.existsById(3L)).thenReturn(true);
         Mockito.when(taskRepository.findAllByProjectId(3L)).thenReturn(List.of(task));
 
@@ -224,6 +236,10 @@ public class TaskServiceTest {
     public void testGetTaskById() {
         Task task = new Task();
         task.setId(5L);
+
+        UserDto userPerformerDto = new UserDto();
+        userPerformerDto.setId(1L);
+        Mockito.when(userServiceClient.getUser(1)).thenReturn(userPerformerDto);
 
         taskRepository.findById(task.getId());
 

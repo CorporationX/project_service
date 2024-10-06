@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +44,7 @@ public class TaskService {
         return updatedTask;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Task> getTasks(Long userId, Long projectId, TaskFilterDto filters) {
         checkUserExists(userId);
         checkProjectExist(projectId);
@@ -55,7 +56,7 @@ public class TaskService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Task getTaskById(Long taskId, Long userId) {
         checkUserExists(userId);
 
@@ -76,18 +77,15 @@ public class TaskService {
 
     private void checkUserExists(Long userId) {
         //todo: Проверка существования пользователя через сервис UserServiceClient
-        //        if (userServiceClient.getUser(userId) == null) {
-        //            throw new IllegalArgumentException("User does not exist");
-        //        }
-        // Для прогона тестов
-        if (userId == 25) {
+        if (userServiceClient.getUser(userId) == null) {
             throw new IllegalArgumentException("User does not exist");
         }
     }
 
     private void checkParentTask(Task tempTask) {
         if (tempTask.getParentTask() != null) {
-            taskRepository.findById(tempTask.getParentTask().getId()).ifPresentOrElse(
+            Optional<Task> parentTask = taskRepository.findById(tempTask.getParentTask().getId());
+            parentTask.ifPresentOrElse(
                     tempTask::setParentTask,
                     () -> {
                         throw new IllegalArgumentException(String.format("Task with taskId = %d does not exist",
@@ -99,12 +97,13 @@ public class TaskService {
     private void checkLinkedTasks(Task tempTask) {
         if (tempTask.getLinkedTasks() != null && !tempTask.getLinkedTasks().isEmpty()) {
             List<Task> linkedTasks = new ArrayList<>();
-            tempTask.getLinkedTasks().forEach(linkedTask -> {
-                taskRepository.findById(linkedTask.getId()).ifPresentOrElse(
+            List<Task> linkedTasksTemp = tempTask.getLinkedTasks();
+            linkedTasksTemp.forEach(linkedTaskTemp -> {
+                taskRepository.findById(linkedTaskTemp.getId()).ifPresentOrElse(
                         linkedTasks::add,
                         () -> {
                             throw new IllegalArgumentException(String.format("Linked task with taskId = %d does not exist",
-                                    linkedTask.getId()));
+                                    linkedTaskTemp.getId()));
                         });
             });
             tempTask.setLinkedTasks(linkedTasks);
