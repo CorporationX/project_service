@@ -33,6 +33,13 @@ dependencies {
      * Amazon S3
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
+    /**
+     * Google
+     */
+    implementation ("com.google.api-client:google-api-client:1.34.1")
+    implementation ("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation ("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
+    implementation ("com.google.http-client:google-http-client-jackson2:1.34.1")
 
     /**
      * Utils & Logging
@@ -61,6 +68,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito:mockito-inline:4.6.1")
 }
 
 tasks.withType<Test> {

@@ -11,12 +11,8 @@ public class UserContext {
         userIdHolder.set(userId);
     }
 
-    public long getUserId() {
-        Long userId = userIdHolder.get();
-        if (userId == null) {
-            throw new IllegalArgumentException("User ID is missing. Please make sure 'x-user-id' header is included in the request.");
-        }
-        return userId;
+    public Long getUserId() {
+        return userIdHolder.get();
     }
 
     public void clear() {

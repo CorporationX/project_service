@@ -22,6 +22,9 @@ databaseChangeLog:
   - include:
         file: db/changelog/changeset/project_V014_resource.sql
   - include:
-      file: db/changelog/changeset/project_V015_resource_roles.sql
+        file: db/changelog/changeset/project_V015_resource_roles.sql
   - include:
-      file: db/changelog/changeset/project_V016_meet.sql
+        file: db/changelog/changeset/project_V016_create_google_oauth_tokens_and_event_mapping.sql
+
+
+
