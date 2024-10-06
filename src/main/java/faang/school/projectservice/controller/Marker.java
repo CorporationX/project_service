@@ -5,5 +5,5 @@ public interface Marker {
 
     interface OnUpdate {}
 
-    interface getProject{}
+    interface GetProject {}
 }

@@ -20,7 +20,7 @@ public class ProjectDto {
 
     @Null(groups = Marker.OnCreate.class)
     @NotNull(groups = Marker.OnUpdate.class)
-    @NotNull(groups = Marker.getProject.class)
+    @NotNull(groups = Marker.GetProject.class)
     private Long id;
 
     @NotBlank(message = "Field name cannot be empty or null")

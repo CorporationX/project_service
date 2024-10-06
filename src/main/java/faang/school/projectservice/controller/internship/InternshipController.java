@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.internship;
 
+import faang.school.projectservice.controller.Marker;
 import faang.school.projectservice.dto.filter.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.service.internship.InternshipService;
@@ -26,11 +27,13 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     @PostMapping
+    @Validated({Marker.OnCreate.class})
     public InternshipDto createInternship(@Valid @RequestBody InternshipDto internshipDto) {
         return internshipService.create(internshipDto);
     }
 
     @PutMapping
+    @Validated({Marker.OnUpdate.class})
     public InternshipDto updateInternship(@Valid @RequestBody InternshipDto internshipDto) {
         return internshipService.update(internshipDto);
     }
@@ -46,7 +49,7 @@ public class InternshipController {
     }
 
     @GetMapping("/{id}")
-    public InternshipDto getInternship(@PathVariable("id") @Positive Long id) {
+    public InternshipDto getInternship(@PathVariable @Positive Long id) {
         return internshipService.getInternshipById(id);
     }
 }

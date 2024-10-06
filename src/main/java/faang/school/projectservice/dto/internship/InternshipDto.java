@@ -1,8 +1,10 @@
 package faang.school.projectservice.dto.internship;
 
+import faang.school.projectservice.controller.Marker;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.model.InternshipStatus;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 public class InternshipDto {
 
-    @NotNull(message = "Internship project field can't be null!")
+    @Null(groups = Marker.OnCreate.class)
+    @NotNull(groups = Marker.OnUpdate.class, message = "Internship project field can't be null!")
     private Long id;
     private Long projectId;
     private TeamMemberDto mentorId;
