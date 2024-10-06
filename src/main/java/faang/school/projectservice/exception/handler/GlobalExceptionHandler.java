@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
     @Value("${project.service.name}")
     private String serviceName;
 
-    @ExceptionHandler({ EntityNotFoundException.class, DataValidationException.class, NoSuchElementException.class, IllegalAccessException.class})
+    @ExceptionHandler({DataValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleDataExceptions(RuntimeException exception) {
         String message = exception.getMessage();
@@ -29,6 +29,30 @@ public class GlobalExceptionHandler {
                 .serviceName(serviceName)
                 .globalMessage(message)
                 .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+    }
+
+    @ExceptionHandler({EntityNotFoundException.class, NoSuchElementException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleEntityNotFoundException(RuntimeException exception) {
+        String message = exception.getMessage();
+        log.error("Entity not found: {}. Exception: {}", message, exception);
+        return ErrorResponse.builder()
+                .serviceName(serviceName)
+                .globalMessage(message)
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
+    }
+
+    @ExceptionHandler(IllegalAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleIllegalAccessException(IllegalAccessException exception) {
+        String message = exception.getMessage();
+        log.error("Access denied: {}", message);
+        return ErrorResponse.builder()
+                .serviceName(serviceName)
+                .globalMessage(message)
+                .status(HttpStatus.FORBIDDEN.value())
                 .build();
     }
 }
