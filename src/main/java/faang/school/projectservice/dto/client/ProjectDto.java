@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class ProjectDto {
 
@@ -25,7 +30,7 @@ public class ProjectDto {
 
     @NotNull(message = "Status should not be null")
     private ProjectStatus status;
-
+  
     @NotNull(message = "Visibility should not be null")
     private ProjectVisibility visibility;
 
@@ -35,4 +40,6 @@ public class ProjectDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<TeamDto> teams;
+    private Long id;
+    private String jiraKey;
 }
