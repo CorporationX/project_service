@@ -417,10 +417,12 @@ public class ResourceServiceTest {
     @Test
     @DisplayName("Создание ресурса в проекте с превышением максимального размера хранилища")
     public void testCreateResourceExceedStorageSize() {
-        when(userContext.getUserId()).thenReturn(MANAGER_ID);
         when(projectRepository.getProjectById(PROJECT_ID)).thenReturn(project);
         when(multipartFile.getSize()).thenReturn(11L);
 
         assertThrows(StorageSizeExceededException.class, () -> resourceService.addResourceToProject(PROJECT_ID, multipartFile));
+
+        verify(projectRepository).getProjectById(PROJECT_ID);
+        verify(multipartFile).getSize();
     }
 }

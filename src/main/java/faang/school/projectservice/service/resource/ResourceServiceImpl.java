@@ -19,7 +19,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,15 +45,7 @@ public class ResourceServiceImpl implements ResourceService {
         long userId = userContext.getUserId();
         Resource resource = findResourceById(resourceId);
         TeamMember teamMember = getTeamMemberByUserIdInProject(userId, resource.getProject().getId());
-        boolean hasAllowedRole = teamMember.getRoles()
-                .stream()
-                .anyMatch(role -> resource.getAllowedRoles().contains(role) || role.equals(TeamRole.MANAGER));
-        if (!hasAllowedRole) {
-            throw new ForbiddenAccessException(
-                    "User with id %d cannot access to team files having roles: %s. Allowed roles: %s"
-                            .formatted(userId, teamMember.getRoles(), resource.getAllowedRoles())
-            );
-        }
+        checkAllowedRoles(teamMember, resource);
         return s3Service.downloadFile(resource.getKey());
     }
 
@@ -64,7 +55,7 @@ public class ResourceServiceImpl implements ResourceService {
         Resource resource = findResourceById(resourceId);
         Project project = resource.getProject();
         TeamMember teamMember = getTeamMemberByUserIdInProject(userId, project.getId());
-        if (notCreatorOrManager(resource, teamMember)) {
+        if (!isCreatorOrManager(resource, teamMember)) {
             throw new ForbiddenAccessException("User with id %d cannot delete resource".formatted(userId));
         }
         BigInteger newStorageSize = project.getStorageSize().subtract(resource.getSize());
@@ -86,7 +77,7 @@ public class ResourceServiceImpl implements ResourceService {
         BigInteger resourceSize = resource.getSize();
         Project project = resource.getProject();
         TeamMember teamMember = getTeamMemberByUserIdInProject(userId, project.getId());
-        if (notCreatorOrManager(resource, teamMember)) {
+        if (!isCreatorOrManager(resource, teamMember)) {
             throw new ForbiddenAccessException("User with id %d cannot update resource".formatted(userId));
         }
         BigInteger newStorageSize = project.getStorageSize()
@@ -104,13 +95,21 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public ResourceDto addResourceToProject(Long projectId, MultipartFile file) {
-        long userId = userContext.getUserId();
         Project project = projectRepository.getProjectById(projectId);
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
+        Resource resource = createResource(file, project);
+        resourceRepository.save(resource);
+        updateProjectSize(project, newStorageSize);
+        s3Service.uploadFile(file, resource.getKey());
+        log.info("resource '{}' for project with id {} saved successfully", resource.getKey(), projectId);
+        return resourceMapper.toResourceDto(resource);
+    }
+
+    private Resource createResource(MultipartFile file, Project project) {
         String key = generateResourceKey(project, file.getOriginalFilename());
-        TeamMember teamMember = getTeamMemberByUserIdInProject(userId, project.getId());
-        Resource resource = Resource.builder()
+        TeamMember teamMember = getTeamMemberByUserIdInProject(userContext.getUserId(), project.getId());
+        return Resource.builder()
                 .name(file.getOriginalFilename())
                 .size(BigInteger.valueOf(file.getSize()))
                 .type(ResourceType.getResourceType(file.getContentType()))
@@ -121,15 +120,10 @@ public class ResourceServiceImpl implements ResourceService {
                 .updatedBy(teamMember)
                 .allowedRoles(new ArrayList<>(teamMember.getRoles()))
                 .build();
-        resourceRepository.save(resource);
-        updateProjectSize(project, newStorageSize);
-        s3Service.uploadFile(file, resource.getKey());
-        log.info("resource '{}' for project with id {} saved successfully", resource.getKey(), projectId);
-        return resourceMapper.toResourceDto(resource);
     }
 
-    private boolean notCreatorOrManager(Resource resource, TeamMember teamMember) {
-        return !(resource.getCreatedBy().getUserId().equals(teamMember.getUserId()) || teamMember.getRoles().contains(TeamRole.MANAGER));
+    private boolean isCreatorOrManager(Resource resource, TeamMember teamMember) {
+        return resource.getCreatedBy().getUserId().equals(teamMember.getUserId()) || teamMember.getRoles().contains(TeamRole.MANAGER);
     }
 
     private Resource getUpdatedResource(Resource resource, MultipartFile file) {
@@ -137,6 +131,18 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setSize(BigInteger.valueOf(file.getSize()));
         resource.setType(ResourceType.getResourceType(file.getContentType()));
         return resource;
+    }
+
+    private void checkAllowedRoles(TeamMember teamMember, Resource resource) {
+        boolean hasAllowedRole = teamMember.getRoles()
+                .stream()
+                .anyMatch(role -> resource.getAllowedRoles().contains(role) || role.equals(TeamRole.MANAGER));
+        if (!hasAllowedRole) {
+            throw new ForbiddenAccessException(
+                    "User with id %d cannot access to team files having roles: %s. Allowed roles: %s"
+                            .formatted(teamMember.getUserId(), teamMember.getRoles(), resource.getAllowedRoles())
+            );
+        }
     }
 
     private TeamMember getTeamMemberByUserIdInProject(long userId, long projectId) {
