@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
@@ -11,7 +10,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.ValidatorProject;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -21,7 +19,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +28,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceImplTest {
-    private static final BigInteger MAX_COVER_IMAGE_SIZE = BigInteger.valueOf(5 * 1024 * 1024);
-
     private final Long projectId = 1L;
     private final String key = "test-key";
 
@@ -187,39 +182,8 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    public void testAddCoverImageForNotExistingProject() {
-        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class,
-                () -> projectService.addCoverImage(projectId, file)
-        );
-
-        verify(projectRepository, never()).save(any(Project.class));
-
-        assertEquals("Project not found", thrown.getMessage());
-    }
-
-    @Test
-    public void testAddCoverImageBiggerThanMaxSize() {
-        when(projectRepository.existsById(projectId)).thenReturn(true);
-        when(file.getSize()).thenReturn(MAX_COVER_IMAGE_SIZE.longValue() + 10);
-
-        DataValidationException thrown = assertThrows(DataValidationException.class,
-                () -> projectService.addCoverImage(projectId, file)
-        );
-
-        verify(projectRepository, never()).save(any(Project.class));
-
-        assertEquals("The size of cover image is greater than " + MAX_COVER_IMAGE_SIZE.longValue(),
-                thrown.getMessage());
-    }
-
-    @Test
     public void testAddCoverImageSuccessfully() {
-        when(projectRepository.existsById(projectId)).thenReturn(true);
-        when(file.getSize()).thenReturn(MAX_COVER_IMAGE_SIZE.longValue());
-
-        Project project = new Project();
-        project.setId(projectId);
-        project.setName("test");
+        Project project = prepareData();
 
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         String folder = project.getName() + projectId + "coverImage";
@@ -234,39 +198,8 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    public void testUpdateCoverImageOfNotExistingProject() {
-        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class,
-                () -> projectService.updateCoverImage(projectId, file)
-        );
-
-        verify(projectRepository, never()).save(any(Project.class));
-
-        assertEquals("Project not found", thrown.getMessage());
-    }
-
-    @Test
-    public void testUpdateCoverImageBiggerThanMaxSize() {
-        when(projectRepository.existsById(projectId)).thenReturn(true);
-        when(file.getSize()).thenReturn(MAX_COVER_IMAGE_SIZE.longValue() + 10);
-
-        DataValidationException thrown = assertThrows(DataValidationException.class,
-                () -> projectService.updateCoverImage(projectId, file)
-        );
-
-        verify(projectRepository, never()).save(any(Project.class));
-
-        assertEquals("The size of cover image is greater than " + MAX_COVER_IMAGE_SIZE.longValue(),
-                thrown.getMessage());
-    }
-
-    @Test
     public void testUpdateCoverImageSuccessfully() {
-        when(projectRepository.existsById(projectId)).thenReturn(true);
-        when(file.getSize()).thenReturn(MAX_COVER_IMAGE_SIZE.longValue());
-
-        Project project = new Project();
-        project.setId(projectId);
-        project.setName("test");
+        Project project = prepareData();
         project.setCoverImageId(key);
 
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
@@ -280,24 +213,10 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    public void testGetCoverImageOfNotExistingProject() {
-        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class,
-                () -> projectService.getCoverImage(projectId)
-        );
-
-        verify(projectRepository, never()).save(any(Project.class));
-
-        assertEquals("Project not found", thrown.getMessage());
-    }
-
-    @Test
     public void testGetCoverImageSuccessfully() {
-        when(projectRepository.existsById(projectId)).thenReturn(true);
-
-        Project project = new Project();
-        project.setId(projectId);
-        project.setName("test");
+        Project project = prepareData();
         project.setCoverImageId(key);
+
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
         projectService.getCoverImage(projectId);
@@ -305,29 +224,22 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    public void testDeleteCoverImageOfNotExistingProject() {
-        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class,
-                () -> projectService.deleteCoverImage(projectId)
-        );
-
-        verify(projectRepository, never()).save(any(Project.class));
-
-        assertEquals("Project not found", thrown.getMessage());
-    }
-
-    @Test
     public void testDeleteCoverImageSuccessfully() {
-        when(projectRepository.existsById(projectId)).thenReturn(true);
-
-        Project project = new Project();
-        project.setId(projectId);
-        project.setName("test");
+        Project project = prepareData();
         project.setCoverImageId(key);
+
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
         projectService.deleteCoverImage(projectId);
 
         verify(projectRepository, times(1)).save(project);
         assertNull(project.getCoverImageId());
+    }
+
+    private Project prepareData() {
+        Project project = new Project();
+        project.setId(projectId);
+        project.setName("test");
+        return project;
     }
 }

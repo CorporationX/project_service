@@ -31,24 +31,21 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public String upload(MultipartFile file, String folder) {
-        long fileSize = file.getSize();
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(fileSize);
-        objectMetadata.setContentType(file.getContentType());
         String key = folder + "/" + System.currentTimeMillis() +  file.getOriginalFilename();
 
-        try {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             BufferedImage image = ImageIO.read(file.getInputStream());
             BufferedImage resizedImage = resizeImage(image);
 
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
             ImageIO.write(resizedImage, getFileExtension(Objects.requireNonNull(file.getOriginalFilename())), os);
             ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
 
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, is, objectMetadata);
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, is, getObjectMetadata(file));
             amazonS3Client.putObject(putObjectRequest);
+
+            is.close();
         } catch (Exception e) {
-            throw new FileException("Failed to upload file");
+            throw new FileException("Failed to upload file " + file.getOriginalFilename());
         }
 
         return key;
@@ -67,6 +64,15 @@ public class S3ServiceImpl implements S3Service {
         } catch (Exception e) {
             throw new FileException("Failed to download file");
         }
+    }
+
+    private ObjectMetadata getObjectMetadata(MultipartFile file) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+
+        objectMetadata.setContentLength(file.getSize());
+        objectMetadata.setContentType(file.getContentType());
+
+        return objectMetadata;
     }
 
     private BufferedImage resizeImage(BufferedImage image) {
