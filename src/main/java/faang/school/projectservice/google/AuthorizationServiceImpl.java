@@ -29,7 +29,11 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class AuthorizationServiceImpl implements AuthorizationService{
+public class AuthorizationServiceImpl implements AuthorizationService {
+    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+
     private final AuthorizationTokenRepository repository;
 
     @Value("${google.google_calendar.credentials_id}")
@@ -38,17 +42,12 @@ public class AuthorizationServiceImpl implements AuthorizationService{
     @Value("${google.google_calendar.scopes}")
     private List<String> scopes;
 
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
-
-    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-
     public Calendar authorizeAndGetCalendar() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         return new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName("name")
                 .build();
     }
-
 
     private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         String credentials = repository.getReferenceById(credentialsId).getJson();

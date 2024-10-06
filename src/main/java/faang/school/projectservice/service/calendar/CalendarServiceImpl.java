@@ -31,18 +31,18 @@ public class CalendarServiceImpl implements CalendarService {
     public void addEventToCalendar(long eventId, String calendarId) throws GeneralSecurityException, IOException {
         EventDto eventDto = userServiceClient.getEvent(eventId);
         if (eventDto.getCalendarEventId() == null) {
-            Event event = add(eventDto, calendarId);
+            Event event = patchEventInCalendar(eventDto, calendarId);
             userServiceClient.setCalendarEventId(eventId, event.getId());
-            log.info("Event created: {}", event.getHtmlLink());
+            log.info("Event created: {} id = {}", event.getHtmlLink(), eventId);
         } else {
-            log.info("event has already added to the calendar");
+            log.info("event has already added to the calendar; id = {}", eventId);
         }
     }
 
     @Override
     public Event updateEvent(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
         validator.validateUpdate(eventDto);
-        Event event = add(eventDto, calendarId);
+        Event event = patchEventInCalendar(eventDto, calendarId);
         log.info("Event updated: {}", event.getHtmlLink());
         return event;
     }
@@ -81,7 +81,7 @@ public class CalendarServiceImpl implements CalendarService {
                 .setReminders(new Event.Reminders().setUseDefault(true));
     }
 
-    private Event add(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
+    private Event patchEventInCalendar(EventDto eventDto, String calendarId) throws GeneralSecurityException, IOException {
         Calendar service = authorizationService.authorizeAndGetCalendar();
         checkIsCalendarAvailable(calendarId, service);
         Event event = initEvent(eventDto);
@@ -95,9 +95,14 @@ public class CalendarServiceImpl implements CalendarService {
                 .execute();
     }
 
-    private void checkIsCalendarAvailable(String calendarId, Calendar service) throws IOException {
-        if (service.calendars().get(calendarId) == null) {
-            throw new DataValidationException("calendar id = " + calendarId + " is not available");
+    private void checkIsCalendarAvailable(String calendarId, Calendar service)  {
+        try {
+            if (service.calendars().get(calendarId) == null) {
+                throw new DataValidationException("calendar id = " + calendarId + " is not available");
+            }
+        } catch (IOException e) {
+            log.error("exception: ", e);
         }
+
     }
 }
