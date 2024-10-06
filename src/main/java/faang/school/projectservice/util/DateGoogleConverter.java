@@ -1,16 +1,14 @@
-package faang.school.projectservice.google;
+package faang.school.projectservice.util;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.EventDateTime;
+import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
 import java.util.Calendar;
 
+@UtilityClass
 public class DateGoogleConverter {
-    private DateGoogleConverter() {
-
-    }
-
     public static EventDateTime toEventDateTime(LocalDateTime localDateTime) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(localDateTime.getYear(), localDateTime.getMonthValue() - 1,
@@ -19,5 +17,4 @@ public class DateGoogleConverter {
         return new EventDateTime()
                 .setDateTime(new DateTime(calendar.getTime()));
     }
-
 }

@@ -9,7 +9,7 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.EventDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.google.AuthorizationServiceImpl;
-import faang.school.projectservice.google.DateGoogleConverter;
+import faang.school.projectservice.util.DateGoogleConverter;
 import faang.school.projectservice.validator.CalendarServiceImplValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

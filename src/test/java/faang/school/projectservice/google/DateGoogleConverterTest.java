@@ -2,6 +2,7 @@ package faang.school.projectservice.google;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.EventDateTime;
+import faang.school.projectservice.util.DateGoogleConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
