@@ -98,14 +98,13 @@ public class TaskService {
         if (tempTask.getLinkedTasks() != null && !tempTask.getLinkedTasks().isEmpty()) {
             List<Task> linkedTasks = new ArrayList<>();
             List<Task> linkedTasksTemp = tempTask.getLinkedTasks();
-            linkedTasksTemp.forEach(linkedTaskTemp -> {
+            linkedTasksTemp.forEach(linkedTaskTemp ->
                 taskRepository.findById(linkedTaskTemp.getId()).ifPresentOrElse(
                         linkedTasks::add,
                         () -> {
                             throw new IllegalArgumentException(String.format("Linked task with taskId = %d does not exist",
                                     linkedTaskTemp.getId()));
-                        });
-            });
+                        }));
             tempTask.setLinkedTasks(linkedTasks);
         }
     }
@@ -117,7 +116,7 @@ public class TaskService {
     }
 
     private void fillProjectIfExist(Task tempTask) {
-        Project project = projectRepository.getProjectById(tempTask.getProject().getId());
+        Project project = projectRepository.getByIdOrThrow(tempTask.getProject().getId());
         tempTask.setProject(project);
     }
 

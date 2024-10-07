@@ -112,7 +112,7 @@ public class TaskServiceTest {
         Project project = new Project();
         project.setId(3L);
         task.setProject(project);
-        Mockito.when(projectRepository.getProjectById(task.getProject().getId())).thenThrow();
+        Mockito.when(projectRepository.getByIdOrThrow(task.getProject().getId())).thenThrow();
 
         assertThrows(RuntimeException.class, () -> taskService.createTask(task));
     }
@@ -133,7 +133,7 @@ public class TaskServiceTest {
         Project project = new Project();
         project.setId(3L);
         task.setProject(project);
-        Mockito.when(projectRepository.getProjectById(task.getProject().getId())).thenReturn(project);
+        Mockito.when(projectRepository.getByIdOrThrow(task.getProject().getId())).thenReturn(project);
 
         Stage stage = new Stage();
         stage.setStageId(3L);
@@ -159,7 +159,7 @@ public class TaskServiceTest {
         Project project = new Project();
         project.setId(3L);
         task.setProject(project);
-        Mockito.when(projectRepository.getProjectById(task.getProject().getId())).thenReturn(project);
+        Mockito.when(projectRepository.getByIdOrThrow(task.getProject().getId())).thenReturn(project);
 
         Stage stage = new Stage();
         stage.setStageId(3L);
@@ -185,7 +185,7 @@ public class TaskServiceTest {
         Project project = new Project();
         project.setId(3L);
         task.setProject(project);
-        Mockito.when(projectRepository.getProjectById(task.getProject().getId())).thenReturn(project);
+        Mockito.when(projectRepository.getByIdOrThrow(task.getProject().getId())).thenReturn(project);
 
         Stage stage = new Stage();
         stage.setStageId(3L);
