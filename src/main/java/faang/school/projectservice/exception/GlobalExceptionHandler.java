@@ -17,7 +17,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException exception) {
-        log.error(exception.getMessage());
+        log.error("Entity not found exception:", exception);
         Map<String, Object> body = new HashMap<>();
         body.put("message", exception.getMessage());
 
@@ -26,7 +26,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<Object> handleApiException(ApiException exception) {
-        log.error(exception.getMessage());
+        log.error("Api exception:", exception);
         Map<String, Object> body = new HashMap<>();
         body.put("message", exception.getMessage());
 

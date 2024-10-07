@@ -21,7 +21,7 @@ public class ImageService {
         try (InputStream inputStream = file.getInputStream()) {
             return ImageIO.read(inputStream);
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error("Get image failure:", e);
             throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -35,7 +35,7 @@ public class ImageService {
                     .size(width, height)
                     .asBufferedImage();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error("Resize image failure:", e);
             throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -44,7 +44,7 @@ public class ImageService {
         try {
             return new MultipartImage(image, file.getName(), file.getOriginalFilename(), file.getContentType());
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error("Convert image to MultipartImage failure:", e);
             throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -59,7 +59,7 @@ public class ProjectImageService {
                     .contentDisposition(contentDisposition)
                     .build();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error("", e);
             throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
