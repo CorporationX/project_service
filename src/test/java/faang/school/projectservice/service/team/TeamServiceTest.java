@@ -1,6 +1,5 @@
 package faang.school.projectservice.service.team;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,8 +24,6 @@ public class TeamServiceTest {
     private TeamRepository teamRepository;
     @Mock
     private ProjectRepository projectRepository;
-    @Mock
-    private UserContext userContext;
 
     @Test
     @DisplayName("+ Create team")
@@ -41,7 +37,6 @@ public class TeamServiceTest {
 
         when(projectRepository.getProjectByIdOrThrow(project.getId()))
                 .thenReturn(project);
-        when(userContext.getUserId()).thenReturn(1L);
         when(teamRepository.save(team)).thenReturn(team);
         when(projectRepository.save(project)).thenReturn(project);
 
