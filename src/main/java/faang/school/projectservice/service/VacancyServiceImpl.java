@@ -95,8 +95,6 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     private void validateVacancy(VacancyDto vacancyDto) {
-        vacancyValidator.validateVacancyByName(vacancyDto);
-        vacancyValidator.validateVacancyByDescription(vacancyDto);
         vacancyValidator.validateVacancyByCount(vacancyDto);
     }
 

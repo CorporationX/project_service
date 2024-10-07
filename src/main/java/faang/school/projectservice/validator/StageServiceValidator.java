@@ -32,12 +32,6 @@ public class StageServiceValidator {
                 .noneMatch(roles::contains);
     }
 
-    public void validateProjectNotCanceled(ProjectStatus status) {
-        if (status.equals(ProjectStatus.CANCELLED)) {
-            throw new IllegalArgumentException("project was canceled");
-        }
-    }
-
     public void validateCount(Long count) {
         if (count == null || count < 0) {
             throw new IllegalArgumentException("incorrect reference of count");

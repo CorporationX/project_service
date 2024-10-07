@@ -13,7 +13,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.validator.ValidatorProject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,13 +29,11 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
     private final List<ProjectFilters> filters;
-    private final ValidatorProject validator;
     private final ProjectViewEventPublisher projectViewEventPublisher;
 
     @Override
     public void createProject(ProjectDto projectDto) {
         Project project = mapper.toEntity(projectDto);
-        validator.validateProject(projectDto);
         validationDuplicateProjectNames(projectDto);
         project.setStatus(ProjectStatus.CREATED);
         projectRepository.save(project);

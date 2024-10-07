@@ -10,7 +10,6 @@ import faang.school.projectservice.model.*;
 import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
-import faang.school.projectservice.validator.ValidatorProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -31,9 +30,6 @@ public class ProjectServiceImplTest {
 
     @InjectMocks
     private ProjectServiceImpl projectService;
-
-    @Mock
-    private ValidatorProject validator;
 
     @Mock
     private ProjectRepository projectRepository;
@@ -122,7 +118,7 @@ public class ProjectServiceImplTest {
         requester.setUserId(1L);
 
         when(projectRepository.findAll()).thenReturn(projects);
-        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, validator, projectViewEventPublisher);
+        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher);
 
         List<ProjectDto> result = service.getProjectsFilters(filterDto, requester);
         assertThat(result).isEqualTo(projects);
@@ -176,7 +172,7 @@ public class ProjectServiceImplTest {
 
         when(project.getTeams()).thenReturn(List.of(team1, team2));
 
-        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, validator, projectViewEventPublisher)
+        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher)
                 .checkUserByPrivateProject(project, requesterId);
 
         assertTrue(result);
