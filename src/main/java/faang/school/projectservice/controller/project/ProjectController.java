@@ -1,19 +1,17 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.groups.Groups;
+import faang.school.projectservice.dto.project.ProjectCoverDeleteResponse;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.InvalidFileException;
-import faang.school.projectservice.exception.InvalidInvitationStatusException;
-import faang.school.projectservice.service.ProjectCoverService;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.project.cover.ProjectCoverService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,14 +38,16 @@ public class ProjectController {
     public ResponseEntity<String> uploadProjectCover(
             @PathVariable Long projectId,
             @RequestParam("file") MultipartFile file) {
-        try {
-            String coverImageId = projectCoverService.uploadProjectCover(projectId, file);
-            return ResponseEntity.ok("Обложка успешно загружена. ID: " + coverImageId);
-        } catch (InvalidFileException | EntityNotFoundException | InvalidInvitationStatusException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ошибка при загрузке обложки: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Внутренняя ошибка сервера");
-        }
+        String coverImageId = projectCoverService.uploadProjectCover(projectId, file);
+        return ResponseEntity.ok("Cover uploaded successfully. ID: " + coverImageId);
+    }
+
+    @DeleteMapping("/{projectId}/cover")
+    public ResponseEntity<ProjectCoverDeleteResponse> deleteProjectCover(
+            @PathVariable @Positive Long projectId) {
+        projectCoverService.deleteProjectCover(projectId);
+        ProjectCoverDeleteResponse response = new ProjectCoverDeleteResponse("Cover successfully deleted");
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{projectId}")
