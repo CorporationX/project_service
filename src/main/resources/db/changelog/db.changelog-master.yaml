@@ -68,3 +68,5 @@ databaseChangeLog:
                   type: varchar(512)
                   constraints:
                     nullable: false
+  - include:
+      file: db/changelog/changeset/project_V017__add_jira_key_column.sql
