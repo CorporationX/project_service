@@ -5,9 +5,7 @@ import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -15,8 +13,7 @@ public class TeamMemberRepository {
     private final TeamMemberJpaRepository jpaRepository;
 
     public TeamMember findByUserIdAndProjectId(Long userId, Long projectId) {
-        return jpaRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Member not found for userId and projectId (%s, %s)", userId, projectId)));
+        return jpaRepository.findByUserIdAndProjectId(userId, projectId);
     }
 
     public TeamMember findByIdOrThrow(Long id) {

@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long> {
@@ -14,7 +13,7 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
         "WHERE tm.userId = :userId " +
         "AND t.project.id = :projectId"
     )
-    Optional<TeamMember> findByUserIdAndProjectId(long userId, long projectId);
+    TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
 }

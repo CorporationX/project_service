@@ -31,11 +31,17 @@ public class TeamMemberService {
     private final ProjectRepository projectRepository;
     private final UserContext userContext;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<TeamMember> getMembersForTeam(Long teamId) {
         Team target = teamRepository.findById(teamId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("No team found for ID = %s", teamId)));
         return target.getTeamMembers();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TeamMember> getMembersForUser(Long userId) {
+        UserDto validated = userServiceClient.getUser(userId);
+        return teamMemberRepository.findByUserId(validated.getId());
     }
 
     @Transactional
@@ -43,11 +49,12 @@ public class TeamMemberService {
         Team toReceiveMembers = teamRepository.findById(teamId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("No team found for ID = %s", teamId)));
         Project teamProject = toReceiveMembers.getProject();
-        TeamMember caller = teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), teamProject.getId());
-        TeamMemberUtil.validateOwnerOrTeamLead(teamProject, userContext.getUserId(), caller);
-        List<TeamMember> verifiedMembers = userServiceClient.getUsersByIds(userIds)
-                .stream()
-                .map(dto -> verifyMember(dto, teamProject.getId(), toReceiveMembers, role))
+        Long callerId = userContext.getUserId();
+        TeamMember caller = teamMemberRepository.findByUserIdAndProjectId(callerId, teamProject.getId());
+        TeamMemberUtil.validateProjectOwnerOrTeamLead(caller, callerId, teamProject);
+
+        List<TeamMember> verifiedMembers = userServiceClient.getUsersByIds(userIds).stream()
+                .map(dto -> createIfNotExistent(dto, teamProject.getId(), toReceiveMembers, role))
                 .toList();
         teamRepository.save(toReceiveMembers);
         log.info("Added members to team(ID={})", toReceiveMembers.getId());
@@ -58,11 +65,15 @@ public class TeamMemberService {
     public TeamMember updateMemberRoles(Long teamMemberId, List<TeamRole> newRoles) {
         TeamMember toUpdate = teamMemberRepository.findByIdOrThrow(teamMemberId);
         Project teamProject = toUpdate.getTeam().getProject();
+
         TeamMember caller = teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), teamProject.getId());
         TeamMemberUtil.validateTeamLead(caller);
         TeamMemberUtil.validateNewRolesNotEmpty(newRoles);
         toUpdate.setRoles(newRoles);
-        return teamMemberRepository.save(toUpdate);
+
+        TeamMember withUpdatedRoles = teamMemberRepository.save(toUpdate);
+        log.info("Updated roles for member: ID = {}", withUpdatedRoles.getId());
+        return withUpdatedRoles;
     }
 
     @Transactional
@@ -70,7 +81,10 @@ public class TeamMemberService {
         TeamMember toUpdate = teamMemberRepository.findByIdOrThrow(teamMemberId);
         TeamMemberUtil.validateCallerOwnsAccount(toUpdate, userContext.getUserId());
         toUpdate.setNickname(nickname);
-        return teamMemberRepository.save(toUpdate);
+
+        TeamMember withUpdatedNickname = teamMemberRepository.save(toUpdate);
+        log.info("Updated nickname({}) for member: ID = {}", nickname, withUpdatedNickname.getId());
+        return withUpdatedNickname;
     }
 
     @Transactional
@@ -79,9 +93,11 @@ public class TeamMemberService {
         TeamMemberUtil.validateProjectOwner(toBeRemovedFrom, userContext.getUserId());
         List<TeamMember> membersToRemove = userServiceClient.getUsersByIds(userIds).stream()
                 .map(UserDto::getId)
-                .map(userId -> teamMemberRepository.findByUserIdAndProjectId(projectId, userId))
+                .map(userId -> teamMemberRepository.findByUserIdAndProjectId(userId, projectId))
                 .toList();
         teamMemberRepository.deleteAll(membersToRemove);
+        projectRepository.save(toBeRemovedFrom);
+        log.info("Removed users(IDs = {}) from project: ID = {}", userIds, toBeRemovedFrom.getId());
     }
 
     @Transactional(readOnly = true)
@@ -102,26 +118,19 @@ public class TeamMemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<TeamMember> getMembersForUser(Long userId) {
-        UserDto validated = userServiceClient.getUser(userId);
-        return teamMemberRepository.findByUserId(validated.getId());
+    public TeamMember getMemberById(Long memberId) {
+        return teamMemberRepository.findByIdOrThrow(memberId);
     }
 
-    private TeamMember verifyMember(UserDto userData, Long projectId, Team target, TeamRole role) {
+    private TeamMember createIfNotExistent(UserDto userData, Long projectId, Team target, TeamRole role) {
         TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userData.getId(), projectId);
-        if (Objects.isNull(member)) {
-            return TeamMember.builder()
-                    .userId(userData.getId())
-                    .nickname(userData.getUsername())
-                    .team(target)
-                    .roles(List.of(role))
-                    .build();
-        }
-        if (member.getRoles().contains(role)) {
-            throw new IllegalStateException("Team member with user ID" + userData.getId() + "already has this role on the project.");
-        }
-        member.getRoles().add(role);
-        return member;
+        TeamMemberUtil.validateUserNotInProject(member, projectId);
+        return TeamMember.builder()
+                .userId(userData.getId())
+                .nickname(userData.getUsername())
+                .team(target)
+                .roles(List.of(role))
+                .build();
     }
 
     private Predicate<TeamMember> nicknameFilter(String filter) {

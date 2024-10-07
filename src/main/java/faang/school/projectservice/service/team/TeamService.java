@@ -1,14 +1,9 @@
 package faang.school.projectservice.service.team;
 
-import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.team.CreateMembersDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamRepository;
-import faang.school.projectservice.util.TeamMemberUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,26 +18,21 @@ import java.util.Objects;
 public class TeamService {
     private final ProjectRepository projectRepository;
     private final TeamRepository teamRepository;
-    private final TeamMemberService teamMemberService;
-    private final UserContext userContext;
 
     @Transactional
-    public Team createTeam(Long projectId, CreateMembersDto dto) {
+    public Team createTeam(Long projectId) {
         Project project = projectRepository.getProjectByIdOrThrow(projectId);
-        TeamMemberUtil.validateProjectOwner(project, userContext.getUserId());
+
         Team team = new Team();
         team.setProject(project);
-        if (Objects.nonNull(dto)) {
-            teamRepository.save(team);
-            teamMemberService.addToTeam(team.getId(), dto.getRole(), dto.getUserIds());
+        Team created = teamRepository.save(team);
+        log.info("Created team(teamID = {}) for project(projectID = {})", created.getId(), projectId);
+        if (Objects.isNull(project.getTeams()) || project.getTeams().isEmpty()) {
+            project.setTeams(List.of(team));
         } else {
-            // at team creation, owner should be added to the team
-            // this method should be defined in teamMemberService
+            project.getTeams().add(team);
         }
-
-        project.getTeams().add(team);
         projectRepository.save(project);
-        log.info("Created team(teamID = {}) for project(projectID = {})", team.getId(), projectId);
-        return teamRepository.save(team);
+        return created;
     }
 }
