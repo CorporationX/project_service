@@ -76,7 +76,6 @@ public class TaskService {
     }
 
     private void checkUserExists(Long userId) {
-        //todo: Проверка существования пользователя через сервис UserServiceClient
         if (userServiceClient.getUser(userId) == null) {
             throw new IllegalArgumentException("User does not exist");
         }

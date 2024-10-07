@@ -10,7 +10,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamRepository;
-import faang.school.projectservice.util.TeamMemberUtil;
+import faang.school.projectservice.validator.TeamMemberValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,7 @@ public class TeamMemberService {
     private final TeamRepository teamRepository;
     private final UserServiceClient userServiceClient;
     private final ProjectRepository projectRepository;
+    private final TeamMemberValidator teamMemberValidator;
     private final UserContext userContext;
 
     @Transactional(readOnly = true)
@@ -50,7 +51,7 @@ public class TeamMemberService {
         Project teamProject = toReceiveMembers.getProject();
         long callerId = userContext.getUserId();
         TeamMember caller = teamMemberRepository.findByUserIdAndProjectId(callerId, teamProject.getId());
-        TeamMemberUtil.validateProjectOwnerOrTeamLead(caller, callerId, teamProject);
+        teamMemberValidator.validateProjectOwnerOrTeamLead(caller, callerId, teamProject);
 
         List<TeamMember> verifiedMembers = userServiceClient.getUsersByIds(userIds).stream()
                 .map(dto -> createIfNotExistent(dto, teamProject.getId(), toReceiveMembers, role))
@@ -67,10 +68,10 @@ public class TeamMemberService {
         Project teamProject = toUpdate.getTeam().getProject();
 
         TeamMember caller = teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), teamProject.getId());
-        TeamMemberUtil.validateTeamLead(caller);
-        TeamMemberUtil.validateNewRolesNotEmpty(newRoles);
-        toUpdate.setRoles(newRoles);
+        teamMemberValidator.validateTeamLead(caller);
+        teamMemberValidator.validateNewRolesNotEmpty(newRoles);
 
+        toUpdate.setRoles(newRoles);
         TeamMember withUpdatedRoles = teamMemberRepository.save(toUpdate);
         log.info("Updated roles for member: ID = {}", withUpdatedRoles.getId());
         return withUpdatedRoles;
@@ -80,7 +81,7 @@ public class TeamMemberService {
     public TeamMember updateMemberNickname(Long teamMemberId, String nickname) {
         TeamMember toUpdate = teamMemberRepository.findById(teamMemberId).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", teamMemberId)));
-        TeamMemberUtil.validateCallerOwnsAccount(toUpdate, userContext.getUserId());
+        teamMemberValidator.validateCallerOwnsAccount(toUpdate, userContext.getUserId());
         toUpdate.setNickname(nickname);
 
         TeamMember withUpdatedNickname = teamMemberRepository.save(toUpdate);
@@ -91,7 +92,7 @@ public class TeamMemberService {
     @Transactional
     public void removeFromProject(Long projectId, List<Long> userIds) {
         Project toBeRemovedFrom = projectRepository.getByIdOrThrow(projectId);
-        TeamMemberUtil.validateProjectOwner(toBeRemovedFrom, userContext.getUserId());
+        teamMemberValidator.validateProjectOwner(toBeRemovedFrom, userContext.getUserId());
         List<TeamMember> membersToRemove = userServiceClient.getUsersByIds(userIds).stream()
                 .map(UserDto::getId)
                 .map(userId -> {
@@ -125,7 +126,8 @@ public class TeamMemberService {
 
     private TeamMember createIfNotExistent(UserDto userData, Long projectId, Team target, TeamRole role) {
         TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userData.getId(), projectId);
-        TeamMemberUtil.validateUserNotInProject(member, projectId);
+        teamMemberValidator.validateUserNotInProject(member, projectId);
+
         return TeamMember.builder()
                 .userId(userData.getId())
                 .nickname(userData.getUsername())

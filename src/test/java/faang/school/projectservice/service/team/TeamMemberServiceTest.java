@@ -10,6 +10,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamRepository;
+import faang.school.projectservice.validator.TeamMemberValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +45,8 @@ public class TeamMemberServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private UserServiceClient userServiceClient;
+    @Mock
+    private TeamMemberValidator teamMemberValidator;
     @Mock
     private UserContext userContext;
 
@@ -121,6 +125,7 @@ public class TeamMemberServiceTest {
         when(userContext.getUserId())
                 .thenReturn(1L);
         when(teamMemberRepository.findByUserIdAndProjectId(1L, project.getId())).thenReturn(null);
+        doNothing().when(teamMemberValidator).validateProjectOwnerOrTeamLead(null, 1L, project);
         when(userServiceClient.getUsersByIds(List.of(3L, 4L)))
                 .thenReturn(dtos);
         when(teamMemberRepository.saveAll(List.of(tm1, tm2)))
@@ -142,7 +147,7 @@ public class TeamMemberServiceTest {
 
     @Test
     @DisplayName("- Add members to team: no tech lead privileges")
-    public void testAddToTeam_NotTechLead() {
+    public void testAddToTeam_NotTeamLead() {
         Project project = new Project();
         project.setId(1L);
         project.setOwnerId(1L);
@@ -161,6 +166,7 @@ public class TeamMemberServiceTest {
         when(userContext.getUserId()).thenReturn(2L);
         when(teamMemberRepository.findByUserIdAndProjectId(member.getUserId(), project.getId()))
                 .thenReturn(member);
+        doThrow(SecurityException.class).when(teamMemberValidator).validateProjectOwnerOrTeamLead(member, 2L, project);
         assertThrows(SecurityException.class,
                 () -> teamMemberService.addToTeam(team.getId(), TeamRole.DEVELOPER, List.of(3L, 4L)));
     }
@@ -186,6 +192,7 @@ public class TeamMemberServiceTest {
         when(userContext.getUserId()).thenReturn(2L);
         when(teamMemberRepository.findByUserIdAndProjectId(member.getUserId(), project.getId()))
                 .thenReturn(member);
+        doNothing().when(teamMemberValidator).validateProjectOwnerOrTeamLead(member, 2L, project);
         when(userServiceClient.getUsersByIds(List.of(3L, 4L)))
                 .thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class,
@@ -221,10 +228,12 @@ public class TeamMemberServiceTest {
         when(userContext.getUserId()).thenReturn(2L);
         when(teamMemberRepository.findByUserIdAndProjectId(member.getUserId(), project.getId()))
                 .thenReturn(member);
+        doNothing().when(teamMemberValidator).validateProjectOwnerOrTeamLead(member, 2L, project);
         when(userServiceClient.getUsersByIds(List.of(3L, 4L)))
                 .thenReturn(dtos);
         when(teamMemberRepository.findByUserIdAndProjectId(3L, project.getId()))
                 .thenReturn(member);
+        doThrow(IllegalStateException.class).when(teamMemberValidator).validateUserNotInProject(member, project.getId());
         assertThrows(IllegalStateException.class,
                 () -> teamMemberService.addToTeam(team.getId(), TeamRole.DEVELOPER, List.of(3L, 4L)));
     }
@@ -310,6 +319,7 @@ public class TeamMemberServiceTest {
         when(teamMemberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(userContext.getUserId()).thenReturn(member.getId());
         when(teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), project.getId())).thenReturn(member);
+        doThrow(SecurityException.class).when(teamMemberValidator).validateTeamLead(member);
 
         assertThrows(SecurityException.class,
                 () -> teamMemberService.updateMemberRoles(member.getId(), List.of(TeamRole.DEVELOPER)));
@@ -334,8 +344,10 @@ public class TeamMemberServiceTest {
         when(teamMemberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(userContext.getUserId()).thenReturn(member.getId());
         when(teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), project.getId())).thenReturn(member);
+        doNothing().when(teamMemberValidator).validateTeamLead(member);
+        doThrow(IllegalArgumentException.class).when(teamMemberValidator).validateNewRolesNotEmpty(List.of());
 
-        assertThrows(SecurityException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> teamMemberService.updateMemberRoles(member.getId(), List.of()));
     }
 
@@ -355,6 +367,7 @@ public class TeamMemberServiceTest {
 
         when(teamMemberRepository.findById(tm.getId())).thenReturn(Optional.of(tm));
         when(userContext.getUserId()).thenReturn(1L);
+        doNothing().when(teamMemberValidator).validateCallerOwnsAccount(tm, 1L);
         when(teamMemberRepository.save(tm)).thenReturn(saved);
 
         TeamMember updated = teamMemberService.updateMemberNickname(tm.getId(), updatedNickname);
@@ -381,6 +394,7 @@ public class TeamMemberServiceTest {
         tm.setUserId(2L);
         when(teamMemberRepository.findById(tm.getId())).thenReturn(Optional.of(tm));
         when(userContext.getUserId()).thenReturn(1L);
+        doThrow(SecurityException.class).when(teamMemberValidator).validateCallerOwnsAccount(tm, 1L);
 
         assertThrows(SecurityException.class,
                 () -> teamMemberService.updateMemberNickname(tm.getId(), "nickname"));
@@ -408,6 +422,7 @@ public class TeamMemberServiceTest {
 
         when(projectRepository.getByIdOrThrow(project.getId())).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
+        doNothing().when(teamMemberValidator).validateProjectOwner(project, 1L);
         when(userServiceClient.getUsersByIds(List.of(2L, 3L))).thenReturn(dtos);
         when(teamMemberRepository.findByUserIdAndProjectId(dto1.getId(), project.getId())).thenReturn(tm1);
         when(teamMemberRepository.findByUserIdAndProjectId(dto2.getId(), project.getId())).thenReturn(tm2);
@@ -435,17 +450,6 @@ public class TeamMemberServiceTest {
     }
 
     @Test
-    @DisplayName("- Remove members from project: context not working")
-    public void testRemoveMembersFromProject_ContextError() {
-        Project project = new Project();
-        project.setId(1L);
-
-        when(projectRepository.getByIdOrThrow(1L)).thenReturn(project);
-        assertThrows(NullPointerException.class,
-                () -> teamMemberService.removeFromProject(1L, List.of(1L, 2L)));
-    }
-
-    @Test
     @DisplayName("- Remove members from project: not project owner")
     public void testRemoveMembersFromProject_NotProjectOwner() {
         Project project = new Project();
@@ -454,6 +458,7 @@ public class TeamMemberServiceTest {
 
         when(projectRepository.getByIdOrThrow(1L)).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
+        doThrow(SecurityException.class).when(teamMemberValidator).validateProjectOwner(project, 1L);
         assertThrows(SecurityException.class,
                 () -> teamMemberService.removeFromProject(1L, List.of(1L, 2L)));
     }
@@ -468,6 +473,7 @@ public class TeamMemberServiceTest {
 
         when(projectRepository.getByIdOrThrow(1L)).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
+        doNothing().when(teamMemberValidator).validateProjectOwner(project, 1L);
         when(userServiceClient.getUsersByIds(userIds)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class,
                 () -> teamMemberService.removeFromProject(1L, userIds));
@@ -490,6 +496,7 @@ public class TeamMemberServiceTest {
 
         when(projectRepository.getByIdOrThrow(1L)).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
+        doNothing().when(teamMemberValidator).validateProjectOwner(project, 1L);
         when(userServiceClient.getUsersByIds(userIds)).thenReturn(dtos);
         assertThrows(EntityNotFoundException.class,
                 () -> teamMemberService.removeFromProject(1L, userIds));
