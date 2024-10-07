@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.resource;
 
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceResponseDto;
 import faang.school.projectservice.dto.resource.ResourceUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -15,7 +16,8 @@ import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.service.teammember.TeamMemberService;
-import faang.school.projectservice.util.decoder.MultiPartFileDecoder;
+import faang.school.projectservice.util.converter.GigabyteConverter;
+import faang.school.projectservice.util.converter.MultiPartFileConverter;
 import faang.school.projectservice.validator.resource.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -41,32 +43,24 @@ public class ResourceService {
     private final ProjectService projectService;
     private final TeamMemberService teamMemberService;
     private final ResourceValidator resourceValidator;
+    private final GigabyteConverter gigabyteConverter;
+    private final UserContext userContext;
 
     @Transactional
-    public ResourceResponseDto saveResource(MultipartFile file, long projectId, long memberId) {
+    public ResourceResponseDto saveResource(MultipartFile file, long projectId, long teamMemberId) {
         Project project = projectService.getProjectById(projectId);
-        TeamMember fileOwner = teamMemberService.getTeamMemberById(memberId);
+        TeamMember fileOwner = teamMemberService.getTeamMemberById(teamMemberId);
 
         resourceValidator.validateTeamMemberBelongsToProject(fileOwner, projectId);
-        resourceValidator.setNewProjectStorageSize(project);
+        projectService.setNewProjectStorageSize(project);
         resourceValidator.validateStorageCapacity(file, project);
 
         project.setStorageSize(BigInteger.valueOf(project.getStorageSize().longValue() - file.getSize()));
         log.debug("New storage size {} GB for project {}",
-                resourceValidator.byteToGigabyteConverter(project.getStorageSize().longValue()),
+                gigabyteConverter.byteToGigabyteConverter(project.getStorageSize().longValue()),
                 project.getName());
 
-        Resource resource = Resource.builder()
-                .name(file.getOriginalFilename())
-                .key(file.getOriginalFilename() + "@" + BigInteger.valueOf(file.getSize()))
-                .size(BigInteger.valueOf(file.getSize()))
-                .allowedRoles(new ArrayList<>(fileOwner.getRoles()))
-                .type(ResourceType.getResourceType(file.getContentType()))
-                .status(ResourceStatus.ACTIVE)
-                .createdBy(fileOwner)
-                .updatedBy(fileOwner)
-                .project(project)
-                .build();
+        Resource resource = buildNewResource(file, fileOwner, project);
 
         project.getResources().add(resource);
 
@@ -79,45 +73,44 @@ public class ResourceService {
         return resourceMapper.toResponseDto(resource);
     }
 
-    public ResourceResponseDto updateFileInfo(ResourceUpdateDto resourceUpdateDto) {
-        Resource originalResource = getResourceById(resourceUpdateDto.getId());
+    public ResourceResponseDto updateFileInfo(ResourceUpdateDto resourceUpdateDto, long resourceId, long updatedById) {
+        Resource originalResource = getResourceById(resourceId);
 
-        TeamMember member = teamMemberService.getTeamMemberById(resourceUpdateDto.getUpdatedById());
+        TeamMember member = teamMemberService.getTeamMemberById(updatedById);
+
+        resourceAccessValidation(originalResource.getCreatedBy().getId(), member.getId(),
+                originalResource.getProject().getOwnerId(),resourceId);
 
         originalResource.setName(resourceUpdateDto.getName());
         originalResource.setStatus(resourceUpdateDto.getStatus());
-        List<TeamRole> updatedRoles = new ArrayList<>(resourceUpdateDto.getAllowedRoles());
-        updatedRoles.addAll(originalResource.getAllowedRoles());
-        originalResource.setAllowedRoles(updatedRoles);
+        originalResource.getAllowedRoles().addAll(resourceUpdateDto.getAllowedRoles());
         originalResource.setUpdatedBy(member);
 
         Resource updatedResource = resourceRepository.save(originalResource);
         return resourceMapper.toResponseDto(updatedResource);
     }
-
+    @Transactional
     public void deleteFile(long resourceId, long teamMemberId) {
-        Resource resource = getResourceById(resourceId);
-        long resourceCreatorId = resource.getCreatedBy().getId();
-        long projectOwnerId = resource.getProject().getOwnerId();
+        Resource resourceToDelete = getResourceById(resourceId);
+
+        long resourceCreatorId = resourceToDelete.getCreatedBy().getId();
+        long projectOwnerId = resourceToDelete.getProject().getOwnerId();
+        String resourceOriginalKey = resourceToDelete.getKey();
+
         TeamMember fileOwner = teamMemberService.getTeamMemberById(teamMemberId);
 
-        if (!Objects.equals(resourceCreatorId, fileOwner.getId()) ||
-                !Objects.equals(projectOwnerId, fileOwner.getId())) {
-            log.error("TeamMember with id {} , doesn't upload this file {} or not an Owner of the project!",
-                    fileOwner.getId(), resource.getId());
-            throw new DataValidationException("You don't have rights to delete this file!");
-        }
+        resourceAccessValidation(resourceCreatorId, fileOwner.getId(), projectOwnerId,resourceId);
 
-        s3Service.deleteObject(resource);
+        clearProjectStorage(resourceToDelete);
+        resourceToDelete.getProject().getResources().remove(resourceToDelete);
+        resourceToDelete.setUpdatedBy(fileOwner);
+        resourceToDelete.setKey("");
+        resourceToDelete.setSize(null);
+        resourceToDelete.setStatus(ResourceStatus.DELETED);
 
-        clearProjectStorage(resource);
-        resource.getProject().getResources().remove(resource);
-        resource.setUpdatedBy(fileOwner);
-        resource.setKey("");
-        resource.setSize(null);
-        resource.setStatus(ResourceStatus.DELETED);
+        resourceRepository.save(resourceToDelete);
 
-        resourceRepository.save(resource);
+        s3Service.deleteObject(resourceOriginalKey,resourceToDelete.getProject().getName());
     }
 
     public MultipartFile downloadFile(long resourceId) {
@@ -127,7 +120,7 @@ public class ResourceService {
         try {
             log.debug("Trying to read bytes from object");
             byte[] content = object.getObjectContent().readAllBytes();
-            return new MultiPartFileDecoder(content,
+            return new MultiPartFileConverter(content,
                     resource.getName(), resource.getKey(), object.getObjectMetadata().getContentType());
         } catch (IOException e) {
             log.error("Something's gone wrong while downloading file! {}", (Object) e.getStackTrace());
@@ -148,5 +141,28 @@ public class ResourceService {
 
     private void clearProjectStorage(Resource resource) {
         resource.getProject().setStorageSize(resource.getProject().getStorageSize().add(resource.getSize()));
+    }
+
+    private Resource buildNewResource(MultipartFile file, TeamMember fileOwner, Project project){
+        return Resource.builder()
+                .name(file.getOriginalFilename())
+                .key(file.getOriginalFilename() + "@" + BigInteger.valueOf(file.getSize()))
+                .size(BigInteger.valueOf(file.getSize()))
+                .allowedRoles(new ArrayList<>(fileOwner.getRoles()))
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .status(ResourceStatus.ACTIVE)
+                .createdBy(fileOwner)
+                .updatedBy(fileOwner)
+                .project(project)
+                .build();
+    }
+    private void resourceAccessValidation(long resourceCreatorId, long fileOwnerId,
+                                          long projectOwnerId, long resourceId){
+        if (!Objects.equals(resourceCreatorId, fileOwnerId) ||
+                !Objects.equals(projectOwnerId, fileOwnerId)) {
+            log.error("TeamMember with id {} , doesn't upload this file {} or not an Owner of the project!",
+                    fileOwnerId, resourceId);
+            throw new DataValidationException("You don't have rights to delete this file!");
+        }
     }
 }

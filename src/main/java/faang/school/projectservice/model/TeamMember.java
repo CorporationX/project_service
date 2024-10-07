@@ -16,15 +16,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 import java.util.Objects;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -51,18 +52,4 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TeamMember that)) return false;
-        return Objects.equals(getId(), that.getId()) && Objects.equals(getUserId(), that.getUserId()) &&
-                Objects.equals(getRoles(), that.getRoles()) && Objects.equals(getTeam(), that.getTeam()) &&
-                Objects.equals(getStages(), that.getStages());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getUserId(), getRoles(), getTeam(), getStages());
-    }
 }

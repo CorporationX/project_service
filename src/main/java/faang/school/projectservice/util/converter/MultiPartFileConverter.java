@@ -1,4 +1,4 @@
-package faang.school.projectservice.util.decoder;
+package faang.school.projectservice.util.converter;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 @Builder
 @AllArgsConstructor
-public class MultiPartFileDecoder implements MultipartFile {
+public class MultiPartFileConverter implements MultipartFile {
 
     private byte[] input;
     private String name;

@@ -7,13 +7,14 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import faang.school.projectservice.config.properties.PropertiesConfig;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.util.decoder.MultiPartFileDecoder;
+import faang.school.projectservice.util.converter.MultiPartFileConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,6 +44,8 @@ public class S3ServiceTest {
     private S3Service s3Service;
     @Mock
     private AmazonS3Client amazonS3Client;
+    @Mock
+    private PropertiesConfig config;
     private static final long TEAM_MEMBER_ID_ONE = 1L;
     private static final String FILE_NAME = "BoberNotKurwa";
     private static final String CONTENT_TYPE = "png/image";
@@ -74,7 +77,7 @@ public class S3ServiceTest {
                 .roles(List.of(TeamRole.DEVELOPER))
                 .build();
 
-        file = MultiPartFileDecoder.builder()
+        file = MultiPartFileConverter.builder()
                 .originalFileName(FILE_NAME)
                 .contentType(CONTENT_TYPE)
                 .input(INPUT)
@@ -108,7 +111,7 @@ public class S3ServiceTest {
         @Test
         @DisplayName("When valid Resource passed then delete it from s3")
         public void whenResourcePassedThenDeleteItFromS3storage() {
-            s3Service.deleteObject(resource);
+            s3Service.deleteObject(resource.getKey(), resource.getProject().getName());
         }
 
         @Test
@@ -167,7 +170,7 @@ public class S3ServiceTest {
                     .deleteObject(any(DeleteObjectRequest.class));
 
             assertThrows(RuntimeException.class, () ->
-                    s3Service.deleteObject(resource));
+                    s3Service.deleteObject(resource.getKey(),resource.getProject().getName()));
         }
 
         @Test
@@ -177,7 +180,7 @@ public class S3ServiceTest {
                     .deleteObject(any(DeleteObjectRequest.class));
 
             assertThrows(RuntimeException.class, () ->
-                    s3Service.deleteObject(resource));
+                    s3Service.deleteObject(resource.getKey(),resource.getProject().getName()));
         }
 
         @Test

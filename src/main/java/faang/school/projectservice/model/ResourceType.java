@@ -13,6 +13,7 @@ public enum ResourceType {
     MSEXCEL,
     ZIP,
     OTHER;
+
     public static ResourceType getResourceType(String contentType) {
         if (isNull(contentType)) {
             return ResourceType.NONE;

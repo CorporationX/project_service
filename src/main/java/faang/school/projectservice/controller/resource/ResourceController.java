@@ -1,12 +1,15 @@
 package faang.school.projectservice.controller.resource;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceResponseDto;
 import faang.school.projectservice.dto.resource.ResourceUpdateDto;
+import faang.school.projectservice.dto.resource.ResourceUploadDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,21 +26,26 @@ import org.springframework.web.multipart.MultipartFile;
 public class ResourceController {
 
     private final ResourceService resourceService;
+    private final UserContext userContext;
 
-    @PutMapping("/{projectId}/upload/{memberId}")
+    @PostMapping
     public ResourceResponseDto upload(@RequestParam("file") MultipartFile file,
-                                      @PathVariable Long projectId, @PathVariable Long memberId) {
-        return resourceService.saveResource(file, projectId, memberId);
+                                      @ModelAttribute ResourceUploadDto resourceUploadDto) {
+        long projectId = resourceUploadDto.getProjectId();
+        long teamMemberId = userContext.getUserId();
+        return resourceService.saveResource(file, projectId, teamMemberId);
     }
 
-    @PostMapping("/update")
-    public ResourceResponseDto reload(@RequestBody ResourceUpdateDto resourceUpdateDto) {
-        return resourceService.updateFileInfo(resourceUpdateDto);
+    @PutMapping("/{resourceId}")
+    public ResourceResponseDto reload(@RequestBody ResourceUpdateDto resourceUpdateDto, @PathVariable Long resourceId) {
+        long updatedById = userContext.getUserId();
+        return resourceService.updateFileInfo(resourceUpdateDto, resourceId, updatedById);
     }
 
-    @DeleteMapping("/{resourceId}/{teamMemberId}")
+    @DeleteMapping("/{resourceId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long resourceId, @PathVariable Long teamMemberId) {
+    public void delete(@PathVariable Long resourceId) {
+        long teamMemberId = userContext.getUserId();
         resourceService.deleteFile(resourceId, teamMemberId);
     }
 

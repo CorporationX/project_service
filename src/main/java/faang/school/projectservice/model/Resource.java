@@ -16,9 +16,11 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -29,8 +31,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "project_resource")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -80,24 +81,4 @@ public class Resource {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Resource resource)) return false;
-        return Objects.equals(getId(), resource.getId()) && Objects.equals(getName(), resource.getName()) &&
-                Objects.equals(getKey(), resource.getKey()) && Objects.equals(getSize(), resource.getSize()) &&
-                Objects.equals(getAllowedRoles(), resource.getAllowedRoles()) && getType() == resource.getType() &&
-                getStatus() == resource.getStatus() && Objects.equals(getCreatedAt(), resource.getCreatedAt()) &&
-                Objects.equals(getCreatedBy(), resource.getCreatedBy()) &&
-                Objects.equals(getUpdatedBy(), resource.getUpdatedBy()) &&
-                Objects.equals(getUpdatedAt(), resource.getUpdatedAt()) &&
-                Objects.equals(getProject(), resource.getProject());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getName(), getKey(), getSize(), getAllowedRoles(), getType(), getStatus(),
-                getCreatedAt(), getCreatedBy(), getUpdatedBy(), getUpdatedAt(), getProject());
-    }
 }

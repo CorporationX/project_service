@@ -17,7 +17,8 @@ import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.service.teammember.TeamMemberService;
-import faang.school.projectservice.util.decoder.MultiPartFileDecoder;
+import faang.school.projectservice.util.converter.GigabyteConverter;
+import faang.school.projectservice.util.converter.MultiPartFileConverter;
 import faang.school.projectservice.validator.resource.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,6 +62,8 @@ public class ResourceServiceTest {
     private TeamMemberService teamMemberService;
     @Mock
     private ResourceValidator resourceValidator;
+    @Mock
+    private GigabyteConverter gigabyteConverter;
 
     private static final long RESOURCE_ID_ONE = 1L;
     private static final long PROJECT_ID_ONE = 1L;
@@ -74,7 +77,7 @@ public class ResourceServiceTest {
     private static final byte[] INPUT = new byte[(int) FILE_TEST_SIZE];
     private Project project;
     private TeamMember teamMember;
-    private MultiPartFileDecoder file;
+    private MultiPartFileConverter file;
     private ResourceResponseDto resourceResponseDto;
     private ResourceResponseDto updatedResponseDto;
     private Resource resource;
@@ -89,6 +92,7 @@ public class ResourceServiceTest {
         resources.add(Resource.builder().build());
 
         project = Project.builder()
+                .name("Project")
                 .id(PROJECT_ID_ONE)
                 .storageSize(STORAGE_SIZE)
                 .resources(resources)
@@ -100,7 +104,7 @@ public class ResourceServiceTest {
                 .roles(List.of(TeamRole.DEVELOPER))
                 .build();
 
-        file = MultiPartFileDecoder.builder()
+        file = MultiPartFileConverter.builder()
                 .originalFileName(FILE_NAME)
                 .contentType(CONTENT_TYPE)
                 .input(INPUT)
@@ -134,11 +138,9 @@ public class ResourceServiceTest {
                 .build();
 
         resourceUpdateDto = ResourceUpdateDto.builder()
-                .id(RESOURCE_ID_ONE)
                 .name(NEW_FILE_NAME)
                 .status(ResourceStatus.INACTIVE)
                 .allowedRoles(List.of(TeamRole.DESIGNER))
-                .updatedById(teamMember.getId())
                 .build();
 
         updatedResource = Resource.builder()
@@ -177,7 +179,7 @@ public class ResourceServiceTest {
 
         verify(resourceValidator).validateTeamMemberBelongsToProject(teamMember, project.getId());
         verify(resourceValidator).validateStorageCapacity(file, project);
-        verify(resourceValidator).setNewProjectStorageSize(project);
+        verify(projectService).setNewProjectStorageSize(project);
         verify(s3Service).saveObject(file, resource);
 
         assertEquals(resourceResponseDto, responseDtoResult);
@@ -186,18 +188,19 @@ public class ResourceServiceTest {
     @Test
     @DisplayName("When valid resourceUpdateDto passed then change Resource and return resourceResponseDto")
     public void whenValidDtoPassedChangeResourceInDBThenReturnResourceResponseDto() {
-        when(resourceRepository.findById(resourceUpdateDto.getId())).thenReturn(Optional.of(resource));
-        when(teamMemberService.getTeamMemberById(resourceUpdateDto.getUpdatedById())).thenReturn(teamMember);
+        when(resourceRepository.findById(RESOURCE_ID_ONE)).thenReturn(Optional.of(resource));
+        when(teamMemberService.getTeamMemberById(teamMember.getId())).thenReturn(teamMember);
         when(resourceRepository.save(resource)).thenReturn(updatedResource);
         when(resourceMapper.toResponseDto(updatedResource)).thenReturn(updatedResponseDto);
 
-        ResourceResponseDto responseDtoResult = resourceService.updateFileInfo(resourceUpdateDto);
+        ResourceResponseDto responseDtoResult =
+                resourceService.updateFileInfo(resourceUpdateDto, RESOURCE_ID_ONE,teamMember.getId());
 
-        assertEquals(resourceUpdateDto.getId(), responseDtoResult.getId());
+        assertEquals(RESOURCE_ID_ONE, responseDtoResult.getId());
         assertEquals(resourceUpdateDto.getName(), responseDtoResult.getName());
         assertEquals(resourceUpdateDto.getStatus(), responseDtoResult.getStatus());
         assertEquals(resourceUpdateDto.getAllowedRoles().size(), responseDtoResult.getAllowedRoles().size());
-        assertEquals(resourceUpdateDto.getUpdatedById(), responseDtoResult.getUpdatedById());
+        assertEquals(teamMember.getId(), responseDtoResult.getUpdatedById());
     }
 
     @Test
@@ -206,12 +209,13 @@ public class ResourceServiceTest {
     public void whenResourceIdAndTeamMemberIdPassedThenDeleteFileFromS3AndUpdateResource() {
         when(resourceRepository.findById(RESOURCE_ID_ONE)).thenReturn(Optional.of(resource));
         when(teamMemberService.getTeamMemberById(TEAM_MEMBER_ID_ONE)).thenReturn(teamMember);
+        String originalResourceKey = resource.getKey();
 
         when(resourceRepository.save(resource)).thenReturn(resource);
 
         resourceService.deleteFile(RESOURCE_ID_ONE, TEAM_MEMBER_ID_ONE);
 
-        verify(s3Service).deleteObject(resource);
+        verify(s3Service).deleteObject(originalResourceKey,resource.getProject().getName());
     }
 
     @Test
@@ -233,7 +237,7 @@ public class ResourceServiceTest {
         when(resourceRepository.findById(RESOURCE_ID_ONE)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () ->
-                resourceService.updateFileInfo(resourceUpdateDto));
+                resourceService.updateFileInfo(resourceUpdateDto, RESOURCE_ID_ONE,teamMember.getId()));
     }
 
     @Test
