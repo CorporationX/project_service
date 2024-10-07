@@ -22,5 +22,5 @@ public interface ProjectService {
 
     boolean checkUserByPrivateProject(Project project, long requester);
 
-    ProjectDto findById(long id);
+    ProjectDto findById(long id, long userId);
 }

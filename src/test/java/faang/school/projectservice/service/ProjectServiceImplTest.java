@@ -3,9 +3,11 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
 import faang.school.projectservice.validator.ValidatorProject;
@@ -26,14 +28,22 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceImplTest {
+
     @InjectMocks
     private ProjectServiceImpl projectService;
+
     @Mock
     private ValidatorProject validator;
+
     @Mock
     private ProjectRepository projectRepository;
+
     @Mock
     private List<ProjectFilters> filters;
+
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
+
     @Spy
     private ProjectMapper mapper = Mappers.getMapper(ProjectMapper.class);
 
@@ -112,7 +122,7 @@ public class ProjectServiceImplTest {
         requester.setUserId(1L);
 
         when(projectRepository.findAll()).thenReturn(projects);
-        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, validator);
+        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, validator, projectViewEventPublisher);
 
         List<ProjectDto> result = service.getProjectsFilters(filterDto, requester);
         assertThat(result).isEqualTo(projects);
@@ -134,15 +144,16 @@ public class ProjectServiceImplTest {
 
     @Test
     public void testFindById() {
-        long id = 1L;
+        long id = 1L, userId = 1L;
         Project project = new Project();
         project.setId(id);
         ProjectDto projectDto = new ProjectDto();
         projectDto.setId(id);
+        when(projectRepository.getProjectById(id)).thenReturn(project);
 
-        when(projectService.findById(id)).thenReturn(projectDto);
-        ProjectDto result = projectService.findById(id);
+        ProjectDto result = projectService.findById(id, userId);
 
+        verify(projectViewEventPublisher).publish(any(ProjectViewEvent.class));
         assertEquals(result, projectDto);
     }
 
@@ -165,7 +176,7 @@ public class ProjectServiceImplTest {
 
         when(project.getTeams()).thenReturn(List.of(team1, team2));
 
-        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, validator)
+        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, validator, projectViewEventPublisher)
                 .checkUserByPrivateProject(project, requesterId);
 
         assertTrue(result);
