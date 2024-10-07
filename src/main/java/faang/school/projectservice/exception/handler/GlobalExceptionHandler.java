@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler({EntityNotFoundException.class, NoSuchElementException.class})
+    @ExceptionHandler({NoSuchElementException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(RuntimeException exception) {
         String message = exception.getMessage();
