@@ -35,7 +35,7 @@ public class TeamServiceTest {
         Team team = new Team();
         team.setProject(project);
 
-        when(projectRepository.getProjectByIdOrThrow(project.getId()))
+        when(projectRepository.getByIdOrThrow(project.getId()))
                 .thenReturn(project);
         when(teamRepository.save(team)).thenReturn(team);
         when(projectRepository.save(project)).thenReturn(project);
@@ -49,7 +49,7 @@ public class TeamServiceTest {
     @Test
     @DisplayName("- Create team: invalid project ID")
     public void testCreateTeam_ProjectInvalid() {
-        when(projectRepository.getProjectByIdOrThrow(1L)).thenThrow(EntityNotFoundException.class);
+        when(projectRepository.getByIdOrThrow(1L)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class,
                 () -> teamService.createTeam(1L));
     }

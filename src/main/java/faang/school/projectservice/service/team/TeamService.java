@@ -21,7 +21,7 @@ public class TeamService {
 
     @Transactional
     public Team createTeam(Long projectId) {
-        Project project = projectRepository.getProjectByIdOrThrow(projectId);
+        Project project = projectRepository.getByIdOrThrow(projectId);
 
         Team team = new Team();
         team.setProject(project);

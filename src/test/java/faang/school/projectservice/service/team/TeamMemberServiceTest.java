@@ -403,7 +403,7 @@ public class TeamMemberServiceTest {
         TeamMember tm2 = new TeamMember();
         tm2.setUserId(dto2.getId());
 
-        when(projectRepository.findByIdThrowing(project.getId())).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(project.getId())).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
         when(userServiceClient.getUsersByIds(List.of(2L, 3L))).thenReturn(List.of(dto1, dto2));
         when(teamMemberRepository.findByUserIdAndProjectId(dto1.getId(), project.getId())).thenReturn(tm1);
@@ -412,7 +412,7 @@ public class TeamMemberServiceTest {
 
         teamMemberService.removeFromProject(project.getId(), List.of(dto1.getId(), dto2.getId()));
 
-        verify(projectRepository, times(1)).findByIdThrowing(project.getId());
+        verify(projectRepository, times(1)).getByIdOrThrow(project.getId());
         verify(userContext, times(1)).getUserId();
         verify(userServiceClient, times(1)).getUsersByIds(List.of(2L, 3L));
         verify(teamMemberRepository, times(1)).findByUserIdAndProjectId(dto1.getId(), project.getId());
@@ -426,7 +426,7 @@ public class TeamMemberServiceTest {
     @Test
     @DisplayName("- Remove members from project: project ID invalid")
     public void testRemoveMembersFromProject_NotFound() {
-        when(projectRepository.findByIdThrowing(1L)).thenThrow(EntityNotFoundException.class);
+        when(projectRepository.getByIdOrThrow(1L)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class,
                 () -> teamMemberService.removeFromProject(1L, List.of(1L, 2L)));
     }
@@ -437,7 +437,7 @@ public class TeamMemberServiceTest {
         Project project = new Project();
         project.setId(1L);
 
-        when(projectRepository.findByIdThrowing(1L)).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(1L)).thenReturn(project);
         assertThrows(NullPointerException.class,
                 () -> teamMemberService.removeFromProject(1L, List.of(1L, 2L)));
     }
@@ -449,7 +449,7 @@ public class TeamMemberServiceTest {
         project.setId(1L);
         project.setOwnerId(2L);
 
-        when(projectRepository.findByIdThrowing(1L)).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(1L)).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
         assertThrows(SecurityException.class,
                 () -> teamMemberService.removeFromProject(1L, List.of(1L, 2L)));
@@ -463,7 +463,7 @@ public class TeamMemberServiceTest {
         project.setOwnerId(1L);
         List<Long> userIds = List.of(1L, 2L);
 
-        when(projectRepository.findByIdThrowing(1L)).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(1L)).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
         when(userServiceClient.getUsersByIds(userIds)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class,
@@ -482,7 +482,7 @@ public class TeamMemberServiceTest {
                 UserDto.builder().id(2L).build()
         );
 
-        when(projectRepository.findByIdThrowing(1L)).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(1L)).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
         when(userServiceClient.getUsersByIds(userIds)).thenReturn(dtos);
         when(teamMemberRepository.findByUserIdAndProjectId(project.getId(), dtos.get(0).getId())).thenThrow(EntityNotFoundException.class);
@@ -511,10 +511,10 @@ public class TeamMemberServiceTest {
         t2.setTeamMembers(List.of(tm2));
         project.setTeams(List.of(t1, t2));
 
-        when(projectRepository.getProjectByIdOrThrow(project.getId())).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(project.getId())).thenReturn(project);
         List<TeamMember> resultingMembers = teamMemberService.getProjectMembersFiltered(project.getId(),null, null);
 
-        verify(projectRepository, times(1)).getProjectByIdOrThrow(project.getId());
+        verify(projectRepository, times(1)).getByIdOrThrow(project.getId());
         assertNotNull(resultingMembers);
         assertIterableEquals(List.of(tm1, tm2), resultingMembers);
     }
@@ -542,10 +542,10 @@ public class TeamMemberServiceTest {
         t2.setTeamMembers(List.of(tm2));
         project.setTeams(List.of(t1, t2));
 
-        when(projectRepository.getProjectByIdOrThrow(project.getId())).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(project.getId())).thenReturn(project);
         List<TeamMember> foundMembers = teamMemberService.getProjectMembersFiltered(project.getId(),"nick", null);
 
-        verify(projectRepository, times(1)).getProjectByIdOrThrow(project.getId());
+        verify(projectRepository, times(1)).getByIdOrThrow(project.getId());
         assertNotNull(foundMembers);
         assertIterableEquals(List.of(tm2), foundMembers);
     }
@@ -576,7 +576,7 @@ public class TeamMemberServiceTest {
         t2.setTeamMembers(List.of(tm2));
         project.setTeams(List.of(t1, t2));
 
-        when(projectRepository.getProjectByIdOrThrow(project.getId())).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(project.getId())).thenReturn(project);
         List<TeamMember> foundMembers = teamMemberService.getProjectMembersFiltered(project.getId(), null, TeamRole.DEVELOPER);
 
         assertNotNull(foundMembers);
@@ -586,7 +586,7 @@ public class TeamMemberServiceTest {
     @Test
     @DisplayName("- All members for a project: invalid project ID")
     public void testGetProjectMembersFiltered_NotFound() {
-        when(projectRepository.getProjectByIdOrThrow(1L)).thenThrow(EntityNotFoundException.class);
+        when(projectRepository.getByIdOrThrow(1L)).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class,
                 () -> teamMemberService.getProjectMembersFiltered(1L, null, null));
     }

@@ -89,7 +89,7 @@ public class TeamMemberService {
 
     @Transactional
     public void removeFromProject(Long projectId, List<Long> userIds) {
-        Project toBeRemovedFrom = projectRepository.findByIdThrowing(projectId);
+        Project toBeRemovedFrom = projectRepository.getByIdOrThrow(projectId);
         TeamMemberUtil.validateProjectOwner(toBeRemovedFrom, userContext.getUserId());
         List<TeamMember> membersToRemove = userServiceClient.getUsersByIds(userIds).stream()
                 .map(UserDto::getId)
@@ -102,7 +102,7 @@ public class TeamMemberService {
 
     @Transactional(readOnly = true)
     public List<TeamMember> getProjectMembersFiltered(Long projectId, String nickname, TeamRole role) {
-        Project target = projectRepository.getProjectByIdOrThrow(projectId);
+        Project target = projectRepository.getByIdOrThrow(projectId);
         Stream<TeamMember> stream = target.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream());
         if (Objects.nonNull(role)) {
