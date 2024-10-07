@@ -43,8 +43,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     private List<String> scopes;
 
     public Calendar authorizeAndGetCalendar() throws GeneralSecurityException, IOException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        return new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+        final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        return new Calendar.Builder(httpTransport, JSON_FACTORY, getCredentials(httpTransport))
                 .setApplicationName("name")
                 .build();
     }

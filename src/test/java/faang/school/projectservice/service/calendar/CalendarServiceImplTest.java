@@ -32,7 +32,7 @@ class CalendarServiceImplTest {
     private CalendarServiceImplValidator validator;
     private EventDto eventDto;
     private final long eventId = 1L;
-    private final String CALENDAR_ID = "primary";
+    private static final String CALENDAR_ID = "primary";
 
     @BeforeEach
     public void init() throws GeneralSecurityException, IOException{

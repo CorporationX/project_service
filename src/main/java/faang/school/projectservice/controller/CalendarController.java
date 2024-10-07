@@ -32,18 +32,18 @@ public class CalendarController {
         service.addEventToCalendar(eventId, calendarId);
     }
 
-    @GetMapping("/event/list/{calendarId}")
+    @GetMapping("/{calendarId}/event/list")
     public List<Event> getEvents(@PathVariable("calendarId") @NotBlank String calendarId) throws GeneralSecurityException, IOException {
         return service.getEvents(calendarId);
     }
 
-    @PutMapping("/event/{calendarId}")
+    @PutMapping("/{calendarId}/event")
     public void updateEvent(@PathVariable("calendarId") @NotBlank String calendarId,
                             @RequestBody EventDto eventDto) throws GeneralSecurityException, IOException {
         service.updateEvent(eventDto, calendarId);
     }
 
-    @PutMapping("/event/{calendarId}/{eventId}")
+    @PutMapping("/{calendarId}/{eventId}/event")
     public void updateEvent(@PathVariable("calendarId") @NotBlank String calendarId,
                             @PathVariable("eventId") @Positive long eventId) throws GeneralSecurityException, IOException {
         service.updateEvent(eventId, calendarId);
