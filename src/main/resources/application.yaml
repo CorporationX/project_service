@@ -24,12 +24,10 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
-
   servlet:
     multipart:
-      enabled: true
-      max-file-size: 10MB
-      max-request-size: 50MB
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 server:
   port: 8082
@@ -46,8 +44,8 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
-    region: us-east-1
+    bucketName: corpbucket
+    region: us-east-2
     isMocked: false
   payment-service:
     host: http://localhost

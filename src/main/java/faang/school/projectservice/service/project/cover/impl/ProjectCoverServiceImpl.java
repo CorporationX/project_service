@@ -3,7 +3,6 @@ package faang.school.projectservice.service.project.cover.impl;
 import faang.school.projectservice.exception.InvalidFileException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.cover.ImageProcessor;
 import faang.school.projectservice.service.project.cover.ProjectCoverService;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.config.ResourceConfig;
@@ -23,7 +22,6 @@ public class ProjectCoverServiceImpl implements ProjectCoverService {
 
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
-    private final ImageProcessor imageProcessor;
     private final ResourceConfig resourceConfig;
 
     @Override
@@ -35,19 +33,16 @@ public class ProjectCoverServiceImpl implements ProjectCoverService {
         if (file.getSize() > resourceConfig.getMaxSize()) {
             throw new InvalidFileException("File size exceeds " +
                     (resourceConfig.getMaxSize() / (1024 * 1024)) + " MB");
-
         }
 
         if (!isImageFile(file)) {
             throw new InvalidFileException("File must be an image (JPEG, PNG, GIF)");
         }
 
-        byte[] imageBytes = imageProcessor.processImage(file);
-
         String fileExtension = getFileExtension(file.getOriginalFilename());
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
 
-        s3Service.uploadFile(imageBytes, Objects.requireNonNull(file.getContentType()), fileName);
+        s3Service.uploadFile(file, fileName);
 
         Project project = projectRepository.getProjectById(projectId);
         project.setCoverImageId(fileName);

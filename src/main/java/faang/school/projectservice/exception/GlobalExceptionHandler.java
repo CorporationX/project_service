@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({DataValidationException.class, IllegalArgumentException.class})
+    @ExceptionHandler({DataValidationException.class, IllegalArgumentException.class, UserNotTeamMemberException.class, StorageSizeExceededException.class})
     public ErrorResponse handleValidationExceptions(DataValidationException ex) {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
@@ -78,5 +78,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleFileOperationException(FileOperationException ex) {
         log.error(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Throwable.class)
+    public ErrorResponse handleResourceHandlingException(Throwable e) {
+        log.error(e.getMessage(), e);
+        return new ErrorResponse(e.getMessage());
     }
 }

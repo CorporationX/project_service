@@ -2,7 +2,6 @@ package faang.school.projectservice.service.project.cover;
 
 import faang.school.projectservice.exception.FileOperationException;
 import faang.school.projectservice.exception.InvalidFileException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,7 +13,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 public class ImageProcessor {
 
     @Value("${resource.image.max-rectangle-width}")

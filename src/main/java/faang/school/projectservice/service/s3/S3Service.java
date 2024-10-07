@@ -1,10 +1,15 @@
 package faang.school.projectservice.service.s3;
 
-import faang.school.projectservice.dto.resource.ResourceObjectResponse;
-import lombok.NonNull;
+import faang.school.projectservice.dto.response.ResourceResponseObject;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface S3Service {
-    void uploadFile(byte[] fileContent, @NonNull String contentType, @NonNull String fileKey);
-    void deleteFile(@NonNull String fileKey);
-    ResourceObjectResponse downloadFile(@NonNull String fileKey);
+
+    void uploadFile(MultipartFile file, String key);
+
+    void uploadFile(byte[] fileContent, String contentType, String key);
+
+    void deleteFile(String key);
+
+    ResourceResponseObject downloadFile(String key);
 }

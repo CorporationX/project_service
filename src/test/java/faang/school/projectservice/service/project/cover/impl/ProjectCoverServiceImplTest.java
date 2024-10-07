@@ -51,9 +51,6 @@ public class ProjectCoverServiceImplTest {
         when(file.getContentType()).thenReturn("image/jpeg");
         when(file.getOriginalFilename()).thenReturn("test.jpg");
 
-        byte[] imageBytes = new byte[]{1, 2, 3};
-        when(imageProcessor.processImage(file)).thenReturn(imageBytes);
-
         when(resourceConfig.getMaxSize()).thenReturn(5242880L); // 5 MB
 
         Project project = new Project();
@@ -63,7 +60,7 @@ public class ProjectCoverServiceImplTest {
         String coverImageId = service.uploadProjectCover(projectId, file);
 
         assertNotNull(coverImageId);
-        verify(s3Service).uploadFile(eq(imageBytes), eq("image/jpeg"), anyString());
+        verify(s3Service).uploadFile(eq(file), anyString());
         verify(projectRepository).save(project);
     }
 
