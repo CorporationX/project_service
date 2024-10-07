@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +27,6 @@ public class ResourceValidatorTest {
     private ResourceValidator resourceValidator;
     @Mock
     private GigabyteConverter gigabyteConverter;
-    private static final long FILE_SIZE = 1_000_000_000L;
     private static final BigInteger STORAGE_SIZE = new BigInteger(String.valueOf(Math.round(Math.pow(1000, 3)) * 2));
     private static final BigInteger STORAGE_TEST_SIZE = new BigInteger(String.valueOf(10_000L));
     private static final long FILE_TEST_SIZE = 100_000L;
@@ -96,18 +94,5 @@ public class ResourceValidatorTest {
             assertThrows(ForbiddenException.class, () -> resourceValidator
                     .validateTeamMemberBelongsToProject(teamMember, project.getId()));
         }
-//        @Test
-//        @DisplayName("When project's storage size is null set it to 2 billion bytes")
-//        public void whenProjectStorageSizeIsNullThenSetItForTwoBillionBytes() {
-//            resourceValidator.setNewProjectStorageSize(project);
-//            assertEquals(STORAGE_SIZE, project.getStorageSize());
-//        }
-//
-//        @Test
-//        @DisplayName("When size passed return representation in GBs")
-//        public void whenSizePassedThenReturnGigabyteRepresentation() {
-//            long gigabyteResult = resourceValidator.byteToGigabyteConverter(FILE_SIZE);
-//            assertEquals(gigabyteResult, 1.0);
-//        }
     }
 }

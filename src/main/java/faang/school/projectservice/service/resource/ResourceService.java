@@ -11,7 +11,6 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
@@ -29,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -79,7 +77,7 @@ public class ResourceService {
         TeamMember member = teamMemberService.getTeamMemberById(updatedById);
 
         resourceAccessValidation(originalResource.getCreatedBy().getId(), member.getId(),
-                originalResource.getProject().getOwnerId(),resourceId);
+                originalResource.getProject().getOwnerId(), resourceId);
 
         originalResource.setName(resourceUpdateDto.getName());
         originalResource.setStatus(resourceUpdateDto.getStatus());
@@ -89,6 +87,7 @@ public class ResourceService {
         Resource updatedResource = resourceRepository.save(originalResource);
         return resourceMapper.toResponseDto(updatedResource);
     }
+
     @Transactional
     public void deleteFile(long resourceId, long teamMemberId) {
         Resource resourceToDelete = getResourceById(resourceId);
@@ -99,7 +98,7 @@ public class ResourceService {
 
         TeamMember fileOwner = teamMemberService.getTeamMemberById(teamMemberId);
 
-        resourceAccessValidation(resourceCreatorId, fileOwner.getId(), projectOwnerId,resourceId);
+        resourceAccessValidation(resourceCreatorId, fileOwner.getId(), projectOwnerId, resourceId);
 
         clearProjectStorage(resourceToDelete);
         resourceToDelete.getProject().getResources().remove(resourceToDelete);
@@ -110,7 +109,7 @@ public class ResourceService {
 
         resourceRepository.save(resourceToDelete);
 
-        s3Service.deleteObject(resourceOriginalKey,resourceToDelete.getProject().getName());
+        s3Service.deleteObject(resourceOriginalKey, resourceToDelete.getProject().getName());
     }
 
     public MultipartFile downloadFile(long resourceId) {
@@ -143,7 +142,7 @@ public class ResourceService {
         resource.getProject().setStorageSize(resource.getProject().getStorageSize().add(resource.getSize()));
     }
 
-    private Resource buildNewResource(MultipartFile file, TeamMember fileOwner, Project project){
+    private Resource buildNewResource(MultipartFile file, TeamMember fileOwner, Project project) {
         return Resource.builder()
                 .name(file.getOriginalFilename())
                 .key(file.getOriginalFilename() + "@" + BigInteger.valueOf(file.getSize()))
@@ -156,8 +155,9 @@ public class ResourceService {
                 .project(project)
                 .build();
     }
+
     private void resourceAccessValidation(long resourceCreatorId, long fileOwnerId,
-                                          long projectOwnerId, long resourceId){
+                                          long projectOwnerId, long resourceId) {
         if (!Objects.equals(resourceCreatorId, fileOwnerId) ||
                 !Objects.equals(projectOwnerId, fileOwnerId)) {
             log.error("TeamMember with id {} , doesn't upload this file {} or not an Owner of the project!",
