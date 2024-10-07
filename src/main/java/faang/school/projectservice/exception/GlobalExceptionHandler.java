@@ -1,6 +1,7 @@
 package faang.school.projectservice.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,10 +11,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException exception) {
+        log.error("Entity not found exception:", exception);
         Map<String, Object> body = new HashMap<>();
         body.put("message", exception.getMessage());
 
@@ -22,6 +26,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<Object> handleApiException(ApiException exception) {
+        log.error("Api exception:", exception);
         Map<String, Object> body = new HashMap<>();
         body.put("message", exception.getMessage());
 
