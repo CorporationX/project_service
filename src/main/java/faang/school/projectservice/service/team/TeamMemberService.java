@@ -3,12 +3,12 @@ package faang.school.projectservice.service.team;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.util.TeamMemberUtil;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,13 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class TeamMemberService {
-    private final TeamMemberRepository teamMemberRepository;
+    private final TeamMemberJpaRepository teamMemberRepository;
     private final TeamRepository teamRepository;
     private final UserServiceClient userServiceClient;
     private final ProjectRepository projectRepository;
@@ -49,7 +48,7 @@ public class TeamMemberService {
         Team toReceiveMembers = teamRepository.findById(teamId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("No team found for ID = %s", teamId)));
         Project teamProject = toReceiveMembers.getProject();
-        Long callerId = userContext.getUserId();
+        long callerId = userContext.getUserId();
         TeamMember caller = teamMemberRepository.findByUserIdAndProjectId(callerId, teamProject.getId());
         TeamMemberUtil.validateProjectOwnerOrTeamLead(caller, callerId, teamProject);
 
@@ -63,7 +62,8 @@ public class TeamMemberService {
 
     @Transactional
     public TeamMember updateMemberRoles(Long teamMemberId, List<TeamRole> newRoles) {
-        TeamMember toUpdate = teamMemberRepository.findByIdOrThrow(teamMemberId);
+        TeamMember toUpdate = teamMemberRepository.findById(teamMemberId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", teamMemberId)));
         Project teamProject = toUpdate.getTeam().getProject();
 
         TeamMember caller = teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), teamProject.getId());
@@ -78,7 +78,8 @@ public class TeamMemberService {
 
     @Transactional
     public TeamMember updateMemberNickname(Long teamMemberId, String nickname) {
-        TeamMember toUpdate = teamMemberRepository.findByIdOrThrow(teamMemberId);
+        TeamMember toUpdate = teamMemberRepository.findById(teamMemberId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", teamMemberId)));
         TeamMemberUtil.validateCallerOwnsAccount(toUpdate, userContext.getUserId());
         toUpdate.setNickname(nickname);
 
@@ -93,7 +94,13 @@ public class TeamMemberService {
         TeamMemberUtil.validateProjectOwner(toBeRemovedFrom, userContext.getUserId());
         List<TeamMember> membersToRemove = userServiceClient.getUsersByIds(userIds).stream()
                 .map(UserDto::getId)
-                .map(userId -> teamMemberRepository.findByUserIdAndProjectId(userId, projectId))
+                .map(userId -> {
+                    TeamMember tm = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+                    if (Objects.isNull(tm)) {
+                        throw new EntityNotFoundException(String.format("User with ID %s no registered for this project", userId));
+                    }
+                    return tm;
+                })
                 .toList();
         teamMemberRepository.deleteAll(membersToRemove);
         projectRepository.save(toBeRemovedFrom);
@@ -103,23 +110,17 @@ public class TeamMemberService {
     @Transactional(readOnly = true)
     public List<TeamMember> getProjectMembersFiltered(Long projectId, String nickname, TeamRole role) {
         Project target = projectRepository.getByIdOrThrow(projectId);
-        Stream<TeamMember> stream = target.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream());
-        if (Objects.nonNull(role)) {
-            return stream
-                    .filter(roleFilter(role))
-                    .toList();
-        } else if (Objects.nonNull(nickname)) {
-            return stream
-                    .filter(nicknameFilter(nickname))
-                    .toList();
-        }
-        return stream.toList();
+        return target.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(nicknameFilter(nickname))
+                .filter(roleFilter(role))
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public TeamMember getMemberById(Long memberId) {
-        return teamMemberRepository.findByIdOrThrow(memberId);
+        return teamMemberRepository.findById(memberId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", memberId)));
     }
 
     private TeamMember createIfNotExistent(UserDto userData, Long projectId, Team target, TeamRole role) {
@@ -134,10 +135,10 @@ public class TeamMemberService {
     }
 
     private Predicate<TeamMember> nicknameFilter(String filter) {
-        return member -> member.getNickname().contains(filter);
+        return member -> Objects.isNull(filter) || member.getNickname().contains(filter);
     }
 
     private Predicate<TeamMember> roleFilter(TeamRole filter) {
-        return member -> member.getRoles().contains(filter);
+        return member -> Objects.isNull(filter) || member.getRoles().contains(filter);
     }
 }

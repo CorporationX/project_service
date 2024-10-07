@@ -3,12 +3,12 @@ package faang.school.projectservice.service.team;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +36,7 @@ public class TeamMemberServiceTest {
     @InjectMocks
     private TeamMemberService teamMemberService;
     @Mock
-    private TeamMemberRepository teamMemberRepository;
+    private TeamMemberJpaRepository teamMemberRepository;
     @Mock
     private TeamRepository teamRepository;
     @Mock
@@ -93,16 +93,14 @@ public class TeamMemberServiceTest {
         member.setUserId(2L);
         member.setRoles(List.of(TeamRole.DESIGNER, TeamRole.TEAM_LEAD));
 
-        List<UserDto> dtos = List.of(
-                UserDto.builder()
-                        .id(3L)
-                        .username("user_3")
-                        .build(),
-                UserDto.builder()
-                        .id(4L)
-                        .username("user_4")
-                        .build()
-        );
+        UserDto dto1 = new UserDto();
+        dto1.setId(3L);
+        dto1.setUsername("user_3");
+        UserDto dto2 = new UserDto();
+        dto2.setId(4L);
+        dto2.setUsername("user_4");
+
+        List<UserDto> dtos = List.of(dto1, dto2);
 
         TeamMember tm1 = new TeamMember();
         tm1.setTeam(team);
@@ -210,10 +208,13 @@ public class TeamMemberServiceTest {
         member.setUserId(2L);
         member.setRoles(List.of(TeamRole.DESIGNER, TeamRole.TEAM_LEAD));
 
-        List<UserDto> dtos = List.of(
-                UserDto.builder().id(3L).build(),
-                UserDto.builder().id(4L).build()
-        );
+        UserDto dto1 = new UserDto();
+        dto1.setId(3L);
+        dto1.setUsername("user_3");
+        UserDto dto2 = new UserDto();
+        dto2.setId(4L);
+        dto2.setUsername("user_4");
+        List<UserDto> dtos = List.of(dto1, dto2);
 
         when(teamRepository.findById(team.getId()))
                 .thenReturn(Optional.of(team));
@@ -244,7 +245,7 @@ public class TeamMemberServiceTest {
         member.setTeam(team);
         member.setRoles(List.of(TeamRole.TEAM_LEAD));
 
-        when(teamMemberRepository.findByIdOrThrow(member.getId())).thenReturn(member);
+        when(teamMemberRepository.findById(member.getId())).thenReturn(Optional.of(member));
         when(userContext.getUserId()).thenReturn(member.getId());
         when(teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), project.getId()))
                 .thenReturn(member);
@@ -252,7 +253,7 @@ public class TeamMemberServiceTest {
 
         TeamMember updated = teamMemberService.updateMemberRoles(member.getId(), List.of(TeamRole.DEVELOPER));
         assertNotNull(updated);
-        verify(teamMemberRepository, times(1)).findByIdOrThrow(member.getId());
+        verify(teamMemberRepository, times(1)).findById(member.getId());
         verify(teamMemberRepository, times(1)).findByUserIdAndProjectId(userContext.getUserId(), project.getId());
         assertThat(updated).usingRecursiveComparison().isEqualTo(member);
     }
@@ -260,7 +261,7 @@ public class TeamMemberServiceTest {
     @Test
     @DisplayName("- Update roles: member ID invalid")
     public void testUpdateMemberRoles_InvalidMemberId() {
-        when(teamMemberRepository.findByIdOrThrow(1L))
+        when(teamMemberRepository.findById(1L))
                 .thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class,
                 () -> teamMemberService.updateMemberRoles(1L, List.of(TeamRole.DEVELOPER)));
@@ -282,7 +283,7 @@ public class TeamMemberServiceTest {
         member.setTeam(team);
         member.setRoles(List.of(TeamRole.TEAM_LEAD));
 
-        when(teamMemberRepository.findByIdOrThrow(1L)).thenReturn(member);
+        when(teamMemberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(userContext.getUserId()).thenReturn(member.getId());
         when(teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), project.getId())).thenThrow(EntityNotFoundException.class);
 
@@ -306,7 +307,7 @@ public class TeamMemberServiceTest {
         member.setTeam(team);
         member.setRoles(List.of(TeamRole.DESIGNER));
 
-        when(teamMemberRepository.findByIdOrThrow(1L)).thenReturn(member);
+        when(teamMemberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(userContext.getUserId()).thenReturn(member.getId());
         when(teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), project.getId())).thenReturn(member);
 
@@ -330,7 +331,7 @@ public class TeamMemberServiceTest {
         member.setTeam(team);
         member.setRoles(List.of(TeamRole.DESIGNER));
 
-        when(teamMemberRepository.findByIdOrThrow(1L)).thenReturn(member);
+        when(teamMemberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(userContext.getUserId()).thenReturn(member.getId());
         when(teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), project.getId())).thenReturn(member);
 
@@ -352,14 +353,14 @@ public class TeamMemberServiceTest {
         tm.setId(1L);
         saved.setNickname(updatedNickname);
 
-        when(teamMemberRepository.findByIdOrThrow(tm.getId())).thenReturn(tm);
+        when(teamMemberRepository.findById(tm.getId())).thenReturn(Optional.of(tm));
         when(userContext.getUserId()).thenReturn(1L);
         when(teamMemberRepository.save(tm)).thenReturn(saved);
 
         TeamMember updated = teamMemberService.updateMemberNickname(tm.getId(), updatedNickname);
 
         assertNotNull(updated);
-        verify(teamMemberRepository, times(1)).findByIdOrThrow(tm.getId());
+        verify(teamMemberRepository, times(1)).findById(tm.getId());
         verify(teamMemberRepository, times(1)).save(tm);
         assertEquals(saved, updated);
     }
@@ -367,7 +368,7 @@ public class TeamMemberServiceTest {
     @Test
     @DisplayName("- Update nickname: member id invalid ")
     public void testUpdateMemberNickname_InvalidId() {
-        when(teamMemberRepository.findByIdOrThrow(1L)).thenThrow(EntityNotFoundException.class);
+        when(teamMemberRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class,
                 () -> teamMemberService.updateMemberNickname(1L, "old_nickname"));
     }
@@ -378,7 +379,7 @@ public class TeamMemberServiceTest {
         TeamMember tm = new TeamMember();
         tm.setId(1L);
         tm.setUserId(2L);
-        when(teamMemberRepository.findByIdOrThrow(tm.getId())).thenReturn(tm);
+        when(teamMemberRepository.findById(tm.getId())).thenReturn(Optional.of(tm));
         when(userContext.getUserId()).thenReturn(1L);
 
         assertThrows(SecurityException.class,
@@ -392,12 +393,14 @@ public class TeamMemberServiceTest {
         project.setId(1L);
         project.setOwnerId(1L);
 
-        UserDto dto1 = UserDto.builder()
-                .id(2L)
-                .build();
-        UserDto dto2 = UserDto.builder()
-                .id(3L)
-                .build();
+        UserDto dto1 = new UserDto();
+        dto1.setId(2L);
+        dto1.setUsername("user_3");
+        UserDto dto2 = new UserDto();
+        dto2.setId(3L);
+        dto2.setUsername("user_4");
+        List<UserDto> dtos = List.of(dto1, dto2);
+
         TeamMember tm1 = new TeamMember();
         tm1.setUserId(dto1.getId());
         TeamMember tm2 = new TeamMember();
@@ -405,7 +408,7 @@ public class TeamMemberServiceTest {
 
         when(projectRepository.getByIdOrThrow(project.getId())).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
-        when(userServiceClient.getUsersByIds(List.of(2L, 3L))).thenReturn(List.of(dto1, dto2));
+        when(userServiceClient.getUsersByIds(List.of(2L, 3L))).thenReturn(dtos);
         when(teamMemberRepository.findByUserIdAndProjectId(dto1.getId(), project.getId())).thenReturn(tm1);
         when(teamMemberRepository.findByUserIdAndProjectId(dto2.getId(), project.getId())).thenReturn(tm2);
         doNothing().when(teamMemberRepository).deleteAll(List.of(tm1, tm2));
@@ -477,15 +480,17 @@ public class TeamMemberServiceTest {
         project.setId(1L);
         project.setOwnerId(1L);
         List<Long> userIds = List.of(1L, 2L);
-        List<UserDto> dtos = List.of(
-                UserDto.builder().id(1L).build(),
-                UserDto.builder().id(2L).build()
-        );
+        UserDto dto1 = new UserDto();
+        dto1.setId(3L);
+        dto1.setUsername("user_3");
+        UserDto dto2 = new UserDto();
+        dto2.setId(4L);
+        dto2.setUsername("user_4");
+        List<UserDto> dtos = List.of(dto1, dto2);
 
         when(projectRepository.getByIdOrThrow(1L)).thenReturn(project);
         when(userContext.getUserId()).thenReturn(1L);
         when(userServiceClient.getUsersByIds(userIds)).thenReturn(dtos);
-        when(teamMemberRepository.findByUserIdAndProjectId(project.getId(), dtos.get(0).getId())).thenThrow(EntityNotFoundException.class);
         assertThrows(EntityNotFoundException.class,
                 () -> teamMemberService.removeFromProject(1L, userIds));
     }
@@ -596,11 +601,11 @@ public class TeamMemberServiceTest {
     public void testGetMember() {
         TeamMember member = new TeamMember();
         member.setId(1L);
-        when(teamMemberRepository.findByIdOrThrow(member.getId())).thenReturn(member);
+        when(teamMemberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
         TeamMember result = teamMemberService.getMemberById(member.getId());
 
-        verify(teamMemberRepository, times(1)).findByIdOrThrow(member.getId());
+        verify(teamMemberRepository, times(1)).findById(member.getId());
         assertNotNull(result);
         assertEquals(1L, result.getId());
     }
@@ -608,7 +613,7 @@ public class TeamMemberServiceTest {
     @Test
     @DisplayName("- Get member by id: invalid ID")
     public void testGetMember_invalidId() {
-        when(teamMemberRepository.findByIdOrThrow(1L)).thenThrow(EntityNotFoundException.class);
+        when(teamMemberRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class,
                 () -> teamMemberService.getMemberById(1L));
     }
@@ -621,25 +626,24 @@ public class TeamMemberServiceTest {
         Team team2 = new Team();
         team2.setId(2L);
 
-        UserDto userDto = UserDto.builder()
-                .id(1L)
-                .build();
+        UserDto dto = new UserDto();
+        dto.setId(1L);
         TeamMember tm1 = new TeamMember();
         tm1.setId(2L);
 
-        tm1.setUserId(userDto.getId());
+        tm1.setUserId(dto.getId());
         TeamMember tm2 = new TeamMember();
         tm2.setId(3L);
-        tm2.setUserId(userDto.getId());
+        tm2.setUserId(dto.getId());
 
-        when(userServiceClient.getUser(userDto.getId())).thenReturn(userDto);
-        when(teamMemberRepository.findByUserId(userDto.getId())).thenReturn(List.of(tm1, tm2));
+        when(userServiceClient.getUser(dto.getId())).thenReturn(dto);
+        when(teamMemberRepository.findByUserId(dto.getId())).thenReturn(List.of(tm1, tm2));
 
-        List<TeamMember> members = teamMemberService.getMembersForUser(userDto.getId());
+        List<TeamMember> members = teamMemberService.getMembersForUser(dto.getId());
 
         assertNotNull(members);
-        verify(userServiceClient, times(1)).getUser(userDto.getId());
-        verify(teamMemberRepository, times(1)).findByUserId(userDto.getId());
+        verify(userServiceClient, times(1)).getUser(dto.getId());
+        verify(teamMemberRepository, times(1)).findByUserId(dto.getId());
         assertIterableEquals(List.of(tm1, tm2), members);
     }
 

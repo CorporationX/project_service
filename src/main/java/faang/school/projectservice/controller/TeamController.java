@@ -79,7 +79,7 @@ public class TeamController {
         teamMemberService.removeFromProject(projectId, userIds);
     }
 
-    @PostMapping("/projects/{project-id}/members")
+    @GetMapping("/projects/{project-id}/members")
     public List<TeamMemberDto> getTeamMembersForProject(@PathVariable("project-id") Long projectId,
                                                         @RequestParam(required = false) String nickname,
                                                         @RequestParam(required = false) TeamRole role) {
