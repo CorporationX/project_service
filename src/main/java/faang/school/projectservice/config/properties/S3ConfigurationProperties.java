@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties
 @Getter
-public class PropertiesConfig {
+public class S3ConfigurationProperties {
 
     @Value("${services.s3.accessKey}")
     private String accessKey;

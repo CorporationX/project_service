@@ -5,7 +5,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import faang.school.projectservice.config.properties.PropertiesConfig;
+import faang.school.projectservice.config.properties.S3ConfigurationProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class S3Configuration {
 
-    private final PropertiesConfig config;
+    private final S3ConfigurationProperties config;
 
     @Bean
     public AmazonS3 amazonS3Client() {

@@ -7,7 +7,7 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import faang.school.projectservice.config.properties.PropertiesConfig;
+import faang.school.projectservice.config.properties.S3ConfigurationProperties;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -45,7 +45,7 @@ public class S3ServiceTest {
     @Mock
     private AmazonS3Client amazonS3Client;
     @Mock
-    private PropertiesConfig config;
+    private S3ConfigurationProperties config;
     private static final long TEAM_MEMBER_ID_ONE = 1L;
     private static final String FILE_NAME = "BoberNotKurwa";
     private static final String CONTENT_TYPE = "png/image";

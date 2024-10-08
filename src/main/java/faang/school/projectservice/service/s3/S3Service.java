@@ -7,7 +7,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import faang.school.projectservice.config.properties.PropertiesConfig;
+import faang.school.projectservice.config.properties.S3ConfigurationProperties;
 import faang.school.projectservice.model.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.io.IOException;
 public class S3Service {
 
     private final AmazonS3 amazonS3Client;
-    private final PropertiesConfig config;
+    private final S3ConfigurationProperties config;
 
     public void saveObject(MultipartFile file, Resource resource) {
         try {
