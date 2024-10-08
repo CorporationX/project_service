@@ -1,6 +1,8 @@
 package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.TeamRole;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +16,10 @@ import java.util.List;
 @Builder
 public class TeamMemberDto {
     private Long id;
-    private Long userId;               // ID пользователя
+
+    @NotNull(message = "User ID must not be null")
+    private Long userId;
+
+    @NotEmpty(message = "Roles must not be empty")// ID пользователя
     private List<TeamRole> roles;      // Список ролей участника
 }
-

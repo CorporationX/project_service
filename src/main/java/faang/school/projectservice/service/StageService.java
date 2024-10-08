@@ -18,12 +18,15 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage.TasksAfterDelete;
 import faang.school.projectservice.repository.StageRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.stream.Stream;
 
+@Validated
 @Service
 @RequiredArgsConstructor
 public class StageService {
@@ -37,7 +40,7 @@ public class StageService {
     private final StageRolesService stageRolesService;
     private final List<StageFilter> filters;
 
-    public StageDto createStage(StageDto stageDto) {
+    public StageDto createStage(@Valid StageDto stageDto) {
         Project project = projectService.getProjectById(stageDto.getProjectId());
         ProjectStatus currentStatus = project.getStatus();
         validatedProjectStatus(currentStatus);
@@ -119,7 +122,7 @@ public class StageService {
         stageRepository.delete(deletedStage);
     }
 
-    public StageDto updateStage(StageDto stageDto) {
+    public StageDto updateStage(@Valid StageDto stageDto) {
         Project project = projectService.getProjectById(stageDto.getProjectId());
         Stage stage = stageMapper.toEntity(stageDto);
         stage.setProject(project);

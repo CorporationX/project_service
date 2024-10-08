@@ -20,12 +20,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+@Validated
 @RequiredArgsConstructor
 @Service
 public class ResourceService {
