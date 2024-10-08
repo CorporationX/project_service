@@ -33,10 +33,6 @@ spring:
 server:
   port: 8082
 
-logging:
-  level:
-    root: info
-
 calculations_messages_processing:
   enabled: true
 
