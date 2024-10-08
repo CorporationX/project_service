@@ -50,3 +50,5 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+
+/logs/
