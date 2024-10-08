@@ -29,12 +29,12 @@ public class ProjectController {
 
     @GetMapping("/{projectId}")
     public ProjectDto getProjectById(@PathVariable @Positive Long projectId,
-                                     @RequestHeader("x-user-id") Long userId) {
+                                     @RequestHeader("x-user-id")  @Positive Long userId) {
         return projectService.findProjectById(projectId, userId);
     }
 
     @GetMapping
-    public List<ProjectDto> getAllProjects(@RequestBody ProjectFilterDto filters,
+    public List<ProjectDto> getAllProjects(@RequestBody @Valid  ProjectFilterDto filters,
                                            @RequestHeader("x-user-id") @Positive Long userId) {
         return projectService.findAllProjects(filters, userId);
     }

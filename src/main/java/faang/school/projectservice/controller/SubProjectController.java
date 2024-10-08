@@ -42,7 +42,7 @@ public class SubProjectController {
 
     @Operation(summary = "Getting sub projects by parentId")
     @GetMapping("/sub-projects-by-filter/{parentId}")
-    public List<SubProjectDto> getSubProjects(@PathVariable @Positive Long parentId, SubProjectFilterDto subProjectFilterDto) {
+    public List<SubProjectDto> getSubProjects(@PathVariable @Positive Long parentId, @Valid SubProjectFilterDto subProjectFilterDto) {
         return subProjectService.findSubProjectsByParentId(parentId, subProjectFilterDto);
     }
 }
