@@ -18,7 +18,7 @@ public class Meet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "title", length = 128, nullable = false)
     private String title;
@@ -31,7 +31,7 @@ public class Meet {
     private MeetStatus status;
 
     @Column(name = "creator_id", nullable = false)
-    private long creatorId;
+    private Long creatorId;
 
     @ManyToOne
     @JoinColumn(name = "project_id")
