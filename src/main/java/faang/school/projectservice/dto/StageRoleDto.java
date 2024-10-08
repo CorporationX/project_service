@@ -13,12 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class StageRoleDto {
     private Long id;
-
-    @NotNull(message = "Team role must not be null")
+    @NotNull
     private TeamRole teamRole;
-
-    @NotNull(message = "Count must not be null")
+    @NotNull
     private Integer count;
-    
     private Long stageId;
 }
+

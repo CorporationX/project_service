@@ -3,7 +3,6 @@ package faang.school.projectservice.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,20 +15,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StageDto {
-
-    @NotNull(message = "Stage ID must not be null")
     private Long stageId;
-
-    @NotBlank(message = "Stage name must not be blank")
-    @Size(max = 255, message = "Stage name must not exceed 255 characters")
+    @NotBlank
     private String stageName;
-
-    @NotNull(message = "Project ID must not be null")
-    @Positive(message = "Project ID must be a positive number")
+    @Positive
     private Long projectId;
-
-    @NotNull(message = "Stage roles must not be null")
+    @NotNull
     private List<StageRoleDto> stageRoles;
-
     private List<Long> teamMemberIds;
 }
+
