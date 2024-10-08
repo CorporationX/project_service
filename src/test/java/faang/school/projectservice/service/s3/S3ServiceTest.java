@@ -30,7 +30,7 @@ class S3ServiceTest {
     private static final String CONTENT_TYPE = "image/png";
     private static final String FILE_CONTENT = "file content";
     private static final int FILE_SIZE = 1024;
-    private static final Long RESOURCE_ID = 123L;
+    private static final String RESOURCE_KEY = "123";
 
     @Mock
     private AmazonS3 amazonS3;
@@ -61,7 +61,7 @@ class S3ServiceTest {
             when(s3Object.getObjectContent()).thenReturn(s3InputStream);
             when(s3Object.getObjectMetadata()).thenReturn(metadata);
 
-            FileData result = s3Service.getFileByKey(TEST_FILE_KEY);
+            FileData result = s3Service.getFileById(TEST_FILE_KEY);
 
             assertNotNull(result);
             assertEquals(FILE_CONTENT, new String(result.getData()));
@@ -74,7 +74,7 @@ class S3ServiceTest {
             when(amazonS3.getObject(any(GetObjectRequest.class))).thenThrow(new AmazonServiceException("S3 error"));
 
             S3Exception exception = assertThrows(S3Exception.class, () -> {
-                s3Service.getFileByKey(TEST_FILE_KEY);
+                s3Service.getFileById(TEST_FILE_KEY);
             });
 
             assertEquals("Amazon S3 service error while fetching file for key: test-file", exception.getMessage());
@@ -86,7 +86,7 @@ class S3ServiceTest {
             when(amazonS3.getObject(any(GetObjectRequest.class))).thenThrow(new SdkClientException("S3 error"));
 
             S3Exception exception = assertThrows(S3Exception.class, () -> {
-                s3Service.getFileByKey(TEST_FILE_KEY);
+                s3Service.getFileById(TEST_FILE_KEY);
             });
 
             assertEquals("SDK client error while fetching file for key: test-file", exception.getMessage());
@@ -103,7 +103,7 @@ class S3ServiceTest {
             when(s3InputStream.readAllBytes()).thenThrow(new IOException("IO error"));
 
             S3Exception exception = assertThrows(S3Exception.class, () -> {
-                s3Service.getFileByKey(TEST_FILE_KEY);
+                s3Service.getFileById(TEST_FILE_KEY);
             });
 
             assertEquals("Error reading file content from S3 for key: test-file", exception.getMessage());
@@ -117,9 +117,9 @@ class S3ServiceTest {
         @Test
         @DisplayName("should upload successfully and return the file key")
         void whenObjectIsUploadedThenReturnFileKey() {
-            s3Service.uploadFile(RESOURCE_ID, TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
+            s3Service.uploadFile(RESOURCE_KEY, TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
 
-            verify(amazonS3).putObject(any(), eq(String.valueOf(RESOURCE_ID)), eq(fileContentStream), any());
+            verify(amazonS3).putObject(any(), eq(RESOURCE_KEY), eq(fileContentStream), any());
         }
 
         @Test
@@ -128,7 +128,7 @@ class S3ServiceTest {
             doThrow(new AmazonServiceException("S3 error")).when(amazonS3).putObject(any(), any(), any(), any());
 
             S3Exception exception = assertThrows(S3Exception.class, () -> {
-                s3Service.uploadFile(RESOURCE_ID, TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
+                s3Service.uploadFile(RESOURCE_KEY, TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
             });
 
             assertEquals("Amazon S3 service error while uploading file: " + TEST_FILE_NAME, exception.getMessage());
@@ -141,7 +141,7 @@ class S3ServiceTest {
             doThrow(new SdkClientException("S3 error")).when(amazonS3).putObject(any(), any(), any(), any());
 
             S3Exception exception = assertThrows(S3Exception.class, () -> {
-                s3Service.uploadFile(RESOURCE_ID, TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
+                s3Service.uploadFile(RESOURCE_KEY, TEST_FILE_NAME, CONTENT_TYPE, FILE_SIZE, fileContentStream);
             });
 
             assertEquals("SDK client error while uploading file: " + TEST_FILE_NAME, exception.getMessage());
@@ -156,9 +156,9 @@ class S3ServiceTest {
         @Test
         @DisplayName("should remove object successfully")
         void whenObjectIsRemovedThenRemoveObjectSuccessfully() {
-            s3Service.removeFileById(RESOURCE_ID);
+            s3Service.removeFileById(RESOURCE_KEY);
 
-            verify(amazonS3).deleteObject(any(), eq(String.valueOf(RESOURCE_ID)));
+            verify(amazonS3).deleteObject(any(), eq(RESOURCE_KEY));
         }
 
         @Test
@@ -167,10 +167,10 @@ class S3ServiceTest {
             doThrow(new AmazonServiceException("S3 error")).when(amazonS3).deleteObject(any(), any());
 
             S3Exception exception = assertThrows(S3Exception.class, () -> {
-                s3Service.removeFileById(RESOURCE_ID);
+                s3Service.removeFileById(RESOURCE_KEY);
             });
 
-            assertEquals("Amazon S3 service error while removing file for id: " + RESOURCE_ID, exception.getMessage());
+            assertEquals("Amazon S3 service error while removing file for id: " + RESOURCE_KEY, exception.getMessage());
         }
 
         @Test
@@ -179,10 +179,10 @@ class S3ServiceTest {
             doThrow(new SdkClientException("S3 error")).when(amazonS3).deleteObject(any(), any());
 
             S3Exception exception = assertThrows(S3Exception.class, () -> {
-                s3Service.removeFileById(RESOURCE_ID);
+                s3Service.removeFileById(RESOURCE_KEY);
             });
 
-            assertEquals("SDK client error while removing file for id: " + RESOURCE_ID, exception.getMessage());
+            assertEquals("SDK client error while removing file for id: " + RESOURCE_KEY, exception.getMessage());
         }
     }
 }

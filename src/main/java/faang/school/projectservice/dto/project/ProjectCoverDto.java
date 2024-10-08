@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class ProjectCoverDto {
     private Long projectId;
-    private Long coverId;
+    private String coverId;
 }

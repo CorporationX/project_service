@@ -36,6 +36,6 @@ public class ProjectCoverController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProjectImage(@PathVariable @Positive Long projectId) {
-        projectCoverService.deleteCover(projectId);
+        projectCoverService.removeCover(projectId);
     }
 }

@@ -25,8 +25,8 @@ public class S3Service implements FileStorageService {
     private String bucketName;
 
     @Override
-    public FileData getFileByKey(String key) {
-        try (S3Object s3Object = amazonS3.getObject(new GetObjectRequest(bucketName, key));
+    public FileData getFileById(String id) {
+        try (S3Object s3Object = amazonS3.getObject(new GetObjectRequest(bucketName, id));
              S3ObjectInputStream inputStream = s3Object.getObjectContent()) {
 
             byte[] bytes = inputStream.readAllBytes();
@@ -35,22 +35,22 @@ public class S3Service implements FileStorageService {
             return new FileData(bytes, contentType);
 
         } catch (IOException e) {
-            throw new S3Exception("Error reading file content from S3 for key: " + key, e);
+            throw new S3Exception("Error reading file content from S3 for id: " + id, e);
         } catch (AmazonServiceException e) {
-            throw new S3Exception("Amazon S3 service error while fetching file for key: " + key, e);
+            throw new S3Exception("Amazon S3 service error while fetching file for id: " + id, e);
         } catch (SdkClientException e) {
-            throw new S3Exception("SDK client error while fetching file for key: " + key, e);
+            throw new S3Exception("SDK client error while fetching file for id: " + id, e);
         }
     }
 
     @Override
-    public void uploadFile(Long id, String fileName, String contentType, int fileSize, InputStream stream) {
+    public void uploadFile(String id, String fileName, String contentType, int fileSize, InputStream stream) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(fileSize);
         metadata.setContentType(contentType);
 
         try {
-            amazonS3.putObject(bucketName, String.valueOf(id), stream, metadata);
+            amazonS3.putObject(bucketName, id, stream, metadata);
         } catch (AmazonServiceException e) {
             throw new S3Exception("Amazon S3 service error while uploading file: " + fileName, e);
         } catch (SdkClientException e) {
@@ -59,9 +59,9 @@ public class S3Service implements FileStorageService {
     }
 
     @Override
-    public void removeFileById(Long id) {
+    public void removeFileById(String id) {
         try {
-            amazonS3.deleteObject(bucketName, String.valueOf(id));
+            amazonS3.deleteObject(bucketName, id);
         } catch (AmazonServiceException e) {
             throw new S3Exception("Amazon S3 service error while removing file for id: " + id, e);
         } catch (SdkClientException e) {

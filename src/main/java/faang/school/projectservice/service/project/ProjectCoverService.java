@@ -2,8 +2,8 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.image.FileData;
 import faang.school.projectservice.dto.project.ProjectCoverDto;
+import faang.school.projectservice.exception.EmptyCoverException;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.image.ImageService;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,66 +31,65 @@ public class ProjectCoverService {
 
     @Transactional
     public ProjectCoverDto uploadCover(Long projectId, MultipartFile imageFile) {
-        return handleCoverUpload(projectId, imageFile, false);
+        return setCover(projectId, imageFile);
     }
 
     @Transactional
     public ProjectCoverDto changeCover(Long projectId, MultipartFile imageFile) {
-        return handleCoverUpload(projectId, imageFile, true);
+        removeCover(projectId);
+
+        return setCover(projectId, imageFile);
     }
 
-    @Transactional
     public FileData getCover(Long projectId) {
         Project project = projectService.getProjectById(projectId);
         String coverImageId = project.getCoverImageId();
 
-        return coverImageId != null ? s3Service.getFileByKey(coverImageId) : null;
+        if (coverImageId != null) {
+            return s3Service.getFileById(coverImageId);
+        } else {
+            throw new EmptyCoverException("Cover image is not set for the project with id: " + projectId);
+        }
     }
 
     @Transactional
-    public void deleteCover(Long projectId) {
+    public void removeCover(Long projectId) {
         Project project = projectService.getProjectById(projectId);
-        removeCoverFile(project);
-        project.setCoverImageId(null);
-        projectRepository.save(project);
+        String coverImageId = project.getCoverImageId();
+
+        if (coverImageId != null) {
+            project.setCoverImageId(null);
+            projectRepository.save(project);
+
+            resourceService.markResourceAsDeleted(coverImageId);
+            s3Service.removeFileById(coverImageId);
+        }
     }
 
-    private ProjectCoverDto handleCoverUpload(Long projectId, MultipartFile imageFile, boolean removeExistingCover) {
+    private ProjectCoverDto setCover(Long projectId, MultipartFile imageFile) {
         imageValidator.validateMaximumSize(imageFile.getSize());
         Project project = projectService.getProjectById(projectId);
-
-        if (removeExistingCover) {
-            removeCoverFile(project);
-        }
-
-        Long coverImageId = uploadCoverFile(imageFile, project);
+        String coverImageId = uploadCoverFile(imageFile, project);
 
         return new ProjectCoverDto(project.getId(), coverImageId);
     }
 
-    private Long uploadCoverFile(MultipartFile imageFile, Project project) {
-        Resource resource = resourceService.putResource(imageFile, ResourceType.IMAGE);
-        Long coverImageId = resource.getId();
+    private String uploadCoverFile(MultipartFile imageFile, Project project) {
+        String fileKey = UUID.randomUUID().toString();
+
+        resourceService.putResource(fileKey, imageFile, ResourceType.IMAGE);
+        project.setCoverImageId(fileKey);
+        projectRepository.save(project);
+
         byte[] resizedImage = imageService.resizeImage(imageFile);
         s3Service.uploadFile(
-                resource.getId(),
+                fileKey,
                 imageFile.getOriginalFilename(),
                 imageFile.getContentType(),
                 resizedImage.length,
                 new ByteArrayInputStream(resizedImage)
         );
 
-        project.setCoverImageId(String.valueOf(coverImageId));
-        projectRepository.save(project);
-
-        return coverImageId;
-    }
-
-    private void removeCoverFile(Project project) {
-        String coverImageId = project.getCoverImageId();
-        if (coverImageId != null) {
-            resourceService.markResourceAsDeleted(Long.valueOf(coverImageId));
-            s3Service.removeFileById(Long.valueOf(coverImageId));
-        }
+        return fileKey;
     }
 }
