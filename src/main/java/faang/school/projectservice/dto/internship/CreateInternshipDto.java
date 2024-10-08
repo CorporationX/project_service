@@ -16,11 +16,11 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateInternshipDto {
 
-    @Length(max = 128, message = "The name cannot be longer than 128 characters")
+    @Size(max = 128, message = "The name cannot be longer than 128 characters")
     @NotBlank(message = "Name cannot be blank")
     private final String name;
 
-    @Length(max = 500, message = "The description cannot be longer than 500 characters")
+    @Size(max = 500, message = "The description cannot be longer than 500 characters")
     @NotBlank(message = "Description cannot be blank")
     private final String description;
 
@@ -30,9 +30,10 @@ public class CreateInternshipDto {
 
     @NotNull(message = "Interns list is required")
     @Size(min = 1, message = "At least one intern is required")
-    private final List<Long> internIds;
+    private final List <@NotNull(message = "Intern ID must not be null") @Positive(message = "Intern ID must be positive") Long> internIds;
 
     @NotNull(message = "Mentor ID cannot be blank")
+    @Positive(message = "Mentor ID must be positive")
     private final Long mentorId;
 
     private LocalDateTime startDate;
