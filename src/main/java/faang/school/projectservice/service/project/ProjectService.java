@@ -8,23 +8,33 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.util.converter.GigabyteConverter;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
+    private static final int POWER_OF_THREE = 3;
+    private static final int GIGABYTE_MULTIPLIER_TWO = 2;
+    private static final int THOUSAND_BYTES = 1000;
+    private static final BigInteger STORAGE_SIZE = new BigInteger(String.
+            valueOf(Math.round(Math.pow(THOUSAND_BYTES, POWER_OF_THREE) * GIGABYTE_MULTIPLIER_TWO)));
 
     private final ProjectValidator projectValidator;
     private final ProjectRepository projectRepository;
     private final List<Filter<ProjectFilterDto, Project>> projectFilters;
     private final ProjectMapper projectMapper;
+    private final GigabyteConverter gigabyteConverter;
 
     public ProjectDto create(ProjectDto projectDto) {
         projectValidator.validateProject(projectDto);
@@ -86,5 +96,13 @@ public class ProjectService {
     public Project getProjectById(long id) {
         return projectRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Project with id " + id + "does not exist!"));
+    }
+
+    public void setNewProjectStorageSize(Project project) {
+        if (project.getStorageSize() == null) {
+            project.setStorageSize(STORAGE_SIZE);
+            log.debug("Set project {} storage for {} GB", project.getName(),
+                    gigabyteConverter.byteToGigabyteConverter(STORAGE_SIZE.longValue()));
+        }
     }
 }
