@@ -31,7 +31,6 @@ public class ResourceManager {
 
     }
 
-    @Transactional
     public Resource uploadFileToProject(MultipartFile file, String directoryPath, Project project, TeamMember teamMember) {
         String path = generateFullPath(file, directoryPath);
         ObjectMetadata metadata = generateMetadata(file);

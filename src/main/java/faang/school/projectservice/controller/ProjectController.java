@@ -3,8 +3,8 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceWithFileStream;
 import faang.school.projectservice.service.project.ProjectService;
-import feign.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,12 +17,16 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +34,7 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ResourceMapper resourceMapper;
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Operation(summary = "Upload file to project", description = "Upload file to project using multipart/form-data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "File uploaded successfully"),
@@ -45,13 +49,15 @@ public class ProjectController {
             @Parameter(description = "ID of the user", required = true)
             @RequestParam("user-id") Long userId,
 
-            @Parameter(description = "File to upload", required = true, content = @Content(mediaType = "multipart/form-data", schema = @Schema(type = "string", format = "binary")))
+            @Parameter(description = "File to upload", required = true,
+                    content = @Content(mediaType = "multipart/form-data",
+                            schema = @Schema(type = "string", format = "binary")))
             @RequestBody MultipartFile file) {
         Resource resource = projectService.uploadFileToProject(projectId, userId, file);
         return resourceMapper.toResourceDto(resource);
     }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Operation(summary = "Delete file from project", description = "Delete a file from a project by project ID, user ID, and resource ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "File deleted successfully"),
@@ -71,7 +77,7 @@ public class ProjectController {
         projectService.deleteFileFromProject(projectId, userId, resourceId);
     }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Operation(summary = "Get file from project", description = "Retrieve a file from a project by project ID, user ID, and resource ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "File retrieved successfully"),
@@ -89,14 +95,13 @@ public class ProjectController {
             @Parameter(description = "ID of the resource to retrieve", required = true)
             @RequestParam("resource-id") Long resourceId) {
 
-        Map<Resource, InputStream> resourceWithFileStream = projectService.getFileFromProject(projectId, userId, resourceId);
-        Resource resource = resourceWithFileStream.keySet().iterator().next();
-        InputStream fileStream = resourceWithFileStream.get(resource);
+        ResourceWithFileStream resourceWithFileStream = projectService.getFileFromProject(projectId, userId, resourceId);
+        Resource resource = resourceWithFileStream.resource();
+        InputStream fileStream = resourceWithFileStream.inputStream();
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(resource.getType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getName() + "\"")
                 .body(new InputStreamResource(fileStream));
     }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
 }

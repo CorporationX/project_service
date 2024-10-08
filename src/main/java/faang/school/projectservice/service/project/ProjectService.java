@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceWithFileStream;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -14,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Slf4j
@@ -42,11 +43,8 @@ public class ProjectService {
 
 
     public TeamMember checkUserParticipationInProjectTeams(Long userId, Project project) {
-        Map<Boolean, TeamMember> isItTeamMember = teamService.checkParticipationUserInTeams(userId, project.getTeams());
-        if (!isItTeamMember.containsKey(true)) {
-            throw new IllegalArgumentException("User is not a part of the project");
-        }
-        return isItTeamMember.get(true);
+        Optional<TeamMember> isItTeamMember = teamService.checkParticipationUserInTeams(userId, project.getTeams());
+        return isItTeamMember.orElseThrow(() -> new IllegalArgumentException("User is not a part of the project"));
     }
 
     @Transactional
@@ -57,12 +55,22 @@ public class ProjectService {
         }
         TeamMember teamMember = checkUserParticipationInProjectTeams(userId, project);
         String directoryPath = generateDirectoriesForUserFiles(projectId, userId);
-        Resource resource = resourceManager.uploadFileToProject(file, directoryPath, project, teamMember);
+        Resource resource = uploadFileToS3(file, directoryPath, project, teamMember);
         updateUpProjectStorageSize(project, resource);
         projectRepository.save(project);
         return resource;
     }
 
+
+    private Resource uploadFileToS3(MultipartFile file, String directoryPath, Project project, TeamMember teamMember) {
+        try {
+            return resourceManager.uploadFileToProject(file, directoryPath, project, teamMember);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload file to S3", e);
+        }
+    }
+
+    @Transactional
     public void deleteFileFromProject(Long projectId, Long userId, Long resourceId) {
         Project project = projectRepository.getProjectById(projectId);
         Resource resource = resourceManager.getResourceById(resourceId);
@@ -96,11 +104,11 @@ public class ProjectService {
         return String.format("%s/%d/%d", DIRECTORY_NAME, projectId, userId);
     }
 
-    public Map<Resource,InputStream> getFileFromProject(Long projectId, Long userId, Long resourceId) {
+    public ResourceWithFileStream getFileFromProject(Long projectId, Long userId, Long resourceId) {
         Project project = projectRepository.getProjectById(projectId);
         checkUserParticipationInProjectTeams(userId, project);
         Resource resource = getResourceFromProjectById(project, resourceId);
-        return Map.of(resource,resourceManager.getFileFromProject(resource));
+        return new ResourceWithFileStream(resource,resourceManager.getFileFromProject(resource));
     }
 
     private Resource getResourceFromProjectById(Project project, Long resourceId) {

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,22 +16,16 @@ import java.util.stream.Collectors;
 public class TeamService {
     private final TeamRepository teamRepository;
 
-    public Map<Boolean, TeamMember> checkParticipationUserInTeams(Long userId, List<Team> teams) {
+    public Optional<TeamMember> checkParticipationUserInTeams(Long userId, List<Team> teams) {
         return teams.stream()
                 .map(team -> checkParticipationUserInTeam(userId, team))
-                .flatMap(map -> map.entrySet().stream())
-                .filter(Map.Entry::getKey)
-                .collect(Collectors.toMap(
-                        booleanTeamMemberEntry -> true,
-                        Map.Entry::getValue
-                ));
+                .flatMap(Optional::stream)
+                .findFirst();
     }
 
-    public Map<Boolean, TeamMember> checkParticipationUserInTeam(Long userId, Team team) {
+    public Optional<TeamMember> checkParticipationUserInTeam(Long userId, Team team) {
         return team.getTeamMembers().stream()
-                .collect(Collectors.toMap(
-                        teamMember -> teamMember.getUserId().equals(userId),
-                        teamMember -> teamMember
-                ));
+                .filter(teamMember -> teamMember.getUserId().equals(userId))
+                .findFirst();
     }
 }

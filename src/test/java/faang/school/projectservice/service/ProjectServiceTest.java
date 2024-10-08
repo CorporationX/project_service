@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -90,21 +91,20 @@ public class ProjectServiceTest {
     public void testGetFileFromProject_Success() {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(teamService.checkParticipationUserInTeams(userId_1, project.getTeams()))
-                .thenReturn(Map.of(true, teamMember_1));
+                .thenReturn(Optional.ofNullable(teamMember_1));
         when(resourceManager.getFileFromProject(any())).thenReturn(mock(InputStream.class));
 
-        Map<Resource, InputStream> result = projectService.getFileFromProject(projectId, userId_1, resourceId);
+        ResourceWithFileStream result = projectService.getFileFromProject(projectId, userId_1, resourceId);
 
-        assertEquals(resourceOfTM_1, result.keySet().iterator().next());
-        assertNotNull(result.get(resourceOfTM_1));
-        assertEquals(1, result.size());
+        assertEquals(resourceOfTM_1, result.resource());
+        assertNotNull(result.resource());
     }
 
     @Test
     public void testGetFileFromProject_NotSuccess_UserNotParticipatingInProject() {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(teamService.checkParticipationUserInTeams(10000L, project.getTeams()))
-                .thenReturn(Map.of());
+                .thenReturn(Optional.empty());
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> projectService.getFileFromProject(projectId, userId_1, resourceId));
         assertEquals("User is not a part of the project", exception.getMessage());
@@ -117,7 +117,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(resourceManager.getResourceById(resourceId)).thenReturn(resourceOfTM_1);
         when(teamService.checkParticipationUserInTeams(userId_1, project.getTeams()))
-                .thenReturn(Map.of(true, teamMember_1));
+                .thenReturn(Optional.ofNullable(teamMember_1));
 
         projectService.deleteFileFromProject(projectId, userId_1, resourceId);
 
@@ -135,7 +135,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(resourceManager.getResourceById(resourceId)).thenReturn(resourceOfTM_1);
         when(teamService.checkParticipationUserInTeams(userId_2, project.getTeams()))
-                .thenReturn(Map.of(true, teamMember_2));
+                .thenReturn(Optional.ofNullable(teamMember_2));
 
         projectService.deleteFileFromProject(projectId, userId_2, resourceId);
 
@@ -154,7 +154,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(resourceManager.getResourceById(resourceId)).thenReturn(resourceOfTM_1);
         when(teamService.checkParticipationUserInTeams(10000L, project.getTeams()))
-                .thenReturn(Map.of(true, teamMember));
+                .thenReturn(Optional.of(teamMember));
 
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -171,7 +171,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(file.getSize()).thenReturn(fileSize);
         when(teamService.checkParticipationUserInTeams(userId_1, project.getTeams()))
-                .thenReturn(Map.of(true, teamMember_1));
+                .thenReturn(Optional.ofNullable(teamMember_1));
 
         when(resourceManager.uploadFileToProject(eq(file), any(String.class), eq(project), any(TeamMember.class)))
                 .thenReturn(resourceOfTM_1);
@@ -204,7 +204,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(file.getSize()).thenReturn(fileSize);
         when(teamService.checkParticipationUserInTeams(10000L, project.getTeams()))
-                .thenReturn(Map.of());
+                .thenReturn(Optional.empty());
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             projectService.uploadFileToProject(projectId, 10000L, file);
