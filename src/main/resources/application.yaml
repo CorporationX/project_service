@@ -25,12 +25,13 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
 server:
   port: 8082
-
-logging:
-  level:
-    root: info
 
 calculations_messages_processing:
   enabled: true
@@ -40,7 +41,7 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     isMocked: false
   payment-service:
     host: http://localhost
@@ -48,6 +49,17 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+app:
+  project_service:
+    cover_image:
+      max_cover_image_size: 5_000_000
+      cover_image_types: jpeg/png
+      cover_image_horizontal_max_width: 1080
+      cover_image_horizontal_max_height: 566
+      cover_image_square_max_width: 1080
+      cover_image_square_max_height: 1080
+      cover_image_folder_name: /cover-image
 
 google:
   client:

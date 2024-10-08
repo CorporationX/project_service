@@ -178,6 +178,16 @@ public class ResourceService {
         );
     }
 
+    @Transactional
+    public void saveResource(Resource resource) {
+        resourceRepository.save(resource);
+    }
+
+    @Transactional
+    public void deleteResource(Resource resource) {
+        resourceRepository.delete(resource);
+    }
+
     private String makeResourceKey(Project project, MultipartFile file) {
         String folderName = String.format("%s_%s", project.getId(), project.getName());
         return String.format("%s/%d_%s", folderName, System.nanoTime(), file.getOriginalFilename());
