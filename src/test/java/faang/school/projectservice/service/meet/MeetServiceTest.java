@@ -118,7 +118,7 @@ class MeetServiceTest {
 
     @Test
     void testCreateMeetThrowsProjectNotFoundException() {
-        doThrow(EntityNotFoundException.class).when(projectService).getProjectById(projectId);
+        doThrow(EntityNotFoundException.class).when(projectService).findById(projectId);
         assertThrows(EntityNotFoundException.class, () -> meetService.createMeet(userId, projectId, testMeet));
     }
 
@@ -192,7 +192,7 @@ class MeetServiceTest {
 
     @Test
     void testGetMeetsByProjectId() {
-        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(projectService.findById(projectId)).thenReturn(project);
         when(meetRepository.findAllByProject(project)).thenReturn(meets);
 
         var result = meetService.getMeetsByProjectId(userId, projectId);
@@ -203,8 +203,8 @@ class MeetServiceTest {
 
     @Test
     void testGetMeetsByProjectIdThrowsEntityNotFoundException() {
-        when(projectService.getProjectById(projectId)).thenThrow(EntityNotFoundException.class);
-        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(projectId));
+        when(projectService.findById(projectId)).thenThrow(EntityNotFoundException.class);
+        assertThrows(EntityNotFoundException.class, () -> projectService.findById(projectId));
     }
 
     @Test

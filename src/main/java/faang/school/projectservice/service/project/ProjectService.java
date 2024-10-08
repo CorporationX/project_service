@@ -37,9 +37,4 @@ public class ProjectService {
     public Project save(Project project) {
         return projectJpaRepository.save(project);
     }
-
-    @Transactional(readOnly = true)
-    public Project getProjectById(Long projectId) {
-        return projectRepository.getProjectById(projectId);
-    }
 }

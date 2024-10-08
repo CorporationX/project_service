@@ -30,7 +30,7 @@ public class MeetService {
 
     @Transactional
     public Meet createMeet(Long userId, Long projectId, Meet meet) {
-        var project = projectService.getProjectById(projectId);
+        var project = projectService.findById(projectId);
         meetValidator.validateUser(userId);
         meetValidator.validateParticipants(meet.getUserIds());
         meet.setCreatorId(userId);
@@ -63,7 +63,7 @@ public class MeetService {
     @Transactional(readOnly = true)
     public Collection<Meet> getMeetsByProjectId(Long userId, Long projectId) {
         meetValidator.validateUser(userId);
-        var project = projectService.getProjectById(projectId);
+        var project = projectService.findById(projectId);
         return meetRepository.findAllByProject(project);
     }
 
