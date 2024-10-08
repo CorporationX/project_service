@@ -31,7 +31,7 @@ public class StageController {
     private final StageService stageService;
 
     @PostMapping("/{projectId}/stages")
-    public StageDto createStage(@RequestBody StageCreateDto stageCreateDto) {
+    public StageDto createStage(@Valid @RequestBody StageCreateDto stageCreateDto) {
         return stageService.createStage(stageCreateDto);
     }
 
@@ -44,7 +44,7 @@ public class StageController {
     @DeleteMapping("/stages/{stageId}")
     public StageDto deleteStage(
             @Positive @PathVariable Long stageId,
-            @NotNull RemoveTypeDto removeTypeDto) {
+            @Valid RemoveTypeDto removeTypeDto) {
         return stageService.removeStage(stageId, removeTypeDto);
     }
 
