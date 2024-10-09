@@ -1,5 +1,6 @@
 package faang.school.projectservice.config.jira;
 
+import faang.school.projectservice.dto.client.UserDto;
 import io.netty.channel.ChannelOption;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +16,6 @@ import java.util.Base64;
 @Configuration
 public class WebClientConfig {
 
-    @Bean
     public WebClient jiraWebClient(String username, String token, String projectUrl) {
         String basicAuth = "Basic " + Base64.getEncoder().encodeToString((username + ":" + token).getBytes());
 
