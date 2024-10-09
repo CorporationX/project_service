@@ -17,7 +17,7 @@ import java.io.InputStream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class S3Service implements FileStorageService {
+public class S3Service2 implements FileStorageService {
 
     private final AmazonS3 amazonS3;
 

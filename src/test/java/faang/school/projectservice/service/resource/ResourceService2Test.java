@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ResourceServiceTest {
+class ResourceService2Test {
 
     private static final String RESOURCE_KEY = "123";
     private static final String TEST_FILE_NAME = "testFile";
@@ -33,7 +33,7 @@ class ResourceServiceTest {
     private MultipartFile multipartFile;
 
     @InjectMocks
-    private ResourceService resourceService;
+    private ResourceService2 resourceService2;
 
     @Nested
     @DisplayName("Retrieving a resource by KEY")
@@ -46,7 +46,7 @@ class ResourceServiceTest {
             resource.setKey(RESOURCE_KEY);
             when(resourceRepository.findByKey(RESOURCE_KEY)).thenReturn(Optional.of(resource));
 
-            Resource result = resourceService.getResourceByKey(RESOURCE_KEY);
+            Resource result = resourceService2.getResourceByKey(RESOURCE_KEY);
 
             assertNotNull(result);
             assertEquals(RESOURCE_KEY, result.getKey());
@@ -58,7 +58,7 @@ class ResourceServiceTest {
             when(resourceRepository.findByKey(RESOURCE_KEY)).thenReturn(Optional.empty());
 
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-                resourceService.getResourceByKey(RESOURCE_KEY);
+                resourceService2.getResourceByKey(RESOURCE_KEY);
             });
 
             assertEquals("Resource with key 123 doesn't exist", exception.getMessage());
@@ -79,7 +79,7 @@ class ResourceServiceTest {
             when(multipartFile.getSize()).thenReturn(TEST_FILE_SIZE);
             when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
 
-            Resource result = resourceService.putResource(RESOURCE_KEY, multipartFile, ResourceType.IMAGE);
+            Resource result = resourceService2.putResource(RESOURCE_KEY, multipartFile, ResourceType.IMAGE);
 
             assertNotNull(result);
             assertEquals(RESOURCE_KEY, result.getKey());
@@ -101,7 +101,7 @@ class ResourceServiceTest {
             when(resourceRepository.findByKey(RESOURCE_KEY)).thenReturn(Optional.of(resource));
             when(resourceRepository.save(resource)).thenReturn(resource);
 
-            Resource result = resourceService.markResourceAsDeleted(RESOURCE_KEY);
+            Resource result = resourceService2.markResourceAsDeleted(RESOURCE_KEY);
 
             assertNotNull(result);
             assertEquals(ResourceStatus.DELETED, result.getStatus());
@@ -114,7 +114,7 @@ class ResourceServiceTest {
             when(resourceRepository.findByKey(RESOURCE_KEY)).thenReturn(Optional.empty());
 
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-                resourceService.markResourceAsDeleted(RESOURCE_KEY);
+                resourceService2.markResourceAsDeleted(RESOURCE_KEY);
             });
 
             assertEquals("Resource with key 123 doesn't exist", exception.getMessage());

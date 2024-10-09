@@ -14,7 +14,7 @@ import java.math.BigInteger;
 
 @Service
 @AllArgsConstructor
-public class ResourceService {
+public class ResourceService2 {
 
     private final ResourceRepository resourceRepository;
 

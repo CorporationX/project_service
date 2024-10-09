@@ -7,8 +7,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.image.ImageService;
-import faang.school.projectservice.service.resource.ResourceService;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.resource.ResourceService2;
+import faang.school.projectservice.service.s3.S3Service2;
 import faang.school.projectservice.validator.image.ImageValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +26,8 @@ public class ProjectCoverService {
     private final ProjectRepository projectRepository;
     private final ProjectService projectService;
     private final ImageValidator imageValidator;
-    private final ResourceService resourceService;
-    private final S3Service s3Service;
+    private final ResourceService2 resourceService2;
+    private final S3Service2 s3Service2;
 
     @Transactional
     public ProjectCoverDto uploadCover(Long projectId, MultipartFile imageFile) {
@@ -46,7 +46,7 @@ public class ProjectCoverService {
         String coverImageId = project.getCoverImageId();
 
         if (coverImageId != null) {
-            return s3Service.getFileById(coverImageId);
+            return s3Service2.getFileById(coverImageId);
         } else {
             throw new EmptyCoverException("Cover image is not set for the project with id: " + projectId);
         }
@@ -61,8 +61,8 @@ public class ProjectCoverService {
             project.setCoverImageId(null);
             projectRepository.save(project);
 
-            resourceService.markResourceAsDeleted(coverImageId);
-            s3Service.removeFileById(coverImageId);
+            resourceService2.markResourceAsDeleted(coverImageId);
+            s3Service2.removeFileById(coverImageId);
         }
     }
 
@@ -77,12 +77,12 @@ public class ProjectCoverService {
     private String uploadCoverFile(MultipartFile imageFile, Project project) {
         String fileKey = UUID.randomUUID().toString();
 
-        resourceService.putResource(fileKey, imageFile, ResourceType.IMAGE);
+        resourceService2.putResource(fileKey, imageFile, ResourceType.IMAGE);
         project.setCoverImageId(fileKey);
         projectRepository.save(project);
 
         byte[] resizedImage = imageService.resizeImage(imageFile);
-        s3Service.uploadFile(
+        s3Service2.uploadFile(
                 fileKey,
                 imageFile.getOriginalFilename(),
                 imageFile.getContentType(),

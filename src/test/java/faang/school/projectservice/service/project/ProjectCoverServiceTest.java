@@ -7,8 +7,8 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.image.ImageService;
-import faang.school.projectservice.service.resource.ResourceService;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.resource.ResourceService2;
+import faang.school.projectservice.service.s3.S3Service2;
 import faang.school.projectservice.validator.image.ImageValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,10 +44,10 @@ class ProjectCoverServiceTest {
     private ImageValidator imageValidator;
 
     @Mock
-    private ResourceService resourceService;
+    private ResourceService2 resourceService2;
 
     @Mock
-    private S3Service s3Service;
+    private S3Service2 s3Service2;
 
     @Mock
     private MultipartFile imageFile;
@@ -73,8 +73,8 @@ class ProjectCoverServiceTest {
             doNothing().when(imageValidator).validateMaximumSize(anyLong());
             when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
             when(imageService.resizeImage(imageFile)).thenReturn(resizedImage);
-            when(resourceService.putResource(any(), any(), any())).thenReturn(resource);
-            doNothing().when(s3Service).uploadFile(any(), any(), any(), anyInt(), any());
+            when(resourceService2.putResource(any(), any(), any())).thenReturn(resource);
+            doNothing().when(s3Service2).uploadFile(any(), any(), any(), anyInt(), any());
 
             ProjectCoverDto result = projectCoverService.uploadCover(PROJECT_ID, imageFile);
 
@@ -82,7 +82,7 @@ class ProjectCoverServiceTest {
             assertEquals(PROJECT_ID, result.getProjectId());
             assertNotNull(result.getCoverId());
 
-            verify(resourceService).putResource(anyString(), eq(imageFile), eq(ResourceType.IMAGE));
+            verify(resourceService2).putResource(anyString(), eq(imageFile), eq(ResourceType.IMAGE));
             verify(projectRepository).save(project);
         }
     }
@@ -106,8 +106,8 @@ class ProjectCoverServiceTest {
             doNothing().when(imageValidator).validateMaximumSize(anyLong());
             when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
             when(imageService.resizeImage(imageFile)).thenReturn(resizedImage);
-            when(resourceService.putResource(any(), any(), any())).thenReturn(resource);
-            doNothing().when(s3Service).uploadFile(any(), any(), any(), anyInt(), any());
+            when(resourceService2.putResource(any(), any(), any())).thenReturn(resource);
+            doNothing().when(s3Service2).uploadFile(any(), any(), any(), anyInt(), any());
 
             ProjectCoverDto result = projectCoverService.changeCover(PROJECT_ID, imageFile);
 
@@ -115,10 +115,10 @@ class ProjectCoverServiceTest {
             assertEquals(PROJECT_ID, result.getProjectId());
             assertNotNull(result.getCoverId());
 
-            verify(resourceService).markResourceAsDeleted(anyString());
-            verify(s3Service).removeFileById(anyString());
+            verify(resourceService2).markResourceAsDeleted(anyString());
+            verify(s3Service2).removeFileById(anyString());
 
-            verify(resourceService).putResource(any(), eq(imageFile), eq(ResourceType.IMAGE));
+            verify(resourceService2).putResource(any(), eq(imageFile), eq(ResourceType.IMAGE));
         }
     }
 
@@ -136,7 +136,7 @@ class ProjectCoverServiceTest {
             FileData fileData = mock(FileData.class);
 
             when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
-            when(s3Service.getFileById(COVER_IMAGE_ID)).thenReturn(fileData);
+            when(s3Service2.getFileById(COVER_IMAGE_ID)).thenReturn(fileData);
 
             FileData result = projectCoverService.getCover(PROJECT_ID);
 
@@ -176,8 +176,8 @@ class ProjectCoverServiceTest {
 
             assertNull(project.getCoverImageId());
 
-            verify(resourceService).markResourceAsDeleted(RESOURCE_KEY);
-            verify(s3Service).removeFileById(RESOURCE_KEY);
+            verify(resourceService2).markResourceAsDeleted(RESOURCE_KEY);
+            verify(s3Service2).removeFileById(RESOURCE_KEY);
             verify(projectRepository).save(project);
         }
     }
