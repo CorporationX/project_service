@@ -148,11 +148,11 @@ class JiraServiceImplTest {
 
     @Test
     void changeTaskStatus() {
-        jiraDto.setStatus("In Progress");
         JiraStatusDto jiraStatusDto = new JiraStatusDto();
-        jiraStatusDto.setId("1");
-        jiraStatusDto.setName("Test");
+        jiraStatusDto.setId("31");
+        jiraStatusDto.setName("In Progress");
         jiraDto.setTransitions(List.of(jiraStatusDto));
+        jiraDto.setStatus("In Progress");
 
         Map<String, Object> body = Map.of(
                 "transition", Map.of("id", "31")
