@@ -24,7 +24,7 @@ public class DuplicateClassesTest {
         assertEquals(ZERO_DUPS, checkForDuplicateClasses(FOLDER_PATH).size());
     }
 
-    private static Map<String, Integer> checkForDuplicateClasses(String packageName) {
+    private Map<String, Integer> checkForDuplicateClasses(String packageName) {
         String path = packageName.replace('.', '/');
         File directory = new File("src/main/java/" + path);
         Map<String, Integer> classMap = new HashMap<>();
@@ -44,7 +44,7 @@ public class DuplicateClassesTest {
         return classMap;
     }
 
-    private static void findClasses(File directory, Map<String, Integer> classMap) {
+    private void findClasses(File directory, Map<String, Integer> classMap) {
         File[] files = directory.listFiles();
         if (files != null) {
             for (File file : files) {
