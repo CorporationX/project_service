@@ -42,6 +42,7 @@ public class ProjectService {
     public TeamMember checkUserParticipationInProjectTeams(Long userId, Project project) {
         return project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
+                .filter(teamMember -> teamMember.getUserId().equals(userId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("User is not a part of the project"));
     }
