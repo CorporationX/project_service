@@ -23,6 +23,6 @@ public class ProjectController {
     @DeleteMapping("/projects/{projectId}/cover")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void removeResourceCover(@PathVariable @NotBlank Long projectId) {
-        projectService.removeResourceCover(projectId);
+        projectService.removeCover(projectId);
     }
 }

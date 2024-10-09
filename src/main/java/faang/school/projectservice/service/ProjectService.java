@@ -40,7 +40,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public void removeResourceCover(Long projectId) {
+    public void removeCover(Long projectId) {
         checkProjectExist(projectId);
 
         Project project = projectRepository.getProjectById(projectId);
