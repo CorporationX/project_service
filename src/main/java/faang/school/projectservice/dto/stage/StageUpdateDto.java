@@ -12,9 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StageUpdateDto {
-    private long stageId;
     private String stageName;
-    private long projectId;
+    private Long projectId;
     private List<Long> stageRoleIds;
     private List<Long> taskIds;
     private List<Long> executorIds;

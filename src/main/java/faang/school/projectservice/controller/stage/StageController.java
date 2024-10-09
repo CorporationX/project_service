@@ -17,32 +17,32 @@ import java.util.List;
 public class StageController {
     private final StageService stageService;
 
-    @PostMapping("/create")
-    public StageCreateDto createStage(@Valid @RequestBody StageCreateDto stageCreateDto) {
+    @PostMapping()
+    public StageDto createStage(@Valid @RequestBody StageCreateDto stageCreateDto) {
         return stageService.createStage(stageCreateDto);
     }
 
-    @PostMapping("/getFilter")
+    @PostMapping("/filter")
     public List<StageDto> getStagesByFilters(@RequestBody StageFilterDto stageFilterDto) {
         return stageService.getStagesByFilters(stageFilterDto);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public void deleteStage(@PathVariable long id) {
         stageService.deleteStage(id);
     }
 
-    @PostMapping("/updateStage")
-    public StageUpdateDto updateStage(@RequestBody StageUpdateDto stageUpdateDto) {
-        return stageService.updateStage(stageUpdateDto);
+    @PatchMapping("/{id}")
+    public StageDto updateStage(@PathVariable long id, @RequestBody StageUpdateDto stageUpdateDto) {
+        return stageService.updateStage(id, stageUpdateDto);
     }
 
-    @GetMapping("/getAllStage")
+    @GetMapping()
     public List<StageDto> getAllStage() {
         return stageService.getAllStage();
     }
 
-    @GetMapping("/getStage/{id}")
+    @GetMapping("/{id}")
     public StageDto getStageById(@PathVariable long id) {
         return stageService.getStageById(id);
     }

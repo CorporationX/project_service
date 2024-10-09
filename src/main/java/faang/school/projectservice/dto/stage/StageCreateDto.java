@@ -18,14 +18,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StageCreateDto {
-    private long id;
     @NotEmpty
     private String stageName;
     @NotNull
-    private long projectId;
+    private Long projectId;
     @NotEmpty
     @Valid
     private List<StageRolesDto> stageRolesDtos;
-    private List<TaskDto> taskDtos;
-    private List<TeamMemberDto> executorDtos;
 }

@@ -6,7 +6,7 @@ import faang.school.projectservice.model.stage.Stage;
 
 import java.util.stream.Stream;
 
-class StageNameFilter implements Filter<StageFilterDto, Stage> {
+public class StageNameFilter implements Filter<StageFilterDto, Stage> {
 
     @Override
     public boolean isApplicable(StageFilterDto stageFilterDto) {

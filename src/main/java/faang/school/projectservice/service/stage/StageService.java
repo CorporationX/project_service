@@ -1,8 +1,8 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.filter.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageCreateDto;
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.filter.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.stage.StageMapper;
@@ -17,8 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -31,38 +29,42 @@ public class StageService {
     private final StageMapper stageMapper;
     private final List<Filter<StageFilterDto, Stage>> stagesFilters;
 
-    public StageCreateDto createStage(StageCreateDto stageCreateDto) {
-        Stage stage = stageRepository.save(stageMapper.toStageCreateEntity(stageCreateDto));
+    public StageDto createStage(StageCreateDto stageCreateDto) {
+        Stage stage = stageMapper.toStageEntity(stageCreateDto);
         stage.setProject(projectService.getProjectById(stageCreateDto.getProjectId()));
 
-        return stageMapper.toStageCreateDto(stage);
+        Stage stageNew = stageRepository.save(stage);
+
+        return stageMapper.toStageDto(stageNew);
     }
 
     public List<StageDto> getStagesByFilters(StageFilterDto stageFilterDto) {
-        Stream<Stage> stages = stageRepository.findAll().stream();
         return stagesFilters.stream()
                 .filter(stagesFilter -> stagesFilter.isApplicable(stageFilterDto))
-                .flatMap(stagesFilter -> stagesFilter.applyFilter(stages, stageFilterDto))
+                .reduce(stageRepository.findAll().stream(),
+                        (s, f) -> f.applyFilter(s, stageFilterDto),
+                        (s1, s2) -> s1)
                 .map(stageMapper::toStageDto)
                 .toList();
     }
 
     public void deleteStage(long id) {
-        Optional<Stage> stage = stageRepository.findById(id);
-        stage.ifPresentOrElse(stageRepository::delete,
-                () -> {
-                    entityNotFoundException(id);
-                });
+        stageRepository.findById(id)
+                .ifPresentOrElse(stageRepository::delete,
+                        () -> {
+                            entityNotFoundException(id);
+                        });
     }
 
-    public StageUpdateDto updateStage(StageUpdateDto stageUpdateDto) {
-        Optional<Stage> stage = stageRepository.findById(stageUpdateDto.getStageId());
-
-        return stage.map(s -> stageMapper.toStageUpdateDto(stageRepository.save(toUpdateEntity(stageUpdateDto))))
-                .orElseThrow(() -> {
-                    entityNotFoundException(stageUpdateDto.getStageId());
-                    return null;
-                });
+    public StageDto updateStage(long id, StageUpdateDto stageUpdateDto) {
+        Stage stage1 = stageRepository.findById(id).map(stage -> {
+            toEntity(stage, stageUpdateDto);
+            return stage;
+        }).orElseThrow(() -> {
+            entityNotFoundException(id);
+            return null;
+        });
+        return stageMapper.toStageDto(stageRepository.save(stage1));
     }
 
     public List<StageDto> getAllStage() {
@@ -78,9 +80,7 @@ public class StageService {
                 });
     }
 
-    private Stage toUpdateEntity(StageUpdateDto stageUpdateDto) {
-        Stage stage = stageMapper.toStageUpdateEntity(stageUpdateDto);
-
+    private Stage toEntity(Stage stage, StageUpdateDto stageUpdateDto) {
         stage.setProject(projectService.getProjectById(stageUpdateDto.getProjectId()));
         stage.setStageRoles(stageRolesService.getAllById(stageUpdateDto.getStageRoleIds()));
         stage.setTasks(taskService.getAllById(stageUpdateDto.getTaskIds()));
@@ -92,5 +92,4 @@ public class StageService {
     private void entityNotFoundException(long id) {
         throw new EntityNotFoundException("No such request was found " + id);
     }
-
 }

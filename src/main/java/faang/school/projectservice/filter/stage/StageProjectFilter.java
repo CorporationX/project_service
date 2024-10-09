@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 public class StageProjectFilter implements Filter<StageFilterDto, Stage> {
     @Override
     public boolean isApplicable(StageFilterDto stageFilterDto) {
-        return stageFilterDto.getProjectId() != 0;
+        return stageFilterDto.getProjectId() != null;
     }
 
     @Override

@@ -10,16 +10,13 @@ public class StageTeamRolesFilter implements Filter<StageFilterDto, Stage> {
 
     @Override
     public boolean isApplicable(StageFilterDto stageFilterDto) {
-        return !stageFilterDto.getStageRolesDtos().isEmpty() &&
-                stageFilterDto.getStageRolesDtos().stream().anyMatch(stageRolesDto ->
-                        stageRolesDto.getTeamRole() != null);
+        return stageFilterDto.getTeamRoles() != null &&
+                !stageFilterDto.getTeamRoles().isEmpty();
     }
 
     @Override
     public Stream<Stage> applyFilter(Stream<Stage> stages, StageFilterDto stageFilterDto) {
         return stages.filter(stage -> stage.getStageRoles().stream()
-                .anyMatch(stageRoles -> stageFilterDto.getStageRolesDtos().stream()
-                        .anyMatch(stageRolesDto ->
-                                stageRoles.getTeamRole().equals(stageRolesDto.getTeamRole()))));
+                .anyMatch(stageRoles -> stageFilterDto.getTeamRoles().contains(stageRoles.getTeamRole())));
     }
 }

@@ -4,8 +4,6 @@ import faang.school.projectservice.dto.stage.StageCreateDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.dto.stageroles.StageRolesDto;
-import faang.school.projectservice.dto.task.TaskDto;
-import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -20,57 +18,17 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
 
-    List<StageDto> toStageDtos(List<Stage> stages);
+    @Mapping(target = "project", ignore = true)
+    @Mapping(source = "stageRolesDtos", target = "stageRoles")
+    Stage toStageEntity(StageCreateDto stageCreateDto);
 
-    @Mapping(source = "project.id", target = "projectId")
-    @Mapping(source = "stageRoles", target = "stageRoleIds", qualifiedByName = "stageRoles")
-    @Mapping(source = "tasks", target = "taskIds", qualifiedByName = "tasks")
-    @Mapping(source = "executors", target = "executorIds", qualifiedByName = "executors")
-    StageDto toStageDto(Stage stage);
+    List<StageDto> toStageDtos(List<Stage> stages);
 
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "stageRoles", ignore = true)
     @Mapping(target = "tasks", ignore = true)
     @Mapping(target = "executors", ignore = true)
-    Stage toStageUpdateEntity(StageUpdateDto stageUpdateDto);
+    Stage toStageEntity(StageUpdateDto stageUpdateDto);
 
-    @Mapping(source = "project.id", target = "projectId")
-    @Mapping(source = "stageRoles", target = "stageRoleIds", qualifiedByName = "stageRoles")
-    @Mapping(source = "tasks", target = "taskIds", qualifiedByName = "tasks")
-    @Mapping(source = "executors", target = "executorIds", qualifiedByName = "executors")
-    StageUpdateDto toStageUpdateDto(Stage stage);
-
-    @Named("stageRoles")
-    default List<Long> stageRoles (List<StageRoles> stages){
-        return stages.stream().map(StageRoles::getId).toList();
-    }
-
-    @Named("tasks")
-    default List<Long> tasks (List<Task> tasks){
-        return tasks.stream().map(Task::getId).toList();
-    }
-
-    @Named("executors")
-    default List<Long> executors (List<TeamMember> teamMembers){
-        return teamMembers.stream().map(TeamMember::getId).toList();
-    }
-
-    @Mapping(source = "project.id", target = "projectId")
-    StageCreateDto toStageCreateDto(Stage stage);
-
-    List<StageRolesDto> toStageRolesDtos (List<StageRoles> stageRoles);
-
-    List<TaskDto> toTaskDtos (List<Task> tasks);
-
-    List<TeamMemberDto> toTeamMemberDtos (List<TeamMember> teamMembers);
-
-    @Mapping(target = "project", ignore = true)
-    Stage toStageCreateEntity(StageCreateDto stageCreateDto);
-
-    List<StageRoles> toStageRolesEntity (List<StageRolesDto> stageRolesDtos);
-
-    List<Task> toTaskEntity (List<TaskDto> taskDtos);
-
-    List<TeamMember> toTeamMemberEntity (List<TeamMemberDto> teamMemberDtos);
-
+    StageDto toStageDto(Stage stage);
 }
