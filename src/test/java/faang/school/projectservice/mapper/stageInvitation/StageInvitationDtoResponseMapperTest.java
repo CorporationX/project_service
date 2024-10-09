@@ -1,7 +1,6 @@
 package faang.school.projectservice.mapper.stageInvitation;
 
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDtoRequest;
-
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -11,22 +10,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Spy;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
 class StageInvitationDtoResponseMapperTest {
 
-    @Spy
-    private StageInvitationDtoMapperImpl mapper;
+    private final static long SIZE_DTOS = 2L;
 
     private final static long STAGE_ID = 1L;
-    private final static long  SIZE_DTOS = 2L;
-    private final static String  DESCRIPTION = "Smth";
+    private final static String DESCRIPTION = "Smth";
+    @InjectMocks
+    private StageInvitationDtoMapperImpl mapper;
 
     private final static StageInvitationStatus STAGE_INVITATION_STATUS = StageInvitationStatus.ACCEPTED;
 
