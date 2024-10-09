@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.resource;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.service.resource.ResourceService;
+import faang.school.projectservice.model.dto.resource.ResourceDto;
+import faang.school.projectservice.service.ResourceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

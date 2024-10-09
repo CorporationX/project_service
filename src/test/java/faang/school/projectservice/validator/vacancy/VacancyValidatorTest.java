@@ -1,10 +1,10 @@
 package faang.school.projectservice.validator.vacancy;
 
-import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.model.dto.vacancy.VacancyDto;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.entity.TeamMember;
+import faang.school.projectservice.model.entity.TeamRole;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

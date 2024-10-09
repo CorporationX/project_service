@@ -1,8 +1,8 @@
 package faang.school.projectservice.subproject.filter;
 
-import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.filter.subproject.ProjectNameFilter;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.dto.project.ProjectFilterDto;
+import faang.school.projectservice.model.filter.subproject.ProjectNameFilter;
+import faang.school.projectservice.model.entity.Project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

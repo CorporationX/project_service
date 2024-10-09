@@ -2,10 +2,10 @@ package faang.school.projectservice.controller.intership;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.service.internship.InternshipService;
+import faang.school.projectservice.model.dto.internship.InternshipDto;
+import faang.school.projectservice.model.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.model.entity.InternshipStatus;
+import faang.school.projectservice.service.InternshipService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

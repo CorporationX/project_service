@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

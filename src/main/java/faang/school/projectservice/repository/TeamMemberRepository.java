@@ -2,7 +2,7 @@ package faang.school.projectservice.repository;
 
 import faang.school.projectservice.exception.IllegalEntityException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.entity.TeamMember;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

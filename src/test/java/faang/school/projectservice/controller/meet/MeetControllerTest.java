@@ -1,11 +1,11 @@
 package faang.school.projectservice.controller.meet;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.meet.MeetFilterDto;
-import faang.school.projectservice.dto.meet.MeetRequestDto;
-import faang.school.projectservice.dto.meet.MeetResponseDto;
-import faang.school.projectservice.model.meet.MeetStatus;
-import faang.school.projectservice.service.meet.MeetServiceImpl;
+import faang.school.projectservice.model.dto.meet.MeetFilterDto;
+import faang.school.projectservice.model.dto.meet.MeetRequestDto;
+import faang.school.projectservice.model.dto.meet.MeetResponseDto;
+import faang.school.projectservice.model.entity.meet.MeetStatus;
+import faang.school.projectservice.service.impl.meet.MeetServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

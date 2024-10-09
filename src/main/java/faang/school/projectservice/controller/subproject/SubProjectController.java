@@ -1,9 +1,9 @@
 package faang.school.projectservice.controller.subproject;
 
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.subproject.SubProjectDto;
-import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.service.subproject.SubProjectService;
+import faang.school.projectservice.model.dto.project.ProjectDto;
+import faang.school.projectservice.model.dto.subproject.SubProjectDto;
+import faang.school.projectservice.model.dto.project.ProjectFilterDto;
+import faang.school.projectservice.service.SubProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator.meet;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.meet.Meet;
+import faang.school.projectservice.model.entity.meet.Meet;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,15 +1,16 @@
 package faang.school.projectservice.service.meet;
 
-import faang.school.projectservice.dto.meet.MeetFilterDto;
-import faang.school.projectservice.dto.meet.MeetRequestDto;
-import faang.school.projectservice.dto.meet.MeetResponseDto;
-import faang.school.projectservice.filter.meet.MeetFilter;
+import faang.school.projectservice.model.dto.meet.MeetFilterDto;
+import faang.school.projectservice.model.dto.meet.MeetRequestDto;
+import faang.school.projectservice.model.dto.meet.MeetResponseDto;
+import faang.school.projectservice.model.filter.meet.MeetFilter;
 import faang.school.projectservice.jpa.MeetRepository;
-import faang.school.projectservice.mapper.meet.MeetMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.meet.Meet;
-import faang.school.projectservice.model.meet.MeetStatus;
+import faang.school.projectservice.model.mapper.meet.MeetMapper;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.meet.Meet;
+import faang.school.projectservice.model.entity.meet.MeetStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.impl.meet.MeetServiceImpl;
 import faang.school.projectservice.validator.meet.MeetValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;

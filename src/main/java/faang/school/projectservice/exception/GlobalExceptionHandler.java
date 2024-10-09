@@ -1,6 +1,6 @@
 package faang.school.projectservice.exception;
 
-import faang.school.projectservice.dto.error.ErrorResponse;
+import faang.school.projectservice.model.dto.error.ErrorResponse;
 import faang.school.projectservice.exception.subproject.SubProjectNotFinishedException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;

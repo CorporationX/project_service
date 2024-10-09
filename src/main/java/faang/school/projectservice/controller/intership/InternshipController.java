@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.intership;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.service.internship.InternshipService;
+import faang.school.projectservice.model.dto.internship.InternshipDto;
+import faang.school.projectservice.model.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.service.InternshipService;
 import faang.school.projectservice.validator.groups.CreateGroup;
 import faang.school.projectservice.validator.groups.UpdateGroup;
 import jakarta.validation.constraints.NotNull;

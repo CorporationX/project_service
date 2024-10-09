@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.intership;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.model.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.IllegalEntityException;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;

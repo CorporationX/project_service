@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.subproject;
 
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.entity.ProjectVisibility;
 import org.springframework.stereotype.Component;
 
 @Component
