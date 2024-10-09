@@ -1,7 +1,7 @@
 package faang.school.projectservice.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
@@ -28,7 +28,7 @@ public class Moment {
             joinColumns = @JoinColumn(name = "moment_id"),
             inverseJoinColumns = @JoinColumn(name = "resource_id")
     )
-    private List<Resource> resource;
+    private List<ResourceDB> resourceDB;
 
     @ManyToMany
     @JoinTable(

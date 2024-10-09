@@ -1,103 +1,66 @@
 package faang.school.projectservice.service.resource;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.service.s3manager.S3Manager;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.util.Objects;
 
 @Slf4j
 @Component
+@AllArgsConstructor
 public class ResourceManager {
-    private final AmazonS3 s3Client;
-    private final String projectBucket;
+    private final S3Manager s3Manager;
     private final ResourceRepository resourceRepository;
 
-    public ResourceManager(AmazonS3 s3Client,
-                           @Value("${services.s3.bucketName}") String projectBucket,
-                           ResourceRepository resourceRepository) {
-        this.s3Client = s3Client;
-        this.projectBucket = projectBucket;
-        this.resourceRepository = resourceRepository;
-
-    }
-
-    public Resource uploadFileToProject(MultipartFile file, String directoryPath, Project project, TeamMember teamMember) {
-        String path = generateFullPath(file, directoryPath);
-        ObjectMetadata metadata = generateMetadata(file);
-        log.info("Uploading file: {} to bucket: {}", file.getOriginalFilename(), projectBucket);
-        try {
-            s3Client.putObject(projectBucket, path, file.getInputStream(), metadata);
-            return createAndSaveProjectResource(file, path, project, teamMember);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file to S3", e);
-        }
-    }
-
-
-    private String generateUniqueFileName(String originalFilename) {
-        String extension = "";
-        if(originalFilename == null || originalFilename.isEmpty()) {
-            return String.valueOf(System.currentTimeMillis());
-        }
-        int dotIndex = originalFilename.lastIndexOf(".");
-        if (dotIndex > 0) {
-            extension = originalFilename.substring(dotIndex);
-        }
-        String baseName = originalFilename.substring(0, dotIndex > 0 ? dotIndex : originalFilename.length());
-        return baseName + "_" + System.currentTimeMillis() + extension;
-    }
-
-    private Resource createAndSaveProjectResource(MultipartFile file, String pathKey, Project project, TeamMember teamMember) {
-        Resource resource = Resource.builder()
-                .key(pathKey)
-                .name(generateResourceNameByProjectName(file, project))
-                .size(BigInteger.valueOf(file.getSize()))
-                .type(file.getContentType())
+    public ResourceDB createAndSaveProjectResource(ObjectMetadata metadata, Project project, TeamMember teamMember) {
+        String path = metadata.getUserMetaDataOf("path");
+        String fileName = metadata.getUserMetaDataOf("name");
+        String type = metadata.getContentType();
+        BigInteger size = BigInteger.valueOf(metadata.getContentLength());
+        ResourceDB resourceDB = ResourceDB.builder()
+                .key(path)
+                .name(generateResourceName(fileName, project.getName()))
+                .size(size)
+                .type(type)
                 .status(ResourceStatus.ACTIVE)
                 .createdBy(teamMember)
                 .updatedBy(teamMember)
                 .project(project)
                 .build();
-        return resourceRepository.save(resource);
+        return resourceRepository.save(resourceDB);
     }
 
-    private String generateResourceNameByProjectName(MultipartFile file, Project project) {
-        return project.getName() + " " + file.getOriginalFilename();
+    private String generateResourceName(String fileName, String entityName) {
+        return entityName + " " + fileName;
     }
 
-    private String generateFullPath(MultipartFile file, String directoryPath) {
-        String fileNameWithExtension = generateUniqueFileName(file.getOriginalFilename());
-        return String.format("%s/%s/%s", directoryPath, file.getContentType(), fileNameWithExtension);
-    }
 
-    private ObjectMetadata generateMetadata(MultipartFile file) {
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.getSize());
-        metadata.setContentType(file.getContentType());
-        return metadata;
-    }
-
-    public Resource getResourceById(Long resourceId) {
+    public ResourceDB getResourceById(Long resourceId) {
         return resourceRepository.findById(resourceId)
                 .orElseThrow(() -> new IllegalArgumentException("Resource not found"));
     }
 
-    public void deleteFileFromProject(Resource resource) {
-        s3Client.deleteObject(projectBucket, resource.getKey());
+    public ResourceInfo uploadResource(MultipartFile file, String directoryPath, Project project, TeamMember teamMember) {
+        ObjectMetadata metadata = s3Manager.uploadFileToS3(file, directoryPath);
+        ResourceDB resourceDB = createAndSaveProjectResource(metadata, project, teamMember);
+        return new ResourceInfo(file.getResource(), resourceDB);
     }
 
-    public InputStream getFileFromProject(Resource resource) {
-        return s3Client.getObject(projectBucket, resource.getKey()).getObjectContent();
+    public void deleteFileFromProject(ResourceDB resourceDB) {
+        s3Manager.deleteFileFromProject(resourceDB.getKey());
     }
+
+    public Resource getResource(String pathKey) {
+        return s3Manager.getFileFromProject(pathKey);
+    }
+
 }

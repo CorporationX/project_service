@@ -31,7 +31,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Resource {
+public class ResourceDB {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
