@@ -13,13 +13,13 @@ import java.io.IOException;
 @Component
 public class ImageProcessor {
 
-    @Value("${resource.image.max-rectangle-width}")
+    @Value("${services.cover_image.max-rectangle-width}")
     private int maxRectangleWidth;
 
-    @Value("${resource.image.max-rectangle-height}")
+    @Value("${services.cover_image.max-rectangle-height}")
     private int maxRectangleHeight;
 
-    @Value("${resource.image.max-square-dimension}")
+    @Value("${services.cover_image.max-square-dimension}")
     private int maxSquareDimension;
 
     public byte[] processImage(MultipartFile file) {

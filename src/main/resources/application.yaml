@@ -35,6 +35,8 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+
+
 services:
   s3:
     endpoint: http://localhost:9000
@@ -43,6 +45,12 @@ services:
     bucketName: corpbucket
     region: us-east-1
     isMocked: false
+
+  cover_image:
+    max-rectangle-width: 1080
+    max-rectangle-height: 566
+    max-square-dimension: 1080
+
   payment-service:
     host: http://localhost
     port: 9080
