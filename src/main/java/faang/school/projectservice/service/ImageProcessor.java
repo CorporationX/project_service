@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-//@Component
+@Component
 public class ImageProcessor {
 
     @Value("${resource.image.max-rectangle-width}")
