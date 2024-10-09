@@ -5,6 +5,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.config.jira.WebClientConfig;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.jira.JiraDto;
+import faang.school.projectservice.dto.jira.JiraStatusDto;
 import faang.school.projectservice.filter.jira.JiraFilter;
 import faang.school.projectservice.service.jira.response.JiraResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -148,10 +149,10 @@ class JiraServiceImplTest {
     @Test
     void changeTaskStatus() {
         jiraDto.setStatus("In Progress");
-        JiraDto.JiraTransitions transition = new JiraDto.JiraTransitions();
-        transition.setId("31");
-        transition.setName("In Progress");
-        jiraDto.setTransitions(List.of(transition));
+        JiraStatusDto jiraStatusDto = new JiraStatusDto();
+        jiraStatusDto.setId("1");
+        jiraStatusDto.setName("Test");
+        jiraDto.setTransitions(List.of(jiraStatusDto));
 
         Map<String, Object> body = Map.of(
                 "transition", Map.of("id", "31")

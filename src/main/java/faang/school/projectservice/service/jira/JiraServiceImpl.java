@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.jira.JiraDto;
 import faang.school.projectservice.filter.jira.JiraFilter;
 import faang.school.projectservice.service.jira.response.JiraResponse;
+import faang.school.projectservice.util.JiraPath;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class JiraServiceImpl implements JiraService {
     public Mono<Object> getIssue(String issueKey) {
         WebClient webClient = authorizeUser();
         return webClient.get()
-                .uri("/rest/api/3/issue/{issueKey}", issueKey)
+                .uri(JiraPath.GET_TASK, issueKey)
                 .exchangeToMono(clientResponse ->
                         jiraResponse.handler(clientResponse, true));
     }
@@ -40,7 +41,7 @@ public class JiraServiceImpl implements JiraService {
     public Mono<Object> createTask(JiraDto dto) {
         WebClient webClient = authorizeUser();
         return webClient.post()
-                .uri("/rest/api/2/issue")
+                .uri(JiraPath.CREATE_TASK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(dto)
                 .exchangeToMono(clientResponse ->
@@ -51,7 +52,7 @@ public class JiraServiceImpl implements JiraService {
     public Mono<Object> updateTask(JiraDto dto) {
         WebClient webClient = authorizeUser();
         return webClient.put()
-                .uri("/rest/api/2/issue/{issueKey}", dto.getKey())
+                .uri(JiraPath.UPDATE_TASK, dto.getKey())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(dto)
                 .exchangeToMono(clientResponse ->
@@ -63,7 +64,7 @@ public class JiraServiceImpl implements JiraService {
     public Mono<Object> updateTaskLink(JiraDto dto) {
         WebClient webClient = authorizeUser();
         return webClient.post()
-                .uri("/rest/api/3/issueLink")
+                .uri(JiraPath.UPDATE_LINK_TASK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(dto)
                 .exchangeToMono(clientResponse ->
@@ -88,7 +89,7 @@ public class JiraServiceImpl implements JiraService {
     private Mono<JiraDto> getAvailableTransitions(String issueKey) {
         WebClient webClient = authorizeUser();
         return webClient.get()
-                .uri("/rest/api/3/issue/{issueKey}/transitions", issueKey)
+                .uri(JiraPath.GET_TRANSITIONS, issueKey)
                 .retrieve()
                 .bodyToMono(JiraDto.class);
     }
@@ -99,7 +100,7 @@ public class JiraServiceImpl implements JiraService {
                 "transition", Map.of("id", transitionId)
         );
         return webClient.post()
-                .uri("/rest/api/3/issue/{issueKey}/transitions", issueKey)
+                .uri(JiraPath.GET_TRANSITIONS, issueKey)
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(Void.class);
@@ -110,7 +111,7 @@ public class JiraServiceImpl implements JiraService {
         WebClient webClient = authorizeUser();
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/rest/api/2/search")
+                        .path(JiraPath.SEARCH)
                         .queryParam("jql", "project = " + keyProject)
                         .queryParam("maxResults", 5)
                         .build())
@@ -129,7 +130,7 @@ public class JiraServiceImpl implements JiraService {
 
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/rest/api/2/search")
+                        .path(JiraPath.SEARCH)
                         .queryParam("jql", jqlQuery)
                         .queryParam("maxResults", 5)
                         .build())

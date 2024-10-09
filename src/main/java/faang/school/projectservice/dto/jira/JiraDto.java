@@ -41,26 +41,19 @@ public class JiraDto {
     private List<JiraIssue> issues;
     @Valid
     @NotEmpty(groups = ChangeStatusGroup.class)
-    private List<JiraTransitions> transitions;
+    private List<JiraStatusDto> transitions;
     private String assignee;
     private String nameUser;
 
     @Data
-    public static class JiraIssue {
+    public class JiraIssue {
         private String key;
         private Fields fields;
     }
 
     @Data
-    public static class JiraTransitions {
-        private String id;
-        @NotBlank(groups = ChangeStatusGroup.class)
-        private String name;
-    }
-
-    @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class Fields {
+    public class Fields {
         @NotNull(groups = CreateGroup.class)
         @Valid
         private Project project;
@@ -74,43 +67,43 @@ public class JiraDto {
         private Parent parent;
 
         @Data
-        public static class Project {
+        public class Project {
             @NotBlank(groups = CreateGroup.class)
             private String key;
         }
 
         @Data
-        public static class IssueType {
+        public class IssueType {
             @NotBlank(groups = CreateGroup.class)
             private String name;
             private boolean subtask;
         }
 
         @Data
-        public static class Assignee {
+        public class Assignee {
             private String accountId;
         }
 
         @Data
-        public static class Parent {
+        public class Parent {
             private String key;
         }
     }
 
     @Data
-    public static class IssueLinkType {
+    public class IssueLinkType {
         @NotBlank(groups = UpdateLinkGroup.class)
         private String name;
     }
 
     @Data
-    public static class InwardIssue {
+    public class InwardIssue {
         @NotBlank(groups = UpdateLinkGroup.class)
         private String key;
     }
 
     @Data
-    public static class OutwardIssue {
+    public class OutwardIssue {
         @NotBlank(groups = UpdateLinkGroup.class)
         private String key;
     }

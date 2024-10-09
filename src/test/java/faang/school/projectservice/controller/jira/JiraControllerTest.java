@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.jira;
 
 import faang.school.projectservice.dto.jira.JiraDto;
+import faang.school.projectservice.dto.jira.JiraStatusDto;
 import faang.school.projectservice.service.jira.JiraServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,9 +57,9 @@ class JiraControllerTest {
     @Test
     @DisplayName("Проверка на статус Ок, при валидном dto")
     void createTaskValidationSuccess() {
-        JiraDto.Fields fields = new JiraDto.Fields();
-        JiraDto.Fields.Project project = new JiraDto.Fields.Project();
-        JiraDto.Fields.IssueType issueType = new JiraDto.Fields.IssueType();
+        JiraDto.Fields fields = jiraDto.new Fields();
+        JiraDto.Fields.Project project = fields.new Project();
+        JiraDto.Fields.IssueType issueType = fields.new IssueType();
         fields.setSummary("sd");
         project.setKey("ds");
         issueType.setName("Ds");
@@ -88,7 +89,7 @@ class JiraControllerTest {
     @Test
     @DisplayName("Проверка на статус BadRequest при не валидном dto")
     void createTaskValidationFailure() {
-        JiraDto.Fields fields = new JiraDto.Fields();
+        JiraDto.Fields fields = jiraDto.new Fields();
         jiraDto.setFields(fields);
 
         webTestClient.post()
@@ -134,9 +135,9 @@ class JiraControllerTest {
     @Test
     @DisplayName("Проверка на статус Ок, при валидном dto")
     void updateTaskLinkValidationSuccess() {
-        JiraDto.IssueLinkType issueLinkType = new JiraDto.IssueLinkType();
-        JiraDto.OutwardIssue outwardIssue = new JiraDto.OutwardIssue();
-        JiraDto.InwardIssue inwardIssue = new JiraDto.InwardIssue();
+        JiraDto.IssueLinkType issueLinkType = jiraDto.new IssueLinkType();
+        JiraDto.OutwardIssue outwardIssue = jiraDto.new OutwardIssue();
+        JiraDto.InwardIssue inwardIssue = jiraDto.new InwardIssue();
         issueLinkType.setName("Test");
         outwardIssue.setKey("Test");
         inwardIssue.setKey("Test");
@@ -164,7 +165,7 @@ class JiraControllerTest {
     @Test
     @DisplayName("Проверка на статус BadRequest при не валидном dto")
     void updateTaskLinkValidationFailure() {
-        JiraDto.IssueLinkType issueLinkType = new JiraDto.IssueLinkType();
+        JiraDto.IssueLinkType issueLinkType = jiraDto.new IssueLinkType();
         issueLinkType.setName("Test");
         jiraDto.setType(issueLinkType);
 
@@ -179,9 +180,10 @@ class JiraControllerTest {
     @Test
     @DisplayName("Проверка на статус Ок, при валидном dto")
     void changeTaskStatusValidationSuccess() {
-        JiraDto.JiraTransitions jiraTransitions = new JiraDto.JiraTransitions();
-        jiraTransitions.setName("Test");
-        jiraDto.setTransitions(List.of(jiraTransitions));
+        JiraStatusDto jiraStatusDto = new JiraStatusDto();
+        jiraStatusDto.setName("ds");
+
+        jiraDto.setTransitions(List.of(jiraStatusDto));
         jiraDto.setKey("Test");
         jiraDto.setStatus("Test");
 

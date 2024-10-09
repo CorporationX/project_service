@@ -1,19 +1,21 @@
 package faang.school.projectservice.config.jira;
 
 import io.netty.channel.ChannelOption;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 import java.util.Base64;
 
-@Component
+@Configuration
 public class WebClientConfig {
 
+    @Bean
     public WebClient jiraWebClient(String username, String token, String projectUrl) {
         String basicAuth = "Basic " + Base64.getEncoder().encodeToString((username + ":" + token).getBytes());
 
