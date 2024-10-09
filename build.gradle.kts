@@ -1,6 +1,5 @@
 plugins {
     java
-    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
 }
@@ -34,7 +33,8 @@ dependencies {
      * Amazon S3
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
-
+    implementation("org.apache.commons:commons-imaging:1.0-alpha3")
+    implementation("org.springframework:spring-mock:2.0.8")
     /**
      * Utils & Logging
      */
@@ -72,54 +72,3 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
-
-/**
-* jacoco settings
-*/
-val jacocoInclude = listOf(
-    "**/controller/**",
-    "**/service/**",
-    "**/validator/**",
-    "**/mapper/**",
-    "**/filter/**"
-)
-
-jacoco {
-    toolVersion = "0.8.9"
-    reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
-}
-
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-
-    reports {
-        xml.required.set(false)
-        csv.required.set(false)
-    }
-
-    classDirectories.setFrom(
-        sourceSets.main.get().output.asFileTree.matching {
-            include(jacocoInclude)
-        }
-    )
-}
-
-tasks.jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            element = "CLASS"
-            classDirectories.setFrom(
-                sourceSets.main.get().output.asFileTree.matching {
-                    include(jacocoInclude)
-                }
-            )
-            enabled = true
-        }
-    }
-}
-
-
