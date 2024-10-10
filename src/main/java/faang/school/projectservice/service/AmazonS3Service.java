@@ -8,6 +8,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.exception.MinioUploadException;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,9 @@ import java.io.InputStream;
 public class AmazonS3Service {
     private final AmazonS3 amazonS3Client;
 
+    @Setter
     @Value("${services.s3.bucketName}")
-    private final String bucketName;
+    private String bucketName;
 
     public String uploadFile(String key, InputStream inputStream, String contentType, long contentLength) throws MinioUploadException {
         log.info("Загрузка файла в Minio: key={}, contentType={}, contentLength={}", key, contentType, contentLength);

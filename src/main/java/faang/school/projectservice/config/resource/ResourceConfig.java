@@ -22,10 +22,10 @@ public class ResourceConfig {
 
     @Bean
     public AmazonS3 amazonS3Client() {
-        AmazonS3 s3 = AmazonS3ClientBuilder.standard()
+        return AmazonS3ClientBuilder.standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, "ru-west-1"))
                 .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+                .withPathStyleAccessEnabled(true)
                 .build();
-        return s3;
     }
 }
