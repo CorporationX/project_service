@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public class TeamMemberRepository {
     private final TeamMemberJpaRepository jpaRepository;
 
-    public TeamMember findById(Long id) {
+    public TeamMember findProjectById(Long id) {
         return jpaRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
