@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.service.ImageProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,13 @@ import java.io.InputStream;
 public class S3Service {
     private final AmazonS3 s3Client;
     private final String projectBucket;
+    private final ImageProcessor imageProcessor;
 
     public S3Service(AmazonS3 s3Client,
-                     @Value("${services.s3.bucketName}") String projectBucket) {
+                     @Value("${services.s3.bucketName}") String projectBucket, ImageProcessor imageProcessor) {
         this.s3Client = s3Client;
         this.projectBucket = projectBucket;
+        this.imageProcessor = imageProcessor;
     }
 
     public void uploadFile(MultipartFile file, String key) {
