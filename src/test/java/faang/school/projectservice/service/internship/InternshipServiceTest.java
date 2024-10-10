@@ -1,17 +1,18 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.filter.internship.InternshipFilter;
-import faang.school.projectservice.mapper.internship.InternshipMapperImpl;
-import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.dto.internship.InternshipDto;
+import faang.school.projectservice.model.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.model.filter.internship.InternshipFilter;
+import faang.school.projectservice.model.mapper.internship.InternshipMapperImpl;
+import faang.school.projectservice.model.entity.Internship;
+import faang.school.projectservice.model.entity.InternshipStatus;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.TeamMember;
+import faang.school.projectservice.model.entity.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.impl.internship.InternshipServiceImpl;
 import faang.school.projectservice.validator.intership.InternshipValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;

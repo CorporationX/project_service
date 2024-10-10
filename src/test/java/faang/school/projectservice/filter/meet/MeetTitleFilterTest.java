@@ -1,7 +1,8 @@
 package faang.school.projectservice.filter.meet;
 
-import faang.school.projectservice.dto.meet.MeetFilterDto;
-import faang.school.projectservice.model.meet.Meet;
+import faang.school.projectservice.model.dto.meet.MeetFilterDto;
+import faang.school.projectservice.model.entity.meet.Meet;
+import faang.school.projectservice.model.filter.meet.MeetTitleFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

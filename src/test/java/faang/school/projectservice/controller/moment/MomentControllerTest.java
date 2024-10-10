@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.moment;
 
-import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.service.moment.MomentServiceImpl;
+import faang.school.projectservice.model.dto.moment.MomentDto;
+import faang.school.projectservice.model.dto.moment.MomentFilterDto;
+import faang.school.projectservice.service.impl.moment.MomentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

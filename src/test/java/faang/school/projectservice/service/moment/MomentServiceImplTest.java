@@ -1,15 +1,16 @@
 package faang.school.projectservice.service.moment;
 
-import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.filter.moment.MomentFilter;
-import faang.school.projectservice.mapper.moment.MomentMapper;
-import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.dto.moment.MomentDto;
+import faang.school.projectservice.model.dto.moment.MomentFilterDto;
+import faang.school.projectservice.model.filter.moment.MomentFilter;
+import faang.school.projectservice.model.mapper.moment.MomentMapper;
+import faang.school.projectservice.model.entity.Moment;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.ProjectStatus;
+import faang.school.projectservice.model.entity.Team;
+import faang.school.projectservice.model.entity.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.service.impl.moment.MomentServiceImpl;
 import faang.school.projectservice.validator.moment.MomentValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

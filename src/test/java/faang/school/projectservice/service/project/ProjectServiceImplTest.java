@@ -1,13 +1,13 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.mapper.subproject.ProjectMapper;
-import faang.school.projectservice.mapper.subproject.ProjectMapperImpl;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.mapper.subproject.ProjectMapperImpl;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.file.FileCompressor;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.S3Service;
+import faang.school.projectservice.service.impl.project.ProjectServiceImpl;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

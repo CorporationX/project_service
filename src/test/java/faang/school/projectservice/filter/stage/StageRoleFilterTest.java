@@ -1,9 +1,10 @@
 package faang.school.projectservice.filter.stage;
 
-import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.dto.stage.StageFilterDto;
+import faang.school.projectservice.model.entity.TeamRole;
+import faang.school.projectservice.model.entity.stage.Stage;
+import faang.school.projectservice.model.entity.stage.StageRoles;
+import faang.school.projectservice.model.filter.stage.StageRoleFilter;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

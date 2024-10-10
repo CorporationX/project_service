@@ -1,10 +1,10 @@
 package faang.school.projectservice.controller.meet;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.meet.MeetFilterDto;
-import faang.school.projectservice.dto.meet.MeetRequestDto;
-import faang.school.projectservice.dto.meet.MeetResponseDto;
-import faang.school.projectservice.service.meet.MeetService;
+import faang.school.projectservice.model.dto.meet.MeetFilterDto;
+import faang.school.projectservice.model.dto.meet.MeetRequestDto;
+import faang.school.projectservice.model.dto.meet.MeetResponseDto;
+import faang.school.projectservice.service.MeetService;
 import faang.school.projectservice.validator.meet.CreateMeet;
 import faang.school.projectservice.validator.meet.UpdateMeet;
 import lombok.RequiredArgsConstructor;
