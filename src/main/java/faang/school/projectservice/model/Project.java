@@ -51,7 +51,7 @@ public class Project {
     private List<Task> tasks;
 
     @OneToMany(mappedBy = "project")
-    private List<ResourceDB> resourceDBS;
+    private List<ProjectResource> projectResources;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

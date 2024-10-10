@@ -2,18 +2,15 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.mapper.ResourceMapper;
-import faang.school.projectservice.model.ResourceDB;
-import faang.school.projectservice.model.ResourceInfo;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.model.ProjectResource;
+import faang.school.projectservice.service.resource.ProjectResourceService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 public class ProjectController {
-    private final ProjectService projectService;
+    private final ProjectResourceService projectResourceService;
     private final ResourceMapper resourceMapper;
 
 
@@ -43,13 +40,9 @@ public class ProjectController {
     public ResourceDto uploadFileToProject(
             @PathVariable("project-id") @Positive Long projectId,
             @RequestParam("user-id") Long userId,
-
-            @Parameter(description = "File to upload", required = true,
-                    content = @Content(mediaType = "multipart/form-data",
-                            schema = @Schema(type = "string", format = "binary")))
             @RequestBody MultipartFile file) {
-        ResourceInfo resourceInfo = projectService.uploadFileToProject(projectId, userId, file);
-        return resourceMapper.toResourceDto(resourceInfo.resourceDB());
+       ProjectResource resource = projectResourceService.uploadFileToProject(projectId, userId, file);
+        return resourceMapper.toResourceDto(resource);
     }
 
 
@@ -63,10 +56,8 @@ public class ProjectController {
     public void deleteFileFromProject(
             @PathVariable("project-id") Long projectId,
             @RequestParam("user-id") Long userId,
-
-            @Parameter(description = "ID of the resource to delete", required = true)
             @RequestParam("resource-id") Long resourceId) {
-        projectService.deleteFileFromProject(projectId, userId, resourceId);
+        projectResourceService.deleteFileFromProject(projectId, userId, resourceId);
     }
 
 
@@ -80,17 +71,14 @@ public class ProjectController {
     public ResponseEntity<Resource> getFileFromProject(
             @PathVariable("project-id") Long projectId,
             @RequestParam("user-id") Long userId,
-
-            @Parameter(description = "ID of the resource to retrieve", required = true)
             @RequestParam("resource-id") Long resourceId) {
-
-        ResourceInfo resourceInfo = projectService.getFileFromProject(projectId, userId, resourceId);
+        Pair<Resource, ProjectResource> resourceInfo = projectResourceService.getFileFromProject(projectId, userId, resourceId);
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(resourceInfo.resourceDB().getType()))
+                .contentType(MediaType.parseMediaType(resourceInfo.getSecond().getType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + resourceInfo.resourceDB().getName() + "\"")
-                .body(resourceInfo.resource());
+                        "attachment; filename=\"" + resourceInfo.getSecond().getName() + "\"")
+                .body(resourceInfo.getFirst());
     }
 
 }
