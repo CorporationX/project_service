@@ -7,8 +7,10 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Component
 public class ImageProcessor {
@@ -22,12 +24,13 @@ public class ImageProcessor {
     @Value("${services.cover_image.max-square-dimension}")
     private int maxSquareDimension;
 
-    public byte[] processImage(MultipartFile file) {
+    public InputStream processImage(MultipartFile file) {
         BufferedImage image = getBufferedImage(file);
         if (checkIfImageNeedsResize(image)) {
             image = resizeImage(image);
         }
-        return getImageBytes(image, getImageFormat(file.getOriginalFilename()));
+        byte[] byteArrayImage = getImageBytes(image, getImageFormat(file.getOriginalFilename()));
+        return new ByteArrayInputStream(byteArrayImage);
     }
 
     private BufferedImage getBufferedImage(MultipartFile file) {
