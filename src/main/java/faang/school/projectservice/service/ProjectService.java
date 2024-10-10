@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +15,8 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class ProjectService {
-    private final ProjectRepository projectRepository;
+    private final ProjectJpaRepository projectJpaRepository;
     private final S3Service s3Service;
-
-    private final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
     @Transactional
     public String uploadCover(Long projectId, MultipartFile file) {
@@ -28,13 +26,13 @@ public class ProjectService {
 
         String key = UUID.randomUUID().toString();
         s3Service.uploadFile(file, key);
-        Project project = projectRepository.getProjectById(projectId);
+        Project project = projectJpaRepository.findById(projectId).orElseThrow();
         String oldCoverImageId = project.getCoverImageId();
         if (oldCoverImageId != null) {
             s3Service.deleteFile(oldCoverImageId);
         }
         project.setCoverImageId(key);
-        projectRepository.save(project);
+        projectJpaRepository.save(project);
 
         return key;
     }
@@ -43,12 +41,12 @@ public class ProjectService {
     public void removeCover(Long projectId) {
         checkProjectExist(projectId);
 
-        Project project = projectRepository.getProjectById(projectId);
+        Project project = projectJpaRepository.findById(projectId).orElseThrow();
         String coverImageId = project.getCoverImageId();
         if (coverImageId != null) {
             s3Service.deleteFile(coverImageId);
             project.setCoverImageId(null);
-            projectRepository.save(project);
+            projectJpaRepository.save(project);
         } else {
             throw new RuntimeException("Project cover not found with ID: " + projectId);
         }
@@ -68,13 +66,15 @@ public class ProjectService {
     }
 
     private void checkProjectExist(Long projectId) {
-        if (!projectRepository.existsById(projectId)) {
+        if (!projectJpaRepository.existsById(projectId)) {
             log.error("Project with id {} does not exist", projectId);
             throw new IllegalArgumentException("Project with id = %d does not exist".formatted(projectId));
         }
     }
 
     private void checkFileSize(MultipartFile file) {
+        long MAX_FILE_SIZE = 5 * 1024 * 1024;
+
         if (file.getSize() > MAX_FILE_SIZE) {
             log.error("File is too large to upload");
             throw new IllegalArgumentException("File %s is too large to upload. Max size is %d".formatted(file.getName(), MAX_FILE_SIZE));

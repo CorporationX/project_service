@@ -50,6 +50,7 @@ services:
     max-rectangle-width: 1080
     max-rectangle-height: 566
     max-square-dimension: 1080
+    max-file-size: 5242880
 
   payment-service:
     host: http://localhost
@@ -57,3 +58,8 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB

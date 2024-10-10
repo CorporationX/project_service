@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -11,13 +11,15 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
 
-    private final ProjectRepository projectRepository = mock(ProjectRepository.class);
+    private final ProjectJpaRepository projectRepository = mock(ProjectJpaRepository.class);
 
     private final S3Service s3Service = mock(S3Service.class);
 
@@ -69,7 +71,7 @@ public class ProjectServiceTest {
 
         Project project = new Project();
         project.setId(projectId);
-        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
         String coverImageId = projectService.uploadCover(projectId, file);
 
@@ -88,7 +90,7 @@ public class ProjectServiceTest {
         Project project = new Project();
         project.setId(projectId);
         project.setCoverImageId(coverImageId);
-        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
         projectService.removeCover(projectId);
 
