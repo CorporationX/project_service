@@ -51,6 +51,10 @@ public class ProjectService {
     @Value("${cover-image.maxFileSize}")
     long maxFileSize;
 
+    public Project getProjectById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
+
     @Transactional
     public ProjectDto uploadCoverImage(Long projectId, MultipartFile coverImage) {
         projectValidator.verifyProjectExists(projectId);

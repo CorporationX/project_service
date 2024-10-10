@@ -10,6 +10,7 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.TasksAfterDelete;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -125,5 +126,4 @@ class StageServiceTest {
         verify(stageRepository).getById(stageId);
         verify(stageMapper).toDto(stage);
     }
-
 }
