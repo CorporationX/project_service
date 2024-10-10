@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.StageFilterDto;
-import faang.school.projectservice.model.stage.TasksAfterDelete;
+import faang.school.projectservice.model.dto.StageDto;
+import faang.school.projectservice.model.dto.StageFilterDto;
+import faang.school.projectservice.model.enums.TasksAfterDelete;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;

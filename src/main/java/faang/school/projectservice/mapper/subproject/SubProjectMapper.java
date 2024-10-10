@@ -1,8 +1,8 @@
 package faang.school.projectservice.mapper.subproject;
 
-import faang.school.projectservice.dto.client.subproject.CreateSubProjectDto;
-import faang.school.projectservice.dto.client.subproject.ProjectDto;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.dto.CreateSubProjectDto;
+import faang.school.projectservice.model.dto.ProjectDto;
+import faang.school.projectservice.model.entity.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

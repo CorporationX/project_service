@@ -1,9 +1,9 @@
 package faang.school.projectservice.mapper.calendar;
 
-import faang.school.projectservice.dto.google.calendar.CalendarEventDto;
-import faang.school.projectservice.dto.google.calendar.CalendarEventStatus;
-import faang.school.projectservice.dto.meet.MeetDto;
-import faang.school.projectservice.model.MeetStatus;
+import faang.school.projectservice.model.dto.CalendarEventDto;
+import faang.school.projectservice.model.enums.CalendarEventStatus;
+import faang.school.projectservice.model.dto.MeetDto;
+import faang.school.projectservice.model.enums.MeetStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

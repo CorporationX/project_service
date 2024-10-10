@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.InjectionStrategy;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.entity.Project;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ProjectMapper {

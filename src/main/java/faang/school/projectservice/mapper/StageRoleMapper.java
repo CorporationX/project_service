@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.StageRoleDto;
-import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.dto.StageRoleDto;
+import faang.school.projectservice.model.entity.StageRoles;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

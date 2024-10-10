@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.subproject;
 
-import faang.school.projectservice.dto.client.subproject.ProjectDto;
+import faang.school.projectservice.model.dto.ProjectDto;
 import org.springframework.stereotype.Component;
 import software.amazon.ion.NullValueException;
 

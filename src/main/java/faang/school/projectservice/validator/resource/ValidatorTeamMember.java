@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator.resource;
 
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.TeamMember;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.stereotype.Component;
 

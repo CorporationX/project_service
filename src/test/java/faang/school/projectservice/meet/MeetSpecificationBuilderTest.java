@@ -1,7 +1,7 @@
 package faang.school.projectservice.meet;
 
-import faang.school.projectservice.dto.meet.MeetFilterDto;
-import faang.school.projectservice.model.Meet;
+import faang.school.projectservice.model.dto.MeetFilterDto;
+import faang.school.projectservice.model.entity.Meet;
 import faang.school.projectservice.specification.MeetSpecificationBuilder;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;

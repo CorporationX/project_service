@@ -1,9 +1,9 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.config.app.AppConfig;
-import faang.school.projectservice.dto.google.calendar.ZonedDateTimeDto;
-import faang.school.projectservice.dto.meet.MeetDto;
-import faang.school.projectservice.model.Meet;
+import faang.school.projectservice.model.dto.ZonedDateTimeDto;
+import faang.school.projectservice.model.dto.MeetDto;
+import faang.school.projectservice.model.entity.Meet;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

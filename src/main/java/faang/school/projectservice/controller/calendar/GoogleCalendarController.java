@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.calendar;
 
-import faang.school.projectservice.dto.google.calendar.CalendarEventDto;
+import faang.school.projectservice.model.dto.CalendarEventDto;
 import faang.school.projectservice.service.GoogleCalendarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

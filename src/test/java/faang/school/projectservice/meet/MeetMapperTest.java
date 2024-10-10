@@ -1,11 +1,11 @@
 package faang.school.projectservice.meet;
 
 import faang.school.projectservice.config.app.AppConfig;
-import faang.school.projectservice.dto.meet.MeetDto;
+import faang.school.projectservice.model.dto.MeetDto;
 import faang.school.projectservice.mapper.MeetMapperImpl;
-import faang.school.projectservice.model.Meet;
-import faang.school.projectservice.model.MeetStatus;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.entity.Meet;
+import faang.school.projectservice.model.enums.MeetStatus;
+import faang.school.projectservice.model.entity.Project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.calendar;
 
-import faang.school.projectservice.dto.meet.MeetDto;
-import faang.school.projectservice.dto.meet.MeetFilterDto;
+import faang.school.projectservice.model.dto.MeetDto;
+import faang.school.projectservice.model.dto.MeetFilterDto;
 import faang.school.projectservice.service.MeetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

@@ -2,7 +2,7 @@ package faang.school.projectservice.controller.resource;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
-import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.model.dto.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;

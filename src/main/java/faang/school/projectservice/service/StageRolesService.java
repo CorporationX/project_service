@@ -1,9 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.jpa.StageRolesRepository;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.entity.TeamMember;
+import faang.school.projectservice.model.entity.Stage;
+import faang.school.projectservice.model.entity.StageRoles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

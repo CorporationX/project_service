@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.FileTooLargeException;
 import faang.school.projectservice.mapper.project.ProjectMapper;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.AmazonS3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;

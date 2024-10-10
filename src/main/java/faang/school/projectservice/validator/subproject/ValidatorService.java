@@ -2,8 +2,8 @@ package faang.school.projectservice.validator.subproject;
 
 import com.amazonaws.services.kms.model.AlreadyExistsException;
 import com.amazonaws.services.kms.model.NotFoundException;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.enums.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package faang.school.projectservice.filter;
 
-import faang.school.projectservice.dto.StageFilterDto;
-import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.dto.StageFilterDto;
+import faang.school.projectservice.model.entity.Stage;
 
 import java.util.stream.Stream;
 

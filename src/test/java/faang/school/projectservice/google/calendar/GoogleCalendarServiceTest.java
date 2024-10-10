@@ -3,9 +3,10 @@ package faang.school.projectservice.google.calendar;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import faang.school.projectservice.config.app.AppConfig;
-import faang.school.projectservice.dto.google.calendar.CalendarEventDto;
+import faang.school.projectservice.config.google.calendar.CalendarProvider;
+import faang.school.projectservice.model.dto.CalendarEventDto;
 import faang.school.projectservice.mapper.calendar.CalendarEventMapper;
-import faang.school.projectservice.service.GoogleCalendarService;
+import faang.school.projectservice.service.impl.GoogleCalendarServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -53,7 +54,7 @@ public class GoogleCalendarServiceTest {
     private Calendar.Events.Get get;
 
     @InjectMocks
-    private GoogleCalendarService googleCalendarService;
+    private GoogleCalendarServiceImpl googleCalendarService;
 
     @BeforeEach
     public void setUp() throws GeneralSecurityException, IOException {

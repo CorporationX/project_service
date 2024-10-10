@@ -1,6 +1,6 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.model.GoogleToken;
+import faang.school.projectservice.model.entity.GoogleToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

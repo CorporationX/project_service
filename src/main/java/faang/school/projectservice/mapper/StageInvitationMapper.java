@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.stage.StageInvitationDto;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.dto.StageInvitationDto;
+import faang.school.projectservice.model.entity.StageInvitation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

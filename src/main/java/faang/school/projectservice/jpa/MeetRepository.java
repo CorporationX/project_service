@@ -1,7 +1,7 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.Meet;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.entity.Meet;
+import faang.school.projectservice.model.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

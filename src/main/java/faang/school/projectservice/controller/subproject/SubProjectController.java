@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.subproject;
 
-import faang.school.projectservice.dto.client.subproject.ProjectDto;
+import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import faang.school.projectservice.validator.subproject.ValidatorSubProjectController;
 import lombok.RequiredArgsConstructor;
