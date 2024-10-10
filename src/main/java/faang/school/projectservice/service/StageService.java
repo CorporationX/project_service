@@ -18,7 +18,6 @@ import faang.school.projectservice.model.entity.Stage;
 import faang.school.projectservice.model.entity.StageRoles;
 import faang.school.projectservice.model.enums.TasksAfterDelete;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

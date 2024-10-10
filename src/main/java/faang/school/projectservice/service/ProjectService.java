@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.project;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.FileTooLargeException;
@@ -6,12 +6,12 @@ import faang.school.projectservice.exception.MinioUploadException;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.AmazonS3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,8 +48,9 @@ public class ProjectService {
     @Value("${cover-image.maxHeightSquare}")
     private int maxHeightSquare;
 
+    @Setter
     @Value("${cover-image.maxFileSize}")
-    long maxFileSize;
+    private long maxFileSize;
 
     public Project getProjectById(Long id) {
         return projectRepository.getProjectById(id);

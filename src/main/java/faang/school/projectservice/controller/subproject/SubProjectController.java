@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.model.dto.ProjectDto;
-import faang.school.projectservice.service.subproject.SubProjectService;
+import faang.school.projectservice.service.SubProjectService;
 import faang.school.projectservice.validator.subproject.ValidatorSubProjectController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

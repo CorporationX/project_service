@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.dto.InternshipDto;
 import faang.school.projectservice.model.dto.InternshipFilterDto;
-import faang.school.projectservice.filter.internship.InternshipFilter;
+import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.entity.Internship;

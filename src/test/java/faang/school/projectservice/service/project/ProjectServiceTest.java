@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import faang.school.projectservice.service.ProjectService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -65,7 +66,7 @@ public class ProjectServiceTest {
         imageName = "test.png";
         project = new Project();
         project.setId(projectId);
-        projectService.maxFileSize = maxFileSize;
+        projectService.setMaxFileSize(maxFileSize);
         project.setCoverImageId("image-id");
         contentType = "image/png";
         coverImageKey = "unique-key";

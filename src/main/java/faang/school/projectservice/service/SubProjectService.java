@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.subproject;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.dto.CreateSubProjectDto;
 import faang.school.projectservice.model.dto.ProjectDto;
@@ -7,7 +7,7 @@ import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.model.enums.ProjectStatus;
 import faang.school.projectservice.model.enums.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.subproject.filters.SubProjectFilter;
+import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.validator.subproject.ValidatorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

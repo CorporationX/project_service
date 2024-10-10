@@ -13,6 +13,8 @@ import faang.school.projectservice.model.entity.TeamMember;
 import faang.school.projectservice.model.enums.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.ResourceService;
+import faang.school.projectservice.service.S3Service;
 import faang.school.projectservice.validator.resource.ValidatorTeamMember;
 import faang.school.projectservice.validator.subproject.ValidatorService;
 import jakarta.persistence.EntityNotFoundException;

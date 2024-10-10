@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.resource;
+package faang.school.projectservice.service;
 
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.config.context.UserContext;

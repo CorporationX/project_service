@@ -1,5 +1,6 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.impl;
 
+import faang.school.projectservice.filter.StageFilter;
 import faang.school.projectservice.model.dto.StageFilterDto;
 import faang.school.projectservice.model.entity.Stage;
 

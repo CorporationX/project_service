@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.subproject.filters;
 
+import faang.school.projectservice.filter.impl.SubProjectStatusFilter;
 import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.model.enums.ProjectStatus;

@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter.internship;
+package faang.school.projectservice.filter;
 
 import faang.school.projectservice.model.dto.InternshipFilterDto;
 import faang.school.projectservice.model.entity.Internship;

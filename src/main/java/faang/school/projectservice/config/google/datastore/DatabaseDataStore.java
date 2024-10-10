@@ -75,13 +75,22 @@ public class DatabaseDataStore implements DataStore<StoredCredential> {
 
     @Override
     public DataStore<StoredCredential> set(String key, StoredCredential value) {
-        Long userId = Long.parseLong(key);
-        GoogleToken googleToken = new GoogleToken();
-        googleToken.setUserId(userId);
-        googleToken.setAccessToken(value.getAccessToken());
-        googleToken.setRefreshToken(value.getRefreshToken());
-        googleToken.setExpiresIn(new java.sql.Timestamp(value.getExpirationTimeMilliseconds()));
-        googleTokenService.saveOrUpdateToken(googleToken);
+        Optional<GoogleToken> existingToken = googleTokenService.getTokenByUserId(Long.parseLong(key));
+        if (existingToken.isPresent()) {
+            GoogleToken tokenToUpdate = existingToken.get();
+            tokenToUpdate.setAccessToken(value.getAccessToken());
+            tokenToUpdate.setRefreshToken(value.getRefreshToken());
+            tokenToUpdate.setExpiresIn(new java.sql.Timestamp(value.getExpirationTimeMilliseconds()));
+            googleTokenService.saveOrUpdateToken(tokenToUpdate);
+        } else {
+            Long userId = Long.parseLong(key);
+            GoogleToken googleToken = new GoogleToken();
+            googleToken.setUserId(userId);
+            googleToken.setAccessToken(value.getAccessToken());
+            googleToken.setRefreshToken(value.getRefreshToken());
+            googleToken.setExpiresIn(new java.sql.Timestamp(value.getExpirationTimeMilliseconds()));
+            googleTokenService.saveOrUpdateToken(googleToken);
+        }
         return this;
     }
 
