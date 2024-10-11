@@ -32,59 +32,22 @@ class ProjectValidatorTest {
     @Nested
     class PositiveTests {
 
-        @Test
-        @DisplayName("Успех если проект имеет название, описание и владелец еще не имеет проекта с таким названием")
-        public void whenValidateThenSuccess() {
-            ProjectDto projectDto = new ProjectDto();
-            projectDto.setName(PROJECT_NAME);
-            projectDto.setDescription(PROJECT_DESCRIPTION);
-            projectDto.setOwnerId(USER_ID);
-            when(projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName()))
-                    .thenReturn(false);
+        @Nested
+        class NegativeTests {
 
-            projectValidator.validateProject(projectDto);
+            @Test
+            @DisplayName("Ошибка если владелец имеет проект с таким названием в БД")
+            public void whenValidateWithOwnerHasSameProjectThenException() {
+                ProjectDto projectDto = new ProjectDto();
+                projectDto.setName(PROJECT_NAME);
+                projectDto.setDescription(PROJECT_DESCRIPTION);
+                projectDto.setOwnerId(USER_ID);
+                when(projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName()))
+                        .thenReturn(true);
 
-            verify(projectRepository).existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName());
-        }
-    }
-
-    @Nested
-    class NegativeTests {
-
-        @Test
-        @DisplayName("Ошибка валидации если у проекта нет названия")
-        public void whenValidateWithEmptyNameThenException() {
-            ProjectDto projectDto = new ProjectDto();
-            projectDto.setName(" ");
-            projectDto.setDescription(PROJECT_DESCRIPTION);
-
-            assertThrows(DataValidationException.class,
-                    () -> projectValidator.validateProject(projectDto));
-        }
-
-        @Test
-        @DisplayName("Ошибка валидации если у проекта нет описания")
-        public void whenValidateWithEmptyDescriptionThenException() {
-            ProjectDto projectDto = new ProjectDto();
-            projectDto.setName(PROJECT_NAME);
-            projectDto.setDescription(" ");
-
-            assertThrows(DataValidationException.class,
-                    () -> projectValidator.validateProject(projectDto));
-        }
-
-        @Test
-        @DisplayName("Ошибка если владелец имеет проект с таким названием в БД")
-        public void whenValidateWithOwnerHasSameProjectThenException() {
-            ProjectDto projectDto = new ProjectDto();
-            projectDto.setName(PROJECT_NAME);
-            projectDto.setDescription(PROJECT_DESCRIPTION);
-            projectDto.setOwnerId(USER_ID);
-            when(projectRepository.existsByOwnerIdAndName(projectDto.getOwnerId(), projectDto.getName()))
-                    .thenReturn(true);
-
-            assertThrows(DataValidationException.class,
-                    () -> projectValidator.validateProject(projectDto));
+                assertThrows(DataValidationException.class,
+                        () -> projectValidator.validateOwnerHasSameProject(projectDto));
+            }
         }
     }
 }

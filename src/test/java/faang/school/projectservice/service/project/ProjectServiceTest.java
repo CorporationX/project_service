@@ -73,7 +73,6 @@ class ProjectServiceTest {
             assertEquals(PROJECT_NAME, createdProjectDto.getName());
             assertEquals(PROJECT_DESCRIPTION, createdProjectDto.getDescription());
             assertEquals(ProjectStatus.CREATED, createdProjectDto.getStatus());
-            verify(projectDtoValidator).validateProject(projectDto);
             verify(projectRepository).save(projectEntity);
         }
 
@@ -99,7 +98,6 @@ class ProjectServiceTest {
             assertEquals(ProjectStatus.IN_PROGRESS, updatedProjectDto.getStatus());
             verify(projectRepository).findById(projectDto.getId());
             verify(projectRepository).save(projectEntity);
-            verify(projectDtoValidator).validateUpdatedFields(projectDto);
         }
 
         @Test

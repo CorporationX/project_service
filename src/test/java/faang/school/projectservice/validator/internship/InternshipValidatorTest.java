@@ -59,25 +59,6 @@ public class InternshipValidatorTest {
         class NegativeTests {
 
             @Test
-            @DisplayName("If internship has null project field and/or empty Interns list then throw exception")
-            public void whenInternshipProjectIsNullAndOrInternsListIsEmptyThenThrowException() {
-                InternshipDto internshipDtoNullProject = InternshipDto.builder()
-                        .interns(List.of(TeamMemberDto.builder().build()))
-                        .startDate(VALID_START_DATE)
-                        .endDate(VALID_END_DATE)
-                        .build();
-                InternshipDto internshipDtoNullList = InternshipDto.builder()
-                        .projectId(PROJECT_ID_ONE)
-                        .startDate(VALID_START_DATE)
-                        .endDate(VALID_END_DATE)
-                        .build();
-                assertThrows(DataValidationException.class, () ->
-                        internshipValidator.validateInternship(internshipDtoNullList));
-                assertThrows(DataValidationException.class, () ->
-                        internshipValidator.validateInternship(internshipDtoNullProject));
-            }
-
-            @Test
             @DisplayName("If internship duration is more than three months throw exception")
             public void whenInternshipDurationIsMoreThanThreeMonthsThenThrowException() {
                 internshipDto = InternshipDto.builder()

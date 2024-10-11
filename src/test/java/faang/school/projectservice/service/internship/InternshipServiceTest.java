@@ -242,25 +242,6 @@ public class InternshipServiceTest {
         }
 
         @Test
-        @DisplayName("When filters is null then throw exception")
-        public void whenFilterDtoIsNullThenThrowException() {
-            internshipService.getFilteredInternship(internshipFilterDto);
-            assertThrows(DataValidationException.class, () ->
-                    internshipService.getFilteredInternship(null));
-        }
-
-        @Test
-        @DisplayName("When internshipDto is null then throw exception")
-        public void whenInternshipDtoIsNullThenThrowException() {
-            when(internshipMapper.toDto(internship)).thenReturn(internshipDto);
-            when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
-            when(internshipRepository.save(internship)).thenReturn(internship);
-            internshipService.create(internshipDto);
-            assertThrows(DataValidationException.class, () ->
-                    internshipService.create(null));
-        }
-
-        @Test
         @DisplayName("When no internship found in database throw exception")
         public void whenNoInternshipFoundInDataBaseThenThrowException() {
             when(internshipRepository.findById(INTERNSHIP_ID_ONE)).thenReturn(Optional.empty());

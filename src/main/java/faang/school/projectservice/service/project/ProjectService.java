@@ -1,8 +1,7 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -36,8 +35,9 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final GigabyteConverter gigabyteConverter;
 
+
     public ProjectDto create(ProjectDto projectDto) {
-        projectValidator.validateProject(projectDto);
+        projectValidator.validateOwnerHasSameProject(projectDto);
 
         projectDto.setStatus(ProjectStatus.CREATED);
         projectDto.setCreatedAt(LocalDateTime.now());
@@ -48,19 +48,12 @@ public class ProjectService {
     }
 
     public ProjectDto update(ProjectDto projectDto) {
-        projectValidator.validateUpdatedFields(projectDto);
 
         Project existedProject = projectRepository.findById(projectDto.getId()).orElseThrow(() ->
                 new EntityNotFoundException("Project with id" + projectDto.getId() + "does not exist"));
 
-        if (projectDto.getDescription() != null && !projectDto.getDescription().isBlank()) {
-            existedProject.setDescription(projectDto.getDescription());
-        }
-
-        if (projectDto.getStatus() != null) {
-            existedProject.setStatus(projectDto.getStatus());
-        }
-
+        existedProject.setDescription(projectDto.getDescription());
+        existedProject.setStatus(projectDto.getStatus());
         existedProject.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(existedProject);
 
@@ -82,10 +75,6 @@ public class ProjectService {
     }
 
     public ProjectDto getProject(Long id) {
-        if (id == null) {
-            throw new DataValidationException("Field id cannot be null");
-        }
-
         return projectMapper.toDto(getProjectById(id));
     }
 
