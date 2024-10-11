@@ -37,10 +37,11 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://localhost:9000
+    endpoint: http://127.0.0.1:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
+    region: us-east-1
     isMocked: false
   payment-service:
     host: http://localhost
@@ -48,3 +49,8 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+project-service:
+  directory: projects
+  max_storage_size_no_subscription: 2147483648
+  max_file_size: 10485760
