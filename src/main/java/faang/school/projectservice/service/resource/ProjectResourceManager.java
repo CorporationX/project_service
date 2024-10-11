@@ -43,7 +43,7 @@ public class ProjectResourceManager {
     }
 
     @Async
-    public void uploadFileS3(MultipartFile file, ProjectResource projectResource, ObjectMetadata metadata) {
+    public void uploadFileS3Async(MultipartFile file, ProjectResource projectResource, ObjectMetadata metadata) {
         log.info("Uploading file: {} to bucket: {}", file.getOriginalFilename(), projectBucket);
         try {
             PutObjectResult result = s3Client.putObject(projectBucket, projectResource.getKey(), file.getInputStream(), metadata);
@@ -57,7 +57,7 @@ public class ProjectResourceManager {
     }
 
     @Async
-    public void deleteFileS3(ProjectResource projectResource) {
+    public void deleteFileS3Async(ProjectResource projectResource) {
         s3Client.deleteObject(projectBucket, projectResource.getKey());
         projectResourceDAO.setStatus(projectResource, ResourceStatus.DELETED);
     }

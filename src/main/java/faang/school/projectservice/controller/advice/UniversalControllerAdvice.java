@@ -1,17 +1,14 @@
 package faang.school.projectservice.controller.advice;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -36,7 +33,7 @@ public class UniversalControllerAdvice {
             Map<String, String> errors = createValidationErrorsMap((MethodArgumentNotValidException) ex);
             return new ResponseEntity<>(new ErrorResponse(status, message, errors), status);
         }
-        return new ResponseEntity<>(new ErrorResponse(status, message,ex), status);
+        return new ResponseEntity<>(new ErrorResponse(status, message, ex), status);
     }
 
     private String determineErrorMessage(Exception ex) {

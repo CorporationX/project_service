@@ -121,7 +121,7 @@ public class ProjectResourceServiceTest {
 
         assertEquals(BigInteger.ZERO, project.getStorageSize());
 
-        verify(projectResourceManager).deleteFileS3(projectResourceOfTM_1);
+        verify(projectResourceManager).deleteFileS3Async(projectResourceOfTM_1);
         verify(projectRepository).save(project);
     }
 
@@ -137,7 +137,7 @@ public class ProjectResourceServiceTest {
 
         assertEquals(BigInteger.ZERO, project.getStorageSize());
 
-        verify(projectResourceManager).deleteFileS3(projectResourceOfTM_1);
+        verify(projectResourceManager).deleteFileS3Async(projectResourceOfTM_1);
         verify(projectRepository).save(project);
     }
 
@@ -157,7 +157,7 @@ public class ProjectResourceServiceTest {
     public void uploadFileToProject_Success() {
         long fileSize = projectResourceOfTM_1.getSize().longValue();
         Pair<ProjectResource, ObjectMetadata> projectResourceWithMetadata = Pair.of(projectResourceOfTM_1, new ObjectMetadata());
-        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
         when(projectResourceManager.getProjectResourceBeforeUploadFile(file, project, teamMember_1))
                 .thenReturn(projectResourceWithMetadata);
 
@@ -168,13 +168,13 @@ public class ProjectResourceServiceTest {
         assertEquals(fileSize, project.getStorageSize().longValue());
         verify(projectRepository).save(project);
         verify(projectResourceRepository).save(projectResourceOfTM_1);
-        verify(projectResourceManager).uploadFileS3(file, projectResourceOfTM_1, projectResourceWithMetadata.getSecond());
+        verify(projectResourceManager).uploadFileS3Async(file, projectResourceOfTM_1, projectResourceWithMetadata.getSecond());
     }
 
 
     @Test
     public void uploadFileToProject_UserNotInTeam_ShouldThrowException() {
-        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             projectResourceService.uploadFileToProject(projectId, 10000L, file);
         });

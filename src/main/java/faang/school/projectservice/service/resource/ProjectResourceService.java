@@ -27,17 +27,10 @@ public class ProjectResourceService {
     private final ProjectResourceRepository projectResourceRepository;
     private final ProjectResourceManager projectResourceManager;
 
-    public TeamMember getTeamMemberFromProjectTeams(Long userId, Project project) {
-        return project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .filter(teamMember -> teamMember.getUserId().equals(userId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("User is not a part of the project"));
-    }
 
     @Transactional
     public ProjectResource uploadFileToProject(Long projectId, Long userId, MultipartFile file) {
-        Project project = projectRepository.getProjectById(projectId);
+        Project project = projectRepository.getByIdOrThrow(projectId);
         TeamMember teamMember = getTeamMemberFromProjectTeams(userId, project);
 
         Pair<ProjectResource, ObjectMetadata> projectResourceWithMetadata = projectResourceManager.
@@ -48,7 +41,7 @@ public class ProjectResourceService {
         projectRepository.save(project);
         projectResourceRepository.save(projectResource);
 
-        projectResourceManager.uploadFileS3(file, projectResource, projectResourceWithMetadata.getSecond());
+        projectResourceManager.uploadFileS3Async(file, projectResource, projectResourceWithMetadata.getSecond());
         return projectResource;
     }
 
@@ -60,10 +53,10 @@ public class ProjectResourceService {
         TeamMember teamMember = getTeamMemberFromProjectTeams(userId, project);
 
         allowedToDeleteFile(project, projectResource, teamMember);
-        projectResourceManager.deleteFileS3(projectResource);
-
         updateDownProjectStorageSize(project, projectResource.getSize());
         projectRepository.save(project);
+
+        projectResourceManager.deleteFileS3Async(projectResource);
     }
 
 
@@ -102,5 +95,13 @@ public class ProjectResourceService {
         ProjectResource resource = projectResourceRepository.findResourceWithProject(resourceId, projectId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Resource with id: %d not found in project with id: %d", resourceId, projectId)));
         return Pair.of(resource, resource.getProject());
+    }
+
+    private TeamMember getTeamMemberFromProjectTeams(Long userId, Project project) {
+        return project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(teamMember -> teamMember.getUserId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("User is not a part of the project"));
     }
 }
