@@ -48,7 +48,6 @@ public class ProjectService {
     }
 
     public ProjectDto update(ProjectDto projectDto) {
-        projectValidator.validateUpdatedFields(projectDto);
 
         Project existedProject = projectRepository.findById(projectDto.getId()).orElseThrow(() ->
                 new EntityNotFoundException("Project with id" + projectDto.getId() + "does not exist"));
