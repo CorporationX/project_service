@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.jira.response;
 
-import faang.school.projectservice.dto.jira.JiraDto;
+import faang.school.projectservice.model.dto.jira.JiraDto;
 import faang.school.projectservice.exception.JiraException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

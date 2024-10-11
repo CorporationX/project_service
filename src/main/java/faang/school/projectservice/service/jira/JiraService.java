@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.jira;
 
-import faang.school.projectservice.dto.jira.JiraDto;
+import faang.school.projectservice.model.dto.jira.JiraDto;
 import reactor.core.publisher.Mono;
 
 public interface JiraService {

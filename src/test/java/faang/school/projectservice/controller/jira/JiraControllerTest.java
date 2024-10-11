@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.jira;
 
-import faang.school.projectservice.dto.jira.JiraDto;
-import faang.school.projectservice.dto.jira.JiraStatusDto;
+import faang.school.projectservice.model.dto.jira.JiraDto;
+import faang.school.projectservice.model.dto.jira.JiraStatusDto;
 import faang.school.projectservice.service.jira.JiraServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

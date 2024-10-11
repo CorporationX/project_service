@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.jira;
+package faang.school.projectservice.model.dto.jira;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import faang.school.projectservice.validator.groups.ChangeStatusGroup;

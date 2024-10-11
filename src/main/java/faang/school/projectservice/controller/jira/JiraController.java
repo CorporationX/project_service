@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.jira;
 
-import faang.school.projectservice.dto.jira.JiraDto;
+import faang.school.projectservice.model.dto.jira.JiraDto;
 import faang.school.projectservice.service.jira.JiraServiceImpl;
 import faang.school.projectservice.validator.groups.ChangeStatusGroup;
 import faang.school.projectservice.validator.groups.CreateGroup;

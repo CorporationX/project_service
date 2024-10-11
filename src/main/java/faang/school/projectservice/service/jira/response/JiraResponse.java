@@ -1,11 +1,9 @@
 package faang.school.projectservice.service.jira.response;
 
-import faang.school.projectservice.dto.jira.JiraDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.dto.jira.JiraDto;
 import faang.school.projectservice.exception.JiraException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 @Component
