@@ -1,6 +1,6 @@
 package faang.school.projectservice.subproject.validator;
 
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.entity.ProjectVisibility;
 import faang.school.projectservice.validator.subproject.SubProjectValidatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

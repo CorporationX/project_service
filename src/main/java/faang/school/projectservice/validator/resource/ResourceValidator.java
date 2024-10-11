@@ -1,10 +1,10 @@
 package faang.school.projectservice.validator.resource;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.Resource;
+import faang.school.projectservice.model.entity.TeamMember;
+import faang.school.projectservice.model.entity.TeamRole;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;

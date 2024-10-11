@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.meet;
 
-import faang.school.projectservice.model.meet.Meet;
+import faang.school.projectservice.model.entity.meet.Meet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

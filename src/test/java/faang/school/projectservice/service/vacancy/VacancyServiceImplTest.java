@@ -1,16 +1,17 @@
 package faang.school.projectservice.service.vacancy;
 
-import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.filter.vacancy.VacancyFilter;
+import faang.school.projectservice.model.dto.vacancy.VacancyDto;
+import faang.school.projectservice.model.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.model.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.mapper.vacancy.VacancyMapper;
-import faang.school.projectservice.model.Candidate;
-import faang.school.projectservice.model.CandidateStatus;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.vacancy.Vacancy;
-import faang.school.projectservice.model.vacancy.VacancyStatus;
+import faang.school.projectservice.model.mapper.vacancy.VacancyMapper;
+import faang.school.projectservice.model.entity.Candidate;
+import faang.school.projectservice.model.entity.CandidateStatus;
+import faang.school.projectservice.model.entity.TeamMember;
+import faang.school.projectservice.model.entity.vacancy.Vacancy;
+import faang.school.projectservice.model.entity.vacancy.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.impl.vacancy.VacancyServiceImpl;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;

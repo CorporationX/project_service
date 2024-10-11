@@ -1,10 +1,10 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.dto.project.ProjectDto;
+import faang.school.projectservice.model.entity.Project;
 import jakarta.validation.constraints.Positive;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

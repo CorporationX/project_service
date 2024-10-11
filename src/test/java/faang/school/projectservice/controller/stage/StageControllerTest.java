@@ -1,11 +1,11 @@
 package faang.school.projectservice.controller.stage;
 
-import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.dto.stage.StageRolesDto;
-import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.stage.StageService;
+import faang.school.projectservice.model.dto.stage.StageDto;
+import faang.school.projectservice.model.dto.stage.StageFilterDto;
+import faang.school.projectservice.model.dto.stage.StageRolesDto;
+import faang.school.projectservice.model.entity.TaskStatus;
+import faang.school.projectservice.model.entity.TeamRole;
+import faang.school.projectservice.service.StageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

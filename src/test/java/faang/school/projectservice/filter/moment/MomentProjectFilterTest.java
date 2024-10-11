@@ -1,8 +1,9 @@
 package faang.school.projectservice.filter.moment;
 
-import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.dto.moment.MomentFilterDto;
+import faang.school.projectservice.model.entity.Moment;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.filter.moment.MomentProjectFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

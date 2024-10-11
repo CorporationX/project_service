@@ -1,9 +1,10 @@
 package faang.school.projectservice.filter.stage;
 
-import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.dto.stage.StageFilterDto;
+import faang.school.projectservice.model.entity.Task;
+import faang.school.projectservice.model.entity.TaskStatus;
+import faang.school.projectservice.model.entity.stage.Stage;
+import faang.school.projectservice.model.filter.stage.TaskStatusFilter;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
