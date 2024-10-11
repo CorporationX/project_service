@@ -37,7 +37,7 @@ create table if not exists team_member_roles
     CONSTRAINT fk_team_member_roles_team_member FOREIGN KEY (team_member_id) REFERENCES team_member (id)
 );
 
-CREATE TABLE IF NOT EXISTS projectResource
+CREATE TABLE IF NOT EXISTS resource
 (
     id         BIGSERIAL PRIMARY KEY,
     name       VARCHAR(255) NOT NULL,
