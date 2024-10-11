@@ -31,13 +31,12 @@ public class UniversalControllerAdvice {
         HttpStatus status = exceptionStatusMap.getOrDefault(ex.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
         String message = determineErrorMessage(ex);
 
-        Map<String, String> errors = null;
 
         if (ex instanceof MethodArgumentNotValidException) {
-            errors = createValidationErrorsMap((MethodArgumentNotValidException) ex);
+            Map<String, String> errors = createValidationErrorsMap((MethodArgumentNotValidException) ex);
+            return new ResponseEntity<>(new ErrorResponse(status, message, errors), status);
         }
-
-        return new ResponseEntity<>(createErrorResponse(status, message, errors), status);
+        return new ResponseEntity<>(new ErrorResponse(status, message,ex), status);
     }
 
     private String determineErrorMessage(Exception ex) {
@@ -52,7 +51,5 @@ public class UniversalControllerAdvice {
         return validationErrors;
     }
 
-    private ErrorResponse createErrorResponse(HttpStatus status, String message, Map<String, String> errors) {
-        return new ErrorResponse(status.value(), message, errors);
-    }
+
 }
