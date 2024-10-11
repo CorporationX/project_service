@@ -3,12 +3,14 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
     private final List<ProjectFilters> filters;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     @Override
     public void createProject(ProjectDto projectDto) {
@@ -90,8 +93,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDto findById(long id) {
-        return mapper.toDto(projectRepository.getProjectById(id));
+    public ProjectDto findById(long id, long userId) {
+        Project project = projectRepository.getProjectById(id);
+        projectViewEventPublisher.publish(new ProjectViewEvent(id, userId, LocalDateTime.now()));
+        return mapper.toDto(project);
     }
 
     private List<Project> findByName(String name) {
