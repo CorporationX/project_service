@@ -41,7 +41,7 @@ public class ProjectController {
             @PathVariable("project-id") @Positive Long projectId,
             @RequestParam("user-id") Long userId,
             @RequestBody MultipartFile file) {
-       ProjectResource resource = projectResourceService.uploadFileToProject(projectId, userId, file);
+        ProjectResource resource = projectResourceService.uploadFileToProject(projectId, userId, file);
         return resourceMapper.toResourceDto(resource);
     }
 
