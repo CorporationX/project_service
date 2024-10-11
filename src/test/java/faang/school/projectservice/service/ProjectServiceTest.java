@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectResourceServiceTest {
+public class ProjectServiceTest {
     private Project project;
     private Long projectId;
     private ProjectResource projectResourceOfTM_1;
@@ -47,16 +47,16 @@ public class ProjectResourceServiceTest {
     @Mock
     private MultipartFile file;
     private final ProjectRepository projectRepository = mock(ProjectRepository.class);
-    private final ProjectResourceRepository projectResourceRepository = mock(ProjectResourceRepository.class);
+    private final ProjectResourceService projectResourceService = mock(ProjectResourceService.class);
     private final ProjectResourceManager projectResourceManager = mock(ProjectResourceManager.class);
 
 
     private final String DIRECTORY_NAME = "projects";
     private final long MAX_STORAGE_SIZE = 2147483648L;
 
-    private final ProjectResourceService projectResourceService = new ProjectResourceService(projectRepository,
-            projectResourceRepository,
-            projectResourceManager);
+    private final ProjectService projectService = new ProjectService(projectRepository,
+            projectResourceManager,
+            projectResourceService);
 
     @BeforeEach
     public void setUp() {
@@ -94,9 +94,9 @@ public class ProjectResourceServiceTest {
 
     @Test
     public void testGetFileFromProject_Success() {
-        when(projectResourceRepository.findResourceWithProject(resourceId, projectId)).thenReturn(Optional.ofNullable(projectResourceOfTM_1));
+        when(projectResourceService.findProjectResourceByIds(resourceId, projectId)).thenReturn(projectResourceOfTM_1);
         when(projectResourceManager.getFileS3ByKey(any(String.class))).thenReturn(mock(Resource.class));
-        Pair<Resource, ProjectResource> result = projectResourceService.getFileFromProject(projectId, userId_1, resourceId);
+        Pair<Resource, ProjectResource> result = projectService.getFileFromProject(projectId, userId_1, resourceId);
 
         assertEquals(projectResourceOfTM_1, result.getSecond());
         assertNotNull(result);
@@ -104,10 +104,10 @@ public class ProjectResourceServiceTest {
 
     @Test
     public void testGetFileFromProject_NotSuccess_UserNotParticipatingInProject() {
-        when(projectResourceRepository.findResourceWithProject(resourceId, projectId)).thenReturn(Optional.ofNullable(projectResourceOfTM_1));
+        when(projectResourceService.findProjectResourceByIds(resourceId, projectId)).thenReturn(projectResourceOfTM_1);
 
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> projectResourceService.getFileFromProject(projectId, 10000L, resourceId));
+                () -> projectService.getFileFromProject(projectId, 10000L, resourceId));
         assertEquals("User is not a part of the project", exception.getMessage());
     }
 
@@ -115,9 +115,9 @@ public class ProjectResourceServiceTest {
     public void testDeleteFileFromProject_Success_UserIsCreator() {
         project.setStorageSize(BigInteger.ONE);
 
-        when(projectResourceRepository.findResourceWithProject(resourceId, projectId)).thenReturn(Optional.ofNullable(projectResourceOfTM_1));
+        when(projectResourceService.findProjectResourceByIds(resourceId, projectId)).thenReturn(projectResourceOfTM_1);
 
-        projectResourceService.deleteFileFromProject(projectId, userId_1, resourceId);
+        projectService.deleteFileFromProject(projectId, userId_1, resourceId);
 
         assertEquals(BigInteger.ZERO, project.getStorageSize());
 
@@ -130,10 +130,10 @@ public class ProjectResourceServiceTest {
     public void testDeleteFileFromProject_Success_UserIsNotCreator_UserIsManager() {
         project.setStorageSize(BigInteger.ONE);
 
-        when(projectResourceRepository.findResourceWithProject(resourceId, projectId)).thenReturn(Optional.ofNullable(projectResourceOfTM_1));
+        when(projectResourceService.findProjectResourceByIds(resourceId, projectId)).thenReturn(projectResourceOfTM_1);
 
 
-        projectResourceService.deleteFileFromProject(projectId, userId_2, resourceId);
+        projectService.deleteFileFromProject(projectId, userId_2, resourceId);
 
         assertEquals(BigInteger.ZERO, project.getStorageSize());
 
@@ -144,10 +144,10 @@ public class ProjectResourceServiceTest {
     @Test
     public void testDeleteFileFromProject_NotSuccess_UserNotAllowedToDeleteFile() {
         teamMember_2.setRoles(List.of(TeamRole.ANALYST));
-        when(projectResourceRepository.findResourceWithProject(resourceId, projectId))
-                .thenReturn(Optional.ofNullable(projectResourceOfTM_1));
+        when(projectResourceService.findProjectResourceByIds(resourceId, projectId))
+                .thenReturn(projectResourceOfTM_1);
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            projectResourceService.deleteFileFromProject(projectId, userId_2, resourceId);
+            projectService.deleteFileFromProject(projectId, userId_2, resourceId);
         });
         assertEquals("User is not allowed to delete this file", exception.getMessage());
     }
@@ -161,13 +161,13 @@ public class ProjectResourceServiceTest {
         when(projectResourceManager.getProjectResourceBeforeUploadFile(file, project, teamMember_1))
                 .thenReturn(projectResourceWithMetadata);
 
-        ProjectResource uploadedResource = projectResourceService.uploadFileToProject(projectId, userId_1, file);
+        ProjectResource uploadedResource = projectService.uploadFileToProject(projectId, userId_1, file);
 
         assertNotNull(uploadedResource);
         assertEquals(projectResourceOfTM_1, uploadedResource);
         assertEquals(fileSize, project.getStorageSize().longValue());
         verify(projectRepository).save(project);
-        verify(projectResourceRepository).save(projectResourceOfTM_1);
+        verify(projectResourceService).save(projectResourceOfTM_1);
         verify(projectResourceManager).uploadFileS3Async(file, projectResourceOfTM_1, projectResourceWithMetadata.getSecond());
     }
 
@@ -176,7 +176,7 @@ public class ProjectResourceServiceTest {
     public void uploadFileToProject_UserNotInTeam_ShouldThrowException() {
         when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            projectResourceService.uploadFileToProject(projectId, 10000L, file);
+            projectService.uploadFileToProject(projectId, 10000L, file);
         });
         assertEquals("User is not a part of the project", exception.getMessage());
     }

@@ -24,19 +24,19 @@ import java.util.Map;
 @Slf4j
 @Component
 public class ProjectResourceManager {
-    private final ProjectResourceDAO projectResourceDAO;
+    private final ProjectResourceService projectResourceService;
     private final AmazonS3 s3Client;
     private final String projectBucket;
     private final String DIRECTORY_NAME;
     private final long MAX_STORAGE_SIZE;
 
     public ProjectResourceManager(AmazonS3 s3Client,
-                                  ProjectResourceDAO projectResourceDAO,
+                                  ProjectResourceService projectResourceService,
                                   @Value("${services.s3.bucketName}") String projectBucket,
                                   @Value("${project-service.directory}") String DIRECTORY_NAME,
                                   @Value("${project-service.max_storage_size_no_subscription}") long MAX_STORAGE_SIZE) {
         this.s3Client = s3Client;
-        this.projectResourceDAO = projectResourceDAO;
+        this.projectResourceService = projectResourceService;
         this.projectBucket = projectBucket;
         this.MAX_STORAGE_SIZE = MAX_STORAGE_SIZE;
         this.DIRECTORY_NAME = DIRECTORY_NAME;
@@ -49,9 +49,9 @@ public class ProjectResourceManager {
             PutObjectResult result = s3Client.putObject(projectBucket, projectResource.getKey(), file.getInputStream(), metadata);
             String eTag = result.getETag();
             log.info("File uploaded successfully. ETag: {}", eTag);
-            projectResourceDAO.setStatus(projectResource, ResourceStatus.ACTIVE);
+            projectResourceService.setStatus(projectResource, ResourceStatus.ACTIVE);
         } catch (Exception e) {
-            projectResourceDAO.setStatus(projectResource, ResourceStatus.FAILED);
+            projectResourceService.setStatus(projectResource, ResourceStatus.FAILED);
             throw new RuntimeException("Failed to upload file to S3", e);
         }
     }
@@ -59,7 +59,7 @@ public class ProjectResourceManager {
     @Async
     public void deleteFileS3Async(ProjectResource projectResource) {
         s3Client.deleteObject(projectBucket, projectResource.getKey());
-        projectResourceDAO.setStatus(projectResource, ResourceStatus.DELETED);
+        projectResourceService.setStatus(projectResource, ResourceStatus.DELETED);
     }
 
     public Resource getFileS3ByKey(String objectKey) {
@@ -83,8 +83,15 @@ public class ProjectResourceManager {
         if (s3Client.doesObjectExist(projectBucket, path)) {
             throw new IllegalStateException("File already exists");
         }
-        ProjectResource projectResource = createProjectResource(metadata, project, teamMember);
+        ProjectResource projectResource = createProjectResourceByMetadata(metadata, project, teamMember);
         return Pair.of(projectResource, metadata);
+    }
+    public ProjectResource createProjectResourceByMetadata(ObjectMetadata metadata, Project project, TeamMember teamMember) {
+        String path = metadata.getUserMetaDataOf("path");
+        String fileName = metadata.getUserMetaDataOf("name");
+        String type = metadata.getContentType();
+        BigInteger size = BigInteger.valueOf(metadata.getContentLength());
+        return projectResourceService.getProjectResource(project, teamMember, path, fileName, size, type);
     }
 
     private ObjectMetadata generateMetadata(MultipartFile file, String path, String fileNameWithExtension) {
@@ -120,24 +127,5 @@ public class ProjectResourceManager {
         return String.format("%s/%d/%d", DIRECTORY_NAME, entityId, teamMemberId);
     }
 
-    public ProjectResource createProjectResource(ObjectMetadata metadata, Project project, TeamMember teamMember) {
-        String path = metadata.getUserMetaDataOf("path");
-        String fileName = metadata.getUserMetaDataOf("name");
-        String type = metadata.getContentType();
-        BigInteger size = BigInteger.valueOf(metadata.getContentLength());
-        return ProjectResource.builder()
-                .key(path)
-                .name(generateResourceName(fileName, project.getName()))
-                .size(size)
-                .type(type)
-                .status(ResourceStatus.PENDING)
-                .createdBy(teamMember)
-                .updatedBy(teamMember)
-                .project(project)
-                .build();
-    }
 
-    private String generateResourceName(String fileName, String entityName) {
-        return entityName + " " + fileName;
-    }
 }

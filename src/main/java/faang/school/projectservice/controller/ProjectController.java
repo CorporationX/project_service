@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.ProjectResource;
-import faang.school.projectservice.service.resource.ProjectResourceService;
+import faang.school.projectservice.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 public class ProjectController {
-    private final ProjectResourceService projectResourceService;
+    private final ProjectService projectService;
     private final ResourceMapper resourceMapper;
 
 
@@ -41,7 +41,7 @@ public class ProjectController {
             @PathVariable("project-id") @Positive Long projectId,
             @RequestParam("user-id") Long userId,
             @RequestBody MultipartFile file) {
-        ProjectResource resource = projectResourceService.uploadFileToProject(projectId, userId, file);
+        ProjectResource resource = projectService.uploadFileToProject(projectId, userId, file);
         return resourceMapper.toResourceDto(resource);
     }
 
@@ -57,7 +57,7 @@ public class ProjectController {
             @PathVariable("project-id") Long projectId,
             @RequestParam("user-id") Long userId,
             @RequestParam("resource-id") Long resourceId) {
-        projectResourceService.deleteFileFromProject(projectId, userId, resourceId);
+        projectService.deleteFileFromProject(projectId, userId, resourceId);
     }
 
 
@@ -72,7 +72,7 @@ public class ProjectController {
             @PathVariable("project-id") Long projectId,
             @RequestParam("user-id") Long userId,
             @RequestParam("resource-id") Long resourceId) {
-        Pair<Resource, ProjectResource> resourceInfo = projectResourceService.getFileFromProject(projectId, userId, resourceId);
+        Pair<Resource, ProjectResource> resourceInfo = projectService.getFileFromProject(projectId, userId, resourceId);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(resourceInfo.getSecond().getType()))
