@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.advice;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.Map;
 public class UniversalControllerAdvice {
 
     private final Map<Class<? extends Exception>, HttpStatus> exceptionStatusMap = Map.of(
+            EntityNotFoundException.class, HttpStatus.NOT_FOUND,
             MethodArgumentNotValidException.class, HttpStatus.BAD_REQUEST,
             IllegalArgumentException.class, HttpStatus.BAD_REQUEST,
             IllegalStateException.class, HttpStatus.BAD_REQUEST,
