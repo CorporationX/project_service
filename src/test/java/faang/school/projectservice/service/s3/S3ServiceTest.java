@@ -2,7 +2,8 @@ package faang.school.projectservice.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import faang.school.projectservice.model.Resource;
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,12 +14,13 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(properties = {"services.s3.bucketName=test-bucket"})
+@Getter
+@Setter
 public class S3ServiceTest {
 
     @InjectMocks
@@ -46,9 +48,8 @@ public class S3ServiceTest {
 
     @Test
     void uploadFile_validRequest_returnsResource() {
-        Resource result = s3Service.uploadFile(multipartFile, folder);
+        s3Service.uploadFile(multipartFile, folder);
         verify(s3Client).putObject(any(PutObjectRequest.class));
-        assertEquals(result.getName(), multipartFile.getOriginalFilename());
     }
 
     @Test

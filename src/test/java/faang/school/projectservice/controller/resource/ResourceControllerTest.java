@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.resource;
 
+import faang.school.projectservice.dto.resource.ResourceDownloadDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,9 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +32,7 @@ public class ResourceControllerTest {
     ResourceService resourceService;
 
     private ResourceDto resourceDto;
+    private ResourceDownloadDto resourceDownloadDto;
     private MultipartFile mockFile;
     private Long id;
     private byte[] fileContent;
@@ -51,7 +50,7 @@ public class ResourceControllerTest {
         resourceDto = new ResourceDto();
         fileContent = "File content".getBytes();
         filename = "filename";
-
+        resourceDownloadDto = new ResourceDownloadDto(fileContent, filename);
     }
 
     @Test
@@ -69,23 +68,24 @@ public class ResourceControllerTest {
 
     @Test
     void downloadResource_validRequest_returnsResource(){
-        InputStream mockInputStream = new ByteArrayInputStream(fileContent);
-        when(resourceService.downloadResource(id)).thenReturn(mockInputStream);
-        when(resourceService.getResourceName(id)).thenReturn(filename);
+        when(resourceService.downloadResource(id)).thenReturn(resourceDownloadDto);
+
         ResponseEntity<byte[]> response = resourceController.downloadResource(id);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertArrayEquals(fileContent, response.getBody());
         HttpHeaders headers = response.getHeaders();
         assertEquals("application/octet-stream", headers.getContentType().toString());
         assertEquals("attachment; filename=\"" + filename + "\"", headers.getContentDisposition().toString());
         verify(resourceService).downloadResource(1L);
-        verify(resourceService).getResourceName(1L);
     }
 
     @Test
     void downloadResource_errorDownloading_throwsException() {
         when(resourceService.downloadResource(id)).thenThrow(new RuntimeException("Error downloading resource"));
+
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> resourceController.downloadResource(1L));
+
         assertEquals("Error downloading resource", thrown.getMessage());
         verify(resourceService).downloadResource(1L);
         verify(resourceService, never()).getResourceName(id);

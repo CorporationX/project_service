@@ -1,9 +1,11 @@
 package faang.school.projectservice.controller.resource;
 
+import faang.school.projectservice.dto.resource.ResourceDownloadDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,14 +18,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.ContentDisposition;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/resource/{projectId}")
+@RequestMapping("/api/v1/project/{projectId}/resource")
 @RequiredArgsConstructor
 public class ResourceController {
 
@@ -47,19 +45,12 @@ public class ResourceController {
     @GetMapping("/{resourceId}")
     public ResponseEntity<byte[]> downloadResource(@PathVariable Long resourceId) {
         log.info("Request to download resource with ID: {}", resourceId);
-        byte[] fileBytes;
-        String filename;
-        try (InputStream inputStream = resourceService.downloadResource(resourceId)) {
-            fileBytes = inputStream.readAllBytes();
-            filename = resourceService.getResourceName(resourceId);
-            log.info("Resource with ID {} successfully downloaded, filename: {}", resourceId, filename);
-        } catch (IOException e) {
-            log.error("Error downloading resource with ID {}", resourceId, e);
-            throw new RuntimeException("Error downloading resource", e);
-        }
+
+        ResourceDownloadDto resource = resourceService.downloadResource(resourceId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/octet-stream"));
-        headers.setContentDisposition(ContentDisposition.builder("attachment").filename(filename).build());
-        return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
+        headers.setContentDisposition(ContentDisposition.builder("attachment").filename(resource.getFilename()).build());
+
+        return new ResponseEntity<>(resource.getFileBytes(), headers, HttpStatus.OK);
     }
 }

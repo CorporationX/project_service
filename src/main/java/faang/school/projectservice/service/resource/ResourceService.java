@@ -1,9 +1,8 @@
 package faang.school.projectservice.service.resource;
 
+import faang.school.projectservice.dto.resource.ResourceDownloadDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.InputStream;
 
 public interface ResourceService {
 
@@ -11,7 +10,7 @@ public interface ResourceService {
 
     void deleteResource(Long resourceId);
 
-    InputStream downloadResource(Long resourceId);
+    ResourceDownloadDto downloadResource(Long resourceId);
 
     String getResourceName(Long resourceId);
 

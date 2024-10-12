@@ -7,8 +7,8 @@ import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Optional;
 
@@ -37,7 +39,7 @@ public class ResourceServiceTest {
     ResourceServiceImpl resourceService;
 
     @Mock
-    private ProjectService projectService;
+    private ProjectRepository projectRepository;
 
     @Mock
     private ResourceRepository resourceRepository;
@@ -97,14 +99,14 @@ public class ResourceServiceTest {
 
         when(userContext.getUserId()).thenReturn(userId);
         when(teamMemberRepository.findById(userId)).thenReturn(teamMember);
-        when(projectService.getProjectById(projectId)).thenReturn(project);
-        when(s3Service.uploadFile(any(MultipartFile.class), any(String.class))).thenReturn(resource);
-        when(resourceRepository.save(resource)).thenReturn(resource);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        when(s3Service.uploadFile(any(MultipartFile.class), any(String.class))).thenReturn(resourceKey);
+        when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
 
         resourceService.addResource(projectId, multipartFile);
 
-        verify(resourceRepository).save(resource);
-        verify(projectService).save(any(Project.class));
+        verify(resourceRepository).save(any(Resource.class));
+        verify(projectRepository).save(any(Project.class));
         verify(mapper).toDto(resource);
     }
 
@@ -124,12 +126,12 @@ public class ResourceServiceTest {
 
         when(userContext.getUserId()).thenReturn(userId);
         when(teamMemberRepository.findById(userId)).thenReturn(teamMember);
-        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
         assertThrows(StorageSizeExceededException.class, () -> resourceService.addResource(projectId, multipartFile));
 
         verify(resourceRepository, never()).save(resource);
-        verify(projectService, never()).save(any(Project.class));
+        verify(projectRepository, never()).save(any(Project.class));
         verify(mapper, never()).toDto(resource);
     }
 
@@ -149,7 +151,7 @@ public class ResourceServiceTest {
         resourceService.deleteResource(resourceId);
 
         verify(s3Service).deleteFile(resourceKey);
-        verify(projectService).save(any(Project.class));
+        verify(projectRepository).save(any(Project.class));
     }
 
     @Test
@@ -160,13 +162,17 @@ public class ResourceServiceTest {
         resource.setCreatedBy(teamMember);
 
         verify(s3Service, never()).deleteFile(resourceKey);
-        verify(projectService, never()).save(any(Project.class));
+        verify(projectRepository, never()).save(any(Project.class));
     }
 
     @Test
     void downloadResource_validRequest_s3serviceCalled() {
         resource.setKey(resourceKey);
+        byte[] fileContent = "test content".getBytes();
+        InputStream fileStream = new ByteArrayInputStream(fileContent);
+
         when(resourceRepository.findById(resourceId)).thenReturn(Optional.ofNullable(resource));
+        when(s3Service.downloadFile(resource.getKey())).thenReturn(fileStream);
 
         resourceService.downloadResource(resourceId);
 
