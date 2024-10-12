@@ -3,15 +3,20 @@ import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.model.Moment;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Validated
 public class MomentService {
 
     private final MomentRepository momentRepository;
@@ -23,19 +28,14 @@ public class MomentService {
         this.momentMapper = momentMapper;
     }
 
-    public MomentDto createMoment(MomentDto momentDto) {
-        if (momentDto.getName() == null || momentDto.getName().isEmpty()) {
-            throw new IllegalArgumentException("Moment name cannot be empty");
-        }
+
+    public MomentDto createMoment(@Valid MomentDto momentDto) {
         Moment moment = momentMapper.toEntity(momentDto);
         Moment savedMoment = momentRepository.save(moment);
         return momentMapper.toDto(savedMoment);
     }
 
-    public MomentDto updateMoment(MomentDto momentDto) {
-        if (momentDto.getId() == null) {
-            throw new IllegalArgumentException("Moment ID cannot be null");
-        }
+    public MomentDto updateMoment(@Valid MomentDto momentDto) {
         Moment moment = momentMapper.toEntity(momentDto);
         Moment updatedMoment = momentRepository.save(moment);
         return momentMapper.toDto(updatedMoment);
@@ -55,7 +55,7 @@ public class MomentService {
     public List<MomentDto> getMomentsByFilters(Date date, List<Long> partnerProjectIds) {
         return momentRepository.findAll().stream()
                 .filter(moment -> (date == null || moment.getDate().equals(date)) &&
-                        (partnerProjectIds == null || moment.getPartnerProjectIds().containsAll(partnerProjectIds)))
+                        (partnerProjectIds == null || new HashSet<>(moment.getPartnerProjectIds()).containsAll(partnerProjectIds)))
                 .map(momentMapper::toDto)
                 .collect(Collectors.toList());
     }

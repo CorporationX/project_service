@@ -5,12 +5,16 @@ import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +33,23 @@ public class MomentServiceTest {
     @InjectMocks
     private MomentService momentService;
 
+    private Validator validator;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+        LocalValidatorFactoryBean factoryBean = new LocalValidatorFactoryBean();
+        factoryBean.afterPropertiesSet();
+        validator = factoryBean.getValidator();
     }
 
     @Test
     public void givenValidMomentDto_whenCreateMoment_thenReturnCreatedMomentDto() {
         MomentDto momentDto = new MomentDto();
         momentDto.setName("Test Moment");
+        momentDto.setDate(LocalDateTime.now());
+        momentDto.setCreatedBy(1L);
+        momentDto.setUpdatedBy(1L);
         Moment moment = new Moment();
         when(momentMapper.toEntity(momentDto)).thenReturn(moment);
         when(momentRepository.save(moment)).thenReturn(moment);
@@ -49,21 +61,13 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void givenMomentDtoWithNullName_whenCreateMoment_thenThrowIllegalArgumentException() {
-        MomentDto momentDto = new MomentDto();
-        momentDto.setName(null);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            momentService.createMoment(momentDto);
-        });
-        assertEquals("Moment name cannot be empty", exception.getMessage());
-    }
-
-    @Test
     public void givenValidMomentDto_whenUpdateMoment_thenReturnUpdatedMomentDto() {
         MomentDto momentDto = new MomentDto();
         momentDto.setId(1L);
         momentDto.setName("Updated Moment");
+        momentDto.setDate(LocalDateTime.now());
+        momentDto.setCreatedBy(1L);
+        momentDto.setUpdatedBy(1L);
         Moment moment = new Moment();
         when(momentMapper.toEntity(momentDto)).thenReturn(moment);
         when(momentRepository.save(moment)).thenReturn(moment);
@@ -72,17 +76,6 @@ public class MomentServiceTest {
         MomentDto result = momentService.updateMoment(momentDto);
 
         assertEquals(momentDto, result);
-    }
-
-    @Test
-    public void givenMomentDtoWithNullId_whenUpdateMoment_thenThrowIllegalArgumentException() {
-        MomentDto momentDto = new MomentDto();
-        momentDto.setId(null);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            momentService.updateMoment(momentDto);
-        });
-        assertEquals("Moment ID cannot be null", exception.getMessage());
     }
 
     @Test

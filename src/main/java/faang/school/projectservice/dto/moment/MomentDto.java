@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.moment;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -23,6 +24,19 @@ public class MomentDto {
 
     @NotNull(message = "Project ID cannot be null")
     private Long projectId;
+
+    @NotBlank(message = "Image ID cannot be blank")
+    private String imageId;
+
+    @NotNull(message = "Created by cannot be null")
+    private Long createdBy;
+
+    @NotNull(message = "Updated by cannot be null")
+    private Long updatedBy;
+
+    private List<Long> resourceIds;
+
+    private List<Long> projectIds;
 
     private List<Long> userIds;
 }
