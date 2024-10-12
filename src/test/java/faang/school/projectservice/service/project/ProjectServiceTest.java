@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.resource.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +19,6 @@ import faang.school.projectservice.exception.FileTooLargeException;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.AmazonS3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ public class ProjectServiceTest {
     private ProjectRepository projectRepository;
 
     @Mock
-    private AmazonS3Service amazonS3Service;
+    private S3Service s3Service;
 
     @Mock
     private ProjectValidator projectValidator;
@@ -66,12 +66,12 @@ public class ProjectServiceTest {
         imageName = "test.png";
         project = new Project();
         project.setId(projectId);
-        projectService.setMaxFileSize(maxFileSize);
+        projectService.maxFileSize = maxFileSize;
         project.setCoverImageId("image-id");
         contentType = "image/png";
         coverImageKey = "unique-key";
         imageData = new byte[]{1, 2, 3};
-        projectService = new ProjectService(projectRepository, amazonS3Service, projectMapper, projectValidator, 1080, 566, 1080, maxFileSize);
+        projectService = new ProjectService(projectRepository, s3Service, projectMapper, projectValidator, 1080, 566, 1080, maxFileSize);
     }
 
 
@@ -85,11 +85,11 @@ public class ProjectServiceTest {
     @Test
     void testDownloadCoverImage_Success() {
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(amazonS3Service.downloadFile(project.getCoverImageId())).thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
+        when(s3Service.downloadCoverImage(project.getCoverImageId())).thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
 
         InputStream inputStream = projectService.downloadCoverImage(projectId);
         assertNotNull(inputStream);
-        verify(amazonS3Service).downloadFile(project.getCoverImageId());
+        verify(s3Service).downloadCoverImage(project.getCoverImageId());
     }
 
     @Test
@@ -105,7 +105,7 @@ public class ProjectServiceTest {
     void testDeleteCoverImage_Success() {
         when(projectRepository.findById(projectId)).thenReturn(project);
         projectService.deleteCoverImage(projectId);
-        verify(amazonS3Service).deleteFile("image-id");
+        verify(s3Service).deleteCoverImage("image-id");
         verify(projectRepository).save(project);
         assertNull(project.getCoverImageId());
     }
@@ -119,6 +119,6 @@ public class ProjectServiceTest {
         ProjectDto result = projectService.deleteCoverImage(projectId);
         assertNotNull(result);
         assertNull(result.getCoverImageId());
-        verify(amazonS3Service, never()).deleteFile(anyString());
+        verify(s3Service, never()).deleteCoverImage(anyString());
     }
 }

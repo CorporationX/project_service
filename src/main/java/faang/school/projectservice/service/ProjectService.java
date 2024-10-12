@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.FileTooLargeException;
@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.MinioUploadException;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.resource.S3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ import java.util.UUID;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
-    private final AmazonS3Service amazonS3Service;
+    private final S3Service s3Service;
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
 
@@ -69,7 +70,7 @@ public class ProjectService {
             byte[] imageData = processImage(coverImage);
             String key = generateUniqueKey(coverImage);
 
-            amazonS3Service.uploadFile(key, new ByteArrayInputStream(imageData), coverImage.getContentType(), imageData.length);
+            s3Service.uploadCoverImage(key, new ByteArrayInputStream(imageData), coverImage.getContentType(), imageData.length);
             project.setCoverImageId(key);
             projectRepository.save(project);
             return projectMapper.toDto(project);
@@ -91,7 +92,7 @@ public class ProjectService {
         if (coverImageId == null) {
             throw new EntityNotFoundException("Проект не имеет обложки");
         }
-        return amazonS3Service.downloadFile(coverImageId);
+        return s3Service.downloadCoverImage(coverImageId);
     }
 
     public ProjectDto deleteCoverImage(Long projectId) {
@@ -101,7 +102,7 @@ public class ProjectService {
 
         String coverImageId = project.getCoverImageId();
         if (coverImageId != null) {
-            amazonS3Service.deleteFile(coverImageId);
+            s3Service.deleteCoverImage(coverImageId);
             project.setCoverImageId(null);
             projectRepository.save(project);
         }
