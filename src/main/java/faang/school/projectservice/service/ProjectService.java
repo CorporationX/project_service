@@ -1,12 +1,11 @@
-package faang.school.projectservice.service.project;
+package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.FileTooLargeException;
 import faang.school.projectservice.exception.MinioUploadException;
 import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.resource.S3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;

@@ -7,6 +7,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.exception.MinioUploadException;
+import faang.school.projectservice.model.entity.Resource;
+import faang.school.projectservice.model.enums.ResourceStatus;
+import faang.school.projectservice.model.enums.ResourceType;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +32,6 @@ public class S3Service {
     @Setter
     @Value("${services.s3.bucketName}")
     private String bucketName;
-
-    public S3Service(AmazonS3 s3Client, String bucketName) {
-        this.s3Client = s3Client;
-        this.bucketName = bucketName;
-    }
 
     public Resource uploadFile(MultipartFile file, String folder) {
         ObjectMetadata objectMetadata = new ObjectMetadata();

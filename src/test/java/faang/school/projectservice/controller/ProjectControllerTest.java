@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import faang.school.projectservice.controller.project.ProjectController;
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

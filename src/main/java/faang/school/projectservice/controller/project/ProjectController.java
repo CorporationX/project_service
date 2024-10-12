@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.project;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

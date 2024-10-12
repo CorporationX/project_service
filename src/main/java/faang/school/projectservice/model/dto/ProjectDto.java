@@ -15,4 +15,5 @@ public class ProjectDto {
     private Long parentProjectId;
     private Long ownerId;
     private List<Long> childrenIds;
+    private String coverImageId;
 }
