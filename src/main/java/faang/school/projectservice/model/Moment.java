@@ -1,9 +1,11 @@
 package faang.school.projectservice.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -16,10 +18,12 @@ public class Moment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Name cannot be blank")
     private String name;
 
     private String description;
 
+    @NotNull(message = "Date cannot be null")
     private LocalDateTime date;
 
     @ManyToMany
@@ -38,11 +42,8 @@ public class Moment {
     )
     private List<Project> projects;
 
-    @ElementCollection
-    @CollectionTable(name = "moment_user", joinColumns = @JoinColumn(name = "moment_id"))
-    @Column(name = "team_member_id")
-    private List<Long> userIds;
 
+    @NotBlank(message = "Image ID cannot be blank")
     @Column(name = "image_id")
     private String imageId;
 
@@ -56,9 +57,15 @@ public class Moment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @NotNull(message = "Created by cannot be null")
     @Column(name = "created_by")
     private Long createdBy;
 
+    @NotNull(message = "Updated by cannot be null")
     @Column(name = "updated_by")
     private Long updatedBy;
+
+    public List<Long> getPartnerProjectIds() {
+        return projects.stream().map(Project::getId).collect(Collectors.toList());
+    }
 }
