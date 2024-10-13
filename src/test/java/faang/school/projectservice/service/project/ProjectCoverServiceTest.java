@@ -1,5 +1,8 @@
 package faang.school.projectservice.service.project;
 
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.dto.image.FileData;
 import faang.school.projectservice.dto.project.ProjectCoverDto;
 import faang.school.projectservice.model.Project;
@@ -7,8 +10,8 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.image.ImageService;
-import faang.school.projectservice.service.resource.ResourceService2;
-import faang.school.projectservice.service.s3.S3Service2;
+import faang.school.projectservice.service.resource.ResourceService;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.image.ImageValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,17 +22,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectCoverServiceTest {
 
     private static final Long PROJECT_ID = 1L;
-    private static final String COVER_IMAGE_ID = "cover123";
-    private static final String  RESOURCE_KEY = "123";
-    private static final String OLD_RESOURCE_KEY = "321";
+    private static final String PROJECT_NAME = "PROJECT_NAME";
+    private static final String RESOURCE_KEY = "123";
+    private static final String CONTENT_TYPE = "image/jpeg";
 
     @Mock
     private ImageService imageService;
@@ -44,10 +50,10 @@ class ProjectCoverServiceTest {
     private ImageValidator imageValidator;
 
     @Mock
-    private ResourceService2 resourceService2;
+    private ResourceService resourceService;
 
     @Mock
-    private S3Service2 s3Service2;
+    private S3Service s3Service;
 
     @Mock
     private MultipartFile imageFile;
@@ -68,13 +74,10 @@ class ProjectCoverServiceTest {
             Resource resource = new Resource();
             resource.setKey(RESOURCE_KEY);
 
-            byte[] resizedImage = new byte[]{};
-
             doNothing().when(imageValidator).validateMaximumSize(anyLong());
             when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
-            when(imageService.resizeImage(imageFile)).thenReturn(resizedImage);
-            when(resourceService2.putResource(any(), any(), any())).thenReturn(resource);
-            doNothing().when(s3Service2).uploadFile(any(), any(), any(), anyInt(), any());
+            when(resourceService.saveResource(any(), any(), any())).thenReturn(resource);
+            doNothing().when(s3Service).saveObject(any(), any());
 
             ProjectCoverDto result = projectCoverService.uploadCover(PROJECT_ID, imageFile);
 
@@ -82,7 +85,7 @@ class ProjectCoverServiceTest {
             assertEquals(PROJECT_ID, result.getProjectId());
             assertNotNull(result.getCoverId());
 
-            verify(resourceService2).putResource(anyString(), eq(imageFile), eq(ResourceType.IMAGE));
+            verify(resourceService).saveResource(eq(imageFile), any(), eq(ResourceType.IMAGE));
             verify(projectRepository).save(project);
         }
     }
@@ -96,18 +99,16 @@ class ProjectCoverServiceTest {
         void whenChangeCoverThenReplaceAndReturnProjectCoverDto() {
             Project project = new Project();
             project.setId(PROJECT_ID);
-            project.setCoverImageId(OLD_RESOURCE_KEY);
+            project.setName(PROJECT_NAME);
+            project.setCoverImageId(RESOURCE_KEY);
 
             Resource resource = new Resource();
             resource.setKey(RESOURCE_KEY);
 
-            byte[] resizedImage = new byte[]{};
-
             doNothing().when(imageValidator).validateMaximumSize(anyLong());
             when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
-            when(imageService.resizeImage(imageFile)).thenReturn(resizedImage);
-            when(resourceService2.putResource(any(), any(), any())).thenReturn(resource);
-            doNothing().when(s3Service2).uploadFile(any(), any(), any(), anyInt(), any());
+            when(resourceService.saveResource(any(), any(), any())).thenReturn(resource);
+            doNothing().when(s3Service).saveObject(any(), any());
 
             ProjectCoverDto result = projectCoverService.changeCover(PROJECT_ID, imageFile);
 
@@ -115,10 +116,9 @@ class ProjectCoverServiceTest {
             assertEquals(PROJECT_ID, result.getProjectId());
             assertNotNull(result.getCoverId());
 
-            verify(resourceService2).markResourceAsDeleted(anyString());
-            verify(s3Service2).removeFileById(anyString());
-
-            verify(resourceService2).putResource(any(), eq(imageFile), eq(ResourceType.IMAGE));
+            verify(resourceService).markResourceAsDeleted(anyString());
+            verify(s3Service).deleteObject(eq(RESOURCE_KEY), eq(PROJECT_NAME));
+            verify(resourceService).saveResource(eq(imageFile), any(), eq(ResourceType.IMAGE));
         }
     }
 
@@ -128,34 +128,32 @@ class ProjectCoverServiceTest {
 
         @Test
         @DisplayName("should return FileData if the cover exists")
-        void whenGetCoverThenReturnFileData() {
+        void whenGetCoverThenReturnFileData() throws IOException {
             Project project = new Project();
             project.setId(PROJECT_ID);
-            project.setCoverImageId(COVER_IMAGE_ID);
+            project.setName(PROJECT_NAME);
+            project.setCoverImageId(RESOURCE_KEY);
 
-            FileData fileData = mock(FileData.class);
+            Resource resource = new Resource();
+            resource.setKey(RESOURCE_KEY);
+
+            S3Object s3Object = mock(S3Object.class);
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(CONTENT_TYPE);
+            byte[] imageBytes = {1, 2, 3, 4};
+            S3ObjectInputStream s3ObjectInputStream = new S3ObjectInputStream(new ByteArrayInputStream(imageBytes), null);
 
             when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
-            when(s3Service2.getFileById(COVER_IMAGE_ID)).thenReturn(fileData);
+            when(resourceService.getResourceByKey(RESOURCE_KEY)).thenReturn(resource);
+            when(s3Service.getObject(resource)).thenReturn(s3Object);
+            when(s3Object.getObjectContent()).thenReturn(s3ObjectInputStream);
+            when(s3Object.getObjectMetadata()).thenReturn(metadata);
 
             FileData result = projectCoverService.getCover(PROJECT_ID);
 
             assertNotNull(result);
-            assertEquals(fileData, result);
-        }
-
-        @Test
-        @DisplayName("should return null if no cover exists")
-        void whenNoCoverExistsThenReturnNull() {
-            Project project = new Project();
-            project.setId(PROJECT_ID);
-            project.setCoverImageId(COVER_IMAGE_ID);
-
-            when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
-
-            FileData result = projectCoverService.getCover(PROJECT_ID);
-
-            assertNull(result);
+            assertEquals(CONTENT_TYPE, result.getContentType());
+            assertArrayEquals(imageBytes, result.getData());
         }
     }
 
@@ -168,6 +166,7 @@ class ProjectCoverServiceTest {
         void whenDeleteCoverThenRemoveCoverAndSaveProject() {
             Project project = new Project();
             project.setId(PROJECT_ID);
+            project.setName(PROJECT_NAME);
             project.setCoverImageId(RESOURCE_KEY);
 
             when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
@@ -176,8 +175,8 @@ class ProjectCoverServiceTest {
 
             assertNull(project.getCoverImageId());
 
-            verify(resourceService2).markResourceAsDeleted(RESOURCE_KEY);
-            verify(s3Service2).removeFileById(RESOURCE_KEY);
+            verify(resourceService).markResourceAsDeleted(RESOURCE_KEY);
+            verify(s3Service).deleteObject(eq(RESOURCE_KEY), eq(PROJECT_NAME));
             verify(projectRepository).save(project);
         }
     }

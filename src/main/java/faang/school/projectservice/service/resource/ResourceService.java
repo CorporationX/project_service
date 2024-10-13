@@ -45,6 +45,26 @@ public class ResourceService {
     private final UserContext userContext;
 
     @Transactional
+    public Resource saveResource(MultipartFile file, String resourceKey, ResourceType resourceType) {
+        Resource resource = new Resource();
+        resource.setName(file.getName());
+        resource.setKey(resourceKey);
+        resource.setSize(BigInteger.valueOf(file.getSize()));
+        resource.setType(resourceType);
+        resource.setStatus(ResourceStatus.ACTIVE);
+
+        return resourceRepository.save(resource);
+    }
+
+    @Transactional
+    public Resource markResourceAsDeleted(String resourceKey) {
+        Resource resource = getResourceByKey(resourceKey);
+        resource.setStatus(ResourceStatus.DELETED);
+
+        return resourceRepository.save(resource);
+    }
+
+    @Transactional
     public ResourceResponseDto saveResource(MultipartFile file, long projectId, long teamMemberId) {
         Project project = projectService.getProjectById(projectId);
         TeamMember fileOwner = teamMemberService.getTeamMemberById(teamMemberId);
@@ -120,7 +140,10 @@ public class ResourceService {
             log.debug("Trying to read bytes from object");
             byte[] content = object.getObjectContent().readAllBytes();
             return new MultiPartFileConverter(content,
-                    resource.getName(), resource.getKey(), object.getObjectMetadata().getContentType());
+                    resource.getName(),
+                    resource.getKey(),
+                    object.getObjectMetadata().getContentType()
+            );
         } catch (IOException e) {
             log.error("Something's gone wrong while downloading file! {}", (Object) e.getStackTrace());
             throw new RuntimeException(e.getMessage());
@@ -131,6 +154,11 @@ public class ResourceService {
                 log.error("Couldn't close s3 object stream! {}", (Object) e.getStackTrace());
             }
         }
+    }
+
+    public Resource getResourceByKey(String key) {
+        return resourceRepository.findByKey(key)
+                .orElseThrow(() -> new EntityNotFoundException("Resource with key " + key + " doesn't exist"));
     }
 
     private Resource getResourceById(long resourceId) {
