@@ -6,10 +6,10 @@ import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
 import faang.school.projectservice.service.s3.S3Service;
-import faang.school.projectservice.validator.ValidatorProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -37,11 +37,11 @@ public class ProjectServiceImplTest {
     @InjectMocks
     private ProjectServiceImpl projectService;
     @Mock
-    private ValidatorProject validator;
-    @Mock
     private ProjectRepository projectRepository;
     @Mock
     private List<ProjectFilters> filters;
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
     @Mock
     private S3Service s3Service;
     @Spy
@@ -122,7 +122,7 @@ public class ProjectServiceImplTest {
         requester.setUserId(1L);
 
         when(projectRepository.findAll()).thenReturn(projects);
-        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, validator, s3Service);
+        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher, s3Service);
 
         List<ProjectDto> result = service.getProjectsFilters(filterDto, requester);
         assertThat(result).isEqualTo(projects);
@@ -175,7 +175,7 @@ public class ProjectServiceImplTest {
 
         when(project.getTeams()).thenReturn(List.of(team1, team2));
 
-        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, validator, s3Service)
+        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher, s3Service)
                 .checkUserByPrivateProject(project, requesterId);
 
         assertTrue(result);
