@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -68,17 +69,16 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(InvitationAlreadyExistsException.class)
-    public ErrorResponse handleInvitationAlreadyExistsException(InvitationAlreadyExistsException ex) {
+    @ExceptionHandler(InvalidFileException.class)
+    public ErrorResponse handleInvalidFileException(InvalidFileException ex) {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(InvalidInvitationStatusException.class)
-    public ErrorResponse handleInvalidInvitationStatusException(InvalidInvitationStatusException ex) {
+    @ExceptionHandler(FileOperationException.class)
+    public ResponseEntity<String> handleFileOperationException(FileOperationException ex) {
         log.error(ex.getMessage(), ex);
-        return new ErrorResponse(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

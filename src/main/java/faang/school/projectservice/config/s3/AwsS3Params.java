@@ -10,6 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AwsS3Params {
     private String accessKey;
     private String secretKey;
-    private String bucketName;
     private String endpoint;
+    private String region;
 }
