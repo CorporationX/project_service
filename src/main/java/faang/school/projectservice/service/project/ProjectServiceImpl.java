@@ -3,16 +3,17 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
-import faang.school.projectservice.validator.ValidatorProject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,13 +32,12 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
     private final List<ProjectFilters> filters;
-    private final ValidatorProject validator;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
     private final S3Service s3Service;
 
     @Override
     public void createProject(ProjectDto projectDto) {
         Project project = mapper.toEntity(projectDto);
-        validator.validateProject(projectDto);
         validationDuplicateProjectNames(projectDto);
         project.setStatus(ProjectStatus.CREATED);
         projectRepository.save(project);
@@ -97,8 +97,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public ProjectDto findById(long id, long userId) {
+        Project project = projectRepository.getProjectById(id);
+        projectViewEventPublisher.publish(new ProjectViewEvent(id, userId, LocalDateTime.now()));
+        return mapper.toDto(project);
+    }
+
+    @Override
     public ProjectDto findById(long id) {
-        return mapper.toDto(projectRepository.getProjectById(id));
+        Project project = projectRepository.getProjectById(id);
+        return mapper.toDto(project);
     }
 
     @Override

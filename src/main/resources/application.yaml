@@ -22,8 +22,8 @@ spring:
       port: 6379
       host: localhost
       channels:
-        calculations_channel:
-          name: calculations_channel
+        calculations_channel: calculations_channel
+        analitic-project-profile-attendance-channel: appa_channel
 
 server:
   port: 8082
@@ -34,6 +34,11 @@ logging:
 
 calculations_messages_processing:
   enabled: true
+
+google:
+  google_calendar:
+    credentials_id: 1
+    scopes: https://www.googleapis.com/auth/calendar.events,https://www.googleapis.com/auth/calendar,https://www.googleapis.com/auth/calendar.acls
 
 services:
   s3:
@@ -48,3 +53,10 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+project:
+  service:
+    name: project-service
+  jira:
+    base-url: https://faang-school.atlassian.net
+

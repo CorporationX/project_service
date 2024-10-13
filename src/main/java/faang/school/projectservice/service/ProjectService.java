@@ -24,6 +24,8 @@ public interface ProjectService {
 
     boolean checkUserByPrivateProject(Project project, long requester);
 
+    ProjectDto findById(long id, long userId);
+
     ProjectDto findById(long id);
 
     void addCoverImage(Long projectId, MultipartFile coverImage);

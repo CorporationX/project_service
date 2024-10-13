@@ -9,8 +9,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.validator.MomentValidator;
-import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +21,6 @@ import java.util.List;
 public class MomentServiceImpl implements MomentService {
     private final MomentRepository momentRepository;
     private final MomentMapper momentMapper;
-    private final MomentValidator momentValidator;
-    private final ProjectValidator projectValidator;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
 
@@ -52,8 +48,6 @@ public class MomentServiceImpl implements MomentService {
     @Override
     public MomentDto createMoment(MomentDto momentDto) {
         Moment moment = momentMapper.toEntity(momentDto);
-        momentValidator.validateMoment(moment);
-        moment.getProjects().forEach(projectValidator::validateProject);
         momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
@@ -70,7 +64,6 @@ public class MomentServiceImpl implements MomentService {
             addUsersAndTheirProjectsToMoment(moment, addedUserIds);
         }
 
-        momentValidator.validateMoment(moment);
         momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }

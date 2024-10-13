@@ -11,6 +11,9 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://packages.atlassian.com/maven-external/")
+    }
 }
 
 dependencies {
@@ -20,8 +23,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis:3.3.4")
 
     /**
      * Database
@@ -30,11 +35,19 @@ dependencies {
     implementation("redis.clients:jedis:4.3.2")
     testImplementation("com.h2database:h2:2.1.214")
     runtimeOnly("org.postgresql:postgresql")
+    testImplementation("com.h2database:h2:2.3.232")
 
     /**
      * Amazon S3
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
+
+    /**
+     * Swagger
+     */
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.15")
+    implementation("io.springfox:springfox-boot-starter:3.0.0")
 
     /**
      * Utils & Logging
@@ -62,6 +75,14 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    /**
+     * google calendar
+     */
+
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
 }
 
 tasks.withType<Test> {
