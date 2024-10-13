@@ -1,8 +1,8 @@
 package faang.school.projectservice.validator.resource;
 
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.Team;
+import faang.school.projectservice.model.entity.TeamMember;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

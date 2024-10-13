@@ -58,7 +58,6 @@ public class S3Service {
         return resource;
     }
 
-
     public void deleteFile(String key) {
         s3Client.deleteObject(bucketName, key);
     }

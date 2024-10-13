@@ -1,10 +1,10 @@
 package faang.school.projectservice.internship;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.model.dto.InternshipDto;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
-import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.entity.Internship;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.TeamMember;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;

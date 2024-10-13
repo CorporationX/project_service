@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.model.dto.UserDto;
 import faang.school.projectservice.exception.DataValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

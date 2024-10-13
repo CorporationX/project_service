@@ -1,10 +1,10 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.enums.InternshipStatus;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.TeamMember;
+import faang.school.projectservice.model.enums.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;

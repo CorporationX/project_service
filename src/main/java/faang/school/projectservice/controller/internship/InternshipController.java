@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.internship;
 
-import faang.school.projectservice.dto.filter.InternshipFilterDto;
-import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.model.dto.InternshipFilterDto;
+import faang.school.projectservice.model.dto.InternshipDto;
 import faang.school.projectservice.service.InternshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

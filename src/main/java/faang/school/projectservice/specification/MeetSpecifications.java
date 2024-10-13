@@ -1,6 +1,6 @@
 package faang.school.projectservice.specification;
 
-import faang.school.projectservice.model.Meet;
+import faang.school.projectservice.model.entity.Meet;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
