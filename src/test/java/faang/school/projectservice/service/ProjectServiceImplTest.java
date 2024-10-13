@@ -3,13 +3,13 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
-import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
+import faang.school.projectservice.service.s3.S3Service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,19 +28,22 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceImplTest {
+    private final Long projectId = 1L;
+    private final String key = "test-key";
+
+    @Mock
+    private MultipartFile file;
 
     @InjectMocks
     private ProjectServiceImpl projectService;
-
     @Mock
     private ProjectRepository projectRepository;
-
     @Mock
     private List<ProjectFilters> filters;
-
     @Mock
     private ProjectViewEventPublisher projectViewEventPublisher;
-
+    @Mock
+    private S3Service s3Service;
     @Spy
     private ProjectMapper mapper = Mappers.getMapper(ProjectMapper.class);
 
@@ -118,7 +122,7 @@ public class ProjectServiceImplTest {
         requester.setUserId(1L);
 
         when(projectRepository.findAll()).thenReturn(projects);
-        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher);
+        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher, s3Service);
 
         List<ProjectDto> result = service.getProjectsFilters(filterDto, requester);
         assertThat(result).isEqualTo(projects);
@@ -140,16 +144,15 @@ public class ProjectServiceImplTest {
 
     @Test
     public void testFindById() {
-        long id = 1L, userId = 1L;
+        long id = 1L;
         Project project = new Project();
         project.setId(id);
         ProjectDto projectDto = new ProjectDto();
         projectDto.setId(id);
-        when(projectRepository.getProjectById(id)).thenReturn(project);
 
-        ProjectDto result = projectService.findById(id, userId);
+        when(projectService.findById(id)).thenReturn(projectDto);
+        ProjectDto result = projectService.findById(id);
 
-        verify(projectViewEventPublisher).publish(any(ProjectViewEvent.class));
         assertEquals(result, projectDto);
     }
 
@@ -172,9 +175,71 @@ public class ProjectServiceImplTest {
 
         when(project.getTeams()).thenReturn(List.of(team1, team2));
 
-        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher)
+        boolean result = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher, s3Service)
                 .checkUserByPrivateProject(project, requesterId);
 
         assertTrue(result);
+    }
+
+    @Test
+    public void testAddCoverImageSuccessfully() {
+        Project project = prepareData();
+
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        String folder = project.getName() + projectId + "coverImage";
+        when(s3Service.upload(file, folder)).thenReturn(key);
+
+        projectService.addCoverImage(projectId, file);
+
+        verify(s3Service, times(1)).upload(file, folder);
+        verify(projectRepository, times(1)).save(project);
+
+        assertEquals(key, project.getCoverImageId());
+    }
+
+    @Test
+    public void testUpdateCoverImageSuccessfully() {
+        Project project = prepareData();
+        project.setCoverImageId(key);
+
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        String folder = project.getName() + projectId + "coverImage";
+        when(s3Service.upload(file, folder)).thenReturn(key);
+
+        projectService.updateCoverImage(projectId, file);
+
+        verify(s3Service, times(1)).upload(file, folder);
+        verify(projectRepository, times(1)).save(project);
+    }
+
+    @Test
+    public void testGetCoverImageSuccessfully() {
+        Project project = prepareData();
+        project.setCoverImageId(key);
+
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        projectService.getCoverImage(projectId);
+        verify(s3Service, times(1)).download(project.getCoverImageId());
+    }
+
+    @Test
+    public void testDeleteCoverImageSuccessfully() {
+        Project project = prepareData();
+        project.setCoverImageId(key);
+
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        projectService.deleteCoverImage(projectId);
+
+        verify(projectRepository, times(1)).save(project);
+        assertNull(project.getCoverImageId());
+    }
+
+    private Project prepareData() {
+        Project project = new Project();
+        project.setId(projectId);
+        project.setName("test");
+        return project;
     }
 }

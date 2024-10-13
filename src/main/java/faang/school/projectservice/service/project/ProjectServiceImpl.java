@@ -13,9 +13,12 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -30,6 +33,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMapper mapper;
     private final List<ProjectFilters> filters;
     private final ProjectViewEventPublisher projectViewEventPublisher;
+    private final S3Service s3Service;
 
     @Override
     public void createProject(ProjectDto projectDto) {
@@ -99,6 +103,51 @@ public class ProjectServiceImpl implements ProjectService {
         return mapper.toDto(project);
     }
 
+    @Override
+    public ProjectDto findById(long id) {
+        Project project = projectRepository.getProjectById(id);
+        return mapper.toDto(project);
+    }
+
+    @Override
+    public void addCoverImage(Long projectId, MultipartFile coverImage) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        saveCoverImage(project, coverImage);
+    }
+
+    @Override
+    public void updateCoverImage(Long projectId, MultipartFile coverImage) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        String key = project.getCoverImageId();
+        if (key != null) {
+            s3Service.delete(key);
+        }
+
+        saveCoverImage(project, coverImage);
+    }
+
+    @Override
+    public InputStream getCoverImage(Long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+
+        return s3Service.download(key);
+    }
+
+    @Override
+    public void deleteCoverImage(Long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+
+        if (key != null) {
+            s3Service.delete(key);
+            project.setCoverImageId(null);
+            projectRepository.save(project);
+        }
+    }
+
     private List<Project> findByName(String name) {
         List<Project> projects = projectRepository.findAll();
         return projects.stream()
@@ -123,5 +172,13 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
         return null;
+    }
+
+    private void saveCoverImage(Project project, MultipartFile coverImage) {
+        String folder = project.getName() + project.getId() + "coverImage";
+        String key = s3Service.upload(coverImage, folder);
+
+        project.setCoverImageId(key);
+        projectRepository.save(project);
     }
 }
