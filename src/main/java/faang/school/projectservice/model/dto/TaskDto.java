@@ -23,4 +23,3 @@ public class TaskDto {
     private LocalDateTime createdAt;   // Время создания задачи
     private LocalDateTime updatedAt;   // Время обновления задачи
 }
-

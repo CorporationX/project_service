@@ -17,4 +17,3 @@ public class TeamMemberDto {
     private Long userId;               // ID пользователя
     private List<TeamRole> roles;      // Список ролей участника
 }
-

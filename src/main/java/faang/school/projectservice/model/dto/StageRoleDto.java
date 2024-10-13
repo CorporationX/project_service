@@ -1,5 +1,7 @@
 package faang.school.projectservice.model.dto;
 
+import faang.school.projectservice.model.TeamRole;
+import jakarta.validation.constraints.Min;
 import faang.school.projectservice.model.enums.TeamRole;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,11 +14,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class StageRoleDto {
+
     private Long id;
-    @NotNull
+    @NotNull(message = "Team role must not be null")
     private TeamRole teamRole;
-    @NotNull
+
+    @NotNull(message = "Count must not be null")
+    @Min(value = 1, message = "Count must be at least 1")
     private Integer count;
+
     private Long stageId;
 }
-
