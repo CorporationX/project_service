@@ -1,8 +1,10 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.model.mapper.subproject.ProjectMapperImpl;
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.model.entity.TeamMember;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.file.FileCompressor;
@@ -48,6 +50,12 @@ public class ProjectServiceImplTest {
     @Mock
     private FileCompressor fileCompressor;
 
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
+
+    @Mock
+    private UserContext userContext;
+
     @InjectMocks
     private ProjectServiceImpl projectService;
 
@@ -72,6 +80,8 @@ public class ProjectServiceImplTest {
 
     @Test
     void testGetProjectOk() {
+        when(userContext.getUserId()).thenReturn(1L);
+
         projectService.getProject(1L);
 
         verify(validator).validateProject(anyLong());

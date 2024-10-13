@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -21,6 +22,9 @@ public class RedisConfig {
     private String host;
     @Value("${spring.data.redis.port}")
     private int port;
+
+    @Value("${spring.data.redis.channels.project-view-channel.name}")
+    private String projectViewTopic;
 
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
@@ -38,5 +42,10 @@ public class RedisConfig {
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
 
         return redisTemplate;
+    }
+
+    @Bean
+    public ChannelTopic projectViewTopic(){
+        return new ChannelTopic(projectViewTopic);
     }
 }
