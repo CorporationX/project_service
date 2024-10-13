@@ -6,8 +6,12 @@ import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/project")
@@ -40,7 +43,7 @@ public class ProjectController {
     }
 
     @PutMapping("/description")
-    public void updateDescription(ProjectDto projectDto, String description) {
+    public void updateDescription(@RequestBody ProjectDto projectDto, @NotBlank @RequestParam String description) {
         projectService.updateDescription(projectDto, description);
     }
 
