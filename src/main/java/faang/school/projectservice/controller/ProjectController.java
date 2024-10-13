@@ -6,13 +6,15 @@ import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/project")
+@RequiredArgsConstructor
+@Validated
 public class ProjectController {
     private final ProjectService projectService;
 

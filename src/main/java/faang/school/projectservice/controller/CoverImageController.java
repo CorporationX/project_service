@@ -17,7 +17,7 @@ public class CoverImageController {
 
     private final ProjectService projectService;
 
-    @PostMapping("")
+    @PostMapping
     public void addCoverImage(@PathVariable Long id, @RequestBody MultipartFile coverImage) {
         if (BigInteger.valueOf(coverImage.getSize()).compareTo(MAX_COVER_IMAGE_SIZE) > 0) {
             throw new DataValidationException("The size of cover image is greater than " + MAX_COVER_IMAGE_SIZE);
@@ -25,7 +25,7 @@ public class CoverImageController {
         projectService.addCoverImage(id, coverImage);
     }
 
-    @PutMapping("")
+    @PutMapping
     public void updateCoverImage(@PathVariable Long id, @RequestBody MultipartFile coverImage) {
         if (BigInteger.valueOf(coverImage.getSize()).compareTo(MAX_COVER_IMAGE_SIZE) > 0) {
             throw new DataValidationException("The size of cover image is greater than " + MAX_COVER_IMAGE_SIZE.longValue());
@@ -33,12 +33,12 @@ public class CoverImageController {
         projectService.updateCoverImage(id, coverImage);
     }
 
-    @GetMapping("")
+    @GetMapping
     public InputStream getCoverImage(@PathVariable Long id) {
         return projectService.getCoverImage(id);
     }
 
-    @DeleteMapping("")
+    @DeleteMapping
     public void deleteCoverImage(@PathVariable Long id) {
         projectService.deleteCoverImage(id);
     }
