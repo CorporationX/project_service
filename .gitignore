@@ -50,3 +50,9 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+
+# Ignore file credentials.json Google API
+src/main/resources/credentials.json
+
+# Ignore tokens directory
+tokens/

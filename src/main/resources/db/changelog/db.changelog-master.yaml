@@ -27,3 +27,9 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V016_meet.sql
   - include:
       file: db/changelog/changeset/project_V017_meet.sql
+  - include:
+      file: db/changelog/changeset/project_V018_meet.sql
+  - include:
+      file: db/changelog/changeset/project_V019_google_tokens.sql
+  - include:
+      file: db/changelog/changeset/project_V020_google_credentials.sql

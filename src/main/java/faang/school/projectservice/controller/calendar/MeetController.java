@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.calendar;
 
-import faang.school.projectservice.dto.meet.MeetDto;
-import faang.school.projectservice.dto.meet.MeetFilterDto;
+import faang.school.projectservice.model.dto.MeetDto;
+import faang.school.projectservice.model.dto.MeetFilterDto;
 import faang.school.projectservice.service.MeetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,8 +22,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 @RestController
@@ -38,7 +42,7 @@ public class MeetController {
     public MeetDto create(
             @Parameter(description = "ID of the user", required = true)
             @RequestHeader("x-user-id") String userId,
-            @Valid @RequestBody MeetDto meetDto) {
+            @Valid @RequestBody MeetDto meetDto) throws GeneralSecurityException, IOException {
         return meetService.create(meetDto);
     }
 
@@ -48,7 +52,7 @@ public class MeetController {
             @Parameter(description = "ID of the user", required = true)
             @RequestHeader("x-user-id") String userId,
             @PathVariable @NotNull long meetId,
-            @Valid @RequestBody MeetDto meetDto) {
+            @Valid @RequestBody MeetDto meetDto) throws GeneralSecurityException, IOException {
         return meetService.update(meetId, meetDto);
     }
 
@@ -58,7 +62,7 @@ public class MeetController {
             @Parameter(description = "ID of the user", required = true)
             @RequestHeader("x-user-id") String userId,
             @Parameter(description = "ID of the meet", required = true)
-            @PathVariable Long meetId) {
+            @PathVariable Long meetId) throws GeneralSecurityException, IOException {
         meetService.delete(meetId);
     }
 
@@ -72,7 +76,7 @@ public class MeetController {
         return meetService.getByFilter(filterDto);
     }
 
-    @GetMapping("/meets")
+    @GetMapping("")
     @Operation(summary = "Get all meets with pagination",
             description = "Retrieves a list of all meets with pagination support using limit and offset.")
     @ApiResponses(value = {
@@ -82,8 +86,9 @@ public class MeetController {
     })
     public Page<MeetDto> getAllMeets(@Parameter(description = "ID of the user", required = true)
                                      @RequestHeader("x-user-id") String userId,
-                                     @Parameter(description = "Pagination information")
-                                     Pageable pageable) {
+                                     @RequestParam(defaultValue = "0") int page,
+                                     @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
         return meetService.getAll(pageable);
     }
 

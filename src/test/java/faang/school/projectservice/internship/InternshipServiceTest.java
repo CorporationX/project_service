@@ -1,16 +1,16 @@
 package faang.school.projectservice.internship;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.filter.InternshipFilterDto;
-import faang.school.projectservice.filter.internship.InternshipStatusFilter;
-import faang.school.projectservice.filter.internship.InternshipTeamRoleFilter;
+import faang.school.projectservice.model.dto.InternshipDto;
+import faang.school.projectservice.model.dto.InternshipFilterDto;
+import faang.school.projectservice.filter.impl.InternshipStatusFilter;
+import faang.school.projectservice.filter.impl.InternshipTeamRoleFilter;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
-import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.entity.Internship;
+import faang.school.projectservice.model.enums.InternshipStatus;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.entity.Team;
+import faang.school.projectservice.model.entity.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;

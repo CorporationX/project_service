@@ -1,10 +1,10 @@
 package faang.school.projectservice.internship;
 
 import faang.school.projectservice.controller.internship.InternshipController;
-import faang.school.projectservice.dto.filter.InternshipFilterDto;
-import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.dto.InternshipFilterDto;
+import faang.school.projectservice.model.dto.InternshipDto;
+import faang.school.projectservice.model.enums.InternshipStatus;
+import faang.school.projectservice.model.enums.TeamRole;
 import faang.school.projectservice.service.InternshipService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

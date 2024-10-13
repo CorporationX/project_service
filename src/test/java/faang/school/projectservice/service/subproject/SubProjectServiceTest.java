@@ -1,15 +1,16 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.client.subproject.ProjectDto;
+import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.mapper.subproject.SubProjectMapperImpl;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.enums.ProjectStatus;
+import faang.school.projectservice.model.enums.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.subproject.filters.SubProjectFilter;
-import faang.school.projectservice.service.subproject.filters.SubProjectNameFilter;
-import faang.school.projectservice.service.subproject.filters.SubProjectStatusFilter;
+import faang.school.projectservice.filter.SubProjectFilter;
+import faang.school.projectservice.filter.impl.SubProjectNameFilter;
+import faang.school.projectservice.filter.impl.SubProjectStatusFilter;
+import faang.school.projectservice.service.SubProjectService;
 import faang.school.projectservice.validator.subproject.ValidatorService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
