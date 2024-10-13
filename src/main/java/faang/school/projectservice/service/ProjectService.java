@@ -33,4 +33,6 @@ public interface ProjectService {
     InputStream getCoverImage(Long projectId);
 
     void deleteCoverImage(Long projectId);
+  
+    ProjectDto findById(long id, long userId);
 }
