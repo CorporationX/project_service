@@ -6,14 +6,15 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.config.properties.S3ConfigurationProperties;
+import faang.school.projectservice.exception.S3Exception;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.service.image.ImageService;
 import faang.school.projectservice.util.converter.MultiPartFileConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -46,6 +46,9 @@ public class S3ServiceTest {
     private AmazonS3Client amazonS3Client;
     @Mock
     private S3ConfigurationProperties config;
+    @Mock
+    private ImageService imageService;
+
     private static final long TEAM_MEMBER_ID_ONE = 1L;
     private static final String FILE_NAME = "BoberNotKurwa";
     private static final String CONTENT_TYPE = "png/image";
@@ -105,6 +108,7 @@ public class S3ServiceTest {
         @Test
         @DisplayName("When MultiPartFile and resource passed, save it in s3")
         public void whenMultipartFileAndResourcePassedThenSaveItInS3Storage() {
+            when(imageService.resizeImage(any())).thenReturn(INPUT);
             s3Service.saveObject(file, resource);
         }
 
@@ -124,42 +128,15 @@ public class S3ServiceTest {
     @Nested
     class ExceptionsTests {
         @Test
-        @DisplayName("When SdkClientException occurs throws RuntimeException")
-        public void whenIOExceptionOccursThenThrowException() throws Exception {
-            MultipartFile invalidFile = mock(MultipartFile.class);
-            when(invalidFile.getResource()).thenReturn((mock(org.springframework.core.io.Resource.class)));
-            when(invalidFile.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
-
-            doThrow(new SdkClientException("Test sdkClientExceptionMessage")).when(amazonS3Client)
-                    .putObject(any(PutObjectRequest.class));
-
-            assertThrows(RuntimeException.class, () ->
-                    s3Service.saveObject(invalidFile, resource));
-        }
-
-        @Test
         @DisplayName("When amazonServiceException occurs throws RuntimeException")
         public void whenAmazonServiceExceptionOccursThenThrowRuntimeException() throws Exception {
             MultipartFile invalidFile = mock(MultipartFile.class);
+            when(imageService.resizeImage(any())).thenReturn(INPUT);
 
-            when(invalidFile.getResource()).thenReturn(mock(org.springframework.core.io.Resource.class));
-            when(invalidFile.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
+            doThrow(new SdkClientException("Test amazonServiceExceptionMessage")).when(amazonS3Client)
+                    .putObject(any());
 
-            doThrow(new AmazonServiceException("Test amazonServiceExceptionMessage")).when(amazonS3Client)
-                    .putObject(any(PutObjectRequest.class));
-
-            assertThrows(RuntimeException.class, () ->
-                    s3Service.saveObject(invalidFile, resource));
-        }
-
-        @Test
-        @DisplayName("When IOException occurs while uploading throws RuntimeException")
-        public void whenIOExceptionOccursThenThrowRuntimeException() throws IOException {
-            MultipartFile invalidFile = mock(MultipartFile.class);
-            when(invalidFile.getResource()).thenReturn(mock(org.springframework.core.io.Resource.class));
-            when(invalidFile.getInputStream()).thenThrow(new IOException("Uploading canceled due to error"));
-
-            assertThrows(RuntimeException.class, () ->
+            assertThrows(S3Exception.class, () ->
                     s3Service.saveObject(invalidFile, resource));
         }
 

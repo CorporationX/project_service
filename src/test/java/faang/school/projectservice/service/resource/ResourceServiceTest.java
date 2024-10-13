@@ -23,6 +23,7 @@ import faang.school.projectservice.validator.resource.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,8 +39,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -64,6 +66,8 @@ public class ResourceServiceTest {
     private ResourceValidator resourceValidator;
     @Mock
     private GigabyteConverter gigabyteConverter;
+    @Mock
+    private MultipartFile multipartFile;
 
     private static final long RESOURCE_ID_ONE = 1L;
     private static final long PROJECT_ID_ONE = 1L;
@@ -75,6 +79,9 @@ public class ResourceServiceTest {
     private static final String NEW_FILE_NAME = "BoberNot";
     private static final String CONTENT_TYPE = "png/image";
     private static final byte[] INPUT = new byte[(int) FILE_TEST_SIZE];
+    private static final String RESOURCE_KEY = "123";
+    private static final String TEST_FILE_NAME = "testFile";
+    private static final long TEST_FILE_SIZE = 5000L;
     private Project project;
     private TeamMember teamMember;
     private MultiPartFileConverter file;
@@ -264,5 +271,91 @@ public class ResourceServiceTest {
         doThrow(new IOException()).when(mockInputStream).close();
         assertThrows(RuntimeException.class, () ->
                 resourceService.downloadFile(RESOURCE_ID_ONE));
+    }
+
+    @Nested
+    @DisplayName("Retrieving a resource by KEY")
+    class GetResourceById {
+
+        @Test
+        @DisplayName("should return the resource when it is found")
+        void whenResourceIsFoundThenReturnResource() {
+            Resource resource = new Resource();
+            resource.setKey(RESOURCE_KEY);
+            when(resourceRepository.findByKey(RESOURCE_KEY)).thenReturn(Optional.of(resource));
+
+            Resource result = resourceService.getResourceByKey(RESOURCE_KEY);
+
+            assertNotNull(result);
+            assertEquals(RESOURCE_KEY, result.getKey());
+        }
+
+        @Test
+        @DisplayName("should throw EntityNotFoundException when resource is not found")
+        void whenResourceIsNotFoundThenThrowEntityNotFoundException() {
+            when(resourceRepository.findByKey(RESOURCE_KEY)).thenReturn(Optional.empty());
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                resourceService.getResourceByKey(RESOURCE_KEY);
+            });
+
+            assertEquals("Resource with key 123 doesn't exist", exception.getMessage());
+        }
+    }
+
+    @Nested
+    @DisplayName("Adding a new resource")
+    class PutResource {
+
+        @Test
+        @DisplayName("should save and return the resource")
+        void whenNewResourceIsAddedThenSaveAndReturnResource() {
+            Resource resource = new Resource();
+            resource.setKey(RESOURCE_KEY);
+
+            when(multipartFile.getName()).thenReturn(TEST_FILE_NAME);
+            when(multipartFile.getSize()).thenReturn(TEST_FILE_SIZE);
+            when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
+
+            Resource result = resourceService.saveResource(multipartFile, RESOURCE_KEY, ResourceType.IMAGE);
+
+            assertNotNull(result);
+            assertEquals(RESOURCE_KEY, result.getKey());
+            verify(resourceRepository).save(any(Resource.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("Marking a resource as deleted")
+    class MarkResourceAsDeleted {
+
+        @Test
+        @DisplayName("should mark the resource as deleted and return it")
+        void whenResourceIsDeletedThenReturnUpdatedResource() {
+            Resource resource = new Resource();
+            resource.setKey(RESOURCE_KEY);
+            resource.setStatus(ResourceStatus.ACTIVE);
+
+            when(resourceRepository.findByKey(RESOURCE_KEY)).thenReturn(Optional.of(resource));
+            when(resourceRepository.save(resource)).thenReturn(resource);
+
+            Resource result = resourceService.markResourceAsDeleted(RESOURCE_KEY);
+
+            assertNotNull(result);
+            assertEquals(ResourceStatus.DELETED, result.getStatus());
+            verify(resourceRepository).save(resource);
+        }
+
+        @Test
+        @DisplayName("should throw EntityNotFoundException when resource is not found")
+        void whenResourceIsNotFoundThenThrowEntityNotFoundException() {
+            when(resourceRepository.findByKey(RESOURCE_KEY)).thenReturn(Optional.empty());
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                resourceService.markResourceAsDeleted(RESOURCE_KEY);
+            });
+
+            assertEquals("Resource with key 123 doesn't exist", exception.getMessage());
+        }
     }
 }

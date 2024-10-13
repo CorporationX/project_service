@@ -8,39 +8,45 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.config.properties.S3ConfigurationProperties;
+import faang.school.projectservice.exception.S3Exception;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class S3Service {
+public class S3Service implements FileStorageService {
 
     private final AmazonS3 amazonS3Client;
     private final S3ConfigurationProperties config;
+    private final ImageService imageService;
 
     public void saveObject(MultipartFile file, Resource resource) {
         try {
+            byte[] resizedImage = imageService.resizeImage(file);
+            String key = resource.getProject().getName() + "/" + resource.getKey();
+
             ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentLength(file.getResource().contentLength());
+            objectMetadata.setContentLength(resizedImage.length);
             objectMetadata.setContentType(file.getContentType());
-            PutObjectRequest request = new PutObjectRequest(config.getBucketName(),
-                    resource.getProject().getName() + "/" + resource.getKey(),
-                    file.getInputStream(),
-                    objectMetadata);
+
+            PutObjectRequest request = new PutObjectRequest(
+                    config.getBucketName(),
+                    key,
+                    new ByteArrayInputStream(resizedImage),
+                    objectMetadata
+            );
             amazonS3Client.putObject(request);
-            log.debug("Successfully uploaded file! {}", file.getName());
-        } catch (IOException e) {
-            log.error("IOException occurred while uploading file: {}", e.getMessage());
-            throw new RuntimeException("Couldn't upload file", e);
+            log.debug("File uploaded successfully: {}", file.getOriginalFilename());
         } catch (SdkClientException e) {
-            log.error("{} occurred ,{}", e.getClass().getName(), e.getMessage());
-            throw new RuntimeException("Couldn't upload file", e);
+            log.error("Client error occurred while uploading file '{}'. Error: {}", file.getOriginalFilename(), e.getMessage());
+            throw new S3Exception("Couldn't upload file", e);
         }
     }
 
@@ -52,7 +58,7 @@ public class S3Service {
             log.debug("Successfully deleted file with key {}", key);
         } catch (SdkClientException e) {
             log.error("{} occurred ,{}", e.getClass().getName(), e.getMessage());
-            throw new RuntimeException("Couldn't delete file", e);
+            throw new S3Exception("Couldn't delete file", e);
         }
     }
 
@@ -63,7 +69,7 @@ public class S3Service {
             return amazonS3Client.getObject(request);
         } catch (SdkClientException e) {
             log.error("{} occurred ,{}", e.getClass().getName(), e.getMessage());
-            throw new RuntimeException("Couldn't get file", e);
+            throw new S3Exception("Couldn't get file", e);
         }
     }
 }
