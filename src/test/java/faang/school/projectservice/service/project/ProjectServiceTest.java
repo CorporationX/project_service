@@ -1,5 +1,26 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.exception.FileTooLargeException;
+import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.model.dto.ProjectDto;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.S3Service;
+import faang.school.projectservice.validator.project.ProjectValidator;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,26 +28,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.FileTooLargeException;
-import faang.school.projectservice.mapper.project.ProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.AmazonS3Service;
-import faang.school.projectservice.validator.project.ProjectValidator;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
@@ -38,7 +39,7 @@ public class ProjectServiceTest {
     private ProjectRepository projectRepository;
 
     @Mock
-    private AmazonS3Service amazonS3Service;
+    private S3Service s3Service;
 
     @Mock
     private ProjectValidator projectValidator;
@@ -65,12 +66,12 @@ public class ProjectServiceTest {
         imageName = "test.png";
         project = new Project();
         project.setId(projectId);
-        projectService.maxFileSize = maxFileSize;
+        projectService.setMaxFileSize(maxFileSize);
         project.setCoverImageId("image-id");
         contentType = "image/png";
         coverImageKey = "unique-key";
         imageData = new byte[]{1, 2, 3};
-        projectService = new ProjectService(projectRepository, amazonS3Service, projectMapper, projectValidator, 1080, 566, 1080, maxFileSize);
+        projectService = new ProjectService(projectRepository, s3Service, projectMapper, projectValidator, 1080, 566, 1080, maxFileSize);
     }
 
 
@@ -84,11 +85,11 @@ public class ProjectServiceTest {
     @Test
     void testDownloadCoverImage_Success() {
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(amazonS3Service.downloadFile(project.getCoverImageId())).thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
+        when(s3Service.downloadCoverImage(project.getCoverImageId())).thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
 
         InputStream inputStream = projectService.downloadCoverImage(projectId);
         assertNotNull(inputStream);
-        verify(amazonS3Service).downloadFile(project.getCoverImageId());
+        verify(s3Service).downloadCoverImage(project.getCoverImageId());
     }
 
     @Test
@@ -104,7 +105,7 @@ public class ProjectServiceTest {
     void testDeleteCoverImage_Success() {
         when(projectRepository.findById(projectId)).thenReturn(project);
         projectService.deleteCoverImage(projectId);
-        verify(amazonS3Service).deleteFile("image-id");
+        verify(s3Service).deleteCoverImage("image-id");
         verify(projectRepository).save(project);
         assertNull(project.getCoverImageId());
     }
@@ -118,6 +119,6 @@ public class ProjectServiceTest {
         ProjectDto result = projectService.deleteCoverImage(projectId);
         assertNotNull(result);
         assertNull(result.getCoverImageId());
-        verify(amazonS3Service, never()).deleteFile(anyString());
+        verify(s3Service, never()).deleteCoverImage(anyString());
     }
 }

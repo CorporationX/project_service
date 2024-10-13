@@ -1,7 +1,8 @@
 package faang.school.projectservice.service.subproject.filters;
 
-import faang.school.projectservice.dto.client.subproject.ProjectDto;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.filter.impl.SubProjectNameFilter;
+import faang.school.projectservice.model.dto.ProjectDto;
+import faang.school.projectservice.model.entity.Project;
 import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

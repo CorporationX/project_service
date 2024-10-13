@@ -1,6 +1,6 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.entity.StageRoles;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

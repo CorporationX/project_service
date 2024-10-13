@@ -1,12 +1,12 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.stage.StageInvitationDto;
+import faang.school.projectservice.model.dto.StageInvitationDto;
 import faang.school.projectservice.mapper.StageInvitationMapper;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.model.entity.TeamMember;
+import faang.school.projectservice.model.entity.Stage;
+import faang.school.projectservice.model.entity.StageRoles;
+import faang.school.projectservice.model.entity.StageInvitation;
+import faang.school.projectservice.model.enums.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;

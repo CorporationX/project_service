@@ -1,7 +1,7 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.entity.Task;
+import faang.school.projectservice.model.enums.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

@@ -1,14 +1,14 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.StageFilterDto;
+import faang.school.projectservice.model.dto.StageDto;
+import faang.school.projectservice.model.dto.StageFilterDto;
 import faang.school.projectservice.filter.StageFilter;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRoleMapper;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.TasksAfterDelete;
+import faang.school.projectservice.model.entity.Task;
+import faang.school.projectservice.model.entity.Stage;
+import faang.school.projectservice.model.enums.TasksAfterDelete;
 import faang.school.projectservice.repository.StageRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -125,5 +125,4 @@ class StageServiceTest {
         verify(stageRepository).getById(stageId);
         verify(stageMapper).toDto(stage);
     }
-
 }

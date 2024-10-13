@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import software.amazon.ion.NullValueException;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -108,6 +110,20 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleStorageLimitExceededException(StorageLimitException e) {
         log.error("Storage limit exception occurred", e);
         return new ErrorResponse("Storage limit exception occurred", e.getMessage());
+    }
+
+    @ExceptionHandler(GeneralSecurityException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGeneralSecurityException(GeneralSecurityException e) {
+        log.error("General security exception", e);
+        return new ErrorResponse("General security exception", e.getMessage());
+    }
+
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleIOException(IOException e) {
+        log.error("IO exception", e);
+        return new ErrorResponse("IO exception", e.getMessage());
     }
 
     @ExceptionHandler(PermissionDeniedDataAccessException.class)

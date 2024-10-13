@@ -1,9 +1,9 @@
 package faang.school.projectservice.validator.subproject;
 
-import faang.school.projectservice.dto.client.subproject.ProjectDto;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.dto.ProjectDto;
+import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.enums.ProjectStatus;
+import faang.school.projectservice.model.enums.ProjectVisibility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.ion.NullValueException;
