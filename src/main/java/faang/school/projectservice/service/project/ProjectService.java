@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,9 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
-@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
-@AllArgsConstructor
 @Slf4j
 @Service
 public class ProjectService {
@@ -39,15 +38,19 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
 
+    @Setter
     @Value("${cover-image.maxWidth}")
     private int maxWidth;
 
+    @Setter
     @Value("${cover-image.maxHeightHorizontal}")
     private int maxHeightHorizontal;
 
+    @Setter
     @Value("${cover-image.maxHeightSquare}")
     private int maxHeightSquare;
 
+    @Setter
     @Value("${cover-image.maxFileSize}")
     long maxFileSize;
 
@@ -107,8 +110,12 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
+    public ProjectDto getProject(long projectId) {
+        Project project = projectRepository.findById(projectId);
+        return projectMapper.toDto(project);
+    }
 
-    byte[] processImage(MultipartFile coverImage) throws IOException {
+    private byte[] processImage(MultipartFile coverImage) throws IOException {
         if (coverImage.isEmpty()) {
             log.error("Загруженный файл пустой.");
             throw new IOException("Ошибка: загруженный файл пустой.");
@@ -145,7 +152,7 @@ public class ProjectService {
         }
     }
 
-    String generateUniqueKey(MultipartFile coverImage) {
+    private String generateUniqueKey(MultipartFile coverImage) {
         String originalFilename = coverImage.getOriginalFilename();
         log.debug("Генерация уникального ключа для изображения: {}", originalFilename);
         String extension = originalFilename != null && originalFilename.contains(".")

@@ -33,11 +33,6 @@ public class S3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public S3Service(AmazonS3 s3Client, String bucketName) {
-        this.s3Client = s3Client;
-        this.bucketName = bucketName;
-    }
-
     public Resource uploadFile(MultipartFile file, String folder) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());

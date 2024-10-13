@@ -74,7 +74,8 @@ class S3ServiceTest {
         contentType = "text/plain";
         contentLength = 10L;
         inputStream = new ByteArrayInputStream("test content".getBytes());
-        s3Service = new S3Service(s3Client, bucketName);
+        s3Service = new S3Service(s3Client);
+        s3Service.setBucketName(bucketName);
     }
 
     @Test

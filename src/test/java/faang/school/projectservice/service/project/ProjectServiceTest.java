@@ -70,7 +70,11 @@ public class ProjectServiceTest {
         contentType = "image/png";
         coverImageKey = "unique-key";
         imageData = new byte[]{1, 2, 3};
-        projectService = new ProjectService(projectRepository, s3Service, projectMapper, projectValidator, 1080, 566, 1080, maxFileSize);
+        projectService = new ProjectService(projectRepository, s3Service, projectMapper, projectValidator);
+        projectService.setMaxWidth(1080);
+        projectService.setMaxHeightHorizontal(566);
+        projectService.setMaxHeightSquare(1080);
+        projectService.setMaxFileSize(maxFileSize);
     }
 
 
