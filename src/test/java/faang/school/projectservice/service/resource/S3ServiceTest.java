@@ -9,7 +9,6 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.exception.MinioUploadException;
 import faang.school.projectservice.model.entity.Resource;
 import faang.school.projectservice.model.enums.ResourceStatus;
-import faang.school.projectservice.service.S3Service;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
