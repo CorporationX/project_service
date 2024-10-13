@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project.cover;
 
 import faang.school.projectservice.exception.FileOperationException;
 import faang.school.projectservice.exception.InvalidFileException;
+import faang.school.projectservice.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -72,12 +73,13 @@ public class ImageProcessor {
     }
 
     private String getImageFormat(String filename) {
-        String extension = getFileExtension(filename);
-        return switch (extension) {
-            case "png" -> "png";
-            case "gif" -> "gif";
-            default -> "jpg";
-        };
+        String extension = FileUtils.getFileExtension(filename);
+        if (extension.equalsIgnoreCase("png") || extension.equalsIgnoreCase("gif")
+                || extension.equalsIgnoreCase("jpg") || extension.equalsIgnoreCase("jpeg")) {
+            return extension.toLowerCase();
+        } else {
+            throw new InvalidFileException("Unsupported image format: " + extension);
+        }
     }
 
     private byte[] getImageBytes(BufferedImage image, String format) {
@@ -87,13 +89,5 @@ public class ImageProcessor {
         } catch (IOException e) {
             throw new FileOperationException("Error while converting image to bytes", e);
         }
-    }
-
-    private String getFileExtension(String filename) {
-        if (filename == null) {
-            return "jpg";
-        }
-        String[] parts = filename.split("\\.");
-        return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : "jpg";
     }
 }

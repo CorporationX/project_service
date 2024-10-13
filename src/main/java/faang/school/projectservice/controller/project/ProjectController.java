@@ -1,15 +1,15 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.groups.Groups;
-import faang.school.projectservice.dto.project.ProjectCoverDeleteResponse;
+import faang.school.projectservice.dto.project.CoverImageResponse;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.SuccessResponse;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.project.cover.ProjectCoverService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,19 +35,17 @@ public class ProjectController {
     private final ProjectCoverService projectCoverService;
 
     @PostMapping("/{projectId}/cover")
-    public ResponseEntity<String> uploadProjectCover(
+    public CoverImageResponse uploadProjectCover(
             @PathVariable Long projectId,
             @RequestParam("file") MultipartFile file) {
         String coverImageId = projectCoverService.uploadProjectCover(projectId, file);
-        return ResponseEntity.ok("Cover uploaded successfully. ID: " + coverImageId);
+        return new CoverImageResponse(coverImageId);
     }
 
     @DeleteMapping("/{projectId}/cover")
-    public ResponseEntity<ProjectCoverDeleteResponse> deleteProjectCover(
-            @PathVariable @Positive Long projectId) {
+    public SuccessResponse deleteProjectCover(@PathVariable @Positive Long projectId) {
         projectCoverService.deleteProjectCover(projectId);
-        ProjectCoverDeleteResponse response = new ProjectCoverDeleteResponse("Cover successfully deleted");
-        return ResponseEntity.ok(response);
+        return new SuccessResponse("Cover successfully deleted");
     }
 
     @GetMapping("/{projectId}")

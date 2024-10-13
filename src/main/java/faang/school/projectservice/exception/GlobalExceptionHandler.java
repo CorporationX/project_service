@@ -68,10 +68,11 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(ex.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidFileException.class)
-    public ResponseEntity<String> handleInvalidFileException(InvalidFileException ex) {
+    public ErrorResponse handleInvalidFileException(InvalidFileException ex) {
         log.error(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        return new ErrorResponse(ex.getMessage());
     }
 
     @ExceptionHandler(FileOperationException.class)

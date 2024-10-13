@@ -19,7 +19,7 @@ import java.io.IOException;
 @Service
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
-    private final AmazonS3 amazonS3;
+    private final AmazonS3 s3Client;
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
@@ -32,7 +32,7 @@ public class S3ServiceImpl implements S3Service {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucketName, key, file.getInputStream(), objectMetadata
             );
-            amazonS3.putObject(putObjectRequest);
+            s3Client.putObject(putObjectRequest);
         } catch (IOException e) {
             log.error("An exception was thrown", e);
             throw new ResourceHandlingException(e.getMessage());
@@ -57,7 +57,7 @@ public class S3ServiceImpl implements S3Service {
         );
 
         try {
-            amazonS3.putObject(putObjectRequest);
+            s3Client.putObject(putObjectRequest);
             log.info("File {}/{} was uploaded successfully", bucketName, key);
         } catch (Exception e) {
             log.error("An exception was thrown during byte array file upload", e);
@@ -67,14 +67,14 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public void deleteFile(String key) {
-        amazonS3.deleteObject(bucketName, key);
+        s3Client.deleteObject(bucketName, key);
         log.info("File {}/{} was deleted successfully", bucketName, key);
     }
 
     @Override
     public ResourceResponseObject downloadFile(String key) {
         try {
-            S3Object s3Object = amazonS3.getObject(bucketName, key);
+            S3Object s3Object = s3Client.getObject(bucketName, key);
             return new ResourceResponseObject(
                     s3Object.getObjectContent(),
                     s3Object.getObjectMetadata().getContentType());

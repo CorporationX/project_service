@@ -6,6 +6,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.cover.ProjectCoverService;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.config.ResourceConfig;
+import faang.school.projectservice.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 public class ProjectCoverServiceImpl implements ProjectCoverService {
+    private static final int BYTES_IN_MEGABYTE = 1024 * 1024;
 
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
@@ -32,21 +34,21 @@ public class ProjectCoverServiceImpl implements ProjectCoverService {
 
         if (file.getSize() > resourceConfig.getMaxSize()) {
             throw new InvalidFileException("File size exceeds " +
-                    (resourceConfig.getMaxSize() / (1024 * 1024)) + " MB");
+                    (resourceConfig.getMaxSize() / BYTES_IN_MEGABYTE) + " MB");
         }
 
         if (!isImageFile(file)) {
             throw new InvalidFileException("File must be an image (JPEG, PNG, GIF)");
         }
 
-        String fileExtension = getFileExtension(file.getOriginalFilename());
+        String fileExtension = FileUtils.getFileExtension(file.getOriginalFilename());
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
-
-        s3Service.uploadFile(file, fileName);
 
         Project project = projectRepository.getProjectById(projectId);
         project.setCoverImageId(fileName);
         projectRepository.save(project);
+
+        s3Service.uploadFile(file, fileName);
 
         log.info("Cover uploaded successfully with ID: {}", fileName);
         return fileName;
@@ -75,13 +77,5 @@ public class ProjectCoverServiceImpl implements ProjectCoverService {
                         contentType.equalsIgnoreCase("image/png") ||
                         contentType.equalsIgnoreCase("image/gif")
         );
-    }
-
-    private String getFileExtension(String filename) {
-        if (filename == null) {
-            return "jpg";
-        }
-        String[] parts = filename.split("\\.");
-        return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : "jpg";
     }
 }
