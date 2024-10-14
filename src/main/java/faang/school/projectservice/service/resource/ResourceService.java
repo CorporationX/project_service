@@ -1,11 +1,12 @@
 package faang.school.projectservice.service.resource;
 
 import com.amazonaws.services.s3.model.S3Object;
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceResponseDto;
 import faang.school.projectservice.dto.resource.ResourceUpdateDto;
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.resource.ResourceMapper;
+import faang.school.projectservice.mapper.teammember.TeamMemberMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -42,7 +43,7 @@ public class ResourceService {
     private final TeamMemberService teamMemberService;
     private final ResourceValidator resourceValidator;
     private final GigabyteConverter gigabyteConverter;
-    private final UserContext userContext;
+    private final TeamMemberMapper teamMemberMapper;
 
     @Transactional
     public Resource saveResource(MultipartFile file, String resourceKey, ResourceType resourceType) {
@@ -67,9 +68,8 @@ public class ResourceService {
     @Transactional
     public ResourceResponseDto saveResource(MultipartFile file, long projectId, long teamMemberId) {
         Project project = projectService.getProjectById(projectId);
-        TeamMember fileOwner = teamMemberService.getTeamMemberById(teamMemberId);
-
-        resourceValidator.validateTeamMemberBelongsToProject(fileOwner, projectId);
+        TeamMemberDto fileOwner = teamMemberService.getTeamMemberById(teamMemberId);
+        resourceValidator.validateTeamMemberBelongsToProject(teamMemberMapper.toEntity(fileOwner), projectId);
         projectService.setNewProjectStorageSize(project);
         resourceValidator.validateStorageCapacity(file, project);
 
@@ -78,7 +78,7 @@ public class ResourceService {
                 gigabyteConverter.byteToGigabyteConverter(project.getStorageSize().longValue()),
                 project.getName());
 
-        Resource resource = buildNewResource(file, fileOwner, project);
+        Resource resource = buildNewResource(file, teamMemberMapper.toEntity(fileOwner), project);
 
         project.getResources().add(resource);
 
@@ -94,7 +94,7 @@ public class ResourceService {
     public ResourceResponseDto updateFileInfo(ResourceUpdateDto resourceUpdateDto, long resourceId, long updatedById) {
         Resource originalResource = getResourceById(resourceId);
 
-        TeamMember member = teamMemberService.getTeamMemberById(updatedById);
+        TeamMemberDto member = teamMemberService.getTeamMemberById(updatedById);
 
         resourceAccessValidation(originalResource.getCreatedBy().getId(), member.getId(),
                 originalResource.getProject().getOwnerId(), resourceId);
@@ -102,7 +102,7 @@ public class ResourceService {
         originalResource.setName(resourceUpdateDto.getName());
         originalResource.setStatus(resourceUpdateDto.getStatus());
         originalResource.getAllowedRoles().addAll(resourceUpdateDto.getAllowedRoles());
-        originalResource.setUpdatedBy(member);
+        originalResource.setUpdatedBy(teamMemberMapper.toEntity(member));
 
         Resource updatedResource = resourceRepository.save(originalResource);
         return resourceMapper.toResponseDto(updatedResource);
@@ -116,13 +116,13 @@ public class ResourceService {
         long projectOwnerId = resourceToDelete.getProject().getOwnerId();
         String resourceOriginalKey = resourceToDelete.getKey();
 
-        TeamMember fileOwner = teamMemberService.getTeamMemberById(teamMemberId);
+        TeamMemberDto fileOwner = teamMemberService.getTeamMemberById(teamMemberId);
 
         resourceAccessValidation(resourceCreatorId, fileOwner.getId(), projectOwnerId, resourceId);
 
         clearProjectStorage(resourceToDelete);
         resourceToDelete.getProject().getResources().remove(resourceToDelete);
-        resourceToDelete.setUpdatedBy(fileOwner);
+        resourceToDelete.setUpdatedBy(teamMemberMapper.toEntity(fileOwner));
         resourceToDelete.setKey("");
         resourceToDelete.setSize(null);
         resourceToDelete.setStatus(ResourceStatus.DELETED);
