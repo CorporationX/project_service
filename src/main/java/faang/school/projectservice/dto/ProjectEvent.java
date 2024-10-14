@@ -6,6 +6,6 @@ import lombok.RequiredArgsConstructor;
 @Data
 @RequiredArgsConstructor
 public class ProjectEvent {
-    Long authorId;
-    Long projectId;
+    private Long authorId;
+    private Long projectId;
 }
