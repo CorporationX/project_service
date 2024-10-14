@@ -4,6 +4,7 @@ import java.util.List;
 
 public enum TeamRole {
     OWNER,
+    TEAMLEAD,
     MANAGER,
     DEVELOPER,
     DESIGNER,

@@ -2,13 +2,14 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.filter.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
+import faang.school.projectservice.mapper.teammember.TeamMemberMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.project.ProjectService;
@@ -35,13 +36,14 @@ public class InternshipService {
     private final List<Filter<InternshipFilterDto, Internship>> internshipFilters;
     private final TeamMemberService teamMemberService;
     private final ProjectService projectService;
+    private final TeamMemberMapper teamMemberMapper;
 
     public InternshipDto create(InternshipDto internshipDto) {
 
         internshipValidator.validateInternship(internshipDto);
         Project project = projectService.getProjectById(internshipDto.getProjectId());
-        TeamMember mentor = teamMemberService.getTeamMemberById(internshipDto.getMentorId().getId());
-        internshipValidator.validateInternshipProjectAndMentorExist(project, mentor);
+        TeamMemberDto mentor = teamMemberService.getTeamMemberById(internshipDto.getMentorId().getId());
+        internshipValidator.validateInternshipProjectAndMentorExist(project, teamMemberMapper.toEntity(mentor));
 
         Internship internshipToSave = internshipMapper.toEntity(internshipDto);
         internshipToSave.setStatus(InternshipStatus.IN_PROGRESS);

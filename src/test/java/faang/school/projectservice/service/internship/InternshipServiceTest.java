@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.internship.InternshipMapperImpl;
+import faang.school.projectservice.mapper.teammember.TeamMemberMapper;
 import faang.school.projectservice.mapper.teammember.TeamMemberMapperImpl;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
@@ -53,6 +54,8 @@ public class InternshipServiceTest {
     @Mock
     private InternshipMapperImpl internshipMapper;
     @Mock
+    private TeamMemberMapper teamMemberMapper;
+    @Mock
     private InternshipValidator internshipValidator;
     @Mock
     private Filter<InternshipFilterDto, Internship> filterOne;
@@ -84,8 +87,15 @@ public class InternshipServiceTest {
     private void customInternshipService() {
         internshipFilters = List.of(filterOne, filterTwo);
         internshipMapper = new InternshipMapperImpl(new TeamMemberMapperImpl());
-        internshipService = new InternshipService(internshipRepository,
-                internshipMapper, internshipValidator, internshipFilters, teamMemberService, projectService);
+        internshipService = new InternshipService(
+                internshipRepository,
+                internshipMapper, 
+                internshipValidator, 
+                internshipFilters, 
+                teamMemberService, 
+                projectService, 
+                teamMemberMapper
+        );
     }
 
     @BeforeEach
