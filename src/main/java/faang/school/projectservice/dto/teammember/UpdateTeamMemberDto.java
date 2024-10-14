@@ -1,5 +1,4 @@
 package faang.school.projectservice.dto.teammember;
-
 import faang.school.projectservice.model.TeamRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +11,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeamMemberDto {
+public class UpdateTeamMemberDto {
     private Long id;
-    private Long userId;
     private List<TeamRole> roles;
     private String nickname;
 }

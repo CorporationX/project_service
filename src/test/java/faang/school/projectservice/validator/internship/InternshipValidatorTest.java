@@ -82,8 +82,10 @@ public class InternshipValidatorTest {
                         .project(Project.builder().build())
                         .build();
                 assertThrows(EntityNotFoundException.class, () ->
-                        internshipValidator.validateInternshipProjectAndMentorExist(internshipWithNoProject
-                                .getProject(), internshipWithNoProject.getMentorId()));
+                        internshipValidator.validateInternshipProjectAndMentorExist(
+                                internshipWithNoProject.getProject(), 
+                                internshipWithNoProject.getMentorId())
+                        );
                 assertThrows(EntityNotFoundException.class, () ->
                         internshipValidator.validateInternshipProjectAndMentorExist(internshipWithNoMentor.getProject(),
                                 internshipWithNoMentor.getMentorId()));
