@@ -22,6 +22,7 @@ spring:
       port: 6379
       host: localhost
       channels:
+        project-event-channel: project-event
         calculations_channel:
           name: calculations_channel
 

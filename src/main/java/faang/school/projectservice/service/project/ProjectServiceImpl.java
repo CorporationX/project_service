@@ -1,16 +1,17 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.ProjectEventPublisher;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.filter.ProjectFilters;
+import faang.school.projectservice.mapper.ProjectEventMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +28,15 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
     private final List<ProjectFilters> filters;
+    private final ProjectEventPublisher projectEventPublisher;
+    private final ProjectEventMapper projectEventMapper;
 
     @Override
     public void createProject(ProjectDto projectDto) {
         Project project = mapper.toEntity(projectDto);
         validationDuplicateProjectNames(projectDto);
         project.setStatus(ProjectStatus.CREATED);
+        projectEventPublisher.publish(projectEventMapper.toEntity(project));
         projectRepository.save(project);
     }
 
