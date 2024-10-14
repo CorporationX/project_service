@@ -7,7 +7,7 @@ import faang.school.projectservice.model.dto.ZonedDateTimeDto;
 import faang.school.projectservice.model.dto.MeetDto;
 import faang.school.projectservice.model.dto.MeetFilterDto;
 import faang.school.projectservice.model.enums.MeetStatus;
-import faang.school.projectservice.service.MeetService;
+import faang.school.projectservice.service.impl.MeetServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class MeetControllerTest {
 
     @Mock
-    private MeetService meetService;
+    private MeetServiceImpl meetService;
 
     @InjectMocks
     private MeetController meetController;

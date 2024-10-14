@@ -10,7 +10,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.filter.impl.SubProjectNameFilter;
 import faang.school.projectservice.filter.impl.SubProjectStatusFilter;
-import faang.school.projectservice.service.SubProjectService;
+import faang.school.projectservice.service.impl.SubProjectServiceImpl;
 import faang.school.projectservice.validator.subproject.ValidatorService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +52,7 @@ class SubProjectServiceTest {
     private ArgumentCaptor<Project> projectCaptor;
 
     @InjectMocks
-    private SubProjectService subProjectService;
+    private SubProjectServiceImpl subProjectService;
 
     private Long parentProjectId;
     private Project parentProject;

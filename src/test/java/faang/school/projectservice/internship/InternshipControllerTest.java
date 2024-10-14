@@ -5,7 +5,7 @@ import faang.school.projectservice.model.dto.InternshipFilterDto;
 import faang.school.projectservice.model.dto.InternshipDto;
 import faang.school.projectservice.model.enums.InternshipStatus;
 import faang.school.projectservice.model.enums.TeamRole;
-import faang.school.projectservice.service.InternshipService;
+import faang.school.projectservice.service.impl.InternshipServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 class InternshipControllerTest {
 
     @Mock
-    private InternshipService internshipService;
+    private InternshipServiceImpl internshipService;
 
     @InjectMocks
     private InternshipController internshipController;

@@ -15,7 +15,7 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
-import faang.school.projectservice.service.InternshipService;
+import faang.school.projectservice.service.impl.InternshipServiceImpl;
 import faang.school.projectservice.validator.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,13 +62,13 @@ class InternshipServiceTest {
     private InternshipTeamRoleFilter internshipTeamRoleFilter;
 
     @InjectMocks
-    private InternshipService internshipService;
+    private InternshipServiceImpl internshipService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        internshipService = new InternshipService(
+        internshipService = new InternshipServiceImpl(
                 projectRepository,
                 internshipRepository,
                 teamMemberRepository,

@@ -13,7 +13,7 @@ import faang.school.projectservice.model.entity.Meet;
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.GoogleCalendarService;
-import faang.school.projectservice.service.MeetService;
+import faang.school.projectservice.service.impl.MeetServiceImpl;
 import faang.school.projectservice.validator.MeetValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.when;
 class MeetServiceTest {
 
     @InjectMocks
-    private MeetService meetService;
+    private MeetServiceImpl meetService;
 
     @Mock
     private MeetRepository meetRepository;

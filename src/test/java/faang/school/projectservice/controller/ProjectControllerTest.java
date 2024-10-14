@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import faang.school.projectservice.controller.project.ProjectController;
 import faang.school.projectservice.model.dto.ProjectDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.impl.ProjectServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +26,7 @@ class ProjectControllerTest {
     private ProjectController projectController;
 
     @Mock
-    private ProjectService projectService;
+    private ProjectServiceImpl projectService;
 
     @Mock
     private MultipartFile file;

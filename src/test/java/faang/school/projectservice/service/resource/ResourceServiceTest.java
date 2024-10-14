@@ -13,7 +13,7 @@ import faang.school.projectservice.model.entity.TeamMember;
 import faang.school.projectservice.model.enums.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.ResourceService;
+import faang.school.projectservice.service.impl.ResourceServiceImpl;
 import faang.school.projectservice.validator.resource.ValidatorTeamMember;
 import faang.school.projectservice.validator.subproject.ValidatorService;
 import jakarta.persistence.EntityNotFoundException;
@@ -79,7 +79,7 @@ class ResourceServiceTest {
     private ArgumentCaptor<Resource> resourceCaptor;
 
     @InjectMocks
-    private ResourceService resourceService;
+    private ResourceServiceImpl resourceService;
 
     private Resource resource;
     private TeamMember teamMember;
