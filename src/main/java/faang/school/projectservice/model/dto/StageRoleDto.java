@@ -1,6 +1,5 @@
 package faang.school.projectservice.model.dto;
 
-import faang.school.projectservice.model.TeamRole;
 import jakarta.validation.constraints.Min;
 import faang.school.projectservice.model.enums.TeamRole;
 import jakarta.validation.constraints.NotNull;

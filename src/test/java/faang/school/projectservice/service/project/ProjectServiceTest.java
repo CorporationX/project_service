@@ -5,8 +5,8 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.service.S3Service;
+import faang.school.projectservice.service.impl.ProjectServiceImpl;
+import faang.school.projectservice.service.resource.S3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 public class ProjectServiceTest {
 
     @InjectMocks
-    private ProjectService projectService;
+    private ProjectServiceImpl projectService;
 
     @Mock
     private ProjectRepository projectRepository;
@@ -71,7 +71,11 @@ public class ProjectServiceTest {
         contentType = "image/png";
         coverImageKey = "unique-key";
         imageData = new byte[]{1, 2, 3};
-        projectService = new ProjectService(projectRepository, s3Service, projectMapper, projectValidator, 1080, 566, 1080, maxFileSize);
+        projectService = new ProjectServiceImpl(projectRepository, s3Service, projectMapper, projectValidator);
+        projectService.setMaxWidth(1080);
+        projectService.setMaxHeightHorizontal(566);
+        projectService.setMaxHeightSquare(1080);
+        projectService.setMaxFileSize(maxFileSize);
     }
 
 

@@ -3,7 +3,7 @@ package faang.school.projectservice.controller.resource;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.model.dto.ResourceDto;
-import faang.school.projectservice.service.ResourceService;
+import faang.school.projectservice.service.impl.ResourceServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RequiredArgsConstructor
 class ResourceControllerTest {
     @Mock
-    private ResourceService resourceService;
+    private ResourceServiceImpl resourceService;
 
     @InjectMocks
     private ResourceController resourceController;

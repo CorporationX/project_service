@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.resource;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -23,9 +23,9 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
+@Service
 public class S3Service {
     private final AmazonS3 s3Client;
 
@@ -57,7 +57,6 @@ public class S3Service {
 
         return resource;
     }
-
 
     public void deleteFile(String key) {
         s3Client.deleteObject(bucketName, key);

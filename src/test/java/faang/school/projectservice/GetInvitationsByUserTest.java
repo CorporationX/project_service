@@ -5,7 +5,7 @@ import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.entity.TeamMember;
 import faang.school.projectservice.model.entity.StageInvitation;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import faang.school.projectservice.service.StageInvitationService;
+import faang.school.projectservice.service.impl.StageInvitationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -27,7 +27,7 @@ class GetInvitationsByUserTest {
     private StageInvitationMapper mapper;
 
     @InjectMocks
-    private StageInvitationService invitationService;
+    private StageInvitationServiceImpl invitationService;
 
     @BeforeEach
     void setUp() {

@@ -10,6 +10,10 @@ import faang.school.projectservice.model.entity.Task;
 import faang.school.projectservice.model.entity.Stage;
 import faang.school.projectservice.model.enums.TasksAfterDelete;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.impl.ProjectServiceImpl;
+import faang.school.projectservice.service.impl.StageRolesServiceImpl;
+import faang.school.projectservice.service.impl.StageServiceImpl;
+import faang.school.projectservice.service.impl.TeamMemberServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +33,7 @@ import static org.mockito.Mockito.when;
 class StageServiceTest {
 
     @InjectMocks
-    private StageService stageService;
+    private StageServiceImpl stageService;
 
     @Mock
     private StageRepository stageRepository;
@@ -41,16 +45,16 @@ class StageServiceTest {
     private StageMapper stageMapper;
 
     @Mock
-    private ProjectService projectService;
+    private ProjectServiceImpl projectService;
 
     @Mock
-    private TeamMemberService teamMemberService;
+    private TeamMemberServiceImpl teamMemberService;
 
     @Mock
     private StageRoleMapper stageRoleMapper;
 
     @Mock
-    private StageRolesService stageRolesService;
+    private StageRolesServiceImpl stageRolesService;
 
     @Mock
     private List<StageFilter> filters;

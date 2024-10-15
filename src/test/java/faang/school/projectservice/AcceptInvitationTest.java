@@ -7,7 +7,7 @@ import faang.school.projectservice.model.entity.StageInvitation;
 import faang.school.projectservice.model.enums.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.StageInvitationService;
+import faang.school.projectservice.service.impl.StageInvitationServiceImpl;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class AcceptInvitationTest {
     private StageInvitationMapper mapper;
 
     @InjectMocks
-    private StageInvitationService invitationService;
+    private StageInvitationServiceImpl invitationService;
 
     @BeforeEach
     void setUp() {
