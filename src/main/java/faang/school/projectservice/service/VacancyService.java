@@ -1,21 +1,24 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.VacancyDtoCreate;
-import faang.school.projectservice.mapper.VacancyMapper;
-import faang.school.projectservice.mapper.VacancyMapperCreate;
-import faang.school.projectservice.mapper.VacancyMapperResponce;
-import faang.school.projectservice.mapper.VacancyMapperUpdate;
+import faang.school.projectservice.dto.client.VacancyCreateDto;
+import faang.school.projectservice.dto.client.VacancyFilterDto;
+import faang.school.projectservice.mapper.VacancyCreateMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.model.filter.VacancyFilter;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static faang.school.projectservice.model.CandidateStatus.ACCEPTED;
 
 
@@ -24,17 +27,17 @@ import static faang.school.projectservice.model.CandidateStatus.ACCEPTED;
 @Slf4j
 public class VacancyService {
     private final VacancyRepository vacancyRepository;
-    private final VacancyMapperCreate vacancyMapper;
-    private final VacancyMapperUpdate vacancyMapper;
-    private final VacancyMapperResponce vacancyMapperResponce;
+    private final VacancyCreateMapper vacancyCreateMapper;
+    private final List<VacancyFilter> listVacancyFilters;
     private final TeamMemberRepository teamMemberRepository;
 
-    public VacancyDtoResponce createVacancy(VacancyDtoCreate vacancyDtoCreate) {
-        log.info("Start of vacancy creation: {}", vacancyDtoCreate.getName());
-        if (createVacancyValidation(vacancyDtoCreate)) {
-            Vacancy vacancy = vacancyRepository.save(vacancyMapperCreate.vacancyDtoToVacancy(vacancyDtoCreate));
+
+    public Vacancy createVacancy(VacancyCreateDto vacancyCreateDto) {
+        log.info("Start of vacancy creation: {}", vacancyCreateDto.getName());
+        if (createVacancyValidation(vacancyCreateDto)) {
+            Vacancy vacancy = vacancyRepository.save(vacancyCreateMapper.toVacancy(vacancyCreateDto));
             log.info("Vacancy created.");
-            return vacancyMapperResponce.toVacancyDto(vacancy);
+            return vacancy;
         } else {
             log.error("Vacancy not created, incorrect data entered.");
             throw new IllegalArgumentException("Vacancy not created, incorrect data entered.");
@@ -42,7 +45,6 @@ public class VacancyService {
     }
 
     public Vacancy updateVacancy(Long id) {
-        log.info("Start updating vacancy with ID: {}", id);
         Vacancy vacancy = vacancyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Vacancy doesn't exist by id: %d", id)));
         long acceptedCandidates = vacancy.getCandidates()
@@ -73,9 +75,11 @@ public class VacancyService {
         log.info("Successfully deleted vacancy with id: {}", id);
     }
 
-    public List<Vacancy> findVacancyByName(String name) {
-        List<Vacancy> vacancyList = vacancyRepository.findVacanciesByProjectName(name);
-        log.info("Found {} vacancies for project name: {}", vacancyList.size(), name);
+    public List<Vacancy> findVacancyByFilter(VacancyFilterDto vacancyFilterDto) {
+        Stream<Vacancy> allVacancy = vacancyRepository.findAll().stream();
+        List<Vacancy> vacancyList = listVacancyFilters.stream().filter(filter -> filter.isApplicable(vacancyFilterDto))
+                .flatMap(filter -> filter.apply(allVacancy, vacancyFilterDto)).collect(Collectors.toList());
+        log.info("Found {} vacancies for project name: {}", vacancyList.size());
         return vacancyList;
     }
 
@@ -87,15 +91,15 @@ public class VacancyService {
         return vacancy;
     }
 
-    private boolean createVacancyValidation(VacancyDtoCreate vacancyDtoCreate) {
+    private boolean createVacancyValidation(VacancyCreateDto vacancyCreateDto) {
         try {
-            if (vacancyDtoCreate.getProjectId() == null) {
+            if (vacancyCreateDto.getProjectId() == null) {
                 throw new IllegalArgumentException("The vacancy must be related to the project.");
             }
-            if (vacancyDtoCreate.getCreatedBy() == null) {
+            if (vacancyCreateDto.getCreatedBy() == null) {
                 throw new IllegalArgumentException("The vacancy must have a supervisor");
             }
-            TeamMember teamMember = teamMemberRepository.findById(vacancyDtoCreate.getCreatedBy());
+            TeamMember teamMember = teamMemberRepository.findById(vacancyCreateDto.getCreatedBy());
             if (!teamMember.getRoles().contains(TeamRole.MANAGER) && !teamMember.getRoles().contains(TeamRole.OWNER)) {
                 throw new IllegalArgumentException("The vacancy supervisor can be a team member with the MANAGER or OWNER role");
             }
@@ -104,5 +108,4 @@ public class VacancyService {
         }
         return true;
     }
-
 }
