@@ -51,130 +51,76 @@ public class CalendarService {
         return oAuthService.generateCredential(calendarToken);
     }
 
-    @Transactional
     public CalendarEventDto createEvent(long projectId, String calendarId, CalendarEventDto eventDto) {
-        Calendar service = buildCalendar(projectId);
-
-        Event event = eventMapper.toModel(eventDto);
-        try {
+        return executeWithCalendar(projectId, service -> {
+            Event event = eventMapper.toModel(eventDto);
             Event savedEvent = service.events()
-                    .insert(String.valueOf(calendarId), event)
+                    .insert(calendarId, event)
                     .execute();
-
             log.info("Created new event");
             return eventMapper.toDto(savedEvent);
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        });
     }
 
-    @Transactional
     public List<CalendarEventDto> getEvents(long projectId, String calendarId) {
-        Calendar service = buildCalendar(projectId);
-
-        try {
-            List<Event> eventsOfProject = service.events()
+        return executeWithCalendar(projectId, service -> {
+            List<Event> events = service.events()
                     .list(calendarId)
                     .setMaxResults(eventsCountToBeReturned)
                     .execute()
                     .getItems();
-
-            return eventMapper.toDtos(eventsOfProject);
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+            return eventMapper.toDtos(events);
+        });
     }
 
-    @Transactional
     public void deleteEvent(long projectId, String calendarId, String eventId) {
-        Calendar service = buildCalendar(projectId);
-
-        try {
-            service.events()
-                    .delete(calendarId, String.valueOf(eventId))
-                    .execute();
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        executeWithCalendar(projectId, service -> {
+            service.events().delete(calendarId, eventId).execute();
+            return null;
+        });
     }
 
-    @Transactional
+
     public CalendarDto createCalendar(long projectId, CalendarDto calendarDto) {
-        Calendar service = buildCalendar(projectId);
-
-        var newCalendar = calendarMapper.toModel(calendarDto);
-        try {
-            var createdCalendar = service.calendars()
-                    .insert(newCalendar)
-                    .execute();
-
+        return executeWithCalendar(projectId, service -> {
+            var newCalendar = calendarMapper.toModel(calendarDto);
+            var createdCalendar = service.calendars().insert(newCalendar).execute();
             return calendarMapper.toDto(createdCalendar);
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        });
     }
 
-    @Transactional
     public CalendarDto getCalendar(long projectId, String calendarId) {
-        Calendar service = buildCalendar(projectId);
-
-        try {
-            var calendar = service.calendars()
-                    .get(calendarId)
-                    .execute();
-
+        return executeWithCalendar(projectId, service -> {
+            var calendar = service.calendars().get(calendarId).execute();
             return calendarMapper.toDto(calendar);
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        });
     }
 
-    @Transactional
+
     public ACLDto createAcl(long projectId, String calendarId, ACLDto aclDto) {
-        Calendar service = buildCalendar(projectId);
-
-        AclRule newAcl = aclMapper.toModel(aclDto);
-        try {
-            AclRule createdAcl = service.acl()
-                    .insert(calendarId, newAcl)
-                    .execute();
-
+        return executeWithCalendar(projectId, service -> {
+            AclRule newAcl = aclMapper.toModel(aclDto);
+            AclRule createdAcl = service.acl().insert(calendarId, newAcl).execute();
             return aclMapper.toDto(createdAcl);
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        });
     }
 
-    @Transactional
     public List<ACLDto> listAcl(long projectId, String calendarId) {
-        Calendar service = buildCalendar(projectId);
-
-        try {
-            List<AclRule> aclRuleList = service.acl()
-                    .list(calendarId)
-                    .execute()
-                    .getItems();
-
-            return aclMapper.toDtos(aclRuleList);
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        return executeWithCalendar(projectId, service -> {
+            List<AclRule> aclList = service.acl().list(calendarId).execute().getItems();
+            return aclMapper.toDtos(aclList);
+        });
     }
 
-    @Transactional
+
     public void deleteAcl(long projectId, String calendarId, long aclId) {
-        Calendar service = buildCalendar(projectId);
-
-        try {
-            service.acl()
-                    .delete(calendarId, String.valueOf(aclId))
-                    .execute();
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        executeWithCalendar(projectId, service -> {
+            service.acl().delete(calendarId, String.valueOf(aclId)).execute();
+            return null;
+        });
     }
 
-    @Transactional
+
     public Calendar buildCalendar(long projectId) {
         Credential credential;
         try {
@@ -184,9 +130,19 @@ public class CalendarService {
                     String.format("Project: %d dont have credentials, set credentials for this", projectId));
         }
 
-        return new Calendar.Builder(oAuthService.getHttp_transport(), oAuthService.getJsonFactory(), credential)
+        return new Calendar.Builder(oAuthService.getHttpTransport(), oAuthService.getJsonFactory(), credential)
                 .setApplicationName(env.getProperty("google.applicationName"))
                 .build();
+    }
+
+
+    private <T> T executeWithCalendar(long projectId, CalendarServiceFunction<T> function) {
+        Calendar service = buildCalendar(projectId);
+        try {
+            return function.execute(service);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 }
 

@@ -1,7 +1,6 @@
 package faang.school.projectservice.dto.calendar;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import faang.school.projectservice.exception.DataValidationException;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -25,10 +24,4 @@ public class CalendarEventDto {
     @Future(message = "You can't create event in the past.")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endTime;
-
-    public void verifyEndIsAfterStartTime() {
-        if (endTime.isBefore(startTime)) {
-            throw new DataValidationException("End time must be after start time");
-        }
-    }
 }

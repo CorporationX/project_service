@@ -1,6 +1,10 @@
 package faang.school.projectservice.service;
 
-import com.google.api.client.auth.oauth2.*;
+import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
+import com.google.api.client.auth.oauth2.BearerToken;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.TokenResponse;
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -28,8 +32,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
-import static java.time.LocalTime.now;
-
 @Service
 @RequiredArgsConstructor
 public class GoogleAuthorizationService {
@@ -39,16 +41,16 @@ public class GoogleAuthorizationService {
     private final Environment env;
 
     @Getter
-    private NetHttpTransport http_transport;
+    private NetHttpTransport httpTransport;
 
     private GoogleAuthorizationCodeFlow flow;
 
     @PostConstruct
     public void setUp() {
         try {
-            http_transport = GoogleNetHttpTransport.newTrustedTransport();
+            httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             flow = new GoogleAuthorizationCodeFlow.Builder(
-                    http_transport, JSON_FACTORY,
+                    httpTransport, JSON_FACTORY,
                     Objects.requireNonNull(env.getProperty("google.clientId")),
                     Objects.requireNonNull(env.getProperty("google.clientSecret")), SCOPES)
                     .setAccessType(env.getProperty("google.accessType"))
@@ -64,7 +66,7 @@ public class GoogleAuthorizationService {
 
         Credential credential = new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
                 .setJsonFactory(JSON_FACTORY)
-                .setTransport(http_transport)
+                .setTransport(httpTransport)
                 .setClientAuthentication(flow.getClientAuthentication())
                 .setTokenServerEncodedUrl(flow.getTokenServerEncodedUrl())
                 .build()
@@ -77,10 +79,16 @@ public class GoogleAuthorizationService {
     }
 
     public void refreshToken(GoogleCalendarToken calendarToken, Credential credential) {
-        if (credential.getExpiresInSeconds() < Long.parseLong(Objects.requireNonNull(env.getProperty("google.accessTokenExpiresInSeconds")))) {
+        long expiresInSeconds = credential.getExpiresInSeconds();
+        long configuredExpirationTime = Long.parseLong(
+                Objects.requireNonNull(env.getProperty("google.accessTokenExpiresInSeconds"))
+        );
+
+        if (expiresInSeconds < configuredExpirationTime) {
             try {
                 credential.refreshToken();
             } catch (IOException e) {
+                // Если не удалось обновить токен, выбрасываем исключение
                 throw new RuntimeException("Failed to refresh token: " + e.getMessage(), e);
             }
 
@@ -92,22 +100,36 @@ public class GoogleAuthorizationService {
         }
     }
 
+
     public GoogleCalendarToken authorizeProject(Project project, String code) {
         return calendarTokenRepository.findByProjectId(project.getId())
-                .orElseGet(() -> {
-                    TokenResponse tokenResponse = requestToken(code);
-                    if (tokenResponse.getRefreshToken() == null || tokenResponse.getRefreshToken().isEmpty()) {
-                        throw new DataValidationException("No refresh token. Refresh tokens are only generated when you grant access to the application.");
-                    }
-
-                    GoogleCalendarToken calendarToken = GoogleCalendarToken.builder()
-                            .project(project)
-                            .accessToken(tokenResponse.getAccessToken())
-                            .refreshToken(tokenResponse.getRefreshToken())
-                            .build();
-                    return calendarTokenRepository.save(calendarToken);
-                });
+                .orElseGet(() -> createAndSaveCalendarToken(project, code));
     }
+
+    private GoogleCalendarToken createAndSaveCalendarToken(Project project, String code) {
+        TokenResponse tokenResponse = requestToken(code);
+        validateRefreshToken(tokenResponse);
+
+        GoogleCalendarToken calendarToken = buildCalendarToken(project, tokenResponse);
+        return calendarTokenRepository.save(calendarToken);
+    }
+
+    private void validateRefreshToken(TokenResponse tokenResponse) {
+        if (tokenResponse.getRefreshToken() == null || tokenResponse.getRefreshToken().isEmpty()) {
+            throw new DataValidationException(
+                    "No refresh token. Refresh tokens are only generated when you grant access to the application."
+            );
+        }
+    }
+
+    private GoogleCalendarToken buildCalendarToken(Project project, TokenResponse tokenResponse) {
+        return GoogleCalendarToken.builder()
+                .project(project)
+                .accessToken(tokenResponse.getAccessToken())
+                .refreshToken(tokenResponse.getRefreshToken())
+                .build();
+    }
+
 
 
     @Retryable(include = TokenResponseException.class)
