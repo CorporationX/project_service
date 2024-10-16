@@ -2,10 +2,7 @@ package faang.school.projectservice.model;
 
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
