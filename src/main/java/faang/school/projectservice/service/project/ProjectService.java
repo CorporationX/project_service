@@ -1,11 +1,14 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectViewEvent;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.util.converter.GigabyteConverter;
 import faang.school.projectservice.validator.project.ProjectValidator;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 @Service
@@ -34,7 +38,8 @@ public class ProjectService {
     private final List<Filter<ProjectFilterDto, Project>> projectFilters;
     private final ProjectMapper projectMapper;
     private final GigabyteConverter gigabyteConverter;
-
+    private final UserContext userContext;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     public ProjectDto create(ProjectDto projectDto) {
         projectValidator.validateOwnerHasSameProject(projectDto);
@@ -75,7 +80,22 @@ public class ProjectService {
     }
 
     public ProjectDto getProject(Long id) {
-        return projectMapper.toDto(getProjectById(id));
+        log.info("getProject() - start");
+        Project project = getProjectById(id);
+        long contextUserId = userContext.getUserId();
+
+        CompletableFuture.runAsync(() -> {
+            ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
+                    .projectId(project.getId())
+                    .userId(contextUserId)
+                    .viewTime(LocalDateTime.now())
+                    .build();
+            log.debug("Trying to send projectViewEvent - {}", projectViewEvent);
+            projectViewEventPublisher.publish(projectViewEvent);
+        });
+
+        log.info("getProject() - finish");
+        return projectMapper.toDto(project);
     }
 
     public List<Project> getProjectByIds(List<Long> ids) {

@@ -1,11 +1,13 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,11 +46,17 @@ class ProjectServiceTest {
     private List<Filter<ProjectFilterDto, Project>> filters;
     @Mock
     private Filter<ProjectFilterDto, Project> projectFilter;
-
+    @Mock
+    private UserContext userContext;
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
 
     private static final long ID = 1L;
+    private static final long FIVE_SECOND_AWAIT = 5L;
+
     private static final String PROJECT_NAME = "name";
     private static final String PROJECT_DESCRIPTION = "description";
+
     private static final int PROJECT_DTOS_SIZE = 2;
 
     @Nested
@@ -125,12 +135,17 @@ class ProjectServiceTest {
             projectDto.setId(ID);
             when(projectRepository.findById(ID)).thenReturn(Optional.of(projectEntity));
             when(projectMapper.toDto(projectEntity)).thenReturn(projectDto);
+            when(userContext.getUserId()).thenReturn(ID);
 
             ProjectDto existedProjectDto = projectService.getProject(ID);
 
             assertNotNull(existedProjectDto);
             assertEquals(ID, existedProjectDto.getId());
             verify(projectRepository).findById(ID);
+
+            await().atMost(FIVE_SECOND_AWAIT, SECONDS).untilAsserted(() -> {
+                verify(projectViewEventPublisher).publish(any());
+            });
         }
 
         @Test
