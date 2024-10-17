@@ -1,8 +1,11 @@
 package faang.school.projectservice.service.impl.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.model.dto.project.ProjectDto;
+import faang.school.projectservice.model.event.ProjectViewEvent;
 import faang.school.projectservice.model.mapper.subproject.ProjectMapper;
 import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.ProjectService;
@@ -15,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
@@ -24,6 +29,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final TeamMemberRepository memberRepository;
     private final S3Service s3Service;
     private final FileCompressor fileCompressor;
+    private final ProjectViewEventPublisher projectViewPublisher;
+    private final UserContext userContext;
 
     @Value("${image.maxWidth}")
     private int maxWidth;
@@ -35,6 +42,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional(readOnly = true)
     public Project getProject(long projectId) {
         Project project = validator.validateProject(projectId);
+
+        ProjectViewEvent event = ProjectViewEvent.builder()
+                .projectId(projectId)
+                .userId(userContext.getUserId())
+                .visitTime(LocalDateTime.now())
+                .build();
+        projectViewPublisher.publish(event);
 
         return project;
     }
