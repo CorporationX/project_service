@@ -57,4 +57,10 @@ public class GlobalExceptionHandler {
                         error -> Objects.requireNonNullElse(error.getDefaultMessage(), "")
                 ));
     }
+
+    @ExceptionHandler(JiraException.class)
+    public ErrorResponse handleJiraErrorResponseException(JiraException ex) {
+        log.error("{}, {}", ex.getStatus(), ex.getMessage());
+        return new ErrorResponse(ex.getStatus().value(), ex.getMessage());
+    }
 }
