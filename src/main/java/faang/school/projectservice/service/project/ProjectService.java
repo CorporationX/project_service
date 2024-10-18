@@ -1,11 +1,14 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.filter.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectViewEvent;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.util.converter.GigabyteConverter;
 import faang.school.projectservice.validator.project.ProjectValidator;
@@ -34,7 +37,8 @@ public class ProjectService {
     private final List<Filter<ProjectFilterDto, Project>> projectFilters;
     private final ProjectMapper projectMapper;
     private final GigabyteConverter gigabyteConverter;
-
+    private final UserContext userContext;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     public ProjectDto create(ProjectDto projectDto) {
         projectValidator.validateOwnerHasSameProject(projectDto);
@@ -75,7 +79,13 @@ public class ProjectService {
     }
 
     public ProjectDto getProject(Long id) {
-        return projectMapper.toDto(getProjectById(id));
+        log.info("getProject() - start");
+        Project project = getProjectById(id);
+        long contextUserId = userContext.getUserId();
+
+        notifyProjectViewEvent(project, contextUserId);
+        log.info("getProject() - finish");
+        return projectMapper.toDto(project);
     }
 
     public List<Project> getProjectByIds(List<Long> ids) {
@@ -93,5 +103,18 @@ public class ProjectService {
             log.debug("Set project {} storage for {} GB", project.getName(),
                     gigabyteConverter.byteToGigabyteConverter(STORAGE_SIZE.longValue()));
         }
+    }
+
+    private void notifyProjectViewEvent(Project project, long userId) {
+        ProjectViewEvent projectViewEvent = mapProjectToProjectViewEvent(project, userId);
+        projectViewEventPublisher.publish(projectViewEvent);
+    }
+
+    private ProjectViewEvent mapProjectToProjectViewEvent(Project project, long userId) {
+        return ProjectViewEvent.builder()
+                .projectId(project.getId())
+                .userId(userId)
+                .viewTime(LocalDateTime.now())
+                .build();
     }
 }
