@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 @Service
@@ -84,16 +83,7 @@ public class ProjectService {
         Project project = getProjectById(id);
         long contextUserId = userContext.getUserId();
 
-        CompletableFuture.runAsync(() -> {
-            ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
-                    .projectId(project.getId())
-                    .userId(contextUserId)
-                    .viewTime(LocalDateTime.now())
-                    .build();
-            log.debug("Trying to send projectViewEvent - {}", projectViewEvent);
-            projectViewEventPublisher.publish(projectViewEvent);
-        });
-
+        notifyProjectViewEvent(project, contextUserId);
         log.info("getProject() - finish");
         return projectMapper.toDto(project);
     }
@@ -113,5 +103,18 @@ public class ProjectService {
             log.debug("Set project {} storage for {} GB", project.getName(),
                     gigabyteConverter.byteToGigabyteConverter(STORAGE_SIZE.longValue()));
         }
+    }
+
+    private void notifyProjectViewEvent(Project project, long userId) {
+        ProjectViewEvent projectViewEvent = mapProjectToProjectViewEvent(project, userId);
+        projectViewEventPublisher.publish(projectViewEvent);
+    }
+
+    private ProjectViewEvent mapProjectToProjectViewEvent(Project project, long userId) {
+        return ProjectViewEvent.builder()
+                .projectId(project.getId())
+                .userId(userId)
+                .viewTime(LocalDateTime.now())
+                .build();
     }
 }
