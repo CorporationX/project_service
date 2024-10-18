@@ -18,7 +18,7 @@ public class RedisConfiguration {
     private final ObjectMapper objectMapper;
 
     @Bean
-    ChannelTopic projectViewEventTopic() {
+    public ChannelTopic projectViewEventTopic() {
         return new ChannelTopic(redisProperties.getChannels().getProjectViewChannel().getName());
     }
 
