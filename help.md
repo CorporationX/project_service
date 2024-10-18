@@ -1,5 +1,5 @@
 <div style="text-align: center;">
-  <img src="/Users/hacker/IdeaProjects/CorporationX/project_service/src/main/java/faang/school/projectservice/controller/calendar/readme/calendar-diagram.svg" 
+  <img src="./calendar-diagram.svg" 
        alt="Diagram of API Flow" width="800"/>
 </div>
 
