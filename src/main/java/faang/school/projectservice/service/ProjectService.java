@@ -30,6 +30,24 @@ public class ProjectService {
 
 
     @Transactional
+    public String uploadCover(Long projectId, Long userId, MultipartFile file) {
+        Project project = projectRepository.getByIdOrThrow(projectId);
+        TeamMember teamMember = getTeamMemberFromProjectTeams(userId, project);
+
+        Pair<ProjectResource, ObjectMetadata> projectResourceWithMetadata = projectResourceManager.
+                getProjectCoverBeforeUploadFile(file, project, teamMember);
+        ProjectResource projectResource = projectResourceWithMetadata.getFirst();
+
+        project.setCoverImageId(projectResource.getKey());
+
+        projectRepository.save(project);
+        projectResourceService.save(projectResource);
+
+        projectResourceManager.uploadFileS3Async(file, projectResource, projectResourceWithMetadata.getSecond());
+        return projectResource.getKey();
+    }
+
+    @Transactional
     public ProjectResource uploadFileToProject(Long projectId, Long userId, MultipartFile file) {
         Project project = projectRepository.getByIdOrThrow(projectId);
         TeamMember teamMember = getTeamMemberFromProjectTeams(userId, project);

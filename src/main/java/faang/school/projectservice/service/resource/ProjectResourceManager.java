@@ -29,17 +29,29 @@ public class ProjectResourceManager {
     private final String projectBucket;
     private final String DIRECTORY_NAME;
     private final long MAX_STORAGE_SIZE;
+    private final long MAX_COVER_FILE_SIZE;
+    private final long COVER_MAX_RECTANGLE_WIDTH;
+    private final long COVER_MAX_RECTANGLE_HEIGHT;
+    private final long COVER_MAX_SQUARE_DIMENSION;
 
     public ProjectResourceManager(AmazonS3 s3Client,
                                   ProjectResourceService projectResourceService,
                                   @Value("${services.s3.bucketName}") String projectBucket,
                                   @Value("${project-service.directory}") String DIRECTORY_NAME,
-                                  @Value("${project-service.max_storage_size_no_subscription}") long MAX_STORAGE_SIZE) {
+                                  @Value("${project-service.max_storage_size_no_subscription}") long MAX_STORAGE_SIZE,
+                                  @Value("${services.cover_image.max_cover_file_size}") long MAX_COVER_FILE_SIZE,
+                                  @Value("${services.cover_image.max-rectangle-width}") long COVER_MAX_RECTANGLE_WIDTH,
+                                  @Value("${services.cover_image.max-rectangle-height}") long COVER_MAX_RECTANGLE_HEIGHT,
+                                  @Value("${services.cover_image.max-square-dimension}") long COVER_MAX_SQUARE_DIMENSION) {
         this.s3Client = s3Client;
         this.projectResourceService = projectResourceService;
         this.projectBucket = projectBucket;
         this.MAX_STORAGE_SIZE = MAX_STORAGE_SIZE;
         this.DIRECTORY_NAME = DIRECTORY_NAME;
+        this.MAX_COVER_FILE_SIZE = MAX_COVER_FILE_SIZE;
+        this.COVER_MAX_RECTANGLE_WIDTH = COVER_MAX_RECTANGLE_WIDTH;
+        this.COVER_MAX_RECTANGLE_HEIGHT = COVER_MAX_RECTANGLE_HEIGHT;
+        this.COVER_MAX_SQUARE_DIMENSION = COVER_MAX_SQUARE_DIMENSION;
     }
 
     @Async
@@ -70,6 +82,23 @@ public class ProjectResourceManager {
         }
     }
 
+    public Pair<ProjectResource, ObjectMetadata> getProjectCoverBeforeUploadFile(MultipartFile file, Project project, TeamMember teamMember) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Cover's file not be empty");
+        }
+        if (file.getSize() > MAX_COVER_FILE_SIZE) {
+            throw new IllegalStateException("Cover's file size exceeds project limit");
+        }
+        String fileNameWithExtension = generateUniqueFileName(file.getOriginalFilename());
+        String path = generateFullPathForUserFiles(file, project.getId(), teamMember.getId(), fileNameWithExtension);
+        ObjectMetadata metadata = generateMetadata(file, path, fileNameWithExtension);
+        if (s3Client.doesObjectExist(projectBucket, path)) {
+            throw new IllegalStateException("File already exists");
+        }
+        ProjectResource projectResource = createProjectResourceByMetadata(metadata, project, teamMember);
+        return Pair.of(projectResource, metadata);
+    }
+
     public Pair<ProjectResource, ObjectMetadata> getProjectResourceBeforeUploadFile(MultipartFile file, Project project, TeamMember teamMember) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File not be empty");
@@ -86,6 +115,7 @@ public class ProjectResourceManager {
         ProjectResource projectResource = createProjectResourceByMetadata(metadata, project, teamMember);
         return Pair.of(projectResource, metadata);
     }
+
     public ProjectResource createProjectResourceByMetadata(ObjectMetadata metadata, Project project, TeamMember teamMember) {
         String path = metadata.getUserMetaDataOf("path");
         String fileName = metadata.getUserMetaDataOf("name");

@@ -7,6 +7,8 @@ import faang.school.projectservice.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +32,30 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ResourceMapper resourceMapper;
 
+    @Operation(summary = "Upload cover to project", description = "Upload cover's file to project using multipart/form-data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cover's file uploaded successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid project ID or cover's file format"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("{project-id}/cover")
+    String uploadCover(@PathVariable("project-id") @NotBlank Long projectId,
+                       @RequestParam("user-id") Long userId,
+                       @RequestBody @NotNull MultipartFile cover) {
+        return projectService.uploadCover(projectId, userId, cover);
+    }
+
+//    @Operation(summary = "Delete cover from project", description = "Delete a cover's file from a project by project ID, user ID")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Cover's file deleted successfully"),
+//            @ApiResponse(responseCode = "400", description = "Invalid project"),
+//            @ApiResponse(responseCode = "500", description = "Internal server error")
+//    })
+//    @DeleteMapping("{project-id}/cover")
+//    void removeCover(@PathVariable @NotBlank Long projectId,
+//                     @RequestParam("user-id") Long userId) {
+//        projectService.removeCover(userId, projectId);
+//    }
 
     @Operation(summary = "Upload file to project", description = "Upload file to project using multipart/form-data")
     @ApiResponses(value = {
