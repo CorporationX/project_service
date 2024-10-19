@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://192.168.43.78:5432/postgres
     username: user
     password: password
 
@@ -20,10 +20,14 @@ spring:
   data:
     redis:
       port: 6379
-      host: localhost
-      channels:
-        calculations_channel:
-          name: calculations_channel
+      host: 192.168.43.78
+#      channels:
+#        calculations_channel:
+#          name: calculations_channel
+
+redis:
+  channels:
+    fund-raised: fund_raised_channel
 
 server:
   port: 8082
@@ -37,16 +41,16 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://localhost:9000
+    endpoint: http://192.168.43.78:9000
     accessKey: user
     secretKey: password
     bucketName: corpbucket
 
   payment-service:
-    host: http://localhost
+    host: http://192.168.43.78
     port: 9080
   user-service:
-    host: http://localhost
+    host: http://192.168.43.78
     port: 8080
 
 cover-image:
