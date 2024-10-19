@@ -10,7 +10,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.publisher.ProjectViewEventPublisher;
+import faang.school.projectservice.publisher.MessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
-    private final ProjectViewEventPublisher projectViewEventPublisher;
+    private final MessagePublisher<ProjectViewEvent> projectViewEventPublisher;
 
     @Override
     public ProjectDto createProject(ProjectDto projectDto) {
