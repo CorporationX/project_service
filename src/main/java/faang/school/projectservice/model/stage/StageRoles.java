@@ -20,7 +20,7 @@ public class StageRoles {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "role", nullable = false)
+    @Column(name = "roles", nullable = false)
     @Enumerated(EnumType.STRING)
     private TeamRole teamRole;
 
