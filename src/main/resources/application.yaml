@@ -1,43 +1,44 @@
 spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: user
-    password: password
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        url: jdbc:postgresql://localhost:5432/postgres
+        username: user
+        password: password
 
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: none
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        hibernate:
+            ddl-auto: none
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
 
-  liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.yaml
+    liquibase:
+        enabled: true
+        change-log: classpath:db/changelog/db.changelog-master.yaml
 
-  data:
-    redis:
-      port: 6379
-      host: localhost
-      channels:
-        calculations_channel:
-          name: calculations_channel
+    data:
+        redis:
+            port: 6379
+            host: localhost
+            channels:
+                calculations_channel:
+                    name: calculations_channel
 
 server:
-  port: 8082
+    port: 8082
 
 logging:
-  level:
-    root: info
+    level:
+        root: info
 
 calculations_messages_processing:
-  enabled: true
+    enabled: true
 
 services:
   s3:
-    endpoint: http://127.0.0.1:9000
+    endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
     bucketName: corpbucket
@@ -50,7 +51,26 @@ services:
     host: http://localhost
     port: 8080
 
+google:
+    calendar_id: kraken.stream6@gmail.com
+    auth_user_id: kraken.stream6@gmail.com
+    tokens_directory_path: tokens
+    credentials_file_path: /google/credentials.json
+    redirect_port: 8888
+    event_popup_time_min: 10
+    event_email_notify_time_min: 1440
+    clientId: 1044491242105-ghlbj5i1bi8bnr5copqsrk6kt2jl2kms.apps.googleusercontent.com
+    clientSecret: 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
+    applicationName: corporationX
+    redirectUri: http://localhost:8888/Callback
+    accessType: offline
+    accessTokenExpiresInSeconds: 1000000000
+
+calendar:
+    event:
+        count_to_return: 10
+
 project-service:
-  directory: projects
-  max_storage_size_no_subscription: 2147483648
-  max_file_size: 10485760
+    directory: projects
+    max_storage_size_no_subscription: 2147483648
+    max_file_size: 10485760
