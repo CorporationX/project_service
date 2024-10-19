@@ -58,8 +58,3 @@ services:
   user-service:
     host: http://localhost
     port: 8080
-
-project-service:
-  directory: projects
-  max_storage_size_no_subscription: 2147483648
-  max_file_size: 10485760
