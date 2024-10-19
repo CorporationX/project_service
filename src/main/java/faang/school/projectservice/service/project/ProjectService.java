@@ -83,7 +83,7 @@ public class ProjectService {
         Project project = getProjectById(id);
         long contextUserId = userContext.getUserId();
 
-        notifyProjectViewEvent(project, contextUserId);
+        publishProjectViewEvent(project, contextUserId);
         log.info("getProject() - finish");
         return projectMapper.toDto(project);
     }
@@ -105,16 +105,8 @@ public class ProjectService {
         }
     }
 
-    private void notifyProjectViewEvent(Project project, long userId) {
-        ProjectViewEvent projectViewEvent = mapProjectToProjectViewEvent(project, userId);
+    private void publishProjectViewEvent(Project project, long userId) {
+        ProjectViewEvent projectViewEvent = projectMapper.toProjectViewEventDto(project, userId);
         projectViewEventPublisher.publish(projectViewEvent);
-    }
-
-    private ProjectViewEvent mapProjectToProjectViewEvent(Project project, long userId) {
-        return ProjectViewEvent.builder()
-                .projectId(project.getId())
-                .userId(userId)
-                .viewTime(LocalDateTime.now())
-                .build();
     }
 }
