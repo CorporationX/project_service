@@ -5,7 +5,7 @@ import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface ProjectEventMapper {
     @Mapping(target = "authorId", source = "ownerId")
     @Mapping(target = "projectId", source = "id")

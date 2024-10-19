@@ -1,11 +1,14 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.ProjectEvent;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.filter.ProjectFilters;
+import faang.school.projectservice.mapper.ProjectEventMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.publisher.ProjectEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -33,6 +36,10 @@ public class ProjectServiceImplTest {
     private List<ProjectFilters> filters;
     @Spy
     private ProjectMapper mapper = Mappers.getMapper(ProjectMapper.class);
+    @Spy
+    private ProjectEventMapper eventMapper = Mappers.getMapper(ProjectEventMapper.class);
+    @Mock
+    ProjectEventPublisher projectEventPublisher;
 
     @Test
     void testCreateProject() {
@@ -42,6 +49,7 @@ public class ProjectServiceImplTest {
         when(mapper.toEntity(projectDto)).thenReturn(projectEntity);
         when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
         when(projectRepository.getProjectById(projectDto.getId())).thenReturn(projectEntity);
+        when(eventMapper.toEvent(projectEntity)).thenReturn(new ProjectEvent());
 
         projectService.createProject(projectDto);
 
