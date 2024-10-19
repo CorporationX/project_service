@@ -65,6 +65,15 @@ dependencies {
      * Swagger
      */
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
+
+    /**
+     * Google Calendar
+     */
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
+    implementation("org.springframework.retry:spring-retry:1.3.1")
+
 }
 
 tasks.withType<Test> {
