@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.ProjectEventPublisher;
+import faang.school.projectservice.publisher.ProjectEventPublisher;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
@@ -36,7 +36,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = mapper.toEntity(projectDto);
         validationDuplicateProjectNames(projectDto);
         project.setStatus(ProjectStatus.CREATED);
-        projectEventPublisher.publish(projectEventMapper.toEntity(project));
+        projectEventPublisher.publish(projectEventMapper.toEvent(project));
         projectRepository.save(project);
     }
 

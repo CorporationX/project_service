@@ -9,5 +9,5 @@ import org.mapstruct.Mapping;
 public interface ProjectEventMapper {
     @Mapping(target = "authorId", source = "ownerId")
     @Mapping(target = "projectId", source = "id")
-   ProjectEvent toEntity(Project project);
+   ProjectEvent toEvent(Project project);
 }

@@ -8,17 +8,19 @@ import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @Validated
 public class ProjectController {
     private final ProjectService projectService;
 
+    @PostMapping("api/v1/project")
     public void createProject(ProjectDto projectDto) {
         projectService.createProject(projectDto);
     }

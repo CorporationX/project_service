@@ -1,4 +1,4 @@
-package faang.school.projectservice;
+package faang.school.projectservice.publisher;
 
 import faang.school.projectservice.config.redis.RedisProperties;
 import faang.school.projectservice.dto.ProjectEvent;
