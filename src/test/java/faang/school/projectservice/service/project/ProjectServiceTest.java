@@ -1,18 +1,18 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ForbiddenAccessException;
 import faang.school.projectservice.filter.project.ProjectFilter;
-import faang.school.projectservice.filter.project.ProjectNameFilter;
-import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,6 +45,9 @@ public class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
+
     @InjectMocks
     private ProjectServiceImpl projectService;
 
@@ -69,7 +72,7 @@ public class ProjectServiceTest {
         ProjectFilter filterSecond = Mockito.mock(ProjectFilter.class);
         projectFilters.add(filterFirst);
         projectFilters.add(filterSecond);
-        projectService = new ProjectServiceImpl(projectRepository, projectMapper, projectFilters);
+        projectService = new ProjectServiceImpl(projectRepository, projectMapper, projectFilters, projectViewEventPublisher);
     }
 
     @Test
@@ -85,13 +88,18 @@ public class ProjectServiceTest {
     @Test
     @DisplayName("Получение приватного проекта по id участником команды")
     public void testGetPrivateProjectByTeamMember() {
+        ProjectViewEvent event = ProjectViewEvent.builder()
+                .projectId(PRIVATE_PROJECT_ID)
+                .userId(TEAM_MEMBER_USER_ID)
+                .timestamp(LocalDateTime.now())
+                .build();
         addTeamsToProject(privateProject);
         when(projectRepository.getProjectById(PRIVATE_PROJECT_ID))
                 .thenReturn(privateProject);
         assertEquals(PRIVATE_PROJECT_ID,
                 projectService.findProjectById(PRIVATE_PROJECT_ID, TEAM_MEMBER_USER_ID).getId());
         verify(projectMapper).toProjectDto(privateProject);
-
+        verify(projectViewEventPublisher).publish(any(ProjectViewEvent.class));
     }
 
     @Test
