@@ -24,13 +24,12 @@ public class ImageProcessor {
     @Value("${services.cover_image.max-square-dimension}")
     private int maxSquareDimension;
 
-    public InputStream processImage(MultipartFile file) {
+    public byte[] processImage(MultipartFile file) {
         BufferedImage image = getBufferedImage(file);
         if (checkIfImageNeedsResize(image)) {
             image = resizeImage(image);
         }
-        byte[] byteArrayImage = getImageBytes(image, getImageFormat(file.getOriginalFilename()));
-        return new ByteArrayInputStream(byteArrayImage);
+        return getImageBytes(image, getImageFormat(file.getOriginalFilename()));
     }
 
     private BufferedImage getBufferedImage(MultipartFile file) {

@@ -45,17 +45,17 @@ public class ProjectController {
         return projectService.uploadCover(projectId, userId, cover);
     }
 
-//    @Operation(summary = "Delete cover from project", description = "Delete a cover's file from a project by project ID, user ID")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Cover's file deleted successfully"),
-//            @ApiResponse(responseCode = "400", description = "Invalid project"),
-//            @ApiResponse(responseCode = "500", description = "Internal server error")
-//    })
-//    @DeleteMapping("{project-id}/cover")
-//    void removeCover(@PathVariable @NotBlank Long projectId,
-//                     @RequestParam("user-id") Long userId) {
-//        projectService.removeCover(userId, projectId);
-//    }
+    @Operation(summary = "Delete cover from project", description = "Delete a cover's file from a project by project ID, user ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cover's file deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid project"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @DeleteMapping("{project-id}/cover")
+    void removeCover(@PathVariable("project-id") @NotBlank Long projectId,
+                     @RequestParam("user-id") Long userId) {
+        projectService.removeCover(projectId, userId);
+    }
 
     @Operation(summary = "Upload file to project", description = "Upload file to project using multipart/form-data")
     @ApiResponses(value = {

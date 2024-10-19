@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import faang.school.projectservice.jpa.ProjectResourceRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectResource;
 import faang.school.projectservice.model.Team;
@@ -12,6 +11,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.resource.ProjectResourceManager;
 import faang.school.projectservice.service.resource.ProjectResourceService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -80,6 +79,7 @@ public class ProjectServiceTest {
         project.setId(projectId);
         project.setTeams(List.of(team));
         project.setStorageSize(BigInteger.ZERO);
+        project.setCoverImageId("cover_image_id");
 
         projectResourceOfTM_1 = new ProjectResource();
         projectResourceOfTM_1.setId(resourceId);
@@ -91,6 +91,65 @@ public class ProjectServiceTest {
         project.setProjectResources(List.of(projectResourceOfTM_1));
 
     }
+
+    @Test
+    @DisplayName("Upload cover: check exist project id")
+    public void testUploadCover_ProjectNotFound() {
+        when(projectRepository.getByIdOrThrow(projectId)).thenThrow();
+
+        assertThrows(RuntimeException.class, () -> projectService.uploadCover(project.getId(), userId_1, file));
+    }
+
+    @Test
+    @DisplayName("Upload cover: check before upload")
+    public void testUploadCover_CheckBeforeUpload_FileIsEmpty() {
+        Pair<ProjectResource, ObjectMetadata> projectResourceWithMetadata = Pair.of(projectResourceOfTM_1, new ObjectMetadata());
+
+        when(projectResourceManager.getProjectResourceBeforeUploadFile(file, project, teamMember_1))
+                .thenThrow();
+
+        assertThrows(RuntimeException.class, () -> projectService.uploadCover(project.getId(), userId_1, file));
+    }
+
+    @Test
+    @DisplayName("Upload cover: check file size")
+    public void testUploadCover_CheckBeforeUpload_FileSizeIsMore() {
+        Pair<ProjectResource, ObjectMetadata> projectResourceWithMetadata = Pair.of(projectResourceOfTM_1, new ObjectMetadata());
+
+        when(projectResourceManager.getProjectResourceBeforeUploadFile(file, project, teamMember_1))
+                .thenReturn(projectResourceWithMetadata);
+
+        assertThrows(RuntimeException.class, () -> projectService.uploadCover(project.getId(), userId_1, file));
+    }
+
+    @Test
+    @DisplayName("Upload cover: check success")
+    public void testUploadCover_Success() {
+        Pair<ProjectResource, ObjectMetadata> projectResourceWithMetadata = Pair.of(projectResourceOfTM_1, new ObjectMetadata());
+        when(projectRepository.getByIdOrThrow(7L)).thenReturn(project);
+        when(projectResourceManager.getProjectCoverBeforeUploadFile(file, project, teamMember_1))
+                .thenReturn(projectResourceWithMetadata);
+
+        String uploadCover = projectService.uploadCover(7L, userId_1, file);
+
+        assertNotNull(uploadCover);
+        verify(projectRepository).save(project);
+        verify(projectResourceService).save(projectResourceOfTM_1);
+        verify(projectResourceManager).uploadFileS3Async(file, projectResourceOfTM_1, projectResourceWithMetadata.getSecond());
+    }
+
+    @Test
+    @DisplayName("Upload cover: check success")
+    public void testRemoveCover_Success() {
+        Pair<ProjectResource, ObjectMetadata> projectResourceWithMetadata = Pair.of(projectResourceOfTM_1, new ObjectMetadata());
+        when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
+
+        projectService.removeCover(projectId, userId_1);
+
+        verify(projectResourceManager).deleteFileS3Async("cover_image_id");
+        verify(projectRepository).save(project);
+    }
+
 
     @Test
     public void testGetFileFromProject_Success() {

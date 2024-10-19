@@ -74,6 +74,11 @@ public class ProjectResourceManager {
         projectResourceService.setStatus(projectResource, ResourceStatus.DELETED);
     }
 
+    @Async
+    public void deleteFileS3Async(String key) {
+        s3Client.deleteObject(projectBucket, key);
+    }
+
     public Resource getFileS3ByKey(String objectKey) {
         try (InputStream inputStream = s3Client.getObject(projectBucket, objectKey).getObjectContent()) {
             return new ByteArrayResource(inputStream.readAllBytes());
