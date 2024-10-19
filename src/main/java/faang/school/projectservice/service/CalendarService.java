@@ -46,7 +46,7 @@ public class CalendarService {
 
     @Transactional
     public Credential auth(long projectId, @NotNull String code) {
-        Project project = projectRepository.getProjectById(projectId);
+        Project project = projectRepository.getByIdOrThrow(projectId);
         GoogleCalendarToken calendarToken = oAuthService.authorizeProject(project, code);
         return oAuthService.generateCredential(calendarToken);
     }
