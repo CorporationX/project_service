@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,7 +30,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Resource {
+@Builder
+public class ProjectResource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -48,8 +50,7 @@ public class Resource {
     @Enumerated(EnumType.STRING)
     private List<TeamRole> allowedRoles;
 
-    @Enumerated(EnumType.STRING)
-    private ResourceType type;
+    private String type;
 
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;

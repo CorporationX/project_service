@@ -26,4 +26,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V016_meet.sql
   - include:
+      file: db/changelog/changeset/project_V017_alter_team_member_add_nickname.sql
+  - include:
       file: db/changelog/changeset/project_V018_create_google_calendar_token.sql

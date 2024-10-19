@@ -37,18 +37,19 @@ calculations_messages_processing:
     enabled: true
 
 services:
-    s3:
-        endpoint: http://localhost:9000
-        accessKey: user
-        secretKey: password
-        bucketName: projectbucket
-        isMocked: false
-    payment-service:
-        host: http://localhost
-        port: 9080
-    user-service:
-        host: http://localhost
-        port: 8080
+  s3:
+    endpoint: http://localhost:9000
+    accessKey: user
+    secretKey: password
+    bucketName: corpbucket
+    region: us-east-1
+    isMocked: false
+  payment-service:
+    host: http://localhost
+    port: 9080
+  user-service:
+    host: http://localhost
+    port: 8080
 
 google:
     calendar_id: kraken.stream6@gmail.com
@@ -68,3 +69,8 @@ google:
 calendar:
     event:
         count_to_return: 10
+
+project-service:
+    directory: projects
+    max_storage_size_no_subscription: 2147483648
+    max_file_size: 10485760

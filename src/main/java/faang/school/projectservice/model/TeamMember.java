@@ -23,6 +23,8 @@ public class TeamMember {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    private String nickname;
+
     @ElementCollection(targetClass = TeamRole.class)
     @CollectionTable(name = "team_member_roles",
             joinColumns = @JoinColumn(name = "team_member_id"))
