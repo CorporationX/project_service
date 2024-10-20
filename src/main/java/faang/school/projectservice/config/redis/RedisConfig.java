@@ -25,6 +25,8 @@ public class RedisConfig {
 
     @Value("${spring.data.redis.channels.project-view-channel.name}")
     private String projectViewTopic;
+    @Value("${spring.data.redis.channels.achievement.name}")
+    private String achievementTopic;
 
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
@@ -43,6 +45,8 @@ public class RedisConfig {
 
         return redisTemplate;
     }
+    @Bean
+    public ChannelTopic achievementChannelTopic() { return new ChannelTopic(achievementTopic); }
 
     @Bean
     public ChannelTopic projectViewTopic(){
