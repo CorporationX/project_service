@@ -13,6 +13,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +36,7 @@ public class MeetService {
     @Value("${meet.scheduler.batch.size}")
     private int BATCH_SIZE = 5;
 
+    @Transactional
     public MeetDto createMeeting(MeetDto meetDto) {
         Project project = projectRepository.getByIdOrThrow(meetDto.getProjectId());
 
@@ -58,6 +60,7 @@ public class MeetService {
         return meetMapper.toDto(createdMeet);
     }
 
+    @Transactional
     public MeetDto updateMeeting(long id, MeetDto meetDto) {
         Meet existingMeet = meetRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
@@ -81,6 +84,7 @@ public class MeetService {
         return meetMapper.toDto(updatedMeet);
     }
 
+    @Transactional
     public void deleteMeeting(long id) {
         Meet meet = meetRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
@@ -95,11 +99,13 @@ public class MeetService {
         meetRepository.save(meet);
     }
 
+    @Transactional(readOnly = true)
     public List<MeetDto> getAllMeetings(String title, String date) {
         List<Meet> meets = meetRepository.findAllMeetingsByTitleAndDate(title, date);
         return meetMapper.toDtoList(meets);
     }
 
+    @Transactional(readOnly = true)
     public MeetDto getMeetingById(long id) {
         Meet meet = meetRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
