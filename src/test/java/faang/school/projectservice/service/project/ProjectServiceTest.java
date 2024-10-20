@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.event.ProjectEvent;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -13,6 +14,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.AbstractMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,6 +47,9 @@ public class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
+    @Mock
+    private AbstractMessagePublisher<ProjectEvent> publisher;
+
     @InjectMocks
     private ProjectServiceImpl projectService;
 
@@ -69,7 +74,7 @@ public class ProjectServiceTest {
         ProjectFilter filterSecond = Mockito.mock(ProjectFilter.class);
         projectFilters.add(filterFirst);
         projectFilters.add(filterSecond);
-        projectService = new ProjectServiceImpl(projectRepository, projectMapper, projectFilters);
+        projectService = new ProjectServiceImpl(projectRepository, projectMapper, projectFilters, publisher);
     }
 
     @Test
