@@ -70,6 +70,12 @@ calendar:
     event:
         count_to_return: 10
 
+meet:
+    scheduler:
+        cron: "0 0/1 * 1/1 * ?" # every minute
+        batch:
+            size: 5
+
 project-service:
     directory: projects
     max_storage_size_no_subscription: 2147483648

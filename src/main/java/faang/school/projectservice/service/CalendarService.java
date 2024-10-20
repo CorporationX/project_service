@@ -62,6 +62,17 @@ public class CalendarService {
         });
     }
 
+    public CalendarEventDto updateEvent(long projectId, String calendarId, String eventId, CalendarEventDto eventDto) {
+        return executeWithCalendar(projectId, service -> {
+            Event event = eventMapper.toModel(eventDto);
+            Event updatedEvent = service.events()
+                    .update(calendarId, eventId, event)
+                    .execute();
+            log.info("Updated event with ID: " + eventId);
+            return eventMapper.toDto(updatedEvent);
+        });
+    }
+
     public List<CalendarEventDto> getEvents(long projectId, String calendarId) {
         return executeWithCalendar(projectId, service -> {
             List<Event> events = service.events()

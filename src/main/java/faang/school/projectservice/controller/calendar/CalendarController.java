@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -72,6 +73,16 @@ public class CalendarController {
     public CalendarDto createCalendar(@PathVariable long projectId, @Valid @RequestBody CalendarDto calendarDto) {
         return calendarService.createCalendar(projectId, calendarDto);
     }
+
+    @PutMapping("/{projectId}/calendars/events/{eventId}")
+    public String updateEvent(@PathVariable long projectId,
+                              @RequestParam String calendarId,
+                              @PathVariable String eventId,
+                              @Valid @RequestBody CalendarEventDto eventDto) {
+        calendarService.updateEvent(projectId, calendarId, eventId, eventDto);
+        return "Event updated successfully.";
+    }
+
 
     @GetMapping("/{projectId}/calendars")
     public CalendarDto getCalendar(@PathVariable long projectId, @RequestParam String calendarId) {

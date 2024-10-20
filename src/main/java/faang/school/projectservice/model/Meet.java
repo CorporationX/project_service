@@ -28,7 +28,7 @@ public class Meet {
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private MeetStatus status;
+    private MeetStatus status = MeetStatus.PENDING;
 
     @Column(name = "creator_id", nullable = false)
     private long creatorId;
@@ -51,4 +51,10 @@ public class Meet {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "google_event_id")
+    private String googleEventId;
+
+    @Column(name = "google_calendar_id")
+    private String googleCalendarId;
 }
