@@ -1,10 +1,13 @@
 package faang.school.projectservice.service.impl;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.exception.FileTooLargeException;
 import faang.school.projectservice.exception.MinioUploadException;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.event.ProjectViewEvent;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.resource.S3Service;
@@ -25,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -36,6 +40,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final S3Service s3Service;
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
+    private final UserContext userContext;
 
     @Setter
     @Value("${cover-image.maxWidth}")
@@ -116,6 +122,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectDto getProject(long projectId) {
         Project project = projectRepository.findById(projectId);
+        if (project != null) {
+            projectViewEventPublisher.publish(new ProjectViewEvent(projectId, userContext.getUserId(), LocalDateTime.now()));
+        }
         return projectMapper.toDto(project);
     }
 

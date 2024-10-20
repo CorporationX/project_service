@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.service.ProjectService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,7 +42,9 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}")
-    public ProjectDto getProject(@PathVariable long projectId) {
+    public ProjectDto getProject(@PathVariable long projectId,
+                                 @Parameter(description = "Значение заголовка x-user-id")
+                                 @RequestHeader(value = "x-user-id") String customHeader) {
         return projectService.getProject(projectId);
     }
 }
