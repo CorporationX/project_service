@@ -23,21 +23,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({IllegalEntityException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse illegalEntityException(RuntimeException exception) {
-        log.error("Exception occurred: {}", exception.getMessage());
+        log.error("Exception occurred: ", exception);
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse entityNotFoundException(EntityNotFoundException exception) {
-        log.error("Entity not found occurred: {}", exception.getMessage());
+        log.error("Entity not found occurred: ", exception);
         return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage());
     }
 
     @ExceptionHandler(SubProjectNotFinishedException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse subProjectNotFinishedException(SubProjectNotFinishedException exception) {
-        log.error("SubProject not finished occurred: {}", exception.getMessage());
+        log.error("SubProject not finished occurred: ", exception);
         return new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage());
     }
 
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> methodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        log.error("MethodArgumentNotValidException occurred: {}", exception.getMessage());
+        log.error("MethodArgumentNotValidException occurred: ", exception);
         return exception.getBindingResult().getAllErrors().stream()
                 .collect(Collectors.toMap(
                         error -> ((FieldError) error).getField(),
@@ -62,5 +62,11 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleJiraErrorResponseException(JiraException ex) {
         log.error("{}, {}", ex.getStatus(), ex.getMessage());
         return new ErrorResponse(ex.getStatus().value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(DataValidationException.class)
+    public ErrorResponse dataValidationException(DataValidationException exception){
+        log.error("Data validation exception occurred: ", exception);
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
     }
 }
