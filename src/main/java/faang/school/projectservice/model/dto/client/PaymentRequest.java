@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
-public record PaymentRequest (
+public record PaymentRequest(
         Long paymentNumber,
 
         @Min(1)
@@ -15,8 +15,6 @@ public record PaymentRequest (
         BigDecimal amount,
 
         @NotNull
-        Currency paymentCurrency,
-
-        @NotNull
-        Currency targetCurrency
-) {}
+        Currency currency
+) {
+}

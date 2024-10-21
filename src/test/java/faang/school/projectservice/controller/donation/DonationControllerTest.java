@@ -80,7 +80,7 @@ public class DonationControllerTest {
     void testGetDonationByIdOk() throws Exception {
         when(donationService.getDonationById(anyLong())).thenReturn(donationDto);
 
-        mockMvc.perform(get("/api/v1/donations/users/{id}", 1))
+        mockMvc.perform(get("/api/v1/donations/{id}", 1))
                 .andExpectAll(status().isOk(),
                         jsonPath("$.campaignId").value(1L),
                         jsonPath("$.currency").value("USD"));

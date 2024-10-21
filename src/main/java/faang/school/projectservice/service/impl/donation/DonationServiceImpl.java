@@ -37,7 +37,7 @@ public class DonationServiceImpl implements DonationService {
         donationValidator.validateSending(donationDto);
         PaymentRequest paymentRequest = PaymentRequest.builder()
                 .amount(donationDto.amount())
-                .paymentCurrency(donationDto.currency())
+                .currency(donationDto.currency())
                 .paymentNumber(donationDto.paymentNumber())
                 .build();
 

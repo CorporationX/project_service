@@ -24,7 +24,7 @@ public class DonationController {
         return donationService.sendDonation(donationDto);
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public DonationDto getDonationById(@PathVariable @Positive long id) {
         return donationService.getDonationById(id);
     }
