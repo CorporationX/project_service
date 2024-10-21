@@ -41,31 +41,6 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public void uploadFile(byte[] fileContent, String contentType, String key) {
-        if (fileContent.length == 0) {
-            throw new IllegalArgumentException("File content is empty for key " + key);
-        }
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType(contentType);
-        metadata.setContentLength(fileContent.length);
-
-        PutObjectRequest putObjectRequest = new PutObjectRequest(
-                bucketName,
-                key,
-                new ByteArrayInputStream(fileContent),
-                metadata
-        );
-
-        try {
-            s3Client.putObject(putObjectRequest);
-            log.info("File {}/{} was uploaded successfully", bucketName, key);
-        } catch (Exception e) {
-            log.error("An exception was thrown during byte array file upload", e);
-            throw new ResourceHandlingException("Error uploading file: " + e.getMessage());
-        }
-    }
-
-    @Override
     public void deleteFile(String key) {
         s3Client.deleteObject(bucketName, key);
         log.info("File {}/{} was deleted successfully", bucketName, key);

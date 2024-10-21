@@ -7,8 +7,6 @@ public interface S3Service {
 
     void uploadFile(MultipartFile file, String key);
 
-    void uploadFile(byte[] fileContent, String contentType, String key);
-
     void deleteFile(String key);
 
     ResourceResponseObject downloadFile(String key);

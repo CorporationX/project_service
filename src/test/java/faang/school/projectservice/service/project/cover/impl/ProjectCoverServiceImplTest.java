@@ -4,7 +4,6 @@ import faang.school.projectservice.config.ResourceConfig;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.cover.ImageProcessor;
 import faang.school.projectservice.service.s3.S3Service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,9 +32,6 @@ public class ProjectCoverServiceImplTest {
 
     @Mock
     private S3Service s3Service;
-
-    @Mock
-    private ImageProcessor imageProcessor;
 
     @Mock
     private ResourceConfig resourceConfig;
