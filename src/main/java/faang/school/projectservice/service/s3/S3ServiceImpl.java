@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @Slf4j
@@ -49,7 +50,9 @@ public class S3ServiceImpl implements S3Service {
     public ResourceResponseObject downloadFile(String key) {
         try {
             S3Object s3Object = s3Client.getObject(bucketName, key);
-            return new ResourceResponseObject(s3Object.getObjectContent(), s3Object.getObjectMetadata().getContentType());
+            return new ResourceResponseObject(
+                    s3Object.getObjectContent(),
+                    s3Object.getObjectMetadata().getContentType());
         } catch (Exception e) {
             throw new ResourceHandlingException(e.getMessage());
         }
