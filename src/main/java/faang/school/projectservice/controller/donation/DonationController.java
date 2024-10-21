@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/donations")
@@ -25,7 +27,7 @@ public class DonationController {
     }
 
     @GetMapping("/users/{userId}/all")
-    public DonationDto getAllDonationsByUserId(@PathVariable @Positive long userId, DonationFilterDto filterDto) {
+    public List<DonationDto> getAllDonationsByUserId(@PathVariable @Positive long userId, DonationFilterDto filterDto) {
         return donationService.getAllDonationsByUserId(userId, filterDto);
     }
 }
