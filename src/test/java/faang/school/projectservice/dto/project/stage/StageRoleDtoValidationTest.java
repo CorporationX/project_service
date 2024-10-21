@@ -61,7 +61,7 @@ class StageRoleDtoValidationTest {
         Set<ConstraintViolation<StageRoleDto>> violations = validator.validate(stageRoleDto);
 
         assertEquals(1, violations.size());
-        assertEquals("Count for member role is required", violations.iterator().next().getMessage());
+        assertEquals("Count for member roles is required", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -75,7 +75,7 @@ class StageRoleDtoValidationTest {
         Set<ConstraintViolation<StageRoleDto>> violations = validator.validate(stageRoleDto);
 
         assertEquals(1, violations.size());
-        assertEquals("Count for member role must be positive", violations.iterator().next().getMessage());
+        assertEquals("Count for member roles must be positive", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -89,6 +89,6 @@ class StageRoleDtoValidationTest {
         assertEquals(2, violations.size());
         assertTrue(violations.stream()
                 .map(ConstraintViolation::getMessage)
-                .toList().containsAll(List.of("Role name is required", "Count for member role is required")));
+                .toList().containsAll(List.of("Role name is required", "Count for member roles is required")));
     }
 }

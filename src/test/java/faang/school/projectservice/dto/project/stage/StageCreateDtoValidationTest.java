@@ -176,7 +176,7 @@ class StageCreateDtoValidationTest {
     }
 
     @Test
-    @DisplayName("Fail dto validation with not valid role")
+    @DisplayName("Fail dto validation with not valid roles")
     void stageCreateDtoValidationTest_failValidationWithNotValidRole() {
         StageCreateDto stageCreateDto = StageCreateDto.builder()
                 .stageName("test")
