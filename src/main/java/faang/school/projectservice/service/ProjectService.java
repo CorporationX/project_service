@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Objects;
 
 
 @Slf4j
@@ -28,6 +30,40 @@ public class ProjectService {
     private final ProjectResourceManager projectResourceManager;
     private final ProjectResourceService projectResourceService;
 
+
+    @Transactional
+    public String uploadCover(Long projectId, Long userId, MultipartFile file) {
+        Project project = projectRepository.getByIdOrThrow(projectId);
+        TeamMember teamMember = getTeamMemberFromProjectTeams(userId, project);
+
+        Pair<ProjectResource, ObjectMetadata> projectResourceWithMetadata = projectResourceManager.
+                getProjectCoverBeforeUploadFile(file, project, teamMember);
+        ProjectResource projectResource = projectResourceWithMetadata.getFirst();
+
+        if (project.getCoverImageId() != null) {
+            projectResourceManager.deleteFileS3Async(project.getCoverImageId());
+        }
+
+        project.setCoverImageId(projectResource.getKey());
+
+        projectRepository.save(project);
+        projectResourceService.save(projectResource);
+
+        projectResourceManager.uploadFileS3Async(file, projectResource, projectResourceWithMetadata.getSecond());
+        return projectResource.getKey();
+    }
+
+    @Transactional
+    public void removeCover(Long projectId, Long userId) {
+        Project project = projectRepository.getByIdOrThrow(projectId);
+        TeamMember teamMember = getTeamMemberFromProjectTeams(userId, project);
+        allowedToDeleteCoverFile(project, teamMember);
+
+        projectResourceManager.deleteFileS3Async(project.getCoverImageId());
+
+        project.setCoverImageId(null);
+        projectRepository.save(project);
+    }
 
     @Transactional
     public ProjectResource uploadFileToProject(Long projectId, Long userId, MultipartFile file) {
@@ -81,6 +117,27 @@ public class ProjectService {
 
         if (!project.equals(projectResource.getProject())) {
             throw new IllegalArgumentException("File not found in this project");
+        }
+    }
+
+    private void allowedToDeleteCoverFile(Project project, TeamMember teamMember) {
+        log.info("Deleting cover's file: {} from project: {}", project.getCoverImageId(), project.getId());
+
+        if (project.getCoverImageId() == null) {
+            throw new IllegalArgumentException("File not found in this project");
+        }
+
+        List<TeamMember> members = project.getTeams().stream()
+                .flatMap(memberTeam -> memberTeam.getTeamMembers().stream())
+                .filter(currentTeamMember -> Objects.equals(teamMember.getId(), currentTeamMember.getId()))
+                .toList();
+
+        if (members.isEmpty()) {
+            throw new IllegalArgumentException("User is not allowed to delete this file");
+        }
+
+        if (members.stream().noneMatch(teamMember1 -> teamMember1.getRoles().contains(TeamRole.MANAGER))) {
+            throw new IllegalArgumentException("User is not allowed to delete this file");
         }
     }
 

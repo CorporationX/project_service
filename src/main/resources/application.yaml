@@ -18,32 +18,39 @@ spring:
         enabled: true
         change-log: classpath:db/changelog/db.changelog-master.yaml
 
-    data:
-        redis:
-            port: 6379
-            host: localhost
-            channels:
-                calculations_channel:
-                    name: calculations_channel
+  data:
+    redis:
+      port: 6379
+      host: localhost
+      channels:
+        calculations_channel:
+          name: calculations_channel
 
 server:
-    port: 8082
+  port: 8082
 
 logging:
-    level:
-        root: info
+  level:
+    root: info
 
 calculations_messages_processing:
-    enabled: true
+  enabled: true
 
 services:
   s3:
-    endpoint: http://localhost:9000
+    endpoint: http://127.0.0.1:9000
     accessKey: user
     secretKey: password
     bucketName: corpbucket
     region: us-east-1
     isMocked: false
+
+  cover_image:
+    max-rectangle-width: 1080
+    max-rectangle-height: 566
+    max-square-dimension: 1080
+    max_cover_file_size: 5242880
+
   payment-service:
     host: http://localhost
     port: 9080
