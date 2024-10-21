@@ -1,9 +1,12 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.exception.FileTooLargeException;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.model.entity.Project;
+import faang.school.projectservice.model.event.ProjectViewEvent;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.impl.ProjectServiceImpl;
 import faang.school.projectservice.service.resource.S3Service;
@@ -12,6 +15,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,12 +31,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
-
     @InjectMocks
     private ProjectServiceImpl projectService;
 
@@ -50,6 +55,14 @@ public class ProjectServiceTest {
     @Mock
     private MultipartFile coverImage;
 
+    @Mock
+    UserContext userContext;
+
+    @Mock
+    ProjectViewEventPublisher projectViewEventPublisher;
+
+    @Captor
+    ArgumentCaptor<ProjectViewEvent> projectViewEventArgumentCaptor;
     private long maxFileSize;
     private Long projectId;
     private String imageName;
@@ -71,7 +84,7 @@ public class ProjectServiceTest {
         contentType = "image/png";
         coverImageKey = "unique-key";
         imageData = new byte[]{1, 2, 3};
-        projectService = new ProjectServiceImpl(projectRepository, s3Service, projectMapper, projectValidator);
+        projectService = new ProjectServiceImpl(projectRepository, s3Service, projectMapper, projectValidator, projectViewEventPublisher, userContext);
         projectService.setMaxWidth(1080);
         projectService.setMaxHeightHorizontal(566);
         projectService.setMaxHeightSquare(1080);
@@ -124,5 +137,14 @@ public class ProjectServiceTest {
         assertNotNull(result);
         assertNull(result.getCoverImageId());
         verify(s3Service, never()).deleteCoverImage(anyString());
+    }
+
+    @Test
+    void testGetProject() {
+        when(projectRepository.findById(projectId)).thenReturn(project);
+
+        projectService.getProject(projectId);
+
+        verify(projectViewEventPublisher, times(1)).publish(projectViewEventArgumentCaptor.capture());
     }
 }

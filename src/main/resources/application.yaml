@@ -21,13 +21,11 @@ spring:
     redis:
       port: 6379
       host: localhost
-#      channels:
-#        calculations_channel:
-#          name: calculations_channel
 
 redis:
   channels:
     fund-raised: fund_raised_channel
+    project-view: project_view_channel
 
 server:
   port: 8082

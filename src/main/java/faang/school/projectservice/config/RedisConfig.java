@@ -13,6 +13,9 @@ public class RedisConfig {
     @Value("${redis.channels.fund-raised}")
     private String fundRaisedEventChannel;
 
+    @Value("${redis.channels.project-view}")
+    private String projectViewChannel;
+
 
     public interface MessagePublisher<T> {
         void publish(T redisEvent);
@@ -30,5 +33,10 @@ public class RedisConfig {
     @Bean
     public ChannelTopic fundRaisedChannelTopic() {
         return new ChannelTopic(fundRaisedEventChannel);
+    }
+
+    @Bean
+    public ChannelTopic projectViewChannelTopic() {
+        return new ChannelTopic(projectViewChannel);
     }
 }
