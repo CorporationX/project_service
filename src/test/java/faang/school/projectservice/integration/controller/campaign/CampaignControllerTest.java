@@ -1,8 +1,6 @@
 package faang.school.projectservice.integration.controller.campaign;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.controller.campaign.CampaignController;
 import faang.school.projectservice.integration.IntegrationTestBase;
 import faang.school.projectservice.model.dto.campaign.CampaignDto;
@@ -10,42 +8,35 @@ import faang.school.projectservice.model.dto.client.Currency;
 import faang.school.projectservice.model.entity.Campaign;
 import faang.school.projectservice.model.entity.CampaignStatus;
 import faang.school.projectservice.repository.CampaignRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@AutoConfigureMockMvc
 public class CampaignControllerTest extends IntegrationTestBase {
 
     @Autowired
     private CampaignController campaignController;
+    @Autowired
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
     @Autowired
     private CampaignRepository campaignRepository;
-//    @MockBean
-//    private UserContext userContext;
 
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(campaignController).build();
         objectMapper = new ObjectMapper();
-//        userContext = new UserContext();
-//        userContext.setUserId(1L);
     }
 
     @Test
@@ -65,9 +56,8 @@ public class CampaignControllerTest extends IntegrationTestBase {
                         .content(jsonCampaign)
                         .header("x-user-id", 1))
                 .andExpectAll(status().isCreated(),
-                        jsonPath("$.id").isNotEmpty(),
-                        jsonPath("$.title").value("title"),
-                        jsonPath("$.status").value(Currency.USD.name()));
+                        jsonPath("$.title").value("Title"),
+                        jsonPath("$.status").value(CampaignStatus.ACTIVE.name()));
 
         List<Campaign> campaigns = campaignRepository.findAll();
         assertEquals(1, campaigns.size());

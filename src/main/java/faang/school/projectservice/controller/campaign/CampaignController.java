@@ -7,6 +7,7 @@ import faang.school.projectservice.service.CampaignService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class CampaignController {
     private final CampaignService campaignService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public CampaignDto publishCampaign(@Valid @RequestBody CampaignDto campaignDto){
         return campaignService.publishCampaign(campaignDto);
     }
