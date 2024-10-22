@@ -1,9 +1,10 @@
 package faang.school.projectservice.exception;
 
 import faang.school.projectservice.dto.response.ErrorResponse;
-import faang.school.projectservice.dto.response.Violation;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -12,8 +13,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @RestControllerAdvice
@@ -28,36 +27,35 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({DataValidationException.class, IllegalArgumentException.class, UserNotTeamMemberException.class, StorageSizeExceededException.class})
-    public ErrorResponse handleValidationExceptions(DataValidationException ex) {
+    public ErrorResponse handleGeneralExceptions(Exception ex) {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<Violation> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        final List<Violation> errors = new ArrayList<>();
+    public Map<String, String> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
-            errors.add(new Violation(
-                    (((FieldError) error).getField()), error.getDefaultMessage()
-            ));
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
         });
+        log.error(ex.getMessage(), ex);
         return errors;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<Violation> onConstraintValidationException(ConstraintViolationException ex) {
-        final List<Violation> violations = ex.getConstraintViolations().stream()
-                .map(
-                        violation -> new Violation(
-                                violation.getPropertyPath().toString(),
-                                violation.getMessage()
-                        )
-                )
-                .toList();
+    public Map<String, String> handleConstraintViolationException(ConstraintViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(violation -> {
+            String fieldName = violation.getPropertyPath().toString();
+            String errorMessage = violation.getMessage();
+            errors.put(fieldName, errorMessage);
+        });
         log.error(ex.getMessage(), ex);
-        return violations;
+        return errors;
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -83,8 +81,8 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Throwable.class)
-    public ErrorResponse handleResourceHandlingException(Throwable e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
+    public ErrorResponse handleThrowable(Throwable ex) {
+        log.error(ex.getMessage(), ex);
+        return new ErrorResponse("An unexpected error occurred.");
     }
 }
