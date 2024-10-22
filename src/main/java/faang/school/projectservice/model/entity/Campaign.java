@@ -63,6 +63,6 @@ public class Campaign {
 
     private Long updatedBy;
 
-//    @Column(name = "removed")
-//    private Boolean removed;
+    @Column(name = "removed")
+    private Boolean removed;
 }

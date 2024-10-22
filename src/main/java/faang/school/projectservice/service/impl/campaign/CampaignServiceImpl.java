@@ -62,7 +62,7 @@ public class CampaignServiceImpl implements CampaignService {
     public void deleteCampaign(long id) {
         long authorId = userContext.getUserId();
         Campaign campaign = findCampaignById(id);
-//        campaign.setRemoved(true);
+        campaign.setRemoved(true);
         campaign.setUpdatedBy(authorId);
         campaignRepository.save(campaign);
     }
