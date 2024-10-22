@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.event.ProjectEvent;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -9,6 +10,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.AbstractMessagePublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,12 +20,24 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Service
-@RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
+
+    private final AbstractMessagePublisher<ProjectEvent> publisher;
+
+    public ProjectServiceImpl(ProjectRepository projectRepository,
+                              ProjectMapper projectMapper,
+                              List<ProjectFilter> projectFilters,
+                              AbstractMessagePublisher<ProjectEvent> publisher
+    ) {
+        this.projectRepository = projectRepository;
+        this.projectMapper = projectMapper;
+        this.projectFilters = projectFilters;
+        this.publisher = publisher;
+    }
 
     @Override
     public ProjectDto createProject(ProjectDto projectDto) {
@@ -33,7 +47,14 @@ public class ProjectServiceImpl implements ProjectService {
         }
         projectDto.setStatus(ProjectStatus.CREATED);
         Project project = projectMapper.toProject(projectDto);
-        return projectMapper.toProjectDto(projectRepository.save(project));
+        ProjectDto returnProjectDto = projectMapper.toProjectDto(projectRepository.save(project));
+
+        ProjectEvent projectEvent = ProjectEvent.builder()
+                .projectId(returnProjectDto.getId())
+                .authorId(returnProjectDto.getOwnerId())
+                .build();
+        publisher.publish(projectEvent);
+        return returnProjectDto;
     }
 
     @Override

@@ -24,6 +24,10 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        project_channel:
+          name: project_channel
+      publisher:
+        delay: 5000
   servlet:
     multipart:
       max-file-size: 100MB
