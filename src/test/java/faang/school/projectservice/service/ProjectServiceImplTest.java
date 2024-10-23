@@ -129,8 +129,8 @@ public class ProjectServiceImplTest {
     // secondProject.setName("Name second");
     // requester.setUserId(1L);
 
-        when(projectRepository.findAll()).thenReturn(projects);
-        ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher, s3Service);
+      //  when(projectRepository.findAll()).thenReturn(projects);
+     //   ProjectServiceImpl service = new ProjectServiceImpl(projectRepository, mapper, filters, projectViewEventPublisher, s3Service);
 
     // List<ProjectDto> result = service.getProjectsFilters(filterDto, requester);
     //  assertThat(result).isEqualTo(projects);

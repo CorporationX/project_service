@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProjectViewEventPublisher implements MessagePublisher<ProjectViewEvent> {
 
-    private final RedisTemplate<String, ProjectViewEvent> redisTemplate;
+    private final RedisTemplate<String, ProjectViewEvent> redisTemplateConfig;
     private final ChannelTopic topic;
 
     @Override
     public void publish(ProjectViewEvent message) {
         log.info("Publishing message to topic: {}", topic.getTopic());
-        redisTemplate.convertAndSend(topic.getTopic(), message);
+        redisTemplateConfig.convertAndSend(topic.getTopic(), message);
         log.info("Message published successfully to topic: {}", topic.getTopic());
     }
 }

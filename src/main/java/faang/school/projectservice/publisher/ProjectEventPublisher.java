@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ProjectEventPublisher {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplateConfig;
     private final RedisProperties redisProperties;
 
     public void publish(ProjectEvent event) {
         String channelName = redisProperties.getChannels().get("project-event-channel");
-        redisTemplate.convertAndSend(channelName, event);
+        redisTemplateConfig.convertAndSend(channelName, event);
         log.info("Published event {}", event);
     }
 }
