@@ -24,7 +24,7 @@ public class DonationValidator {
             throw new DataValidationException("Donation user does not exist in database");
         }
 
-        Campaign campaign = campaignService.getCampaign(donationDto.campaignId());
+        Campaign campaign = campaignService.findCampaignById(donationDto.campaignId());
         if (campaign.getStatus() != CampaignStatus.ACTIVE) {
             throw new DataValidationException("Campaign is not active");
         }
