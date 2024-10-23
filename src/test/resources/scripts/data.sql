@@ -108,12 +108,8 @@ VALUES ('john_doe', 'securePassword123', 'john.doe@example.com', '+1234567890', 
 INSERT INTO users (username, password, email, phone, about_me, active, city, country_id, experience)
 VALUES ('jane_smith', 'anotherSecurePassword456', 'jane.smith@example.com', '+0987654321', 'Data scientist passionate about AI and ML', true, 'San Francisco', 2, 3);
 
---INSERT INTO project (name, description, parent_project_id, storage_size, max_storage_size, owner_id, status, visibility, cover_image_id)
---VALUES ('AI Research Project', 'A project focused on artificial intelligence and machine learning', NULL, 5000, 10000, 1, 'ACTIVE', 'PUBLIC', 'img_12345');
-
 INSERT INTO project (name, description, status, visibility)
 VALUES ('AI Research Project', 'A project focused on artificial intelligence and machine learning', 'CREATED', 'PUBLIC');
-
 
 insert into team (project_id) values (1);
 
@@ -122,3 +118,5 @@ insert into team_member (user_id, team_id) values (2, 1);
 
 insert into team_member_roles (team_member_id, role) values (1, 'MANAGER');
 insert into team_member_roles (team_member_id, role) values (2, 'DEVELOPER');
+
+insert into campaign  (title, description, status) values ('title', 'descr', 'ACTIVE');
