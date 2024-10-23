@@ -4,6 +4,7 @@ import faang.school.projectservice.publisher.ProjectEventPublisher;
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.dto.client.TeamMemberDto;
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.filter.ProjectFilters;
 import faang.school.projectservice.mapper.ProjectEventMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -11,10 +12,15 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -30,6 +36,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final List<ProjectFilters> filters;
     private final ProjectEventPublisher projectEventPublisher;
     private final ProjectEventMapper projectEventMapper;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
+    private final S3Service s3Service;
 
     @Override
     public void createProject(ProjectDto projectDto) {
@@ -94,8 +102,55 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public ProjectDto findById(long id, long userId) {
+        Project project = projectRepository.getProjectById(id);
+        projectViewEventPublisher.publish(new ProjectViewEvent(id, userId, LocalDateTime.now()));
+        return mapper.toDto(project);
+    }
+
+    @Override
     public ProjectDto findById(long id) {
-        return mapper.toDto(projectRepository.getProjectById(id));
+        Project project = projectRepository.getProjectById(id);
+        return mapper.toDto(project);
+    }
+
+    @Override
+    public void addCoverImage(Long projectId, MultipartFile coverImage) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        saveCoverImage(project, coverImage);
+    }
+
+    @Override
+    public void updateCoverImage(Long projectId, MultipartFile coverImage) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        String key = project.getCoverImageId();
+        if (key != null) {
+            s3Service.delete(key);
+        }
+
+        saveCoverImage(project, coverImage);
+    }
+
+    @Override
+    public InputStream getCoverImage(Long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+
+        return s3Service.download(key);
+    }
+
+    @Override
+    public void deleteCoverImage(Long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+        String key = project.getCoverImageId();
+
+        if (key != null) {
+            s3Service.delete(key);
+            project.setCoverImageId(null);
+            projectRepository.save(project);
+        }
     }
 
     private List<Project> findByName(String name) {
@@ -122,5 +177,13 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
         return null;
+    }
+
+    private void saveCoverImage(Project project, MultipartFile coverImage) {
+        String folder = project.getName() + project.getId() + "coverImage";
+        String key = s3Service.upload(coverImage, folder);
+
+        project.setCoverImageId(key);
+        projectRepository.save(project);
     }
 }

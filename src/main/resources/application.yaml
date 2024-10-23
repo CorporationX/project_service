@@ -22,7 +22,8 @@ spring:
       port: 6379
       host: localhost
       channels:
-        project-event-channel: project-event
+        analitic-project-profile-attendance-channel: appa_channel
+        project-channel: project_channel
         calculations_channel:
           name: calculations_channel
 
@@ -46,7 +47,7 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     isMocked: false
   payment-service:
     host: http://localhost
