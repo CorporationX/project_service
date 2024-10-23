@@ -22,8 +22,10 @@ spring:
       port: 6379
       host: localhost
       channels:
-        calculations_channel: calculations_channel
         analitic-project-profile-attendance-channel: appa_channel
+        project-channel: project_channel
+        calculations_channel:
+          name: calculations_channel
 
 server:
   port: 8082
