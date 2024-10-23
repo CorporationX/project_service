@@ -4,5 +4,5 @@ import faang.school.projectservice.model.entity.Campaign;
 
 public interface CampaignService {
 
-    public Campaign getCampaign(long id);
+    Campaign findCampaignById(long id);
 }

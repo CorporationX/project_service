@@ -16,8 +16,9 @@ public class CampaignServiceImpl implements CampaignService {
 
     @Override
     @Transactional(readOnly = true)
-    public Campaign getCampaign(long id) {
+    public Campaign findCampaignById(long id) {
         return campaignRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Campaign with id %s not found".formatted(id)));
+                .orElseThrow(() -> new EntityNotFoundException("Campaign with id %s was not found"
+                        .formatted(id)));
     }
 }
