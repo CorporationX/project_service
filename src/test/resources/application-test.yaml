@@ -1,0 +1,6 @@
+calculations_messages_processing:
+  enabled: false
+
+spring:
+  liquibase:
+    enabled: false

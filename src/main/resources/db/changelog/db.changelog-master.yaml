@@ -25,3 +25,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V015_resource_roles.sql
   - include:
       file: db/changelog/changeset/project_V016_meet.sql
+  - include:
+      file: db/changelog/changeset/project_V017_campaign_column_removed_add.xml
