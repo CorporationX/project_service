@@ -21,7 +21,6 @@ public abstract class IntegrationTestBase {
     @Container
     private static final PostgreSQLContainer<?> postgres =
             new PostgreSQLContainer<>(DockerImageName.parse("postgres:13.3"));
-//                    .withInitScript("scripts/data.sql");
 
     @DynamicPropertySource
     static void configProperties(DynamicPropertyRegistry registry) {
