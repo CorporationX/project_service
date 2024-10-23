@@ -31,7 +31,7 @@ public abstract class IntegrationTestBase {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
-        registry.add("spring.data.redis.port", () -> REDIS_CONTAINER.getMappedPort(6379));
+        registry.add("spring.data.redis.port", REDIS_CONTAINER::getFirstMappedPort);
         registry.add("spring.datasource.host", REDIS_CONTAINER::getHost);
     }
 }
