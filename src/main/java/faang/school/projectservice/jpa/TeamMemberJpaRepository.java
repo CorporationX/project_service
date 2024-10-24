@@ -1,6 +1,7 @@
 package faang.school.projectservice.jpa;
 
 import faang.school.projectservice.model.entity.TeamMember;
+import faang.school.projectservice.model.enums.TeamRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,11 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
                     "AND t.project.id = :projectId"
     )
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
+
+    @Query("select distinct tm.roles from TeamMember tm " +
+            "join tm.team t " +
+            "where t.project.id = :projectId and tm.userId = :userId")
+    List<TeamRole> findRolesByProjectIdAndUserId(Long projectId, Long userId);
 
     List<TeamMember> findByUserId(long userId);
 

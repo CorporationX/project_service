@@ -7,7 +7,7 @@ import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.impl.ProjectServiceImpl;
 import faang.school.projectservice.service.resource.S3Service;
-import faang.school.projectservice.validator.project.ProjectValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.resource;
+package faang.school.projectservice.controller;
 
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.model.dto.ResourceDto;

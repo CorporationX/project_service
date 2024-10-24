@@ -2,7 +2,7 @@ package faang.school.projectservice.meet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import faang.school.projectservice.controller.calendar.MeetController;
+import faang.school.projectservice.controller.MeetController;
 import faang.school.projectservice.model.dto.ZonedDateTimeDto;
 import faang.school.projectservice.model.dto.MeetDto;
 import faang.school.projectservice.model.dto.MeetFilterDto;

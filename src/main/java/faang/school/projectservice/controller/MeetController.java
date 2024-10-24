@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.calendar;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.model.dto.MeetDto;
 import faang.school.projectservice.model.dto.MeetFilterDto;

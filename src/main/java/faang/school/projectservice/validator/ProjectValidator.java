@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.project;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;

@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.resource;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.controller.ResourceController;
 import faang.school.projectservice.model.dto.ResourceDto;
 import faang.school.projectservice.service.impl.ResourceServiceImpl;
 import lombok.RequiredArgsConstructor;

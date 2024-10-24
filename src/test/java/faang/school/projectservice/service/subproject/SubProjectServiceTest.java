@@ -11,7 +11,7 @@ import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.filter.impl.SubProjectNameFilter;
 import faang.school.projectservice.filter.impl.SubProjectStatusFilter;
 import faang.school.projectservice.service.impl.SubProjectServiceImpl;
-import faang.school.projectservice.validator.subproject.ValidatorService;
+import faang.school.projectservice.validator.ValidatorService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
