@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CampaignServiceImplTest {
+public class CampaignServiceTest {
     @Mock
     private UserContext userContext;
     @Mock

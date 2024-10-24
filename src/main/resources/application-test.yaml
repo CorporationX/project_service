@@ -1,2 +1,5 @@
 calculations_messages_processing:
   enabled: false
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/db.test-changelog-master.yaml
