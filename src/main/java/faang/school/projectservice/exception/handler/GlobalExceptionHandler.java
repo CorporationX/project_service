@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String SOMETHING_ERROR = "Something went wrong";
+
     @Value("${project.service.name}")
     private String serviceName;
 
@@ -30,7 +34,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleDataExceptions(RuntimeException exception) {
         String message = exception.getMessage();
-        log.error("Error: {}", message);
+        log.error("Error: {}", message, exception);
         return ErrorResponse.builder()
                 .serviceName(serviceName)
                 .globalMessage(message)
@@ -105,6 +109,24 @@ public class GlobalExceptionHandler {
         return ErrorResponse.builder()
                 .errors(errors)
                 .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        Map<String, String> errors = exception.getBindingResult()
+                .getAllErrors()
+                .stream()
+                .collect(Collectors.toMap(
+                        error -> error instanceof FieldError ? ((FieldError) error).getField() : "Error",
+                        error -> Optional.ofNullable(error.getDefaultMessage()).orElse(SOMETHING_ERROR)
+                ));
+        log.error("Validation errors: {}", errors);
+
+        return ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .errors(errors)
                 .build();
     }
 }

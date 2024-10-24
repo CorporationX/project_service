@@ -26,7 +26,7 @@ public class Stage {
     @Column(name = "project_stage_name", nullable = false)
     private String stageName;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 

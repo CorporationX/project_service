@@ -3,6 +3,7 @@ package faang.school.projectservice.repository;
 import faang.school.projectservice.model.Campaign;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,5 +25,12 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
                                     @Param("minGoal") BigDecimal minGoal,
                                     @Param("maxGoal") BigDecimal maxGoal,
                                     @Param("status") String status,
+
                                     Pageable pageable);
+    @Modifying
+    @Query("""
+            UPDATE Campaign c SET c.deleted = true, c.deletedAt = CURRENT_TIMESTAMP
+            WHERE c.id = :id
+            """)
+    void softDelete(Long id);
 }
