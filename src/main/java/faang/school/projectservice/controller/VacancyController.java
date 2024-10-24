@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.client.VacancyCreateDto;
 import faang.school.projectservice.dto.client.VacancyFilterDto;
 import faang.school.projectservice.dto.client.VacancyUpdateDto;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.filter.VacancyFilter;
 import faang.school.projectservice.service.VacancyService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +16,14 @@ import java.util.List;
 public class VacancyController {
     private final VacancyService vacancyService;
 
-    @PostMapping
+    @PostMapping("/create")
     public Vacancy createVacancy(@RequestBody VacancyCreateDto vacancyDto) {
         return vacancyService.createVacancy(vacancyDto);
     }
 
     @PutMapping("/update/{id}")
-    public void updateVacancy(@PathVariable Long id) {
-        vacancyService.updateVacancy(id);
+    public void updateVacancy(@PathVariable Long id, VacancyUpdateDto vacancyUpdateDto) {
+        vacancyService.updateVacancy(id, vacancyUpdateDto);
     }
 
     @DeleteMapping("/delete/{id}")

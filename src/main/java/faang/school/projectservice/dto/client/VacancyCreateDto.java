@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class VacancyCreateDto {
+
     private String name;
     private String description;
     private Long projectId;

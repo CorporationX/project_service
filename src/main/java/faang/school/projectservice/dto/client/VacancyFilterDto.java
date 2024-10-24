@@ -16,22 +16,13 @@ public class VacancyFilterDto {
     private String descriptionPattern;
     private Project projectPattern;
     private List<Candidate> candidatesPattern;
-
     private LocalDateTime createdAtPattern;
-
     private LocalDateTime updatedAtPattern;
-
     private Long createdByPattern;
-
     private Long updatedByPattern;
-
     private VacancyStatus statusPattern;
-
     private Double salaryPattern;
-
     private WorkSchedule workSchedulePattern;
-
     private Integer countPattern;
-
     private List<Long> requiredSkillIdsPattern;
 }
