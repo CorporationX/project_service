@@ -1,8 +1,12 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.resource.ResourceDownloadDto;
+import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.project.ProjectImageService;
+import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,6 +27,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProjectController {
     private final UserContext userContext;
     private final ProjectImageService projectImageService;
+    private final ProjectService projectService;
+    private final ProjectMapper mapper;
+
+    @GetMapping("/{projectId}")
+    public ProjectDto findProject(@PathVariable long projectId) {
+        Project project = projectService.findById(projectId);
+
+        return mapper.toDto(project);
+    }
 
     @PutMapping("/{projectId}/add/cover")
     @ResponseStatus(HttpStatus.CREATED)
