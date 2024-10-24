@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,6 +22,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProjectCoverServiceImpl implements ProjectCoverService {
     private static final int BYTES_IN_MEGABYTE = 1024 * 1024;
+    private static final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList(
+            "image/jpeg",
+            "image/png",
+            "image/gif"
+    );
 
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
@@ -71,10 +78,6 @@ public class ProjectCoverServiceImpl implements ProjectCoverService {
 
     private boolean isImageFile(MultipartFile file) {
         String contentType = file.getContentType();
-        return contentType != null && (
-                contentType.equalsIgnoreCase("image/jpeg") ||
-                        contentType.equalsIgnoreCase("image/png") ||
-                        contentType.equalsIgnoreCase("image/gif")
-        );
+        return contentType != null && ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase());
     }
 }
