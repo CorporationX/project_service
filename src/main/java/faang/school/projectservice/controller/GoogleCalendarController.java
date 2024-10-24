@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.calendar;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.model.dto.CalendarEventDto;
 import faang.school.projectservice.service.GoogleCalendarService;

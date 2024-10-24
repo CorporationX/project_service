@@ -2,7 +2,7 @@ package faang.school.projectservice.google.calendar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import faang.school.projectservice.controller.calendar.GoogleCalendarController;
+import faang.school.projectservice.controller.GoogleCalendarController;
 import faang.school.projectservice.model.dto.CalendarEventDto;
 import faang.school.projectservice.model.dto.ZonedDateTimeDto;
 import faang.school.projectservice.service.GoogleCalendarService;

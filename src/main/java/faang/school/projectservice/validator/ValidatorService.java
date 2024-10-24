@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.subproject;
+package faang.school.projectservice.validator;
 
 import com.amazonaws.services.kms.model.AlreadyExistsException;
 import com.amazonaws.services.kms.model.NotFoundException;

@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.model.entity.Project;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -10,7 +9,6 @@ import java.io.InputStream;
 public interface ProjectService {
     Project getProjectById(Long id);
 
-    @Transactional
     ProjectDto uploadCoverImage(Long projectId, MultipartFile coverImage);
 
     InputStream downloadCoverImage(Long projectId);

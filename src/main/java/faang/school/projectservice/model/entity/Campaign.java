@@ -63,4 +63,7 @@ public class Campaign {
     private LocalDateTime updatedAt;
 
     private Long updatedBy;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 }

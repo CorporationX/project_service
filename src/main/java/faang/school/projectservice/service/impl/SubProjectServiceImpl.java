@@ -9,7 +9,7 @@ import faang.school.projectservice.model.enums.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.service.SubProjectService;
-import faang.school.projectservice.validator.subproject.ValidatorService;
+import faang.school.projectservice.validator.ValidatorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

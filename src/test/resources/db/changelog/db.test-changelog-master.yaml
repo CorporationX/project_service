@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changeset/0_create_test_users_table.sql
+  - include:
+      file: db/changelog/db.changelog-master.yaml

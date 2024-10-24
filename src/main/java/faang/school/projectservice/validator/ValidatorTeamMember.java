@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.resource;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.model.entity.TeamMember;

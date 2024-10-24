@@ -1,6 +1,6 @@
 package faang.school.projectservice.internship;
 
-import faang.school.projectservice.controller.internship.InternshipController;
+import faang.school.projectservice.controller.InternshipController;
 import faang.school.projectservice.model.dto.InternshipFilterDto;
 import faang.school.projectservice.model.dto.InternshipDto;
 import faang.school.projectservice.model.enums.InternshipStatus;

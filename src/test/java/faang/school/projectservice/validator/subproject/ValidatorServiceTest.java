@@ -5,6 +5,7 @@ import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.model.entity.Project;
 import faang.school.projectservice.model.enums.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.validator.ValidatorService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

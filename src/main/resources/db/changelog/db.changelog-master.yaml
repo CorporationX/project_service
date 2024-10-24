@@ -33,3 +33,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V019_google_tokens.sql
   - include:
       file: db/changelog/changeset/project_V020_google_credentials.sql
+  - include:
+      file: db/changelog/changeset/project_V021_add_deleted_to_campaign.sql
