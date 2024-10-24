@@ -43,7 +43,7 @@ public class Project {
     @Column(name = "jira_key", length = 100)
     private String jiraKey;
 
-    @ManyToOne(cascade={CascadeType.ALL})
+    @ManyToOne(cascade={CascadeType.ALL}, fetch = FetchType.LAZY)
     @JoinColumn(name="parent_project_id")
     private Project parentProject;
 

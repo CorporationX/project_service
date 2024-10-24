@@ -70,3 +70,5 @@ databaseChangeLog:
                     nullable: false
   - include:
       file: db/changelog/changeset/project_V017__add_jira_key_column.sql
+  - include:
+      file: db/changelog/changeset/project_V018__add_deleted_column.sql

@@ -1,6 +1,5 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto;
 
-import faang.school.projectservice.model.TeamRole;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -8,19 +7,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeamMemberDto {
-
-    @Positive
-    private Long userId;
+public class CampaignUpdateDto {
 
     @NotNull
-    private TeamDto team;
+    @Positive
+    private Long id;
 
-    private List<TeamRole> roles;
+    @Positive
+    private Long updatedBy;
+
+    private String title;
+    private String description;
+
 }

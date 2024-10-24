@@ -37,8 +37,8 @@ public class ProjectDto {
     @Positive(message = "ID should not be null")
     private Long id;
 
+    private Long ownerId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<TeamDto> teams;
     private String jiraKey;
 }

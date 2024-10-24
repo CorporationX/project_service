@@ -30,7 +30,7 @@ public class TeamMember {
     @Enumerated(EnumType.STRING)
     private List<TeamRole> roles;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", referencedColumnName = "id")
     private Team team;
 
