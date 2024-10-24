@@ -22,8 +22,10 @@ public class AwsS3Config {
     @Bean
     public AmazonS3 amazonClient() {
         return AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(s3Params.getEndpoint(), Regions.EU_CENTRAL_1.getName()))
-                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(s3Params.getAccessKey(), s3Params.getSecretKey())))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                        s3Params.getEndpoint(), Regions.EU_CENTRAL_1.getName()))
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(
+                        s3Params.getAccessKey(), s3Params.getSecretKey())))
                 .withPathStyleAccessEnabled(true)
                 .build();
     }
