@@ -11,6 +11,7 @@ import faang.school.projectservice.mapper.CampaignMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.CampaignRepository;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.CampaignValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +73,6 @@ public class CampaignServiceImplTest {
 
     private CampaignDto campaignDto;
     private Campaign campaign;
-    private Project project;
     private long projectId;
     private long creatorId;
     private long campaignId;
@@ -87,10 +87,11 @@ public class CampaignServiceImplTest {
         projectId = 1L;
         creatorId = 1L;
         campaignId = 1L;
-        project = Project.builder()
+        Project project = Project.builder()
                 .id(projectId)
                 .build();
         campaignDto = CampaignDto.builder()
+                .id(campaignId)
                 .creatorId(creatorId)
                 .projectId(projectId)
                 .build();
@@ -206,6 +207,7 @@ public class CampaignServiceImplTest {
 
     @Test
     public void getCampaignsSortedByCreatedAtAndByFilter_ShouldReturnFilteredCampaigns_WhenCampaignsExist() {
+        campaignDto.setId(null);
         mockFilter(invocation -> {
             Stream<Campaign> stream = invocation.getArgument(0);
             return stream.filter(c -> c.getCreatedBy() == creatorId);

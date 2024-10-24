@@ -9,6 +9,7 @@ import faang.school.projectservice.filter.CampaignFilter;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.repository.CampaignRepository;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.CampaignValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
