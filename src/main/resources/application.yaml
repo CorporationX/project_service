@@ -22,6 +22,8 @@ spring:
       port: 6379
       host: localhost
       channels:
+        achievement:
+          name: achievement_channel
         calculations_channel:
           name: calculations_channel
         project-view-channel:
