@@ -34,6 +34,9 @@ public class Campaign {
     @Column(name = "description", length = 4096)
     private String description;
 
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = false;
+
     @Column(name = "goal")
     private BigDecimal goal;
 

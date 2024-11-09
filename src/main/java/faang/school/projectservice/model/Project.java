@@ -90,4 +90,7 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Meet> meets;
+
+    @OneToMany(mappedBy = "project")
+    private List<Campaign> campaigns;
 }

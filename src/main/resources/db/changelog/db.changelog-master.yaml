@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V018_create_google_calendar_token.sql
   - include:
         file: db/changelog/changeset/project_V019_add_google_calendar_and_event_id_meet.sql
+  - include:
+        file: db/changelog/changeset/project_V020_alter_campaign_add_deleted.sql
