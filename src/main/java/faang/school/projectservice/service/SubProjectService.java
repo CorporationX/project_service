@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProjectService {
+public class SubProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;

@@ -1,14 +1,12 @@
 package faang.school.projectservice.controller.subprojectController;
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.CreateSubProjectDto;
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.ProjectDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.SubProjectService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/subprojects")
@@ -16,10 +14,10 @@ import java.util.List;
 @Slf4j
 public class SubProjectController {
 
-    private final ProjectService projectService;
+    private final SubProjectService projectService;
 
     @Autowired
-    public SubProjectController(ProjectService projectService) {
+    public SubProjectController(SubProjectService projectService) {
         this.projectService = projectService;
     }
 

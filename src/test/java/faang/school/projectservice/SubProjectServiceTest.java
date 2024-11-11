@@ -7,7 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.SubProjectService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +23,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectServiceTest {
+public class SubProjectServiceTest {
 
     @InjectMocks
-    private ProjectService projectService;
+    private SubProjectService projectService;
 
     @Mock
     private ProjectRepository projectRepository;
