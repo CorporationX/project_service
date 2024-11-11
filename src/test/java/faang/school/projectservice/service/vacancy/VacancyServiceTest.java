@@ -2,12 +2,11 @@ package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.mapper.VacancyMapper;
+import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.VacancyService;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

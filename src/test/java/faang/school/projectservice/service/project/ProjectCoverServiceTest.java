@@ -162,7 +162,7 @@ class ProjectCoverServiceTest {
     class DeleteCover {
 
         @Test
-        @DisplayName("should delete the cover and update the project")
+        @DisplayName("should delete the cover and updateCampaign the project")
         void whenDeleteCoverThenRemoveCoverAndSaveProject() {
             Project project = new Project();
             project.setId(PROJECT_ID);

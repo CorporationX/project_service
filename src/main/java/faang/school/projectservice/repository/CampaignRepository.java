@@ -25,4 +25,6 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
                                     @Param("maxGoal") BigDecimal maxGoal,
                                     @Param("status") String status,
                                     Pageable pageable);
+
+    List<Campaign> findAllByProjectId(Long projectId);
 }

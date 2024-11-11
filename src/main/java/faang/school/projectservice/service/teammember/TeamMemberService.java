@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
@@ -51,13 +52,13 @@ public class TeamMemberService {
     }
 
     private void checkIfMemberExists(AddTeamMemberDto addTeamMemberDto) {
-        TeamMember existingMember = teamMemberRepository.findByUserIdAndProjectId(
+        Optional<TeamMember> existingMember = teamMemberRepository.findByUserIdAndProjectId(
                 addTeamMemberDto.getUserId(),
                 addTeamMemberDto.getProjectId());
 
-        if (existingMember != null && existingMember.getUserId().equals(addTeamMemberDto.getUserId())) {
-            throw new IllegalArgumentException(
-                    "The member with userId: " + addTeamMemberDto.getUserId() + "already exists.");
+        if (existingMember.isPresent() && existingMember.get().getUserId().equals(addTeamMemberDto.getUserId())) {
+            throw new IllegalArgumentException("The member with userId: " +
+                    addTeamMemberDto.getUserId() + " already exists.");
         }
     }
 
@@ -71,7 +72,7 @@ public class TeamMemberService {
         String nickName = teamMemberDto.getNickname();
 
         if (!roles.isEmpty() && !teamMember.getRoles().contains(TeamRole.TEAMLEAD)) {
-            throw new IllegalArgumentException("Only TEAMLEAD can update roles and permissions");
+            throw new IllegalArgumentException("Only TEAMLEAD can updateCampaign roles and permissions");
         }
         if (!nickName.isEmpty() && !id.equals(updater.getId())) {
             throw new IllegalArgumentException("Nickname can be edited only by yourself");

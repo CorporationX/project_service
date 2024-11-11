@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectFilterDto  extends FilterDto {
+public class ProjectFilterDto extends FilterDto {
     private String name;
     private ProjectStatus status;
 }

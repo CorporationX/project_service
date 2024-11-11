@@ -139,7 +139,7 @@ class MomentServiceTest {
         }
 
         @Test
-        @DisplayName("When valid moment ID and DTO are provided then update the moment")
+        @DisplayName("When valid moment ID and DTO are provided then updateCampaign the moment")
         void whenValidMomentIdAndDtoProvidedThenUpdateMoment() {
             when(momentRepository.findById(MOMENT_ID)).thenReturn(Optional.of(moment));
             when(projectService.getProjectByIds(momentDto.getProjectIds())).thenReturn(List.of(project));

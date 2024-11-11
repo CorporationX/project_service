@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.vacancy;
 
 import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
@@ -8,8 +8,9 @@ import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface VacancyMapper {
 
     @Mapping(source = "project.id", target = "projectId")

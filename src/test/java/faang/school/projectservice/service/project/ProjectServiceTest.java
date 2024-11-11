@@ -87,7 +87,7 @@ class ProjectServiceTest {
         }
 
         @Test
-        @DisplayName("Successful project description and status update")
+        @DisplayName("Successful project description and status updateCampaign")
         public void whenUpdateThenSaveProject() {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(ID);

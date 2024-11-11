@@ -46,7 +46,7 @@ public class InternshipControllerTest {
     }
 
     @Test
-    @DisplayName("Controller calls service.update one time and return updated dto")
+    @DisplayName("Controller calls service.updateCampaign one time and return updated dto")
     public void whenControllerCallsServiceUpdateOneTimeThenReturnUpdatedDto() {
         internshipDto = InternshipDto.builder()
                 .id(INTERNSHIP_ID_IS_ONE)

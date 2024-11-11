@@ -97,7 +97,7 @@ public class TeamMemberServiceTest {
 
             when(userContext.getUserId()).thenReturn(1L);
             when(teamMemberRepository.findById(1L)).thenReturn(Optional.of(owner));
-            when(teamMemberRepository.findByUserIdAndProjectId(3L, 1L)).thenReturn(null);
+            when(teamMemberRepository.findByUserIdAndProjectId(3L, 1L)).thenReturn(Optional.empty());
             when(teamMemberMapper.toEntity(any(AddTeamMemberDto.class))).thenReturn(teamMember);
             when(teamMemberRepository.save(any(TeamMember.class))).thenReturn(teamMember);
             when(teamMemberMapper.toDto(any(TeamMember.class))).thenReturn(teamMemberDto);
@@ -169,7 +169,7 @@ public class TeamMemberServiceTest {
                 teamMemberService.updateTeamMember(updateTeamMemberDto.getId(), updateTeamMemberDto);
             });
 
-            assertEquals("Only TEAMLEAD can update roles and permissions", exception.getMessage());
+            assertEquals("Only TEAMLEAD can updateCampaign roles and permissions", exception.getMessage());
             verify(teamMemberRepository, never()).save(any(TeamMember.class));
         }
     }

@@ -222,7 +222,7 @@ public class ResourceServiceTest {
 
     @Test
     @DisplayName("When resourceId and teamMemberId passed, check if it's project owner or fileOwner " +
-            "then delete object in S3 storage, update resource as it's deleted")
+            "then delete object in S3 storage, updateCampaign resource as it's deleted")
     public void whenResourceIdAndTeamMemberIdPassedThenDeleteFileFromS3AndUpdateResource() {
         when(resourceRepository.findById(RESOURCE_ID_ONE)).thenReturn(Optional.of(resource));
         when(teamMemberService.getTeamMemberById(TEAM_MEMBER_ID_ONE)).thenReturn(teamMemberDto);
