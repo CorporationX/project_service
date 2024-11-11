@@ -1,21 +1,27 @@
-package faang.school.projectservice.dto.subprojectDto;
+package faang.school.projectservice.dto.subprojectDto.subprojectDto;
 
-import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Project;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateSubProjectDto {
+    Long id;
     @NotNull
-    private Long parentProjectId;
+    private Long parentID;
     @NotNull
     private String name;
     @NotNull
     private String description;
     @NotNull
-    private ProjectStatus status;
+    private Boolean isPrivate;
+    private List<Project> children;
 }
