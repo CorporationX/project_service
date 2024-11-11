@@ -187,7 +187,6 @@ public class SubProjectServiceTest {
 
     @Test
     void testGetSubProject_NoSubProjects() {
-        // Arrange
         Long parentProjectId = 1L;
         Long subProjectId = 2L;
 
