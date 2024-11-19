@@ -6,5 +6,5 @@ public enum TaskStatus {
     REVIEW,
     TESTING,
     DONE,
-    CANCELLED,
+    CANCELLED, projectService,
 }
