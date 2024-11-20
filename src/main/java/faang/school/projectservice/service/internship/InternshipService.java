@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.exception.internship.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.internship.InternshipFilterDto;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.*;
@@ -18,8 +18,6 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
