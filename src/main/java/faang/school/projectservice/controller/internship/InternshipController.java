@@ -32,7 +32,7 @@ public class InternshipController {
     @GetMapping("/status")
     public List<InternshipDto> getAllInternshipByStatus(@RequestParam @NotNull Long projectId,
                                                         @RequestBody @Valid InternshipFilterDto filters) {
-        return internshipService.getAllInternshipByStatus(projectId, filters);
+        return internshipService.getAllInternshipByStatusAndRole(projectId, filters);
     }
 
     @GetMapping(("/allinternship"))

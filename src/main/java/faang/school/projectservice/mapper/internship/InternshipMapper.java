@@ -19,7 +19,6 @@ public interface InternshipMapper {
 
     List<InternshipDto> toListDto(List<Internship> internship);
 
-    //@Mapping(target = "interns", ignore = true)
     @Mapping(source = "mentorId", target = "mentorId", qualifiedByName = "toTeamMember")
     Internship toEntity(InternshipDto internshipDto);
 

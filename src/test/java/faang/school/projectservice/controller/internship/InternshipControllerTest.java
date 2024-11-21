@@ -47,9 +47,6 @@ public class InternshipControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-//    @Autowired
-//    private ObjectMapper objectMapper;
-
     @Test
     void positiveTestForCreateDtoMethod() throws Exception {
         InternshipDto internshipDto = InternshipDto.builder()
@@ -192,7 +189,7 @@ public class InternshipControllerTest {
                 .projectId(1L)
                 .build();
 
-        when(service.getAllInternshipByStatus(eq(1L), any(InternshipFilterDto.class)))
+        when(service.getAllInternshipByStatusAndRole(eq(1L), any(InternshipFilterDto.class)))
                 .thenReturn(List.of(internshipDto));
 
         mockMvc.perform(get(GET_URL_BY_STATUS)

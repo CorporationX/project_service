@@ -96,7 +96,8 @@ public class InternshipService {
         internshipRepository.save(internshipEntity);
     }
 
-    public List<InternshipDto> getAllInternshipByStatus(@Valid @NotNull Long projectId, InternshipFilterDto filters) {
+    //3 Получить все стажировки проекта с фильтрами по статусу или роли.
+    public List<InternshipDto> getAllInternshipByStatusAndRole(Long projectId, InternshipFilterDto filters) {
         List<Internship> allInternship = internshipRepository.findAll();
         return allInternship.stream()
                 .filter(internship -> internship.getProject().getId().equals(projectId))
@@ -107,12 +108,14 @@ public class InternshipService {
                 .map(internshipMapper::toDto).toList();
     }
 
+    //4 Получить все стажировки.
     public List<InternshipDto> getAllInternship() {
         List<Internship> internships = internshipRepository.findAll();
         return internshipMapper.toListDto(internships);
     }
 
-    public InternshipDto getInternshipById(@Valid @NotNull Long id) {
+    //5 Получить стажировку по id.
+    public InternshipDto getInternshipById(Long id) {
         Internship internships = internshipRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Интернатура с ID " + id + " не найдена"));
         return internshipMapper.toDto(internships);

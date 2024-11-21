@@ -56,17 +56,15 @@ public class InternshipServiceTest {
 
     @Test
     public void testCreateWithCheckingTeamMember() {
-        // Создаем DTO стажировки
         InternshipDto internshipDto = new InternshipDto();
-        internshipDto.setProjectId(1L); // ID проекта
+        internshipDto.setProjectId(1L);
         testCheckDatePeriod(internshipDto);
-        internshipDto.setInternsIds(List.of(1L, 2L)); // IDs участников
-        internshipDto.setMentorId(1L); // ID ментора
+        internshipDto.setInternsIds(List.of(1L, 2L));
+        internshipDto.setMentorId(1L);
 
-        // Создаем моки TeamMember
         TeamMember teamMember1 = new TeamMember();
-        teamMember1.setId(1L); // ID участника
-        teamMember1.setUserId(1L); // ID пользователя
+        teamMember1.setId(1L);
+        teamMember1.setUserId(1L);
         TeamMember teamMember2 = new TeamMember();
         teamMember2.setId(2L);
         teamMember2.setUserId(2L);
@@ -76,11 +74,11 @@ public class InternshipServiceTest {
 
         Internship savedInternship = new Internship();
         savedInternship.setId(1L);
-        savedInternship.setInterns(List.of(teamMember1, teamMember2)); // Устанавливаем список участников
+        savedInternship.setInterns(List.of(teamMember1, teamMember2));
 
         when(internshipRepository.save(any(Internship.class))).thenReturn(savedInternship);
 
-        internshipService.create(internshipDto); // Вызываем метод создания стажировки
+        internshipService.create(internshipDto);
 
         verify(internshipRepository, times(1)).save(captor.capture());
 
@@ -102,7 +100,7 @@ public class InternshipServiceTest {
     public void testUpdateInternshipSuccess() {
         InternshipDto internshipDto = new InternshipDto();
         internshipDto.setId(1L);
-        internshipDto.setStartDate(LocalDateTime.now().plusDays(5)); // Дата начала в будущем
+        internshipDto.setStartDate(LocalDateTime.now().plusDays(5));
         internshipDto.setEndDate(LocalDateTime.now().plusMonths(1));
         internshipDto.setInternsIds(List.of(1L, 2L));
 
@@ -110,7 +108,7 @@ public class InternshipServiceTest {
         existingInternship.setId(1L);
         existingInternship.setStartDate(LocalDateTime.of(2022, Month.JANUARY, 1, 0, 0));
         existingInternship.setEndDate(LocalDateTime.of(2022, Month.APRIL, 1, 0, 0));
-        existingInternship.setStatus(InternshipStatus.COMPLETED); // Завершаем стажировку
+        existingInternship.setStatus(InternshipStatus.COMPLETED);
 
         TeamMember teamMember1 = new TeamMember();
         teamMember1.setId(1L);
@@ -173,7 +171,7 @@ public class InternshipServiceTest {
         when(internshipRepository.findAll()).thenReturn(List.of(internship));
         when(internshipMapper.toDto(any(Internship.class))).thenReturn(new InternshipDto());
 
-        List<InternshipDto> result = internshipService.getAllInternshipByStatus(projectId, filter);
+        List<InternshipDto> result = internshipService.getAllInternshipByStatusAndRole(projectId, filter);
 
         Assertions.assertEquals(1, result.size());
         verify(internshipRepository, times(1)).findAll();
