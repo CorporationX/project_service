@@ -31,6 +31,11 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 
+  jira:
+    client:
+      username: brilev-ruslan@rambler.ru
+      url: https://faang-school.atlassian.net
+
 server:
   port: 8082
 
@@ -63,3 +68,5 @@ resource:
     max-rectangle-width: 1080
     max-rectangle-height: 566
     max-square-dimension: 1080
+
+api-token: 5
