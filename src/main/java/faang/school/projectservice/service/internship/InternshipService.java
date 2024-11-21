@@ -27,9 +27,7 @@ public class InternshipService {
     private final InternshipMapper internshipMapper;
     private final TeamMemberRepository teamMemberRepository;
 
-    //1 Создать стажировку
     public InternshipDto create(@Valid @NotNull InternshipDto internshipDto) {
-        //1 Проверка длительности стажировки
         validateDurationOfInternship(internshipDto);
 
         if (internshipDto.getProjectId() == null) {
@@ -57,39 +55,30 @@ public class InternshipService {
         return internshipMapper.toDto(internshipEntity);
     }
 
-    //2 Обновить стажировку
     public void updateInternship(@Valid @NotNull InternshipDto internshipDto) {
-        //Internship internshipEntity = internshipMapper.toEntity(internshipDto); // Преобразуем DTO в сущность
 
-        // Загружаем существующую сущность стажировки из базы
         Internship internshipEntity = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Стажировка не найдена"));
 
-        //4. Запрет на добавление новых стажеров
         if (internshipEntity.getStartDate().isBefore(LocalDateTime.now()) &&
                 internshipEntity.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
             throw new DataValidationException("стажировка началась, добавление новых стажеров невозможно");
         }
 
-        // Обновляем даты начала и окончания стажировки из DTO
         internshipEntity.setStartDate(internshipDto.getStartDate());
         internshipEntity.setEndDate(internshipDto.getEndDate());
 
-        // Получаем список стажеров
         List<TeamMember> teamMembers = internshipDto.getInternsIds()
                 .stream().map(teamMemberRepository::findById).collect(Collectors.toList());
         internshipEntity.setInterns(teamMembers);
 
-        //1 Проверка длительности стажировки
         validateDurationOfInternship(internshipDto);
 
-        //2 Проверка условий завершения стажировки для участников
         for (TeamMember teamMember : teamMembers) {
             boolean completeInternship = teamMember.getStages().stream()
                                 .allMatch(stage -> stage.getTasks().stream()
                                 .allMatch(task -> task.getStatus().equals(TaskStatus.DONE)));
 
-        //3 Обновление ролей участников
         if (completeInternship) {
             teamMember.getRoles().remove(TeamRole.INTERN);
             teamMember.getRoles().add(TeamRole.DEVELOPER);
@@ -98,18 +87,15 @@ public class InternshipService {
             internshipEntity.getInterns().remove(teamMember);
         }}
 
-        //5 Досрочное завершение
         if (internshipEntity.getEndDate().isBefore(LocalDateTime.now()) &&
                 internshipEntity.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
             internshipEntity.setStatus(InternshipStatus.COMPLETED);
             internshipEntity.setEndDate(LocalDateTime.now());
         }
 
-        // Сохраняем обновлённую стажировку
         internshipRepository.save(internshipEntity);
     }
 
-    //3 Получить все стажировки проекта с фильтрами по статусу или роли.
     public List<InternshipDto> getAllInternshipByStatus(@Valid @NotNull Long projectId, InternshipFilterDto filters) {
         List<Internship> allInternship = internshipRepository.findAll();
         return allInternship.stream()
@@ -121,13 +107,11 @@ public class InternshipService {
                 .map(internshipMapper::toDto).toList();
     }
 
-    //4 Получить все стажировки.
     public List<InternshipDto> getAllInternship() {
         List<Internship> internships = internshipRepository.findAll();
         return internshipMapper.toListDto(internships);
     }
 
-    //5 Получить стажировку по id.
     public InternshipDto getInternshipById(@Valid @NotNull Long id) {
         Internship internships = internshipRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Интернатура с ID " + id + " не найдена"));
