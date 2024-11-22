@@ -8,6 +8,7 @@ import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.internship.InternshipService;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,6 +29,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import faang.school.projectservice.handler.GlobalExceptionHandler;
+
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 
 @WebMvcTest
@@ -46,6 +50,15 @@ public class InternshipControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private InternshipController internshipController;
+
+    @BeforeEach
+    void setup() {
+        mockMvc = standaloneSetup(internshipController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+    }
 
     @Test
     void positiveTestForCreateDtoMethod() throws Exception {
@@ -265,10 +278,10 @@ public class InternshipControllerTest {
     @Test
     void negativeTestForGetInternshipById() throws Exception {
         when(service.getInternshipById(999L))
-                .thenThrow(new EntityNotFoundException("Стажировка с ID " + 999L + " не найдена"));
+                .thenThrow(new EntityNotFoundException("Internship with ID " + 999L + " not found"));
 
         mockMvc.perform(get(GET_URL_BY_ID, 999L))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Стажировка с ID 999 не найдена"));
+                .andExpect(content().string("Internship with ID 999 not found"));
     }
 }

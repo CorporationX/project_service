@@ -44,14 +44,4 @@ public class InternshipController {
     public InternshipDto getInternshipById(@PathVariable @NotNull Long id) {
         return internshipService.getInternshipById(id);
     }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException exception) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRunTimeException(RuntimeException exception) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + exception.getMessage());
-    }
 }
