@@ -44,4 +44,5 @@ public class InternshipController {
     public InternshipDto getInternshipById(@PathVariable @NotNull Long id) {
         return internshipService.getInternshipById(id);
     }
+
 }

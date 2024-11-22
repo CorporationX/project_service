@@ -284,4 +284,5 @@ public class InternshipControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Internship with ID 999 not found"));
     }
+
 }
