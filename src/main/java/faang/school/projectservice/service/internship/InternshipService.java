@@ -96,7 +96,7 @@ public class InternshipService {
         internshipRepository.save(internshipEntity);
     }
 
-    public List<InternshipDto> getAllInternshipByStatusAndRole(Long projectId, InternshipFilterDto filters) {
+    public List<InternshipDto> getAllInternshipByStatusAndRole(@Valid @NotNull Long projectId, InternshipFilterDto filters) {
         List<Internship> allInternship = internshipRepository.findAll();
         return allInternship.stream()
                 .filter(internship -> internship.getProject().getId().equals(projectId))
@@ -112,7 +112,7 @@ public class InternshipService {
         return internshipMapper.toListDto(internships);
     }
 
-    public InternshipDto getInternshipById(Long id) {
+    public InternshipDto getInternshipById(@Valid @NotNull Long id) {
         Internship internships = internshipRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Интернатура с ID " + id + " не найдена"));
         return internshipMapper.toDto(internships);
