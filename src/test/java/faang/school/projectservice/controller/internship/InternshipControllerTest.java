@@ -8,7 +8,6 @@ import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.internship.InternshipService;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -284,5 +283,4 @@ public class InternshipControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Internship with ID 999 not found"));
     }
-
 }
