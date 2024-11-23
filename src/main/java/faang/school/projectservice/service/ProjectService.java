@@ -105,6 +105,10 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
+    public boolean existsById(Long projectId) {
+        return projectRepository.existsById(projectId);
+    }
+
     public Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);
     }
@@ -122,6 +126,6 @@ public class ProjectService {
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
     }
-
 }
+
 

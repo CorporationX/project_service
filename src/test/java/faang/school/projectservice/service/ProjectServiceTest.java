@@ -5,7 +5,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.filter.Filter;
-import faang.school.projectservice.filter.projectfilter.ProjectStatusFilter;
+import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.mapper.project.UpdateProjectMapperImpl;
 import faang.school.projectservice.model.Project;

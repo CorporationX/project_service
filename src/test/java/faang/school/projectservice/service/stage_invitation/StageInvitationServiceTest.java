@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFiltersDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -25,18 +26,12 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class StageInvitationServiceTest {
@@ -72,6 +67,10 @@ class StageInvitationServiceTest {
         stage = Stage
                 .builder()
                 .stageId(1L)
+                .project(Project.builder()
+                        .ownerId(2L)
+                        .build()
+                )
                 .stageName("Stage 1")
                 .executors(new ArrayList<>())
                 .build();
@@ -121,7 +120,7 @@ class StageInvitationServiceTest {
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getInvitedId())).thenReturn(invited);
         when(stageInvitationRepository.save(any(StageInvitation.class))).thenReturn(stageInvitation);
         when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
-        when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(stage);
+        when(stageService.getStageById(stageInvitationDto.getStageId())).thenReturn(stage);
 
         StageInvitationDto result = stageInvitationService.sendStageInvitation(stageInvitationDto);
 
@@ -130,7 +129,7 @@ class StageInvitationServiceTest {
         assertEquals(stageInvitationDto.getAuthorId(), result.getAuthorId());
         assertEquals(stageInvitationDto.getInvitedId(), result.getInvitedId());
 
-        verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
+        verify(stageService, times(1)).getStageById(stageInvitationDto.getStageId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getAuthorId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getInvitedId());
         verify(stageInvitationRepository, times(1)).save(any(StageInvitation.class));
@@ -139,32 +138,32 @@ class StageInvitationServiceTest {
 
     @Test
     void testSendStageInvitationFailureInvalidStage() {
-        when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(null);
+        when(stageService.getStageById(stageInvitationDto.getStageId())).thenReturn(null);
 
         StageInvitationDto stageInvitation = stageInvitationService.sendStageInvitation(stageInvitationDto);
 
         assertNull(stageInvitation);
 
-        verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
+        verify(stageService, times(1)).getStageById(stageInvitationDto.getStageId());
         verify(teamMemberService, never()).getTeamMemberByUserId(null);
         verify(stageInvitationRepository, never()).save(null);
     }
 
     @Test
     void testSendStageInvitationFailureInvalidAuthor() {
-        when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(stage);
+        when(stageService.getStageById(stageInvitationDto.getStageId())).thenReturn(stage);
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getAuthorId())).thenReturn(null);
 
         stageInvitationService.sendStageInvitation(stageInvitationDto);
 
-        verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
+        verify(stageService, times(1)).getStageById(stageInvitationDto.getStageId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getAuthorId());
         verify(stageInvitationRepository, never()).save(null);
     }
 
     @Test
     void testSendStageInvitationFailureInvalidInvited() {
-        when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(stage);
+        when(stageService.getStageById(stageInvitationDto.getStageId())).thenReturn(stage);
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getAuthorId())).thenReturn(author);
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getInvitedId())).thenReturn(null);
 
@@ -172,7 +171,7 @@ class StageInvitationServiceTest {
 
         assertNull(response);
 
-        verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
+        verify(stageService, times(1)).getStageById(stageInvitationDto.getStageId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getAuthorId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getInvitedId());
         verify(stageInvitationRepository, never()).save(null);
@@ -262,5 +261,89 @@ class StageInvitationServiceTest {
         assertEquals(dto, result.get(0));
 
         verify(stageInvitationRepository, times(1)).findAll();
+    }
+
+
+    @Test
+    void testCreateStageInvitationDtoSuccess() {
+        TeamMember teamMember = setUpTeamMember();
+
+        StageInvitationDto result = stageInvitationService.createStageInvitationDto(stage, teamMember);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getStageId());
+        assertEquals(2L, result.getAuthorId());
+        assertEquals(3L, result.getInvitedId());
+    }
+
+    @Test
+    void testCreateStageInvitationDtoValidationFailure() {
+        TeamMember teamMember = setUpTeamMember();
+
+        doThrow(new RuntimeException("Validation failed")).when(stageInvitationValidator)
+                .validateStageInvitation(any());
+
+        Exception exception = assertThrows(RuntimeException.class, () ->
+                stageInvitationService.createStageInvitationDto(stage, teamMember));
+
+        assertEquals("Validation failed", exception.getMessage());
+    }
+
+    @Test
+    void testSendStageInvitationToProjectParticipantsWithLessThanRequiredUsers() {
+        TeamMember teamMember1 = new TeamMember();
+        TeamMember teamMember2 = new TeamMember();
+        List<TeamMember> teamMembers = Arrays.asList(teamMember1, teamMember2);
+
+        when(stageService.getStageById(anyLong())).thenReturn(stage);
+        when(teamMemberService.getTeamMemberByUserId(anyLong())).thenReturn(teamMember1, teamMember2);
+        when(stageInvitationRepository.save(any(StageInvitation.class))).thenReturn(new StageInvitation());
+        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(new StageInvitationDto());
+
+        stageInvitationService.sendStageInvitationToProjectParticipants(stage, teamMembers, 4);
+
+        verify(stageInvitationRepository, times(2)).save(any(StageInvitation.class));
+        verify(stageInvitationMapper, times(2)).toDto(any(StageInvitation.class));
+    }
+
+    @Test
+    void testSendStageInvitationToProjectParticipantsWithMoreThanRequiredUsers() {
+        TeamMember teamMember1 = new TeamMember();
+        TeamMember teamMember2 = new TeamMember();
+        TeamMember teamMember3 = new TeamMember();
+        List<TeamMember> teamMembers = Arrays.asList(teamMember1, teamMember2, teamMember3);
+
+        when(stageService.getStageById(anyLong())).thenReturn(stage);
+        when(teamMemberService.getTeamMemberByUserId(anyLong())).thenReturn(teamMember1, teamMember2);
+        when(stageInvitationRepository.save(any(StageInvitation.class))).thenReturn(new StageInvitation());
+        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(new StageInvitationDto());
+
+        stageInvitationService.sendStageInvitationToProjectParticipants(stage, teamMembers, 2);
+
+        verify(stageInvitationRepository, times(2)).save(any(StageInvitation.class));
+        verify(stageInvitationMapper, times(2)).toDto(any(StageInvitation.class));
+    }
+
+    @Test
+    void testSendStageInvitationToProjectParticipantsWithExactRequiredUsers() {
+        TeamMember teamMember1 = new TeamMember();
+        TeamMember teamMember2 = new TeamMember();
+        List<TeamMember> teamMembers = Arrays.asList(teamMember1, teamMember2);
+
+        when(stageService.getStageById(anyLong())).thenReturn(stage);
+        when(teamMemberService.getTeamMemberByUserId(anyLong())).thenReturn(teamMember1, teamMember2);
+        when(stageInvitationRepository.save(any(StageInvitation.class))).thenReturn(new StageInvitation());
+        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(new StageInvitationDto());
+
+        stageInvitationService.sendStageInvitationToProjectParticipants(stage, teamMembers, 2);
+
+        verify(stageInvitationRepository, times(2)).save(any(StageInvitation.class));
+        verify(stageInvitationMapper, times(2)).toDto(any(StageInvitation.class));
+    }
+
+    private TeamMember setUpTeamMember() {
+        return TeamMember.builder()
+                .id(3L)
+                .build();
     }
 }

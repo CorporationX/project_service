@@ -14,4 +14,9 @@ public enum TeamRole {
     public static List<TeamRole> getAll() {
         return List.of(TeamRole.values());
     }
+
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
 }

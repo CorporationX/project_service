@@ -34,4 +34,11 @@ public class StageRepository {
     public boolean existsById(Long stageId) {
         return jpaRepository.existsById(stageId);
     }
+
+    public List<Stage> findAllByProjectId(Long projectId) {
+        return jpaRepository.findAllByProjectId(projectId).orElseThrow(
+                () -> new IllegalArgumentException(
+                        String.format("Stages not found cause by: project with id: %s does not exist", projectId))
+        );
+    }
 }

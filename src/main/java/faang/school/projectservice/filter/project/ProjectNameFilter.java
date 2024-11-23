@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter.projectfilter;
+package faang.school.projectservice.filter.project;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.Filter;
@@ -8,15 +8,15 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class ProjectStatusFilter implements Filter<Project, ProjectFilterDto> {
+public class ProjectNameFilter implements Filter<Project, ProjectFilterDto> {
 
     @Override
     public boolean isApplicable(ProjectFilterDto filters) {
-        return filters.getStatus() != null;
+        return filters.getName() != null;
     }
 
     @Override
     public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto filters) {
-        return projects.filter(project -> project.getStatus() == filters.getStatus());
+        return projects.filter(project -> project.getName().equals(filters.getName()));
     }
 }

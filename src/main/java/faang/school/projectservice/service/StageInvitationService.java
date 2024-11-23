@@ -6,6 +6,8 @@ import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFiltersDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
@@ -32,7 +34,7 @@ public class StageInvitationService {
 
         StageInvitation stageInvitation = StageInvitation
                 .builder()
-                .stage(stageService.getById(stageInvitationDto.getStageId()))
+                .stage(stageService.getStageById(stageInvitationDto.getStageId()))
                 .author(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getAuthorId()))
                 .invited(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getInvitedId()))
                 .status(StageInvitationStatus.PENDING)
@@ -74,5 +76,26 @@ public class StageInvitationService {
                 );
 
         return filteredGoals.map(stageInvitationMapper::toDto).toList();
+    }
+
+    public StageInvitationDto createStageInvitationDto(Stage stage, TeamMember teamMember) {
+        var stageInvitationDto = StageInvitationDto.builder()
+                .stageId(stage.getStageId())
+                .authorId(stage.getProject().getOwnerId())
+                .invitedId(teamMember.getId())
+                .build();
+        stageInvitationValidator.validateStageInvitation(stageInvitationDto);
+        return stageInvitationDto;
+    }
+
+    public void sendStageInvitationToProjectParticipants(Stage stage,
+                                                         List<TeamMember> teamMembers,
+                                                         int requiredNumberOfUsers) {
+        int numberInvitationsToSend = Math.min(requiredNumberOfUsers, teamMembers.size());
+
+        for (int i = 0; i < numberInvitationsToSend; i++) {
+            StageInvitationDto invitation = createStageInvitationDto(stage, teamMembers.get(i));
+            sendStageInvitation(invitation);
+        }
     }
 }
