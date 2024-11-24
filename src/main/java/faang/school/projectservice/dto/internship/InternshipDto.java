@@ -30,7 +30,6 @@ public class InternshipDto {
     @PositiveOrZero
     private Long mentorId;
 
-    @NotNull
     @NotEmpty
     private List<Long> internsIds;
 

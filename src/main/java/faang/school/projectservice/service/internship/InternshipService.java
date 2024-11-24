@@ -27,7 +27,7 @@ public class InternshipService {
     private final InternshipMapper internshipMapper;
     private final TeamMemberRepository teamMemberRepository;
 
-    public InternshipDto create(@Valid @NotNull InternshipDto internshipDto) {
+    public InternshipDto create(InternshipDto internshipDto) {
         validateDurationOfInternship(internshipDto);
 
         if (internshipDto.getProjectId() == null) {
@@ -55,7 +55,7 @@ public class InternshipService {
         return internshipMapper.toDto(internshipEntity);
     }
 
-    public void updateInternship(@Valid @NotNull InternshipDto internshipDto) {
+    public void updateInternship(InternshipDto internshipDto) {
 
         Internship internshipEntity = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Стажировка не найдена"));
@@ -85,7 +85,8 @@ public class InternshipService {
 
         } else {
             internshipEntity.getInterns().remove(teamMember);
-        }}
+        }
+        }
 
         if (internshipEntity.getEndDate().isBefore(LocalDateTime.now()) &&
                 internshipEntity.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
