@@ -37,4 +37,5 @@ public interface InternshipMapper {
     default List<Long> map(List<TeamMember> interns) {
         return interns.stream().map(TeamMember::getId).toList();
     }
+
 }

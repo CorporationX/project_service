@@ -125,4 +125,5 @@ public class InternshipService {
             throw new DataValidationException("Стажировка не может длится больше трех месяцев");
         }
     }
+
 }

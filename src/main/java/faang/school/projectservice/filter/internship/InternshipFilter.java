@@ -8,4 +8,5 @@ public interface InternshipFilter {
     boolean isApplicable(InternshipFilterDto filters);
 
     Stream<Internship> apply(Stream<Internship> internship, InternshipFilterDto filters);
+
 }

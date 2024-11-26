@@ -17,4 +17,5 @@ public class InternshipFilterDto {
     private InternshipStatus status;
     @NotNull
     private TeamRole intern;
+
 }

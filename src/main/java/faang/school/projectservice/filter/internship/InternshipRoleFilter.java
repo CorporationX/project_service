@@ -16,5 +16,6 @@ public class InternshipRoleFilter implements InternshipFilter {
     public Stream<Internship> apply(Stream<Internship> internship, InternshipFilterDto filters) {
         return internship.filter(internship1 -> internship1.getInterns().stream()
                 .anyMatch(teamMember -> teamMember.getRoles().contains(filters.getIntern())));
+
     }
 }

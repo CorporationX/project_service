@@ -42,4 +42,5 @@ public class InternshipDto {
     private LocalDateTime endDate;
 
     private InternshipStatus status;
+
 }

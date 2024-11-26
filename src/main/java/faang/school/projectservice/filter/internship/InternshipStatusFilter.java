@@ -12,4 +12,5 @@ public class InternshipStatusFilter {
     public boolean apply(Internship internship, InternshipFilterDto filters) {
         return internship.getStatus().equals(filters.getStatus());
     }
+
 }
