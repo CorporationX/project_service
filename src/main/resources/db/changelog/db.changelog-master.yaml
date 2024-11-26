@@ -20,8 +20,10 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V013_create_initiative.sql
   - include:
-        file: db/changelog/changeset/project_V014_resource.sql
+      file: db/changelog/changeset/project_V014_resource.sql
   - include:
       file: db/changelog/changeset/project_V015_resource_roles.sql
   - include:
       file: db/changelog/changeset/project_V016_meet.sql
+  - include:
+      file: db/changelog/changeset/project_V017__alter_stage_invitation.sql

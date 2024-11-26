@@ -12,16 +12,23 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class StageInvitationRepository {
     private final StageInvitationJpaRepository repository;
-    private final TeamMemberRepository teamMemberRepository;
 
-    public StageInvitation save(StageInvitation stageInvitation) {
-        return repository.save(stageInvitation);
+    public void save(StageInvitation stageInvitation) {
+        repository.save(stageInvitation);
     }
 
     public StageInvitation findById(Long stageInvitationId) {
         return repository.findById(stageInvitationId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("Stage invitation doesn't exist by id: %s", stageInvitationId))
         );
+    }
+
+    public List<StageInvitation> findByInvitedUserId(Long userId) {
+        return repository.findByInvited_UserId(userId);
+    }
+
+    public boolean stageInvitationExist(Long stageInvitationId) {
+        return repository.existsById(stageInvitationId);
     }
 
     public List<StageInvitation> findAll() {

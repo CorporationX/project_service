@@ -24,6 +24,9 @@ public class StageInvitation {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "rejection")
+    private String rejection;
+
     @Column(name = "status")
     @Enumerated(value = EnumType.STRING)
     private StageInvitationStatus status;
