@@ -8,11 +8,12 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 @Data
 @Builder
+@Validated
 public class ProjectDto {
-
     @Positive(message = "Id must be greater than 0.")
     private Long id;
 
@@ -28,6 +29,9 @@ public class ProjectDto {
     @Positive(message = "OwnerId must be greater than 0.")
     private Long ownerId;
 
+    @Size(max = 255, message = "Visibility pattern must not exceed 255 characters.")
     private ProjectVisibility visibility;
+
+    @Size(max = 255, message = "Status pattern must not exceed 255 characters.")
     private ProjectStatus status;
 }

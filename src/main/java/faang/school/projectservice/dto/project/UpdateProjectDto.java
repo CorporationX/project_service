@@ -8,11 +8,12 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 @Data
 @Builder
+@Validated
 public class UpdateProjectDto {
-
     @NotNull(message = "ProjectId is required.")
     @Positive(message = "ProjectId must be greater than 0.")
     private Long id;
@@ -27,6 +28,9 @@ public class UpdateProjectDto {
 
     @Size(min = 10, max = 4096, message = "Description must be between 10 and 4096 characters.")
     private String description;
+
+    @Size(max = 255, message = "Pattern must not exceed 255 characters.")
+    private String requestFilterPattern;
 
     private ProjectVisibility visibility;
     private ProjectStatus status;

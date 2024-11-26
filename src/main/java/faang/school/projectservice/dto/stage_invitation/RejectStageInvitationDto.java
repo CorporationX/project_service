@@ -7,10 +7,12 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Validated
 public class RejectStageInvitationDto {
     @Positive(message = "Id must be positive")
     @NotNull(message = "Id must not be null")

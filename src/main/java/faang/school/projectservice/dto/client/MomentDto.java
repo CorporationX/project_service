@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Validated
 public class MomentDto {
 
     @Positive(message = "Id is required")
@@ -29,5 +31,11 @@ public class MomentDto {
     @NotEmpty(message = "At least one project must be specified")
     private List<@NotNull(message = "The project ID cannot be null") Long> projectsIds;
 
+    @Size(max = 255, message = "Description length should not exceed 255 characters")
+    private String description;
+
     private LocalDateTime date;
+
+    @Size(max = 255, message = "Pattern length should not exceed 255 characters")
+    private String requestFilterPattern;
 }

@@ -15,6 +15,7 @@ import java.util.List;
 public class NewVacancyDto {
 
     @NotBlank(message = "Vacancy title cannot be empty")
+    @Size(max = 255, message = "Vacancy title must be under 255 characters long")
     private String name;
 
     @NotBlank(message = "Vacancy description cannot be empty")
@@ -43,4 +44,7 @@ public class NewVacancyDto {
 
     @NotEmpty(message = "Required skills ids list cannot be null or empty")
     private List<Long> requiredSkillIds;
+
+    @Size(max = 255, message = "Pattern must be under 255 characters long")
+    private String requestFilterPattern;
 }
