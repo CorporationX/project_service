@@ -11,6 +11,9 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://packages.atlassian.com/maven/repository/public")
+    }
 }
 
 dependencies {
@@ -34,6 +37,20 @@ dependencies {
      * Amazon S3
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
+
+    /**
+     * Jira
+     */
+
+    implementation("org.glassfish.jersey.core:jersey-common:2.27")
+    implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4") {
+        exclude(group = "org.glassfish.jersey.core", module = "jersey-common")
+    }
+    implementation("io.atlassian.fugue:fugue:6.1.0")
+
+
+
 
     /**
      * Utils & Logging
