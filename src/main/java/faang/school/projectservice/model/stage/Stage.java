@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @Table(name = "project_stage")
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Builder
 @Data
 public class Stage {
