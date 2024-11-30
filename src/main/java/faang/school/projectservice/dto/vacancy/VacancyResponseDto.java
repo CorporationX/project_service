@@ -4,14 +4,12 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
-@Validated
 public class VacancyResponseDto {
 
     private long id;

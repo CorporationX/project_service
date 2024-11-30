@@ -15,6 +15,8 @@ import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.statusupdator.StatusUpdater;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -35,6 +41,7 @@ public class ProjectService {
     private final ApplicationEventPublisher eventPublisher;
     private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
+    private final ResourceValidator resourceValidator;
     private final ProjectMapper projectMapper;
     private final UpdateProjectMapper updateProjectMapper;
     private final List<Filter<Project, ProjectFilterDto>> projectFilters;
@@ -204,6 +211,25 @@ public class ProjectService {
             eventPublisher.publishEvent(new SubProjectClosedEvent(this, parentProject.getId()));
             log.info("Published SubProjectClosedEvent for project #{}", parentProject.getId());
         }
+    }
+
+    public void increaseOccupiedStorageSize(Project project, MultipartFile file) {
+        resourceValidator.validateResourceNotEmpty(file);
+
+        BigInteger currentStorageSize = project.getStorageSize();
+        BigInteger updatedStorageSize = currentStorageSize.add(BigInteger.valueOf(file.getSize()));
+
+        project.setStorageSize(updatedStorageSize);
+        projectRepository.save(project);
+    }
+
+    public void decreaseOccupiedStorageSize(Project project, BigInteger fileSize) {
+
+        BigInteger currentStorageSize = project.getStorageSize();
+        BigInteger updatedStorageSize = currentStorageSize.subtract(fileSize);
+
+        project.setStorageSize(updatedStorageSize);
+        projectRepository.save(project);
     }
 }
 

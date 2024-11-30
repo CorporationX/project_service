@@ -38,7 +38,7 @@ calculations_messages_processing:
   enabled: true
 
 services:
-  s3:
+  minio:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password

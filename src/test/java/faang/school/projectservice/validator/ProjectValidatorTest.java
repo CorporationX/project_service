@@ -9,6 +9,7 @@ import faang.school.projectservice.exception.ProjectVisibilityException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -45,6 +48,7 @@ class ProjectValidatorTest {
     private Long ownerId;
     private String projectName;
     private Long projectId = 1L;
+    private Long userId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -104,7 +108,6 @@ class ProjectValidatorTest {
     @Test
     @DisplayName("Check project exists")
     void testValidateProjectExistsById() {
-        Long projectId = 1L;
         when(projectRepository.existsById(projectId)).thenReturn(true);
 
         assertDoesNotThrow(() -> projectValidator.validateProjectExistsById(projectId));
@@ -115,7 +118,6 @@ class ProjectValidatorTest {
     @Test
     @DisplayName("Check project doesn't exist")
     void testValidateProjectInVacancyNotExists() {
-        Long projectId = 1L;
         when(projectRepository.existsById(projectId)).thenReturn(false);
 
         Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateProjectExistsById(projectId));
@@ -336,5 +338,37 @@ class ProjectValidatorTest {
         )));
 
         assertFalse(projectValidator.validateHasChildrenProjectsClosed(project));
+    }
+
+    @Test
+    @DisplayName("Test user belongs to the project team by valid userId: success")
+    void validateUserInProjectTeam_ValidParameters_Success(){
+        TeamMember teamMember = TeamMember.builder().userId(1L).build();
+        Team team = Team.builder().teamMembers(List.of(teamMember)).build();
+        project.setTeams(List.of(team));
+
+        assertDoesNotThrow(() -> projectValidator.validateUserInProjectTeam(userId, project));
+    }
+
+    @Test
+    @DisplayName("Test user doesn't belong to the project team: fail")
+    void validateUserInProjectTeam_ValidParametersNoTeam_FailException(){
+        TeamMember teamMember = TeamMember.builder().userId(2L).build();
+        Team team = Team.builder().teamMembers(List.of(teamMember)).build();
+        project.setId(5L);
+        project.setTeams(List.of(team));
+
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateUserInProjectTeam(userId, project));
+        assertEquals(String.format("User id: 1 doesn't work on project id: %d", project.getId()), ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test project doesn't have a team: fail")
+    void validateUserInProjectTeam_ProjectWithoutAnyTeam_FailException(){
+        project.setId(5L);
+        project.setTeams(List.of());
+
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateUserInProjectTeam(userId, project));
+        assertEquals(String.format("User id: 1 doesn't work on project id: %d", project.getId()), ex.getMessage());
     }
 }

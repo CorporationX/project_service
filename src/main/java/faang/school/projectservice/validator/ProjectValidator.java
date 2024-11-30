@@ -148,4 +148,14 @@ public class ProjectValidator {
         return project.getChildren().stream()
                 .allMatch(child -> child.getStatus() == ProjectStatus.COMPLETED || child.getStatus() == ProjectStatus.CANCELLED);
     }
+
+    public void validateUserInProjectTeam(Long userId, Project project) {
+        if(project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .map(TeamMember::getUserId)
+                .noneMatch(id -> id.equals(userId))
+        ) {
+            throw new EntityNotFoundException(String.format("User id: %d doesn't work on project id: %d", userId, project.getId()));
+        }
+    }
 }

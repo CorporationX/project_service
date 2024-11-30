@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateResponseDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.exception.InsufficientStorageException;
 import faang.school.projectservice.exception.ProjectVisibilityException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.projectfilter.ProjectStatusFilter;
@@ -18,6 +19,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.statusupdator.StatusUpdater;
 import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +32,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +58,9 @@ class ProjectServiceTest {
 
     @Mock
     private ProjectValidator projectValidator;
+
+    @Mock
+    private ResourceValidator resourceValidator;
 
     @Spy
     private ProjectMapperImpl projectMapper;
@@ -212,7 +219,7 @@ class ProjectServiceTest {
         ProjectStatusFilter statusFilter = new ProjectStatusFilter();
         filters = List.of(statusFilter);
         projectValidator = new ProjectValidator(projectRepository);
-        projectService = new ProjectService(eventPublisher, projectRepository, projectValidator,
+        projectService = new ProjectService(eventPublisher, projectRepository, projectValidator, resourceValidator,
                 projectMapper, updateProjectMapper, filters, statusUpdates);
         when(projectRepository.findAll()).thenReturn(notFilteredProjects);
 
@@ -228,7 +235,7 @@ class ProjectServiceTest {
         allProjects.get(2).setVisibility(ProjectVisibility.PRIVATE);
         List<ProjectDto> availableProjectDtos = getProjectDtosList();
         projectValidator = new ProjectValidator(projectRepository);
-        projectService = new ProjectService(eventPublisher, projectRepository, projectValidator,
+        projectService = new ProjectService(eventPublisher, projectRepository, projectValidator, resourceValidator,
                 projectMapper, updateProjectMapper, filters, statusUpdates);
 
         when(projectRepository.findAll()).thenReturn(allProjects);
@@ -553,5 +560,45 @@ class ProjectServiceTest {
         projectFilterDto = ProjectFilterDto.builder()
                 .status(ProjectStatus.CREATED)
                 .build();
+    }
+
+    @Test
+    @DisplayName("Increase storage size after file upload with valid input: success")
+    void increaseOccupiedStorageSize_ValidInput_Success() {
+        MockMultipartFile file = new MockMultipartFile("file", "content".getBytes());
+
+        project.setStorageSize(BigInteger.valueOf(10L));
+
+        projectService.increaseOccupiedStorageSize(project, file);
+
+        verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
+
+        assertEquals(BigInteger.valueOf(17L), project.getStorageSize());
+    }
+
+    @Test
+    @DisplayName("Increase storage size with empty file: fail")
+    void increaseOccupiedStorageSizeAfterFileUpload_EmptyFile_Fail() {
+        MockMultipartFile file = new MockMultipartFile("file", new byte[0]);
+        doThrow(new InsufficientStorageException("Not enough space to store files"))
+                .when(resourceValidator).validateResourceNotEmpty(file);
+
+        RuntimeException ex = assertThrows(InsufficientStorageException.class, () ->
+                projectService.increaseOccupiedStorageSize(project, file));
+        assertEquals("Not enough space to store files", ex.getMessage());
+
+        verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
+    }
+
+    @Test
+    @DisplayName("Decrease storage size after file deleted with valid input: success")
+    void decreaseOccupiedStorageSize_ValidInput_Success() {
+        BigInteger fileSize = BigInteger.valueOf(5L);
+
+        project.setStorageSize(BigInteger.valueOf(10L));
+
+        projectService.decreaseOccupiedStorageSize(project, fileSize);
+
+        assertEquals(BigInteger.valueOf(5L), project.getStorageSize());
     }
 }

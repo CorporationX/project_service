@@ -7,7 +7,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.apache.http.HttpStatus;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +34,7 @@ public class MomentController {
     @PostMapping
     public ResponseEntity<MomentDto> saveMoment(@Valid @RequestBody MomentDto momentDto) {
         MomentDto savedMoment = momentService.saveMoment(momentDto);
-        return ResponseEntity.status(HttpStatus.SC_CREATED).body(savedMoment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedMoment);
     }
 
     @PutMapping
