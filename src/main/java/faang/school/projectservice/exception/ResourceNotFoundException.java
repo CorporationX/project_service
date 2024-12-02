@@ -1,4 +1,4 @@
-package faang.school.projectservice.exceptions;
+package faang.school.projectservice.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

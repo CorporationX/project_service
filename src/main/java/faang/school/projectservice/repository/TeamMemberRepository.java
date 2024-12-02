@@ -19,7 +19,7 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
-    public Optional<TeamMember> findByUserIdAndProjectId(Long userId, Long projectId) {
+    public TeamMember findByUserIdAndProjectId(Long userId, Long projectId) {
         return jpaRepository.findByUserIdAndProjectId(userId, projectId);
     }
 

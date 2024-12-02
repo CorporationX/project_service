@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -31,9 +32,11 @@ public class Project {
     @Column(name = "description", length = 4096)
     private String description;
 
+    @ToString.Exclude
     @Column(name = "storage_size")
     private BigInteger storageSize;
 
+    @ToString.Exclude
     @Column(name = "max_storage_size")
     private BigInteger maxStorageSize;
 

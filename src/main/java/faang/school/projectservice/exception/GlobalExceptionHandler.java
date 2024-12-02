@@ -1,5 +1,6 @@
-package faang.school.projectservice.exceptions;
+package faang.school.projectservice.exception;
 
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -91,6 +92,13 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
                 LocalDateTime.now());
+    }
+
+    @ExceptionHandler(FeignException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public faang.school.projectservice.exception.ErrorResponse handleFeignException(FeignException e) {
+        log.error("Feign Exception: ", e);
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

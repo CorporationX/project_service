@@ -7,6 +7,8 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+
 @RequiredArgsConstructor
 @Service
 public class ProjectService {
@@ -20,5 +22,10 @@ public class ProjectService {
     public ResponseProjectDto getProject(long projectId) {
         Project project = findProjectById(projectId);
         return projectMapper.toResponseDto(project);
+    }
+
+    public void updateStorageSize(BigInteger size, Project project) {
+        project.setStorageSize(size);
+        projectRepository.save(project);
     }
 }

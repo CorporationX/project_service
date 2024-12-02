@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -168,7 +167,7 @@ public class TeamMemberServiceTest {
         when(teamMemberMapper.toEntity(createDto)).thenReturn(teamMember);
         when(teamMemberMapper.toResponseDto(any(TeamMember.class))).thenReturn(responseDto);
         when(teamMemberRepository.findByUserIdAndProjectId(creatorId, project.getId()))
-                .thenReturn(Optional.ofNullable(teamMember));
+                .thenReturn(teamMember);
         when(teamMemberRepository.save(any(TeamMember.class))).thenReturn(teamMember);
 
         // Act
@@ -188,7 +187,7 @@ public class TeamMemberServiceTest {
         when(teamService.getTeamById(teamId)).thenReturn(team);
         when(teamMemberRepository.findById(memberId)).thenReturn(teamMember);
         when(teamMemberRepository.findByUserIdAndProjectId(creatorId, project.getId()))
-                .thenReturn(Optional.ofNullable(teamMember));
+                .thenReturn(teamMember);
         when(teamMemberMapper.toResponseDto(teamMember)).thenReturn(responseDto);
 
         // Act
@@ -206,7 +205,7 @@ public class TeamMemberServiceTest {
         when(userContext.getUserId()).thenReturn(deleterId);
         when(teamService.getTeamById(teamId)).thenReturn(team);
         when(teamMemberRepository.findByUserIdAndProjectId(creatorId, project.getId()))
-                .thenReturn(Optional.ofNullable(teamMember));
+                .thenReturn(teamMember);
         when(teamMemberRepository.findById(memberId)).thenReturn(teamMember);
 
         // Act

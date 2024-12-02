@@ -9,11 +9,13 @@ import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamMemberActions;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class TeamMemberService {
     private final ProjectService projectService;
     private final StageService stageService;
     private final TeamMemberMapper teamMemberMapper;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final UserServiceClient userServiceClient;
     private final UserContext userContext;
 
@@ -153,12 +156,14 @@ public class TeamMemberService {
     }
 
     private TeamMember findTeamMemberByUserAndProjectId(Long memberId, Long projectId) {
-        return teamMemberRepository.findByUserIdAndProjectId(memberId, projectId)
-                .orElseThrow(() -> {
-                    log.warn("Team member with user ID {} does not exist", memberId);
-                    return new EntityNotFoundException(
-                            String.format("Team member with user ID %d does not exist", memberId));
-                });
+        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(memberId, projectId);
+
+        if(teamMember == null){
+            log.error("Team member with user ID {} does not exist", memberId);
+            throw  new EntityNotFoundException(String.format("Team member with user ID %d does not exist", memberId));
+        }
+
+        return teamMember;
     }
 
     private void updateRolesIfPresent(UpdateTeamMemberDto teamMemberDto, TeamMember teamMember) {
@@ -208,5 +213,19 @@ public class TeamMemberService {
     @Transactional
     public TeamMember getTeamMember(long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId);
+    }
+
+    public TeamMember getProjectMember(long userId, long projectId) {
+        TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, projectId);
+        if (teamMember == null) {
+            log.error("TeamMember not found for userId={} and projectId={}", userId , projectId);
+            throw new EntityNotFoundException("TeamMember not found");
+        }
+        return teamMember;
+    }
+
+    public boolean teamMemberInProjectNotExists(long userId, long projectId) {
+        TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, projectId);
+        return teamMember == null;
     }
 }

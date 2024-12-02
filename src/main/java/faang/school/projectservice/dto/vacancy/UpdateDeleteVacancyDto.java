@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.VacancyStatus;
 import jakarta.validation.constraints.NotBlank;
@@ -9,8 +9,8 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record CreateVacancyDto(
-        Long id,
+public record UpdateDeleteVacancyDto(
+        @NotNull @Positive Long id,
         @NotBlank String name,
         @NotBlank String description,
         @NotNull @Positive Long projectId,

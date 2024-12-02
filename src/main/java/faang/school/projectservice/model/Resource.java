@@ -15,8 +15,10 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -27,6 +29,7 @@ import java.util.List;
 @Entity
 @Table(name = "project_resource")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Resource {
@@ -59,12 +62,15 @@ public class Resource {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+
     @ManyToOne
     @JoinColumn(name = "created_by")
+    @ToString.Exclude
     private TeamMember createdBy;
 
     @ManyToOne
     @JoinColumn(name = "updated_by")
+    @ToString.Exclude
     private TeamMember updatedBy;
 
     @UpdateTimestamp
@@ -72,7 +78,12 @@ public class Resource {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    public boolean isNotCreator(TeamMember teamMember){
+        return !createdBy.equals(teamMember);
+    }
 }
