@@ -6,6 +6,13 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+
+@OpenAPIDefinition(
+    info = @Info(title = "Project Service API", version = "1.0", description = "API for managing projects and vacancies")
+)
 @SpringBootApplication
 @EnableScheduling
 @EnableFeignClients
