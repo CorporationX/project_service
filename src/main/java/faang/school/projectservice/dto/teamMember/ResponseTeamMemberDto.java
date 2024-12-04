@@ -1,6 +1,6 @@
 package faang.school.projectservice.dto.teamMember;
 
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.team.TeamRole;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

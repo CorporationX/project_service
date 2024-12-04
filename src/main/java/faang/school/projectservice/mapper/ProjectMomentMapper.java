@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.project.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

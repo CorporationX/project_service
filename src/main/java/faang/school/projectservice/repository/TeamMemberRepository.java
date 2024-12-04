@@ -1,7 +1,7 @@
 package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.team.TeamMember;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -33,9 +33,5 @@ public class TeamMemberRepository {
 
     public void delete(TeamMember teamMember) {
         jpaRepository.delete(teamMember);
-    }
-
-    public void updateTeamMembers(Long teamId, List<TeamMember> teamMembers) {
-        jpaRepository.updateTeamMembers(teamId, teamMembers);
     }
 }

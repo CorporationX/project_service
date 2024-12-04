@@ -30,7 +30,7 @@ spring:
       max-file-size: 10MB
 
 server:
-  port: 8082
+  port: 8091
 
 logging:
   level:
@@ -52,3 +52,53 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+jira:
+  url: https://foodwise.atlassian.net
+  username: //ваш логин Jira
+  token: //ваш токен Jira
+  api:
+    create-issue-uri: ${jira.url}/rest/api/3/issue
+    update-issue-uri: ${jira.url}/rest/api/3/issue/%s
+    transition-issue-uri: ${jira.url}/rest/api/3/issue/%s/transitions
+    search-uri: ${jira.url}/rest/api/3/search
+  search:
+    default-fields:
+      - summary
+      - description
+      - status
+      - assignee
+      - issuetype
+      - priority
+      - created
+      - updated
+  transition:
+    ids:
+      TODO: "11"
+      IN_PROGRESS: "21"
+      DONE: "31"
+  issue-type:
+    ids:
+      TASK: "10012"
+      SUBTASK: "10016"
+      BUG: "10013"
+
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      jira-api-circuit-breaker:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+  retry:
+    instances:
+      jira-api-retry:
+        max-attempts: 10
+        wait-duration: 200ms
+        exponential-backoff-multiplier: 2.0
+

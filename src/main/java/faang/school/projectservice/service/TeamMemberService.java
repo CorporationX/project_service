@@ -7,11 +7,11 @@ import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamMemberActions;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.team.Team;
+import faang.school.projectservice.model.team.TeamMember;
+import faang.school.projectservice.model.team.TeamMemberActions;
+import faang.school.projectservice.model.team.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -76,7 +75,7 @@ public class TeamMemberService {
         ensureHasAccess(deleterId, List.of(TeamRole.OWNER), TeamMemberActions.REMOVE_MEMBER, project.getId());
         TeamMember teamMember = teamMemberRepository.findById(memberId);
 
-        removeTeamMemberFromTeam(team, teamMember);
+        team.removeTeamMember(teamMember);
         teamMemberRepository.delete(teamMember);
     }
 
@@ -98,22 +97,6 @@ public class TeamMemberService {
     public boolean curatorHasNoAccess(Long curatorId) {
         TeamMember teamMember = teamMemberRepository.findById(curatorId);
         return !teamMember.isCurator();
-    }
-
-    @Transactional
-    public void addTeamMemberToTeam(Team team, TeamMember teamMember) {
-        List<TeamMember> updatedTeamMembers = new ArrayList<>(team.getTeamMembers());
-        updatedTeamMembers.add(teamMember);
-        team.setTeamMembers(updatedTeamMembers);
-        teamMemberRepository.updateTeamMembers(team.getId(), updatedTeamMembers);
-    }
-
-    @Transactional
-    public void removeTeamMemberFromTeam(Team team, TeamMember teamMember) {
-        List<TeamMember> updatedTeamMembers = new ArrayList<>(team.getTeamMembers());
-        updatedTeamMembers.remove(teamMember);
-        team.setTeamMembers(updatedTeamMembers);
-        teamMemberRepository.updateTeamMembers(team.getId(), updatedTeamMembers);
     }
 
     private boolean hasAccess(Long userId, List<TeamRole> requiredRoles, Long projectId) {
@@ -147,7 +130,7 @@ public class TeamMemberService {
             return existingTeamMember;
         }
         teamMember.setTeam(team);
-        addTeamMemberToTeam(team, teamMember);
+        team.addTeamMember(teamMember);
         teamMemberRepository.save(teamMember);
         return teamMember;
     }

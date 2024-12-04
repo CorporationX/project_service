@@ -1,6 +1,6 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.team.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.springframework.data.jpa.repository.JpaRepository;

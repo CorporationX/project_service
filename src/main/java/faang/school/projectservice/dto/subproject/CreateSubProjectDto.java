@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.project.ProjectVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.exceptions.ResourceNotFoundException;
-import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.team.Team;
 import faang.school.projectservice.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

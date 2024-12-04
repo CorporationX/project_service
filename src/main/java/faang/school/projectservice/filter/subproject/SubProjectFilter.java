@@ -1,7 +1,7 @@
 package faang.school.projectservice.filter.subproject;
 
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.project.Project;
 
 import java.util.List;
 

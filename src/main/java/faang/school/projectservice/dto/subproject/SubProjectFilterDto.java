@@ -1,6 +1,6 @@
 package faang.school.projectservice.dto.subproject;
 
-import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.project.ProjectStatus;
 import lombok.Builder;
 
 @Builder

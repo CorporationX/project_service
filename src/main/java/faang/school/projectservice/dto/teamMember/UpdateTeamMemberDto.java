@@ -1,6 +1,6 @@
 package faang.school.projectservice.dto.teamMember;
 
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.team.TeamRole;
 import lombok.Builder;
 
 import java.util.List;

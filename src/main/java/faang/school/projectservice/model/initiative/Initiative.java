@@ -1,7 +1,7 @@
 package faang.school.projectservice.model.initiative;
 
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.team.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

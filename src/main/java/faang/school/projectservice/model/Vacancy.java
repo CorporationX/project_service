@@ -3,6 +3,8 @@ package faang.school.projectservice.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import faang.school.projectservice.model.candidate.Candidate;
+import faang.school.projectservice.model.project.Project;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;

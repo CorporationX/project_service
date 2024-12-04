@@ -1,5 +1,7 @@
 package faang.school.projectservice.model;
 
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.team.TeamMember;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

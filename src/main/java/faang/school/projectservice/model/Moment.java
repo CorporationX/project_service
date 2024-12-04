@@ -1,7 +1,9 @@
 package faang.school.projectservice.model;
 
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.resource.Resource;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

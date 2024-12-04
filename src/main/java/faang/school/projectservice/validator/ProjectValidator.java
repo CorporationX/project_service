@@ -3,9 +3,9 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.project.ProjectStatus;
+import faang.school.projectservice.model.project.ProjectVisibility;
 import org.springframework.stereotype.Component;
 
 @Component

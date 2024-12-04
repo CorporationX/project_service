@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ResponseProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
@@ -10,7 +11,6 @@ import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMomentMapper;
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.utils.image.ImageUtils;

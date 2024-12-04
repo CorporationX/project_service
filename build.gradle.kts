@@ -11,6 +11,12 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://packages.atlassian.com/mvn/maven-atlassian-external/")
+    }
+    maven {
+        url = uri("https://mvnrepository.com/artifact/io.atlassian.fugue/fugue")
+    }
 }
 
 dependencies {
@@ -21,6 +27,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
@@ -32,9 +40,31 @@ dependencies {
     testImplementation("com.h2database:h2")
 
     /**
+     * Reactor
+     */
+    implementation("io.projectreactor:reactor-core")
+    testImplementation("io.projectreactor:reactor-test:3.5.10")
+
+
+    /**
+     * Resilience4j
+     */
+    implementation("io.github.resilience4j:resilience4j-spring-boot3:2.1.0")
+    implementation("io.github.resilience4j:resilience4j-reactor:2.1.0")
+
+    /**
      * Amazon S3
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
+
+    /**
+     * Jira
+     */
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.2")
+    implementation("com.atlassian.jira:jira-rest-java-client-api:5.2.2")
+    implementation("org.apache.httpcomponents:httpclient:4.5.14")
+    compileOnly("io.atlassian.fugue:fugue:4.7.2")
+
 
     /**
      * Utils & Logging

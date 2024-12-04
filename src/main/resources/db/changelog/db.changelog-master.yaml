@@ -25,3 +25,11 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V015_resource_roles.sql
   - include:
       file: db/changelog/changeset/project_V016_meet.sql
+  - include:
+      file: db/changelog/changeset/project_V017_alter_project_add_jira_project_key.sql
+  - include:
+      file: db/changelog/changeset/project_V018_alter_team_member_add_jira_username.sql
+  - include:
+      file: db/changelog/changeset/project_V019_alter_task_add_task_type.sql
+  - include:
+      file: db/changelog/changeset/project_V020_alter_task_add_issue_key.sql

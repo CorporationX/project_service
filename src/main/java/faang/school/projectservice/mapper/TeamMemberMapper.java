@@ -3,7 +3,7 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.teamMember.CreateTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.team.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

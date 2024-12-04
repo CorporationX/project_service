@@ -1,5 +1,7 @@
 package faang.school.projectservice.model;
 
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.project.ProjectVisibility;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

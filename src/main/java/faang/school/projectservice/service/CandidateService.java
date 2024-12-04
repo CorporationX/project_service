@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.candidate.Candidate;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.CandidateRepository;
 import lombok.RequiredArgsConstructor;

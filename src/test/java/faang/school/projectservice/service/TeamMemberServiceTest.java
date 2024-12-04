@@ -7,10 +7,10 @@ import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.project.Project;
+import faang.school.projectservice.model.team.Team;
+import faang.school.projectservice.model.team.TeamMember;
+import faang.school.projectservice.model.team.TeamRole;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -177,7 +176,6 @@ public class TeamMemberServiceTest {
         // Assert
         assertEquals(responseDto, result);
         verify(teamService).getTeamById(teamId);
-        verify(teamMemberRepository).updateTeamMembers(teamId, new ArrayList<>(team.getTeamMembers()));
         verify(teamMemberRepository).save(any(TeamMember.class));
     }
 

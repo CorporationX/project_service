@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
@@ -12,9 +13,8 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.mapper.ProjectMomentMapper;
 import faang.school.projectservice.mapper.ProjectMomentMapperImpl;
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.project.ProjectStatus;
+import faang.school.projectservice.model.project.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.utils.image.ImageUtils;
 import faang.school.projectservice.validator.FileValidator;
@@ -23,6 +23,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
@@ -48,8 +50,13 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
-    private ProjectService projectService;
+
+    @Mock
     private ProjectRepository projectRepository;
+
+    @InjectMocks
+    private ProjectService projectService;
+
     private ProjectMapper projectMapper;
     private ProjectMomentMapper projectMomentMapper;
     private ProjectValidator projectValidator;
@@ -125,7 +132,6 @@ public class ProjectServiceTest {
 
         // act
         projectService.createSubProject(projectId, createSubProjectDto);
-
         // assert
         verify(projectMapper).toProjectDto(project);
     }
@@ -379,7 +385,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(1L)).thenReturn(project);
 
         // Act
-        Project result = projectService.getProjectById(1L);
+        Project result = projectService.findProjectById(1L);
 
         // Assert
         assertEquals(project, result);
