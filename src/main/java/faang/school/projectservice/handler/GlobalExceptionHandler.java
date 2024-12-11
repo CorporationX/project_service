@@ -9,6 +9,8 @@ import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.exception.Subproject.*;
 import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.exception.StorageSizeException;
+import faang.school.projectservice.exception.project.ImageValidationFailException;
+import faang.school.projectservice.exception.project.StorageSizeExceededException;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
 import lombok.extern.slf4j.Slf4j;
@@ -126,17 +128,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(PermissionDeniedException.class)
+    @ExceptionHandler(StorageSizeExceededException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleTeamMemberPermission(PermissionDeniedException e) {
-        log.error("Team  member does not have permission", e);
-        return new ErrorResponse("Team  member does not have permission", e.getMessage());
+    public ErrorResponse handleStorageSizeExceededException(StorageSizeExceededException exception) {
+        log.error("Storage Size Exceeded Error: {}", exception);
+        return new ErrorResponse("Storage Size Exceeded Error", exception.getMessage());
     }
 
-    @ExceptionHandler(StorageSizeException.class)
+    @ExceptionHandler(ImageValidationFailException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleStorageSize(StorageSizeException e) {
-        log.error("Storage size exceeded", e);
-        return new ErrorResponse("Storage size exceeded", e.getMessage());
+    public ErrorResponse handleImageValidationFailException(ImageValidationFailException exception) {
+        log.error("Image Validation Fail Error: {}", exception);
+        return new ErrorResponse("Image Validation Fail Error", exception.getMessage());
     }
 }
