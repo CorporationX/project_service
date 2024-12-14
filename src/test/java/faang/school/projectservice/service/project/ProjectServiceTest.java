@@ -50,9 +50,6 @@ public class ProjectServiceTest {
     @Mock
     private UserContext userContext;
 
-    @Mock
-    private ProjectViewEventPublisher projectViewEventPublisher;
-
     @InjectMocks
     private ProjectService projectService;
 
@@ -220,7 +217,7 @@ public class ProjectServiceTest {
         when(projectMapper.toResponseDtoFromEntity(any(Project.class))).thenReturn(responseDtoForTests);
 
         ProjectService projectService = new ProjectService(
-                projectRepository, projectMapper, userContext, List.of(filterMock), projectViewEventPublisher);
+                projectRepository, projectMapper, userContext, List.of(filterMock));
 
         List<ProjectResponseDto> projectResponseDtos = projectService.findAllProjectsWithFilters(filterDto);
 

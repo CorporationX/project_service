@@ -10,8 +10,6 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.publisher.projectview.ProjectViewEvent;
-import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.Positive;
@@ -34,7 +32,6 @@ public class ProjectService {
 
     private static final ProjectStatus projectDefaultStatus = ProjectStatus.CREATED;
     private static final ProjectVisibility projectDefaultVisibility = ProjectVisibility.PUBLIC;
-    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     public ProjectResponseDto createProject(ProjectCreateDto projectCreateDto) {
         Long currentUserId = userContext.getUserId();
@@ -96,30 +93,5 @@ public class ProjectService {
 
     public void saveProject(Project project) {
         projectRepository.save(project);
-    }
-
-    public ProjectResponseDto viewProject(Long projectId, Long userId) {
-        log.info("Starting viewProject method. Project ID: {}, User ID: {}", projectId, userId);
-
-        Project project = projectRepository.getProjectById(projectId);
-        log.info("Project retrieved successfully. Project ID: {}, Owner ID: {}", projectId, project.getOwnerId());
-
-        if (!userId.equals(project.getOwnerId())) {
-            log.info("User ID {} is viewing a project they do not own. Preparing ProjectViewEvent.", userId);
-            ProjectViewEvent event = ProjectViewEvent.builder()
-                    .projectId(projectId)
-                    .userId(userId)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-                projectViewEventPublisher.publish(event);
-        } else {
-            log.info("User ID {} is the owner of Project ID {}. No event will be published.", userId, projectId);
-        }
-
-        ProjectResponseDto responseDto = projectMapper.toResponseDtoFromEntity(project);
-        log.info("ProjectResponseDto successfully created for Project ID: {}", projectId);
-
-        log.info("viewProject method execution completed. Project ID: {}, User ID: {}", projectId, userId);
-        return responseDto;
     }
 }

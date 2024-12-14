@@ -48,9 +48,6 @@ public class ProjectControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private UserContext userContext;
-
     @Test
     public void findAllProjectsTest() throws Exception {
         List<ProjectResponseDto> mockProjects = Arrays.asList(
@@ -70,7 +67,7 @@ public class ProjectControllerTest {
 
         when(projectService.findAllProject()).thenReturn(mockProjects);
 
-        mockMvc.perform(get("/api/v1/projects/all"))
+        mockMvc.perform(get("/projects/all"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].description", is("This my first TEST")))
@@ -92,7 +89,7 @@ public class ProjectControllerTest {
 
         when(projectService.getProjectById(1L)).thenReturn(projectResponseDto);
 
-        mockMvc.perform(get("/api/v1/projects/get/{projectId}", 1L))
+        mockMvc.perform(get("/projects/get/{projectId}", 1L))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is("Test project")))
@@ -120,7 +117,7 @@ public class ProjectControllerTest {
 
         when(projectService.findAllProjectsWithFilters(filterDto)).thenReturn(mockProjects);
 
-        mockMvc.perform(post("/api/v1/projects/filtered")
+        mockMvc.perform(post("/projects/filtered")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(filterDto)))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -150,7 +147,7 @@ public class ProjectControllerTest {
 
         when(projectService.createProject(projectCreateDto)).thenReturn(projectResponseDto);
 
-        mockMvc.perform(post("/api/v1/projects")
+        mockMvc.perform(post("/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(projectCreateDto)))
                 .andExpect(status().isOk())
@@ -178,7 +175,7 @@ public class ProjectControllerTest {
 
         when(projectService.updateProject(projectId, projectUpdateDto)).thenReturn(projectResponseDto);
 
-        mockMvc.perform(put("/api/v1/projects/{projectId}", 1L)
+        mockMvc.perform(put("/projects/{projectId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(projectUpdateDto)))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
