@@ -24,6 +24,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        team_channel:
+          name: team_channel
   servlet:
     multipart:
       max-request-size: 2GB
