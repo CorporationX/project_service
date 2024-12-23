@@ -22,9 +22,9 @@ public enum ResourceType {
             return ResourceType.VIDEO;
         } else if (contentType.contains("audio")) {
             return ResourceType.AUDIO;
-        } else if (contentType.contains("msword")) {
+        } else if (contentType.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
             return ResourceType.MSWORD;
-        } else if (contentType.contains("ms-excel")) {
+        } else if (contentType.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
             return ResourceType.MSEXCEL;
         } else if (contentType.contains("pdf")) {
             return ResourceType.PDF;

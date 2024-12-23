@@ -25,6 +25,12 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+
 server:
   port: 8082
 
@@ -37,10 +43,10 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://localhost:9000
+    endpoint: http://127.0.0.1:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     isMocked: false
   payment-service:
     host: http://localhost
