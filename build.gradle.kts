@@ -86,7 +86,7 @@ val jacocoIncludePackagesList = listOf(
     "**/controller/**",
     "**/service/**",
     "**/mapper/**",
-    "**/utilities/**"
+    "**/utilities/**",
     "**/validation/**",
     "**/filter/**"
 )

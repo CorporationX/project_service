@@ -4,3 +4,12 @@ spring:
 
 calculations_messages_processing:
   enabled: false
+
+file:
+  folder:
+    project-cover-name: Project-cover
+  extension:
+    type: jpg
+    target-image-size: 1080
+  max-file-size: 5
+  max-request-size: 5

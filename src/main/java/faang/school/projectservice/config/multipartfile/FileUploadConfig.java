@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.s3;
+package faang.school.projectservice.config.multipartfile;
 
 import jakarta.servlet.MultipartConfigElement;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,10 +9,10 @@ import org.springframework.util.unit.DataSize;
 
 @Configuration
 public class FileUploadConfig {
-    @Value("${file.max-file-size}")
-    private int maxFileSize;
-    @Value("${file.max-request-size}")
-    private int maxRequestSize;
+//    @Value("${file.max-file-size}")
+    private int maxFileSize = 5;
+//    @Value("${file.max-request-size}")
+    private int maxRequestSize = 5;
 
     @Bean
     public MultipartConfigElement multipartConfigElement() {
