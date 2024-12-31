@@ -1,9 +1,10 @@
 package faang.school.projectservice.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
+import org.hibernate.type.StandardBasicTypes;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,6 +42,10 @@ public class Meet {
     @CollectionTable(name = "meet_participant", joinColumns = @JoinColumn(name = "meet_id"))
     @Column(name = "user_id")
     private List<Long> userIds;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "date", nullable = false)
+    private LocalDateTime date;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
