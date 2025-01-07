@@ -1,18 +1,21 @@
 package faang.school.projectservice.controller.project;
 
+import faang.school.projectservice.dto.campaign.CampaignDto;
+import faang.school.projectservice.dto.campaign.CampaignFilter;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.service.campaign.CampaignService;
 import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +30,7 @@ import java.util.List;
 @RequestMapping("/projects")
 public class ProjectController {
     private final ProjectService projectService;
+    private final CampaignService campaignService;
 
     @PostMapping
     public ResponseEntity<ProjectDto> createProject(@RequestBody @Valid ProjectDto projectDto) {
@@ -62,4 +66,10 @@ public class ProjectController {
     public ResponseEntity<List<CreateSubProjectDto>> getProjectsByFilters(@RequestBody @Valid ProjectFilterDto filterDto, @PathVariable @Positive @NotNull Long projectId) {
         return ResponseEntity.ok(projectService.getProjectsByFilters(projectId, filterDto));
     }
+
+    @GetMapping("{id}/campaigns")
+    public List<CampaignDto> getByProject(@PathVariable Long id, @ModelAttribute @Valid CampaignFilter filter) {
+        return campaignService.getCampaignsByProject(id, filter);
+    }
+
 }

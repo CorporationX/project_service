@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,8 +22,22 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
             "AND (:status IS NULL OR c.status = :status)"
     )
     List<Campaign> findAllByFilters(@Param("namePattern") String namePattern,
-                                    @Param("minGoal") BigDecimal minGoal,
-                                    @Param("maxGoal") BigDecimal maxGoal,
-                                    @Param("status") String status,
-                                    Pageable pageable);
+                                              @Param("minGoal") BigDecimal minGoal,
+                                              @Param("maxGoal") BigDecimal maxGoal,
+                                              @Param("status") String status,
+                                              Pageable pageable);
+
+    @Query("SELECT c FROM Campaign c " +
+                    "WHERE (c.project.id = :projectId) " +
+                    "AND (cast(:fromAt as timestamp) IS NULL OR c.createdAt > :fromAt) " +
+                    "AND (cast(:toAt as timestamp) IS NULL OR c.createdAt < :toAt) " +
+                    "AND (:createdBy IS NULL OR c.createdBy = :createdBy) " +
+                    "AND (:status IS NULL OR c.status = :status) " +
+                    "ORDER BY c.createdAt DESC"
+    )
+    List<Campaign> findAllByProjectAndFilters(@Param("projectId") Long projectId,
+                                              @Param("fromAt") LocalDateTime from,
+                                              @Param("toAt") LocalDateTime to,
+                                              @Param("createdBy") Long createdBy,
+                                              @Param("status") String status);
 }

@@ -26,8 +26,8 @@ public class ProjectDto {
     @NotNull(message = "Project description must not be null")
     @NotBlank(message = "Project description must not be blank")
     @Size(max = 255, message = "Project description should not exceed 255 characters")
-    private List<@NotNull Long> childrenIds;
     private String description;
+    private List<@NotNull Long> childrenIds;
     private Long ownerId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
