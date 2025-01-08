@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V018_sessions.sql
   - include:
       file: db/changelog/changeset/project_V019_meet_add_column_google_event_id.sql
+  - include:
+      file: db/changelog/changeset/project_V020_add_table_task_linked_tasks.sql

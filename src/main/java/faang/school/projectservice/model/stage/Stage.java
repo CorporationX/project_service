@@ -1,5 +1,6 @@
 package faang.school.projectservice.model.stage;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
@@ -33,7 +34,8 @@ public class Stage {
     @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL)
     private List<StageRoles> stageRoles;
 
-    @OneToMany(cascade = CascadeType.MERGE)
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JsonManagedReference
     @JoinColumn(name = "stage_id")
     private List<Task> tasks;
 

@@ -1,11 +1,9 @@
 package faang.school.projectservice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -51,10 +49,12 @@ public class Task {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "parent_task_id")
     private Task parentTask;
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "task_linked_tasks",
@@ -63,11 +63,15 @@ public class Task {
     )
     private List<Task> linkedTasks;
 
-    @ManyToOne
+    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @ManyToOne
+    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name = "stage_id")
     private Stage stage;
 }
