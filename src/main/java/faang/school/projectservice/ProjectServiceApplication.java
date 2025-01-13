@@ -16,5 +16,6 @@ public class ProjectServiceApplication {
         new SpringApplicationBuilder(ProjectServiceApplication.class)
                 .bannerMode(Banner.Mode.OFF)
                 .run(args);
+        System.out.println("A");
     }
 }
