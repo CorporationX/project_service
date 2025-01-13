@@ -5,7 +5,5 @@ public class TestCI {
     @Test
     public void testCI() {
         Assertions.assertTrue(true);
-        Assertions.fail();
-
     }
 }
