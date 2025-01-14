@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - chimera-master-stream8
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
+      - name: Gradle build
+        uses: gradle/gradle-build-action@v2
+        with:
+          tasks: build
+
+      - name: Run Tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          tasks: test
