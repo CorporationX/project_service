@@ -22,10 +22,11 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Gradle build
-        run: ./gradlew build -x test --no-daemon
+        run: ./gradlew build testClasses -x test -x check -x checkstyleMain -x checkstyleTest --no-daemon
 
-#      - name: Run Checkstyle
-#        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
+      - name: Test with Gradle
+        run: ./gradlew test -x testClasses --no-daemon --continue
 
-      - name: Run Tests
-        run: ./gradlew test --stacktrace
+      - name: Checkstyle verification
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
+
