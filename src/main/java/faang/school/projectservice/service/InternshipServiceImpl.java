@@ -2,6 +2,8 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.internship.InternshipDto;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
+import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.repository.InternshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     public List<InternshipDto> getAllInternships() {
+//        List<Internship> internships = InternshipRepository.
         return List.of();
     }
 
