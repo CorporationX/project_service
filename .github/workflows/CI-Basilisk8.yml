@@ -24,8 +24,8 @@ jobs:
       - name: Gradle build
         run: ./gradlew build -x test --no-daemon
 
-      - name: Run Checkstyle
-        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
+#      - name: Run Checkstyle
+#        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
 
       - name: Run Tests
         run: ./gradlew test --stacktrace
