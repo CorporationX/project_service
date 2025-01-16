@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +21,8 @@ public class InternshipServiceImpl implements InternshipService {
     private final List<InternshipFilter> internshipFilters;
 
     @Override
-    public void createInternship(InternshipDto internshipDto) {
-
+    public InternshipDto createInternship(InternshipDto internshipDto) {
+        return null;
     }
 
     @Override
@@ -31,14 +32,19 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     public List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters) {
-        return List.of();
+        Stream<Internship> internship = internshipRepository.findAll().stream();
+        internshipFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .forEach(filter -> filter.apply(internship, filters));
+        return internshipMapper.toDto(internship.toList());
     }
 
     @Override
     public List<InternshipDto> getAllInternships() {
         List<Internship> internships = internshipRepository.findAll().stream().toList();
 
-        return internships.stream().map(internshipMapper::toDto).toList();
+//        return internships.stream().map(internshipMapper::toDto).toList();
+        return internshipMapper.toDto(internships);
     }
 
     @Override
