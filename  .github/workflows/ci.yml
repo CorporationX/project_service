@@ -2,8 +2,11 @@ name: Java CI with Gradle
 
 on:
   pull_request:
-    branches:
-      - "feature-BJS2-52787"
+    types: [opened, reopened, synchronize, edited]
+
+permissions:
+  issues: write
+  pull-requests: write
 
 jobs:
   build-and-test:
@@ -33,9 +36,8 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('/gradle.properties', '/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle.properties', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
 
       # 5. Сборка проекта
       - name: Build with Gradle
@@ -51,7 +53,7 @@ jobs:
         if: failure()
         uses: actions/github-script@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const issue_number = context.issue.number;
             const message = "⚠️ Ошибка: Сборка провалена. Проверьте логи и исправьте ошибки, затем обновите PR. Ошибка может быть связана с тестами, Checkstyle или сборкой.";
