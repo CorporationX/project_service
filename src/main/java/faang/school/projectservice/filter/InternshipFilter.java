@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 public interface InternshipFilter {
 
-    boolean isApplicable(InternshipDto filters);
+    boolean isApplicable(InternshipFilterDto filters);
 
     Stream<Internship> apply(Stream<Internship> requests, InternshipFilterDto filters);
 }
