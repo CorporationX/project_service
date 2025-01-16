@@ -1,9 +1,8 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.internship;
 
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 public class InternshipFilterIntern implements InternshipFilter {

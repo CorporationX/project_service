@@ -1,9 +1,9 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.client.internship.InternshipDto;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
-import faang.school.projectservice.filter.InternshipFilter;
-import faang.school.projectservice.mapper.InternshipMapper;
+import faang.school.projectservice.filter.internship.InternshipFilter;
+import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.repository.InternshipRepository;
 import lombok.RequiredArgsConstructor;

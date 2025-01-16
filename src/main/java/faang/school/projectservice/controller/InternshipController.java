@@ -2,8 +2,8 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.internship.InternshipDto;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
-import faang.school.projectservice.service.InternshipService;
-import faang.school.projectservice.validator.Internship.InternshipControllerValidator;
+import faang.school.projectservice.service.internship.InternshipService;
+import faang.school.projectservice.validator.internship.InternshipControllerValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
