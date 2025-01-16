@@ -9,9 +9,9 @@ import java.util.List;
 @Data
 public class InternshipDto {
     private Long id;
-    private Long project;
+    private Long projectId;
     private Long mentorId;
-    private List<Long> interns;
+    private List<Long> internsId;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private InternshipStatus status;
@@ -21,5 +21,5 @@ public class InternshipDto {
     private LocalDateTime updatedAt;
     private Long createdBy;
     private Long updatedBy;
-    private Long schedule;
+    private Long scheduleId;
 }
