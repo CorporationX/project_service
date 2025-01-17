@@ -12,13 +12,14 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class InternshipController {
-    //TODO Logs!!!
+    //TODO Logs!!! + Postman
     private final InternshipService internshipService;
     private final InternshipControllerValidator internshipValidator;
 
-    public void createInternship(InternshipDto internshipDto) {
+    public InternshipDto createInternship(InternshipDto internshipDto) {
         internshipValidator.checkDataBeforeCreate(internshipDto);
         internshipService.createInternship(internshipDto);
+        return internshipDto;
     }
 
     public InternshipDto updateInternship(Long id) {
