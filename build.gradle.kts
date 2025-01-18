@@ -2,7 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
-    id("checkstyle") version "10.3.1"
+    id("checkstyle")
 }
 
 group = "faang.school"
