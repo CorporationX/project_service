@@ -5,6 +5,10 @@ plugins {
     id("checkstyle")
 }
 
+checkstyle {
+    toolVersion = "10.3"
+}
+
 group = "faang.school"
 version = "1.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
