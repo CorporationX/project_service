@@ -28,6 +28,6 @@ jobs:
         run: ./gradlew test -x testClasses --no-daemon --continue
 
       - name: Checkstyle verification
-##        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
-        run: ./gradlew checkstyleMain checkstyleTest --stacktrace --debug
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
+##        run: ./gradlew checkstyleMain checkstyleTest --stacktrace --debug
 
