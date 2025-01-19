@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
     branches:
-      - BJS2-54078/test-ci-pipeline
+      - BJS2-54078/demo-ci-pipeline
 
 jobs:
   build:
