@@ -9,7 +9,6 @@ public class PipelineTest {
 
     @Test
     public void testFailPipelineCase() {
-        //Неуспешный тест
         fail();
     }
 }
