@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class InternshipControllerValidator {
     private static final String CHECK_MESSAGE = "%s can't be empty.";
+    private static final int NUMBER_MONTH = 3;
 
     public void checkDataBeforeCreate(InternshipDto internshipDto) {
         if (internshipDto == null) {
@@ -26,10 +27,14 @@ public class InternshipControllerValidator {
         if (internshipDto.getDescription() == null) {
             throw new DataValidationException(String.format(CHECK_MESSAGE, "Description"));
         }
+        if (internshipDto.getStartDate().plusMonths(NUMBER_MONTH).isAfter(internshipDto.getEndDate())) {
+            throw new DataValidationException(String.format("Internship can't last longer more than %d months",
+                    NUMBER_MONTH));
+        }
     }
 
-    public void checkDataBeforeUpdate(Long id) {
-        checkIsIdNull(id);
+    public void checkDataBeforeUpdate(InternshipDto internshipDto) {
+        checkIsIdNull(internshipDto.getId());
     }
 
     public void checkDataBeforeGetInternship(Long id) {

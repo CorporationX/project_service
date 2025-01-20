@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.client.internship.InternshipDto;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
@@ -12,7 +12,6 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class InternshipController {
-    //TODO Logs!!! + Postman
     private final InternshipService internshipService;
     private final InternshipControllerValidator internshipValidator;
 
@@ -22,9 +21,9 @@ public class InternshipController {
         return internshipDto;
     }
 
-    public InternshipDto updateInternship(Long id) {
-        internshipValidator.checkDataBeforeUpdate(id);
-        return internshipService.updateInternship(id);
+    public InternshipDto updateInternship(InternshipDto internshipDto) {
+        internshipValidator.checkDataBeforeUpdate(internshipDto);
+        return internshipService.updateInternship(internshipDto);
     }
 
     public List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters) {
