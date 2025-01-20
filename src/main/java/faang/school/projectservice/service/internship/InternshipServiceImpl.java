@@ -9,6 +9,7 @@ import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class InternshipServiceImpl implements InternshipService {
     private final InternshipRepository internshipRepository;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final TeamRepository teamRepository;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> internshipFilters;
 
@@ -32,8 +34,26 @@ public class InternshipServiceImpl implements InternshipService {
     public InternshipDto createInternship(InternshipDto internshipDto) {
         checkInternshipBeforeCreate(internshipDto);
         Project project = projectRepository.getReferenceById(internshipDto.getProjectId());
-//        internshipDto.get
-//        internshipDto.getInternsId().stream().forEach(intern->teamMembers.add(new TeamMember()));
+        List<TeamMember> teamMembers = new ArrayList<>();
+        Team team = new Team();
+        team.setProject(project);
+        team.setTeamMembers(teamMembers);
+        teamRepository.save(team);
+
+        // а потом получить id и тут записать
+        for (Long id : internshipDto.getInternsId()) {
+            List<TeamRole> teamRoles = new ArrayList<>();
+            teamRoles.add(TeamRole.INTERN);
+            TeamMember teamMember = new TeamMember();
+            teamMember.setTeam(team);
+            teamMember.setRoles(teamRoles);
+            teamMember.setUserId(id);
+            teamMembers.add(teamMember);
+        }
+//        for 1 project list of teams
+//        create in TeamRepository
+//        create in TeamMemberRepository
+//        create in InternshipRepository
         return internshipMapper.toDto(internshipRepository.save(internshipMapper.toEntity(internshipDto)));
     }
 

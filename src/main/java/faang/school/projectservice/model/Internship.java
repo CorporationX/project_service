@@ -51,6 +51,8 @@ public class Internship {
     )
     private List<TeamMember> interns;
 
+    private TeamRole role;
+
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     private LocalDateTime startDate;
