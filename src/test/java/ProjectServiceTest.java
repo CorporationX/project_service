@@ -1,10 +1,17 @@
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataAlreadyExistException;
 import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.DataValidateException;
+import faang.school.projectservice.filter.ProjectFilter;
+import faang.school.projectservice.filter.ProjectNameFilter;
+import faang.school.projectservice.filter.ProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.Test;
@@ -15,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -30,6 +38,16 @@ import static org.mockito.Mockito.when;
 public class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
+    Project projectPublic;
+    Project projectPrivate;
+    Team teamPublic;
+    Team teamPrivate;
+    TeamMember teamMemberPublic;
+    TeamMember teamMemberPrivate;
+    ProjectNameFilter nameFilter;
+    ProjectStatusFilter statusFilter;
+    List<ProjectFilter> projectFilters;
+    List<Project> allProject;
 
     @Mock
     private ProjectRepository projectRepository;
@@ -39,6 +57,36 @@ public class ProjectServiceTest {
 
     @Captor
     private ArgumentCaptor<Project> captor;
+
+//    @BeforeEach
+//    public void setUp() {
+//        teamMemberPublic.builder()
+//                .userId(1L)
+//                .build();
+//
+//        teamPublic.builder()
+//                .teamMembers(List.of(teamMemberPublic))
+//                .build();
+//
+//        projectPublic.builder()
+//                .teams(List.of(teamPublic))
+//                .visibility(ProjectVisibility.PUBLIC)
+//                .build();
+//
+//        teamMemberPrivate.builder()
+//                .userId(2L)
+//                .build();
+//
+//        teamPrivate.builder()
+//                .teamMembers(List.of(teamMemberPrivate))
+//                .build();
+//
+//        projectPrivate.builder()
+//                .teams(List.of(teamPrivate))
+//                .visibility(ProjectVisibility.PRIVATE);
+//
+//        allProject = List.of(projectPublic, projectPrivate);
+//    }
 
     @Test
     public void testCreateProjectWithoutTitle() {
@@ -192,5 +240,32 @@ public class ProjectServiceTest {
         verify(projectRepository, times(1)).findById(1L);
         verify(projectRepository, times(1)).save(project);
         verify(projectMapper, times(1)).toDto(project);
+    }
+
+    @Test
+    public void testGetPublicProjectsWithoutFilters() {
+        ProjectFilterDto filterDto = new ProjectFilterDto();
+
+        Project publicProject = Project.builder()
+                .name("Project public")
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+
+        Project privateProject = Project.builder()
+                .name("Project private")
+                .visibility(ProjectVisibility.PRIVATE)
+                .build();
+
+        List<Project> projects = List.of(publicProject, privateProject);
+
+        when(projectRepository.findAll()).thenReturn(projects);
+        when(projectMapper.toDto(any())).thenAnswer(invocationOnMock -> {
+            Project currentProject = invocationOnMock.getArgument(0);
+            return new ProjectDto();
+        });
+
+        List<ProjectDto> result = projectService.getProjectWithFilters(new ProjectFilterDto(), 100L);
+
+        assertEquals(1, result.size());
     }
 }
