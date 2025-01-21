@@ -7,12 +7,8 @@ import java.util.List;
 
 public interface InternshipService {
     InternshipDto createInternship(InternshipDto internshipDto);
-
-    InternshipDto updateInternship(Long id);
-
+    InternshipDto updateInternship(InternshipDto internshipDto);
     List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters);
-
     List<InternshipDto> getAllInternships();
-
     InternshipDto getInternship(Long id);
 }
