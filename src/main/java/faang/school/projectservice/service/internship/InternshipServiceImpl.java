@@ -33,23 +33,23 @@ public class InternshipServiceImpl implements InternshipService {
     @Override
     public InternshipDto createInternship(InternshipDto internshipDto) {
         checkInternshipBeforeCreate(internshipDto);
-        Project project = projectRepository.getReferenceById(internshipDto.getProjectId());
-        List<TeamMember> teamMembers = new ArrayList<>();
-        Team team = new Team();
-        team.setProject(project);
-        team.setTeamMembers(teamMembers);
-        teamRepository.save(team);
+//        Project project = projectRepository.getReferenceById(internshipDto.getProjectId());
+//        List<TeamMember> teamMembers = new ArrayList<>();
+//        Team team = new Team();
+//        team.setProject(project);
+//        team.setTeamMembers(teamMembers);
+//        teamRepository.save(team);
 
         // а потом получить id и тут записать
-        for (Long id : internshipDto.getInternsId()) {
-            List<TeamRole> teamRoles = new ArrayList<>();
-            teamRoles.add(TeamRole.INTERN);
-            TeamMember teamMember = new TeamMember();
-            teamMember.setTeam(team);
-            teamMember.setRoles(teamRoles);
-            teamMember.setUserId(id);
-            teamMembers.add(teamMember);
-        }
+//        for (Long id : internshipDto.getInternsId()) {
+//            List<TeamRole> teamRoles = new ArrayList<>();
+//            teamRoles.add(TeamRole.INTERN);
+//            TeamMember teamMember = new TeamMember();
+//            teamMember.setTeam(team);
+//            teamMember.setRoles(teamRoles);
+//            teamMember.setUserId(id);
+//            teamMembers.add(teamMember);
+//        }
 //        for 1 project list of teams
 //        create in TeamRepository
 //        create in TeamMemberRepository
@@ -95,12 +95,12 @@ public class InternshipServiceImpl implements InternshipService {
                     "with the status: %s",projectStatus ));
         }
 
-        List<TeamMember> teamMembers = teamMemberRepository.findByProjectId(internshipDto.getProjectId());
-        if (!teamMembers.stream().anyMatch(teamMember -> teamMember.getId() == internshipDto
-                .getMentorId())) {
-            throw new DataValidationException(String.format("Mentor with id %d not from project %d team",
-                    internshipDto.getMentorId(), internshipDto.getProjectId()));
-        }
+//        List<TeamMember> teamMembers = teamMemberRepository.findByProjectId(internshipDto.getProjectId());
+//        if (!teamMembers.stream().anyMatch(teamMember -> teamMember.getId() == internshipDto
+//                .getMentorId())) {
+//            throw new DataValidationException(String.format("Mentor with id %d not from project %d team",
+//                    internshipDto.getMentorId(), internshipDto.getProjectId()));
+//        }
     }
 
     private Project getProjectById(Long id) {
