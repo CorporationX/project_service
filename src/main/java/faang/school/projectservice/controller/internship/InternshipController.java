@@ -12,13 +12,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/internship")
 @Tag(name = "Internship", description = "All methods for internship")
 public class InternshipController {
     private final InternshipService internshipService;
     private final InternshipControllerValidator internshipValidator;
+
+    @GetMapping("/health")
+    public String checkHealth() {
+        return "Application is running!";
+    }
 
     @PostMapping
     public InternshipDto createInternship(@NotNull @RequestBody InternshipDto internshipDto) {
@@ -32,8 +37,8 @@ public class InternshipController {
         return internshipService.updateInternship(internshipDto);
     }
 
-    @PostMapping("/filter")
-    public List<InternshipDto> getInternshipsWithFilters(@RequestBody InternshipFilterDto filters) {
+    @GetMapping("/filter")
+    public List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters) {
         return getInternshipsWithFilters(filters);
     }
     @GetMapping

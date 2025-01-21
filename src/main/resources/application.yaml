@@ -49,6 +49,7 @@ services:
     host: http://localhost
     port: 8080
 
+
 springdoc:
   api-docs:
     path: /api-docs
