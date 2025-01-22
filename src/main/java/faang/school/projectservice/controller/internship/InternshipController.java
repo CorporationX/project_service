@@ -40,8 +40,9 @@ public class InternshipController {
 
     @GetMapping("/filter")
     public List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters) {
-        return getInternshipsWithFilters(filters);
+        return internshipService.getInternshipsWithFilters(filters);
     }
+
     @GetMapping
     public List<InternshipDto> getAllInternships() {
         return internshipService.getAllInternships();

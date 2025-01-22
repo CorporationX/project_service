@@ -6,9 +6,9 @@ import lombok.Data;
 @Data
 public class InternshipFilterDto {
     private Long projectId;
-    private Long mentorId;
-    private Long internId;
-    private InternshipStatus status;
-    private String description;
-    private String name;
+//    private Long mentorId;
+//    private Long internId;
+//    private InternshipStatus status;
+//    private String description;
+//    private String name;
 }

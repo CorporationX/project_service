@@ -9,11 +9,14 @@ import java.util.stream.Stream;
 public class InternshipFilterMentor implements InternshipFilter {
     @Override
     public boolean isApplicable(InternshipFilterDto filters) {
-        return filters.getMentorId() != null;
+//        return filters.getMentorId() != null;
+        return false;
     }
 
     @Override
     public Stream<Internship> apply(Stream<Internship> requests, InternshipFilterDto filters) {
-        return requests.filter(request -> Objects.equals(request.getMentorId().getId(), filters.getMentorId()));
+//        return requests.filter(request -> Objects.equals(request.getMentorId().getId(), filters.getMentorId()));
+//        return requests.filter(request -> request.getMentorId().getId()== filters.getMentorId());
+        return Stream.of();
     }
 }

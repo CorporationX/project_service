@@ -45,21 +45,6 @@ public class InternshipServiceImpl implements InternshipService {
 //        дописать адаптер как прослойку получения данных между сервисом и репозиторием
         Project project = projectRepository.findById(internshipDto.getProjectId()).orElseThrow();
 
-        // а потом получить id и тут записать
-//        for (Long id : internshipDto.getInternsId()) {
-//            List<TeamRole> teamRoles = new ArrayList<>();
-//            teamRoles.add(TeamRole.INTERN);
-//            TeamMember teamMember = new TeamMember();
-//            teamMember.setTeam(team);
-//            teamMember.setRoles(teamRoles);
-//            teamMember.setUserId(id);
-//            teamMembers.add(teamMember);
-//        }
-//        for 1 project list of teams
-//        create in TeamRepository
-//        create in TeamMemberRepository
-//        create in InternshipRepository
-//        Тут сохранить сначала команду, а потом в команду
         List<TeamMember> interns = new ArrayList<>();
         Team team = new Team();
         team.setProject(project);
@@ -68,7 +53,7 @@ public class InternshipServiceImpl implements InternshipService {
         for (InternshipUserInformationDto internshipUserInformationDto : internshipDto.getInterns()) {
             TeamMember teamMember = new TeamMember();
             teamMember.setTeam(team);
-            teamMember.setUserId(internshipUserInformationDto.getId());
+            teamMember.setUserId(internshipUserInformationDto.getUserId());
             teamMember.setNickname(internshipUserInformationDto.getNickname());
             List<TeamRole> teamRoles = new ArrayList<>();
             teamRoles.add(TeamRole.INTERN);
@@ -98,6 +83,7 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     public List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters) {
+//        todo not work correctly
         Stream<Internship> internship = internshipRepository.findAll().stream();
         internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
@@ -129,7 +115,7 @@ public class InternshipServiceImpl implements InternshipService {
 //        adapter
         TeamMember mentor = teamMemberRepository.findById(internshipDto.getMentorId())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("User с id: %s not found!", internshipDto.getMentorId())));
-
+// вот тут ошибка . зачем так написала???
          if ( teamMemberRepository.findByUserIdAndProjectId(internshipDto.getMentorId(),project.getId()) == null){
                          throw new DataValidationException(String.format("Mentor with id %d not from project %d team",
                     internshipDto.getMentorId(), internshipDto.getProjectId()));
