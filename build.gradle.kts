@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
 }
@@ -61,8 +62,74 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
+jacoco {
+    toolVersion = "0.8.12"
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+val exclusions = listOf(
+    "**/config",
+    "**/dto/**",
+    "**/entity/**",
+    "**/client/**",
+    "**/config/**",
+    "**/mapper/**",
+    "**/model/**",
+    "**/controller/**",
+    "**/UserServiceApplication.*"
+)
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.required.set(true)
+    }
+
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(exclusions)
+            }
+        })
+    )
+
+    doLast {
+        val reportDir = reports.html.outputLocation.get().asFile.absolutePath
+        val reportFile = File(reportDir, "index.html")
+        if (reportFile.exists()) {
+            println("Jacoco saved report to $reportFile")
+        } else {
+            println("Jacoco couldn't save report file")
+        }
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(exclusions)
+            }
+        })
+    )
+
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.7.toBigDecimal()
+            }
+        }
+    }
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
