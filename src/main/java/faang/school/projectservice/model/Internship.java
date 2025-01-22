@@ -51,6 +51,7 @@ public class Internship {
     )
     private List<TeamMember> interns;
 
+    @NotBlank
     private TeamRole role;
 
     @Temporal(TemporalType.TIMESTAMP)
