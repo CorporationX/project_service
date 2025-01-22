@@ -36,7 +36,7 @@ public class ProjectController {
         return projectService.getProjectWithFilters(filter, userId);
     }
 
-    @GetMapping("/project/{userId}")
+    @GetMapping("/user/{userId}")
     public List<ProjectDto> getAllProject(@PathVariable long userId) {
         return projectService.getAllProject(userId);
     }
