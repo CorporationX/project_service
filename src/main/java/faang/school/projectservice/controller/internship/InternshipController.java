@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.client.internship.InternshipDto;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
 import faang.school.projectservice.service.internship.InternshipService;
 import faang.school.projectservice.validator.internship.InternshipControllerValidator;
 import jakarta.validation.constraints.NotNull;
@@ -32,9 +33,9 @@ public class InternshipController {
         return internshipDto;
     }
     @PutMapping
-    public InternshipDto updateInternship(@NotNull @RequestBody InternshipDto internshipDto) {
-        internshipValidator.checkDataBeforeUpdate(internshipDto);
-        return internshipService.updateInternship(internshipDto);
+    public InternshipUpdateDto updateInternship(@NotNull @RequestBody InternshipUpdateDto internshipUpdateDto) {
+        internshipValidator.checkDataBeforeUpdate(internshipUpdateDto);
+        return internshipService.updateInternship(internshipUpdateDto);
     }
 
     @GetMapping("/filter")

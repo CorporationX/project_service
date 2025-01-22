@@ -1,6 +1,8 @@
 package faang.school.projectservice.dto.client.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
+import faang.school.projectservice.model.TeamRole;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,7 +13,7 @@ public class InternshipDto {
     private Long id;
     private Long projectId;
     private Long mentorId;
-    private List<Long> internsId;
+    private List<InternshipUserInformationDto> interns;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private InternshipStatus status;

@@ -1,6 +1,7 @@
 package faang.school.projectservice.validator.internship;
 
 import faang.school.projectservice.dto.client.internship.InternshipDto;
+import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -18,8 +19,8 @@ public class InternshipControllerValidator {
         if (internshipDto.getMentorId() == null) {
             throw new DataValidationException(String.format(CHECK_MESSAGE, "Mentor"));
         }
-        if (internshipDto.getInternsId() == null) {
-            throw new DataValidationException(String.format(CHECK_MESSAGE, "Interns ids"));
+        if (internshipDto.getInterns() == null) {
+            throw new DataValidationException(String.format(CHECK_MESSAGE, "Interns users ids"));
         }
         if (internshipDto.getProjectId() == null) {
             throw new DataValidationException(String.format(CHECK_MESSAGE, "Project id"));
@@ -33,8 +34,8 @@ public class InternshipControllerValidator {
         }
     }
 
-    public void checkDataBeforeUpdate(InternshipDto internshipDto) {
-        checkIsIdNull(internshipDto.getId());
+    public void checkDataBeforeUpdate(InternshipUpdateDto internshipUpdateDto) {
+        checkIsIdNull(internshipUpdateDto.getId());
     }
 
     public void checkDataBeforeGetInternship(Long id) {
