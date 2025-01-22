@@ -1,5 +1,8 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.config.redis.RedisTopicProperties;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ResponseProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
@@ -9,6 +12,8 @@ import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMomentMapper;
+import faang.school.projectservice.message.event.ProjectViewEvent;
+import faang.school.projectservice.message.producer.impl.RedisMessagePublisher;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -17,6 +22,8 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.utils.image.ImageUtils;
 import faang.school.projectservice.validator.FileValidator;
 import faang.school.projectservice.validator.ProjectValidator;
+import feign.FeignException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +45,10 @@ public class ProjectService {
     private final ProjectMomentMapper projectMomentMapper;
     private final ProjectValidator projectValidator;
     private final List<SubProjectFilter> filters;
+    private final UserContext userContext;
+    private final RedisMessagePublisher redisMessagePublisher;
+    private final RedisTopicProperties redisTopicProperties;
+    private final UserServiceClient userServiceClient;
 
     private final StageService stageService;
     private final MomentService momentService;
@@ -143,7 +155,9 @@ public class ProjectService {
     }
 
     public ResponseProjectDto getProject(long projectId) {
+        log.info("Trying to get project by id: {}", projectId);
         Project project = getProjectById(projectId);
+        publishProjectProfileViewEvent(projectId);
         return projectMapper.toResponseDto(project);
     }
 
@@ -167,6 +181,28 @@ public class ProjectService {
                 stageService.createStage(stage);
             });
             subProject.setStages(stages);
+        }
+    }
+
+    private void publishProjectProfileViewEvent(long projectId) {
+        long userId = userContext.getUserId();
+        validateUserExists(userId);
+
+        log.info("Trying to publish project profile view event for project {} by user: {}", projectId, userId);
+        ProjectViewEvent projectViewEvent = ProjectViewEvent.builder()
+                .projectId(projectId)
+                .userId(userId)
+                .receivedAt(LocalDateTime.now())
+                .build();
+
+        redisMessagePublisher.publish(redisTopicProperties.getProjectViewChannel(), projectViewEvent);
+    }
+
+    private void validateUserExists(long userId) {
+        try {
+            userServiceClient.getUser(userId);
+        } catch (FeignException e) {
+            throw new EntityNotFoundException("User with id %s does not exist".formatted(userId));
         }
     }
 }
