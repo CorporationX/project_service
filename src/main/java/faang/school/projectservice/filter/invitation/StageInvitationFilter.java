@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 @Component
 public interface StageInvitationFilter {
-    boolean isApplicable (StageInvitationFilterDto filter);
+    boolean isApplicable(StageInvitationFilterDto filter);
+
     Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitations, StageInvitationFilterDto filter);
 }

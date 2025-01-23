@@ -5,7 +5,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 
 import java.util.stream.Stream;
 
-public class StageInvitationAuthorIdFilter implements StageInvitationFilter{
+public class StageInvitationAuthorIdFilter implements StageInvitationFilter {
     @Override
     public boolean isApplicable(StageInvitationFilterDto filter) {
         return filter.getAuthorId() != null;
