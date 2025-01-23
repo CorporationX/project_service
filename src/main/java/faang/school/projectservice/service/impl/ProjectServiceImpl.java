@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -64,13 +65,14 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponseDto update(Long id, ProjectRequestDto projectDto) {
         Project project = projectRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException(String.format("There is no project with id:%d in database", id)));
-        if (!projectDto.description().isBlank()) {
+        if (Objects.nonNull(projectDto.description())) {
             project.setDescription(projectDto.description());
         }
-        if (!projectDto.status().isBlank()) {
+        if (Objects.nonNull(projectDto.status())) {
             project.setStatus(getProjectStatusFromString(projectDto.status()));
         }
         project.setUpdatedAt(LocalDateTime.now());
+        projectRepository.save(project);
         return projectMapper.projectEntityToProjectResponseDto(project);
     }
 
