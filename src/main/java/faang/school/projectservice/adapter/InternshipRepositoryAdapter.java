@@ -25,4 +25,8 @@ public class InternshipRepositoryAdapter {
     public Stream<Internship> findAll() {
         return internshipRepository.findAll().stream();
     }
+
+    public Stream<Internship> findAllByProjectId(Long id) {
+        return internshipRepository.findAllByProjectId(id).stream();
+    }
 }

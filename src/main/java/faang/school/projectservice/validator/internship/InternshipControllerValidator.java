@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator.internship;
 
-import faang.school.projectservice.dto.client.internship.InternshipDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

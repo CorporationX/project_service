@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client.internship;
+package faang.school.projectservice.dto.internship;
 
 public class InternshipUserStatus {
     private Long id;

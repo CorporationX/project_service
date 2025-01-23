@@ -1,8 +1,7 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.adapter.*;
-import faang.school.projectservice.dto.client.internship.*;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.dto.internship.*;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.*;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
@@ -69,9 +67,9 @@ public class InternshipServiceImpl implements InternshipService {
     }
 
     @Override
-    public List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters) {
+    public List<InternshipDto> getProjectInternshipsWithFilters(Long projectId, InternshipFilterDto filters) {
 //        todo not work correctly
-        Stream<Internship> internship = internshipRepositoryAdapter.findAll();
+        Stream<Internship> internship = internshipRepositoryAdapter.findAllByProjectId(projectId);
         internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .forEach(filter -> filter.apply(internship, filters));

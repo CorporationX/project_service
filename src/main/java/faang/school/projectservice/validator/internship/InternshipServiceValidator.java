@@ -2,7 +2,7 @@ package faang.school.projectservice.validator.internship;
 
 import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.adapter.TeamMemberRepositoryAdapter;
-import faang.school.projectservice.dto.client.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -27,7 +27,7 @@ public class InternshipServiceValidator {
             throw new DataValidationException(String.format("It is not possible to add an internship to a project " +
                     "with the status: %s", projectStatus));
         }
-//        adapter
+
         TeamMember mentor = teamMemberRepositoryAdapter.findById(internshipDto.getMentorId());
 
         TeamMember mentorFromProject = teamMemberRepositoryAdapter.findByUserIdAndProjectId(internshipDto.getMentorId(),project.getId());

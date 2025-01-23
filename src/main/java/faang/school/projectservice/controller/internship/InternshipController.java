@@ -1,15 +1,13 @@
 package faang.school.projectservice.controller.internship;
 
-import faang.school.projectservice.dto.client.internship.InternshipDto;
-import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.service.internship.InternshipService;
 import faang.school.projectservice.validator.internship.InternshipControllerValidator;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
@@ -39,8 +37,8 @@ public class InternshipController {
     }
 
     @GetMapping("/filter")
-    public List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters) {
-        return internshipService.getInternshipsWithFilters(filters);
+    public List<InternshipDto> getProjectInternshipsWithFilters(Long projectId,InternshipFilterDto filters) {
+        return internshipService.getProjectInternshipsWithFilters(projectId,filters);
     }
 
     @GetMapping

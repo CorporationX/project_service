@@ -1,8 +1,6 @@
-package faang.school.projectservice.dto.client.internship;
+package faang.school.projectservice.dto.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.TeamRole;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.LocalDateTime;

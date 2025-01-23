@@ -1,8 +1,8 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.client.internship.InternshipDto;
-import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public interface InternshipService {
 
     InternshipUpdateDto updateInternship(InternshipUpdateDto internshipUpdateDto);
 
-    List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters);
+    List<InternshipDto> getProjectInternshipsWithFilters(Long projectId, InternshipFilterDto filters);
 
     List<InternshipDto> getAllInternships();
 
