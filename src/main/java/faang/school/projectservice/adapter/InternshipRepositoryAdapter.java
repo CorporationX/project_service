@@ -1,6 +1,7 @@
 package faang.school.projectservice.adapter;
 
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.InternshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,7 @@ public class InternshipRepositoryAdapter {
         return internshipRepository.findAll().stream();
     }
 
-    public Stream<Internship> findAllByProjectId(Long id) {
-        return internshipRepository.findAllByProjectId(id).stream();
+    public Stream<Internship> findAllByProjectId(Long projectId) {
+        return internshipRepository.findAllByProjectId(projectId).stream();
     }
 }

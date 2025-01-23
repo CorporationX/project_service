@@ -7,6 +7,6 @@ import java.util.List;
 @Data
 public class InternshipUpdateDto {
     private Long id;
-    private List<InternshipUserStatus> interns;
+    private List<InternshipUserStatusDto> interns;
     private TeamRole role;
 }

@@ -1,10 +1,22 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.adapter.*;
-import faang.school.projectservice.dto.internship.*;
+import faang.school.projectservice.adapter.InternshipRepositoryAdapter;
+import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
+import faang.school.projectservice.adapter.ScheduleRepositoryAdapter;
+import faang.school.projectservice.adapter.TeamMemberRepositoryAdapter;
+import faang.school.projectservice.adapter.TeamRepositoryAdapter;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipUserInformationDto;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Schedule;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.validator.internship.InternshipServiceValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -67,13 +79,18 @@ public class InternshipServiceImpl implements InternshipService {
     }
 
     @Override
-    public List<InternshipDto> getProjectInternshipsWithFilters(Long projectId, InternshipFilterDto filters) {
-//        todo not work correctly
-        Stream<Internship> internship = internshipRepositoryAdapter.findAllByProjectId(projectId);
-        internshipFilters.stream()
+    public List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters) {
+        Stream<Internship> internships = internshipRepositoryAdapter.findAll();
+//        internshipFilters.stream()
+//                .filter(filter -> filter.isApplicable(filters))
+//                .forEach(filter -> filter.apply(internship, filters));
+//        return internshipMapper.toDto(internship.toList());
+        return internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .forEach(filter -> filter.apply(internship, filters));
-        return internshipMapper.toDto(internship.toList());
+                .reduce(internships, (stream, filter) -> filter.apply(stream, filters),
+                        (newStream, oldStream) -> newStream)
+                .map(internshipMapper::toDto)
+                .toList();
     }
 
     @Override

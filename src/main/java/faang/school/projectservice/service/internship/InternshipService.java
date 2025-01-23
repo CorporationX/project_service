@@ -11,7 +11,7 @@ public interface InternshipService {
 
     InternshipUpdateDto updateInternship(InternshipUpdateDto internshipUpdateDto);
 
-    List<InternshipDto> getProjectInternshipsWithFilters(Long projectId, InternshipFilterDto filters);
+    List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters);
 
     List<InternshipDto> getAllInternships();
 
