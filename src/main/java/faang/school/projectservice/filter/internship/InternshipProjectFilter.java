@@ -2,7 +2,6 @@ package faang.school.projectservice.filter.internship;
 
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
-import org.hibernate.validator.constraints.CodePointLength;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
