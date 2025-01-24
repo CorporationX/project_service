@@ -16,13 +16,13 @@ public class InternshipControllerValidator {
         if (internshipDto == null) {
             throw new DataValidationException(String.format(CHECK_MESSAGE, "Internship"));
         }
-        if (internshipDto.getMentorId() == null) {
+        if (internshipDto.getMentorId() == null || internshipDto.getMentorId() == 0) {
             throw new DataValidationException(String.format(CHECK_MESSAGE, "Mentor"));
         }
         if (internshipDto.getInterns() == null) {
             throw new DataValidationException(String.format(CHECK_MESSAGE, "Interns users ids"));
         }
-        if (internshipDto.getProjectId() == null) {
+        if (internshipDto.getProjectId() == null || internshipDto.getProjectId() == 0) {
             throw new DataValidationException(String.format(CHECK_MESSAGE, "Project id"));
         }
         if (internshipDto.getDescription() == null) {
@@ -43,7 +43,7 @@ public class InternshipControllerValidator {
     }
 
     private void checkIsIdNull(Long id) {
-        if (id == null) {
+        if (id == null || id == 0) {
             throw new DataValidationException(String.format(CHECK_MESSAGE, "Id of internship"));
         }
     }

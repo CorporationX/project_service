@@ -12,17 +12,23 @@ import faang.school.projectservice.dto.internship.InternshipUserInformationDto;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Schedule;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.validator.internship.InternshipServiceValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
@@ -72,19 +78,30 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     public InternshipUpdateDto updateInternship(InternshipUpdateDto internshipUpdateDto) {
-//        Internship internship = internshipRepositoryAdapter.findById(id);
-
+        internshipServiceValidator.checkDataBeforeUpdate(internshipUpdateDto);
+        Internship internship = internshipRepositoryAdapter.findById(internshipUpdateDto.getId());
+        if (Objects.equals(internshipUpdateDto.getStatus(), InternshipStatus.COMPLETED)) { //completed
+          for  (TeamMember teamMember : internship.getInterns()) {
+               for (Stage stage : teamMember.getStages()) {
+                   for (Task task : stage.getTasks()) {
+//                       task.getStatus() == TaskStatus.DONE || task.getStatus() == TaskStatus.CANCELLED
+                   }
+               }
+            }
+            return null;
+        }
 //        return internshipMapper.toDto(InternshipUpdateDto);
+//        нужно ли создавать новй маппер
         return null;
     }
 
+    //    Обновить стажировку. Если стажировка завершена, то стажирующиеся должны получить новые роли на проекте,
+//    если прошли, и быть удалены из списка участников проекта, если не прошли. Участник считается прошедшим стажировку,
+//    если все запланированные задачи выполнены.
+//    После старта стажировки нельзя добавлять новых стажёров. Стажировку можно пройти досрочно или досрочно быть уволенным.
     @Override
     public List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters) {
         Stream<Internship> internships = internshipRepositoryAdapter.findAll();
-//        internshipFilters.stream()
-//                .filter(filter -> filter.isApplicable(filters))
-//                .forEach(filter -> filter.apply(internship, filters));
-//        return internshipMapper.toDto(internship.toList());
         return internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .reduce(internships, (stream, filter) -> filter.apply(stream, filters),
