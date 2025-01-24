@@ -80,6 +80,7 @@ public class InternshipServiceImpl implements InternshipService {
     public InternshipUpdateDto updateInternship(InternshipUpdateDto internshipUpdateDto) {
         internshipServiceValidator.checkDataBeforeUpdate(internshipUpdateDto);
         Internship internship = internshipRepositoryAdapter.findById(internshipUpdateDto.getId());
+        List<Task> tasks =  internship.getProject().getTasks();
         if (Objects.equals(internshipUpdateDto.getStatus(), InternshipStatus.COMPLETED)) { //completed
           for  (TeamMember teamMember : internship.getInterns()) {
                for (Stage stage : teamMember.getStages()) {
