@@ -55,9 +55,7 @@ public class ProjectServiceImpl implements ProjectService {
         } else {
             result = projectRepository.findAll();
         }
-        return result.stream()
-                .map(projectMapper::projectEntityToProjectResponseDto)
-                .toList();
+        return projectMapper.projectEntitiesToProjectResponseDtos(result);
     }
 
     @Override
@@ -87,9 +85,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectResponseDto> findAll() {
         List<Project> projects = projectRepository.findAll();
-        return projects.stream()
-                .map(projectMapper::projectEntityToProjectResponseDto)
-                .toList();
+        return projectMapper.projectEntitiesToProjectResponseDtos(projects);
     }
 
     private ProjectStatus getProjectStatusFromString(String status) {
