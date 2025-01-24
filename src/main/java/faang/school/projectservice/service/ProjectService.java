@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-public class ProjectService {
+public class ProjectService implements ProjectServiceInterface {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
@@ -46,27 +46,35 @@ public class ProjectService {
         Project projectToUpdate = projectRepository.findById(projectDto.getId())
                 .orElseThrow(() -> new DataNotFoundException("This project does not found"));
 
+        boolean isUpdated = false;
+
         if (projectDto.getDescription() != null &&
                 !Objects.equals(projectDto.getDescription(), projectToUpdate.getDescription())) {
             projectToUpdate.setDescription(projectDto.getDescription());
-            projectToUpdate.setUpdatedAt(LocalDateTime.now());
+            isUpdated = true;
         }
 
         if (projectDto.getStatus() != null &&
                 !Objects.equals(projectDto.getStatus(), projectToUpdate.getStatus())) {
             projectToUpdate.setStatus(projectDto.getStatus());
-            projectToUpdate.setUpdatedAt(LocalDateTime.now());
+            isUpdated = true;
         }
 
-        projectRepository.save(projectToUpdate);
+        if (isUpdated) {
+            projectRepository.save(projectToUpdate);
+            projectToUpdate.setUpdatedAt(LocalDateTime.now());
+        }
         return projectMapper.toDto(projectToUpdate);
     }
 
     public List<ProjectDto> getProjectWithFilters(ProjectFilterDto filterDto, long userId) {
         Stream<Project> allAvailableProject = getAvailableProjectForUser(userId).stream();
-        projectFilters.stream()
+        List<ProjectFilter> applicableFilter = projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .forEach(filter -> filter.applyFilter(allAvailableProject, filterDto));
+                .toList();
+        for (ProjectFilter filter : applicableFilter) {
+            allAvailableProject = filter.applyFilter(allAvailableProject, filterDto);
+        }
         List<Project> projectsAfterFilters = allAvailableProject.toList();
         return projectsAfterFilters.stream().map(projectMapper::toDto).toList();
     }

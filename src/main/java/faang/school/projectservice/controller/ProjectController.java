@@ -32,7 +32,8 @@ public class ProjectController {
     }
 
     @PostMapping("/{userId}")
-    public List<ProjectDto> getProjectWithFilter(@NotBlank @RequestBody ProjectFilterDto filter, @PathVariable long userId) {
+    public List<ProjectDto> getProjectWithFilter(
+            @NotBlank @RequestBody ProjectFilterDto filter, @PathVariable long userId) {
         return projectService.getProjectWithFilters(filter, userId);
     }
 

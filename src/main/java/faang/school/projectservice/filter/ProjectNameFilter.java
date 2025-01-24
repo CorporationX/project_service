@@ -7,15 +7,15 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class ProjectNameFilter implements ProjectFilter{
+public class ProjectNameFilter implements ProjectFilter {
 
     @Override
     public boolean isApplicable(ProjectFilterDto filter) {
-        return filter.getNamePattern() != null && filter.getNamePattern().isEmpty();
+        return filter.getNamePattern() != null && !filter.getNamePattern().isEmpty();
     }
 
     @Override
-    public void applyFilter(Stream<Project> projectStream, ProjectFilterDto filter) {
-        projectStream.filter(project -> project.getName().contains(filter.getNamePattern()));
+    public Stream<Project> applyFilter(Stream<Project> projectStream, ProjectFilterDto filter) {
+         return projectStream.filter(project -> project.getName().contains(filter.getNamePattern()));
     }
 }
