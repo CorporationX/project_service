@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper.internship;
 
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.dto.internship.InternshipUserInformationDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
@@ -25,7 +26,7 @@ public interface InternshipMapper {
     @Mapping(source = "projectId", target = "project.id")
     @Mapping(source = "mentorId", target = "mentorId.id")
     @Mapping(source = "scheduleId", target = "schedule.id")
-    @Mapping(target = "interns", ignore = true )
+    @Mapping(target = "interns", ignore = true)
     Internship toEntity(InternshipDto internshipDto);
 
     @Named("mapToId")

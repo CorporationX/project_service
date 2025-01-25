@@ -31,7 +31,7 @@ public class InternshipController {
         return internshipDto;
     }
     @PutMapping
-    public InternshipUpdateDto updateInternship(@NotNull @RequestBody InternshipUpdateDto internshipUpdateDto) {
+    public InternshipDto updateInternship(@NotNull @RequestBody InternshipUpdateDto internshipUpdateDto) {
         internshipValidator.checkDataBeforeUpdate(internshipUpdateDto);
         return internshipService.updateInternship(internshipUpdateDto);
     }

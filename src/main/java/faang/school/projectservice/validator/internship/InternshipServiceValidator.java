@@ -1,15 +1,9 @@
 package faang.school.projectservice.validator.internship;
 
-import faang.school.projectservice.adapter.InternshipRepositoryAdapter;
-import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
-import faang.school.projectservice.adapter.TeamMemberRepositoryAdapter;
-import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.internship.InternshipUpdateDto;
+import faang.school.projectservice.adapter.*;
+import faang.school.projectservice.dto.internship.*;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +29,11 @@ public class InternshipServiceValidator {
         checkNewInternAdd(internshipUpdateDto);
     }
 
+    public void checkTeamRoleIsNotNull(TeamRole teamRole) {
+        if (teamRole == null) {
+            throw new DataValidationException("Team role can't be empty.");
+        }
+    }
     private void checkNewInternAdd(InternshipUpdateDto internshipUpdateDto) {
         Internship internship = internshipRepositoryAdapter.findById(internshipUpdateDto.getId());
         if (internship.getInterns().size() < internshipUpdateDto.getInterns().size()) {

@@ -9,7 +9,7 @@ import java.util.List;
 public interface InternshipService {
     InternshipDto createInternship(InternshipDto internshipDto);
 
-    InternshipUpdateDto updateInternship(InternshipUpdateDto internshipUpdateDto);
+    InternshipDto updateInternship(InternshipUpdateDto internshipUpdateDto);
 
     List<InternshipDto> getInternshipsWithFilters(InternshipFilterDto filters);
 
