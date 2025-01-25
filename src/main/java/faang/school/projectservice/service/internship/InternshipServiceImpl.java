@@ -79,7 +79,7 @@ public class InternshipServiceImpl implements InternshipService {
             internshipRepositoryAdapter.save(internship);
             return internshipMapper.toDto(internship);
         }
-        if (!Objects.equals(internship.getMentorId(), internshipUpdateDto.getMentorId())) {
+        if (!Objects.equals(internship.getMentorId().getId(), internshipUpdateDto.getMentorId())) {
             TeamMember teamMember = teamMemberRepositoryAdapter.findById(internshipUpdateDto.getMentorId());
             internship.setMentorId(teamMember);
             internshipRepositoryAdapter.save(internship);
@@ -88,24 +88,22 @@ public class InternshipServiceImpl implements InternshipService {
         Stream<InternshipUserStatusDto> internsIsAheadOfSchedule = internshipUpdateDto.getInterns()
                 .stream()
                 .filter(InternshipUserStatusDto::isAheadOfSchedule);
-        if (internsIsAheadOfSchedule.findAny() != null) {
+        if (internsIsAheadOfSchedule.findAny().orElse(null) != null) {
             List<TeamMember> teamMembers = new ArrayList<>();
             internshipServiceValidator.checkTeamRoleIsNotNull(teamRole);
-            internsIsAheadOfSchedule.forEach(intern -> {
-                internship.getInterns().stream()
-                        .filter(internEntity -> Objects.equals(internEntity.getId(), intern.getId()))
-                        .map(internEntity -> {
-                            if (intern.getStatus().equals(InternshipInternStatus.PASSED)) {
-                                List<TeamRole> internRoles = internEntity.getRoles();
-                                internRoles.clear();
-                                internRoles.add(teamRole);
-                                internEntity.setRoles(internRoles);
-                            } else {
-                                teamMembers.add(internEntity);
-                            }
-                            return false;
-                        });
-            });
+            internsIsAheadOfSchedule.forEach(intern -> internship.getInterns().stream()
+                    .filter(internEntity -> Objects.equals(internEntity.getId(), intern.getId()))
+                    .map(internEntity -> {
+                        if (intern.getStatus().equals(InternshipInternStatus.PASSED)) {
+                            List<TeamRole> internRoles = internEntity.getRoles();
+                            internRoles.clear();
+                            internRoles.add(teamRole);
+                            internEntity.setRoles(internRoles);
+                        } else {
+                            teamMembers.add(internEntity);
+                        }
+                        return false;
+                    }));
             if (!teamMembers.isEmpty()) {
                 internship.getInterns().removeAll(teamMembers);
             }

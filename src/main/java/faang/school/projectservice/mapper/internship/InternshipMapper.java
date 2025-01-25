@@ -1,13 +1,8 @@
 package faang.school.projectservice.mapper.internship;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.internship.InternshipUpdateDto;
-import faang.school.projectservice.dto.internship.InternshipUserInformationDto;
-import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.TeamMember;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import faang.school.projectservice.dto.internship.*;
+import faang.school.projectservice.model.*;
+import org.mapstruct.*;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.ArrayList;
