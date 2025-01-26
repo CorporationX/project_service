@@ -27,7 +27,7 @@ public interface InternshipMapper {
     @Named("mapToId")
     default List<InternshipUserInformationDto> mapToId(List<TeamMember> interns) {
         List<InternshipUserInformationDto> internshipUserInformationDtos = new ArrayList<>();
-        interns.stream().forEach(teamMember -> {
+        interns.forEach(teamMember -> {
             InternshipUserInformationDto internshipUserInformationDto = new InternshipUserInformationDto();
             internshipUserInformationDto.setId(teamMember.getId());
             internshipUserInformationDto.setUserId(teamMember.getUserId());
