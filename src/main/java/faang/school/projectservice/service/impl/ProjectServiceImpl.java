@@ -1,16 +1,19 @@
 package faang.school.projectservice.service.impl;
 
-import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.dto.ProjectRequestDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
+import faang.school.projectservice.dto.ProjectUpdateRequestDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.ProjectSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,82 +31,56 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public ProjectResponseDto save(ProjectRequestDto projectDto) {
+    public ProjectResponseDto save(ProjectCreateRequestDto projectDto) {
         validateProject(projectDto);
-        Project projectForSaving = projectMapper.projectRequestDtoToEntity(projectDto);
+        Project projectForSaving = projectMapper.toProjectEntity(projectDto);
         projectForSaving.setStatus(ProjectStatus.CREATED);
         Project projectEntity = projectRepository.save(projectForSaving);
-        return projectMapper.projectEntityToProjectResponseDto(projectEntity);
+        return projectMapper.toProjectResponseDto(projectEntity);
     }
 
     @Override
     public List<ProjectResponseDto> findAllByFilter(ProjectFilterDto filter) {
-        String name = filter.nameFilter();
-        String status = filter.statusFilter();
-        if (!status.isBlank()) {
-            ProjectStatus projectStatus = getProjectStatusFromString(filter.statusFilter());
-            status = projectStatus.name();
+        Specification<Project> spec = Specification.where(null);
+        if (Objects.nonNull(filter.name())) {
+            spec.and(ProjectSpecifications.nameLike(filter.name()));
         }
-
-        List<Project> result;
-        if (!name.isBlank() && !status.isBlank()) {
-            result = projectRepository.findAllByNameAndStatus(name, status);
-        } else if (!name.isBlank()) {
-            result = projectRepository.findAllByNameContaining(name);
-        } else if (!status.isBlank()) {
-            result = projectRepository.findAllByStatus(status);
-        } else {
-            result = projectRepository.findAll();
+        if (Objects.nonNull(filter.status())) {
+            spec.and(ProjectSpecifications.statusEquals(filter.status()));
         }
-        return projectMapper.projectEntitiesToProjectResponseDtos(result);
+        return projectMapper.toProjectResponseDtos(projectRepository.findAll(spec));
     }
 
     @Override
     @Transactional
-    public ProjectResponseDto update(Long id, ProjectRequestDto projectDto) {
+    public ProjectResponseDto update(Long id, ProjectUpdateRequestDto projectDto) {
         Project project = projectRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException(String.format("There is no project with id:%d in database", id)));
-        if (Objects.nonNull(projectDto.description())) {
-            project.setDescription(projectDto.description());
-        }
-        if (Objects.nonNull(projectDto.status())) {
-            project.setStatus(getProjectStatusFromString(projectDto.status()));
-        }
+                () -> new EntityNotFoundException(String.format("There is no project with id:%d in database", id)));
+        projectMapper.update(projectDto, project);
         project.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(project);
-        return projectMapper.projectEntityToProjectResponseDto(project);
+        return projectMapper.toProjectResponseDto(project);
     }
 
     @Override
     public ProjectResponseDto findById(Long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
+                .orElseThrow(() -> new EntityNotFoundException(
                         String.format("#ProjectServiceImpl: project with id:%d has not been found", id)));
-        return projectMapper.projectEntityToProjectResponseDto(project);
+        return projectMapper.toProjectResponseDto(project);
     }
 
     @Override
     public List<ProjectResponseDto> findAll() {
         List<Project> projects = projectRepository.findAll();
-        return projectMapper.projectEntitiesToProjectResponseDtos(projects);
+        return projectMapper.toProjectResponseDtos(projects);
     }
 
-    private ProjectStatus getProjectStatusFromString(String status) {
-        if (status.isBlank()) {
-            throw new IllegalArgumentException("Requested status can not be empty");
-        }
-        for (ProjectStatus projectStatus : ProjectStatus.values()) {
-            if (projectStatus.name().toLowerCase().contains(status.toLowerCase()))
-                return projectStatus;
-        }
-        throw new IllegalArgumentException(String.format("Incorrect requested status: %s", status));
-    }
-
-    private void validateProject(ProjectRequestDto projectDto) {
+    private void validateProject(ProjectCreateRequestDto projectDto) {
         if (projectRepository.existsByOwnerIdAndName(projectDto.ownerId(), projectDto.name())) {
             throw new IllegalArgumentException(String.format(
-                    "#Validation error: the same user with id:%d cannot create projects with the same name: %s"
-                    , projectDto.ownerId(), projectDto.name()));
+                    "#Validation error: the same user with id:%d cannot create projects with the same name: %s",
+                    projectDto.ownerId(), projectDto.name()));
         }
     }
 }

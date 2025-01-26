@@ -1,12 +1,13 @@
 package faang.school.projectservice.dto;
 
+import faang.school.projectservice.model.ProjectStatus;
 import lombok.Builder;
 
 @Builder
-public record ProjectRequestDto(
+public record ProjectCreateRequestDto(
         Long ownerId,
         String name,
-        String status,
+        ProjectStatus status,
         String description
 ) {
 }

@@ -1,9 +1,11 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.ProjectRequestDto;
+import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
+import faang.school.projectservice.dto.ProjectUpdateRequestDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -11,9 +13,11 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
 
-    Project projectRequestDtoToEntity(ProjectRequestDto dto);
+    Project toProjectEntity(ProjectCreateRequestDto dto);
 
-    ProjectResponseDto projectEntityToProjectResponseDto(Project entity);
+    ProjectResponseDto toProjectResponseDto(Project entity);
 
-    List<ProjectResponseDto> projectEntitiesToProjectResponseDtos(List<Project> entities);
+    List<ProjectResponseDto> toProjectResponseDtos(List<Project> entities);
+
+    void update(ProjectUpdateRequestDto projectUpdateRequestDto, @MappingTarget Project project);
 }

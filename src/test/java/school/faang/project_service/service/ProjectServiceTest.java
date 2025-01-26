@@ -1,8 +1,10 @@
 package school.faang.project_service.service;
 
+import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.dto.ProjectRequestDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
+import faang.school.projectservice.dto.ProjectUpdateRequestDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -19,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Optional;
 
@@ -36,11 +39,11 @@ public class ProjectServiceTest {
     private ProjectServiceImpl projectService;
     @Captor
     private ArgumentCaptor<Project> projectCaptor;
-    private ProjectRequestDto projectRequest;
+    private ProjectCreateRequestDto projectRequest;
 
     @BeforeEach
     void init() {
-        projectRequest = ProjectRequestDto.builder()
+        projectRequest = ProjectCreateRequestDto.builder()
                 .name("excellent project")
                 .ownerId(1L)
                 .description("some description")
@@ -54,13 +57,13 @@ public class ProjectServiceTest {
 
         Mockito.when(projectRepository.existsByOwnerIdAndName(ownerId, name)).thenReturn(true);
 
-        ProjectRequestDto projectRequestDto = ProjectRequestDto.builder()
+        ProjectCreateRequestDto projectCreateRequestDto = ProjectCreateRequestDto.builder()
                 .ownerId(ownerId)
                 .name(name)
                 .build();
 
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> projectService.save(projectRequestDto));
+                () -> projectService.save(projectCreateRequestDto));
     }
 
     @Test
@@ -78,27 +81,29 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void testFindAllByFilterIfIncorrectStatusFailed() {
-        String incorrectStatus = "extra";
-        ProjectFilterDto filterDto = ProjectFilterDto.builder()
-                .statusFilter(incorrectStatus)
-                .build();
-
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> projectService.findAllByFilter(filterDto));
-    }
-
-    @Test
     public void testFindAllByFilterSuccess() {
         ProjectFilterDto filterDto = ProjectFilterDto.builder()
-                .nameFilter("super")
-                .statusFilter("create")
+                .name("super")
+                .status(ProjectStatus.CREATED)
                 .build();
 
         projectService.findAllByFilter(filterDto);
 
         verify(projectRepository, times(1))
-                .findAllByNameAndStatus(filterDto.nameFilter(), ProjectStatus.CREATED.name());
+                .findAll(any(Specification.class));
+    }
+
+
+    @Test
+    public void testUpdateWhenProjectIdIsNotExistsFailed(){
+        Mockito.when(projectRepository.findById(1L)).thenThrow(new EntityNotFoundException(""));
+        ProjectUpdateRequestDto request = ProjectUpdateRequestDto.builder()
+                .status(ProjectStatus.CREATED)
+                .description("description")
+                .build();
+
+        Assertions.assertThrows(EntityNotFoundException.class,
+                () -> projectService.update(1L, request));
     }
 
     @Test
@@ -107,12 +112,17 @@ public class ProjectServiceTest {
                 .id(1L)
                 .build();
         Mockito.when(projectRepository.findById(1L)).thenReturn(Optional.of(responseEntity));
+        ProjectUpdateRequestDto projectUpdateRequest = ProjectUpdateRequestDto.builder()
+                .description("updated description")
+                .status(ProjectStatus.COMPLETED)
+                .build();
 
-        projectService.update(1L, projectRequest);
+        projectService.update(1L, projectUpdateRequest);
         Mockito.verify(projectRepository, times(1)).save(projectCaptor.capture());
 
         Project project = projectCaptor.getValue();
-        Assertions.assertEquals(project.getDescription(), projectRequest.description());
+        Assertions.assertEquals(project.getStatus(), projectUpdateRequest.status());
+        Assertions.assertEquals(project.getDescription(), projectUpdateRequest.description());
         Assertions.assertNotNull(project.getUpdatedAt());
     }
 }
