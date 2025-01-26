@@ -35,6 +35,12 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+
 services:
   s3:
     endpoint: http://localhost:9000
