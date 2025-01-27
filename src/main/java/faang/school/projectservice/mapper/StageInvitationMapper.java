@@ -16,6 +16,4 @@ public interface StageInvitationMapper {
 
 
     StageInvitation toEntity(StageInvitationDto stageInvitationDto);
-
-
 }

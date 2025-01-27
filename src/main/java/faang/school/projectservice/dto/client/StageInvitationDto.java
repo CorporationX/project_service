@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.client;
 
-import faang.school.projectservice.model.stage.Stage;
 import lombok.Data;
 
 
@@ -13,6 +12,4 @@ public class StageInvitationDto {
     private long stageId;
     private long authorId;
     private long invitedId;
-
-
 }

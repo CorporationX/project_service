@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.controller.StageInvitationController;
 import faang.school.projectservice.dto.FilterDto.StageInvitationFilterDto;
 import faang.school.projectservice.dto.client.StageInvitationDto;
 import faang.school.projectservice.filter.invitation.StageInvitationFilter;
@@ -10,8 +9,6 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.StageInvitationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,30 +19,28 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class StageInvitationService {
-    private final StageInvitationController stageInvitationController;
+
     private final StageInvitationRepository stageInvitationRepository;
-    private final StageRepository stageRepository;
-    private final TeamMemberRepository teamMemberRepository;
-    private final StageInvitationMapper stageMapper;
+    private final StageService stageService;
+    private final TeamMemberService teamMemberService;
+    private final StageInvitationMapper stageInvitationMapper;
     private final StageInvitationValidator stageInvitationValidator;
     private final List<StageInvitationFilter> stageInvitationFilters;
 
 
     public StageInvitationDto sendInvitation(StageInvitationDto stageInvitationDto) {
+        stageInvitationValidator.validateInvitedForCreate(stageInvitationDto.getAuthorId(),
+                stageInvitationDto.getInvitedId());
         StageInvitation invitation = new StageInvitation();
-        Stage stage = stageRepository.findById(stageInvitationDto.getStageId())
-                .orElseThrow(() -> new IllegalArgumentException("Stage not found"));
-        TeamMember author = teamMemberRepository.findById(stageInvitationDto.getAuthorId())
-                .orElseThrow(() -> new IllegalArgumentException("Author not found"));
-        TeamMember invited = teamMemberRepository.findById(stageInvitationDto.getInvitedId())
-                .orElseThrow(() -> new IllegalArgumentException("Invited not found"));
+        Stage stage = stageService.getStage(stageInvitationDto.getStageId());
+        TeamMember author = teamMemberService.getTeamMember(stageInvitationDto.getAuthorId());
+        TeamMember invited = teamMemberService.getTeamMember(stageInvitationDto.getInvitedId());
         invitation.setStage(stage);
         invitation.setAuthor(author);
         invitation.setInvited(invited);
-        stageInvitationRepository.save(invitation);
-        return stageMapper.toDto(invitation);
-
-
+        invitation.setStatus(StageInvitationStatus.PENDING);
+        StageInvitation saved = stageInvitationRepository.save(invitation);
+        return stageInvitationMapper.toDto(saved);
     }
 
     public StageInvitationDto acceptInvitation(long invitationId) {
@@ -55,9 +50,9 @@ public class StageInvitationService {
 
         invited.getStages().add(invitation.getStage());
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
-        stageInvitationRepository.save(invitation);
+        StageInvitation saved = stageInvitationRepository.save(invitation);
 
-        return stageMapper.toDto(invitation);
+        return stageInvitationMapper.toDto(saved);
 
     }
 
@@ -69,18 +64,18 @@ public class StageInvitationService {
         invited.getStages().remove(invitation.getStage());
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setRejectionReason(rejectionReason);
-        stageInvitationRepository.save(invitation);
-        return stageMapper.toDto(invitation);
+        StageInvitation saved = stageInvitationRepository.save(invitation);
+        return stageInvitationMapper.toDto(saved);
     }
 
     public List<StageInvitationDto> getAllInvitationsForOneParticipant(Long participantId,
-                                                                    StageInvitationFilterDto filter) {
+                                                                       StageInvitationFilterDto filter) {
         Stream<StageInvitation> stageInvitationFiltered = stageInvitationRepository.findAll().stream()
                 .filter(stageInvitation -> stageInvitation.getInvited().getId().equals(participantId));
         return stageInvitationFilters.stream()
                 .filter(stageInvitationFilter -> stageInvitationFilter.isApplicable(filter))
                 .flatMap(stageInvitationFilter -> stageInvitationFilter.apply(stageInvitationFiltered, filter))
-                .map(stageMapper::toDto)
+                .map(stageInvitationMapper::toDto)
                 .toList();
     }
 }

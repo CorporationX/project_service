@@ -6,6 +6,8 @@ import faang.school.projectservice.service.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class StageInvitationController {
@@ -15,15 +17,15 @@ public class StageInvitationController {
         return stageInvitationService.sendInvitation(stageInvitationDto);
     }
 
-    public void acceptInvitation(long invitedId) {
-        stageInvitationService.acceptInvitation(invitedId);
+    public StageInvitationDto acceptInvitation(long invitedId) {
+        return stageInvitationService.acceptInvitation(invitedId);
     }
 
-    public void rejectStageInvitation(Long id, String rejectionReason) {
-        stageInvitationService.rejectStageInvitation(id, rejectionReason);
+    public StageInvitationDto rejectStageInvitation(Long id, String rejectionReason) {
+        return stageInvitationService.rejectStageInvitation(id, rejectionReason);
     }
 
-    public void getAllInvitationsForOneParticipant(Long participantId, StageInvitationFilterDto filter) {
-        stageInvitationService.getAllInvitationsForOneParticipant(participantId, filter);
+    public List<StageInvitationDto> getAllInvitationsForOneParticipant(Long participantId, StageInvitationFilterDto filter) {
+        return stageInvitationService.getAllInvitationsForOneParticipant(participantId, filter);
     }
 }
