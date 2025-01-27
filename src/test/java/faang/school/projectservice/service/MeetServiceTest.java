@@ -11,6 +11,7 @@ import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MeetRepository;
 import faang.school.projectservice.service.filter.meet.MeetFilter;
+import faang.school.projectservice.service.meet.MeetService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

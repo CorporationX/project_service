@@ -35,6 +35,11 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+google:
+  calendar:
+    credentials:
+      file: classpath:service-account.json
+
 services:
   s3:
     endpoint: http://localhost:9000

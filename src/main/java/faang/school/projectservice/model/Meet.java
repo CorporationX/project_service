@@ -53,6 +53,9 @@ public class Meet {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    @Column(name = "google_event_id")
+    private String googleEventId;
+
     @ElementCollection
     @CollectionTable(name = "meet_participant", joinColumns = @JoinColumn(name = "meet_id"))
     @Column(name = "user_id")

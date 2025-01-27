@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.meet;
 
 import faang.school.projectservice.dto.meet.MeetCreateRequest;
 import faang.school.projectservice.dto.meet.MeetFilterRequest;
@@ -8,6 +8,8 @@ import faang.school.projectservice.exception.MeetingOwnershipRequiredException;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.repository.MeetRepository;
+import faang.school.projectservice.service.ProjectValidator;
+import faang.school.projectservice.service.UserValidator;
 import faang.school.projectservice.service.filter.meet.MeetFilter;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;

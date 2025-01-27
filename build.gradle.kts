@@ -48,6 +48,13 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
 
     /**
+     * API
+     */
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
+
+    /**
     * Test containers
     */
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
