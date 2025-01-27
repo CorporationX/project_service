@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
-    public TeamMember getTeamMember(long teamMemberId){
+    public TeamMember getTeamMember(long teamMemberId) {
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId)
                 .orElseThrow(() -> new EntityNotFoundException("TeamMember not found"));
         return teamMember;

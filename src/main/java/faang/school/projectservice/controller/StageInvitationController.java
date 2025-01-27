@@ -25,7 +25,8 @@ public class StageInvitationController {
         return stageInvitationService.rejectStageInvitation(id, rejectionReason);
     }
 
-    public List<StageInvitationDto> getAllInvitationsForOneParticipant(Long participantId, StageInvitationFilterDto filter) {
+    public List<StageInvitationDto> getAllInvitationsForOneParticipant(Long participantId,
+                                                                       StageInvitationFilterDto filter) {
         return stageInvitationService.getAllInvitationsForOneParticipant(participantId, filter);
     }
 }

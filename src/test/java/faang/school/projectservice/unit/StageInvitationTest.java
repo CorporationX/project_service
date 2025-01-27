@@ -33,10 +33,7 @@ public class StageInvitationTest {
     @InjectMocks
     private StageInvitationService stageInvitationService;
 
-    @Test
-    public void sendInvitation_Where_author_equals_invited() {
 
-    }
 
 
 }
