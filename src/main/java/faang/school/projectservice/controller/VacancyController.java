@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyRequestDto;
-import faang.school.projectservice.service.impl.VacancyServiceImpl;
+import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/vacancies")
 public class VacancyController {
-    private final VacancyServiceImpl vacancyService;
+    private final VacancyService vacancyService;
 
     @PostMapping("/filter")
     public List<VacancyDto> getVacanciesByFilter(@RequestBody VacancyFilterDto filter) {
