@@ -5,6 +5,9 @@ import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.NameSpecification;
+import faang.school.projectservice.filter.SpecificationFilter;
+import faang.school.projectservice.filter.StatusSpecification;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -13,36 +16,34 @@ import faang.school.projectservice.service.impl.ProjectServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
-    @Mock
     private ProjectRepository projectRepository;
-    @Spy
-    private ProjectMapperImpl projectMapper;
-    @InjectMocks
     private ProjectServiceImpl projectService;
-    @Captor
     private ArgumentCaptor<Project> projectCaptor;
     private ProjectCreateRequestDto projectRequest;
 
     @BeforeEach
     void init() {
+        projectRepository = Mockito.mock(ProjectRepository.class);
+        ProjectMapperImpl projectMapper = Mockito.spy(ProjectMapperImpl.class);
+        NameSpecification nameSpecification = Mockito.spy(NameSpecification.class);
+        StatusSpecification statusSpecification = Mockito.spy(StatusSpecification.class);
+        List<SpecificationFilter> specificationFilters = List.of(nameSpecification, statusSpecification);
+        projectService = new ProjectServiceImpl(projectRepository, projectMapper, specificationFilters);
+
+        projectCaptor = ArgumentCaptor.forClass(Project.class);
+
         projectRequest = ProjectCreateRequestDto.builder()
                 .name("excellent project")
                 .ownerId(1L)
@@ -93,9 +94,8 @@ public class ProjectServiceTest {
                 .findAll(any(Specification.class));
     }
 
-
     @Test
-    public void testUpdateWhenProjectIdIsNotExistsFailed(){
+    public void testUpdateWhenProjectIdIsNotExistsFailed() {
         Mockito.when(projectRepository.findById(1L)).thenThrow(new EntityNotFoundException(""));
         ProjectUpdateRequestDto request = ProjectUpdateRequestDto.builder()
                 .status(ProjectStatus.CREATED)

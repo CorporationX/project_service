@@ -5,21 +5,19 @@ import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.SpecificationFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.service.ProjectSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -28,9 +26,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final List<SpecificationFilter> specificationFilters;
 
     @Override
-    @Transactional
     public ProjectResponseDto save(ProjectCreateRequestDto projectDto) {
         validateProject(projectDto);
         Project projectForSaving = projectMapper.toProjectEntity(projectDto);
@@ -41,18 +39,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectResponseDto> findAllByFilter(ProjectFilterDto filter) {
-        Specification<Project> spec = Specification.where(null);
-        if (Objects.nonNull(filter.name())) {
-            spec.and(ProjectSpecifications.nameLike(filter.name()));
-        }
-        if (Objects.nonNull(filter.status())) {
-            spec.and(ProjectSpecifications.statusEquals(filter.status()));
-        }
+        Specification<Project> spec = getProjectSpecification(filter);
         return projectMapper.toProjectResponseDtos(projectRepository.findAll(spec));
     }
 
     @Override
-    @Transactional
     public ProjectResponseDto update(Long id, ProjectUpdateRequestDto projectDto) {
         Project project = projectRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException(String.format("There is no project with id:%d in database", id)));
@@ -82,5 +73,15 @@ public class ProjectServiceImpl implements ProjectService {
                     "#Validation error: the same user with id:%d cannot create projects with the same name: %s",
                     projectDto.ownerId(), projectDto.name()));
         }
+    }
+
+    private Specification<Project> getProjectSpecification(ProjectFilterDto filter) {
+        Specification<Project> spec = Specification.where(null);
+        for (SpecificationFilter specificationFilter : specificationFilters) {
+            if (specificationFilter.isApplicable(filter)) {
+                spec = specificationFilter.apply(spec, filter);
+            }
+        }
+        return spec;
     }
 }
