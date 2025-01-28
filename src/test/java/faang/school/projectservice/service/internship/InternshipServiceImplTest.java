@@ -56,7 +56,7 @@ public class InternshipServiceImplTest {
     private static final String INTERNSHIP_NAME = "Java";
 
     @Test
-    public void testСreateInternship() {
+    public void testCreateInternship() {
         InternshipDto internshipDto = new InternshipDto();
         internshipDto.setProjectId(PROJECT_ID);
         internshipDto.setMentorId(MENTOR_ID);
@@ -85,33 +85,26 @@ public class InternshipServiceImplTest {
         teamMember.setUserId(INTERN_ID);
         teamMember.setTeam(team);
         teamMember.setRoles(teamRoles);
-//        teamMember.setStages(new ArrayList<>());
+
         when(teamMemberRepositoryAdapter.save(teamMember)).thenReturn(teamMember);
 
-//        internshipDto.setInterns(interns);
+        internshipDto.setInterns(interns);
         Schedule schedule = new Schedule();
-//        schedule.setName("Schedule");
+        schedule.setName("Schedule");
         schedule.setId(SCHEDULE_ID);
-//        schedule.setProject(project);
+        schedule.setProject(project);
         when(scheduleRepositoryAdapter.findById(SCHEDULE_ID)).thenReturn(schedule);
         Internship internship = new Internship();
-//        internship.setStatus(internshipDto.getStatus());
-//        internship.setInterns(teamMembers);
-//        internship.setProject(project);
-//        internship.setName(internshipDto.getName());
-//        internship.setDescription(internshipDto.getDescription());
-//        internship.setSchedule(schedule);
-//        internship.setStartDate(internshipDto.getStartDate());
-//        internship.setEndDate(internshipDto.getEndDate());
+        internship.setStatus(internshipDto.getStatus());
+        internship.setInterns(teamMembers);
+        internship.setProject(project);
+        internship.setName(internshipDto.getName());
+        internship.setDescription(internshipDto.getDescription());
+        internship.setSchedule(schedule);
+        internship.setStartDate(internshipDto.getStartDate());
+        internship.setEndDate(internshipDto.getEndDate());
 
         when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
-//        when(internship.setProject(project)).thenReturn()
-//
-//        internship.setProject(project);
-//        internship.setSchedule(schedule);
-//        internship.setInterns(interns);
-
-
         internshipService.createInternship(internshipDto);
         Mockito.verify(internshipRepositoryAdapter, Mockito.times(NUMBER_INVOCATION)).save(internship);
     }

@@ -1,15 +1,35 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.adapter.*;
-import faang.school.projectservice.dto.internship.*;
+import faang.school.projectservice.adapter.InternshipRepositoryAdapter;
+import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
+import faang.school.projectservice.adapter.ScheduleRepositoryAdapter;
+import faang.school.projectservice.adapter.TeamMemberRepositoryAdapter;
+import faang.school.projectservice.adapter.TeamRepositoryAdapter;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipUserInformationDto;
+import faang.school.projectservice.dto.internship.InternshipUserStatusDto;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipInternStatus;
+import faang.school.projectservice.model.InternshipStatus;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Schedule;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.validator.internship.InternshipServiceValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -63,7 +83,7 @@ public class InternshipServiceImpl implements InternshipService {
         TeamRole teamRole = internshipUpdateDto.getRole();
         if (Objects.equals(internshipUpdateDto.getStatus(), InternshipStatus.COMPLETED)) {
             internshipServiceValidator.checkTeamRoleIsNotNull(teamRole);
-            internship.getInterns().removeIf(intern -> {
+            internship.getInterns().removeIf(intern -> { //тут протестировать
                 if (intern.getStages().stream()
                         .flatMap(stage -> stage.getTasks().stream())
                         .allMatch(task -> doneTaskStatuses.contains(task.getStatus()))) {
@@ -85,27 +105,31 @@ public class InternshipServiceImpl implements InternshipService {
             internshipRepositoryAdapter.save(internship);
             return internshipMapper.toDto(internship);
         }
-        Stream<InternshipUserStatusDto> internsIsAheadOfSchedule = internshipUpdateDto.getInterns()
+        List<InternshipUserStatusDto> internsIsAheadOfSchedule = internshipUpdateDto.getInterns()
                 .stream()
-                .filter(InternshipUserStatusDto::isAheadOfSchedule);
-        if (internsIsAheadOfSchedule.findAny().orElse(null) != null) {
-            List<TeamMember> teamMembers = new ArrayList<>();
+                .filter(InternshipUserStatusDto::isAheadOfSchedule).toList();
+        if (!internsIsAheadOfSchedule.isEmpty()) {
+            List<TeamMember> teamMembersFail = new ArrayList<>();
             internshipServiceValidator.checkTeamRoleIsNotNull(teamRole);
-            internsIsAheadOfSchedule.forEach(intern -> internship.getInterns().stream()
-                    .filter(internEntity -> Objects.equals(internEntity.getId(), intern.getId()))
-                    .map(internEntity -> {
-                        if (intern.getStatus().equals(InternshipInternStatus.PASSED)) {
-                            List<TeamRole> internRoles = internEntity.getRoles();
-                            internRoles.clear();
-                            internRoles.add(teamRole);
-                            internEntity.setRoles(internRoles);
-                        } else {
-                            teamMembers.add(internEntity);
-                        }
-                        return false;
-                    }));
-            if (!teamMembers.isEmpty()) {
-                internship.getInterns().removeAll(teamMembers);
+            internsIsAheadOfSchedule.stream().forEach(intern -> {
+                TeamMember teamMember = internship.getInterns().stream().filter(teamM -> Objects.equals(teamM.getId(), intern.getId())).findFirst().orElse(null);
+                if (Objects.equals(intern.getStatus(), InternshipInternStatus.PASSED)) {
+                    List<TeamRole> internRoles = teamMember.getRoles();
+                    internRoles.clear();
+                    internRoles.add(teamRole);
+                    teamMember.setRoles(internRoles);
+                } else {
+                    teamMembersFail.add(teamMember);
+                }
+            });
+            if (!teamMembersFail.isEmpty()) {
+                internship.getInterns().removeAll(teamMembersFail);
+            }
+
+            if (!internship.getInterns().stream()
+                    .flatMap(teamMember -> teamMember.getRoles().stream())
+                    .collect(Collectors.toList()).contains(TeamRole.INTERN)) {
+                internship.setStatus(InternshipStatus.COMPLETED);
             }
             internshipRepositoryAdapter.save(internship);
             return internshipMapper.toDto(internship);
