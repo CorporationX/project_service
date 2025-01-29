@@ -87,8 +87,8 @@ public class ProjectService implements ProjectServiceInterface {
         List<Project> availableProjects = new ArrayList<>();
         List<Project> privateProjects = new ArrayList<>();
 
-        for(Project project: allProjects) {
-            if(project.getVisibility() == ProjectVisibility.PUBLIC) {
+        for (Project project : allProjects) {
+            if (project.getVisibility() == ProjectVisibility.PUBLIC) {
                 availableProjects.add(project);
             } else if (project.getVisibility() == ProjectVisibility.PRIVATE) {
                 privateProjects.add(project);
@@ -98,9 +98,10 @@ public class ProjectService implements ProjectServiceInterface {
         for (Project project : privateProjects) {
             boolean isAvailableCurrentUser = project.getTeams()
                     .stream()
-                    .anyMatch(team -> team.getTeamMembers()
-                            .stream()
-                            .anyMatch(teamMember -> teamMember.getUserId() == userId));
+                    .flatMap(team -> team.getTeamMembers()
+                            .stream())
+                    .anyMatch(teamMember -> teamMember.getUserId() == userId);
+
             if (isAvailableCurrentUser) {
                 availableProjects.add(project);
             }
