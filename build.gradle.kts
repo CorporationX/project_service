@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
 }
@@ -69,4 +70,94 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
+}
+
+/**
+ * Jacoco Configuration
+ */
+val jacocoIncludes = listOf(
+    "**/controller/**",
+    "**/service/**",
+    "**/mapper/**",
+    "**/validation/**",
+    "**/filter/**"
+)
+val jacocoExcludes = listOf(
+    "**/model/**",
+    "**/repository/**",
+    "**/dto/**"
+)
+val integrationTestPath = "**/school/faang/projectservice/integration/**"
+
+jacoco {
+    toolVersion = "0.8.12"
+    reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+}
+
+tasks.register<Test>("integrationTest") {
+    group = "verification"
+    description = "Run integration tests"
+    useJUnitPlatform {
+        include(integrationTestPath)
+    }
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        html.required.set(false)
+        xml.required.set(false)
+        csv.required.set(false)
+    }
+
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            include(jacocoIncludes)
+            exclude(jacocoExcludes)
+        }
+    )
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+
+    violationRules {
+        rule {
+            element = "CLASS"
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.70".toBigDecimal()
+            }
+        }
+    }
+
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            include(jacocoIncludes)
+            exclude(jacocoExcludes)
+        }
+    )
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.build {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }

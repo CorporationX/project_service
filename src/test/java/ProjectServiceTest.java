@@ -2,7 +2,6 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataAlreadyExistException;
 import faang.school.projectservice.exception.DataNotFoundException;
-import faang.school.projectservice.exception.DataValidateException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.filter.ProjectNameFilter;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -31,6 +30,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -85,21 +85,6 @@ public class ProjectServiceTest {
 
         projectFilters.add(new ProjectNameFilter());
         projectService = new ProjectService(projectRepository, projectMapper, projectFilters);
-    }
-
-    @Test
-    public void testCreateProjectWithoutTitle() {
-        generalDto.setName(" ");
-
-        assertThrows(DataValidateException.class, () -> projectService.createProject(generalDto));
-    }
-
-    @Test
-    public void testCreateProjectWithoutDescription() {
-        generalDto.setName("Project name");
-        generalDto.setDescription(" ");
-
-        assertThrows(DataValidateException.class, () -> projectService.createProject(generalDto));
     }
 
     @Test
@@ -180,30 +165,6 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void testDoesNotUpdateIdenticalProjectData() {
-        ProjectDto identicalDto = ProjectDto.builder()
-                .id(1L)
-                .name("Chairs hand made")
-                .description("some description")
-                .visibility(ProjectVisibility.PUBLIC)
-                .status(ProjectStatus.CREATED)
-                .build();
-
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(chairProject));
-        when(projectMapper.toDto(chairProject)).thenReturn(identicalDto);
-
-        ProjectDto resultDto = projectService.updatedProject(identicalDto);
-
-        assertNotNull(resultDto);
-        assertEquals(identicalDto.getDescription(), resultDto.getDescription());
-        assertEquals(identicalDto.getStatus(), resultDto.getStatus());
-
-        verify(projectRepository, times(1)).findById(1L);
-        verify(projectRepository, times(0)).save(chairProject);
-        verify(projectMapper, times(1)).toDto(chairProject);
-    }
-
-    @Test
     public void testUpdatedDescriptionAndStatusProject() {
         ProjectDto expectedDto = ProjectDto.builder()
                 .id(1L)
@@ -212,7 +173,7 @@ public class ProjectServiceTest {
                 .build();
 
         when(projectRepository.findById(1L)).thenReturn(Optional.of(chairProject));
-        when(projectRepository.save(any(Project.class))).thenReturn(chairProject);
+        doNothing().when(projectMapper).updateProject(expectedDto, chairProject);
         when(projectMapper.toDto(chairProject)).thenReturn(expectedDto);
 
         ProjectDto result = projectService.updatedProject(expectedDto);
@@ -222,7 +183,7 @@ public class ProjectServiceTest {
         assertEquals(expectedDto.getStatus(), result.getStatus());
 
         verify(projectRepository, times(1)).findById(1L);
-        verify(projectRepository, times(1)).save(chairProject);
+        verify(projectMapper, times(1)).updateProject(expectedDto, chairProject);
         verify(projectMapper, times(1)).toDto(chairProject);
     }
 
@@ -237,7 +198,7 @@ public class ProjectServiceTest {
                     .build();
         });
 
-        List<ProjectDto> result = projectService.getProjectWithFilters(filter, 100L);
+        List<ProjectDto> result = projectService.getAllAvailableProjectsForUserWithFilter(filter, 100L);
 
         assertEquals(2, result.size());
         assertEquals("Chairs hand made", result.get(0).getName());
@@ -258,7 +219,7 @@ public class ProjectServiceTest {
                     .build();
         });
 
-        List<ProjectDto> result = projectService.getProjectWithFilters(filter, 1L);
+        List<ProjectDto> result = projectService.getAllAvailableProjectsForUserWithFilter(filter, 1L);
 
         assertEquals(3, result.size());
         assertEquals("Chairs hand made", result.get(0).getName());
@@ -281,7 +242,7 @@ public class ProjectServiceTest {
                     .build();
         });
 
-        List<ProjectDto> result = projectService.getProjectWithFilters(filter, 100L);
+        List<ProjectDto> result = projectService.getAllAvailableProjectsForUserWithFilter(filter, 100L);
 
         assertEquals(1, result.size());
         assertEquals("Repair computers", result.get(0).getName());
@@ -302,8 +263,7 @@ public class ProjectServiceTest {
                     .build();
         });
 
-
-        List<ProjectDto> result = projectService.getAllProject(1L);
+        List<ProjectDto> result = projectService.getAllAvailableProjectsForUser(1L);
 
         assertEquals(3, result.size());
         assertEquals("Chairs hand made", result.get(0).getName());
@@ -317,7 +277,7 @@ public class ProjectServiceTest {
     public void testProjectByIdNotFound() {
         when(projectRepository.findById(30L)).thenReturn(Optional.empty());
 
-        assertThrows(DataNotFoundException.class, () -> projectService.getProjectId(30L));
+        assertThrows(DataNotFoundException.class, () -> projectService.getProjectById(30L));
 
         verify(projectRepository, times(1)).findById(30L);
     }
@@ -333,7 +293,7 @@ public class ProjectServiceTest {
         when(projectRepository.findById(100L)).thenReturn(Optional.of(chairProject));
         when(projectMapper.toDto(chairProject)).thenReturn(generalDto);
 
-        ProjectDto result = projectService.getProjectId(100L);
+        ProjectDto result = projectService.getProjectById(100L);
 
         assertEquals("Chairs hand made", result.getName());
         assertEquals("some description", result.getDescription());

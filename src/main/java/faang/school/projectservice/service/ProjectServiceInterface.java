@@ -10,9 +10,9 @@ public interface ProjectServiceInterface {
 
     ProjectDto updatedProject(ProjectDto projectDto);
 
-    List<ProjectDto> getProjectWithFilters(ProjectFilterDto filterDto, long userId);
+    List<ProjectDto> getAllAvailableProjectsForUserWithFilter(ProjectFilterDto filterDto, long userId);
 
-    List<ProjectDto> getAllProject(long userId);
+    List<ProjectDto> getAllAvailableProjectsForUser(long userId);
 
-    ProjectDto getProjectId(long projectId);
+    ProjectDto getProjectById(long projectId);
 }

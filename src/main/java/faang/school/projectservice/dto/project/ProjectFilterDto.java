@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProjectFilterDto {
     private String namePattern;
+
     private ProjectStatus projectStatusPattern;
 }
