@@ -1,27 +1,38 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.adapter.*;
-import faang.school.projectservice.dto.internship.*;
+import faang.school.projectservice.adapter.InternshipRepositoryAdapter;
+import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
+import faang.school.projectservice.adapter.ScheduleRepositoryAdapter;
+import faang.school.projectservice.adapter.TeamMemberRepositoryAdapter;
+import faang.school.projectservice.adapter.TeamRepositoryAdapter;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipUserInformationDto;
+import faang.school.projectservice.dto.internship.InternshipUserStatusDto;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.filter.internship.InternshipStatusFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipInternStatus;
+import faang.school.projectservice.model.InternshipStatus;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Schedule;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.validator.internship.InternshipServiceValidator;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataAccessException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,64 +69,39 @@ public class InternshipServiceImplTest {
 
     @Test
     public void testCreateInternship() {
-        InternshipDto internshipDto = new InternshipDto();
-        internshipDto.setProjectId(PROJECT_ID);
-        internshipDto.setMentorId(MENTOR_ID);
-        internshipDto.setDescription(INTERNSHIP_DESCRIPTION);
-        internshipDto.setName(INTERNSHIP_NAME);
-        internshipDto.setStatus(InternshipStatus.IN_PROGRESS);
-        internshipDto.setScheduleId(SCHEDULE_ID);
+        InternshipDto internshipDto = prepareInternshipDto();
         List<InternshipUserInformationDto> interns = new ArrayList<>();
         List<TeamMember> teamMembers = new ArrayList<>();
-        List<TeamRole> teamRoles = new ArrayList<>();
-        Project project = new Project();
-        project.setId(internshipDto.getProjectId());
+
+        Project project = prepareProject(internshipDto.getProjectId());
         when(projectRepositoryAdapter.findById(internshipDto.getProjectId())).thenReturn(project);
 
-        Team team = new Team();
-        team.setProject(project);
-        team.setTeamMembers(teamMembers);
+        Team team = prepareTeam(project, teamMembers);
         when(teamRepositoryAdapter.save(team)).thenReturn(team);
-        teamRoles.add(TeamRole.INTERN);
 
         InternshipUserInformationDto internshipUserInformationDto = new InternshipUserInformationDto();
         internshipUserInformationDto.setUserId(INTERN_ID);
         interns.add(internshipUserInformationDto);
         internshipDto.setInterns(interns);
-        TeamMember teamMember = new TeamMember();
-        teamMember.setUserId(INTERN_ID);
-        teamMember.setTeam(team);
-        teamMember.setRoles(teamRoles);
+
+        TeamMember teamMember = prepareTeamMember(team);
 
         when(teamMemberRepositoryAdapter.save(teamMember)).thenReturn(teamMember);
 
-        internshipDto.setInterns(interns);
-        Schedule schedule = new Schedule();
-        schedule.setName("Schedule");
-        schedule.setId(SCHEDULE_ID);
-        schedule.setProject(project);
+        Schedule schedule = prepareSchedule(project);
         when(scheduleRepositoryAdapter.findById(SCHEDULE_ID)).thenReturn(schedule);
-        Internship internship = new Internship();
-        internship.setStatus(internshipDto.getStatus());
-        internship.setInterns(teamMembers);
-        internship.setProject(project);
-        internship.setName(internshipDto.getName());
-        internship.setDescription(internshipDto.getDescription());
-        internship.setSchedule(schedule);
-        internship.setStartDate(internshipDto.getStartDate());
-        internship.setEndDate(internshipDto.getEndDate());
 
+        Internship internship = prepareInternship(internshipDto, teamMembers, project, schedule);
         when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
+
         internshipService.createInternship(internshipDto);
         Mockito.verify(internshipRepositoryAdapter, Mockito.times(NUMBER_INVOCATION)).save(internship);
     }
 
     @Test
     public void testUpdateInternshipWhenStatusCompleted() {
-        InternshipUpdateDto internshipUpdateDto = new InternshipUpdateDto();
-        internshipUpdateDto.setId(INTERNSHIP_ID);
-        internshipUpdateDto.setRole(TeamRole.ANALYST);
-        internshipUpdateDto.setStatus(InternshipStatus.COMPLETED);
+        InternshipUpdateDto internshipUpdateDto = prepareInternshipUpdateDto(MENTOR_ID, InternshipStatus.COMPLETED);
+
         Internship internship = new Internship();
         internship.setId(internshipUpdateDto.getId());
         internship.setInterns(new ArrayList<>());
@@ -124,11 +110,19 @@ public class InternshipServiceImplTest {
         Mockito.verify(internshipRepositoryAdapter, Mockito.times(NUMBER_INVOCATION)).save(internship);
     }
 
-    @Test
-    public void testUpdateInternshipWhenNewMentor() {
+    private InternshipUpdateDto prepareInternshipUpdateDto(Long mentorId, InternshipStatus internshipStatus) {
         InternshipUpdateDto internshipUpdateDto = new InternshipUpdateDto();
         internshipUpdateDto.setId(INTERNSHIP_ID);
-        internshipUpdateDto.setMentorId(MENTOR_NEW_ID);
+        internshipUpdateDto.setMentorId(mentorId);
+        internshipUpdateDto.setRole(TeamRole.ANALYST);
+        internshipUpdateDto.setStatus(internshipStatus);
+        return internshipUpdateDto;
+    }
+
+    @Test
+    public void testUpdateInternshipWhenNewMentor() {
+        InternshipUpdateDto internshipUpdateDto = prepareInternshipUpdateDto(MENTOR_NEW_ID,
+                InternshipStatus.IN_PROGRESS);
 
         TeamMember teamMemberNew = new TeamMember();
         teamMemberNew.setId(MENTOR_NEW_ID);
@@ -146,7 +140,7 @@ public class InternshipServiceImplTest {
     }
 
     @Test
-    public void testUpdateInternshipIsAheadOfSchedule(){
+    public void testUpdateInternshipIsAheadOfSchedule() {
         InternshipUpdateDto internshipUpdateDto = new InternshipUpdateDto();
         internshipUpdateDto.setId(INTERNSHIP_ID);
         internshipUpdateDto.setMentorId(MENTOR_ID);
@@ -217,4 +211,61 @@ public class InternshipServiceImplTest {
         }
         return internships;
     }
+
+    private Team prepareTeam(Project project, List<TeamMember> teamMembers) {
+        Team team = new Team();
+        team.setProject(project);
+        team.setTeamMembers(teamMembers);
+        return team;
+    }
+
+    private Project prepareProject(Long projectId) {
+        Project project = new Project();
+        project.setId(projectId);
+        return project;
+    }
+
+    private Schedule prepareSchedule(Project project) {
+        Schedule schedule = new Schedule();
+        schedule.setName("Schedule");
+        schedule.setId(SCHEDULE_ID);
+        schedule.setProject(project);
+        return schedule;
+    }
+
+    private Internship prepareInternship(InternshipDto internshipDto, List<TeamMember> teamMembers, Project project,
+                                         Schedule schedule) {
+        Internship internship = new Internship();
+        internship.setStatus(internshipDto.getStatus());
+        internship.setInterns(teamMembers);
+        internship.setProject(project);
+        internship.setName(internshipDto.getName());
+        internship.setDescription(internshipDto.getDescription());
+        internship.setSchedule(schedule);
+        internship.setStartDate(internshipDto.getStartDate());
+        internship.setEndDate(internshipDto.getEndDate());
+        return internship;
+    }
+
+    private InternshipDto prepareInternshipDto() {
+        InternshipDto internshipDto = new InternshipDto();
+        internshipDto.setProjectId(PROJECT_ID);
+        internshipDto.setMentorId(MENTOR_ID);
+        internshipDto.setDescription(INTERNSHIP_DESCRIPTION);
+        internshipDto.setName(INTERNSHIP_NAME);
+        internshipDto.setStatus(InternshipStatus.IN_PROGRESS);
+        internshipDto.setScheduleId(SCHEDULE_ID);
+        return internshipDto;
+    }
+
+    private TeamMember prepareTeamMember(Team team) {
+        List<TeamRole> teamRoles = new ArrayList<>();
+        TeamMember teamMember = new TeamMember();
+        teamMember.setUserId(INTERN_ID);
+        teamMember.setTeam(team);
+        teamRoles.add(TeamRole.INTERN);
+        teamMember.setRoles(teamRoles);
+        return teamMember;
+    }
+
 }
