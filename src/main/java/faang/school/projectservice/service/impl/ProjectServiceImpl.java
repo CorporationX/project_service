@@ -76,12 +76,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private Specification<Project> getProjectSpecification(ProjectFilterDto filter) {
-        Specification<Project> spec = Specification.where(null);
-        for (SpecificationFilter specificationFilter : specificationFilters) {
-            if (specificationFilter.isApplicable(filter)) {
-                spec = specificationFilter.apply(spec, filter);
-            }
-        }
-        return spec;
+        return specificationFilters.stream()
+                .filter(spec -> spec.isApplicable(filter))
+                .map(spec -> spec.apply(filter))
+                .reduce((spec1, spec2) -> spec1.and(spec2))
+                .orElse(null);
     }
 }

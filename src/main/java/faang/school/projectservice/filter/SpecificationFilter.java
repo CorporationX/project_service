@@ -5,7 +5,8 @@ import faang.school.projectservice.model.Project;
 import org.springframework.data.jpa.domain.Specification;
 
 public interface SpecificationFilter {
+
     boolean isApplicable(ProjectFilterDto filters);
 
-    Specification<Project> apply (Specification<Project> spec, ProjectFilterDto filters);
+    Specification<Project> apply (ProjectFilterDto filters);
 }

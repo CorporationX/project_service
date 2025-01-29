@@ -14,8 +14,8 @@ public class NameSpecification implements SpecificationFilter{
     }
 
     @Override
-    public Specification<Project> apply(Specification<Project> spec, ProjectFilterDto filters) {
-        return spec.and((root, criteriaQuery, criteriaBuilder) ->
-                criteriaBuilder.like(root.get("name"), String.format("%%%s%%", filters.name())));
+    public Specification<Project> apply(ProjectFilterDto filters) {
+        return (root, criteriaQuery, criteriaBuilder) ->
+                criteriaBuilder.like(root.get("name"), String.format("%%%s%%", filters.name()));
     }
 }

@@ -14,8 +14,8 @@ public class StatusSpecification implements SpecificationFilter{
     }
 
     @Override
-    public Specification<Project> apply(Specification<Project> spec, ProjectFilterDto filters) {
-        return spec.and(((root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), filters.status())));
+    public Specification<Project> apply(ProjectFilterDto filters) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("status"), filters.status()));
     }
 }
