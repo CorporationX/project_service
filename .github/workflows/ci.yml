@@ -3,7 +3,7 @@ name: Java CI with Gradle
 on:
   pull_request:
     branches:
-      - "feature-BJS2-52787"
+      - "werewolf-master-stream8"
 
 permissions:
   issues: write
