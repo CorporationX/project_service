@@ -13,8 +13,7 @@ public class StageService {
     private final StageRepository stageRepository;
 
     public Stage getStage(long stageId) {
-        Stage stage = stageRepository.findById(stageId)
+        return stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException("Stage not found"));
-        return stage;
     }
 }

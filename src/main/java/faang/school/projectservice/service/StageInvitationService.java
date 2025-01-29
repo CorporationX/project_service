@@ -57,6 +57,9 @@ public class StageInvitationService {
     }
 
     public StageInvitationDto rejectStageInvitation(Long id, String rejectionReason) {
+        if (rejectionReason.isBlank()) {
+            return null;
+        }
         StageInvitation invitation = stageInvitationRepository.getReferenceById(id);
         TeamMember invited = invitation.getInvited();
         stageInvitationValidator.validateStatusPendingCheck(invitation);
