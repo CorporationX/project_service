@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.calendar;
 
 import faang.school.projectservice.service.calendar.GoogleCalendarService;
+import faang.school.projectservice.service.calendar.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,39 +17,33 @@ import java.security.GeneralSecurityException;
 @RequestMapping("/api/calendar")
 @RestController
 public class GoogleCalendarController {
-
     private final GoogleCalendarService googleCalendarService;
+    private final AuthService oAuthService;
 
-       /**
-     * Эндпоинт для создания события в Google Calendar
-     */
     @PostMapping("/event")
     public ResponseEntity<String> createEvent(
             @RequestParam String summary,
             @RequestParam String description,
-            @RequestParam String startDateTime, // Формат: "2025-01-29T10:00:00Z"
-            @RequestParam String endDateTime    // Формат: "2025-01-29T11:00:00Z"
-    ) {
+            @RequestParam String startDateTime,
+            @RequestParam String endDateTime
+    ) throws Exception {
         try {
             googleCalendarService.createEvent(summary, description, startDateTime, endDateTime);
-            return ResponseEntity.ok("Событие успешно создано!");
+            return ResponseEntity.ok("Event successfully created");
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body("Ошибка при создании события: " + e.getMessage());
+            return ResponseEntity.status(500).body("Event creating interrupted with error " + e.getMessage());
         }
     }
 
-    /**
-     * Эндпоинт для проверки соединения с Google Calendar API
-     */
     @GetMapping("/test")
     public ResponseEntity<String> testConnection() {
         try {
-            googleCalendarService.getCredentials();
-            return ResponseEntity.ok("Подключение к Google Calendar API успешно!");
+            oAuthService.getCredentials("user@mail.net");
+            return ResponseEntity.ok("Connecting to Google Calendar API successfully done");
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body("Ошибка подключения: " + e.getMessage());
+            return ResponseEntity.status(500).body("Connection failed " + e.getMessage());
         }
     }
 }
