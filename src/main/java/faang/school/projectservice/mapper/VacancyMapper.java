@@ -3,7 +3,12 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.client.VacancyDTO;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
+
 
 import java.util.List;
 

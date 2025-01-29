@@ -20,10 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class VacancyService {
 
     private final VacancyMapper vacancyMapper;
@@ -57,7 +55,7 @@ public class VacancyService {
         if (vacancyDTO.getCandidateIds() != null) {
             List<Candidate> candidates = candidateRepositoryAdapter.getByIds(vacancyDTO.getCandidateIds());
             vacancy.setCandidates(candidates);
-            candidates.forEach(e -> e.setVacancy(vacancy));
+            candidates.forEach(c -> c.setVacancy(vacancy));
         }
         if (Objects.equals(vacancyDTO.getStatus(), VacancyStatus.CLOSED)) {
             List<Candidate> acceptedCandidates = vacancy.getCandidates().stream()

@@ -196,7 +196,4 @@ public class VacancyServiceTest {
         Mockito.verify(vacancyRepository).findAll((Specification<Vacancy>) Mockito.isNull());
         Mockito.verify(vacancyMapper).toDtoList(List.of(vacancy));
     }
-
-
-
 }
