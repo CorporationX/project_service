@@ -25,23 +25,34 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 server:
   port: 8082
+  servlet:
+    context-path: /api/v1
 
 logging:
   level:
     root: info
 
+gallery:
+  maxFiles: 50
+
 calculations_messages_processing:
   enabled: true
 
+aws:
+  endpoint: http://localhost:9000
+  accessKey: user
+  secretKey: password
+  bucketName: projectbucket
+  isMocked: false
+
 services:
-  s3:
-    endpoint: http://localhost:9000
-    accessKey: user
-    secretKey: password
-    bucketName: projectbucket
-    isMocked: false
   payment-service:
     host: http://localhost
     port: 9080
