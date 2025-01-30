@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.FilterDto.StageInvitationFilterDto;
+import faang.school.projectservice.dto.filterDto.StageInvitationFilterDto;
 import faang.school.projectservice.dto.client.StageInvitationDto;
 import faang.school.projectservice.service.StageInvitationService;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,8 @@ public class StageInvitationController {
         return stageInvitationService.rejectStageInvitation(id, rejectionReason);
     }
 
-    public List<StageInvitationDto> getAllInvitationsForOneParticipant(Long participantId,
-                                                                       StageInvitationFilterDto filter) {
-        return stageInvitationService.getAllInvitationsForOneParticipant(participantId, filter);
+    public List<StageInvitationDto> viewAllInvitation(Long participantId,
+                                                      StageInvitationFilterDto filter) {
+        return stageInvitationService.viewAllInvitation(participantId, filter);
     }
 }

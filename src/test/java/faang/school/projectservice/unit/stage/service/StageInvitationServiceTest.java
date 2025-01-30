@@ -1,15 +1,14 @@
-package faang.school.projectservice.unit;
+package faang.school.projectservice.unit.stage.service;
 
-import faang.school.projectservice.dto.FilterDto.StageInvitationFilterDto;
 import faang.school.projectservice.dto.client.StageInvitationDto;
+import faang.school.projectservice.dto.filterDto.StageInvitationFilterDto;
 import faang.school.projectservice.filter.invitation.StageInvitationFilter;
-import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.StageInvitationService;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TeamMemberService;
@@ -17,44 +16,32 @@ import faang.school.projectservice.validator.StageInvitationValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class StageInvitationTest {
-
-    @Spy
-    private StageInvitationMapper invitationMapper = Mappers.getMapper(StageInvitationMapper.class);
+public class StageInvitationServiceTest {
 
     @Mock
-    private StageInvitationValidator stageInvitationValidator;
-
-    @Mock
-    private List<StageInvitationFilter> stageInvitationFilters;
+    private StageInvitationRepository stageInvitationRepository;
 
     @Mock
     private StageService stageService;
@@ -62,11 +49,14 @@ public class StageInvitationTest {
     @Mock
     private TeamMemberService teamMemberService;
 
-    @Mock
-    private StageInvitationRepository stageInvitationRepository;
+    @Spy
+    private StageInvitationMapperImpl stageInvitationMapper;
 
     @Mock
-    private StageInvitationMapper stageInvitationMapper;
+    private StageInvitationValidator stageInvitationValidator;
+
+    @Mock
+    private List<StageInvitationFilter> invitationFilters;
 
     @InjectMocks
     private StageInvitationService stageInvitationService;
@@ -75,7 +65,7 @@ public class StageInvitationTest {
     private ArgumentCaptor<StageInvitation> stageInvitationCaptor;
 
     @Test
-    public void sendInvitation_where_author_equals_invited() {
+    public void sendInvitation_whereAuthorEqualsInvited() {
         StageInvitationDto dto = new StageInvitationDto();
         dto.setAuthorId(1L);
         dto.setInvitedId(1L);
@@ -86,7 +76,7 @@ public class StageInvitationTest {
     }
 
     @Test
-    public void sendInvitation_where_stage_not_found() {
+    public void sendInvitation_whereStageNotFound() {
         StageInvitationDto dto = new StageInvitationDto();
         dto.setAuthorId(1L);
         dto.setInvitedId(2L);
@@ -98,8 +88,8 @@ public class StageInvitationTest {
     }
 
     @Test
-    public void sendInvitation_where_teamMember_not_found() {
-        Long sameId = 1L;
+    public void sendInvitation_whereTeamMemberNotFound() {
+        long sameId = 1L;
         StageInvitationDto dto = new StageInvitationDto();
         dto.setAuthorId(1L);
         dto.setInvitedId(2L);
@@ -138,7 +128,7 @@ public class StageInvitationTest {
     }
 
     @Test
-    public void acceptInvitation_when_invitation_accept() {
+    public void acceptInvitation_whenInvitationAccept() {
         Long invitationId = 1L;
         StageInvitation invitation = new StageInvitation();
         invitation.setId(invitationId);
@@ -152,7 +142,7 @@ public class StageInvitationTest {
     }
 
     @Test
-    public void acceptInvitation_when_invitation_rejected() {
+    public void acceptInvitation_whenInvitationRejected() {
         Long invitationId = 1L;
         StageInvitation invitation = new StageInvitation();
         invitation.setId(invitationId);
@@ -201,7 +191,7 @@ public class StageInvitationTest {
 
 
     @Test
-    public void rejectStageInvitation_when_invitation_accept() {
+    public void rejectStageInvitation_whenInvitationAccept() {
         Long invitationId = 1L;
         String text = "text";
         StageInvitation invitation = new StageInvitation();
@@ -213,12 +203,11 @@ public class StageInvitationTest {
 
         assertThrows(IllegalArgumentException.class, () -> {
             stageInvitationService.rejectStageInvitation(invitationId, text);
-
         });
     }
 
     @Test
-    public void rejectStageInvitation_when_invitation_rejected() {
+    public void rejectStageInvitation_whenInvitationRejected() {
         Long invitationId = 1L;
         String text = "text";
         StageInvitation invitation = new StageInvitation();
@@ -230,9 +219,9 @@ public class StageInvitationTest {
 
         assertThrows(IllegalArgumentException.class, () -> {
             stageInvitationService.rejectStageInvitation(invitationId, text);
-
         });
     }
+
     @Test
     public void rejectStageInvitation() {
         Long invitationId = 1L;
@@ -256,40 +245,11 @@ public class StageInvitationTest {
     }
 
     @Test
-    public void getAllInvitationsForOneParticipant() {
-        Long participantId = 1L;
-
-        StageInvitation invitation1 = new StageInvitation();
-        invitation1.setId(1L);
-        TeamMember invited1 = new TeamMember();
-        invited1.setId(participantId);
-        invitation1.setInvited(invited1);
-
-        StageInvitation invitation2 = new StageInvitation();
-        invitation2.setId(2L);
-        TeamMember invited2 = new TeamMember();
-        invited2.setId(2L);
-        invitation2.setInvited(invited2);
-
-        List<StageInvitation> allInvitations = List.of(invitation1, invitation2);
-
-        when(stageInvitationRepository.findAll()).thenReturn(allInvitations);
-
+    public void viewAllInvitation() {
+        Long userId = 1L;
         StageInvitationFilterDto filter = new StageInvitationFilterDto();
-        StageInvitationFilter stageInvitationFilterMock = mock(StageInvitationFilter.class);
 
-        when(stageInvitationFilterMock.isApplicable(filter)).thenReturn(true);
-        when(stageInvitationFilterMock.apply(any(), eq(filter)))
-                .thenAnswer(invocation -> ((Stream<StageInvitation>) invocation.getArgument(0))
-                        .filter(invitation -> invitation.getInvited().getId().equals(participantId)));
-
-        when(stageInvitationFilters.stream()).thenReturn(Stream.of(stageInvitationFilterMock));
-
-        List<StageInvitationDto> result = stageInvitationService.getAllInvitationsForOneParticipant(participantId, filter);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getId());
+        stageInvitationService.viewAllInvitation(userId, filter);
 
         verify(stageInvitationRepository, times(1)).findAll();
     }

@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.FilterDto.StageInvitationFilterDto;
 import faang.school.projectservice.dto.client.StageInvitationDto;
+import faang.school.projectservice.dto.filterDto.StageInvitationFilterDto;
 import faang.school.projectservice.filter.invitation.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -25,7 +25,7 @@ public class StageInvitationService {
     private final TeamMemberService teamMemberService;
     private final StageInvitationMapper stageInvitationMapper;
     private final StageInvitationValidator stageInvitationValidator;
-    private final List<StageInvitationFilter> stageInvitationFilters;
+    private final List<StageInvitationFilter> invitationFilters;
 
 
     public StageInvitationDto sendInvitation(StageInvitationDto stageInvitationDto) {
@@ -71,13 +71,20 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(saved);
     }
 
-    public List<StageInvitationDto> getAllInvitationsForOneParticipant(Long participantId,
-                                                                       StageInvitationFilterDto filter) {
-        Stream<StageInvitation> stageInvitationFiltered = stageInvitationRepository.findAll().stream()
-                .filter(stageInvitation -> stageInvitation.getInvited().getId().equals(participantId));
-        return stageInvitationFilters.stream()
-                .filter(stageInvitationFilter -> stageInvitationFilter.isApplicable(filter))
-                .flatMap(stageInvitationFilter -> stageInvitationFilter.apply(stageInvitationFiltered, filter))
+    public List<StageInvitationDto> viewAllInvitation(Long userId, StageInvitationFilterDto filter) {
+        List<StageInvitation> allInvitationOfInvited = stageInvitationRepository.findAll().stream()
+                .filter(invitation -> invitation.getInvited().getId().equals(userId))
+                .toList();
+
+        return filterInvitation(allInvitationOfInvited, filter);
+    }
+
+    private List<StageInvitationDto> filterInvitation(List<StageInvitation> invitations, StageInvitationFilterDto filter) {
+        Stream<StageInvitation> invitationStream = invitations.stream();
+
+        return invitationFilters.stream()
+                .filter(f -> f.isApplicable(filter))
+                .flatMap(f -> f.apply(invitationStream, filter))
                 .map(stageInvitationMapper::toDto)
                 .toList();
     }
