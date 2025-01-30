@@ -2,6 +2,8 @@ package faang.school.projectservice.service.meet.publisher;
 
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.service.meet.event.MeetCreateEvent;
+import faang.school.projectservice.service.meet.event.MeetDeleteEvent;
+import faang.school.projectservice.service.meet.event.MeetUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -19,11 +21,11 @@ public class MeetEventPublisherAdapter implements MeetEventPublisher {
 
     @Override
     public void publishMeetUpdated(Meet meet) {
-
+        eventPublisher.publishEvent(new MeetUpdateEvent(meet));
     }
 
     @Override
     public void publishMeetDeleted(Meet meet) {
-
+        eventPublisher.publishEvent(new MeetDeleteEvent(meet));
     }
 }

@@ -38,7 +38,8 @@ calculations_messages_processing:
 google:
   calendar:
     credentials:
-      file: classpath:service-account.json
+      filePath: /google-credentials.json
+      tokensPath: tokens
 
 services:
   s3:

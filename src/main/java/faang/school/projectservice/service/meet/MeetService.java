@@ -11,6 +11,7 @@ import faang.school.projectservice.repository.MeetRepository;
 import faang.school.projectservice.service.ProjectValidator;
 import faang.school.projectservice.service.UserValidator;
 import faang.school.projectservice.service.filter.meet.MeetFilter;
+import faang.school.projectservice.service.meet.publisher.MeetEventPublisher;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,9 @@ public class MeetService {
     private final MeetMapper meetMapper;
     private final MeetRepository meetRepository;
     private final List<MeetFilter> meetFilters;
+    private final MeetEventPublisher meetEventPublisher;
 
+    @Transactional
     public MeetResponse createMeet(@Valid MeetCreateRequest meetCreateRequest) {
         userValidator.validateUser(meetCreateRequest.creatorId());
         if (meetCreateRequest.userIds() != null) {
@@ -42,6 +45,7 @@ public class MeetService {
         }
 
         Meet meet = meetMapper.toEntity(meetCreateRequest);
+        meetEventPublisher.publishMeetCreated(meet);
         return meetMapper.toMeetResponse(meetRepository.save(meet));
     }
 
@@ -51,23 +55,26 @@ public class MeetService {
         Meet meet = getMeet(meetUpdateRequest.meetId());
         if (!Objects.equals(meetUpdateRequest.userId(), meet.getCreatorId())) {
             throw new MeetingOwnershipRequiredException("Изменять встречу может только владелец");
+        if (!Objects.equals(meetUpdateRequest.userId(), meet.getCreatorId())) {
+            throw new IllegalArgumentException("Изменять встречу может только владелец");
         }
 
         meetMapper.updateMeet(meetUpdateRequest, meet);
+        meetEventPublisher.publishMeetUpdated(meet);
         return meetMapper.toMeetResponse(meet);
     }
 
     @Transactional
     public void deleteMeet(Long meetId, Long userId) {
         userValidator.validateUser(userId);
-        if (!meetRepository.existsById(meetId)) {
-            throw new EntityNotFoundException("Meet not found");
-        }
+
         if (!meetRepository.isUserOwnerMeet(meetId, userId)) {
             throw new MeetingOwnershipRequiredException("Удалять встречу может только владелец");
         }
 
+        Meet meet = getMeet(meetId);
         meetRepository.deleteById(meetId);
+        meetEventPublisher.publishMeetDeleted(meet);
     }
 
     @Transactional(readOnly = true)
