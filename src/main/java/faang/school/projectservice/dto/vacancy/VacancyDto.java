@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.vacancy;
 
+import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.candidate.CandidateDto;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;
@@ -13,7 +14,7 @@ public record VacancyDto(
         String name,
         String description,
         TeamRole position,
-        Long projectId,
+        ProjectResponseDto projectResponseDto,
         List<CandidateDto> candidatesDto,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,

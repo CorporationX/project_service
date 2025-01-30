@@ -18,15 +18,18 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VacancyServiceImpl implements VacancyService {
+    private static final List<TeamRole> ALLOWED_ROLES = List.of(TeamRole.MANAGER, TeamRole.OWNER);
     private final VacancyRepository vacancyRepository;
     private final VacancyMapper vacancyMapper;
     private final ProjectRepository projectRepository;
@@ -56,6 +59,8 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public VacancyDto createVacancy(VacancyRequestDto vacancyDto) {
+        log.info("Vacancy {} creating...", vacancyDto);
+
         validateVacancyRequestingUser(vacancyDto, vacancyDto.createdBy());
 
         Vacancy vacancy = vacancyMapper.toVacancyEntity(vacancyDto);
@@ -68,8 +73,10 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public VacancyDto updateVacancy(VacancyRequestDto vacancyDto, Long id) {
+        log.info("Vacancy {} with id {} updating...", vacancyDto, id);
+
         if (vacancyDto.updatedBy() == null) {
-            throw new DataValidationException("UpdatedBy can't be null in vacancy update request");
+            throw new DataValidationException("UpdatedBy can't be null in vacancy with id " + id + " update request");
         }
         validateVacancyRequestingUser(vacancyDto, vacancyDto.updatedBy());
 
@@ -89,6 +96,8 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public void deleteVacancy(Long id) {
+        log.info("Vacancy with id {} deleting...", id);
+
         Vacancy vacancy = vacancyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vacancy with id " + id + " was not found"));
         vacancy.getCandidates().clear();
@@ -102,7 +111,7 @@ public class VacancyServiceImpl implements VacancyService {
         TeamMember member = getTeamMember(userId, projectId);
 
         List<TeamRole> roles = member.getRoles();
-        if (roles == null || !roles.contains(TeamRole.OWNER) && !roles.contains(TeamRole.MANAGER)) {
+        if (roles == null || roles.stream().noneMatch(ALLOWED_ROLES::contains)) {
             throw new DataValidationException("TeamMember with id " + member.getId()
                     + " does not have roles OWNER or MANAGER to work with vacancy");
         }

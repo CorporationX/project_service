@@ -15,7 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+@Mapper(uses = { ProjectMapper.class },
+        componentModel = MappingConstants.ComponentModel.SPRING,
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public abstract class VacancyMapper {
@@ -30,14 +31,12 @@ public abstract class VacancyMapper {
     @Mapping(target = "candidates", ignore = true)
     public abstract Vacancy toVacancyEntity(VacancyRequestDto dto);
 
-    @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "candidates", target = "candidatesDto", qualifiedByName = "mapToCandidatesDto")
     public abstract VacancyDto toVacancyDto(Vacancy entity);
 
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "candidates", ignore = true)
     public abstract void update(VacancyRequestDto dto, @MappingTarget Vacancy entity);
-
 
     @Named("mapToCandidatesDto")
     protected List<CandidateDto> mapToCandidatesDto(List<Candidate> candidates) {

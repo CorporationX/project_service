@@ -25,8 +25,8 @@ import java.util.List;
 public class VacancyController {
     private final VacancyService vacancyService;
 
-    @PostMapping("/filter")
-    public List<VacancyDto> getVacanciesByFilter(@RequestBody VacancyFilterDto filter) {
+    @GetMapping
+    public List<VacancyDto> getVacanciesByFilter(VacancyFilterDto filter) {
         return vacancyService.getVacanciesByFilter(filter);
     }
 
