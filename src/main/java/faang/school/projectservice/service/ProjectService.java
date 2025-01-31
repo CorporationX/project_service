@@ -81,9 +81,12 @@ public class ProjectService {
     }
 
     public ProjectResponseDto getProjectDtoById(Long id) {
-        Project project = projectRepository.findById(id)
+        return projectMapper.toResponseDto(getProjectById(id));
+    }
+
+    public Project getProjectById(Long id) {
+        return projectRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Project not found"));
-        return projectMapper.toResponseDto(project);
     }
 
     public void deleteProjectById(Long id) {
