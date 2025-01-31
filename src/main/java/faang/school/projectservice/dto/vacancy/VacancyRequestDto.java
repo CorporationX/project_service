@@ -1,25 +1,35 @@
 package faang.school.projectservice.dto.vacancy;
 
-import faang.school.projectservice.dto.candidate.CandidateDto;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.model.WorkSchedule;
-
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import java.util.List;
 
-public record VacancyDto(
-        Long id,
+@Builder
+public record VacancyRequestDto(
+        @NotNull @NotBlank
         String name,
+
+        @NotNull @NotBlank
         String description,
+
+        @NotNull
         TeamRole position,
+
+        @NotNull
         Long projectId,
-        List<CandidateDto> candidatesDto,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
+
+        List<Long> candidatesIds,
+
+        @NotNull
         Long createdBy,
+
         Long updatedBy,
+
+        @NotNull
         VacancyStatus status,
-        Double salary,
-        WorkSchedule workSchedule,
+
+        @NotNull
         Integer count) {}
