@@ -10,6 +10,8 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -34,6 +36,6 @@ public interface VacancyMapper {
         if(candidates != null) {
             return candidates.stream().map(Candidate::getId).toList();
         }
-        return null;
+        return Collections.emptyList();
     }
 }
