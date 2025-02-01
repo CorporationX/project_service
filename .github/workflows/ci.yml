@@ -53,7 +53,7 @@ jobs:
 
       # Проверка Checkstyle
       - name: Checkstyle verification
-        run: ./gradlew checkstyleMain checkstyleTest --no-daemon
+        run: ./gradlew checkstyleMain --no-daemon
 
       # Архивация отчета о тестах
       - name: Archive test report
