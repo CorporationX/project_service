@@ -26,26 +26,26 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     @PostMapping()
-    public void createInternship(@RequestBody @Valid InternshipCreateRequest dto) {
+    public void createInternship(@RequestBody InternshipCreateRequest dto) {
         internshipService.createInternship(dto);
     }
 
-    @PutMapping()
+    @PostMapping("/")
     public void updateInternship(@RequestBody @Valid InternshipUpdateRequest dto) {
         internshipService.updateInternship(dto);
     }
 
     @PostMapping("/filter")
-    public List<InternshipResponse> getInternshipsByFilter(@RequestBody @Valid InternshipFilterRequest filterRequest) {
+    public List<InternshipResponse> getInternshipsByFilter(InternshipFilterRequest filterRequest) {
         return internshipService.getInternshipsByFilter(filterRequest);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/internships")
     public List<InternshipResponse> getAllInternships() {
         return internshipService.getAllInternships();
     }
 
-    @GetMapping("/{internshipId}")
+    @GetMapping("/{internshipId}/internship")
     public InternshipResponse getInternshipById(@RequestParam long internshipId) {
         return internshipService.getInternshipById(internshipId);
     }
