@@ -21,13 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class AuthService {
-    private static final ConcurrentHashMap<String, String> tokenMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, String> tokens = new ConcurrentHashMap<>();
     private static final String CREDENTIALS_FILE_PATH = "src/main/resources/client-secret-calendar.json";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
 
-    public Credential getCredentials(String email) throws IOException, GeneralSecurityException {
+    public Credential getCredentials(String userId) throws IOException, GeneralSecurityException {
         NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new FileReader(CREDENTIALS_FILE_PATH));
@@ -41,8 +40,8 @@ public class AuthService {
                 .setApprovalPrompt("force")
                 .build();
 
-        String accessToken = tokenMap.get("acc" + email);
-        String refreshToken = tokenMap.get("ref" + email);
+        String accessToken = tokens.get("acc" + userId);
+        String refreshToken = tokens.get("ref" + userId);
 
         if (accessToken != null && refreshToken != null) {
             return new Credential.Builder(flow.getMethod())
@@ -60,13 +59,13 @@ public class AuthService {
                 .setCallbackPath("/callback")
                 .build();
 
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize(email);
+        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId);
 
         accessToken = credential.getAccessToken();
         refreshToken = credential.getRefreshToken();
 
-        tokenMap.put(String.format("acc%s", email), accessToken);
-        tokenMap.put(String.format("ref%s", email), refreshToken);
+        tokens.put(String.format("acc%s", userId), accessToken);
+        tokens.put(String.format("ref%s", userId), refreshToken);
 
         return credential;
     }
