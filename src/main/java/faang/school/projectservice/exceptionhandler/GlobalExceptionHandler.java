@@ -3,6 +3,7 @@ package faang.school.projectservice.exceptionhandler;
 import faang.school.projectservice.exception.DataAlreadyExistException;
 import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.DataValidateException;
+import faang.school.projectservice.exception.GoogleCalendarException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,5 +47,12 @@ public class GlobalExceptionHandler {
         log.error(e.getMessage());
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(GoogleCalendarException.class)
+    public ResponseEntity<ErrorResponse> handlerGoogleCalendarException(GoogleCalendarException e) {
+        log.error(e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
     }
 }

@@ -25,6 +25,13 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+google:
+  service:
+    account:
+        key: src/main/resources/service-account.json
+  application:
+    name: Project Service Calendar
+
 server:
   port: 8082
 

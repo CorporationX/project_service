@@ -52,6 +52,12 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
     /**
+     * Google Calendar
+     */
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.15.0")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
+
+    /**
      * Test containers
      */
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))

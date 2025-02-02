@@ -49,4 +49,4 @@ out/
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
+/.nb-gradle/src/main/resources/service-account.json
