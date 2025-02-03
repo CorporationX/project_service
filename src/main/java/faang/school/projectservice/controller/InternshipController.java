@@ -30,7 +30,7 @@ public class InternshipController {
         internshipService.createInternship(dto);
     }
 
-    @PutMapping()
+    @PutMapping("/")
     public void updateInternship(@RequestBody @Valid InternshipUpdateRequest dto) {
         internshipService.updateInternship(dto);
     }
