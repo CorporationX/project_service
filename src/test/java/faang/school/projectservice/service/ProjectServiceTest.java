@@ -2,10 +2,14 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.*;
+import faang.school.projectservice.dto.project.gallery.AddImageResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.ResourceRepository;
+import faang.school.projectservice.validator.project.ProjectGalleryValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,7 +29,16 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
-
+    @Mock
+    private S3Service s3Service;
+    @Mock
+    private TeamMemberService teamMemberService;
+    @Mock
+    private ResourceRepository resourceRepository;
+    @Spy
+    private ResourceMapper resourceMapper = Mappers.getMapper(ResourceMapper.class);
+    @Mock
+    private ProjectGalleryValidator projectGalleryValidator;
     @Mock
     private ProjectRepository projectRepository;
 
@@ -32,12 +46,14 @@ class ProjectServiceTest {
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
 
     @InjectMocks
+    @Spy
     private ProjectService projectService;
 
     private Project crearteProject;
     private Project updateProject;
     private ProjectCreateRequestDto createRequestDto;
     private ProjectUpdateRequestDto updateRequestDto;
+    private MultipartFile file;
 
     @BeforeEach
     void setUp() {
@@ -157,5 +173,102 @@ class ProjectServiceTest {
         projectService.deleteProjectById(1L);
 
         verify(projectRepository).deleteById(1L);
+    }
+
+    @Test
+    void addImageInProjectGallery_ShouldUploadFileAndSaveResource() {
+        Long projectId = 1L;
+        Long creatorId = 2L;
+        Project project = new Project();
+        project.setId(projectId);
+        project.setName("TestProject");
+        TeamMember creator = new TeamMember();
+        creator.setId(creatorId);
+        String key = "test-folder/test-file.txt";
+        Resource resource = new Resource();
+        resource.setKey(key);
+
+        AddImageResponseDto expectedResponse = new AddImageResponseDto();
+        expectedResponse.setKey(key);
+        expectedResponse.setProjectId(projectId);
+        expectedResponse.setCreatedByTeamMemberId(creatorId);
+        expectedResponse.setUpdatedByTeamMemberId(creatorId);
+
+
+        doReturn(project).when(projectService).getProjectById(projectId);
+        doNothing().when(projectGalleryValidator).validateAddingImage(project, creatorId, file);
+        when(s3Service.uploadFile(file, "TestProject1")).thenReturn(resource);
+        when(teamMemberService.getTeamMemberById(creatorId)).thenReturn(creator);
+        when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
+
+        AddImageResponseDto response = projectService.addImageInProjectGallery(projectId, creatorId, file);
+
+        assertEquals(expectedResponse, response);
+        verify(s3Service).uploadFile(file, "TestProject1");
+        verify(resourceRepository).save(any(Resource.class));
+    }
+
+    @Test
+    void deleteImageFromProjectGallery_ShouldDeleteResource() {
+        Resource resource = new Resource();
+        resource.setKey("test-folder/test-file.txt");
+        Project project = new Project();
+        resource.setProject(project);
+        Long userId = 2L;
+        Long resourceId = 1L;
+
+        doNothing().when(projectGalleryValidator).validateDeletingImage(project, userId);
+        when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
+        doNothing().when(s3Service).deleteFile(resource.getKey());
+
+        projectService.deleteImageFromProjectGallery(resourceId, userId);
+
+        verify(s3Service).deleteFile("test-folder/test-file.txt");
+        verify(resourceRepository).delete(resource);
+    }
+
+    @Test
+    void deleteImageFromProjectGallery_ShouldThrowExceptionWhenResourceNotFound() {
+        Long resourceId = 1L;
+        Long userId = 2L;
+
+        when(resourceRepository.findById(resourceId)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () ->
+                projectService.deleteImageFromProjectGallery(resourceId, userId));
+    }
+
+    @Test
+    void getImagesFromProjectGallery_ShouldReturnImageUrls() {
+        Long projectId = 1L;
+        Long userId = 2L;
+        Project project = new Project();
+        project.setGalleryFileKeys(List.of("file1", "file2"));
+
+        doReturn(project).when(projectService).getProjectById(projectId);
+        doNothing().when(projectGalleryValidator).validateGettingGallery(project, userId);
+        when(s3Service.getFileUrl("file1")).thenReturn("https://s3.com/file1");
+        when(s3Service.getFileUrl("file2")).thenReturn("https://s3.com/file2");
+
+        List<String> urls = projectService.getImagesFromProjectGallery(projectId, userId);
+
+        assertEquals(2, urls.size());
+        assertEquals("https://s3.com/file1", urls.get(0));
+        assertEquals("https://s3.com/file2", urls.get(1));
+    }
+
+    @Test
+    void getImagesFromProjectGallery_ShouldReturnEmptyListWhenNoImages() {
+        Long projectId = 1L;
+        Long userId = 2L;
+        Project project = new Project();
+        project.setGalleryFileKeys(null);
+
+        doReturn(project).when(projectService).getProjectById(projectId);
+        doNothing().when(projectGalleryValidator).validateGettingGallery(project, userId);
+
+        List<String> urls = projectService.getImagesFromProjectGallery(projectId, userId);
+
+        assertTrue(urls.isEmpty());
     }
 }
