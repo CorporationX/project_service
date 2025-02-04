@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/vacancy")
@@ -45,8 +47,8 @@ public class VacancyController {
         if (file.isEmpty()) {
             throw new DataValidationException("File is empty.");
         }
-        String fileType = file.getContentType().substring(file.getContentType().lastIndexOf("/") + 1);
-        if (!IMAGE_TYPES.contains(fileType)) {
+        String fileType = Objects.requireNonNull(file.getContentType()).substring(file.getContentType().lastIndexOf("/") + 1);
+        if (!IMAGE_TYPES.stream().anyMatch(imageType -> Objects.equals(imageType.toString(),fileType))) {
             log.error("Invalid file type.");
             throw new DataValidationException("Invalid file type.");
         }

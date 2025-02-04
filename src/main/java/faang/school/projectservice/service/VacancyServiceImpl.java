@@ -37,7 +37,7 @@ public class VacancyServiceImpl implements VacancyService {
         String coverImageKey = s3Service.uploadFile(fileAfterCheck, folder);
         vacancy.setCoverImageKey(coverImageKey);
         vacancyRepositoryAdapter.save(vacancy);
-        log.info("Cover of vacancy with id{} has been successfully added", id);
+        log.info("Cover of vacancy with id {} has been successfully added", id);
     }
 
     @Override
