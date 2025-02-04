@@ -28,7 +28,7 @@ public class InternshipServiceImpl implements InternshipService {
     private final ScheduleRepositoryAdapter scheduleRepositoryAdapter;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> internshipFilters;
-    private final List<TaskStatus> doneTaskStatuses = List.of(TaskStatus.CANCELLED, TaskStatus.DONE);
+    private final static List<TaskStatus> DONE_TASK_STATUSES = List.of(TaskStatus.CANCELLED, TaskStatus.DONE);
 
     @Override
     public InternshipDto createInternship(InternshipDto internshipDto) {
@@ -135,7 +135,7 @@ public class InternshipServiceImpl implements InternshipService {
         internsIsAheadOfSchedule.stream().forEach(intern -> {
             TeamMember teamMember = internship.getInterns().stream().filter(teamM -> Objects
                     .equals(teamM.getId(), intern.getId())).findFirst().orElse(null);
-            if (Objects.equals(intern.getStatus(), InternshipInternStatus.PASSED)) {
+            if (intern.getStatus() == InternshipInternStatus.PASSED) {
                 List<TeamRole> internRoles = teamMember.getRoles();
                 internRoles.clear();
                 internRoles.add(teamRole);
@@ -166,7 +166,7 @@ public class InternshipServiceImpl implements InternshipService {
         internship.getInterns().removeIf(intern -> {
             if (intern.getStages().stream()
                     .flatMap(stage -> stage.getTasks().stream())
-                    .allMatch(task -> doneTaskStatuses.contains(task.getStatus()))) {
+                    .allMatch(task -> DONE_TASK_STATUSES.contains(task.getStatus()))) {
                 List<TeamRole> internRoles = intern.getRoles();
                 internRoles.clear();
                 internRoles.add(teamRole);

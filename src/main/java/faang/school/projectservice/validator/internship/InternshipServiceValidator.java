@@ -7,8 +7,6 @@ import faang.school.projectservice.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 @Component
 @RequiredArgsConstructor
 public class InternshipServiceValidator {
@@ -57,9 +55,9 @@ public class InternshipServiceValidator {
 
     private void checkProjectStatus(Project project) {
         ProjectStatus projectStatus = project.getStatus();
-        if (Objects.equals(projectStatus, ProjectStatus.ON_HOLD) ||
-                Objects.equals(projectStatus, ProjectStatus.CANCELLED) ||
-                Objects.equals(projectStatus, ProjectStatus.COMPLETED)) {
+        if (projectStatus == ProjectStatus.ON_HOLD ||
+                projectStatus == ProjectStatus.CANCELLED ||
+                projectStatus == ProjectStatus.COMPLETED) {
             throw new DataValidationException(String.format("It is not possible to add an internship to a project " +
                     "with the status: %s", projectStatus));
         }
