@@ -1,0 +1,88 @@
+name: Java CI with Gradle
+
+on:
+  pull_request:
+    branches:
+      - "werewolf-master-stream8"
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  build-and-test:
+    name: Build and Test with Gradle
+    runs-on: ubuntu-latest
+
+    steps:
+      # Проверка кода
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Установка JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Настройка Gradle
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # Кеширование зависимостей Gradle
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('/gradle.properties', '/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # Сборка проекта
+      - name: Build with Gradle
+        run: ./gradlew clean build --no-daemon
+
+      # Запуск тестов
+      - name: Run Tests
+        run: ./gradlew test --no-daemon
+        env:
+          CI: true
+
+      # Проверка Checkstyle
+      - name: Checkstyle verification
+        run: ./gradlew checkstyleMain --no-daemon
+
+      # Архивация отчета о тестах
+      - name: Archive test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_report
+          path: build/reports/tests/test
+
+      # Архивация отчета Checkstyle
+      - name: Archive checkstyle report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle_report
+          path: build/reports/checkstyle
+
+      # Добавление комментария о результате билда в PR
+      - name: Comment on Pull Request if build failed
+        if: failure()
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.issue.number;
+            const message = "⚠️ Ошибка: Сборка провалена. Проверьте логи и исправьте ошибки, затем обновите PR. Ошибка может быть связана с тестами, Checkstyle или сборкой.";
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: message
+            });
