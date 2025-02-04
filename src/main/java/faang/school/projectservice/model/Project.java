@@ -103,7 +103,7 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private List<Vacancy> vacancies;
 
-    @ManyToMany(mappedBy = "projectkks")
+    @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
 
     @OneToMany(mappedBy = "project")
