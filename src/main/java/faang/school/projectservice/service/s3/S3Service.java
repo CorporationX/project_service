@@ -1,20 +1,28 @@
-package faang.school.projectservice.service.resource;
+package faang.school.projectservice.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
+import static faang.school.projectservice.service.s3.S3ErrorMessage.FAILED_DELETE_FILE;
+import static faang.school.projectservice.service.s3.S3ErrorMessage.FAILED_UPLOAD_FILE;
+import static faang.school.projectservice.service.s3.S3ErrorMessage.NOT_NULL_FILE_KEY;
+
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class S3Service {
@@ -28,15 +36,19 @@ public class S3Service {
         ObjectMetadata objectMetaData = new ObjectMetadata();
         objectMetaData.setContentLength(fileSize);
         objectMetaData.setContentType(file.getContentType());
-        String key = String.format("%s/%d%s", folder,
-                System.currentTimeMillis(), file.getOriginalFilename());
+        String key = String.format("%s/%s_%s", folder,
+                UUID.randomUUID(), file.getOriginalFilename());
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucketName, key, file.getInputStream(), objectMetaData);
             s3Client.putObject(putObjectRequest);
+        } catch (AmazonS3Exception e) {
+            log.error("Failed to upload file to S3: ", e);
+            throw new FileException(FAILED_UPLOAD_FILE);
         } catch (Exception e) {
-            throw new FileException(e.getMessage());
+            log.error("Unexpected error occurred while uploading file: ", e);
+            throw new FileException(FAILED_UPLOAD_FILE);
         }
 
         Resource resource = new Resource();
@@ -51,6 +63,18 @@ public class S3Service {
     }
 
     public void deleteFile(String key) {
-        s3Client.deleteObject(bucketName, key);
+        if (key == null || key.isBlank()) {
+            throw new FileException(NOT_NULL_FILE_KEY);
+        }
+
+        try {
+            s3Client.deleteObject(bucketName, key);
+        } catch (AmazonS3Exception e) {
+            log.error("Failed to delete file from S3: ", e);
+            throw new FileException(FAILED_DELETE_FILE);
+        } catch (Exception e) {
+            log.error("Unexpected error occurred while deleting file: ", e);
+            throw new FileException(FAILED_DELETE_FILE);
+        }
     }
 }

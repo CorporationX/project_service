@@ -21,6 +21,9 @@ public class AmazonS3Config {
     @Value("${services.s3.endpoint}")
     private String endpoint;
 
+    @Value("${services.s3.region}")
+    private String region;
+
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
@@ -29,7 +32,7 @@ public class AmazonS3Config {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, null))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
                 .withPathStyleAccessEnabled(true)
                 .build();
     }

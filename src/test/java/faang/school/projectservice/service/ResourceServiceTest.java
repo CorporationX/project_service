@@ -1,17 +1,19 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.exception.ResourceNotFoundException;
+import faang.school.projectservice.exception.AccessDeniedException;
+import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.resource.ResourceService;
-import faang.school.projectservice.service.resource.S3Service;
+import faang.school.projectservice.service.s3.S3Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -77,6 +78,7 @@ public class ResourceServiceTest {
         resource = new Resource();
         resource.setId(1L);
         resource.setSize(BigInteger.valueOf(500));
+        resource.setType(ResourceType.IMAGE);
         resource.setKey("test-key");
         resource.setProject(project);
         resource.setCreatedBy(member);
@@ -84,13 +86,14 @@ public class ResourceServiceTest {
         resource.setStatus(ResourceStatus.ACTIVE);
 
         file = mock(MultipartFile.class);
-        lenient().when(file.getSize()).thenReturn(500L);
     }
 
     @Test
     void testAddResource_Saves_WhenValid() {
         when(projectRepository.findById(project.getId())).thenReturn(Optional.ofNullable(project));
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(member);
+        when(file.getContentType()).thenReturn("image");
+        when(file.getSize()).thenReturn(500L);
         when(s3Service.uploadFile(file, "1-Test Project")).thenReturn(resource);
         when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
 
@@ -105,7 +108,7 @@ public class ResourceServiceTest {
     void testAddResource_Throws_WhenProjectNotFound() {
         when(projectRepository.findById(project.getId())).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () ->
+        assertThrows(DataNotFoundException.class, () ->
                 resourceService.addResource(project.getId(), userId, file));
     }
 
@@ -114,15 +117,27 @@ public class ResourceServiceTest {
         when(projectRepository.findById(project.getId())).thenReturn(Optional.ofNullable(project));
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(null);
 
-        assertThrows(ResourceNotFoundException.class, () ->
+        assertThrows(DataNotFoundException.class, () ->
                 resourceService.addResource(project.getId(), userId, file));
     }
 
     @Test
-    void testUpdateResource_Updates_WhenValid() {
+    void testAddResource_Throws_WhenInvalidFileExtension() {
+        when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(member);
+        when(file.getContentType()).thenReturn("application/octet-stream");
+
+        assertThrows(FileException.class, () ->
+                resourceService.addResource(project.getId(), userId, file));
+    }
+
+    @Test
+    void testUpdateResource_UpdatesWhenValid() {
         when(projectRepository.findById(project.getId())).thenReturn(Optional.ofNullable(project));
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(member);
         when(resourceRepository.findById(resource.getId())).thenReturn(Optional.ofNullable(resource));
+        when(file.getContentType()).thenReturn("image");
+        when(file.getSize()).thenReturn(500L);
         when(s3Service.uploadFile(file, "1-Test Project")).thenReturn(resource);
         when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
 
@@ -139,7 +154,18 @@ public class ResourceServiceTest {
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(member);
         when(resourceRepository.findById(resource.getId())).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () ->
+        assertThrows(DataNotFoundException.class, () ->
+                resourceService.updateResource(resource.getId(), project.getId(), userId, file));
+    }
+
+    @Test
+    void testUpdateResource_Throws_WhenInvalidFileExtension() {
+        when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(member);
+        when(resourceRepository.findById(resource.getId())).thenReturn(Optional.of(resource));
+        when(file.getContentType()).thenReturn("audio");
+
+        assertThrows(FileException.class, () ->
                 resourceService.updateResource(resource.getId(), project.getId(), userId, file));
     }
 
@@ -148,6 +174,7 @@ public class ResourceServiceTest {
         when(file.getSize()).thenReturn(15000L);
         when(projectRepository.findById(project.getId())).thenReturn(Optional.ofNullable(project));
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(member);
+        when(file.getContentType()).thenReturn("image");
         when(s3Service.uploadFile(any(), anyString())).thenReturn(resource);
 
         assertThrows(FileException.class, () ->
@@ -173,7 +200,7 @@ public class ResourceServiceTest {
     void testDeleteResource_Throws_WhenProjectNotFound() {
         when(projectRepository.findById(project.getId())).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () ->
+        assertThrows(DataNotFoundException.class, () ->
                 resourceService.deleteResource(resource.getId(), project.getId(), userId));
     }
 
@@ -182,7 +209,7 @@ public class ResourceServiceTest {
         when(projectRepository.findById(project.getId())).thenReturn(Optional.ofNullable(project));
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(null);
 
-        assertThrows(ResourceNotFoundException.class, () ->
+        assertThrows(DataNotFoundException.class, () ->
                 resourceService.deleteResource(resource.getId(), project.getId(), userId));
     }
 
@@ -190,9 +217,20 @@ public class ResourceServiceTest {
     void testDeleteResource_Throws_WhenResourceNotFound() {
         when(projectRepository.findById(project.getId())).thenReturn(Optional.ofNullable(project));
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(member);
-        when(resourceRepository.findById(resource.getId())).thenReturn(Optional.ofNullable(null));
+        when(resourceRepository.findById(resource.getId())).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () ->
+        assertThrows(DataNotFoundException.class, () ->
+                resourceService.deleteResource(resource.getId(), project.getId(), userId));
+    }
+
+    @Test
+    void testDeleteResource_Throws_WhenAccessDenied() {
+        member.setRoles(List.of(TeamRole.INTERN));
+        when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(member);
+        when(resourceRepository.findById(resource.getId())).thenReturn(Optional.of(resource));
+
+        assertThrows(AccessDeniedException.class, () ->
                 resourceService.deleteResource(resource.getId(), project.getId(), userId));
     }
 }

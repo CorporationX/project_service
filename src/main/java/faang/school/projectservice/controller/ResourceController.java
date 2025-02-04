@@ -36,7 +36,7 @@ public class ResourceController {
     }
 
     @PatchMapping("/{projectId}/{resourceId}")
-    public ResponseEntity<ResourceDto> addResource(
+    public ResponseEntity<ResourceDto> updateResource(
             @PathVariable @Positive Long projectId,
             @PathVariable @Positive Long resourceId, @RequestBody MultipartFile file) {
         Long userId = userContext.getUserId();
@@ -46,8 +46,8 @@ public class ResourceController {
     }
 
     @DeleteMapping("/{projectId}/{resourceId}")
-    public ResponseEntity<Void> addResource(@PathVariable @Positive Long projectId,
-                                            @PathVariable @Positive Long resourceId) {
+    public ResponseEntity<Void> deleteResource(@PathVariable @Positive Long projectId,
+                                               @PathVariable @Positive Long resourceId) {
         Long userId = userContext.getUserId();
         resourceService.deleteResource(resourceId, projectId, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
