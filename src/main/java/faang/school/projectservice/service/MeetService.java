@@ -68,7 +68,9 @@ public class MeetService {
     @Transactional
     public MeetResponseDto updateMeet(UpdateMeetDto updateMeetDto) {
         Meet meet = meetRepository.findById(updateMeetDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot update meet with id: " + updateMeetDto.getId() + ", because not found"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Cannot update meet with id: " + updateMeetDto.getId() + ", because not found")
+                );
         meetMapper.update(meet, updateMeetDto);
         return meetMapper.toResponseDto(meetRepository.save(meet));
     }
@@ -76,7 +78,9 @@ public class MeetService {
     @Transactional
     public MeetResponseDto cancelMeet(long id) {
         Meet meet = meetRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot cancel meet with id: " + id + ", because not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Cannot cancel meet with id: "
+                        + id + ", because not found")
+                );
         meet.setStatus(MeetStatus.CANCELLED);
         return meetMapper.toResponseDto(meetRepository.save(meet));
     }

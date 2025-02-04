@@ -14,7 +14,9 @@ public interface MeetRepository extends JpaRepository<Meet, Long> {
             "(m.project.id = :projectId) AND " +
             "(:title IS NULL OR m.title LIKE %:title%) AND " +
             "(:date IS NULL OR TO_CHAR(m.startsAt, 'YYYY-MM-DD') = :date)")
-    Stream<Meet> findByFilter(@Param("projectId") long projectId, @Param("title") String title, @Param("date") String date);
+    Stream<Meet> findByFilter(@Param("projectId") long projectId,
+                              @Param("title") String title,
+                              @Param("date") String date);
 
     Optional<Meet> findByProject(Project project);
 

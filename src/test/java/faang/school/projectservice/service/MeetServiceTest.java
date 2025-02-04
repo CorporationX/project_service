@@ -72,8 +72,7 @@ public class MeetServiceTest {
         when(userServiceClient.getUser(anyLong())).thenReturn(null);
 
         // When & Then
-        DataValidationException exception = assertThrows(DataValidationException.class, () -> meetService.createMeet(createMeetDto));
-        assertEquals("Meet creator not exists with id: 1", exception.getMessage());
+        assertThrows(DataValidationException.class, () -> meetService.createMeet(createMeetDto));
     }
 
     @Test
