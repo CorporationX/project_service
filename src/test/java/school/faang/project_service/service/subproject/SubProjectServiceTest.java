@@ -1,6 +1,7 @@
 package school.faang.project_service.service.subproject;
 
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
+import faang.school.projectservice.exeption.EntityNotFoundException;
 import faang.school.projectservice.exeption.ProjectNotClosableException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -11,7 +12,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.subproject.SubProjectFilter;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.subproject.SubProjectService;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
