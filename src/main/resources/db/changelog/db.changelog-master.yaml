@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V018_alter_file_columns_and_create_gallery_table.sql
   - include:
       file: db/changelog/changeset/project_V019_after_stage_invitation_add_rejectReason_column.sql
+  - include:
+      file: db/changelog/changeset/project_V020_calendar_id.sql

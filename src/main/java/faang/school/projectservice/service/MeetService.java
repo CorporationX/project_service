@@ -1,5 +1,11 @@
 package faang.school.projectservice.service;
 
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventAttendee;
+import com.google.api.services.calendar.model.EventDateTime;
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.audit.AuditorAwareImpl;
 import faang.school.projectservice.dto.meet.CreateMeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
@@ -15,9 +21,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +39,8 @@ public class MeetService {
     private final ProjectService projectService;
     private final UserValidator userValidator;
     private final AuditorAwareImpl auditorAware;
+    private final Calendar calendar;
+    private final UserServiceClient userServiceClient;
 
     @Transactional
     public MeetResponseDto createMeet(CreateMeetDto createMeetDto) {
@@ -95,5 +109,78 @@ public class MeetService {
                 );
         userValidator.validateUserIsMeetCreator(meet);
         meetRepository.delete(meet);
+    }
+
+    public void addMeetToCalendar(long id) {
+        Meet meet = meetRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cannot add meet to calendar with id: "
+                        + id + ", because not found")
+                );
+        Event event = new Event();
+        event.setDescription(meet.getDescription());
+        event.setSummary(meet.getTitle());
+        event.setStart(convertLocalToEventDateTime(meet.getStartsAt()));
+        event.setEnd(convertLocalToEventDateTime(meet.getStartsAt().plusHours(1)));
+
+        var meetAttendees = userServiceClient.getUsersByIds(meet.getUserIds());
+        event.setAttendees(meetAttendees.stream()
+                .map(userDto -> {
+                    EventAttendee eventAttendee = new EventAttendee();
+                    eventAttendee.setEmail(userDto.email());
+                    eventAttendee.setId(String.valueOf(userDto.id()));
+                    eventAttendee.setDisplayName(userDto.username());
+                    return eventAttendee;
+                })
+                .toList()
+        );
+
+        try {
+            if (meet.getProject().getGoogleCalendarId() == null) {
+                var projectCalendar = new com.google.api.services.calendar.model.Calendar();
+                projectCalendar.setSummary(meet.getProject().getName());
+                var createdCalendarId = calendar.calendars().insert(projectCalendar).execute().getId();
+                meet.getProject().setGoogleCalendarId(createdCalendarId);
+                meetRepository.save(meet);
+            }
+            calendar.events()
+                    .insert(meet.getProject().getGoogleCalendarId(), event)
+                    .setSendNotifications(true)
+                    .execute();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<MeetResponseDto> getProjectCalendarMeets(long projectId) {
+        try {
+            var calendarId = projectService.getProjectById(projectId).getGoogleCalendarId();
+            return calendar.events()
+                    .list(calendarId)
+                    .execute()
+                    .getItems()
+                    .stream()
+                    .map(event -> {
+                        MeetResponseDto meetDto = new MeetResponseDto();
+                        meetDto.setTitle(event.getSummary());
+                        DateTime dateTime = event.getStart().getDateTime();
+                        Instant instant = Instant.ofEpochMilli(dateTime.getValue());
+                        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
+                        meetDto.setStartsAt(zonedDateTime.toLocalDateTime());
+                        return meetDto;
+                    })
+                    .toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private EventDateTime convertLocalToEventDateTime(LocalDateTime localDateTime) {
+        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
+        DateTime dateTime = new DateTime(zonedDateTime.toInstant().toEpochMilli());
+        EventDateTime eventDateTime = new EventDateTime();
+        eventDateTime.setDateTime(dateTime);
+        eventDateTime.setTimeZone(TimeZone.getDefault().getID());
+        return eventDateTime;
     }
 }
