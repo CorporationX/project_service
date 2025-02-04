@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.dto.project.ProjectInfoDto;
+import faang.school.projectservice.dto.project.ProjectReadDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
@@ -29,7 +29,7 @@ public class ProjectManagementService {
     private final ProjectEntityMapper projectEntityMapper;
     private final List<ProjectFilter> projectFilters;
 
-    public ProjectInfoDto createProject(ProjectCreateDto projectCreateDto, long userId) {
+    public ProjectReadDto createProject(ProjectCreateDto projectCreateDto, long userId) {
         if (projectRepository.existsByOwnerIdAndName(userId, projectCreateDto.getName())) {
             throw new BusinessException("Проект с таким названием уже существует для этого владельца");
         }
@@ -40,7 +40,7 @@ public class ProjectManagementService {
         return projectEntityMapper.toProjectDto(projectRepository.save(project));
     }
 
-    public ProjectInfoDto updateProject(ProjectUpdateDto projectUpdateDto, long projectId, long userId) {
+    public ProjectReadDto updateProject(ProjectUpdateDto projectUpdateDto, long projectId, long userId) {
         Project project = getProject(projectId);
 
         if(!isVisibleToUser(project,userId)){
@@ -51,7 +51,7 @@ public class ProjectManagementService {
         return projectEntityMapper.toProjectDto(projectRepository.save(project));
     }
 
-    public List<ProjectInfoDto> getAllProjects(ProjectFilterDto filters, long userId) {
+    public List<ProjectReadDto> getAllProjects(ProjectFilterDto filters, long userId) {
         Stream<Project> projectStream  = projectRepository.findAll().stream();
 
         for (ProjectFilter filter : projectFilters) {
@@ -59,10 +59,10 @@ public class ProjectManagementService {
         }
 
         List<Project> filteredProjects = projectStream.toList();
-        return getListProjects(userId, filteredProjects);
+        return mapProjectsToDtoList(userId, filteredProjects);
     }
 
-    public ProjectInfoDto getProjectById(long projectId, long userId){
+    public ProjectReadDto getProjectById(long projectId, long userId){
         Project project = getProject(projectId);
 
         if(!isVisibleToUser(project,userId)){
@@ -77,7 +77,7 @@ public class ProjectManagementService {
                 () -> new EntityNotFoundException("Не существует проекта с ID: " + projectId));
     }
 
-    private List<ProjectInfoDto> getListProjects(long userId, List<Project> projects) {
+    private List<ProjectReadDto> mapProjectsToDtoList(long userId, List<Project> projects) {
         return projects.stream()
                 .filter(project -> isVisibleToUser(project, userId))
                 .map(projectEntityMapper::toProjectDto)

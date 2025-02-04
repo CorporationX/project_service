@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
-import faang.school.projectservice.dto.project.ProjectInfoDto;
+import faang.school.projectservice.dto.project.ProjectReadDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
 import io.micrometer.common.util.StringUtils;
@@ -23,7 +23,7 @@ public interface ProjectEntityMapper {
     @Mapping(target = "description", conditionQualifiedByName = "isNotBlank")
     void updateEntityFromDto(ProjectUpdateDto dto, @MappingTarget Project entity);
 
-    ProjectInfoDto toProjectDto(Project project);
+    ProjectReadDto toProjectDto(Project project);
 
     @Condition
     @Named("isNotBlank")

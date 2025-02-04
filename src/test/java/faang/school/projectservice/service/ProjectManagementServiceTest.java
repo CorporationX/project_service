@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.dto.project.ProjectInfoDto;
+import faang.school.projectservice.dto.project.ProjectReadDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
@@ -134,7 +134,7 @@ public class ProjectManagementServiceTest {
         when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
         mockProjectFiltersReturnStream(Stream.of(project1));
 
-        List<ProjectInfoDto> filteredProjects = projectManagementService.getAllProjects(filterDto, OWNER_ID);
+        List<ProjectReadDto> filteredProjects = projectManagementService.getAllProjects(filterDto, OWNER_ID);
 
         assertEquals(1, filteredProjects.size());
         assertEquals("Test Project 1", filteredProjects.get(0).getName());
@@ -169,7 +169,7 @@ public class ProjectManagementServiceTest {
 
         mockFindProjectById(project);
 
-        ProjectInfoDto result = projectManagementService.getProjectById(PROJECT_ID, OWNER_ID);
+        ProjectReadDto result = projectManagementService.getProjectById(PROJECT_ID, OWNER_ID);
 
         assertNotNull(result);
         assertEquals(PROJECT_ID, result.getId());
