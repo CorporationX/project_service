@@ -1,7 +1,6 @@
 package faang.school.projectservice.adapter;
 
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.InternshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,8 @@ public class InternshipRepositoryAdapter {
     public Internship findById(Long id) {
         return internshipRepository
                 .findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Internship with id: %d not found!", id)));
+                .orElseThrow(() -> new IllegalArgumentException(String
+                        .format("Internship with id: %d not found!", id)));
     }
 
     public Stream<Internship> findAll() {

@@ -9,8 +9,10 @@ import lombok.Data;
 public class InternshipFilterDto {
     @Schema(description = "Project id", example = "1")
     private Long projectId;
+
     @Schema(description = "Mentor id", example = "1")
     private Long mentorId;
+
     @Schema(description = "Internship status", allowableValues = { "IN_PROGRESS", "COMPLETED" })
     private InternshipStatus status;
 }

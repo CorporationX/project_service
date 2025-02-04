@@ -15,12 +15,17 @@ import static faang.school.projectservice.model.ProjectStatus.COMPLETED;
 public class InternshipUpdateDto {
     @Schema(description = "Internship id", example = "1")
     private Long id;
+
     @Schema(description = "Mentor id", example = "1")
     private Long mentorId;
+
     @Schema(description = "Interns Information")
     private List<InternshipUserStatusDto> interns;
-    @Schema(description = "Role for intern", allowableValues = {"DEVELOPER","DESIGNER","TESTER","ANALYST","MANAGER"})
+
+    @Schema(description = "Role for intern", allowableValues = {"DEVELOPER", "DESIGNER", "TESTER", "ANALYST",
+            "MANAGER"})
     private TeamRole role;
+
     @Schema(description = "Internship status", allowableValues = { "IN_PROGRESS", "COMPLETED" })
     private InternshipStatus status;
 }

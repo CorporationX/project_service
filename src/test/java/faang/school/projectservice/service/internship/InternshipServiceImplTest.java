@@ -70,7 +70,6 @@ public class InternshipServiceImplTest {
     @Test
     public void testCreateInternship() {
         InternshipDto internshipDto = prepareInternshipDto();
-        List<InternshipUserInformationDto> interns = new ArrayList<>();
         List<TeamMember> teamMembers = new ArrayList<>();
 
         Project project = prepareProject(internshipDto.getProjectId());
@@ -81,6 +80,8 @@ public class InternshipServiceImplTest {
 
         InternshipUserInformationDto internshipUserInformationDto = new InternshipUserInformationDto();
         internshipUserInformationDto.setUserId(INTERN_ID);
+
+        List<InternshipUserInformationDto> interns = new ArrayList<>();
         interns.add(internshipUserInformationDto);
         internshipDto.setInterns(interns);
 
@@ -159,11 +160,11 @@ public class InternshipServiceImplTest {
         teamMember.setId(MENTOR_ID);
         internship.setMentorId(teamMember);
         List<TeamRole> teamRoles = new ArrayList<>();
-        List<TeamMember> teamMembers = new ArrayList<>();
         TeamMember intern = new TeamMember();
         intern.setId(INTERN_ID);
         intern.setTeam(new Team());
         intern.setRoles(teamRoles);
+        List<TeamMember> teamMembers = new ArrayList<>();
         teamMembers.add(intern);
         internship.setInterns(teamMembers);
         when(internshipRepositoryAdapter.findById(INTERNSHIP_ID)).thenReturn(internship);

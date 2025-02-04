@@ -32,6 +32,7 @@ public class InternshipServiceValidator {
             throw new DataValidationException("Team role can't be empty.");
         }
     }
+
     private void checkNewInternAdd(InternshipUpdateDto internshipUpdateDto) {
         Internship internship = internshipRepositoryAdapter.findById(internshipUpdateDto.getId());
         if (internship.getInterns().size() < internshipUpdateDto.getInterns().size()) {
@@ -55,9 +56,8 @@ public class InternshipServiceValidator {
 
     private void checkProjectStatus(Project project) {
         ProjectStatus projectStatus = project.getStatus();
-        if (projectStatus == ProjectStatus.ON_HOLD ||
-                projectStatus == ProjectStatus.CANCELLED ||
-                projectStatus == ProjectStatus.COMPLETED) {
+        if (projectStatus == ProjectStatus.ON_HOLD || projectStatus == ProjectStatus.CANCELLED
+                || projectStatus == ProjectStatus.COMPLETED) {
             throw new DataValidationException(String.format("It is not possible to add an internship to a project " +
                     "with the status: %s", projectStatus));
         }

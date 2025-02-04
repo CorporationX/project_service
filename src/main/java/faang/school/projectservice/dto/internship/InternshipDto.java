@@ -12,30 +12,43 @@ import java.util.List;
 public class InternshipDto {
     @Schema(description = "Internship id", example = "1")
     private Long id;
+
     @Schema(description = "Project id", example = "1")
     private Long projectId;
+
     @Schema(description = "Mentor id", example = "1")
     private Long mentorId;
+
     @Schema(description = "Interns")
     private List<InternshipUserInformationDto> interns;
+
     @Schema(description = "Start date of internship")
     private LocalDateTime startDate;
+
     @Schema(description = "Start date of internship")
     private LocalDateTime endDate;
+
     @Schema(description = "Internship status", allowableValues = { "IN_PROGRESS" })
     private InternshipStatus status;
+
     @Schema(description = "Description", example = "Java developers")
     private String description;
+
     @Schema(description = "Name", example = "Java")
     private String name;
+
     @Schema(description = "Create date")
     private LocalDateTime createdAt;
+
     @Schema(description = "Updated date", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime updatedAt;
+
     @Schema(description = "Created by")
     private Long createdBy;
+
     @Schema(description = "Updated by", accessMode = Schema.AccessMode.READ_ONLY)
     private Long updatedBy;
+
     @Schema(description = "Schedule id", example = "1")
     private Long scheduleId;
 }

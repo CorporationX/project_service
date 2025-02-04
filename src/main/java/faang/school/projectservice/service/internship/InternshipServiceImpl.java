@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class InternshipServiceImpl implements InternshipService {
+    private static final List<TaskStatus> DONE_TASK_STATUSES = List.of(TaskStatus.CANCELLED, TaskStatus.DONE);
 
     private final InternshipServiceValidator internshipServiceValidator;
     private final InternshipRepositoryAdapter internshipRepositoryAdapter;
@@ -28,7 +29,6 @@ public class InternshipServiceImpl implements InternshipService {
     private final ScheduleRepositoryAdapter scheduleRepositoryAdapter;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> internshipFilters;
-    private final static List<TaskStatus> DONE_TASK_STATUSES = List.of(TaskStatus.CANCELLED, TaskStatus.DONE);
 
     @Override
     public InternshipDto createInternship(InternshipDto internshipDto) {

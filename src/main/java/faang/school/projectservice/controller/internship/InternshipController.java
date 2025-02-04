@@ -26,7 +26,7 @@ public class InternshipController {
     }
 
     @PostMapping
-    @Operation( summary = "Create internship", description = "The method allows you to create an internship.")
+    @Operation(summary = "Create internship", description = "The method allows you to create an internship.")
     public InternshipDto createInternship(@NotNull @RequestBody InternshipDto internshipDto) {
         internshipValidator.checkDataBeforeCreate(internshipDto);
         internshipService.createInternship(internshipDto);
@@ -34,28 +34,28 @@ public class InternshipController {
     }
 
     @PutMapping
-    @Operation( summary = "Update internship", description = "The method allows you to update an internship.")
+    @Operation(summary = "Update internship", description = "The method allows you to update an internship.")
     public InternshipDto updateInternship(@NotNull @RequestBody InternshipUpdateDto internshipUpdateDto) {
         internshipValidator.checkDataBeforeUpdate(internshipUpdateDto);
         return internshipService.updateInternship(internshipUpdateDto);
     }
 
     @GetMapping("/filter")
-    @Operation( summary = "Get internships with filters", description = "The method allows you to get internships " +
+    @Operation(summary = "Get internships with filters", description = "The method allows you to get internships " +
             "by filters.")
     public List<InternshipDto> getProjectInternshipsWithFilters(InternshipFilterDto filters) {
         return internshipService.getInternshipsWithFilters(filters);
     }
 
     @GetMapping
-    @Operation( summary = "Get all internships from database", description = "The method allows you to get all" +
+    @Operation(summary = "Get all internships from database", description = "The method allows you to get all" +
             " internships from database.")
     public List<InternshipDto> getAllInternships() {
         return internshipService.getAllInternships();
     }
 
     @GetMapping("/{id}")
-    @Operation( summary = "Get internship by id", description = "The method allows you to get the internship by id.")
+    @Operation(summary = "Get internship by id", description = "The method allows you to get the internship by id.")
     public InternshipDto getInternship(Long id) {
         internshipValidator.checkDataBeforeGetInternship(id);
         return internshipService.getInternship(id);

@@ -9,8 +9,10 @@ import lombok.Data;
 public class InternshipUserStatusDto {
     @Schema(description = "Intern id", example = "1")
     private Long id;
+
     @Schema(description = "If intern finished internship ahead of schedule", example = "true")
     private boolean aheadOfSchedule;
-    @Schema(description = "Status of internship", example = "PASSED", allowableValues = {"PASSED","FAILED"})
+
+    @Schema(description = "Status of internship", example = "PASSED", allowableValues = {"PASSED", "FAILED"})
     private InternshipInternStatus status;
 }
