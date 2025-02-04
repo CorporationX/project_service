@@ -60,7 +60,6 @@ dependencies {
      */
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.4")
     testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("org.mockito:mockito-core:5.15.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
