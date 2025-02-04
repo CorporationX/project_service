@@ -17,6 +17,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
