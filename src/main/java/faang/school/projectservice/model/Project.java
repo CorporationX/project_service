@@ -24,10 +24,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -59,16 +56,20 @@ public class Project {
     private Long ownerId;
 
     @ManyToOne(cascade = {CascadeType.ALL})
+    @ToString.Exclude
     @JoinColumn(name = "parent_project_id")
     private Project parentProject;
 
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
+    @ToString.Exclude
     private List<Project> children;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
     private List<Task> tasks;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
     private List<Resource> resources;
 
     @CreationTimestamp
@@ -92,21 +93,26 @@ public class Project {
     private String coverImageId;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
     private List<Team> teams;
 
     @OneToOne(mappedBy = "project")
     private Schedule schedule;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
     private List<Stage> stages;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
     private List<Vacancy> vacancies;
 
     @ManyToMany(mappedBy = "projects")
+    @ToString.Exclude
     private List<Moment> moments;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
     private List<Meet> meets;
 
     @Column(name = "presentation_file_key")

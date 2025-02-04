@@ -1,22 +1,18 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.project.CreateProjectRequest;
-import faang.school.projectservice.dto.project.DeleteProjectRequest;
-import faang.school.projectservice.dto.project.FilterProjectRequest;
-import faang.school.projectservice.dto.project.ProjectResponse;
-import faang.school.projectservice.dto.project.UpdateProjectRequest;
+import faang.school.projectservice.dto.project.*;
+import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.S3ObjectDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -52,5 +48,21 @@ public class ProjectController {
     public void deleteProject(@Valid @RequestBody DeleteProjectRequest deleteProjectRequest) {
         projectService.deleteProject(deleteProjectRequest);
     }
+
+    @GetMapping("/generate/pdf/{projectId}")
+    public ResponseEntity<ResourceDto> createPdf(@Valid @NotNull @PathVariable Long projectId) {
+        return ResponseEntity.ok(projectService.createPdfFromProject(projectId));
+    }
+
+    @GetMapping("/download/pdf/{resourceId}")
+    public ResponseEntity<InputStreamResource> downloadFile(@Valid @NotNull @PathVariable Long resourceId) {
+        S3ObjectDto obj = projectService.downloadPdf(resourceId);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + obj.fileName() + "\"." +obj.contentType())
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(obj.s3Object().getObjectContent()));
+    }
+
 }
 

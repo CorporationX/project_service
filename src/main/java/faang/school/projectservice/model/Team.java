@@ -11,10 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
 @Entity
@@ -34,6 +31,7 @@ public class Team {
 
     @ManyToOne
     @JoinColumn(name = "project_id")
+    @ToString.Exclude
     private Project project;
 
     @Column(name = "avatar_key")
