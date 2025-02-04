@@ -9,9 +9,9 @@ import java.util.List;
 public interface MomentRepository extends JpaRepository<Moment, Long> {
 
     @Query(nativeQuery = true, value = """
-    select m.* from moment m
-    where m.id in
-    (select moment_id from moment_project where project_id = :projectId)
-    """)
+            select m.* from moment m
+            where m.id in
+            (select moment_id from moment_project where project_id = :projectId)
+            """)
     List<Moment> findAllByProjectId(long projectId);
 }
