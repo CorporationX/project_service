@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.moment;
 
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ public record MomentResponseDto(
         String name,
         String description,
         LocalDateTime date,
-        List<Long> projectIds,
+        List<ProjectResponseDto> projects,
         List<Long> teamMembersIds
 ) {
 }

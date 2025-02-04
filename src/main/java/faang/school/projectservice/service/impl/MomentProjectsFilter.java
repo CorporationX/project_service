@@ -13,13 +13,15 @@ import java.util.stream.Stream;
 public class MomentProjectsFilter implements MomentFilter {
     @Override
     public boolean isApplicable(MomentFilterDto filter) {
-        return !filter.projectsIds().isEmpty();
+        return filter.projectsIds() != null && !filter.projectsIds().isEmpty();
     }
 
     @Override
     public Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto filter) {
         Predicate<Moment> momentPredicate =
-                moment -> moment.getProjects().stream().map(Project::getId).toList().containsAll(filter.projectsIds());
-        return moments.filter(momentPredicate).toList().stream();
+                moment -> moment.getProjects().stream()
+                        .map(Project::getId).toList()
+                        .containsAll(filter.projectsIds());
+        return moments.filter(momentPredicate);
     }
 }

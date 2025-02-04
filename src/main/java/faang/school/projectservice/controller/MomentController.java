@@ -14,27 +14,26 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/moment")
+@RequestMapping("/moments")
 public class MomentController {
 
     private final MomentService momentService;
 
-    @PostMapping("/")
+    @PostMapping
     public MomentResponseDto create(@RequestBody MomentCreateRequestDto momentCreateRequestDto) {
         log.info("Created moment {}", momentCreateRequestDto);
         return momentService.createMoment(momentCreateRequestDto);
     }
 
-    @PatchMapping("/")
+    @PatchMapping
     public MomentResponseDto update(@PathVariable("id") Long momentId,
                                     @RequestBody MomentUpdateRequestDto momentUpdateRequestDto) {
         log.info("Updated moment {}", momentUpdateRequestDto);
         return momentService.updateMoment(momentId, momentUpdateRequestDto);
     }
 
-    @PostMapping("/filtered")
+    @PostMapping("/search")
     public List<MomentResponseDto> getMoments(@RequestBody MomentFilterDto filter) {
-        //@RequestHeader(value = "X-User-Id", required = true) Long userId,
         return momentService.getMoments(filter);
     }
 

@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.MomentFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,8 @@ import java.util.Optional;
 class MomentServiceImplTest {
     @Mock
     MomentRepository momentRepositoryMock;
+    @Mock
+    ProjectRepository projectRepositoryMock;
     @InjectMocks
     MomentServiceImpl momentService;
     @Spy
@@ -77,7 +80,8 @@ class MomentServiceImplTest {
         momentService = new MomentServiceImpl(momentRepositoryMock,
                 momentMapper,
                 momentFilters,
-                momentServiceValidator);
+                momentServiceValidator,
+                projectRepositoryMock);
     }
 
     @Test
