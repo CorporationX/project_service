@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.s3;
+package faang.school.projectservice.service.impl;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +21,6 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-//@ConditionalOnProperty(value = "services.s3.isMocked", havingValue = "false")
 public class S3ServiceImpl implements S3Service {
     private final AmazonS3 s3Client;
     @Value("${services.s3.bucketName}")

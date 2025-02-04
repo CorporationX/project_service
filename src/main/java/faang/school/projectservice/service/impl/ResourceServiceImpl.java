@@ -8,7 +8,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.ResourceService;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

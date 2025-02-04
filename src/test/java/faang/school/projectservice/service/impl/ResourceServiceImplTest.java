@@ -5,7 +5,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.service.s3.S3ServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +21,6 @@ import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceServiceImplTest {
-
     @Mock
     private ProjectService projectServiceMock;
     @Mock
