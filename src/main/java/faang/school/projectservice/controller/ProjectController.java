@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.project.ProjectUpdateRequestDto;
 import faang.school.projectservice.dto.project.ProjectUpdateResponseDto;
+import faang.school.projectservice.dto.project.gallery.AddImageResponseDto;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -57,5 +60,25 @@ public class ProjectController {
     public ResponseEntity<Void> deleteProjectById(@PathVariable Long id) {
         projectService.deleteProjectById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/images/{projectId}/{creatorId}")
+    public AddImageResponseDto addImageInProjectGallery(@PathVariable Long projectId,
+                                                        @PathVariable Long creatorId,
+                                                        @RequestPart("file") MultipartFile file) {
+        return projectService.addImageInProjectGallery(projectId, creatorId, file);
+    }
+
+    @DeleteMapping("/images/{resourceId}/{userId}")
+    public ResponseEntity<Void> deleteImageFromProjectGallery(@PathVariable Long resourceId,
+                                                              @PathVariable Long userId) {
+        projectService.deleteImageFromProjectGallery(resourceId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/images/{projectId}/{userId}")
+    public List<String> getImagesFromProjectGallery(@PathVariable Long projectId,
+                                                         @PathVariable Long userId) {
+        return projectService.getImagesFromProjectGallery(projectId, userId);
     }
 }

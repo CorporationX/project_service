@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -15,9 +16,9 @@ import java.util.List;
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
-    public TeamMember getTeamMember(long teamMemberId) {
-        return teamMemberRepository.findById(teamMemberId)
-                .orElseThrow(() -> new EntityNotFoundException("TeamMember not found"));
+    public TeamMember getTeamMemberById(Long teamMemberId) {
+        return teamMemberRepository.findByUserId(teamMemberId)
+                .orElseThrow(() -> new NoSuchElementException("TeamMember not found"));
     }
 
     public List<TeamMember> findAllByIds(List<Long> teamMemberIds) {
