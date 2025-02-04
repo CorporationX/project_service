@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.VacancyCoverDto;
 import faang.school.projectservice.exception.BusinessException;
