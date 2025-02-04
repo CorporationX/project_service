@@ -35,7 +35,7 @@ public class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
 
-    private Project crearteProject;
+    private Project createProject;
     private Project updateProject;
     private ProjectCreateRequestDto createRequestDto;
     private ProjectUpdateRequestDto updateRequestDto;
@@ -43,10 +43,10 @@ public class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
-        crearteProject = new Project();
-        crearteProject.setOwnerId(100L);
-        crearteProject.setName("Test Project");
-        crearteProject.setStatus(ProjectStatus.CREATED);
+        createProject = new Project();
+        createProject.setOwnerId(100L);
+        createProject.setName("Test Project");
+        createProject.setStatus(ProjectStatus.CREATED);
 
         updateProject = new Project();
         updateProject.setId(1L);
@@ -59,19 +59,22 @@ public class ProjectServiceTest {
 
         updateRequestDto = new ProjectUpdateRequestDto();
         updateRequestDto.setId(1L);
+
+        project = new Project();
+        project.setId(1L);
     }
 
     @Test
     void createProject_ShouldSaveProjectWhenValidRequest() {
         when(projectRepository.existsByOwnerIdAndName(100L, "Test Project")).thenReturn(false);
 
-        when(projectRepository.save(crearteProject)).thenReturn(crearteProject);
+        when(projectRepository.save(createProject)).thenReturn(createProject);
 
         ProjectCreateResponseDto result = projectService.createProject(createRequestDto);
 
 
-        assertEquals(projectMapper.toCreateResponseDto(crearteProject), result);
-        verify(projectRepository).save(crearteProject);
+        assertEquals(projectMapper.toCreateResponseDto(createProject), result);
+        verify(projectRepository).save(createProject);
     }
 
     @Test
@@ -108,7 +111,7 @@ public class ProjectServiceTest {
         Project privateProject = new Project();
         privateProject.setVisibility(ProjectVisibility.PRIVATE);
         privateProject.setOwnerId(userId);
-        List<Project> projects = List.of(crearteProject, privateProject);
+        List<Project> projects = List.of(createProject, privateProject);
         ProjectFilterDto filterDto = new ProjectFilterDto();
 
         when(projectRepository.findAll()).thenReturn(projects);
@@ -124,7 +127,7 @@ public class ProjectServiceTest {
         Project privateProject = new Project();
         privateProject.setVisibility(ProjectVisibility.PRIVATE);
         privateProject.setOwnerId(101L);
-        List<Project> projects = List.of(crearteProject, privateProject);
+        List<Project> projects = List.of(createProject, privateProject);
         Long userId = 100L;
         ProjectFilterDto filterDto = new ProjectFilterDto();
 
@@ -140,11 +143,11 @@ public class ProjectServiceTest {
 
     @Test
     void getProjectDtoById_ShouldReturnProjectWhenExists() {
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(crearteProject));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(createProject));
 
         ProjectResponseDto result = projectService.getProjectDtoById(1L);
 
-        assertEquals(projectMapper.toResponseDto(crearteProject), result);
+        assertEquals(projectMapper.toResponseDto(createProject), result);
     }
 
     @Test

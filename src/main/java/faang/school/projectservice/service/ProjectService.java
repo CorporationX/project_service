@@ -1,6 +1,16 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
+import faang.school.projectservice.dto.project.ProjectCreateResponseDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
+import faang.school.projectservice.dto.project.ProjectUpdateRequestDto;
+import faang.school.projectservice.dto.project.ProjectUpdateResponseDto;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
