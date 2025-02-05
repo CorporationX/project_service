@@ -35,6 +35,9 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+domain:
+  base-path: /api/v1
+
 services:
   s3:
     endpoint: http://localhost:9000
