@@ -75,4 +75,19 @@ public class Resource {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    @Override
+    public String toString() {
+        return "Resource{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", key='" + key + '\'' +
+            ", size=" + size +
+            ", type=" + type +
+            ", status=" + status +
+            ", createdAt=" + createdAt +
+            ", updatedAt=" + updatedAt +
+            ", projectId=" + (project != null ? project.getId() : null) +
+            '}';
+    }
 }
