@@ -19,8 +19,8 @@ public class JiraController {
 
     @GetMapping("/project/{projectId}")
     @ResponseStatus(HttpStatus.OK)
-    public IssueResponseDto getAllIssues(@PathVariable("projectId") String projectId) {
-        return jiraService.getAllIssues(projectId);
+    public IssueResponseDto getAllIssuesByProject(@PathVariable("projectId") String projectId) {
+        return jiraService.getAllIssuesByProject(projectId);
     }
 
     @GetMapping("/{id}")

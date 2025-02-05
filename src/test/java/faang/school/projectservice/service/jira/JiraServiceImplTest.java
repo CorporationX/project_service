@@ -56,14 +56,14 @@ class JiraServiceImplTest {
     }
 
     @Test
-    public void testGetAllIssues() {
+    public void testGetAllIssuesByProject() {
         String projectId = "PROJ";
         String responseBody = "{\"issues\":[{\"key\":\"1\",\"summary\":\"Test Issue\"}]}";
         mockServer.expect(requestTo("/search?jql=project%3DPROJ"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        IssueResponseDto response = jiraService.getAllIssues(projectId);
+        IssueResponseDto response = jiraService.getAllIssuesByProject(projectId);
 
         assertNotNull(response);
         assertEquals(1, response.getIssues().size());

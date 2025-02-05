@@ -60,13 +60,13 @@ class JiraControllerTest {
     private final String basePath = "/api/v1/jira/issues";
 
     @Test
-    public void testGetAllIssues() throws Exception {
+    public void testGetAllIssuesByProject() throws Exception {
         String projectId = "PROJ";
         IssueResponseDto responseDto = new IssueResponseDto();
         responseDto.setIssues(Collections.singletonList(new IssueDto("1",
                 IssueFieldsResponseDto.builder().summary("Test Issue").build())));
 
-        when(jiraService.getAllIssues(projectId)).thenReturn(responseDto);
+        when(jiraService.getAllIssuesByProject(projectId)).thenReturn(responseDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/project/{projectId}", projectId)
                         .accept(MediaType.APPLICATION_JSON))

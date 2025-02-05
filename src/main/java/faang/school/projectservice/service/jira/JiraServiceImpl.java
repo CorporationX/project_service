@@ -18,7 +18,7 @@ public class JiraServiceImpl implements JiraService {
     private final RestClient restClient;
 
     @Override
-    public IssueResponseDto getAllIssues(String projectId) {
+    public IssueResponseDto getAllIssuesByProject(String projectId) {
         return restClient.get()
                 .uri(String.format("/search?jql=project=%s", projectId))
                 .retrieve()

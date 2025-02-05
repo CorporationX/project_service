@@ -8,7 +8,7 @@ import faang.school.projectservice.dto.jira.response.IssueResponseDto;
 
 public interface JiraService {
 
-    IssueResponseDto getAllIssues(String projectId);
+    IssueResponseDto getAllIssuesByProject(String projectId);
 
     IssueDto getIssueById(String issueId);
 
