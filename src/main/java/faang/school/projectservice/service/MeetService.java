@@ -10,6 +10,7 @@ import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.repository.MeetRepository;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,9 @@ public class MeetService {
 
     @Transactional
     public MeetResponseDto createMeet(CreateMeetDto createMeetDto) {
-        if (userServiceClient.getUser(createMeetDto.getCreatorId()) == null) {
+        try {
+            userServiceClient.getUser(createMeetDto.getCreatorId());
+        } catch (FeignException e) {
             throw new DataValidationException("Meet creator not exists with id: " + createMeetDto.getCreatorId());
         }
         Meet meet = meetMapper.fromCreateDto(createMeetDto);

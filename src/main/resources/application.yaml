@@ -52,3 +52,4 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+    path: /api/v1

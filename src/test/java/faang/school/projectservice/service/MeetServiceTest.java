@@ -12,6 +12,7 @@ import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MeetRepository;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,7 +71,7 @@ public class MeetServiceTest {
     @Test
     void createMeet_ShouldThrowExceptionWhenCreatorNotExists() {
         // Given
-        when(userServiceClient.getUser(anyLong())).thenReturn(null);
+        when(userServiceClient.getUser(anyLong())).thenThrow(mock(FeignException.BadRequest.class));
 
         // When & Then
         assertThrows(DataValidationException.class, () -> meetService.createMeet(createMeetDto));

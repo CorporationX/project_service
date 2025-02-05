@@ -39,9 +39,9 @@ public class MeetController {
         return meetService.findAll();
     }
 
-    @GetMapping("/project/{id}")
-    public List<MeetResponseDto> findProjectMeetsByFilter(@PathVariable long id, MeetFilterDto filter) {
-        return meetService.findProjectMeetsByFilter(id, filter);
+    @GetMapping("/project/{projectId}")
+    public List<MeetResponseDto> findProjectMeetsByFilter(@PathVariable long projectId, MeetFilterDto filter) {
+        return meetService.findProjectMeetsByFilter(projectId, filter);
     }
 
     @GetMapping("/{id}")
