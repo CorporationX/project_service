@@ -47,6 +47,7 @@ services:
   payment-service:
     host: http://localhost
     port: 9080
+    url: ${services.user-service.host}:${services.user-service.port}
   user-service:
     host: http://localhost
     port: 8080

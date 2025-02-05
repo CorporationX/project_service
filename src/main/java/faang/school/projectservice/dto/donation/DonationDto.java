@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Builder
 public record DonationDto(
-        @NotNull(message = "Сумма платежа не должна быть пустой")
+        @NotNull(message = "Номер платежа не должен быть пустым")
         Long paymentNumber,
 
         @Positive(message = "Сумма должна быть положительной")

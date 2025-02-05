@@ -42,21 +42,22 @@ public class DonationService {
         if (id == null || userId == null) {
             throw new DataValidationException("Ошибка валидации метода findDonationByIdAndUserId");
         }
-        findUserById(userId);
+        userService.getUserDtoById(userId);
+
         var donation = donationRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new EntityNotFoundException("Донат с ID " + id + " не найден "));
+                .orElseThrow(() -> new EntityNotFoundException("Донат с ID " + id + " не найден"));
         return donationMapper.toDto(donation);
     }
 
     public List<DonationDto> getDonationByIdUser(long userId, DonationFilter donationFilter) {
-        findUserById(userId);
+        userService.getUserDtoById(userId);
         Specification<Donation> donationSpec = donationSpecification.build(userId, donationFilter);
         List<Donation> donations = donationRepository.findAll(donationSpec);
         return donations.stream().map(donationMapper::toDto).toList();
     }
 
     private PaymentRequest mapDonationToPaymentRequest(DonationDto dto) {
-        Campaign campaign = findCampaignById(dto.campaignId());
+        Campaign campaign = campaignService.findById(dto.campaignId());
         validCampaignStatus(campaign);
         return PaymentRequest.builder()
                 .paymentNumber(dto.paymentNumber())
@@ -66,18 +67,9 @@ public class DonationService {
                 .build();
     }
 
-    private Campaign findCampaignById(long idCampaign) {
-        return campaignService.findById(idCampaign);
-    }
-
     private void validCampaignStatus(Campaign campaign) {
         if (campaign.getStatus() != CampaignStatus.ACTIVE) {
             throw new BusinessException("Ошибка статуса компании " + campaign.getStatus());
         }
     }
-
-    private void findUserById(long userId) {
-        userService.getUserDtoById(userId);
-    }
-
 }
