@@ -37,14 +37,23 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://localhost:9000
+    endpoint: http://192.168.100.3:9000
     accessKey: user
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+
   payment-service:
     host: http://localhost
     port: 9080
+
   user-service:
     host: http://localhost
     port: 8080
+
+resource:
+  max-size: 5242880 #5 MB
+  image:
+    max-rectangle-width: 1080
+    max-rectangle-height: 566
+    max-square-dimension: 1080

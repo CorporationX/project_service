@@ -1,7 +1,12 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.amazon.ResourceConfig;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.s3.S3Service;
+import faang.school.projectservice.service.imageprocessing.ImageProcessingUtils;
+import faang.school.projectservice.validator.project.FileValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,13 +30,21 @@ class ProjectServiceTest {
     private ProjectRepository projectRepository;
 
     private ProjectService projectService;
+    private S3Service s3Service;
+    private ProjectMapper projectMapper;
+    private FileValidator validator;
+    private ImageProcessingUtils imageProcessingUtils;
 
     private final Long projectId = 1L;
     private final Project project = Project.builder().id(projectId).build();
 
     @BeforeEach
     void setUp() {
-        projectService = new ProjectService(projectRepository);
+        projectService = new ProjectService(projectRepository,
+                s3Service,
+                projectMapper,
+                validator,
+                imageProcessingUtils);
     }
 
     @Test
