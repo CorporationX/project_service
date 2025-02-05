@@ -83,6 +83,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.1")
+    /**
+     * ImageResizer
+     */
+    implementation("net.coobird:thumbnailator:0.4.20")
+
 
     /**
      * Jira
