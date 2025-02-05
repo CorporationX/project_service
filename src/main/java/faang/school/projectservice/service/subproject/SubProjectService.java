@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
+import faang.school.projectservice.exeption.EntityNotFoundException;
 import faang.school.projectservice.exeption.ProjectNotClosableException;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -9,7 +10,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.subproject.SubProjectFilter;
 import faang.school.projectservice.service.moment.MomentService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
