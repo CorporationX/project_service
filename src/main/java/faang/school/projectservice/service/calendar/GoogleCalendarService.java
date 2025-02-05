@@ -24,9 +24,8 @@ import java.util.Date;
 public class GoogleCalendarService {
     private final AuthService oAuthService;
 
-    public String createEvent(CalendarEventDto eventDto) throws Exception {
-        Credential credential = oAuthService.getCredentials(String.valueOf(eventDto.getCreatorId()));
-        Calendar newCalendar = getCalendar(credential);
+    public Event createEvent(CalendarEventDto eventDto) throws Exception {
+        Calendar newCalendar = getCalendar(eventDto.getCreatorId());
         Date startDateTime = convertLocalDateToDate(eventDto.getStartsAt());
         Date endDateTime = convertLocalDateToDate(eventDto.getEndsAt());
 
@@ -40,22 +39,21 @@ public class GoogleCalendarService {
 
         Event createdEvent = newCalendar.events().insert(eventDto.getCalendarId(), event).execute();
         log.info("New event with id {} was added to calendar", createdEvent.getId());
-        return createdEvent.getId();
+        return createdEvent;
     }
 
     public Event getEvent(String calendarId, String eventId, long creatorId) throws Exception {
-        Credential credential = oAuthService.getCredentials(String.valueOf(creatorId));
-        Calendar calendar = getCalendar(credential);
+        Calendar calendar = getCalendar(creatorId);
         return calendar.events().get(calendarId, eventId).execute();
     }
 
     public void deleteEvent(String calendarId, String eventId, long creatorId) throws Exception {
-        Credential credential = oAuthService.getCredentials(String.valueOf(creatorId));
-        Calendar calendar = getCalendar(credential);
+        Calendar calendar = getCalendar(creatorId);
         calendar.events().delete(calendarId, eventId).execute();
     }
 
-    private Calendar getCalendar(Credential credential) throws GeneralSecurityException, IOException {
+    private Calendar getCalendar(long creatorId) throws GeneralSecurityException, IOException {
+        Credential credential = oAuthService.getCredentials(String.valueOf(creatorId));
         return new Calendar.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
                 GsonFactory.getDefaultInstance(),

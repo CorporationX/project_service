@@ -26,10 +26,10 @@ public class GoogleCalendarController {
     private final AuthService oAuthService;
 
     @PostMapping("/event")
-    public ResponseEntity<String> createEvent(@RequestBody CalendarEventDto dto) throws Exception {
+    public ResponseEntity<Event> createEvent(@RequestBody CalendarEventDto dto) throws Exception {
         try {
-            String eventId = googleCalendarService.createEvent(dto);
-            return ResponseEntity.ok(String.format("Event #%s successfully created", eventId));
+            Event event = googleCalendarService.createEvent(dto);
+            return ResponseEntity.ok(event);
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
