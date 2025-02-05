@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -41,8 +40,6 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setProject(project);
         resource.setCreatedBy(teamMember);
         resource.setUpdatedBy(teamMember);
-        resource.setCreatedAt(LocalDateTime.now());
-        resource.setUpdatedAt(LocalDateTime.now());
         resource = resourceRepository.save(resource);
         return resourceMapper.toResourceResponseDto(resource);
     }

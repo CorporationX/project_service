@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 public record ResourceRequestDto(
         String key,
         BigInteger size,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
         String status,
         String type,
         String name
