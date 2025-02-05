@@ -18,4 +18,7 @@ public class DonationCreateDto {
     private Long campaignId;
     @NotNull(message = "Currency must not be null")
     private Currency currency;
+    @NotNull(message = "User id must not be null")
+    @Positive
+    private Long userId;
 }

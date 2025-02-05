@@ -19,19 +19,17 @@ public class DonationController {
     private final DonationService donationService;
 
     @PostMapping
-    public DonationDto sendDonation(@RequestHeader("x-user-id") Long userId,
-                                    @Valid @RequestBody DonationCreateDto donationCreateDto) {
-        return donationService.sendDonation(userId, donationCreateDto);
+    public DonationDto sendDonation(@Valid @RequestBody DonationCreateDto donationCreateDto) {
+        return donationService.sendDonation(donationCreateDto);
     }
 
-    @GetMapping("/{donationId}")
-    public DonationDto getDonationByIdAndUserId(@RequestHeader("x-user-id") Long userId,
-                                                @PathVariable Long donationId) {
+    @GetMapping("/{donationId}/users/{userId}")
+    public DonationDto getDonationByIdAndUserId(@PathVariable Long donationId, @PathVariable Long userId) {
         return donationService.getDonationByIdAndUserId(donationId, userId);
     }
 
-    @GetMapping
-    public List<DonationDto> getAllDonationsByUser(@RequestHeader("x-user-id") Long userId,
+    @GetMapping("/users/{userId}")
+    public List<DonationDto> getFilteredDonations(@PathVariable Long userId,
                                                    @ModelAttribute DonationFilterDto filters) {
         return donationService.getAllDonationsByUser(userId, filters);
     }
