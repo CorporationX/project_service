@@ -14,7 +14,7 @@ public class CreateVacancyRequest {
     private String description;
     private TeamRole position;
     private Long projectId;
-    private Long createdBy;
+    private Long userCreatedBy;
     private Double salary;
     private WorkSchedule workSchedule;
     private Integer count;

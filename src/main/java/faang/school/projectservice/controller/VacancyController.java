@@ -8,14 +8,16 @@ import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Component
+@RestController
 @RequiredArgsConstructor
 public class VacancyController {
     private final VacancyService vacancyService;
+
 
     public CreateVacancyResponse createVacancy(CreateVacancyRequest createRequest) {
         return vacancyService.create(createRequest);
@@ -25,15 +27,15 @@ public class VacancyController {
         return vacancyService.update(updateRequest);
     }
 
-    public void deleteVacancy(long id) {
-        vacancyService.delete(id);
+    public void deleteVacancy(long vacancyId) {
+        vacancyService.delete(vacancyId);
     }
 
-    public GetVacancyResponse getVacancy(long id) {
-        return vacancyService.getById(id);
+    public GetVacancyResponse getVacancy(long vacancyId) {
+        return vacancyService.getVacancyById(vacancyId);
     }
 
     public List<GetVacancyResponse> getAllVacancy(VacancyFilterDto filters) {
-        return vacancyService.getAll(filters);
+        return vacancyService.getAllVacancies(filters);
     }
 }

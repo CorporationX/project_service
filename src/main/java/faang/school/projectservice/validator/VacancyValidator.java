@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.exception.VacancyException;
+import faang.school.projectservice.exception.VacancyValidationException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -18,26 +18,26 @@ public class VacancyValidator {
 
     public void validateCreatedVacancy(Vacancy vacancy) {
         if (!checkRoleOfCreatedBy(vacancy)) {
-            throw new VacancyException("Only user with owner or manager role can create vacancy");
+            throw new VacancyValidationException("Only user with owner or manager role can create vacancy");
         }
     }
 
     public void validateUpdatedVacancy(Vacancy vacancy) {
         if (!checkRoleOfUpdatedBy(vacancy)) {
-            throw new VacancyException("Only user with owner or manager role can update vacancy");
+            throw new VacancyValidationException("Only user with owner or manager role can update vacancy");
         }
 
         if (!checkCandidatesAreNotTeamMember(vacancy)) {
-            throw new VacancyException("Candidate is team member");
+            throw new VacancyValidationException("Candidate is team member");
         }
 
         if (vacancy.getStatus() == VacancyStatus.CLOSED) {
             if (!checkCountOfAcceptedCandidates(vacancy)) {
-                throw new VacancyException("There is not enough number of candidates");
+                throw new VacancyValidationException("There is not enough number of candidates");
             }
 
             if (!checkCountOfWaitingCandidates(vacancy)) {
-                throw new VacancyException("There are candidates waiting for response. " +
+                throw new VacancyValidationException("There are candidates waiting for response. " +
                         "You should accept or reject them");
             }
         }

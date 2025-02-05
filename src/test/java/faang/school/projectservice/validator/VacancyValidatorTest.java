@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.exception.VacancyException;
+import faang.school.projectservice.exception.VacancyValidationException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
@@ -54,7 +54,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getCreatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.DEVELOPER)).build());
 
-        assertThrows(VacancyException.class, () -> vacancyValidator.validateCreatedVacancy(vacancy));
+        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateCreatedVacancy(vacancy));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getUpdatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.DEVELOPER)).build());
 
-        assertThrows(VacancyException.class, () -> vacancyValidator.validateUpdatedVacancy(vacancy));
+        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatedVacancy(vacancy));
     }
 
     @Test
@@ -128,7 +128,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId()))
                 .thenReturn(new TeamMember());
 
-        assertThrows(VacancyException.class, () -> vacancyValidator.validateUpdatedVacancy(vacancy));
+        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatedVacancy(vacancy));
     }
 
     @Test
@@ -160,7 +160,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(2).getUserId(), vacancy.getProject().getId()))
                 .thenReturn(null);
 
-        assertThrows(VacancyException.class, () -> vacancyValidator.validateUpdatedVacancy(vacancy));
+        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatedVacancy(vacancy));
 
         verify(teamMemberRepository, times(1))
                 .findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId());
@@ -199,7 +199,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(2).getUserId(), vacancy.getProject().getId()))
                 .thenReturn(null);
 
-        assertThrows(VacancyException.class, () -> vacancyValidator.validateUpdatedVacancy(vacancy));
+        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatedVacancy(vacancy));
 
         verify(teamMemberRepository, times(1))
                 .findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId());

@@ -16,13 +16,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface VacancyMapper {
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "project", ignore = true)
-    @Mapping(target = "candidates", ignore = true)
     Vacancy fromCreateRequest(CreateVacancyRequest createRequest);
 
-    @Mapping(target = "project", ignore = true)
-    @Mapping(target = "candidates", ignore = true)
     Vacancy fromUpdateRequest(UpdateVacancyRequest updateRequest);
 
     @Mapping(source = "project.id", target = "projectId")

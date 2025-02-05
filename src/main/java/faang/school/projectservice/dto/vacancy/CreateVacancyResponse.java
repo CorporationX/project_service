@@ -15,10 +15,6 @@ public class CreateVacancyResponse {
     private String description;
     private TeamRole position;
     private Long projectId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private Long createdBy;
-    private Long updatedBy;
     private VacancyStatus status;
     private Double salary;
     private WorkSchedule workSchedule;

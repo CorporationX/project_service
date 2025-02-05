@@ -6,7 +6,7 @@ import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.exception.VacancyException;
+import faang.school.projectservice.exception.VacancyValidationException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -17,13 +17,13 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.VacancyValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class VacancyService {
     private final VacancyRepository vacancyRepository;
@@ -70,20 +70,20 @@ public class VacancyService {
             candidateRepository.deleteAllById(candidateIds);
             vacancyRepository.deleteById(id);
         } else {
-            throw new VacancyException("There is no vacancy for this ID");
+            throw new VacancyValidationException("There is no vacancy for this ID");
         }
     }
 
-    public GetVacancyResponse getById(long id) {
+    public GetVacancyResponse getVacancyById(long id) {
         Optional<Vacancy> vacancyOptional = vacancyRepository.findById(id);
         if (vacancyOptional.isPresent()) {
             return vacancyMapper.toGetResponse(vacancyOptional.get());
         } else {
-            throw new VacancyException("There is no vacancy for this ID");
+            throw new VacancyValidationException("There is no vacancy for this ID");
         }
     }
 
-    public List<GetVacancyResponse> getAll(VacancyFilterDto filters) {
+    public List<GetVacancyResponse> getAllVacancies(VacancyFilterDto filters) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
         vacancyFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))

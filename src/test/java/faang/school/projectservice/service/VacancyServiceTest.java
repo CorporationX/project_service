@@ -5,12 +5,9 @@ import faang.school.projectservice.dto.vacancy.CreateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.exception.VacancyException;
+import faang.school.projectservice.exception.VacancyValidationException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
-import faang.school.projectservice.filter.vacancy.VacancyNameFilter;
-import faang.school.projectservice.filter.vacancy.VacancyPositionFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
-import faang.school.projectservice.mapper.VacancyMapperImpl;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
@@ -29,7 +26,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -90,7 +86,7 @@ public class VacancyServiceTest {
                 .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
                 .position(TeamRole.DEVELOPER)
                 .projectId(515L)
-                .createdBy(123L)
+                .userCreatedBy(123L)
                 .salary(150000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
@@ -153,7 +149,7 @@ public class VacancyServiceTest {
                 .position(TeamRole.DEVELOPER)
                 .projectId(515L)
                 .candidateIds(List.of(167L, 180L, 188L, 153L))
-                .updatedBy(123L)
+                .userIdUpdatedBy(123L)
                 .status(VacancyStatus.OPEN)
                 .salary(150000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
@@ -244,33 +240,33 @@ public class VacancyServiceTest {
 
         when(vacancyRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(VacancyException.class, () -> vacancyService.delete(333L));
+        assertThrows(VacancyValidationException.class, () -> vacancyService.delete(333L));
     }
 
     @Test
-    public void getById_ShouldReturnVacancySuccessfully() {
+    public void getVacancyById_ShouldReturnVacancySuccessfully() {
         long id = 333L;
 
         when(vacancyRepository.findById(id))
                 .thenReturn(Optional.of(Vacancy.builder().candidates(new ArrayList<>()).build()));
 
-        vacancyService.getById(id);
+        vacancyService.getVacancyById(id);
 
         verify(vacancyMapper, times(1)).toGetResponse(vacancyArgumentCaptor.capture());
     }
 
     @Test
-    public void getById_ShouldThrowVacancyExceptionWhenVacancyDoesNotExist() {
+    public void getVacancyById_ShouldThrowVacancyExceptionWhenVacancyDoesNotExist() {
         long id = 333L;
 
         when(vacancyRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(VacancyException.class, () -> vacancyService.getById(333L));
+        assertThrows(VacancyValidationException.class, () -> vacancyService.getVacancyById(333L));
     }
 
     @Test
-    public void getAll_ShouldReturnAllVacanciesSuccessfully() {
-        vacancyService.getAll(new VacancyFilterDto());
+    public void getAll_ShouldReturnAllVacanciesVacanciesSuccessfully() {
+        vacancyService.getAllVacancies(new VacancyFilterDto());
 
         verify(vacancyRepository, times(1)).findAll();
     }

@@ -17,7 +17,7 @@ public class UpdateVacancyRequest {
     private TeamRole position;
     private Long projectId;
     private List<Long> candidateIds;
-    private Long updatedBy;
+    private Long userUpdatedBy;
     private VacancyStatus status;
     private Double salary;
     private WorkSchedule workSchedule;
