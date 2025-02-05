@@ -1,18 +1,17 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.config.audit.AuditorAwareImpl;
 import faang.school.projectservice.dto.meet.CreateMeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
 import faang.school.projectservice.dto.meet.MeetResponseDto;
 import faang.school.projectservice.dto.meet.UpdateMeetDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.MeetMapperImpl;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MeetRepository;
-import feign.FeignException;
+import faang.school.projectservice.validator.UserValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,6 +38,10 @@ import static org.mockito.Mockito.when;
 public class MeetServiceTest {
     @Mock
     private MeetRepository meetRepository;
+    @Mock
+    private UserValidator userValidator;
+    @Mock
+    private AuditorAwareImpl auditorAware;
     @Spy
     private MeetMapperImpl meetMapper;
     @Mock
@@ -57,7 +58,6 @@ public class MeetServiceTest {
     @BeforeEach
     void setUp() {
         createMeetDto = new CreateMeetDto();
-        createMeetDto.setCreatorId(1L);
         createMeetDto.setProjectId(1L);
 
         updateMeetDto = new UpdateMeetDto();
@@ -69,19 +69,9 @@ public class MeetServiceTest {
     }
 
     @Test
-    void createMeet_ShouldThrowExceptionWhenCreatorNotExists() {
-        // Given
-        when(userServiceClient.getUser(anyLong())).thenThrow(mock(FeignException.BadRequest.class));
-
-        // When & Then
-        assertThrows(DataValidationException.class, () -> meetService.createMeet(createMeetDto));
-    }
-
-    @Test
     void createMeet_ShouldReturnMeetResponseDto() {
         // Given
-
-        when(userServiceClient.getUser(anyLong())).thenReturn(new UserDto(1L, "", ""));
+        when(auditorAware.getCurrentAuditor()).thenReturn(Optional.of(1L));
         when(projectService.findEntityById(createMeetDto.getProjectId())).thenReturn(new Project());
         when(meetRepository.save(any(Meet.class))).thenReturn(meet);
 
@@ -176,12 +166,12 @@ public class MeetServiceTest {
     @Test
     void deleteMeet_ShouldCallDeleteById() {
         // Given
-        doNothing().when(meetRepository).deleteById(1L);
+        when(meetRepository.findById(1L)).thenReturn(Optional.of(new Meet()));
 
         // When
         meetService.deleteMeet(1L);
 
         // Then
-        verify(meetRepository, times(1)).deleteById(1L);
+        verify(meetRepository, times(1)).delete(any(Meet.class));
     }
 }

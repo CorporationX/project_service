@@ -18,9 +18,6 @@ public class CreateMeetDto {
     @Size(max = 512, message = "Meet description can't be longer then 512 symbols")
     private String description;
 
-    @Positive(message = "Meet must have creator id")
-    private long creatorId;
-
     @Positive(message = "Meet must have project id")
     private long projectId;
 

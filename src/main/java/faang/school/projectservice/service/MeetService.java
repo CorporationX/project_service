@@ -1,16 +1,15 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.audit.AuditorAwareImpl;
 import faang.school.projectservice.dto.meet.CreateMeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
 import faang.school.projectservice.dto.meet.MeetResponseDto;
 import faang.school.projectservice.dto.meet.UpdateMeetDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.repository.MeetRepository;
-import feign.FeignException;
+import faang.school.projectservice.validator.UserValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,16 +25,14 @@ public class MeetService {
     private final MeetRepository meetRepository;
     private final MeetMapper meetMapper;
     private final ProjectService projectService;
-    private final UserServiceClient userServiceClient;
+    private final UserValidator userValidator;
+    private final AuditorAwareImpl auditorAware;
 
     @Transactional
     public MeetResponseDto createMeet(CreateMeetDto createMeetDto) {
-        try {
-            userServiceClient.getUser(createMeetDto.getCreatorId());
-        } catch (FeignException e) {
-            throw new DataValidationException("Meet creator not exists with id: " + createMeetDto.getCreatorId());
-        }
+        userValidator.validateCurrentUserExists();
         Meet meet = meetMapper.fromCreateDto(createMeetDto);
+        meet.setCreatorId(auditorAware.getCurrentAuditor().get());
         meet.setProject(projectService.findEntityById(createMeetDto.getProjectId()));
         meet.setStatus(MeetStatus.PENDING);
         return meetMapper.toResponseDto(meetRepository.save(meet));
@@ -74,6 +71,7 @@ public class MeetService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Cannot update meet with id: " + updateMeetDto.getId() + ", because not found")
                 );
+        userValidator.validateUserIsMeetCreator(meet);
         meetMapper.update(meet, updateMeetDto);
         return meetMapper.toResponseDto(meetRepository.save(meet));
     }
@@ -84,12 +82,18 @@ public class MeetService {
                 .orElseThrow(() -> new EntityNotFoundException("Cannot cancel meet with id: "
                         + id + ", because not found")
                 );
+        userValidator.validateUserIsMeetCreator(meet);
         meet.setStatus(MeetStatus.CANCELLED);
         return meetMapper.toResponseDto(meetRepository.save(meet));
     }
 
     @Transactional
     public void deleteMeet(long id) {
-        meetRepository.deleteById(id);
+        Meet meet = meetRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cannot delete meet with id: "
+                        + id + ", because not found")
+                );
+        userValidator.validateUserIsMeetCreator(meet);
+        meetRepository.delete(meet);
     }
 }
