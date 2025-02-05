@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.exception.IntegrationException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,10 @@ public class AmazonS3Service {
     }
 
     public void deleteFile(String key) {
+        if (!s3Client.doesObjectExist(bucketName, key)) {
+            throw new EntityNotFoundException(String.format("Файл с ключом %s не найден в хранилище", key));
+        }
+
         try {
             s3Client.deleteObject(bucketName, key);
         } catch (SdkClientException exception) {
