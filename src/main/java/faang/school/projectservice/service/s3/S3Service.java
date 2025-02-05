@@ -5,8 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.handler.IntegrationException;
+import faang.school.projectservice.exception.IntegrationException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
@@ -25,7 +24,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class S3Service {
-    private static final long FILE_MAX_COUNT = 50;
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
@@ -33,8 +31,6 @@ public class S3Service {
     private final AmazonS3 s3Client;
 
     public Resource uploadFile(MultipartFile file, String folder) {
-        validateStorageSpace();
-
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
         putObjectToStorage(file, key);
 
@@ -73,12 +69,13 @@ public class S3Service {
         }
     }
 
-    private void validateStorageSpace() {
-        List<S3ObjectSummary> summary = s3Client.listObjects(bucketName).getObjectSummaries();
-        if (summary.size() >= FILE_MAX_COUNT) {
-            throw new DataValidationException(
-                    String.format("Файл не может быть добавлен в хранилище, " +
-                            "так как превышен максимальный лимит в %d файлов", FILE_MAX_COUNT));
+    public List<S3ObjectSummary> getAllObject(String folder) {
+        try {
+            return s3Client.listObjects(bucketName, folder).getObjectSummaries();
+        } catch (SdkClientException exception) {
+            String errorMessage = "Ошибка при получении файлов из хранилища";
+            log.error(errorMessage, exception);
+            throw new IntegrationException(errorMessage);
         }
     }
 }

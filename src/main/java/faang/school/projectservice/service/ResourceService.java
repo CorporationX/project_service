@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import faang.school.projectservice.dto.resource.ResourceReadDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ResourceMapper;
@@ -20,6 +21,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
+    private static final long FILE_MAX_COUNT_IN_PROJECT_GALLERY = 50;
 
     private final S3Service amazonS3Client;
     private final ProjectService projectService;
@@ -36,7 +38,8 @@ public class ResourceService {
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
         BigInteger newStorageSize = project.getStorageSize().add(fileSize);
 
-        validateStorageSize(newStorageSize, project, fileSize);
+        validateProjectStorageSize(newStorageSize, project, fileSize);
+        validateStorageSpace(folder);
 
         Resource uploadedResource = amazonS3Client.uploadFile(file, folder);
         uploadedResource.setProject(project);
@@ -75,7 +78,7 @@ public class ResourceService {
         projectRepository.save(project);
     }
 
-    private static void validateStorageSize(BigInteger newStorageSize, Project project, BigInteger fileSize) {
+    private static void validateProjectStorageSize(BigInteger newStorageSize, Project project, BigInteger fileSize) {
         if (newStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
             throw new DataValidationException(String.format(
                     "Загрузка невозможна: максимальный размер хранилища %d, размер файла %d",
@@ -86,6 +89,15 @@ public class ResourceService {
     private static void validateResource(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new DataValidationException("Загрузка невозможна: файл пустой");
+        }
+    }
+
+    private void validateStorageSpace(String folder) {
+        List<S3ObjectSummary> summary = amazonS3Client.getAllObject(folder);
+        if (summary.size() >= FILE_MAX_COUNT_IN_PROJECT_GALLERY) {
+            throw new DataValidationException(
+                    String.format("Файл не может быть добавлен в хранилище, " +
+                            "так как превышен максимальный лимит в %d файлов", FILE_MAX_COUNT_IN_PROJECT_GALLERY));
         }
     }
 }
