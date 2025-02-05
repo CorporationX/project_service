@@ -1,15 +1,23 @@
 package faang.school.projectservice.service;
 
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import faang.school.projectservice.config.S3.S3Config;
+import faang.school.projectservice.exception.ImageResizeException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,6 +26,10 @@ import java.util.List;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final ImageResizer imageResizer;
+    private final S3Config s3Config;
+    @Value("${services.s3.bucketName}")
+    private String bucketName;
 
     @Transactional
     public Project createProject(Project project, Long ownerId) {
@@ -118,4 +130,52 @@ public class ProjectService {
     private boolean isProjectVisible(Project project, Long userId) {
         return project.getVisibility() == ProjectVisibility.PUBLIC || project.getOwnerId().equals(userId);
     }
+
+    @Transactional
+    public void uploadProjectCover(Long projectId, MultipartFile file) {
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new MaxUploadSizeExceededException(file.getSize());
+        }
+
+        byte[] resizedImage = null;
+        try {
+            resizedImage = imageResizer.resizeImage(file.getBytes(), 1080, 566);
+        } catch (IOException e) {
+            throw new ImageResizeException("Failed to resize image " + file.getOriginalFilename());
+        }
+
+        String objectName = "project-" + projectId + "-cover.jpg";
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(resizedImage.length);
+        objectMetadata.setContentType(file.getContentType());
+
+        s3Config.amazonS3Client().putObject(
+                bucketName,
+                objectName,
+                new ByteArrayInputStream(resizedImage),
+                objectMetadata);
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+        project.setCoverImageId(objectName);
+        projectRepository.save(project);
+    }
+
+    @Transactional
+    public void deleteCover(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+        String objectName = project.getCoverImageId();
+
+        if (objectName != null) {
+            s3Config.amazonS3Client().deleteObject(bucketName, objectName);
+        } else {
+            throw new IllegalArgumentException("Cover image not found");
+        }
+
+        project.setCoverImageId(null);
+        projectRepository.save(project);
+    }
+
+
 }
