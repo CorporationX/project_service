@@ -15,4 +15,13 @@ public class AppConfig {
 
     @Value("${app.config.minio_bucket_name}")
     private String minioBucketName;
+
+    @Value("${app.config.minio_login}")
+    private String minioLogin;
+
+    @Value("${app.config.minio_password}")
+    private String minioPassword;
+
+    @Value("${app.config.minio_endpoint}")
+    private String minioEndpoint;
 }

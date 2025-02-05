@@ -5,12 +5,10 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +30,7 @@ public class TeamAvatarService {
     @Transactional
     public void uploadAvatar(Long teamId, MultipartFile avatar) {
         if (!avatar.getContentType().split("/")[0].equals("image")) {
-            throw new IllegalArgumentException("Отправленный файл не является картинкой");
+            throw new IllegalArgumentException("The sent file is not an image.");
         }
 
         int maxSideLength = appConfig.getMaxTeamAvatarSideLength();
@@ -77,8 +75,8 @@ public class TeamAvatarService {
         try {
             originalImage = ImageIO.read(multipartFile.getInputStream());
         } catch (IOException e) {
-            log.error("resizeImage: не получилось считать файл", e);
-            throw new IllegalArgumentException("Не получилось считать файл");
+            log.error("resizeImage: couldn't read the file", e);
+            throw new IllegalArgumentException("couldn't read the file");
         }
 
         log.info("ORIGINAL FILE SIZE {}x{}", originalImage.getWidth(), originalImage.getHeight());
@@ -104,8 +102,8 @@ public class TeamAvatarService {
             try {
                 resultStream.write(multipartFile.getBytes());
             } catch (IOException e) {
-                log.error("resizeImage: не получилось записать файл", e);
-                throw new IllegalArgumentException("Не получилось записать файл");
+                log.error("resizeImage: couldn't write the file", e);
+                throw new IllegalArgumentException("couldn't write the file");
             }
             return resultStream;
         }
@@ -114,8 +112,8 @@ public class TeamAvatarService {
         try {
             ImageIO.write(resizedImage, formatType, resultStream);
         } catch (IOException e) {
-            log.error("resizeImage: не получилось записать файл", e);
-            throw new IllegalArgumentException("Не получилось записать файл");
+            log.error("resizeImage: couldn't write the file", e);
+            throw new IllegalArgumentException("couldn't write the file");
         }
 
         log.info("RESIZED FILE SIZE {}x{}", resizedImage.getWidth(), resizedImage.getHeight());

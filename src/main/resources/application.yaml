@@ -1,8 +1,12 @@
 app:
   config:
     minio_bucket_name: "corpbucket"
+    minio_login: "user"
+    minio_password: "password"
+    minio_endpoint: "http://localhost:9000"
     max_team_avatar_side_length: 512
     max_team_avatar_size_in_mb: 5
+
 
 spring:
   datasource:
