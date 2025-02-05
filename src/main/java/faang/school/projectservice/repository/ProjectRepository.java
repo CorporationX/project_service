@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
+
+import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query(
@@ -14,6 +17,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
                     "WHERE p.ownerId = :ownerId AND p.name = :name"
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
+
+    Optional<Project> findById(Long id);
 
     @Query(nativeQuery = true, value = """
                 SELECT *
