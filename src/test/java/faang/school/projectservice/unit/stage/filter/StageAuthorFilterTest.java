@@ -19,12 +19,12 @@ public class StageAuthorFilterTest extends StageInvitationFilterTest {
 
     @Test
     public void testIsApplicable() {
-        IsApplicableCheck(authorFilter, filter.getAuthorId(), 1L);
+        isApplicableCheck(authorFilter, filter.getAuthorId(), 1L);
     }
 
     @Test
     public void testIsNotApplicable() {
-        IsNotApplicableCheck(authorFilter, filter.getAuthorId(), null);
+        isNotApplicableCheck(authorFilter, filter.getAuthorId(), null);
     }
 
     @Test

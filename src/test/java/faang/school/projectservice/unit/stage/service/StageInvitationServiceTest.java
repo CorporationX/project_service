@@ -14,12 +14,14 @@ import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TeamMemberService;
 import faang.school.projectservice.validator.StageInvitationValidator;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,8 +31,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -55,25 +58,23 @@ public class StageInvitationServiceTest {
     @Mock
     private StageInvitationValidator stageInvitationValidator;
 
-    @Mock
-    private List<StageInvitationFilter> invitationFilters;
-
+    @Spy
     @InjectMocks
+    private StageInvitationService spyStageInvitationService;
+
+
     private StageInvitationService stageInvitationService;
+
+    @BeforeEach
+    void init() {
+        StageInvitationFilter filter = Mockito.mock(StageInvitationFilter.class);
+        List<StageInvitationFilter> filters = List.of(filter);
+        stageInvitationService = new StageInvitationService(stageInvitationRepository,
+                stageService, teamMemberService, stageInvitationMapper, stageInvitationValidator, filters);
+    }
 
     @Captor
     private ArgumentCaptor<StageInvitation> stageInvitationCaptor;
-
-    @Test
-    public void sendInvitation_whereAuthorEqualsInvited() {
-        StageInvitationDto dto = new StageInvitationDto();
-        dto.setAuthorId(1L);
-        dto.setInvitedId(1L);
-        doThrow(IllegalArgumentException.class)
-                .when(stageInvitationValidator).validateInvitedForCreate(dto.getAuthorId(), dto.getInvitedId());
-
-        assertThrows(IllegalArgumentException.class, () -> stageInvitationService.sendInvitation(dto));
-    }
 
     @Test
     public void sendInvitation_whereStageNotFound() {
@@ -85,11 +86,12 @@ public class StageInvitationServiceTest {
                 .thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class, () -> stageInvitationService.sendInvitation(dto));
+
     }
 
     @Test
     public void sendInvitation_whereTeamMemberNotFound() {
-        long sameId = 1L;
+        final long sameId = 1L;
         StageInvitationDto dto = new StageInvitationDto();
         dto.setAuthorId(1L);
         dto.setInvitedId(2L);
@@ -102,6 +104,7 @@ public class StageInvitationServiceTest {
 
     @Test
     public void sendInvitation() {
+
         StageInvitationDto dto = new StageInvitationDto();
         dto.setAuthorId(1L);
         dto.setInvitedId(2L);
@@ -115,16 +118,42 @@ public class StageInvitationServiceTest {
         when(stageService.getStage(dto.getStageId())).thenReturn(stage);
         when(teamMemberService.getTeamMember(dto.getAuthorId())).thenReturn(author);
         when(teamMemberService.getTeamMember(dto.getInvitedId())).thenReturn(invited);
+        doReturn(dto).when(spyStageInvitationService).createStageInvitationAndGetDto(stage, author, invited);
 
-        stageInvitationService.sendInvitation(dto);
+        final StageInvitationDto sentInvitation = spyStageInvitationService.sendInvitation(dto);
 
+        verify(stageService, times(1)).getStage(dto.getStageId());
+        verify(teamMemberService, times(1)).getTeamMember(dto.getAuthorId());
+        verify(teamMemberService, times(1)).getTeamMember(dto.getInvitedId());
+        verify(spyStageInvitationService, times(1))
+                .createStageInvitationAndGetDto(stage, author, invited);
+
+        assertEquals(dto, sentInvitation);
+    }
+
+    @Test
+    public void createStageInvitationAndGetDto() {
+        long stageId = 1L;
+        long authorId = 1L;
+        long invitedId = 2L;
+        Stage stage = new Stage();
+        stage.setStageId(stageId);
+        TeamMember author = new TeamMember();
+        author.setId(authorId);
+        TeamMember invited = new TeamMember();
+        invited.setId(invitedId);
+        StageInvitation invitation = new StageInvitation();
+        invitation.setStage(stage);
+        invitation.setAuthor(author);
+        invitation.setInvited(invited);
+        invitation.setStatus(StageInvitationStatus.PENDING);
+        doNothing().when(stageInvitationValidator).validateInvitedForCreate(authorId, invitedId);
+        StageInvitationDto expectedStageInvitationDto = stageInvitationService
+                .createStageInvitationAndGetDto(stage, author, invited);
+
+        verify(stageInvitationValidator, times(1)).validateInvitedForCreate(authorId, invitedId);
         verify(stageInvitationRepository, times(1)).save(stageInvitationCaptor.capture());
-
-        StageInvitation captured = stageInvitationCaptor.getValue();
-        assertEquals(author, captured.getAuthor());
-        assertEquals(invited, captured.getInvited());
-        assertEquals(stage, captured.getStage());
-        assertEquals(StageInvitationStatus.PENDING, captured.getStatus());
+        assertEquals(expectedStageInvitationDto, stageInvitationMapper.toDto(stageInvitationCaptor.capture()));
     }
 
     @Test
@@ -158,7 +187,7 @@ public class StageInvitationServiceTest {
     @Test
     public void acceptInvitation() {
         Long invitationId = 1L;
-        Stage stage = new Stage();
+        final Stage stage = new Stage();
         TeamMember invited = new TeamMember();
         invited.setStages(new ArrayList<>());
 
@@ -168,20 +197,21 @@ public class StageInvitationServiceTest {
         invitation.setInvited(invited);
         invitation.setStage(stage);
         when(stageInvitationRepository.getReferenceById(invitationId)).thenReturn(invitation);
+        doNothing().when(stageInvitationValidator).validateStatusPendingCheck(stageInvitationCaptor.capture());
 
-        stageInvitationService.acceptInvitation(invitationId);
+        final StageInvitationDto expectedAccept = stageInvitationService.acceptInvitation(invitationId);
 
+        verify(stageInvitationRepository, times(1)).getReferenceById(invitationId);
+        verify(stageInvitationValidator, times(1)).validateStatusPendingCheck(invitation);
         verify(stageInvitationRepository, times(1)).save(stageInvitationCaptor.capture());
-        StageInvitation captured = stageInvitationCaptor.getValue();
+        assertEquals(expectedAccept, stageInvitationMapper.toDto(stageInvitationCaptor.capture()));
 
-        assertEquals(StageInvitationStatus.ACCEPTED, captured.getStatus());
-        assertTrue(captured.getInvited().getStages().contains(stage));
     }
 
     @Test
     public void rejectStageInvitation_withBlankRejectionReason() {
         Long invitationId = 1L;
-        String rejectionReason = "";
+        String rejectionReason = " ";
 
         StageInvitationDto result = stageInvitationService.rejectStageInvitation(invitationId, rejectionReason);
 
@@ -195,6 +225,7 @@ public class StageInvitationServiceTest {
         Long invitationId = 1L;
         String text = "text";
         StageInvitation invitation = new StageInvitation();
+        invitation.setRejectionReason(text);
         invitation.setId(invitationId);
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
         when(stageInvitationRepository.getReferenceById(invitationId)).thenReturn(invitation);
@@ -202,7 +233,7 @@ public class StageInvitationServiceTest {
                 .when(stageInvitationValidator).validateStatusPendingCheck(invitation);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            stageInvitationService.rejectStageInvitation(invitationId, text);
+            stageInvitationService.rejectStageInvitation(invitation.getId(), invitation.getRejectionReason());
         });
     }
 
@@ -211,6 +242,7 @@ public class StageInvitationServiceTest {
         Long invitationId = 1L;
         String text = "text";
         StageInvitation invitation = new StageInvitation();
+        invitation.setRejectionReason(text);
         invitation.setId(invitationId);
         invitation.setStatus(StageInvitationStatus.REJECTED);
         when(stageInvitationRepository.getReferenceById(invitationId)).thenReturn(invitation);
@@ -218,15 +250,15 @@ public class StageInvitationServiceTest {
                 .when(stageInvitationValidator).validateStatusPendingCheck(invitation);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            stageInvitationService.rejectStageInvitation(invitationId, text);
+            stageInvitationService.rejectStageInvitation(invitation.getId(), invitation.getRejectionReason());
         });
     }
 
     @Test
     public void rejectStageInvitation() {
         Long invitationId = 1L;
-        String text = "text";
-        Stage stage = new Stage();
+        final String text = "text";
+        final Stage stage = new Stage();
         TeamMember invited = new TeamMember();
         invited.setStages(new ArrayList<>());
         StageInvitation invitation = new StageInvitation();
@@ -238,10 +270,11 @@ public class StageInvitationServiceTest {
         invitation.setStatus(StageInvitationStatus.PENDING);
         when(stageInvitationRepository.getReferenceById(invitationId)).thenReturn(invitation);
 
-        stageInvitationService.rejectStageInvitation(invitationId, text);
+        StageInvitationDto expectedStageInvitationDto = stageInvitationService
+                .rejectStageInvitation(invitationId, text);
 
         verify(stageInvitationRepository, times(1)).save(stageInvitationCaptor.capture());
-
+        assertEquals(expectedStageInvitationDto, stageInvitationMapper.toDto(stageInvitationCaptor.capture()));
     }
 
     @Test

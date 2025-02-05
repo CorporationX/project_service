@@ -21,12 +21,12 @@ public abstract class StageInvitationFilterTest {
         teamMember = Mockito.mock(TeamMember.class);
     }
 
-    public void IsApplicableCheck(StageInvitationFilter invitationFilter, Object pattern, Object value) {
+    public void isApplicableCheck(StageInvitationFilter invitationFilter, Object pattern, Object value) {
         when(pattern).thenReturn(value);
         assertTrue(invitationFilter.isApplicable(filter), "Success");
     }
 
-    public void IsNotApplicableCheck(StageInvitationFilter invitationFilter, Object pattern, Object value) {
+    public void isNotApplicableCheck(StageInvitationFilter invitationFilter, Object pattern, Object value) {
         when(pattern).thenReturn(value);
         assertFalse(invitationFilter.isApplicable(filter), "Failed");
     }

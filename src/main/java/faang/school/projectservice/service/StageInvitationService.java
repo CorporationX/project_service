@@ -27,7 +27,6 @@ public class StageInvitationService {
     private final StageInvitationValidator stageInvitationValidator;
     private final List<StageInvitationFilter> invitationFilters;
 
-
     public StageInvitationDto sendInvitation(StageInvitationDto stageInvitationDto) {
         Stage stage = stageService.getStage(stageInvitationDto.getStageId());
         TeamMember author = teamMemberService.getTeamMember(stageInvitationDto.getAuthorId());
@@ -82,7 +81,8 @@ public class StageInvitationService {
         return filterInvitation(allInvitationOfInvited, filter);
     }
 
-    private List<StageInvitationDto> filterInvitation(List<StageInvitation> invitations, StageInvitationFilterDto filter) {
+    private List<StageInvitationDto> filterInvitation(List<StageInvitation> invitations,
+                                                      StageInvitationFilterDto filter) {
         Stream<StageInvitation> invitationStream = invitations.stream();
 
         return invitationFilters.stream()

@@ -21,12 +21,12 @@ public class StageStatusFilterTest extends StageInvitationFilterTest {
 
     @Test
     public void testIsApplicable() {
-        IsApplicableCheck(statusFilter, filter.getStatus(), StageInvitationStatus.ACCEPTED);
+        isApplicableCheck(statusFilter, filter.getStatus(), StageInvitationStatus.ACCEPTED);
     }
 
     @Test
     public void testIsNotApplicable() {
-        IsNotApplicableCheck(statusFilter, filter.getStatus(), null);
+        isNotApplicableCheck(statusFilter, filter.getStatus(), null);
     }
 
     @Test
