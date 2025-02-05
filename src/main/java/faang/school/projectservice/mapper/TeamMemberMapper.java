@@ -13,7 +13,7 @@ public interface TeamMemberMapper {
     @Mapping(source = "team.id", target = "teamId")
     TeamMemberDto teamMemberToTeamMemberDto(TeamMember teamMember);
 
-
+    @Mapping(target = "stages", ignore = true)
     @Mapping(source = "teamId", target = "team.id")
     TeamMember teamMemberDtoToTeamMember(TeamMemberDto teamMemberDto);
 
