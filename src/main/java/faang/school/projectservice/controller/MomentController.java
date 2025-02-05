@@ -25,7 +25,7 @@ public class MomentController {
         return momentService.createMoment(momentCreateRequestDto);
     }
 
-    @PatchMapping
+    @PatchMapping("/{id}")
     public MomentResponseDto update(@PathVariable("id") Long momentId,
                                     @RequestBody MomentUpdateRequestDto momentUpdateRequestDto) {
         log.info("Updated moment {}", momentUpdateRequestDto);

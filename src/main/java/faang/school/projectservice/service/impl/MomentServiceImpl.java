@@ -19,9 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -109,35 +107,28 @@ public class MomentServiceImpl implements MomentService {
         List<Long> addedProjectTeamMembersIds
                 = getProjectsTeamMemberIds(projects);
         List<Long> initialTeamMembersIds = initialMoment.getUserIds();
-        List<Long> resultTeamMemberIds = new ArrayList<>() {{
+        Set<Long> resultTeamMemberIds = new HashSet<>() {{
             addAll(initialTeamMembersIds);
             addAll(initialAllProjectTeamMembersIds);
             addAll(addedProjectTeamMembersIds);
             addAll(addedTeamMembersIds);
         }};
-
-        return resultTeamMemberIds.stream()
-                .distinct()
-                .sorted()
-                .toList();
+        return new ArrayList<>(resultTeamMemberIds);
     }
 
     private List<Project> getUpdatedMomentProjects(Moment initialMoment,
                                                 List<Long> addedProjectIds) {
         List<Project> initialAllProjects = initialMoment.getProjects();
         List<Project> addedProjects = getProjectsByIds(addedProjectIds);
-        List<Project> resultProjects = new ArrayList<>() {{
+        Set<Project> resultProjects = new HashSet<>() {{
             addAll(initialAllProjects);
             addAll(addedProjects);
         }};
-        return resultProjects.stream()
-                .distinct()
-                .sorted()
-                .toList();
+        return new ArrayList<>(resultProjects);
     }
 
-    private List<MomentResponseDto> getFilteredMoments(Stream<Moment> moments, MomentFilterDto momentFilterDto) {
-
+    private List<MomentResponseDto> getFilteredMoments(Stream<Moment> moments,
+                                                       MomentFilterDto momentFilterDto) {
         LocalDateTime dateFrom = Optional.ofNullable(momentFilterDto.dateFrom()).orElse(LocalDateTime.MIN);
         LocalDateTime dateTo = Optional.ofNullable(momentFilterDto.dateTo()).orElse(LocalDateTime.MAX);
         if (dateFrom.isAfter(dateTo) && !dateFrom.isEqual(dateTo)) {
