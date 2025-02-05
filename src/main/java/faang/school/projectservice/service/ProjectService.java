@@ -9,7 +9,7 @@ import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.s3.AmazonS3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import faang.school.projectservice.validator.resource.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,7 +28,7 @@ public class ProjectService {
 
     private final ResourceValidator resourceValidator;
     private final ProjectValidator projectValidator;
-    private final S3Service amazonS3Client;
+    private final AmazonS3Service amazonS3Client;
     private final ProjectRepository projectRepository;
     private final ResourceMapper resourceMapper;
     private final ResourceRepository resourceRepository;

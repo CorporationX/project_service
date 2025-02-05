@@ -16,7 +16,7 @@ import java.io.IOException;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class S3Service {
+public class AmazonS3Service {
 
     @Value("${services.s3.bucketName}")
     private String bucketName;

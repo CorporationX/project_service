@@ -4,7 +4,7 @@ import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.s3.AmazonS3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import faang.school.projectservice.validator.resource.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,7 +37,7 @@ class ProjectServiceTest {
     private ProjectValidator projectValidator;
 
     @Mock
-    private S3Service amazonS3Client;
+    private AmazonS3Service amazonS3Client;
 
     @Spy
     private ResourceMapper resourceMapper;
