@@ -62,7 +62,7 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(FileSizeLimitExceededException.class)
-    public ErrorResponse handleConstraintViolationException(FileSizeLimitExceededException e) {
+    public ErrorResponse handleFileSizeLimitExceededException(FileSizeLimitExceededException e) {
         return new ErrorResponse(e.getMessage());
     }
 }

@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.resource.ResourceReadDto;
-import faang.school.projectservice.service.ResourceService;
+import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,25 +15,25 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/resources")
+@RequestMapping("/projects")
 @RequiredArgsConstructor
-public class ResourceController {
+public class ProjectController {
 
-    private final ResourceService resourceService;
+    private final ProjectService projectService;
 
-    @PostMapping("/{projectId}")
+    @PostMapping("/{projectId}/resources")
     public ResourceReadDto uploadResource(@PathVariable long projectId, @RequestBody MultipartFile file) {
-        return resourceService.uploadResource(projectId, file);
+        return projectService.uploadResourceToGallery(projectId, file);
     }
 
-    @GetMapping("/{projectId}/all")
+    @GetMapping("/{projectId}/resources/list")
     public List<ResourceReadDto> getAllResources(@PathVariable long projectId) {
-        return resourceService.getAllProjectResources(projectId);
+        return projectService.getAllProjectResources(projectId);
     }
 
-    @DeleteMapping("/{projectId}/all/{resourceId}")
+    @DeleteMapping("/{projectId}/resources/list/{resourceId}")
     public String deleteResource(@PathVariable long projectId, @PathVariable long resourceId) {
-        resourceService.deleteResource(projectId, resourceId);
+        projectService.deleteResourceFromGallery(projectId, resourceId);
         return String.format("Ресурс с id %d удален из проекта с id %d", resourceId, projectId);
     }
 }

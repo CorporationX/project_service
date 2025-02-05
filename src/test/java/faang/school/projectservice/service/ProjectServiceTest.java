@@ -1,12 +1,18 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.ResourceRepository;
+import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.validator.project.ProjectValidator;
+import faang.school.projectservice.validator.resource.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -24,15 +30,26 @@ class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
+    @Mock
+    private ResourceValidator resourceValidator;
+
+    @Mock
+    private ProjectValidator projectValidator;
+
+    @Mock
+    private S3Service amazonS3Client;
+
+    @Spy
+    private ResourceMapper resourceMapper;
+
+    @Mock
+    private ResourceRepository resourceRepository;
+
+    @InjectMocks
     private ProjectService projectService;
 
     private final Long projectId = 1L;
     private final Project project = Project.builder().id(projectId).build();
-
-    @BeforeEach
-    void setUp() {
-        projectService = new ProjectService(projectRepository);
-    }
 
     @Test
     public void shouldSuccessGetProject() {
