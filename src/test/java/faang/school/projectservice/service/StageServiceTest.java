@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.ResourceNotFoundException;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
@@ -12,6 +13,7 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.util.StageDataUtilTest;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,7 +56,7 @@ public class StageServiceTest {
 
         when(projectRepository.findById(stageDataUtilTest.getStageDto().getProjectId()))
                 .thenReturn(Optional.empty());
-        assertThrows(DataValidationException.class,
+        assertThrows(EntityNotFoundException.class,
                 () -> stageService.createStage(stageDataUtilTest.getStageDto()));
         Mockito.verify(projectRepository, Mockito.times(1))
                 .findById(anyLong());
@@ -87,7 +89,7 @@ public class StageServiceTest {
         when(projectRepository.existsByOwnerIdAndName(anyLong(), anyString()))
                 .thenReturn(false);
 
-        assertThrows(DataValidationException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> stageService.createStage(stageDataUtilTest.getStageDto()));
 
         Mockito.verify(projectRepository, Mockito.times(1))
@@ -147,7 +149,7 @@ public class StageServiceTest {
                 .thenReturn(stageDataUtilTest.getStageDto());
 
         StageFilterDto filter = stageDataUtilTest.getStageFilterDto();
-        filter.setStatus(null);
+        filter.setStatus("");
         List<StageDto> stages = stageService.getAllStagesByFilter(filter);
 
         assert (stages.size() == 1);
