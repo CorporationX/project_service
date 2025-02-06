@@ -36,14 +36,14 @@ public class ProjectController {
 
     @PatchMapping("/{projectId}")
     public ProjectReadDto updateProject(
-            ProjectUpdateDto projectUpdateDto,
+            @Valid @RequestBody ProjectUpdateDto projectUpdateDto,
             @PathVariable long projectId) {
         return projectManagementService.updateProject(projectUpdateDto, projectId, userContext.getUserId());
     }
 
     @GetMapping
     public List<ProjectReadDto> getAllProjectsWithFilters(
-            @Valid @RequestBody ProjectFilterDto filterDto ) {
+            ProjectFilterDto filterDto ) {
         return projectManagementService.getAllProjects(filterDto, userContext.getUserId());
     }
 
