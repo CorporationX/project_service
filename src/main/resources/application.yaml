@@ -40,6 +40,9 @@ jira:
   username: admin
   password: password
 
+domain:
+  base-path: /api/v1
+
 services:
   s3:
     endpoint: http://localhost:9000
