@@ -1,11 +1,12 @@
-
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.*;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProjectServiceTest {
+public class ProjectServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
@@ -34,17 +35,18 @@ class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
 
-    private Project crearteProject;
+    private Project createProject;
     private Project updateProject;
     private ProjectCreateRequestDto createRequestDto;
     private ProjectUpdateRequestDto updateRequestDto;
+    private Project project;
 
     @BeforeEach
     void setUp() {
-        crearteProject = new Project();
-        crearteProject.setOwnerId(100L);
-        crearteProject.setName("Test Project");
-        crearteProject.setStatus(ProjectStatus.CREATED);
+        createProject = new Project();
+        createProject.setOwnerId(100L);
+        createProject.setName("Test Project");
+        createProject.setStatus(ProjectStatus.CREATED);
 
         updateProject = new Project();
         updateProject.setId(1L);
@@ -57,19 +59,22 @@ class ProjectServiceTest {
 
         updateRequestDto = new ProjectUpdateRequestDto();
         updateRequestDto.setId(1L);
+
+        project = new Project();
+        project.setId(1L);
     }
 
     @Test
     void createProject_ShouldSaveProjectWhenValidRequest() {
         when(projectRepository.existsByOwnerIdAndName(100L, "Test Project")).thenReturn(false);
 
-        when(projectRepository.save(crearteProject)).thenReturn(crearteProject);
+        when(projectRepository.save(createProject)).thenReturn(createProject);
 
         ProjectCreateResponseDto result = projectService.createProject(createRequestDto);
 
 
-        assertEquals(projectMapper.toCreateResponseDto(crearteProject), result);
-        verify(projectRepository).save(crearteProject);
+        assertEquals(projectMapper.toCreateResponseDto(createProject), result);
+        verify(projectRepository).save(createProject);
     }
 
     @Test
@@ -106,7 +111,7 @@ class ProjectServiceTest {
         Project privateProject = new Project();
         privateProject.setVisibility(ProjectVisibility.PRIVATE);
         privateProject.setOwnerId(userId);
-        List<Project> projects = List.of(crearteProject, privateProject);
+        List<Project> projects = List.of(createProject, privateProject);
         ProjectFilterDto filterDto = new ProjectFilterDto();
 
         when(projectRepository.findAll()).thenReturn(projects);
@@ -122,7 +127,7 @@ class ProjectServiceTest {
         Project privateProject = new Project();
         privateProject.setVisibility(ProjectVisibility.PRIVATE);
         privateProject.setOwnerId(101L);
-        List<Project> projects = List.of(crearteProject, privateProject);
+        List<Project> projects = List.of(createProject, privateProject);
         Long userId = 100L;
         ProjectFilterDto filterDto = new ProjectFilterDto();
 
@@ -132,15 +137,17 @@ class ProjectServiceTest {
 
         assertEquals(1, result.size());
         verify(projectRepository).findAll();
+        project = new Project();
+        project.setId(1L);
     }
 
     @Test
     void getProjectDtoById_ShouldReturnProjectWhenExists() {
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(crearteProject));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(createProject));
 
         ProjectResponseDto result = projectService.getProjectDtoById(1L);
 
-        assertEquals(projectMapper.toResponseDto(crearteProject), result);
+        assertEquals(projectMapper.toResponseDto(createProject), result);
     }
 
     @Test
@@ -150,6 +157,30 @@ class ProjectServiceTest {
         NoSuchElementException noSuchElementException = assertThrows(NoSuchElementException.class,
                 () -> projectService.getProjectDtoById(1L));
         assertEquals("Project not found", noSuchElementException.getMessage());
+    }
+
+    @Test
+    void findEntityById_ShouldReturnProject() {
+        // Given
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        // When
+        Project foundProject = projectService.findEntityById(1L);
+
+        // Then
+        assertNotNull(foundProject);
+        assertEquals(1L, foundProject.getId());
+        verify(projectRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void findEntityById_ShouldThrowExceptionWhenProjectNotFound() {
+        // Given
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(EntityNotFoundException.class, () -> projectService.findEntityById(1L));
+        verify(projectRepository, times(1)).findById(1L);
     }
 
     @Test
