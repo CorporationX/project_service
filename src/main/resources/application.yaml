@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: project-service
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres

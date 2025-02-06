@@ -16,7 +16,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.repository.TaskRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -84,7 +83,7 @@ public class StageServiceImpl implements StageService {
                 .filter(role -> !role.isEmpty())
                 .ifPresent(role -> {
                     if (!isValidateRole(role)) {
-                        throw new DataValidationException("Invalid role " + role);
+                        throw new DataValidationException("Invalid role: " + role);
                     }
                 });
     }
@@ -93,7 +92,7 @@ public class StageServiceImpl implements StageService {
         filter.getStatus().filter(status -> !status.isEmpty())
                 .ifPresent(status -> {
                     if (!isValidStatus(status)) {
-                        throw new DataValidationException("Invalid status " + status);
+                        throw new DataValidationException("Invalid status: " + status);
                     }
                 });
     }
@@ -131,13 +130,13 @@ public class StageServiceImpl implements StageService {
         return stageDto.getStageRoles().stream()
                 .map(stageRolesDto -> stageRolesDto.getId())
                 .map(stageRolesId -> stageRolesRepository.findById(stageRolesId)
-                        .orElseThrow(() -> new EntityNotFoundException(String.format("StageRoles with id %d not found", stageRolesId))))
+                        .orElseThrow(() -> new ResourceNotFoundException(String.format("StageRoles with id %d not found", stageRolesId))))
                 .toList();
     }
 
     private Project getActiveProject(StageDto stageDto) {
         Project project = projectRepository.findById(stageDto.getProjectId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Project with id %d not found", stageDto.getProjectId())));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Project with id %d not found", stageDto.getProjectId())));
         if (INVALID_STATUSES.contains(project.getStatus())) {
             throw new DataValidationException(String.format("Project with id %d is in an invalid status:%s", stageDto.getProjectId(), project.getStatus()));
         }
