@@ -13,6 +13,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -26,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @Testcontainers
 public class AppContextTest {
-    private static final long WAITING_TIME = 1000L;
-
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -44,16 +43,11 @@ public class AppContextTest {
     @DynamicPropertySource
     static void postgresqlProperties(DynamicPropertyRegistry registry) {
         POSTGRESQL_CONTAINER.start();
+        POSTGRESQL_CONTAINER.waitingFor(Wait.forListeningPort());
 
         registry.add("spring.datasource.url", POSTGRESQL_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRESQL_CONTAINER::getUsername);
         registry.add("spring.datasource.password", POSTGRESQL_CONTAINER::getPassword);
-
-        try {
-            Thread.sleep(WAITING_TIME);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Test
