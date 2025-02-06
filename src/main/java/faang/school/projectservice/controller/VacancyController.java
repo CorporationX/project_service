@@ -8,7 +8,10 @@ import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -18,24 +21,28 @@ import java.util.List;
 public class VacancyController {
     private final VacancyService vacancyService;
 
-
+    @PostMapping("/vacancies")
     public CreateVacancyResponse createVacancy(CreateVacancyRequest createRequest) {
         return vacancyService.create(createRequest);
     }
 
-    public UpdateVacancyResponse updateVacancy(UpdateVacancyRequest updateRequest) {
+    @PostMapping("/vacancies/{id}")
+    public UpdateVacancyResponse updateVacancy(@PathVariable long id, UpdateVacancyRequest updateRequest) {
         return vacancyService.update(updateRequest);
     }
 
-    public void deleteVacancy(long vacancyId) {
-        vacancyService.delete(vacancyId);
+    @DeleteMapping("/vacancies/{id}")
+    public void deleteVacancy(@PathVariable long id) {
+        vacancyService.delete(id);
     }
 
-    public GetVacancyResponse getVacancy(long vacancyId) {
-        return vacancyService.getVacancyById(vacancyId);
+    @GetMapping("/vacancies/{id}")
+    public GetVacancyResponse getVacancy(long id) {
+        return vacancyService.getVacancyById(id);
     }
 
-    public List<GetVacancyResponse> getAllVacancy(VacancyFilterDto filters) {
+    @GetMapping("/vacancies")
+    public List<GetVacancyResponse> getAllVacancies(VacancyFilterDto filters) {
         return vacancyService.getAllVacancies(filters);
     }
 }
