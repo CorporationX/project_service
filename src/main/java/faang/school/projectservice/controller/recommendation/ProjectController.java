@@ -36,7 +36,7 @@ public class ProjectController {
 
     @PatchMapping("/{projectId}")
     public ProjectReadDto updateProject(
-            ProjectUpdateDto projectUpdateDto,
+            @Valid @RequestBody ProjectUpdateDto projectUpdateDto,
             @PathVariable long projectId) {
         return projectManagementService.updateProject(projectUpdateDto, projectId, userContext.getUserId());
     }
