@@ -19,7 +19,6 @@ import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.service.filter.donation.CurrencyFilter;
 import faang.school.projectservice.service.filter.donation.DonationFilter;
-import faang.school.projectservice.util.RandomGenerator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,8 +44,6 @@ public class DonationServiceTest {
     private static List<Donation> donationList;
     @Mock
     private UserServiceClient userServiceClient;
-    @Mock
-    private RandomGenerator randomGenerator;
     @Spy
     private DonationMapperImpl donationMapper;
     @Mock
@@ -162,13 +159,13 @@ public class DonationServiceTest {
                 .amount(new BigDecimal(1000))
                 .build();
 
-        when(randomGenerator.getRandomNumber(1000L, 100000L)).thenReturn(123L);
+        when(donationService.getRandomNumber(1000L, 100000L)).thenReturn(123L);
         when(paymentServiceClient.sendPayment(paymentRequest)).thenReturn(paymentResponse);
 
         PaymentResponse result = donationService.paymentToDonate(donation);
 
         assertEquals(result.amount(), paymentRequest.amount());
-        assertEquals(randomGenerator.getRandomNumber(1000L, 100000L), paymentRequest.paymentNumber());
+        assertEquals(donationService.getRandomNumber(1000L, 100000L), paymentRequest.paymentNumber());
         verify(paymentServiceClient, times(1)).sendPayment(paymentRequest);
 
     }
@@ -184,7 +181,7 @@ public class DonationServiceTest {
                 .amount(new BigDecimal(1000))
                 .build();
 
-        when(randomGenerator.getRandomNumber(1000L, 100000L)).thenReturn(123L);
+        when(donationService.getRandomNumber(1000L, 100000L)).thenReturn(123L);
         when(paymentServiceClient.sendPayment(paymentRequest)).thenThrow(new RuntimeException());
 
         PaymentServiceConnectException exception = assertThrows(PaymentServiceConnectException.class, () -> {
@@ -266,6 +263,5 @@ public class DonationServiceTest {
 
         assertEquals("Payment Failed !", exception.getMessage());
     }
-
 
 }
