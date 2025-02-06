@@ -59,17 +59,7 @@ public class GoogleCalendarObserver {
             throw new RuntimeException("Google Event not updated. EventID is null");
         }
 
-        EventDateTime start = new EventDateTime()
-                .setDateTime(convertToEventDateTime(meet.getStartsAt()))
-                .setTimeZone(zoneId.getId());
-        EventDateTime end = new EventDateTime()
-                .setDateTime(convertToEventDateTime(meet.getStartsAt().plusHours(1)))
-                .setTimeZone(zoneId.getId());
-        Event event = new Event()
-                .setSummary(meet.getTitle())
-                .setDescription(meet.getDescription())
-                .setStart(start)
-                .setEnd(end);
+        Event event = createEvent(meet);
 
         try {
             event = googleCalendar.events().update(calendarId, meet.getGoogleEventId(), event).execute();

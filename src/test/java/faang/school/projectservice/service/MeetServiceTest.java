@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.meet.MeetCreateRequest;
 import faang.school.projectservice.dto.meet.MeetFilterRequest;
 import faang.school.projectservice.dto.meet.MeetResponse;
@@ -12,6 +11,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MeetRepository;
 import faang.school.projectservice.service.filter.meet.MeetFilter;
 import faang.school.projectservice.service.meet.MeetService;
+import faang.school.projectservice.service.meet.publisher.MeetEventPublisher;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -54,7 +55,7 @@ class MeetServiceTest {
     private MeetRepository meetRepository;
 
     @Mock
-    private UserServiceClient userServiceClient;
+    private MeetEventPublisher meetEventPublisher;
 
     @Spy
     private List<MeetFilter> meetFilters = new ArrayList<>();
@@ -170,7 +171,8 @@ class MeetServiceTest {
     void deleteMeet_Success() {
         long meetId = 100;
         long userId = 1;
-        when(meetRepository.existsById(meetId)).thenReturn(true);
+        doNothing().when(userValidator).validateUser(userId);
+        when(meetRepository.findById(meetId)).thenReturn(Optional.of(new Meet()));
         when(meetRepository.isUserOwnerMeet(meetId, userId)).thenReturn(true);
 
         meetService.deleteMeet(meetId, userId);
@@ -181,9 +183,13 @@ class MeetServiceTest {
     @Test
     void deleteMeet_NotFoundThrowsException() {
         long meetId = 999;
-        when(meetRepository.existsById(meetId)).thenReturn(false);
+        long userId = 1;
 
-        assertThrows(EntityNotFoundException.class, () -> meetService.deleteMeet(meetId, 1L));
+        doNothing().when(userValidator).validateUser(userId);
+        when(meetRepository.findById(meetId)).thenReturn(Optional.empty());
+        when(meetRepository.isUserOwnerMeet(meetId, userId)).thenReturn(true);
+
+        assertThrows(EntityNotFoundException.class, () -> meetService.deleteMeet(meetId, userId));
         verify(meetRepository, never()).deleteById(any());
     }
 
@@ -191,7 +197,7 @@ class MeetServiceTest {
     void deleteMeetNotOwnerThrowsException() {
         long meetId = 100;
         long userId = 1;
-        when(meetRepository.existsById(meetId)).thenReturn(true);
+        doNothing().when(userValidator).validateUser(userId);
         when(meetRepository.isUserOwnerMeet(meetId, userId)).thenReturn(false);
 
         assertThrows(MeetingOwnershipRequiredException.class, () -> meetService.deleteMeet(meetId, userId));

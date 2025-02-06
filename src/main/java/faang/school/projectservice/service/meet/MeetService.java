@@ -55,8 +55,6 @@ public class MeetService {
         Meet meet = getMeet(meetUpdateRequest.meetId());
         if (!Objects.equals(meetUpdateRequest.userId(), meet.getCreatorId())) {
             throw new MeetingOwnershipRequiredException("Изменять встречу может только владелец");
-        if (!Objects.equals(meetUpdateRequest.userId(), meet.getCreatorId())) {
-            throw new IllegalArgumentException("Изменять встречу может только владелец");
         }
 
         meetMapper.updateMeet(meetUpdateRequest, meet);
@@ -94,6 +92,7 @@ public class MeetService {
         return meets.map(meetMapper::toMeetResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MeetResponse> getMeetsByProjectId(Long projectId) {
         projectValidator.validateProject(projectId);
         Stream<Meet> meets = meetRepository.findByProjectId(projectId);
