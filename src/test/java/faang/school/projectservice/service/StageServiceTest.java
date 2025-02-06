@@ -13,7 +13,6 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.util.StageDataUtilTest;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,7 +55,7 @@ public class StageServiceTest {
 
         when(projectRepository.findById(stageDataUtilTest.getStageDto().getProjectId()))
                 .thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> stageService.createStage(stageDataUtilTest.getStageDto()));
         Mockito.verify(projectRepository, Mockito.times(1))
                 .findById(anyLong());
