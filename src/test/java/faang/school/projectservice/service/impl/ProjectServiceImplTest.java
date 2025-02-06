@@ -65,32 +65,7 @@ class ProjectServiceImplTest {
     void tearDown() {
     }
 
-    @Test
-    @DisplayName("Test if user is in project")
-    void testIsUserInProject() {
-        long userId = 1L;
-        long projectId = 222L;
-        Mockito.when(projectRepositoryMock.findById(projectId)).thenReturn(Optional.ofNullable(project));
-        Assertions.assertTrue(projectService.isUserInProject(userId, projectId));
-        userId = 33L;
-        Assertions.assertFalse(projectService.isUserInProject(userId, projectId));
-    }
 
-    @Test
-    @DisplayName("Test is project public or not")
-    void testIsProjectPublic() {
-        long projectId = 1010L;
-        long privateProjectId = 1011L;
-        Project privateProject = Project.builder()
-                .id(1011L)
-                .name("test project 11")
-                .visibility(ProjectVisibility.PRIVATE)
-                .build();
-        Mockito.when(projectRepositoryMock.findById(projectId)).thenReturn(Optional.ofNullable(project));
-        Assertions.assertTrue(projectService.isProjectPublic(projectId));
-        Mockito.when(projectRepositoryMock.findById(privateProjectId)).thenReturn(Optional.ofNullable(privateProject));
-        Assertions.assertFalse(projectService.isProjectPublic(privateProjectId));
-    }
 
     @Test
     @DisplayName("Test get project resource Ids")

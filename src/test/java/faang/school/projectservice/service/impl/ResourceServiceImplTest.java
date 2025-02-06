@@ -15,14 +15,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceServiceImplTest {
     @Mock
     private ProjectService projectServiceMock;
+    @Mock
+    private ProjectValidator projectValidatorMock;
     @Mock
     private ResourceValidator resourceValidatorMock;
     @Spy
@@ -37,7 +42,7 @@ class ResourceServiceImplTest {
     private Resource resource;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
 
         Project project = Project.builder()
                 .id(222L)
@@ -49,6 +54,15 @@ class ResourceServiceImplTest {
                 .id(10000L)
                 .project(project)
                 .build();
+
+        ClassPathResource resource = new ClassPathResource("files/ComeHere.jpg");
+        file = new MockMultipartFile(
+                "file",
+                resource.getFilename(),
+                "text/csv",
+                resource.getInputStream()
+        );
+
     }
 
     @AfterEach
@@ -60,12 +74,13 @@ class ResourceServiceImplTest {
     void addResource() {
         Long userId = 1L;
         Long projectId = 222L;
-        Mockito.when(s3Service.uploadFile(file, "project_" + projectId)).thenReturn(resource);
+        //Mockito.when(s3Service.uploadFile(file, "project_" + projectId)).thenReturn("someFileKey");
         resourceService.addResource(userId, projectId, file);
-        Mockito.verify(s3Service, Mockito.times(1))
-                .uploadFile(file, "project_" + projectId);
         Mockito.verify(resourceRepository, Mockito.times(1))
-                .save(resource);
+                .save(Mockito.any());
+        Mockito.verify(s3Service, Mockito.times(1))
+                .uploadFile(Mockito.any(), Mockito.anyString());
+
     }
 
     @Test

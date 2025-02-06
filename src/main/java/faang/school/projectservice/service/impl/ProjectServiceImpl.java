@@ -17,24 +17,6 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
 
     @Override
-    public boolean isUserInProject(Long userId, Long projectId) {
-        Project project = getProject(projectId);
-        List<Long> projectUserIds = project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .map(TeamMember::getUserId)
-                .distinct()
-                .sorted()
-                .toList();
-        return projectUserIds.contains(userId);
-    }
-
-    @Override
-    public boolean isProjectPublic(Long projectId) {
-        Project project = getProject(projectId);
-        return ProjectVisibility.PUBLIC.equals(project.getVisibility());
-    }
-
-    @Override
     public List<Long> getProjectResourceIds(Long projectId) {
         Project project = getProject(projectId);
         return project.getResources().stream()
@@ -44,7 +26,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public Project getProject(Long projectId) {
-        return projectRepository.findById(projectId).orElseThrow();
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Not found project with Id = " + projectId));
     }
 
 }

@@ -32,10 +32,15 @@ spring:
 
 server:
   port: 8082
+  servlet:
+    context-path: /api/v1
 
 logging:
   level:
     root: info
+
+gallery:
+  max-files: 50
 
 calculations_messages_processing:
   enabled: true

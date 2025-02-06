@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceResponseDto;
 import faang.school.projectservice.service.ResourceService;
 import org.junit.jupiter.api.AfterEach;
@@ -21,6 +22,8 @@ class ResourceControllerTest {
     @InjectMocks
     private ResourceController resourceController;
 
+    @Mock
+    private UserContext userContext;
     private MultipartFile file;
     private ResourceResponseDto resourceResponseDto;
     //ResponseEntity<byte[]> someFile;
@@ -54,7 +57,8 @@ class ResourceControllerTest {
         Long userId = 1L;
         Long projectId = 111L;
         Mockito.when(resourceService.addResource(userId, projectId, file)).thenReturn(resourceResponseDto);
-        resourceController.addResource(userId, projectId, file);
+        Mockito.when(userContext.getUserId()).thenReturn(userId);
+        resourceController.addResource(projectId, file);
         Mockito.verify(resourceService, Mockito.times(1))
                 .addResource(userId, projectId, file);
     }
