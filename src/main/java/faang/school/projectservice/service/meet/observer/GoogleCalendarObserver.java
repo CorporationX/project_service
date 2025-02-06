@@ -11,6 +11,7 @@ import faang.school.projectservice.service.meet.event.MeetDeleteEvent;
 import faang.school.projectservice.service.meet.event.MeetUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -28,10 +29,13 @@ import java.time.ZonedDateTime;
 @Lazy
 public class GoogleCalendarObserver {
 
+    @Value("${google.calendar.settings.calendarId}")
+    private String calendarId;
+
+    @Value("${google.calendar.settings.zone}")
+    private String zoneId;
+
     private final Calendar googleCalendar;
-    private final ZoneId zoneId = ZoneId.of("Europe/Moscow");
-    private final String calendarId = "fcc4660e6d7a24a8ef8ee0f841f3e0acf298d0b1e7c6b92a8bc0c5c3bc5f2a97"
-            + "@group.calendar.google.com";
     private final MeetRepository meetRepository;
 
     @EventListener
@@ -90,18 +94,20 @@ public class GoogleCalendarObserver {
     }
 
     private DateTime convertToEventDateTime(LocalDateTime dateTime) {
-        ZonedDateTime zonedDateTime = dateTime.atZone(zoneId);
+        ZoneId zone = ZoneId.of(zoneId);
+        ZonedDateTime zonedDateTime = dateTime.atZone(zone);
         return new DateTime(zonedDateTime.toInstant().toEpochMilli());
     }
 
     private Event createEvent(Meet meet) {
+        ZoneId zone = ZoneId.of(zoneId);
         EventDateTime start = new EventDateTime()
                 .setDateTime(convertToEventDateTime(meet.getStartsAt()))
-                .setTimeZone(zoneId.getId());
+                .setTimeZone(zone.getId());
 
         EventDateTime end = new EventDateTime()
                 .setDateTime(convertToEventDateTime(meet.getStartsAt().plusHours(1)))
-                .setTimeZone(zoneId.getId());
+                .setTimeZone(zone.getId());
 
         return new Event()
                 .setSummary(meet.getTitle())

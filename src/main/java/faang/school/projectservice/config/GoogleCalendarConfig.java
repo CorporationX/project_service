@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,12 +39,19 @@ public class GoogleCalendarConfig {
     private String tokens;
 
     @Bean
-    public Calendar googleCalendar() throws GeneralSecurityException, IOException {
-        NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
-        Credential credentials = getCredentials(transport);
-        return new Calendar.Builder(transport, jsonFactory, credentials)
-                .setApplicationName(applicationName)
-                .build();
+    public Calendar googleCalendar() {
+        NetHttpTransport transport;
+        Credential credentials;
+        try {
+            transport = GoogleNetHttpTransport.newTrustedTransport();
+            credentials = getCredentials(transport);
+            return new Calendar.Builder(transport, jsonFactory, credentials)
+                    .setApplicationName(applicationName)
+                    .build();
+        } catch (Exception e) {
+            log.error("Ошибка конфигурирования календаря {}", e.getMessage());
+            throw new RuntimeException("Ошибка конфигурирования календаря {}");
+        }
     }
 
     private Credential getCredentials(NetHttpTransport transport) throws IOException {
