@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    jacoco
 }
 
 group = "faang.school"
@@ -66,6 +67,37 @@ dependencies {
      */
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
+}
+
+// JACOCO
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+val includedDirectories = fileTree("build/classes/java/main") {
+    include("faang/school/projectservice/controller/**")
+    include("faang/school/projectservice/service/**")
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    classDirectories.setFrom(includedDirectories)
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.5".toBigDecimal()
+            }
+        }
+    }
+    classDirectories.setFrom(includedDirectories)
+}
+
+tasks.named("check") {
+    dependsOn(tasks.named("jacocoTestCoverageVerification"))
 }
 
 tasks.withType<Test> {
