@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.donation.DonationFilter;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.spetification.DonationSpecification;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Campaign;
@@ -25,7 +26,7 @@ public class DonationService {
     private final DonationRepository donationRepository;
     private final DonationMapper donationMapper;
     private final PaymentServiceClient paymentServiceClient;
-    private final CampaignService campaignService;
+    private final CampaignRepository campaignRepository;
     private final UserService userService;
     private final DonationSpecification donationSpecification;
 
@@ -57,19 +58,17 @@ public class DonationService {
     }
 
     private PaymentRequest mapDonationToPaymentRequest(DonationDto dto) {
-        Campaign campaign = campaignService.findById(dto.campaignId());
-        validCampaignStatus(campaign);
+        Campaign campaign = campaignRepository.findById(dto.campaignId())
+                .orElseThrow(() -> new EntityNotFoundException("Компания с ID < " + dto.campaignId() + " > не найдена"));
+
+        if (campaign.getStatus() != CampaignStatus.ACTIVE) {
+            throw new BusinessException("Ошибка статуса компании " + campaign.getStatus());
+        }
         return PaymentRequest.builder()
                 .paymentNumber(dto.paymentNumber())
                 .amount(dto.amount())
                 .paymentCurrency(campaign.getCurrency())
                 .targetCurrency(dto.currency())
                 .build();
-    }
-
-    private void validCampaignStatus(Campaign campaign) {
-        if (campaign.getStatus() != CampaignStatus.ACTIVE) {
-            throw new BusinessException("Ошибка статуса компании " + campaign.getStatus());
-        }
     }
 }
