@@ -50,7 +50,7 @@ public class GoogleCalendarConfig {
                     .build();
         } catch (Exception e) {
             log.error("Ошибка конфигурирования календаря {}", e.getMessage());
-            throw new RuntimeException("Ошибка конфигурирования календаря {}");
+            throw new RuntimeException("Ошибка конфигурирования календаря");
         }
     }
 
