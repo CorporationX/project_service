@@ -11,6 +11,7 @@ import faang.school.projectservice.service.meet.event.MeetDeleteEvent;
 import faang.school.projectservice.service.meet.event.MeetUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,6 +25,7 @@ import java.time.ZonedDateTime;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Lazy
 public class GoogleCalendarObserver {
 
     private final Calendar googleCalendar;

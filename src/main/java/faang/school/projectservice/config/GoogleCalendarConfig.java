@@ -12,12 +12,12 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,6 +25,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Configuration
 public class GoogleCalendarConfig {
 
@@ -42,8 +43,7 @@ public class GoogleCalendarConfig {
     public Calendar googleCalendar() throws GeneralSecurityException, IOException {
         NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         Credential credentials = getCredentials(transport);
-        return new Calendar.Builder(
-                transport, jsonFactory, credentials)
+        return new Calendar.Builder(transport, jsonFactory, credentials)
                 .setApplicationName(applicationName)
                 .build();
     }
@@ -51,7 +51,8 @@ public class GoogleCalendarConfig {
     private Credential getCredentials(NetHttpTransport transport) throws IOException {
         InputStream in = GoogleCalendarConfig.class.getResourceAsStream(credentialsFilePath);
         if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + credentialsFilePath);
+            log.error("Google Credentials Resource not found: {}", credentialsFilePath);
+            return null;
         }
 
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(in));
