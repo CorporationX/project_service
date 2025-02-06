@@ -17,22 +17,22 @@ import java.util.List;
 public class InternshipController {
     private final InternshipService internshipService;
 
-    @PostMapping()
+    @PostMapping
     public InternshipCreateDto createInternship(@Valid @RequestBody InternshipCreateDto internshipCreateDto) {
         return internshipService.create(internshipCreateDto);
     }
 
-    @PutMapping()
+    @PutMapping
     public InternshipCreateDto updateInternship( @Valid @RequestBody InternshipUpdateDto internshipUpdateDto) {
         return internshipService.updateInternship(internshipUpdateDto);
     }
 
-    @GetMapping("/internship-by-id/{id}")
+    @GetMapping("/{id}")
     public InternshipCreateDto getInternship(@PathVariable("id") long id ) {
         return internshipService.getInternship(id);
     }
 
-    @GetMapping("/internship-by-filter")
+    @GetMapping
     public List<InternshipCreateDto> getInternshipByFilter(@RequestBody InternshipFilterDto filter) {
         return internshipService.getInternshipByFilter(filter);
     }

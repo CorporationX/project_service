@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class InternshipValidator {
-    private static final long MAX_DURATION = 92;
+    private static final long INTERNSHIP_MAX_DURATION_IN_DAYS = 92;
 
     public void internshipCreateValidate(Internship internship) {
         internshipDateValidation(internship.getStartDate(), internship.getEndDate());
@@ -63,8 +63,8 @@ public class InternshipValidator {
     }
 
     public void internshipDateValidation(LocalDateTime startDate, LocalDateTime endDate) {
-        if (ChronoUnit.DAYS.between(startDate, endDate) > MAX_DURATION) {
-            throw new BusinessException("Стажировка длится слишком долго!!!.\nМаксимальное кол-во дней " + MAX_DURATION);
+        if (ChronoUnit.DAYS.between(startDate, endDate) > INTERNSHIP_MAX_DURATION_IN_DAYS) {
+            throw new BusinessException("Стажировка длится слишком долго!!!.\nМаксимальное кол-во дней " + INTERNSHIP_MAX_DURATION_IN_DAYS);
         }
         if (startDate.isAfter(endDate) || startDate.isEqual(endDate)) {
             throw new IllegalArgumentException("Дата окончания не может быть раньше или равна дате начала!!!");

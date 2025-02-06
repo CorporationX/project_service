@@ -12,27 +12,24 @@ import java.util.List;
 @Data
 @Builder
 public class InternshipCreateDto {
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Название стажировки отсутсвует")
     private String name;
-    @Min(1)
+    @Min(value = 1, message = "id указан неверно")
     private long projectId;
-    @Min(1)
+    @Min(value = 1, message = "id указан неверно")
     private long mentorId;
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Описание не может быть путсым")
     private String description;
-    @NotNull
-    @NotEmpty
+    @NotEmpty(message = "список стажеров не может быть пустым")
     private List<Long> internsId;
-    @NotNull
-    @FutureOrPresent
+    @NotNull(message = "Дата начала не может быть пустой")
+    @FutureOrPresent(message = "Дата не актуальна")
     private LocalDateTime startDate;
-    @NotNull
-    @FutureOrPresent
+    @NotNull(message = "Дата окончания не может быть пустой")
+    @FutureOrPresent(message = "Дата не актуальна")
     private LocalDateTime endDate;
-    @NotNull
+    @NotNull(message = "Статус не может быть пустой")
     private InternshipStatus status;
-    @NotNull
+    @NotNull (message = "Роль не может быть пустой")
     private TeamRole role;
 }

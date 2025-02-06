@@ -44,7 +44,6 @@ public class InternshipService {
         internship.setCreatedBy(auditor.getCurrentAuditor().orElseThrow(() -> new EntityNotFoundException("Auditor not found")));
         validator.internshipCreateValidate(internship);
         internshipRepository.save(internship);
-        log.info("Стажировка с id: {} успешно создана", internship.getId());
         return mapper.toDto(internship);
     }
 
@@ -71,7 +70,6 @@ public class InternshipService {
             internship.setInterns(getInterns(internshipUpdateDto.getInternsId()));
         }
         internshipRepository.save(internship);
-        log.info("Стажировка с id: {} успешно обновлена", internship.getId());
         return mapper.toDto(internship);
     }
 
