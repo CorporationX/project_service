@@ -20,7 +20,7 @@ public class ProjectController {
         return projectService.generateProjectPresentation(projectId);
     }
 
-    @GetMapping("{projectId}/presentation")
+    @GetMapping("/{projectId}/presentation")
     public String getPresentationFilePath(@PathVariable long projectId) {
         return projectService.getPresentationFileKey(projectId);
     }

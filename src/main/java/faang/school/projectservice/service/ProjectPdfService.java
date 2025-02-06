@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PdfService {
+public class ProjectPdfService {
 
     public InputStream generateProjectPresentation(ProjectPresentationDto dto) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

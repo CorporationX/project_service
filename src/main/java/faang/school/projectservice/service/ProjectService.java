@@ -42,7 +42,7 @@ public class ProjectService {
     private final List<SubProjectFilter> subProjectFilters;
     private final S3Service S3service;
     private final S3Properties s3Properties;
-    private final PdfService pdfService;
+    private final ProjectPdfService projectPdfService;
     private final UserServiceClient userServiceClient;
     private final AuditorAwareImpl auditorAware;
 
@@ -101,7 +101,7 @@ public class ProjectService {
                 formatTeams(project.getTeams())
         );
 
-        InputStream pdfInputStream = pdfService.generateProjectPresentation(dto);
+        InputStream pdfInputStream = projectPdfService.generateProjectPresentation(dto);
         String fileKey = "project/" + project.getId() + "/presentation.pdf";
         S3service.putFileInStore(fileKey, pdfInputStream);
         project.setPresentationFileKey(fileKey);

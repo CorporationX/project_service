@@ -68,7 +68,7 @@ public class ProjectServiceTest {
     private S3Properties s3Properties;
 
     @Mock
-    private PdfService pdfService;
+    private ProjectPdfService projectPdfService;
 
     @Mock
     private UserServiceClient userServiceClient;
@@ -196,7 +196,7 @@ public class ProjectServiceTest {
         String fileKey = "project/" + projectId + "/presentation.pdf";
 
         projectService.generateProjectPresentation(projectId);
-        verify(pdfService, atLeastOnce()).generateProjectPresentation(any());
+        verify(projectPdfService, atLeastOnce()).generateProjectPresentation(any());
         verify(S3service, atLeastOnce()).putFileInStore(fileKeyCaptor.capture(), any());
         assertEquals(
                 fileKey,
