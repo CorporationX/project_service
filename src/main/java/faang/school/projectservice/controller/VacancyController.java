@@ -7,11 +7,16 @@ import faang.school.projectservice.service.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,8 +52,9 @@ public class VacancyController {
         if (file.isEmpty()) {
             throw new DataValidationException("File is empty.");
         }
-        String fileType = Objects.requireNonNull(file.getContentType()).substring(file.getContentType().lastIndexOf("/") + 1);
-        if (!IMAGE_TYPES.stream().anyMatch(imageType -> Objects.equals(imageType.toString(),fileType))) {
+        String fileType = Objects.requireNonNull(file.getContentType()).substring(file.getContentType()
+                .lastIndexOf("/") + 1);
+        if (IMAGE_TYPES.stream().noneMatch(imageType -> Objects.equals(imageType.toString(), fileType))) {
             log.error("Invalid file type.");
             throw new DataValidationException("Invalid file type.");
         }

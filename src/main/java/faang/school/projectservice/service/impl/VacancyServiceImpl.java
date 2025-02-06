@@ -2,8 +2,6 @@ package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.adapter.VacancyRepositoryAdapter;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.FileException;
-import faang.school.projectservice.file.FileMultipartFile;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.ImageProcessor;
@@ -72,7 +70,7 @@ public class VacancyServiceImpl implements VacancyService {
                 .filter(teamMember -> Objects.equals(teamMember.getId(), userId))
                 .flatMap(teamMember -> teamMember.getRoles().stream())
                 .anyMatch(teamRole -> teamRole == TeamRole.MANAGER);
-        if (!(isVacancyOwner && isProjectOwner && isProjectManager)) {
+        if (!(isVacancyOwner || isProjectOwner || isProjectManager)) {
             log.error("The user {} does not have enough rights to delete the vacancy cover", userId);
             throw new DataValidationException(String.format("The user %d does not have enough rights to delete the " +
                     "vacancy cover", userId));

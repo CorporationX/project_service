@@ -27,6 +27,11 @@ public class ImageProcessorImpl implements ImageProcessor {
     @Override
     public BufferedImage resizeImage(MultipartFile file) {
         BufferedImage bufferedImage;
+
+        if (file == null) {
+            log.error("File is null.");
+            throw new FileException("File is null.");
+        }
         try {
             double ratio = 0.0;
             bufferedImage = ImageIO.read(file.getInputStream());

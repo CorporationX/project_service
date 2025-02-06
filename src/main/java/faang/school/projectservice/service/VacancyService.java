@@ -7,6 +7,8 @@ import java.io.InputStream;
 
 public interface VacancyService {
     void addCover(Long id, MultipartFile file);
+
     InputStream getVacancyCover(Long id);
+
     void deleteVacancyCover(@PathVariable Long id, Long userId);
 }

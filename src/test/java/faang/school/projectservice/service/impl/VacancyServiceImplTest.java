@@ -12,8 +12,6 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -21,9 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -43,11 +39,7 @@ public class VacancyServiceImplTest {
     @Mock
     private ImageProcessorImpl imageProcessor;
     @Mock
-    private  AmazonS3 s3Client;
-//    @Captor
-//    private ArgumentCaptor<MultipartFile> fileCaptor;
-//    @Mock
-//    private MultipartFile multipartFile;
+    private AmazonS3 s3Client;
 
     private static final Long VACANCY_ID = 1L;
     private static final Long VACANCY_OWNER = 1L;
@@ -82,7 +74,7 @@ public class VacancyServiceImplTest {
                 .project(project)
                 .build();
         outputStream = new ByteArrayOutputStream();
-        bufferedImage = new BufferedImage(WIDTH,HEIGHT, IMAGE_TYPE);
+        bufferedImage = new BufferedImage(WIDTH, HEIGHT, IMAGE_TYPE);
         ImageIO.write(bufferedImage, FORMAT_NAME, outputStream);
         bufferedImage.flush();
         file = new FileMultipartFile(IMAGE_NAME,
@@ -99,13 +91,9 @@ public class VacancyServiceImplTest {
         when(vacancyRepositoryAdapter.findById(VACANCY_ID)).thenReturn(vacancy);
         when(imageProcessor.resizeImage(file)).thenReturn(bufferedImage);
         when(imageProcessor.convertImageToMultipartFile(bufferedImage, file.getName(), file.getOriginalFilename(),
-                        file.getContentType())).thenReturn(file);
+                file.getContentType())).thenReturn(file);
         vacancyService.addCover(VACANCY_ID, file);
-//        Mockito.verify(s3Service, times(NUMBER_INVOCATION)).uploadFile(fileCaptor.capture(),eq(folder));
-        Mockito.verify(vacancyRepositoryAdapter,times(NUMBER_INVOCATION)).save(vacancy);
-//        BufferedImage bufferedImage = ImageIO.read(fileCaptor.getValue().getInputStream());
-//        assertEquals(512, bufferedImage.getWidth());
-//        assertEquals(256, bufferedImage.getHeight());
+        Mockito.verify(vacancyRepositoryAdapter, times(NUMBER_INVOCATION)).save(vacancy);
     }
 
     @Test
@@ -119,16 +107,15 @@ public class VacancyServiceImplTest {
     @Test
     public void testGetVacancyCover() {
         when(vacancyRepositoryAdapter.findById(VACANCY_ID)).thenReturn(vacancy);
-//        s3Service.downloadFile(vacancy.getCoverImageKey())).thenReturn(new ByteArrayInputStream(outputStream.toByteArray()));
         vacancyService.getVacancyCover(VACANCY_ID);
-        Mockito.verify(s3Service,times(NUMBER_INVOCATION)).downloadFile(vacancy.getCoverImageKey());
+        Mockito.verify(s3Service, times(NUMBER_INVOCATION)).downloadFile(vacancy.getCoverImageKey());
     }
 
     @Test
     public void testDeleteVacancyCover() {
         when(vacancyRepositoryAdapter.findById(VACANCY_ID)).thenReturn(vacancy);
-        vacancyService.deleteVacancyCover(VACANCY_ID,VACANCY_OWNER);
-        Mockito.verify(vacancyRepositoryAdapter,times(NUMBER_INVOCATION)).save(vacancy);
+        vacancyService.deleteVacancyCover(VACANCY_ID, VACANCY_OWNER);
+        Mockito.verify(vacancyRepositoryAdapter, times(NUMBER_INVOCATION)).save(vacancy);
     }
 
     @Test
@@ -136,6 +123,6 @@ public class VacancyServiceImplTest {
         when(vacancyRepositoryAdapter.findById(VACANCY_ID)).thenReturn(vacancy);
         Assert.assertThrows(
                 DataValidationException.class,
-                () -> vacancyService.deleteVacancyCover(VACANCY_ID,VACANCY_PROJECT_TESTER));
+                () -> vacancyService.deleteVacancyCover(VACANCY_ID, VACANCY_PROJECT_TESTER));
     }
 }
