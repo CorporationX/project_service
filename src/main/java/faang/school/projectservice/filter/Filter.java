@@ -2,8 +2,8 @@ package faang.school.projectservice.filter;
 
 import java.util.stream.Stream;
 
-public interface Filter<S, F> {
+public interface Filter<T, F> {
     boolean isApplicable(F filter);
 
-    Stream<S> apply(Stream<S> elements, F filter);
+    Stream<T> apply(Stream<T> elements, F filter);
 }

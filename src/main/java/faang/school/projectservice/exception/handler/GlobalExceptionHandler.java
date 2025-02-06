@@ -1,7 +1,7 @@
 package faang.school.projectservice.exception.handler;
 
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.BusinessException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(DataValidationException.class)
-    public ResponseEntity<String> handleDataValidationException(DataValidationException e) {
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<String> handleDataValidationException(BusinessException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 

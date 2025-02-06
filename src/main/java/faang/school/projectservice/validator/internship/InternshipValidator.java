@@ -3,7 +3,7 @@ package faang.school.projectservice.validator.internship;
 import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipEditDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;

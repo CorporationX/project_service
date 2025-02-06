@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.team_member;
 
-import faang.school.projectservice.exception.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;

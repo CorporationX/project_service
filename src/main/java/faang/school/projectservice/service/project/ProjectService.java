@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.exception.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;

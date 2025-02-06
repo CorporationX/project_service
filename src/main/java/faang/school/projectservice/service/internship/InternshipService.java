@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipEditDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipReadDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipCreateMapper;
 import faang.school.projectservice.mapper.internship.InternshipReadMapper;
