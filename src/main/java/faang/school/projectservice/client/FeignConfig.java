@@ -1,6 +1,6 @@
 package faang.school.projectservice.client;
 
-import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.config.feign.UserContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
