@@ -9,26 +9,24 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CreateBucketRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.annotation.Value;
 
 @Slf4j
 @Configuration
 public class AmazonS3Config {
-    @Value("${services.s3.accessKey}")
-    private String accessKey;
-    @Value("${services.s3.secretKey}")
-    private String secretKey;
-    @Value("${services.s3.endpoint}")
-    private String endpoint;
-    @Value("${services.s3.bucketName}")
-    private String bucketName;
+    @Autowired
+    private S3Properties s3Properties;
 
     @Bean
     public AmazonS3 amazonS3() {
-        AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+        String accessKey = s3Properties.getS3().get("accessKey");
+        String secretKey = s3Properties.getS3().get("secretKey");
+        String endpoint = s3Properties.getS3().get("endpoint");
+        String bucketName = s3Properties.getS3().get("bucketName");
 
+        AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, null))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))

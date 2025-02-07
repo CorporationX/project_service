@@ -18,7 +18,7 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/resource")
+@RequestMapping("/resources")
 public class ResourceController {
     private final ResourceService resourceService;
     private final UserContext userContext;
@@ -48,7 +48,7 @@ public class ResourceController {
 
     @DeleteMapping("/{resourceId}")
     public void deleteResource(@RequestHeader(value = "X-User-Id", required = false) Long userId,
-                                                 @NotBlank @PathVariable Long resourceId) {
+                               @NotBlank @PathVariable Long resourceId) {
         resourceService.deleteResource(userId, resourceId);
         log.info("Image with id {} was successfully deleted", resourceId);
     }
