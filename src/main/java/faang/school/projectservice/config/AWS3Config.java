@@ -29,6 +29,7 @@ public class AWS3Config {
             .withEndpointConfiguration(
                 new AwsClientBuilder.EndpointConfiguration(endpoint, "us-east-1"))
             .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials))
+            .enablePathStyleAccess()
             .build();
     }
 }

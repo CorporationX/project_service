@@ -31,7 +31,6 @@ public class ProjectResourceService {
 
     @Transactional
     public Resource addFile(long projectResourceId, long userId, MultipartFile file) {
-        log.info("getting project from db and validate for enough memory");
         Project project = projectService.getProject(projectResourceId);
 
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
@@ -40,14 +39,12 @@ public class ProjectResourceService {
         checkStorageForEnoughMemory(storageSize, project.getMaxStorageSize());
         project.setStorageSize(storageSize);
 
-        String key =
-            String.format("%s/%d %s", projectResourceId + project.getName(),
-                System.currentTimeMillis(),
-                file.getOriginalFilename());
+        String key = String.format("%s/%d %s", projectResourceId + project.getName(),
+            System.currentTimeMillis(),
+            file.getOriginalFilename());
 
         TeamMember author = getTeamMember(userId, projectResourceId);
 
-        log.info("calling s3 to add resource to cloud");
         Resource resource = amazonS3Service.addResource(file, key);
         resource.setProject(project);
         resource.setCreatedBy(author);
@@ -56,6 +53,7 @@ public class ProjectResourceService {
         resourceRepository.save(resource);
         projectService.saveProject(project);
 
+        log.info("The file has been added " + resource.getName());
         return resource;
     }
 
@@ -76,13 +74,12 @@ public class ProjectResourceService {
         resource.setUpdatedAt(LocalDateTime.now());
         resource.setSize(BigInteger.valueOf(file.getSize()));
 
-        log.info("update resource and project");
         resourceRepository.save(resource);
         projectService.saveProject(project);
 
-        log.info("calling s3 for update Resource at cloud");
         amazonS3Service.updateResource(file, resource.getKey());
 
+        log.info("The file has been changed " + resource.getName());
         return resource;
     }
 
@@ -90,7 +87,6 @@ public class ProjectResourceService {
         Resource resource = getResource(projectResourceId);
         Project project = resource.getProject();
 
-        log.info("getting userId from userContext");
         TeamMember teamMember = getTeamMember(userId, project.getId());
         checkAccessForRemoval(userId, resource, teamMember.getRoles());
 
@@ -101,17 +97,15 @@ public class ProjectResourceService {
         project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
         resource.setSize(BigInteger.valueOf(0));
 
-        log.info("calling s3 for remove resource from cloud");
         amazonS3Service.completeRemoval(resource.getKey());
         resource.setKey(null);
 
-        log.info("update resource and project");
         resourceRepository.save(resource);
         projectService.saveProject(project);
 
+        log.info("The file has been deleted " + resource.getName());
         return resource;
     }
-
 
     private void checkStorageForEnoughMemory(@NotNull BigInteger currentStorageSize,
                                              @NotNull BigInteger maxStorageSize) {
@@ -129,8 +123,7 @@ public class ProjectResourceService {
         }
     }
 
-    private TeamMember getTeamMember(long projectId, long userId) {
-        log.info("Using team service to find TeamMember");
+    private TeamMember getTeamMember(long userId, long projectId) {
         return teamMemberService.getTeamMemberByIdAndProjectId(userId, projectId);
     }
 
@@ -139,4 +132,5 @@ public class ProjectResourceService {
             .orElseThrow(
                 () -> new EntityNotFoundException("Resource not found by id " + resourceId));
     }
+
 }

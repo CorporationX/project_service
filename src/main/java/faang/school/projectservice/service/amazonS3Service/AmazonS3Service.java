@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.TeamRole;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,7 +35,6 @@ public class AmazonS3Service {
         resource.setName(file.getOriginalFilename());
         resource.setKey(key);
         resource.setSize(BigInteger.valueOf(file.getSize()));
-        resource.setAllowedRoles(TeamRole.getAll());
         resource.setAllowedRoles(List.of(
             TeamRole.ANALYST,
             TeamRole.DESIGNER,
@@ -51,7 +51,6 @@ public class AmazonS3Service {
     }
 
     public void updateResource(MultipartFile file, String key) {
-        completeRemoval(key);
         uploadFileInCloud(file, key);
     }
 
@@ -82,13 +81,12 @@ public class AmazonS3Service {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(multipartFile.getSize());
         objectMetadata.setContentType(multipartFile.getContentType());
-        try {
-            PutObjectRequest putObjectRequest =
-                new PutObjectRequest(bucketName, key, multipartFile.getInputStream(),
-                    objectMetadata);
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, inputStream, objectMetadata);
             amazonS3.putObject(putObjectRequest);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Image not upload" + e.getMessage());
+            log.error("Image uploading " + e);
+            throw new RuntimeException("Error upload image");
         }
     }
 }
