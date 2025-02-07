@@ -71,7 +71,7 @@ public class DonationService {
         return donationMapper.toDto(donation);
     }
 
-    protected PaymentResponse paymentToDonate(DonationCreateDto donationDto) {
+    private PaymentResponse paymentToDonate(DonationCreateDto donationDto) {
         var paymentNumber = getRandomNumber(MIN_PAYMENT_NUMBER, MAX_PAYMENT_NUMBER);
 
         PaymentRequest paymentRequest = new PaymentRequest(
@@ -89,7 +89,7 @@ public class DonationService {
         }
     }
 
-    public UserDto getUserById(Long userId) {
+    private UserDto getUserById(Long userId) {
         try {
             var user = userServiceClient.getUser(userId);
             if (user == null) {

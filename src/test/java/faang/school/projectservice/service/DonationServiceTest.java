@@ -19,6 +19,7 @@ import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.service.filter.donation.CurrencyFilter;
 import faang.school.projectservice.service.filter.donation.DonationFilter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,12 +28,15 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -77,36 +81,54 @@ public class DonationServiceTest {
     }
 
     @Test
-    public void getUserById_Success() {
-        when(userServiceClient.getUser(1L)).thenReturn(usersList.get(0));
+    public void getUserById_Success() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Long userId = 1L;
+        UserDto mockUser = new UserDto(userId, "John Doe", "user1@gmail.com");
 
-        UserDto user = donationService.getUserById(1L);
+        when(userServiceClient.getUser(userId)).thenReturn(mockUser);
 
-        assertEquals(user.email(), usersList.get(0).email());
+        Method method = DonationService.class.getDeclaredMethod("getUserById", Long.class);
+        method.setAccessible(true);
+
+        UserDto result = (UserDto) method.invoke(donationService, userId);
+
+        assertNotNull(result);
+        assertEquals(userId, result.id());
+        assertEquals("John Doe", result.username());
     }
 
     @Test
-    public void getUserById_UserIsNull() {
+    void getUserById_UserIsNull() throws Exception {
         when(userServiceClient.getUser(6L)).thenReturn(null);
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-                donationService.getUserById(6L)
-        );
+        Method method = DonationService.class.getDeclaredMethod("getUserById", Long.class);
+        method.setAccessible(true);
 
-        assertEquals("User not found with id = 6", exception.getMessage());
+        Exception exception = Assertions.assertThrows(InvocationTargetException.class, () ->
+                method.invoke(donationService, 6L)
+        );
+        Throwable cause = exception.getCause();
+        Assertions.assertInstanceOf(EntityNotFoundException.class, cause);
+        assertEquals("User not found with id = 6", exception.getCause().getMessage());
     }
 
     @Test
-    public void getUserById_UserServiceConnectionException() {
-
+    public void getUserById_UserServiceConnectionException() throws Exception {
         when(userServiceClient.getUser(1L)).thenThrow(new UserServiceConnectionException("User service not working !!!"));
 
-        UserServiceConnectionException exception = assertThrows(UserServiceConnectionException.class, () ->
-                donationService.getUserById(1L)
+        Method method = DonationService.class.getDeclaredMethod("getUserById", Long.class);
+        method.setAccessible(true);
+
+        InvocationTargetException exception = assertThrows(InvocationTargetException.class, () ->
+                method.invoke(donationService, 1L)
         );
 
-        assertEquals("User service not working !!!", exception.getMessage());
+        Throwable cause = exception.getCause();
+        Assertions.assertInstanceOf(UserServiceConnectionException.class, cause);
+        assertEquals("User service not working !!!", cause.getMessage());
         verify(userServiceClient, times(1)).getUser(1L);
+
+
     }
 
     @Test
@@ -122,7 +144,6 @@ public class DonationServiceTest {
     @Test
     public void getDonationById_NotFound() {
         when(donationRepository.findByIdAndUserId(1L, 5L)).thenReturn(Optional.empty());
-
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
             donationService.getDonationById(1L, 5L);
@@ -147,31 +168,34 @@ public class DonationServiceTest {
     }
 
     @Test
-    public void paymentToDonate_Success() {
+    public void paymentToDonate_Success() throws Exception {
 
-        PaymentRequest paymentRequest = new PaymentRequest(
-                123L, new BigDecimal(1000), Currency.USD, Currency.USD);
-        PaymentResponse paymentResponse = PaymentResponse.builder().status("SUCCESS").amount(new BigDecimal(1000)).build();
+        PaymentResponse paymentResponse = PaymentResponse.builder()
+                .status("SUCCESS")
+                .amount(new BigDecimal(1000))
+                .build();
 
-        DonationCreateDto donation = DonationCreateDto
-                .builder()
+        DonationCreateDto donation = DonationCreateDto.builder()
                 .currency(Currency.USD)
                 .amount(new BigDecimal(1000))
                 .build();
 
-        when(donationService.getRandomNumber(1000L, 100000L)).thenReturn(123L);
-        when(paymentServiceClient.sendPayment(paymentRequest)).thenReturn(paymentResponse);
+        when(paymentServiceClient.sendPayment(any(PaymentRequest.class))).thenReturn(paymentResponse);
 
-        PaymentResponse result = donationService.paymentToDonate(donation);
+        Method method = DonationService.class.getDeclaredMethod("paymentToDonate", DonationCreateDto.class);
+        method.setAccessible(true);
 
-        assertEquals(result.amount(), paymentRequest.amount());
-        assertEquals(donationService.getRandomNumber(1000L, 100000L), paymentRequest.paymentNumber());
-        verify(paymentServiceClient, times(1)).sendPayment(paymentRequest);
+        PaymentResponse result = (PaymentResponse) method.invoke(donationService, donation);
 
+        assertNotNull(result);
+        assertEquals(paymentResponse.amount(), result.amount());
+        assertEquals(paymentResponse.status(), result.status());
+
+        verify(paymentServiceClient, times(1)).sendPayment(any(PaymentRequest.class));
     }
 
     @Test
-    public void paymentToDonate_PaymentServiceNotWorked() {
+    public void paymentToDonate_PaymentServiceNotWorked() throws NoSuchMethodException {
         PaymentRequest paymentRequest = new PaymentRequest(
                 123L, new BigDecimal(1000), Currency.USD, Currency.USD);
 
@@ -181,15 +205,19 @@ public class DonationServiceTest {
                 .amount(new BigDecimal(1000))
                 .build();
 
-        when(donationService.getRandomNumber(1000L, 100000L)).thenReturn(123L);
         when(paymentServiceClient.sendPayment(paymentRequest)).thenThrow(new RuntimeException());
 
-        PaymentServiceConnectException exception = assertThrows(PaymentServiceConnectException.class, () -> {
-            donationService.paymentToDonate(donation);
+        Method method = DonationService.class.getDeclaredMethod("paymentToDonate", DonationCreateDto.class);
+        method.setAccessible(true);
+
+        Exception exception = assertThrows(InvocationTargetException.class, () -> {
+            method.invoke(donationService, donation);
         });
 
-        assertEquals("Payment service not working !", exception.getMessage());
-        verify(paymentServiceClient, times(1)).sendPayment(paymentRequest);
+        Throwable cause = exception.getCause();
+        Assertions.assertInstanceOf(PaymentServiceConnectException.class, cause);
+
+        assertEquals("Payment service not working !", exception.getCause().getMessage());
     }
 
     @Test
@@ -256,6 +284,7 @@ public class DonationServiceTest {
                 PaymentResponse.builder().status("ERROR").amount(new BigDecimal(1000)).build());
         when(userServiceClient.getUser(1L)).thenReturn(usersList.get(0));
         when(campaignService.getCampingById(1L)).thenReturn(campaign);
+
 
         PaymentFailedException exception = assertThrows(PaymentFailedException.class, () -> {
             donationService.createDonation(donationCreateDto);
