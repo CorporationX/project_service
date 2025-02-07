@@ -11,6 +11,9 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://packages.atlassian.com/maven/repository/public")
+    }
 }
 
 dependencies {
@@ -45,6 +48,8 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+    implementation("com.atlassian.jira:jira-rest-java-client-core:6.0.1")
+    implementation("com.atlassian.jira:jira-rest-java-client-api:6.0.1")
 
     /**
      * Test containers

@@ -25,6 +25,11 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+jira:
+  url:  https://testcorpx.atlassian.net/jira
+  username: username
+  api-token: token
+
 server:
   port: 8082
   servlet:
