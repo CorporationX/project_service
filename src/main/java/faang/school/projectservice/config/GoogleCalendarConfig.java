@@ -49,8 +49,8 @@ public class GoogleCalendarConfig {
                     .setApplicationName(applicationName)
                     .build();
         } catch (Exception e) {
-            log.error("Ошибка конфигурирования календаря {}", e.getMessage());
-            throw new RuntimeException("Ошибка конфигурирования календаря");
+            log.error("Error configuring google calendar {}", e.getMessage());
+            throw new RuntimeException("Error configuring google calendar");
         }
     }
 
