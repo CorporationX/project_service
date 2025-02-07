@@ -7,6 +7,7 @@ import faang.school.projectservice.service.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,24 +26,27 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Slf4j
 public class VacancyController {
+
+    private static final List<ImageType> IMAGE_TYPES = List.of(ImageType.png, ImageType.jpg);
+    private static final String VACANCY_ID_COVER = "/{id}/cover";
+
     private final VacancyService vacancyService;
     private final UserContext userContext;
-    private static final List<ImageType> IMAGE_TYPES = List.of(ImageType.png, ImageType.jpg);
 
-    @PostMapping("/{id}/cover")
+    @PostMapping(VACANCY_ID_COVER)
     @Operation(summary = "Add cover to vacancy", description = "Allows you to add cover for vacancy")
     public void addCover(@PathVariable Long id, @RequestBody MultipartFile file) {
         checkContentType(file);
         vacancyService.addCover(id, file);
     }
 
-    @GetMapping("/{id}/cover")
+    @GetMapping(VACANCY_ID_COVER)
     @Operation(summary = "Download cover", description = "Allows you to download cover from vacancy")
     public InputStream getVacancyCover(@PathVariable Long id) {
         return vacancyService.getVacancyCover(id);
     }
 
-    @PutMapping("/{id}/cover")
+    @DeleteMapping(VACANCY_ID_COVER)
     @Operation(summary = "Delete vacancy cover", description = "Allows you to delete vacancy cover")
     public void deleteVacancyCover(@PathVariable Long id) {
         vacancyService.deleteVacancyCover(id, userContext.getUserId());
