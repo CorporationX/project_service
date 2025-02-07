@@ -1,0 +1,4 @@
+spring:
+  servlet:
+    mvc:
+      path: /api/v1
