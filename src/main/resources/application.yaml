@@ -24,6 +24,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+  config:
+    import: optional:file:.env
 
 server:
   port: 8082
@@ -36,9 +38,9 @@ calculations_messages_processing:
   enabled: true
 
 jira:
-  url: http://localhost:8099
-  username: admin
-  password: password
+  url: https://shakhzodkamolov.atlassian.net/
+  username: ${JIRA_USERNAME}
+  token: ${JIRA_TOKEN}
 
 domain:
   base-path: /api/v1

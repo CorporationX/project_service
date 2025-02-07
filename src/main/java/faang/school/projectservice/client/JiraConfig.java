@@ -9,18 +9,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Configuration
-public class JiraFeignConfig {
+public class JiraConfig {
 
     @Value("${jira.username}")
     private String username;
 
-    @Value("${jira.password}")
-    private String password;
+    @Value("${jira.token}")
+    private String token;
 
     @Bean
     public RequestInterceptor requestInterceptor() {
         return template -> {
-            String auth = username + ":" + password;
+            String auth = username + ":" + token;
             String encodedAuth = Base64.getEncoder()
                     .encodeToString(auth.getBytes(StandardCharsets.UTF_8));
             template.header("Authorization", "Basic " + encodedAuth);
