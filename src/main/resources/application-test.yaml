@@ -1,2 +1,6 @@
+
+spring:
+  liquibase:
+    enabled: true
 calculations_messages_processing:
   enabled: false
