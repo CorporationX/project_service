@@ -34,7 +34,7 @@ public class DonationService {
     private final CampaignValidator campaignValidator;
     private final UserServiceClient userServiceClient;
 
-    public DonationDto sendDonation(DonationCreateDto donationCreateDto) {
+    public DonationDto sendDonation(DonationCreateDto donationCreateDto, Long userId) {
         Donation donation = donationMapper.toEntity(donationCreateDto);
         Campaign campaign = campaignRepository.findById(donationCreateDto.getCampaignId())
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -42,7 +42,6 @@ public class DonationService {
 
         campaignValidator.validateCampaignStatus(campaign);
 
-        long userId = donationCreateDto.getUserId();
         try {
             userServiceClient.getUser(userId);
         } catch (FeignException e) {
