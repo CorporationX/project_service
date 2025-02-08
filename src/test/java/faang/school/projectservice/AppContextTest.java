@@ -1,11 +1,14 @@
 package faang.school.projectservice;
 
+import faang.school.projectservice.config.s3.S3Config;
+import faang.school.projectservice.service.S3Service;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -32,6 +35,12 @@ public class AppContextTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @MockBean
+    private S3Config s3Config;
+
+    @MockBean
+    private S3Service s3Service;
 
     @Container
     public static PostgreSQLContainer<?> POSTGRESQL_CONTAINER;
