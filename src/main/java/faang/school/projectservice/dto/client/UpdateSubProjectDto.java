@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.client;
 
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.stage.Stage;
 import lombok.Builder;
@@ -13,6 +12,6 @@ public record UpdateSubProjectDto(
         List<Long> subProjectIds,
         Stage stage,
         ProjectVisibility visibility,
-        Moment lastUpdate
+        MomentDto lastUpdate
 ) {
 }
