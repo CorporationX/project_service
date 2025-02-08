@@ -29,9 +29,9 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@RestClientTest(JiraServiceImpl.class)
+@RestClientTest(JiraGateway.class)
 @Import(JiraRestClientConfig.class)
-class JiraServiceImplTest {
+class JiraGatewayTest {
 
     @MockBean
     private JiraProperties jiraProperties;
@@ -46,7 +46,7 @@ class JiraServiceImplTest {
     private MockRestServiceServer mockServer;
 
     @Autowired
-    private JiraServiceImpl jiraService;
+    private JiraGateway jiraService;
 
     @BeforeEach
     public void init() {
@@ -66,8 +66,8 @@ class JiraServiceImplTest {
         IssueResponseDto response = jiraService.getAllIssuesByProject(projectId);
 
         assertNotNull(response);
-        assertEquals(1, response.getIssues().size());
-        assertEquals("1", response.getIssues().get(0).getKey());
+        assertEquals(1, response.issues().size());
+        assertEquals("1", response.issues().get(0).key());
         mockServer.verify();
     }
 
@@ -81,7 +81,7 @@ class JiraServiceImplTest {
         IssueDto response = jiraService.getIssueById(issueId);
 
         assertNotNull(response);
-        assertEquals("1", response.getKey());
+        assertEquals("1", response.key());
         mockServer.verify();
     }
 
@@ -97,8 +97,8 @@ class JiraServiceImplTest {
         IssueResponseDto response = jiraService.getIssuesByAssignee(assigneeId);
 
         assertNotNull(response);
-        assertEquals(1, response.getIssues().size());
-        assertEquals("1", response.getIssues().get(0).getKey());
+        assertEquals(1, response.issues().size());
+        assertEquals("1", response.issues().get(0).key());
         mockServer.verify();
     }
 
@@ -112,8 +112,8 @@ class JiraServiceImplTest {
         IssueResponseDto response = jiraService.getIssuesByStatus(issueStatus);
 
         assertNotNull(response);
-        assertEquals(1, response.getIssues().size());
-        assertEquals("1", response.getIssues().get(0).getKey());
+        assertEquals(1, response.issues().size());
+        assertEquals("1", response.issues().get(0).key());
         mockServer.verify();
     }
 
@@ -126,8 +126,8 @@ class JiraServiceImplTest {
         IssueCreateResponseDto response = jiraService.createIssue(getIssueCreateRequestDto());
 
         assertNotNull(response);
-        assertEquals("123", response.getId());
-        assertEquals("PROJ-123", response.getKey());
+        assertEquals("123", response.id());
+        assertEquals("PROJ-123", response.key());
         mockServer.verify();
     }
 
@@ -144,21 +144,19 @@ class JiraServiceImplTest {
     }
 
     private IssueUpdateRequestDto getIssueUpdateRequestDto() {
-        IssueUpdateRequestDto requestDto = new IssueUpdateRequestDto();
-        requestDto.setFields(IssueFieldsUpdateRequestDto.builder()
-                .summary("Updated Summary")
-                .description("Updated Description")
-                .build());
-        return requestDto;
+        return new IssueUpdateRequestDto(
+                IssueFieldsUpdateRequestDto.builder()
+                        .summary("Updated Summary")
+                        .description("Updated Description")
+                        .build());
     }
 
     private IssueCreateRequestDto getIssueCreateRequestDto() {
-        IssueCreateRequestDto requestDto = new IssueCreateRequestDto();
-        requestDto.setFields(IssueFieldsCreateRequestDto.builder()
-                .summary("Test issue")
-                .description("Test Description")
-                .build());
-        return requestDto;
+        return new IssueCreateRequestDto(
+                IssueFieldsCreateRequestDto.builder()
+                        .summary("Test issue")
+                        .description("Test Description")
+                        .build()
+        );
     }
-
 }

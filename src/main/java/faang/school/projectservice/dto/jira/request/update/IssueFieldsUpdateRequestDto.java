@@ -1,9 +1,8 @@
 package faang.school.projectservice.dto.jira.request.update;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import faang.school.projectservice.dto.jira.request.AssigneeRequestDto;
+import faang.school.projectservice.dto.jira.AssigneeDto;
 import faang.school.projectservice.dto.jira.request.IssueTypeRequestDto;
-import faang.school.projectservice.dto.jira.ParentDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +27,13 @@ public class IssueFieldsUpdateRequestDto {
     @JsonProperty("duedate")
     private String dueDate;
 
-    private AssigneeRequestDto assignee;
+    private AssigneeDto assignee;
+
+    @Data
+    static class ParentDto {
+
+        private String key;
+
+    }
 
 }

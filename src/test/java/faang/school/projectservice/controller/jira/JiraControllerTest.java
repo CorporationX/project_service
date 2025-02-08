@@ -8,7 +8,7 @@ import faang.school.projectservice.dto.jira.response.IssueCreateResponseDto;
 import faang.school.projectservice.dto.jira.response.IssueDto;
 import faang.school.projectservice.dto.jira.response.IssueFieldsResponseDto;
 import faang.school.projectservice.dto.jira.response.IssueResponseDto;
-import faang.school.projectservice.service.jira.JiraService;
+import faang.school.projectservice.service.jira.JiraGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +27,9 @@ import java.util.Collections;
 import java.util.Properties;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -38,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class JiraControllerTest {
 
     @Mock
-    private JiraService jiraService;
+    private JiraGateway jiraGateway;
 
     @InjectMocks
     private JiraController jiraController;
@@ -62,11 +64,7 @@ class JiraControllerTest {
     @Test
     public void testGetAllIssuesByProject() throws Exception {
         String projectId = "PROJ";
-        IssueResponseDto responseDto = new IssueResponseDto();
-        responseDto.setIssues(Collections.singletonList(new IssueDto("1",
-                IssueFieldsResponseDto.builder().summary("Test Issue").build())));
-
-        when(jiraService.getAllIssuesByProject(projectId)).thenReturn(responseDto);
+        when(jiraGateway.getAllIssuesByProject(projectId)).thenReturn(getIssueResponseDto());
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/project/{projectId}", projectId)
                         .accept(MediaType.APPLICATION_JSON))
@@ -79,7 +77,7 @@ class JiraControllerTest {
         IssueDto issueDto = new IssueDto("1",
                 IssueFieldsResponseDto.builder().summary("Test Issue").build());
 
-        when(jiraService.getIssueById(issueId)).thenReturn(issueDto);
+        when(jiraGateway.getIssueById(issueId)).thenReturn(issueDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/{id}", issueId)
                         .accept(MediaType.APPLICATION_JSON))
@@ -89,11 +87,7 @@ class JiraControllerTest {
     @Test
     public void testGetIssuesByAssignee() throws Exception {
         String userId = "user123";
-        IssueResponseDto responseDto = new IssueResponseDto();
-        responseDto.setIssues(Collections.singletonList(new IssueDto("1",
-                IssueFieldsResponseDto.builder().summary("Test Issue").build())));
-
-        when(jiraService.getIssuesByAssignee(userId)).thenReturn(responseDto);
+        when(jiraGateway.getIssuesByAssignee(userId)).thenReturn(getIssueResponseDto());
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/assignee/{userId}", userId)
                         .accept(MediaType.APPLICATION_JSON))
@@ -103,11 +97,7 @@ class JiraControllerTest {
     @Test
     public void testGetIssuesByStatus() throws Exception {
         String status = "In Progress";
-        IssueResponseDto responseDto = new IssueResponseDto();
-        responseDto.setIssues(Collections.singletonList(new IssueDto("1",
-                IssueFieldsResponseDto.builder().summary("Test Issue").build())));
-
-        when(jiraService.getIssuesByStatus(status)).thenReturn(responseDto);
+        when(jiraGateway.getIssuesByStatus(status)).thenReturn(getIssueResponseDto());
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/status/{status}", status)
                         .accept(MediaType.APPLICATION_JSON))
@@ -116,7 +106,7 @@ class JiraControllerTest {
 
     @Test
     public void testCreateIssue() throws Exception {
-        when(jiraService.createIssue(eq(getIssueCreateRequestDto()))).thenReturn(getIssueCreateResponseDto());
+        when(jiraGateway.createIssue(eq(getIssueCreateRequestDto()))).thenReturn(getIssueCreateResponseDto());
         String requestBody = """
                 {
                   "fields" : {
@@ -138,7 +128,7 @@ class JiraControllerTest {
     @Test
     public void testEditIssue() throws Exception {
         String issueId = "1";
-        doNothing().when(jiraService).editIssue(eq(issueId), eq(getIssueUpdateRequestDto()));
+        doNothing().when(jiraGateway).editIssue(eq(issueId), eq(getIssueUpdateRequestDto()));
 
         String requestBody = """
                 {
@@ -158,31 +148,34 @@ class JiraControllerTest {
                         .content(requestBody))
                 .andExpect(status().isNoContent());
 
-        verify(jiraService).editIssue(issueId, getIssueUpdateRequestDto());
+        verify(jiraGateway).editIssue(issueId, getIssueUpdateRequestDto());
     }
 
     private IssueCreateRequestDto getIssueCreateRequestDto() {
-        return IssueCreateRequestDto.builder()
-                .fields(IssueFieldsCreateRequestDto.builder()
+        return new IssueCreateRequestDto(
+                IssueFieldsCreateRequestDto.builder()
                         .summary("Test Issue")
                         .description("Test Description")
-                        .build())
-                .build();
+                        .build());
     }
 
     private IssueCreateResponseDto getIssueCreateResponseDto() {
-        return IssueCreateResponseDto.builder()
-                .id("key")
-                .key("PROJ")
-                .build();
+        return new IssueCreateResponseDto("key", "PROJ");
     }
 
     private IssueUpdateRequestDto getIssueUpdateRequestDto() {
-        return IssueUpdateRequestDto.builder()
-                .fields(IssueFieldsUpdateRequestDto.builder()
+        return new IssueUpdateRequestDto(
+                IssueFieldsUpdateRequestDto.builder()
                         .summary("Updated Summary")
                         .description("Updated Description")
-                        .build())
-                .build();
+                        .build());
+    }
+
+    private IssueResponseDto getIssueResponseDto() {
+        return new IssueResponseDto(
+                Collections.singletonList(new IssueDto("1",
+                        IssueFieldsResponseDto.builder()
+                                .summary("Test Issue")
+                                .build())));
     }
 }

@@ -22,4 +22,11 @@ public class IssueFieldsCreateRequestDto {
     @JsonProperty("issuetype")
     private IssueTypeRequestDto issueType;
 
+    @Data
+    static class ProjectCreateDto {
+
+        private String key;
+
+    }
+
 }
