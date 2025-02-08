@@ -11,7 +11,6 @@ import faang.school.projectservice.filter.DonationFilter;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.DonationRepository;
-import faang.school.projectservice.validator.DonationValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,9 +41,6 @@ class DonationServiceTest {
     private DonationMapper donationMapper;
 
     @Mock
-    private DonationValidator donationValidator;
-
-    @Mock
     private List<DonationFilter> donationFilters;
 
     @Mock
@@ -71,7 +67,6 @@ class DonationServiceTest {
         donationDto.setPaymentNumber(123456789L);
         donationDto.setAmount(BigDecimal.valueOf(100));
         donationDto.setCurrency(Currency.USD);
-        when(userContext.getUserId()).thenReturn(1L);
 
         PaymentRequest paymentRequest = new PaymentRequest(
                 donationDto.getPaymentNumber(),
@@ -96,7 +91,6 @@ class DonationServiceTest {
         DonationDto result = donationService.sendDonation(donationDto);
 
         assertEquals(expectedDonationDto, result);
-        verify(donationValidator, times(1)).validateDonation(donationDto);
         verify(paymentServiceClient, times(1)).sendPayment(paymentRequest);
         verify(donationMapper, times(1)).toEntity(donationDto);
         verify(donationRepository, times(1)).save(donation);
@@ -117,7 +111,7 @@ class DonationServiceTest {
     }
 
     @Test
-    void testGettingDonationsByFilter() {
+    void testGettingUserDonationsByFilters() {
         Long userId = 1L;
         DonationFilterDto filter = new DonationFilterDto();
         when(donationRepository.findAllByUserId(userId)).thenReturn(List.of(donation));
@@ -127,7 +121,7 @@ class DonationServiceTest {
         when(donationFilters.stream()).thenReturn(Stream.of(mockFilter));
         when(donationMapper.toDto(donation)).thenReturn(donationDto);
 
-        List<DonationDto> result = donationService.getDonationsByFilter(filter, userId);
+        List<DonationDto> result = donationService.getUserDonationsByFilters(filter, userId);
 
         assertEquals(1, result.size());
         assertEquals(donationDto, result.get(0));

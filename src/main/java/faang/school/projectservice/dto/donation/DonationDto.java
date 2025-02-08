@@ -9,15 +9,15 @@ import java.math.BigDecimal;
 
 @Data
 public class DonationDto {
-    @NotNull
+    @NotNull(message = "Номер платежа не может быть null")
     private Long paymentNumber;
-    @NotNull
-    @Min(value = 1)
+    @NotNull(message = "Сумма доната не может быть null")
+    @Min(value = 1, message = "Сумма доната не может быть меньше 1")
     private BigDecimal amount;
-    @NotNull
+    @NotNull(message = "Кампания не может быть null")
     private Long campaignId;
-    @NotNull
+    @NotNull(message = "Валюта не может быть null")
     private Currency currency;
-    @NotNull
+    @NotNull(message = "Юзер доната не может быть null")
     private Long userId;
 }

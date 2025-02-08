@@ -6,12 +6,13 @@ import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.dto.payment.PaymentRequest;
 import faang.school.projectservice.dto.payment.PaymentResponse;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.PaymentFailedException;
 import faang.school.projectservice.filter.DonationFilter;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.DonationRepository;
-import faang.school.projectservice.validator.DonationValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,15 +27,12 @@ import java.util.stream.Stream;
 public class DonationService {
     private final DonationRepository donationRepository;
     private final DonationMapper donationMapper;
-    private final DonationValidator donationValidator;
     private final List<DonationFilter> donationFilters;
     private final PaymentServiceClient paymentServiceClient;
     private final UserContext userContext;
 
     public DonationDto sendDonation(DonationDto donationDto) {
         log.info("Отправка доната: {}", donationDto);
-        donationValidator.validateDonation(donationDto);
-        userContext.getUserId();
 
         PaymentRequest paymentRequest = new PaymentRequest(
                 donationDto.getPaymentNumber(),
@@ -43,13 +41,13 @@ public class DonationService {
         );
 
         try {
-            log.info("Отправка платежа: {}", paymentRequest);
+            log.info("Запрос в сервис платежа: {}", paymentRequest);
             PaymentResponse response = paymentServiceClient.sendPayment(paymentRequest);
             log.info("Ответ от платежного сервиса: {}", response.status());
 
             Donation donation = donationMapper.toEntity(donationDto);
             Donation savedDonation = donationRepository.save(donation);
-            log.info("Донат сохранена: {}", savedDonation);
+            log.info("Донат сохранён: {}", savedDonation);
 
             return donationMapper.toDto(savedDonation);
         } catch (Exception e) {
@@ -58,18 +56,30 @@ public class DonationService {
     }
 
     public DonationDto getDonationByUserId(Long donationId, Long userId) {
-        Donation donation = donationRepository.findByIdAndUserId(donationId, userId).get();
+        validateId(donationId);
+        validateId(userId);
+        Donation donation = donationRepository.findByIdAndUserId(donationId, userId).orElseThrow(
+                () -> new EntityNotFoundException(
+                        String.format("Донат c id %d не найден у юзера c id %d", donationId, userId))
+        );
         return donationMapper.toDto(donation);
     }
 
-    public List<DonationDto> getDonationsByFilter(DonationFilterDto filter, Long userId) {
+    public List<DonationDto> getUserDonationsByFilters(DonationFilterDto filter, Long userId) {
         Stream<Donation> donations = donationRepository.findAllByUserId(userId).stream();
 
         return donationFilters.stream()
                 .filter(donationFilter -> donationFilter.isApplicable(filter))
                 .flatMap(donationFilter -> donationFilter.apply(donations, filter))
-                .sorted(Comparator.comparing(Donation::getDonationTime))
+                .sorted(Comparator.comparing(Donation::getDonationTime,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(donationMapper::toDto)
                 .toList();
+    }
+
+    private void validateId(Long id) {
+        if (id == null) {
+            throw new DataValidationException("ID не может быть null");
+        }
     }
 }

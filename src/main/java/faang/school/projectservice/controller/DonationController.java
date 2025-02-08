@@ -5,6 +5,8 @@ import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.service.DonationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,23 +19,24 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/donations")
+@RequestMapping("/donations")
 public class DonationController {
     private final DonationService donationService;
     private final UserContext userContext;
 
-    @PostMapping("/send")
+    @PostMapping()
     public DonationDto sendDonation(@Valid @RequestBody DonationDto donationDto) {
         return donationService.sendDonation(donationDto);
     }
 
-    @GetMapping("/user/{donationId}")
-    public DonationDto getDonationsByUserId(@PathVariable Long donationId) {
+    @GetMapping("/{donationId}")
+    public DonationDto getDonationsByUserId(@PathVariable @NotNull @Positive Long donationId) {
         return donationService.getDonationByUserId(donationId, userContext.getUserId());
     }
 
     @GetMapping("/filter/{userId}")
-    public List<DonationDto> getDonationsByFilter(@RequestBody DonationFilterDto filter, @PathVariable Long userId) {
-        return donationService.getDonationsByFilter(filter, userId);
+    public List<DonationDto> getUserDonationsByFilters(@RequestBody DonationFilterDto filter,
+                                                       @PathVariable @NotNull @Positive Long userId) {
+        return donationService.getUserDonationsByFilters(filter, userId);
     }
 }

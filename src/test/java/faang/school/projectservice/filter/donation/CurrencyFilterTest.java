@@ -19,7 +19,7 @@ class CurrencyFilterTest {
 
     @BeforeEach
     void setUp() {
-        currencyFilter = CurrencyFilter.CURRENCY;
+        currencyFilter = new CurrencyFilter();
         filter = new DonationFilterDto();
         firstDonation = new Donation();
         secondDonation = new Donation();
