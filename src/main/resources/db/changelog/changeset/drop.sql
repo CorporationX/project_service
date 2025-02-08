@@ -26,6 +26,7 @@ DROP TABLE IF EXISTS campaign;
 DROP TABLE IF EXISTS vacancy_skills;
 DROP TABLE IF EXISTS candidate;
 DROP TABLE IF EXISTS vacancy;
+DROP TABLE IF EXISTS project_gallery;
 DROP TABLE IF EXISTS project;
 DROP TABLE IF EXISTS donation;
 

@@ -83,5 +83,9 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "stage_id")
     private Stage stage;
+
+    public void close() {
+        this.status = TaskStatus.DONE;
+    }
 }
 

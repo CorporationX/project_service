@@ -21,6 +21,12 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Verify Test Coverage
+        run: ./gradlew jacocoTestCoverageVerification --no-daemon
+
+      - name: Run Tests
+        run: ./gradlew test --no-daemon
+
       - name: Gradle build
         run: ./gradlew build -x test --no-daemon
 
@@ -29,3 +35,4 @@ jobs:
 
       - name: Run Tests
         run: ./gradlew test --no-daemon
+
