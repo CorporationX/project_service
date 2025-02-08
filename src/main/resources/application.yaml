@@ -34,7 +34,7 @@ spring:
     max-request-size: 100MB
 
 jira:
-  url:  https://testcorpx.atlassian.net/jira
+  url: https://testcorpx.atlassian.net/jira
   username: username
   api-token: token
 
