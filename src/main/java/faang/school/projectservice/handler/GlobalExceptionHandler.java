@@ -5,14 +5,31 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler {
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ErrorDto handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        String message = "Validation error occurred";
+        List<ErrorDto.ValidationError> validationErrors = new ArrayList<>();
+
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            validationErrors.add(new ErrorDto.ValidationError(fieldError.getField(), fieldError.getDefaultMessage()));
+        }
+
+        return new ErrorDto(message, validationErrors);
+    }
 
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
