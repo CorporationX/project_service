@@ -46,8 +46,9 @@ public class StageService {
 
     @Transactional
     public StageDto updateStage(StageDto stageDto) {
-        Stage stage = stageRepository.findById(stageDto.stageId()).orElseThrow(() -> new IllegalArgumentException(""));
-        return null;
+        Stage stage = findAndCheckStageId(stageDto);
+        stageMapper.updateEntity(stageDto, stage);
+        return stageMapper.toDto(stage);
     }
 
     public StageDto getAllStages() {
@@ -59,6 +60,12 @@ public class StageService {
         return stageRepository.findById(stageId)
                 .map(stageMapper::toDto).orElseThrow(
                         () -> new EntityNotFoundException("Stage with " + stageId + " id not found"));
+    }
+
+    private Stage findAndCheckStageId (StageDto stageDto) {
+        return stageRepository.findById(stageDto.stageId()).orElseThrow(
+                () -> new EntityNotFoundException("Stage with " + stageDto.stageId() + " id not found")
+        );
     }
 
 }

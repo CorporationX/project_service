@@ -60,8 +60,8 @@ public class StageController {
     // нужно проверять, что обновлённые список участников удовлетворяет требованиям ролей.
 
     @PutMapping("/update")
-    public void updateStage() {
-
+    public StageDto updateStage(StageDto stageDto) {
+        return stageService.updateStage(stageDto);
     }
 
     //Получить все этапы проекта.
