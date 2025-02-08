@@ -26,7 +26,7 @@ spring:
           name: calculations_channel
 
 jira:
-  url:  https://testcorpx.atlassian.net/jira
+  url: https://testcorpx.atlassian.net/jira
   username: username
   api-token: token
 

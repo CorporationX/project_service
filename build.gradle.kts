@@ -49,7 +49,9 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("com.atlassian.jira:jira-rest-java-client-core:6.0.1")
+    implementation("org.glassfish.jersey.core:jersey-common:2.27")
     implementation("com.atlassian.jira:jira-rest-java-client-api:6.0.1")
+    implementation("io.atlassian.fugue:fugue:6.1.1")
 
     /**
      * Test containers

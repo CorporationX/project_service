@@ -11,7 +11,6 @@ public interface IssueMapper {
 
     @Mapping(source = "issueType.id", target = "typeId")
     @Mapping(source = "status.id", target = "statusId")
-    @Mapping(source = "endDate", target = "dueDate")
     IssueDto toIssueDto(Issue issue);
 
     Iterable<IssueDto> toIterableIssueDto(Iterable<Issue> issues);

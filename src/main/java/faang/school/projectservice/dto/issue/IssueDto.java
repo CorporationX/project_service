@@ -32,5 +32,5 @@ public class IssueDto {
     private Long typeId;
     @NotNull
     @Future
-    private DateTime endDate;
+    private DateTime dueDate;
 }
