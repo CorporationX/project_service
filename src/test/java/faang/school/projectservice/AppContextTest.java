@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
@@ -34,20 +35,28 @@ public class AppContextTest {
     private JdbcTemplate jdbcTemplate;
 
     @Container
-    public static PostgreSQLContainer<?> POSTGRESQL_CONTAINER;
+    public static PostgreSQLContainer<?> POSTGRESQL_CONTAINER
+            = new PostgreSQLContainer<>(DockerImageName.parse("postgres:13.3"));
 
-    static {
-        POSTGRESQL_CONTAINER = new PostgreSQLContainer<>(DockerImageName.parse("postgres:13.3"));
-    }
+    @Container
+    public static MinIOContainer MINIO_CONTAINER
+            = new MinIOContainer(DockerImageName.parse("minio/minio:RELEASE.2023-09-04T19-57-37Z"));
 
     @DynamicPropertySource
     static void postgresqlProperties(DynamicPropertyRegistry registry) {
         POSTGRESQL_CONTAINER.start();
+        MINIO_CONTAINER.start();
+
         POSTGRESQL_CONTAINER.waitingFor(Wait.forListeningPort());
+        MINIO_CONTAINER.waitingFor(Wait.forListeningPort());
 
         registry.add("spring.datasource.url", POSTGRESQL_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRESQL_CONTAINER::getUsername);
         registry.add("spring.datasource.password", POSTGRESQL_CONTAINER::getPassword);
+
+        registry.add("services.s3.endpoint", MINIO_CONTAINER::getS3URL);
+        registry.add("services.s3.accessKey", MINIO_CONTAINER::getUserName);
+        registry.add("services.s3.secretKey", MINIO_CONTAINER::getPassword);
     }
 
     @Test
@@ -57,6 +66,7 @@ public class AppContextTest {
         jdbcTemplate.execute("SELECT 1");
 
         assertTrue(POSTGRESQL_CONTAINER.isRunning());
+        assertTrue(MINIO_CONTAINER.isRunning());
 
         String result = jdbcTemplate.queryForObject("SELECT current_database()", String.class);
         assertNotNull(result);
@@ -65,5 +75,6 @@ public class AppContextTest {
     @AfterAll
     public static void tearDown() {
         POSTGRESQL_CONTAINER.stop();
+        MINIO_CONTAINER.stop();
     }
 }
