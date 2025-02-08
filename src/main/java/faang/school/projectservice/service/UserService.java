@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.config.feign.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import feign.FeignException;

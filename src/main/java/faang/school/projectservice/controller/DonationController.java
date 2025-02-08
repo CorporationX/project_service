@@ -27,13 +27,13 @@ public class DonationController {
     }
 
     @PostMapping("/{id}/user/{userId}")
-    public ResponseEntity<DonationDto> findDonationByIdAndUserId(@PathVariable Long id,
-                                                                 @PathVariable Long userId) {
+    public ResponseEntity<DonationDto> findDonationByIdAndUserId(@PathVariable long id,
+                                                                 @PathVariable long userId) {
         return ResponseEntity.ok(donationService.findDonationByIdAndUserId(id, userId));
     }
 
     @PostMapping("/user/{userId}")
-    public ResponseEntity<List<DonationDto>> getDonationByIdUserWithFilter(@PathVariable Long userId,
+    public ResponseEntity<List<DonationDto>> getDonationByIdUserWithFilter(@PathVariable long userId,
                                                                            @RequestBody(required = false)
                                                                            @Valid DonationFilter dto) {
         return ResponseEntity.ok(donationService.getDonationByIdUser(userId, dto));

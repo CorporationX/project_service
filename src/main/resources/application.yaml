@@ -51,5 +51,5 @@ services:
   user-service:
     host: http://localhost
     port: 8080
-    path: /users/api/v1/users
+    path: /users/api/v1
     url: ${services.user-service.host}:${services.user-service.port}${services.user-service.path}

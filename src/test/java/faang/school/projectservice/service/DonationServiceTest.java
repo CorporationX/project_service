@@ -167,26 +167,6 @@ public class DonationServiceTest {
     }
 
     @Test
-    @DisplayName("findDonationByIdAndUserId: выбрасывает исключение при null userId")
-    public void testFindDonationByIdAndUserIdWithUserIdNull() {
-        DataValidationException exception = Assertions.assertThrows(DataValidationException.class, () -> {
-            donationService.findDonationByIdAndUserId(DONATION_ID, null);
-        });
-
-        Assertions.assertEquals("Ошибка валидации метода findDonationByIdAndUserId", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("findDonationByIdAndUserId: выбрасывает исключение при null donationId")
-    public void testFindDonationByIdAndUserIdWithDonationIdNull() {
-        DataValidationException exception = Assertions.assertThrows(DataValidationException.class, () -> {
-            donationService.findDonationByIdAndUserId(null, USER_ID);
-        });
-
-        Assertions.assertEquals("Ошибка валидации метода findDonationByIdAndUserId", exception.getMessage());
-    }
-
-    @Test
     @DisplayName("findDonationByIdAndUserId: выбрасывает исключение при отсутствии доната")
     public void testFindDonationByIdAndUserIdThrowsEntityNotFoundException() {
         Mockito.when(donationRepository.findByIdAndUserId(DONATION_ID, USER_ID)).thenReturn(Optional.empty());
@@ -194,7 +174,7 @@ public class DonationServiceTest {
             donationService.findDonationByIdAndUserId(DONATION_ID, USER_ID);
         });
 
-        Assertions.assertEquals("Донат с ID " + DONATION_ID + " не найден", exception.getMessage());
+        Assertions.assertEquals("Донат с ID " + DONATION_ID + "по юзеру с ID " + USER_ID + " не найден", exception.getMessage());
     }
 
     @Test

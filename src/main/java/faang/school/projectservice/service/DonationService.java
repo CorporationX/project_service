@@ -39,14 +39,11 @@ public class DonationService {
         return dto;
     }
 
-    public DonationDto findDonationByIdAndUserId(Long id, Long userId) {
-        if (id == null || userId == null) {
-            throw new DataValidationException("Ошибка валидации метода findDonationByIdAndUserId");
-        }
+    public DonationDto findDonationByIdAndUserId(long id, long userId) {
         userService.getUserDtoById(userId);
 
         var donation = donationRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new EntityNotFoundException("Донат с ID " + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Донат с ID " + id + "по юзеру с ID " + userId + " не найден"));
         return donationMapper.toDto(donation);
     }
 
