@@ -1,6 +1,7 @@
 package faang.school.projectservice.exception.handler;
 
 import faang.school.projectservice.exception.BusinessException;
+import faang.school.projectservice.exception.FileManagementException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(FileManagementException.class)
+    public ResponseEntity<String> handleFileManagementException(FileManagementException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }

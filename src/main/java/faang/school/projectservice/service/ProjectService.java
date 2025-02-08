@@ -32,6 +32,7 @@ public class ProjectService {
 
         validator.validateFile(file);
         validator.checkFileSize(file.getSize());
+        validator.checkIsFileImage(file);
 
         MultipartFile resizedImageBytes = imageProcessingUtils.convertByteToMultipartFile(
                 imageProcessingUtils.resizeImage(file),
