@@ -53,7 +53,7 @@ public class AmazonS3Service {
         try {
             PutObjectRequest request = new PutObjectRequest(bucketName, key, file.getInputStream(), metadata);
             s3Client.putObject(request);
-        } catch (IOException exception) {
+        } catch (IOException | SdkClientException exception) {
             String errorMessage = "Ошибка при отправке файла в хранилище";
             log.error(errorMessage, exception);
             throw new IntegrationException(errorMessage);

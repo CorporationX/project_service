@@ -58,7 +58,7 @@ public class ProjectService {
 
     public List<ResourceReadDto> getAllProjectResources(long projectId) {
         Project project = getProject(projectId);
-        if (project.getGalleryFileKeys().isEmpty()) {
+        if (project.getGalleryFileKeys().isEmpty() && project.getResources().isEmpty()) {
             throw new DataValidationException("Галерея проекта пуста");
         }
 
