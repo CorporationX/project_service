@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.moment.*;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,21 +24,19 @@ public class MomentService {
 
     private final MomentRepository momentRepository;
     private final ProjectService projectService;
-    private final ResourceService resourceService;
     private final UserContext userContext;
     private final MomentMapper momentMapper;
 
     public CreateMomentResponse createMoment(CreateMomentRequest createMomentRequest) {
-        Long createdBy = userContext.getUserId();
+        Long creatorId = userContext.getUserId();
         List<Project> projects = getProjects(createMomentRequest.projectIds());
-        List<Resource> resources = getResources(createMomentRequest.resourceIds());
-        Moment moment = momentMapper.toEntity(createMomentRequest, projects, resources, createdBy);
+        Moment moment = momentMapper.toEntity(createMomentRequest, projects, creatorId);
         moment = momentRepository.save(moment);
         return momentMapper.toCreateMomentResponse(moment);
     }
 
     @Transactional
-    public void updateMoment(long id, UpdateMomentRequest updateMomentRequest) {
+    public UpdateMomentResponse updateMoment(long id, UpdateMomentRequest updateMomentRequest) {
         Moment moment = findMomentById(id);
         Set<Project> projects = new HashSet<>(moment.getProjects());
         Set<Long> userIds = new HashSet<>(moment.getUserIds());
@@ -74,6 +71,7 @@ public class MomentService {
         moment.setProjects(projects.stream().toList());
         Long updatedBy = userContext.getUserId();
         momentMapper.updateMoment(moment, updateMomentRequest, updatedBy);
+        return momentMapper.toUpdateMomentResponse(moment);
     }
 
     public List<GetMomentResponse> getMoments(MomentFilter momentFilter) {
@@ -88,7 +86,7 @@ public class MomentService {
         return momentMapper.toGetMomentResponse(moment);
     }
 
-    public Moment findMomentById(long id) {
+    private Moment findMomentById(long id) {
         return momentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Момент с айди %s не был найден".formatted(id)));
     }
@@ -96,12 +94,6 @@ public class MomentService {
     private List<Project> getProjects(List<Long> projectIds) {
         return projectIds.stream()
                 .map(projectService::getActiveProjectById)
-                .toList();
-    }
-
-    private List<Resource> getResources(List<Long> resourceIds) {
-        return resourceIds.stream()
-                .map(resourceService::getResourceRefById)
                 .toList();
     }
 }

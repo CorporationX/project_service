@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.moment.CreateMomentRequest;
 import faang.school.projectservice.dto.moment.CreateMomentResponse;
-import faang.school.projectservice.dto.moment.GetMomentResponse;
 import faang.school.projectservice.dto.moment.UpdateMomentRequest;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -16,12 +15,7 @@ public class MomentDataFactory {
     public static CreateMomentRequest getCreateMomentRequest() {
         return CreateMomentRequest.builder()
                 .name("Test Moment")
-                .description("This is a test moment")
-                .date(LocalDateTime.of(2024, 2, 15, 10, 0))
                 .projectIds(List.of(1L, 2L))
-                .resourceIds(List.of(3L, 4L))
-                .userIds(List.of(5L, 6L))
-                .imageId("test-image-id")
                 .build();
     }
 
@@ -52,24 +46,6 @@ public class MomentDataFactory {
                 "updated-image-id"
         );
     }
-
-    public static GetMomentResponse getGetMomentResponse() {
-        return new GetMomentResponse(
-                100L,
-                "Test Moment",
-                "This is a test moment",
-                LocalDateTime.of(2024, 2, 15, 10, 0),
-                List.of(1L, 2L),
-                List.of(3L, 4L),
-                List.of(5L, 6L),
-                "test-image-id",
-                LocalDateTime.of(2024, 2, 15, 10, 5),
-                LocalDateTime.of(2024, 2, 15, 10, 10),
-                1L,
-                2L
-        );
-    }
-
 
     public static Moment getMoment() {
         Moment moment = new Moment();

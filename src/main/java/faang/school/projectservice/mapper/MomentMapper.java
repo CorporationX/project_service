@@ -1,12 +1,8 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.moment.CreateMomentRequest;
-import faang.school.projectservice.dto.moment.CreateMomentResponse;
-import faang.school.projectservice.dto.moment.GetMomentResponse;
-import faang.school.projectservice.dto.moment.UpdateMomentRequest;
+import faang.school.projectservice.dto.moment.*;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -18,14 +14,15 @@ import java.util.List;
 )
 public interface MomentMapper {
 
-    Moment toEntity(CreateMomentRequest createMomentRequest, List<Project> projects,
-                    List<Resource> resources, Long createdBy);
+    Moment toEntity(CreateMomentRequest createMomentRequest, List<Project> projects, Long creatorId);
 
     CreateMomentResponse toCreateMomentResponse(Moment moment);
 
     GetMomentResponse toGetMomentResponse(Moment moment);
 
     List<GetMomentResponse> toGetMomentResponseList(List<Moment> moments);
+
+    UpdateMomentResponse toUpdateMomentResponse(Moment moment);
 
     @Mapping(target = "userIds", ignore = true)
     @Mapping(target = "projects", ignore = true)

@@ -24,10 +24,9 @@ public class MomentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateMoment(@PathVariable long id,
+    public UpdateMomentResponse updateMoment(@PathVariable long id,
                                              @RequestBody @Valid UpdateMomentRequest updateMomentRequest) {
-        momentService.updateMoment(id, updateMomentRequest);
-        return ResponseEntity.noContent().build();
+        return momentService.updateMoment(id, updateMomentRequest);
     }
 
     @GetMapping

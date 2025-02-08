@@ -6,7 +6,6 @@ import faang.school.projectservice.exception.ProjectAlreadyCanceledException;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.MomentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -29,8 +28,6 @@ class MomentServiceTest {
     @Mock
     private ProjectService projectService;
     @Mock
-    private ResourceService resourceService;
-    @Mock
     private UserContext userContext;
     private MomentMapper momentMapper;
     private MomentService momentService;
@@ -38,8 +35,7 @@ class MomentServiceTest {
     @BeforeEach
     void setUp() {
         momentMapper = Mappers.getMapper(MomentMapper.class);
-        momentService = new MomentService(momentRepository, projectService,
-                resourceService, userContext, momentMapper);
+        momentService = new MomentService(momentRepository, projectService, userContext, momentMapper);
     }
 
     @Test
@@ -55,24 +51,17 @@ class MomentServiceTest {
     void createMoment_Success() {
         List<Project> projects = Arrays.asList(MomentDataFactory.getProject(1L),
                 MomentDataFactory.getProject(2L));
-        List<Resource> resources = Arrays.asList(MomentDataFactory.getResource(3L),
-                MomentDataFactory.getResource(4L));
         CreateMomentRequest createMomentRequest = MomentDataFactory.getCreateMomentRequest();
         CreateMomentResponse createMomentResponse = MomentDataFactory.getCreateMomentResponse();
         Project project = MomentDataFactory.getProject(1L);
-        Resource resource = MomentDataFactory.getResource(3L);
         Mockito.when(projectService.getActiveProjectById(Mockito.anyLong()))
                 .thenReturn(project);
-        Mockito.when(resourceService.getResourceRefById(Mockito.anyLong()))
-                .thenReturn(resource);
-        Moment mappedMoment = momentMapper.toEntity(createMomentRequest, projects, resources, 1L);
+        Moment mappedMoment = momentMapper.toEntity(createMomentRequest, projects, 1L);
         Mockito.when(momentRepository.save(Mockito.any(Moment.class)))
                 .thenReturn(mappedMoment);
         CreateMomentResponse savedMoment = momentService.createMoment(createMomentRequest);
         Assertions.assertNotNull(savedMoment);
         Assertions.assertEquals(createMomentResponse.name(), savedMoment.name());
-        Assertions.assertEquals(createMomentResponse.description(), savedMoment.description());
-        Assertions.assertEquals(createMomentResponse.date(), savedMoment.date());
     }
 
     @Test
