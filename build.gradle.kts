@@ -52,6 +52,7 @@ dependencies {
     implementation("org.glassfish.jersey.core:jersey-common:2.27")
     implementation("com.atlassian.jira:jira-rest-java-client-api:6.0.1")
     implementation("io.atlassian.fugue:fugue:6.1.1")
+    implementation("com.itextpdf:itext7-core:7.2.0")
 
     /**
      * Test containers
