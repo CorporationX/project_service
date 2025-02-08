@@ -21,11 +21,6 @@ public class StageService {
     private final List<StageFilter> stageFilter;
     private final StageMapper stageMapper;
 
-//  Создание этапа. Этап ОБЯЗАТЕЛЬНО относится к какому-то проекту.
-//  Все этапы хранятся в базе данных, названия этапов в БД могут повторяться.
-//  При создании этапа необходимо определить список ролей и количество человек для каждой роли,
-//  которые гарантированно будут задействованы на этапе.
-
     @Transactional
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
@@ -41,7 +36,7 @@ public class StageService {
 
     @Transactional
     public StageDto deleteStage() {
-//        stageRepository.delete
+
     }
 
     @Transactional
@@ -59,10 +54,11 @@ public class StageService {
     public StageDto getStageById(Long stageId) throws EntityNotFoundException {
         return stageRepository.findById(stageId)
                 .map(stageMapper::toDto).orElseThrow(
-                        () -> new EntityNotFoundException("Stage with " + stageId + " id not found"));
+                        () -> new EntityNotFoundException("Stage with " + stageId + " id not found")
+                );
     }
 
-    private Stage findAndCheckStageId (StageDto stageDto) {
+    private Stage findAndCheckStageId(StageDto stageDto) {
         return stageRepository.findById(stageDto.stageId()).orElseThrow(
                 () -> new EntityNotFoundException("Stage with " + stageDto.stageId() + " id not found")
         );
