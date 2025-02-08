@@ -70,7 +70,10 @@ public class DonationService {
 
         return donationFilters.stream()
                 .filter(donationFilter -> donationFilter.isApplicable(filter))
-                .flatMap(donationFilter -> donationFilter.apply(donations, filter))
+                .reduce(donations,
+                        (donationStream, donationFilter)
+                                -> donationFilter.apply(donationStream, filter),
+                        Stream::concat)
                 .sorted(Comparator.comparing(Donation::getDonationTime,
                         Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(donationMapper::toDto)
