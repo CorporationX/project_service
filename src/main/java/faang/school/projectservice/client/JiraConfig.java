@@ -1,7 +1,8 @@
 package faang.school.projectservice.client;
 
+import faang.school.projectservice.config.JiraProperties;
 import feign.RequestInterceptor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,18 +10,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Configuration
+@RequiredArgsConstructor
 public class JiraConfig {
 
-    @Value("${jira.username}")
-    private String username;
-
-    @Value("${jira.token}")
-    private String token;
+    private final JiraProperties jiraProperties;
 
     @Bean
     public RequestInterceptor requestInterceptor() {
         return template -> {
-            String auth = username + ":" + token;
+            String auth = jiraProperties.getUsername() + ":" + jiraProperties.getToken();
             String encodedAuth = Base64.getEncoder()
                     .encodeToString(auth.getBytes(StandardCharsets.UTF_8));
             template.header("Authorization", "Basic " + encodedAuth);

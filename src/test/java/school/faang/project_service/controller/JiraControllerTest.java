@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.jira.request.JiraIssueRequest;
 import faang.school.projectservice.dto.jira.response.JiraIssueResponse;
 import faang.school.projectservice.dto.jira.response.JiraSearchResponse;
 import faang.school.projectservice.gateway.JiraClientGateway;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,11 +28,16 @@ class JiraControllerTest {
     @InjectMocks
     private JiraController jiraController;
 
+    private JiraIssueResponse expectedResponse;
+
+    @BeforeEach
+    void setUp() {
+        expectedResponse = new JiraIssueResponse("12345", TEST_ISSUE_ID, "http://jira/test-125");
+    }
+
     @Test
     void createIssue_ReturnsIssueResponse() {
         JiraIssueRequest request = new JiraIssueRequest();
-        JiraIssueResponse expectedResponse = new JiraIssueResponse();
-
         when(jiraClientGateway.createIssue(request)).thenReturn(expectedResponse);
 
         ResponseEntity<JiraIssueResponse> response = jiraController.createIssue(request);
@@ -39,28 +45,23 @@ class JiraControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedResponse, response.getBody());
-
         verify(jiraClientGateway).createIssue(request);
     }
 
     @Test
     void updateIssue_ReturnsNoContent() {
         JiraIssueRequest request = new JiraIssueRequest();
-
         doNothing().when(jiraClientGateway).updateIssue(TEST_ISSUE_ID, request);
 
         ResponseEntity<Void> response = jiraController.updateIssue(TEST_ISSUE_ID, request);
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-
         verify(jiraClientGateway).updateIssue(TEST_ISSUE_ID, request);
     }
 
     @Test
     void getIssue_ReturnsIssueResponse() {
-        JiraIssueResponse expectedResponse = new JiraIssueResponse();
-
         when(jiraClientGateway.getIssue(TEST_ISSUE_ID)).thenReturn(expectedResponse);
 
         ResponseEntity<JiraIssueResponse> response = jiraController.getIssue(TEST_ISSUE_ID);
@@ -68,7 +69,6 @@ class JiraControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedResponse, response.getBody());
-
         verify(jiraClientGateway).getIssue(TEST_ISSUE_ID);
     }
 
@@ -79,7 +79,6 @@ class JiraControllerTest {
         int maxResults = 50;
         String fields = "summary,status,assignee";
         JiraSearchResponse expectedResponse = new JiraSearchResponse();
-
         when(jiraClientGateway.searchIssues(jqlQuery, startAt, maxResults, fields)).thenReturn(expectedResponse);
 
         ResponseEntity<JiraSearchResponse> response = jiraController.getIssues(jqlQuery, startAt, maxResults, fields);
@@ -87,7 +86,6 @@ class JiraControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedResponse, response.getBody());
-
         verify(jiraClientGateway).searchIssues(jqlQuery, startAt, maxResults, fields);
     }
 }

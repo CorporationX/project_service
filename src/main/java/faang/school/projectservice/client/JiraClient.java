@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "jiraClient", url = "${jira.url}", configuration = JiraConfig.class)
+@FeignClient(name = "jiraClient", url = "${jira.url}")
 public interface JiraClient {
 
     @PostMapping("/rest/api/2/issue")
