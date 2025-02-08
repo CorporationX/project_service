@@ -12,9 +12,16 @@ import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class SubProjectServiceImpl implements SubProjectService {
 
     private final ProjectRepository projectRepository;
@@ -25,14 +32,13 @@ public class SubProjectServiceImpl implements SubProjectService {
     public SubProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
 
         if (subProjectDto.parentId() == null) {
-            log.error("Parent id can not be null");
             throw new IllegalArgumentException("Parent id can not be null");
         }
-        Project parentProject = projectRepository.findById(subProjectDto.parentId()).orElseThrow(() -> new RuntimeException("Parent project not found"));
+        Project parentProject = projectRepository.findById(subProjectDto.parentId())
+                .orElseThrow(() -> new RuntimeException("Parent project not found"));
 
         ProjectVisibility parentVisibility = parentProject.getVisibility();
-        if (parentVisibility == ProjectVisibility.PRIVATE) {
-            log.error("Parent project is private");
+        if (parentVisibility.equals(ProjectVisibility.PRIVATE)) {
             throw new RuntimeException("Parent project is private");
         }
 
@@ -43,22 +49,29 @@ public class SubProjectServiceImpl implements SubProjectService {
     }
 
     @Override
-    public void updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
+    public SubProjectDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
+
+        if (updateSubProjectDto == null) {
+            throw new IllegalArgumentException("Project to update can not be null");
+        }
 
         if (updateSubProjectDto.id() == null) {
-            log.error("Project to update id can not be null");
             throw new IllegalArgumentException("Project to update id can not be null");
         }
 
         Project subProject = projectRepository.findById(updateSubProjectDto.id()).orElseThrow(() -> new RuntimeException("No project found to update"));
 
-        subProject.getChildren().forEach(project -> {
-            if (project.getStatus() != subProject.getStatus()) {
-                throw new RuntimeException("Project status not same as subprojects statuses");
-            }
-        });
+        Optional.ofNullable(subProject.getChildren())
+                .ifPresent(children -> children.forEach(project -> {
+                    if (!project.getStatus().equals(subProject.getStatus())) {
+                        throw new RuntimeException("Project status not same as subprojects statuses");
+                    }
+                }));
 
-        if (subProject.getChildren().stream().allMatch(project -> project.getStatus() == ProjectStatus.CANCELLED)) {
+        if (subProject.getChildren() != null &&
+                subProject.getChildren().stream()
+                        .allMatch(project ->
+                                project.getStatus().equals(ProjectStatus.CANCELLED))) {
 
             Moment moment = new Moment();
             moment.getProjects().add(subProject);
@@ -70,18 +83,29 @@ public class SubProjectServiceImpl implements SubProjectService {
             moment.setName("Выполнены все подпроекты");
             momentRepository.save(moment);
         }
-        if (updateSubProjectDto.visibility() == ProjectVisibility.PRIVATE) {
+        if (updateSubProjectDto.visibility().equals(ProjectVisibility.PRIVATE)
+                && subProject.getChildren() != null) {
             subProject.getChildren().forEach(child -> {
                 child.setVisibility(ProjectVisibility.PRIVATE);
                 projectRepository.save(child);
             });
         }
+        return subProjectMapper.toProjectResponseDto(subProject);
     }
 
-    //@Override
-    //public List<Project> getSubProjectByFilter(SubProjectFilterDto subProjectFilterDto) {
-    /*  не очень понимаю применение фильтров и как правильно их обрабатывать
-        Помогите пж :)
-     */
-    //}
+    @Override
+    public List<SubProjectDto> getSubprojects(Project project, String filterName, ProjectStatus filterStatus) {
+        return project.getChildren().stream()
+                .filter(subproject -> subproject.getVisibility().equals(ProjectVisibility.PUBLIC)
+                        && subproject.getName().contains(filterName)
+                        && subproject.getStatus().equals(filterStatus))
+                .map(subproject -> SubProjectDto.builder()
+                        .id(subproject.getId())
+                        .title(subproject.getName())
+                        .visibility(subproject.getVisibility())
+                        .status(subproject.getStatus())
+                        .supProjectIds(Collections.singletonList(project.getId()))
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
