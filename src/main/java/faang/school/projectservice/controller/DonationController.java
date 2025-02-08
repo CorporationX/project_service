@@ -27,13 +27,13 @@ public class DonationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(donationService.createDonation(dto));
     }
 
-    @GetMapping("/{id}/user/{userId}")
+    @PostMapping("/{id}/user/{userId}")
     public ResponseEntity<DonationDto> findDonationByIdAndUserId(@PathVariable Long id,
                                                                  @PathVariable Long userId) {
         return ResponseEntity.ok(donationService.findDonationByIdAndUserId(id, userId));
     }
 
-    @GetMapping("/user/{userId}")
+    @PostMapping("/user/{userId}")
     public ResponseEntity<List<DonationDto>> getDonationByIdUserWithFilter(@PathVariable Long userId,
                                                                            @RequestBody(required = false)
                                                                            @Valid DonationFilter dto) {
