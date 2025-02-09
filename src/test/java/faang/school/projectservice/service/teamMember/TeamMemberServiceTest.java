@@ -4,6 +4,7 @@ import faang.school.projectservice.exception.NoSuchTeamMemberException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,7 @@ class TeamMemberServiceTest {
                         .build())
                 .build();
 
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(1L, 1L)).thenReturn(teamMember);
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(1L, 1L)).thenReturn(Optional.ofNullable(teamMember));
         TeamMember actual = teamMemberService.getTeamMemberByIdAndProjectId(1L, 1L);
         Assertions.assertEquals(teamMember, actual);
         Mockito.verify(teamMemberRepository, Mockito.times(1))
@@ -37,7 +38,7 @@ class TeamMemberServiceTest {
 
     @Test
     void getTeamMemberByIdAndProjectIdNegative() {
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(1L, 1L)).thenReturn(null);
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(1L, 1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(NoSuchTeamMemberException.class,
                 () -> teamMemberService.getTeamMemberByIdAndProjectId(1L, 1L),
                 ("No team member found with id 1 in project 1"));

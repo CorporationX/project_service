@@ -3,7 +3,6 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.exeption.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
