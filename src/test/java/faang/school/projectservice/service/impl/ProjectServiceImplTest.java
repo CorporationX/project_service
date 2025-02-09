@@ -61,12 +61,6 @@ class ProjectServiceImplTest {
                 .build();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
-
-
     @Test
     @DisplayName("Test get project resource Ids")
     void testGetProjectResourceIds() {

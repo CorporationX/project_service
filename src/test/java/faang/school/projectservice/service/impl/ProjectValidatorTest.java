@@ -70,12 +70,8 @@ class ProjectValidatorTest {
         Long userId = 1L;
         Long userNotInProjectId = 11L;
         Long projectId = 222L;
-        //Mockito.when(projectValidator.isUserParticipatedInProject(userId, projectId)).thenReturn(true);
         Mockito.when(projectServiceMock.getProject(projectId)).thenReturn(project);
-
         projectValidator.validateUserInProject(userId, projectId);
-
-        //Mockito.when(projectValidator.isUserParticipatedInProject(userNotInProjectId, projectId)).thenReturn(false);
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> projectValidator.validateUserInProject(userNotInProjectId, projectId));
     }
@@ -85,7 +81,6 @@ class ProjectValidatorTest {
     void testIsUserInProject() {
         long userId = 1L;
         long projectId = 222L;
-        //Mockito.when(projectRepositoryMock.findById(projectId)).thenReturn(Optional.ofNullable(project));
         Mockito.when(projectServiceMock.getProject(projectId)).thenReturn(project);
         Assertions.assertTrue(projectValidator.isUserParticipatedInProject(userId, projectId));
         userId = 33L;
@@ -102,10 +97,8 @@ class ProjectValidatorTest {
                 .name("test project 11")
                 .visibility(ProjectVisibility.PRIVATE)
                 .build();
-        //Mockito.when(projectRepositoryMock.findById(projectId)).thenReturn(Optional.ofNullable(project));
         Mockito.when(projectServiceMock.getProject(projectId)).thenReturn(project);
         Assertions.assertTrue(projectValidator.isProjectPublic(projectId));
-        //Mockito.when(projectRepositoryMock.findById(privateProjectId)).thenReturn(Optional.ofNullable(privateProject));
         Mockito.when(projectServiceMock.getProject(privateProjectId)).thenReturn(privateProject);
         Assertions.assertFalse(projectValidator.isProjectPublic(privateProjectId));
     }

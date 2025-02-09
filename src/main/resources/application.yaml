@@ -40,18 +40,19 @@ logging:
     root: info
 
 gallery:
-  max-files: 50
+  maxFiles: 50
 
 calculations_messages_processing:
   enabled: true
 
+aws:
+  endpoint: http://localhost:9000
+  accessKey: user
+  secretKey: password
+  bucketName: projectbucket
+  isMocked: false
+
 services:
-  s3:
-    endpoint: http://localhost:9000
-    accessKey: user
-    secretKey: password
-    bucketName: projectbucket
-    isMocked: false
   payment-service:
     host: http://localhost
     port: 9080

@@ -8,23 +8,24 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CreateBucketRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class AmazonS3Config {
-    @Autowired
-    private S3Properties s3Properties;
+
+    private final AwsProperties awsProperties;
 
     @Bean
     public AmazonS3 amazonS3() {
-        String accessKey = s3Properties.getS3().get("accessKey");
-        String secretKey = s3Properties.getS3().get("secretKey");
-        String endpoint = s3Properties.getS3().get("endpoint");
-        String bucketName = s3Properties.getS3().get("bucketName");
+        String accessKey = awsProperties.getAccessKey();
+        String secretKey = awsProperties.getSecretKey();
+        String endpoint = awsProperties.getEndpoint();
+        String bucketName = awsProperties.getBucketName();
 
         AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()

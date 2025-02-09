@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.impl;
 
+import faang.school.projectservice.config.filestorage.GalleryProperties;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,10 +23,11 @@ class ResourceValidatorTest {
     private ProjectServiceImpl projectServiceMock;
     @Mock
     private ProjectValidator projectValidatorMock;
+    @Mock
+    private GalleryProperties galleryPropertiesMock;
     @InjectMocks
     private ResourceValidator resourceValidator;
-    //@InjectMocks
-    //Properties properties;
+
     private final List<Long> resourceIds = new ArrayList<>();
 
     @BeforeEach
@@ -34,14 +35,7 @@ class ResourceValidatorTest {
         for (int i = 0; i < 49; i++) {
             resourceIds.add((long) i);
         }
-        //ReflectionTestUtils.setField(properties, "gallery.max-files", "50");
     }
-
-    @AfterEach
-    void tearDown() {
-    }
-
-
 
     @Test
     @DisplayName("Test user can download resource")
@@ -75,6 +69,8 @@ class ResourceValidatorTest {
     void validateResourcesOversize() {
         Long projectId = 222L;
         Mockito.when(projectServiceMock.getProjectResourceIds(projectId)).thenReturn(resourceIds);
+        Mockito.when(galleryPropertiesMock.getMaxFiles()).thenReturn(50);
+
         resourceValidator.validateResourcesOversize(projectId);
         resourceIds.add(1050L);
         resourceValidator.validateResourcesOversize(projectId);

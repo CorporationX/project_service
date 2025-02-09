@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProjectValidator {
 
-    //private final ProjectRepository projectRepository;
     private final ProjectService projectService;
 
     void validateUserInProject(Long userId, Long projectId) {
@@ -26,13 +25,6 @@ public class ProjectValidator {
 
     boolean isUserParticipatedInProject(Long userId, Long projectId) {
         Project project = projectService.getProject(projectId);
-/*        List<Long> projectUserIds = project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .map(TeamMember::getUserId)
-                .distinct()
-                .sorted()
-                .toList();*/
-        //return projectUserIds.contains(userId);
         return project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getUserId).anyMatch(usrId -> usrId.equals(userId));
@@ -42,8 +34,4 @@ public class ProjectValidator {
         Project project = projectService.getProject(projectId);
         return ProjectVisibility.PUBLIC.equals(project.getVisibility());
     }
-
-    //private boolean isUserInProject(Long userId, Long projectId) {
-    //        return isUserParticipatedInProject(userId, projectId);
-    //}
 }

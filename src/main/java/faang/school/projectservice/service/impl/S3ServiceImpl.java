@@ -5,8 +5,8 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.service.S3Service;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,15 +15,12 @@ import java.io.InputStream;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
-    private final AmazonS3 s3Client;
-    private final String bucketName;
 
-    @Autowired
-    public S3ServiceImpl(AmazonS3 s3Client, @Value("${services.s3.bucketName}") String bucketName) {
-        this.s3Client = s3Client;
-        this.bucketName = bucketName;
-    }
+    private final AmazonS3 s3Client;
+    @Value("${aws.bucketName}")
+    private final String bucketName;
 
     @Override
     public void uploadFile(MultipartFile file, String key) {

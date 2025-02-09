@@ -1,6 +1,6 @@
 package faang.school.projectservice;
 
-import faang.school.projectservice.config.filestorage.S3Properties;
+import faang.school.projectservice.config.filestorage.AwsProperties;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableFeignClients
 @EnableJpaAuditing
-@EnableConfigurationProperties(S3Properties.class)
+@EnableConfigurationProperties(AwsProperties.class)
 public class ProjectServiceApplication {
 
     public static void main(String[] args) {

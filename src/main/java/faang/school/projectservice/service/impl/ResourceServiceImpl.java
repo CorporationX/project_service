@@ -39,17 +39,7 @@ public class ResourceServiceImpl implements ResourceService {
         Project project = projectService.getProject(projectId);
         String folder = FOLDER_PREFIX + projectId;
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-        Resource resource = Resource.builder()
-                .key(key)
-                .size(BigInteger.valueOf(file.getSize()))
-                .status(ResourceStatus.ACTIVE)
-                .type(ResourceType.getResourceType(file.getContentType()))
-                .name(file.getOriginalFilename())
-                .project(project)
-                .createdBy(teamMember)
-                .updatedBy(teamMember)
-                .build();
-        resource = resourceRepository.save(resource);
+        Resource resource = resourceRepository.save(createResource (key, file, project, teamMember));
         s3Service.uploadFile(file, key);
         return resourceMapper.toResourceResponseDto(resource);
     }
@@ -79,6 +69,19 @@ public class ResourceServiceImpl implements ResourceService {
     private TeamMember getTeamMember(Long userId) {
         return TeamMember.builder()
                 .id(userId)
+                .build();
+    }
+
+    private Resource createResource (String key, MultipartFile file, Project project, TeamMember teamMember) {
+        return Resource.builder()
+                .key(key)
+                .size(BigInteger.valueOf(file.getSize()))
+                .status(ResourceStatus.ACTIVE)
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .name(file.getOriginalFilename())
+                .project(project)
+                .createdBy(teamMember)
+                .updatedBy(teamMember)
                 .build();
     }
 
