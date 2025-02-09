@@ -4,13 +4,16 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.repository.TaskRepository;
@@ -23,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +46,12 @@ public class StageServiceTest {
 
     @Mock
     private TaskRepository taskRepository;
+
+    @Mock
+    private List<StageFilter> stageFilters;
+
+    @Mock
+    private ProjectRepository projectRepository;
 
     @Mock
     private StageRolesRepository stageRolesRepository;
@@ -144,6 +154,32 @@ public class StageServiceTest {
         verify(stageValidator).checkStageToRemove(stageId);
         verify(stageRepository).findById(stageId);
         verifyNoInteractions(taskRepository, stageRolesRepository, teamMemberRepository);
+    }
+    @Test
+    public void testGetActiveStages() {
+        // Arrange
+        long projectId = 1L;
+        StageFilterDto stageFilterDto = new StageFilterDto();
+        Project project = mock(Project.class);
+        Stage stage = mock(Stage.class);
+        StageDto stageDto = mock(StageDto.class);
+
+        when(projectRepository.getReferenceById(projectId)).thenReturn(project);
+        when(project.getStages()).thenReturn(Collections.singletonList(stage));
+        when(stageFilters.stream()).thenReturn(Collections.singletonList(mock(StageFilter.class)).stream());
+        when(stageMapper.toStageDto(stage)).thenReturn(stageDto);
+
+        // Act
+        List<StageDto> result = stageService.getActiveStages(projectId, stageFilterDto);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(stageDto, result.get(0));
+
+        verify(projectRepository, times(1)).getReferenceById(projectId);
+        verify(project, times(1)).getStages();
+        verify(stageMapper, times(1)).toStageDto(stage);
     }
 
 }

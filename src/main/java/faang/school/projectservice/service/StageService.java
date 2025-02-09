@@ -1,8 +1,11 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
@@ -20,14 +23,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class StageService {
     private final ProjectRepository projectRepository;
     private final StageValidator stageValidator;
     private final StageMapper stageMapper;
-    private final ProjectService projectService;
+    private final List<StageFilter> stageFilters;
     private final TeamMemberRepository teamMemberRepository;
     private final StageRolesRepository stageRolesRepository;
 
@@ -52,6 +52,17 @@ public class StageService {
     public List<StageDto> getStages(Long projectId) {
         Project project = stageValidator.getValidProject(projectId);
         return project.getStages().stream()
+                .map(stageMapper::toStageDto).toList();
+    }
+
+    public List<StageDto> getActiveStages(long projectId, StageFilterDto stageFilter) {
+        Project project = projectRepository.getReferenceById(projectId);
+        List<Stage> projectStages = project.getStages();
+
+        return projectStages.stream()
+                .filter(stage -> stageFilters.stream()
+                        .filter(filter -> filter.isApplicable(stageFilter))
+                        .anyMatch(filter -> filter.filterEntity(stage, stageFilter)))
                 .map(stageMapper::toStageDto).toList();
     }
 
@@ -98,13 +109,9 @@ public class StageService {
         return stageMapper.toStageUpdateDto(stageDto);
     }
 
-    public ResponseEntity<StageDto> sendInvitations(Long stageId, Stage stage) {
+    public StageInvitationDto sendInvitations(Long stageId, StageInvitationDto stageInvitationDto) {
         return null;
-    }
 
-    public ResponseEntity<StageDto> getStageDetails(Long stageId) {
-
-        return null;
     }
 
     public ResponseEntity<List<Task>> getStageTasks(Long stageId, TaskStatus status) {

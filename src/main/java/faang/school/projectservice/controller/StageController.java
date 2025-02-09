@@ -2,10 +2,13 @@ package faang.school.projectservice.controller;
 
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
@@ -33,17 +36,13 @@ import java.util.Set;
 @RequestMapping("/api/v1/{projectId}/stages")
 public class StageController {
 
-    private final StageMapper stageMapper;
     private final StageService stageService;
-
 
     @PostMapping("/stage")
     public StageDto createStage(@Valid @PathVariable Long projectId,
                                 @RequestBody StageDto stageDto) {
         return stageService.createStage(stageDto);
     }
-
-    ;
 
     @GetMapping("/stages")
     public ResponseEntity<List<StageDto>> getStages(@Valid @PathVariable Long projectId,
@@ -52,16 +51,12 @@ public class StageController {
         return ResponseEntity.ok(stageService.getStages(projectId));
     }
 
-    ;
-
     @DeleteMapping("/{stageId}")
     public void deleteStage(@Valid @PathVariable Long stageId,
                             @PathVariable Long projectId) {
         stageService.deleteStage(stageId);
         log.info("Удален этап {} проекта {}", stageId, projectId);
     }
-
-    ;
 
     @PutMapping("/{stageId}")
     public StageUpdateDto updateStage(@Valid @PathVariable Long projectId,
@@ -70,24 +65,13 @@ public class StageController {
         return stageService.updateStage(stageId, StageUpdateDto);
     }
 
-    ;
 
     @PostMapping("/{stageId}/invitations")
-    public ResponseEntity<StageDto> sendInvitations(@Valid @PathVariable Long projectId,
-                                                    @PathVariable Long stageId,
-                                                    @RequestBody StageDto stageDto) {
-        return stageService.sendInvitations(stageId, stageMapper.toStage(stageDto));
+    public ResponseEntity<StageInvitationDto> sendStageInvitations(@Valid @PathVariable Long projectId,
+                                                                   @PathVariable Long stageId,
+                                                                   @RequestBody StageInvitationDto stageInvitationDto) {
+        return ResponseEntity.ok((stageService.sendInvitations(stageId,stageInvitationDto)));
     }
-
-    ;
-
-    @GetMapping("/{stageId}")
-    public ResponseEntity<StageDto> getStageDetails(@Valid @PathVariable Long projectId,
-                                                    @PathVariable Long stageId) {
-        return stageService.getStageDetails(stageId);
-    }
-
-    ;
 
     @GetMapping("/{stageId}/tasks")
     public ResponseEntity<List<Task>> getStageTasks(@Valid @PathVariable Long projectId,
@@ -96,14 +80,22 @@ public class StageController {
         return stageService.getStageTasks(stageId, status);
     }
 
-    ;
-
     @PutMapping("/{stageId}/participants")
     public ResponseEntity<StageUpdateDto> updateStageTeamMember(@Valid @PathVariable Long projectId,
                                                                 @PathVariable Long stageId,
                                                                 @RequestBody Set<StageUpdateDto> StageUpdateDto) {
         return stageService.updateStageParticipants(StageUpdateDto);
     }
+    @GetMapping("/filter")
+    public ResponseEntity<List<StageDto>> getFilteredStages(@Valid @PathVariable Long projectId,
+                                                            @RequestParam(required = false) Set<TeamRole> roles,
+                                                            @RequestParam(required = false) TaskStatus taskStatus) {
+        StageFilterDto stageFilter = StageFilterDto.builder()
+                .role(roles)
+                .taskStatus(taskStatus)
+                .build();
+        List<StageDto> filteredStages = stageService.getActiveStages(projectId, stageFilter);
 
-    ;
+        return ResponseEntity.ok(filteredStages);
+    }
 }
