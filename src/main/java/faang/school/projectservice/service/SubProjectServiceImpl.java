@@ -43,6 +43,9 @@ public class SubProjectServiceImpl implements SubProjectService {
         }
 
         Project subProjectToSave = subProjectMapper.toProjectEntity(subProjectDto);
+        if (subProjectToSave == null) {
+            throw new IllegalStateException("Mapped subProject is null");
+        }
         subProjectToSave.setStatus(ProjectStatus.CREATED);
         Project projectEntity = projectRepository.save(subProjectToSave);
         return subProjectMapper.toProjectResponseDto(projectEntity);
@@ -104,7 +107,7 @@ public class SubProjectServiceImpl implements SubProjectService {
                         .title(subproject.getName())
                         .visibility(subproject.getVisibility())
                         .status(subproject.getStatus())
-                        .supProjectIds(Collections.singletonList(project.getId()))
+                        .subProjectIds(Collections.singletonList(project.getId()))
                         .build())
                 .collect(Collectors.toList());
     }
