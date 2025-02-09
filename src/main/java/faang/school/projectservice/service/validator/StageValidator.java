@@ -2,8 +2,13 @@ package faang.school.projectservice.service.validator;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageUpdateDto;
+import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.stage.StageTeamRoleFilter;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
@@ -18,6 +23,7 @@ public class StageValidator {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final ProjectService projectService;
+    private final StageTeamRoleFilter stageTeamRoleFilter;
 
     public void validateStageCreation(StageDto stageDto) {
         /**
@@ -48,6 +54,14 @@ public class StageValidator {
          *
          * Убедиться, что этап с таким названием (или идентификатором) ещё не существует в рамках данного проекта (если требуется уникальность).
          */
+        Project project = projectRepository.findById(stageDto.getProject().getId()).orElseThrow(
+                () -> new EntityNotFoundException("Проект не найден.")
+        );
+
+        if (project.getStatus() == ProjectStatus.CANCELLED) {
+            throw new BusinessException("Проект в статусе Отменен");
+        }
+
     }
 
     public Project getValidProject(Long projectId) {

@@ -25,11 +25,11 @@ public class StageDto {
     private String stageName;
     @NotEmpty(message = "Проект обязателен при создании этапа, не забудьте заполнить его")
     private Project project;
-    @NotEmpty
+    @NotEmpty (message = "Этап проект с незаполненными ролями или участниками")
     private List<StageRoles> stageRoles;
     @NotNull
     private List<Task> tasks;
-    @NotEmpty
+    @NotEmpty(message = "Этап проект с незаполненными ролями или участниками")
     private List<TeamMember> executors;
 
 }
