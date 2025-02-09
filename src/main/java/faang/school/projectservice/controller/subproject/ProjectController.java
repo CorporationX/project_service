@@ -6,7 +6,7 @@ import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.UpdateProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.ProjectValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

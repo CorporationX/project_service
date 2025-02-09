@@ -9,6 +9,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.projectfilter.ProjectNameFilter;
 import faang.school.projectservice.service.projectfilter.ProjectStatusFilter;
 import faang.school.projectservice.validator.ProjectValidator;

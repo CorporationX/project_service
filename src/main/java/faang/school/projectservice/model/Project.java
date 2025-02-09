@@ -119,4 +119,24 @@ public class Project {
     @CollectionTable(name = "project_gallery", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "file_key", nullable = false)
     private List<String> galleryFileKeys;
+
+    @Override
+    public String toString() {
+        return "Project{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", description='" + description + '\'' +
+            ", storageSize=" + storageSize +
+            ", maxStorageSize=" + maxStorageSize +
+            ", ownerId=" + ownerId +
+            ", parentProjectId=" + (parentProject != null ? parentProject.getId() : null) +
+            ", createdAt=" + createdAt +
+            ", updatedAt=" + updatedAt +
+            ", status=" + status +
+            ", visibility=" + visibility +
+            ", coverImageId='" + coverImageId + '\'' +
+            ", presentationFileKey='" + presentationFileKey + '\'' +
+            ", presentationGeneratedAt=" + presentationGeneratedAt +
+            '}';
+    }
 }

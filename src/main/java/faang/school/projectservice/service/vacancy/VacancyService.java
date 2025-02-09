@@ -7,7 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.candidate.CandidateService;
 import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import lombok.RequiredArgsConstructor;

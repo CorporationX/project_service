@@ -51,4 +51,15 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
+
+    @Override
+    public String toString() {
+        return "TeamMember{" +
+            "id=" + id +
+            ", userId=" + userId +
+            ", nickname='" + nickname + '\'' +
+            ", roles=" + roles +
+            ", teamId=" + (team != null ? team.getId() : null) +
+            '}';
+    }
 }

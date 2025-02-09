@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exeption.EntityNotFoundException;
@@ -100,7 +100,7 @@ public class ProjectService {
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
     }
-    void validateUniqueProject(Project project) {
+    public void validateUniqueProject(Project project) {
         Long ownerId = project.getOwnerId();
         String name = project.getName();
 
@@ -112,4 +112,16 @@ public class ProjectService {
         }
         log.info("Project '{}' with ownerId #{} unique and can be created.", name, ownerId);
     }
+
+    public Project getProject(long projectId) {
+        return projectRepository.findById(projectId).orElseThrow(
+            () -> new jakarta.persistence.EntityNotFoundException(
+                String.format("Project not found by id: %s", projectId))
+        );
+    }
+
+    public void saveProject(Project project){
+        projectRepository.save(project);
+    }
+
 }
