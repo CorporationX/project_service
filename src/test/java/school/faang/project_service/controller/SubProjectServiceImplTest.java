@@ -1,78 +1,150 @@
 package school.faang.project_service.controller;
 
 import faang.school.projectservice.dto.client.CreateSubProjectDto;
+import faang.school.projectservice.dto.client.MomentDto;
+import faang.school.projectservice.dto.client.StageDto;
 import faang.school.projectservice.dto.client.SubProjectDto;
 import faang.school.projectservice.dto.client.UpdateSubProjectDto;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.SubProjectServiceImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SubProjectServiceImplTest {
+class SubProjectServiceImplTest {
 
-    @MockBean
+    @Mock
     private ProjectRepository projectRepository;
 
-    @MockBean
-    private ProjectRepository subProjectRepository;
-
-    @MockBean
+    @Mock
     private SubProjectMapper subProjectMapper;
 
-    @MockBean
-    private CreateSubProjectDto createSubProjectDto;
+    @Mock
+    private MomentRepository momentRepository;
 
-    @MockBean
-    private SubProjectDto subProjectDto;
-
-    @MockBean
-    private UpdateSubProjectDto updateSubProjectDto;
-
-    @MockBean
+    @InjectMocks
     private SubProjectServiceImpl subProjectService;
 
+    private Project parentProject;
+    private Project subProject;
+    private CreateSubProjectDto createSubProjectDto;
+    private UpdateSubProjectDto updateSubProjectDto;
+
+    @BeforeEach
     void setUp() {
-        Project project = new Project();
-        project.setId(1L);
-        project.setName("Test Project");
 
-        Project subProject = new Project();
+        parentProject = new Project();
+        parentProject.setId(1L);
+        parentProject.setVisibility(ProjectVisibility.PUBLIC);
+
+        subProject = new Project();
         subProject.setId(2L);
-        subProject.setName("Test SubProject");
-        List<Project> projects = Collections.singletonList(project);
-        subProject.setChildren(projects);
+        subProject.setVisibility(ProjectVisibility.PUBLIC);
 
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-        when(subProjectRepository.findById(2L)).thenReturn(Optional.of(subProject));
-        when(subProjectRepository.save(any(Project.class))).thenReturn(subProject);
+        MomentDto momentDto = MomentDto.builder()
+                .id(1L)
+                .name("Last update")
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        createSubProjectDto = CreateSubProjectDto.builder()
+                .parentId(1L)
+                .id(2L)
+                .subProjectIds(Collections.emptyList())
+                .build();
+
+        updateSubProjectDto = UpdateSubProjectDto.builder()
+                .id(2L)
+                .subProjectIds(Collections.emptyList())
+                .stageDto(new StageDto(200L, "Development"))
+                .visibility(ProjectVisibility.PUBLIC)
+                .lastUpdate(momentDto)
+                .build();
     }
 
     @Test
-    public void testGetSubProject() {
-        Project project = new Project();
-        project.setId(1L);
-        project.setDescription("Test Description");
+    void testCreateSubProject_Success() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(parentProject));
+        when(projectRepository.save(any(Project.class))).thenReturn(subProject);
 
-        List<SubProjectDto> subProjectDtos = subProjectService.getSubprojects(
-                project, "Test Title", ProjectStatus.CREATED);
+        SubProjectDto result = subProjectService.createSubProject(createSubProjectDto);
 
-        assertNotNull(subProjectDtos);
-        assertEquals(1L, subProjectDtos.get(0).id());
-        assertEquals("Test Title", subProjectDtos.get(0).title());
+        assertNotNull(result);
+        assertEquals(2L, result.id());
+        verify(projectRepository).save(any(Project.class));
+    }
+
+    @Test
+    void testCreateSubProject_ParentNotFound() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                subProjectService.createSubProject(createSubProjectDto));
+
+        assertEquals("Parent project not found", exception.getMessage());
+    }
+
+    @Test
+    void testCreateSubProject_ParentIsPrivate() {
+        parentProject.setVisibility(ProjectVisibility.PRIVATE);
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(parentProject));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                subProjectService.createSubProject(createSubProjectDto));
+
+        assertEquals("Parent project is private", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateSubProject_Success() {
+        when(projectRepository.findById(2L)).thenReturn(Optional.of(subProject));
+
+        SubProjectDto result = subProjectService.updateSubProject(updateSubProjectDto);
+
+        assertNotNull(result);
+        assertEquals(2L, result.id());
+    }
+
+    @Test
+    void testUpdateSubProject_NotFound() {
+        when(projectRepository.findById(2L)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                subProjectService.updateSubProject(updateSubProjectDto));
+
+        assertEquals("No project found to update", exception.getMessage());
+    }
+
+    @Test
+    void testGetSubProjects_Success() {
+        parentProject.setChildren(Collections.singletonList(subProject));
+
+        List<SubProjectDto> result = subProjectService.getSubprojects(parentProject, "Test", ProjectStatus.CREATED);
+
+        assertNotNull(result);
+        Assertions.assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
     }
 }

@@ -11,6 +11,6 @@ public record SubProjectDto(
         String title,
         ProjectVisibility visibility,
         ProjectStatus status,
-        List<Long> supProjectIds
+        List<Long> subProjectIds
 ) {
 }
