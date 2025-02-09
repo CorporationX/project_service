@@ -14,24 +14,26 @@ import java.util.List;
 public record MeetDto(
         Long id,
 
-        @NotNull @NotBlank
+        @NotBlank
         @Size(max = 128)
         String title,
 
-        @NotNull @NotBlank
+        @NotBlank
         @Size(max = 512)
         String description,
 
         @NotNull
         MeetStatus status,
 
-        @NotNull @Positive
+        @NotNull
+        @Positive
         Long creatorId,
 
+        @NotNull
         @Positive
         Long projectId,
 
-        @NotNull @NotEmpty
+        @NotEmpty
         List<Long> userIds,
 
         @NotNull
