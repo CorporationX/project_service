@@ -27,7 +27,7 @@ public class TeamMemberService {
 
     public TeamMemberDto addMember(TeamMemberDto memberDto, Long requesterId) {
 
-        TeamMember requester = validateRequester(memberDto.teamId(), requesterId, List.of(TeamRole.OWNER, TeamRole.MANAGER));
+        TeamMember requester = getRequester(memberDto.teamId(), requesterId, List.of(TeamRole.OWNER, TeamRole.MANAGER));
 
         userServiceClient.getUser(memberDto.userId());
 
@@ -44,7 +44,7 @@ public class TeamMemberService {
                 .orElseThrow(() -> new EntityNotFoundException("Member not found"));
 
         if (!requesterId.equals(member.getUserId())) {
-            validateRequester(updatedDto.teamId(), requesterId, List.of(TeamRole.MANAGER));
+            getRequester(updatedDto.teamId(), requesterId, List.of(TeamRole.MANAGER));
         }
 
         member.setNickname(updatedDto.nickname());
@@ -55,7 +55,7 @@ public class TeamMemberService {
     }
 
     public void removeMember(Long teamId, Long memberId, Long requesterId) {
-        validateRequester(teamId, requesterId, List.of(TeamRole.OWNER));
+        getRequester(teamId, requesterId, List.of(TeamRole.OWNER));
         teamMemberRepository.deleteById(memberId);
     }
 
@@ -73,7 +73,7 @@ public class TeamMemberService {
         return teamMemberMapper.toDto(member);
     }
 
-    private TeamMember validateRequester(Long teamId, Long requesterId, List<TeamRole> allowedRoles) {
+    private TeamMember getRequester(Long teamId, Long requesterId, List<TeamRole> allowedRoles) {
         TeamMember requester = teamMemberRepository.findByUserIdAndTeamId(requesterId, teamId)
                 .orElseThrow(() -> new EntityNotFoundException("Requester not found in the team"));
 
