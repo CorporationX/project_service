@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.recommendation;
 
-import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.config.feign.UserContext;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectReadDto;

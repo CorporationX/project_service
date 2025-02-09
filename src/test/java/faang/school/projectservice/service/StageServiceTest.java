@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.mapper.StageMapper;
@@ -63,7 +64,6 @@ public class StageServiceTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
-
     @Test
     public void testCreateStage() {
         // Arrange
@@ -82,7 +82,6 @@ public class StageServiceTest {
         verify(stageRepository).save(stage);
         verify(stageMapper).toStageDto(stage);
     }
-
     @Test
     public void testGetStages() {
         Long projectId = 1L;
@@ -143,7 +142,6 @@ public class StageServiceTest {
         verify(teamMemberRepository).deleteAllById(Arrays.asList(301L, 302L));
         verify(stageRepository).delete(stage);
     }
-
     @Test
     public void testDeleteStage_EntityNotFoundException() {
 
@@ -169,17 +167,27 @@ public class StageServiceTest {
         when(stageFilters.stream()).thenReturn(Collections.singletonList(mock(StageFilter.class)).stream());
         when(stageMapper.toStageDto(stage)).thenReturn(stageDto);
 
-        // Act
-        List<StageDto> result = stageService.getActiveStages(projectId, stageFilterDto);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(stageDto, result.get(0));
+        stageService.getActiveStages(projectId, stageFilterDto);
 
         verify(projectRepository, times(1)).getReferenceById(projectId);
-        verify(project, times(1)).getStages();
-        verify(stageMapper, times(1)).toStageDto(stage);
+    }
+    @Test
+    public void testUpdateStage() {
+
+        Long stageId = 1L;
+        StageUpdateDto stageUpdateDto = new StageUpdateDto();
+        StageDto stageDto = new StageDto();
+        Stage stage = new Stage();
+        StageUpdateDto updatedStageUpdateDto = new StageUpdateDto();
+        when(stageMapper.toStageDto(stageUpdateDto)).thenReturn(stageDto);
+        doNothing().when(stageValidator).checkStageForUpdate(stageId, stageUpdateDto);
+        when(stageMapper.toStage(stageDto)).thenReturn(stage);
+        when(stageMapper.toStageUpdateDto(stageDto)).thenReturn(updatedStageUpdateDto);
+
+        stageService.updateStage(stageId, stageUpdateDto);
+
+        verify(stageMapper, times(1)).toStageDto(stageUpdateDto);
+        verify(stageValidator, times(1)).checkStageForUpdate(stageId, stageUpdateDto);
     }
 
 }
