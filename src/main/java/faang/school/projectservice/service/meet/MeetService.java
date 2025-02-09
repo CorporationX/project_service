@@ -5,7 +5,7 @@ import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MeetRepository;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
