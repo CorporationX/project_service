@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
@@ -22,6 +23,8 @@ public class GlobalExceptionHandler {
     private static final Map<Class<? extends Exception>, HttpStatus> EXCEPTION_STATUS_MAP = Map.of(
             MethodArgumentNotValidException.class, HttpStatus.BAD_REQUEST,
             HttpMessageNotReadableException.class, HttpStatus.BAD_REQUEST,
+            IllegalArgumentException.class, HttpStatus.BAD_REQUEST,
+            NoSuchElementException.class, HttpStatus.NOT_FOUND,
             EntityNotFoundException.class, HttpStatus.NOT_FOUND,
             NotUniqueProjectException.class, HttpStatus.CONFLICT,
             ProjectNotClosableException.class, HttpStatus.PRECONDITION_FAILED
