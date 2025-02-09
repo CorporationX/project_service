@@ -65,5 +65,4 @@ public class TeamController {
         teamMemberService.removeMember(teamId, userId, requesterId);
         return ResponseEntity.noContent().build();
     }
-
 }

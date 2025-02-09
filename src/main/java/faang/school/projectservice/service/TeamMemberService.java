@@ -27,7 +27,6 @@ public class TeamMemberService {
 
     public TeamMemberDto addMember(TeamMemberDto memberDto, Long requesterId) {
 
-
         TeamMember requester = validateRequester(memberDto.teamId(), requesterId, List.of(TeamRole.OWNER, TeamRole.MANAGER));
 
         userServiceClient.getUser(memberDto.userId());
