@@ -18,7 +18,6 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 @PropertySource("classpath:application.yaml")
 class ResourceValidatorTest {
-
     @Mock
     private ProjectServiceImpl projectServiceMock;
     @Mock
@@ -27,7 +26,6 @@ class ResourceValidatorTest {
     private GalleryProperties galleryPropertiesMock;
     @InjectMocks
     private ResourceValidator resourceValidator;
-
     private final List<Long> resourceIds = new ArrayList<>();
 
     @BeforeEach

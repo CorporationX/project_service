@@ -23,8 +23,8 @@ public class ResourceController {
     private final ResourceService resourceService;
     private final UserContext userContext;
 
-    @PostMapping("/projects/{projectId}")
-    public ResourceResponseDto addResource(@NotBlank @PathVariable Long projectId,
+    @PostMapping("/")
+    public ResourceResponseDto addResource(@RequestParam Long projectId,
                                            @RequestBody MultipartFile file) {
         log.info("Uploading image {} to project {}", file.getName(), projectId);
         Long userId = userContext.getUserId();
