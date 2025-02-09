@@ -72,7 +72,6 @@ class ProjectServiceTest {
 
         ProjectCreateResponseDto result = projectService.createProject(createRequestDto);
 
-
         assertEquals(projectMapper.toCreateResponseDto(createProject), result);
         verify(projectRepository).save(createProject);
     }
@@ -144,8 +143,7 @@ class ProjectServiceTest {
 
     @Test
     void getProjectDtoById_ShouldReturnProjectWhenExists() {
-        when(projectService.getProjectById(1L)
-        ).thenReturn(project);
+        doReturn(project).when(projectService).getProjectById(1L);
 
         ProjectResponseDto result = projectService.getProjectDtoById(1L);
 

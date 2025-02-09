@@ -31,11 +31,12 @@ public class StageInvitationService {
         TeamMember author = teamMemberService.getTeamMember(authorId);
         stageInvitationValidator.validateInvitedForCreate(author.getId(), invited.getId());
 
-        StageInvitation invitation = new StageInvitation();
-        invitation.setStage(stage);
-        invitation.setAuthor(author);
-        invitation.setInvited(invited);
-        invitation.setStatus(StageInvitationStatus.PENDING);
+        StageInvitation invitation = StageInvitation.builder()
+                .stage(stage)
+                .author(author)
+                .invited(invited)
+                .status(StageInvitationStatus.PENDING)
+                .build();
 
         StageInvitation saved = stageInvitationRepository.save(invitation);
         return stageInvitationMapper.toDto(saved);
