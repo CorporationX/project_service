@@ -8,7 +8,7 @@ import faang.school.projectservice.dto.jira.response.IssueCreateResponseDto;
 import faang.school.projectservice.dto.jira.response.IssueDto;
 import faang.school.projectservice.dto.jira.response.IssueFieldsResponseDto;
 import faang.school.projectservice.dto.jira.response.IssueResponseDto;
-import faang.school.projectservice.service.jira.JiraGateway;
+import faang.school.projectservice.client.jira.JiraClientImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class JiraControllerTest {
 
     @Mock
-    private JiraGateway jiraGateway;
+    private JiraClientImpl jiraClientImpl;
 
     @InjectMocks
     private JiraController jiraController;
@@ -64,7 +64,7 @@ class JiraControllerTest {
     @Test
     public void testGetAllIssuesByProject() throws Exception {
         String projectId = "PROJ";
-        when(jiraGateway.getAllIssuesByProject(projectId)).thenReturn(getIssueResponseDto());
+        when(jiraClientImpl.getAllIssuesByProject(projectId)).thenReturn(getIssueResponseDto());
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/project/{projectId}", projectId)
                         .accept(MediaType.APPLICATION_JSON))
@@ -77,7 +77,7 @@ class JiraControllerTest {
         IssueDto issueDto = new IssueDto("1",
                 IssueFieldsResponseDto.builder().summary("Test Issue").build());
 
-        when(jiraGateway.getIssueById(issueId)).thenReturn(issueDto);
+        when(jiraClientImpl.getIssueById(issueId)).thenReturn(issueDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/{id}", issueId)
                         .accept(MediaType.APPLICATION_JSON))
@@ -87,7 +87,7 @@ class JiraControllerTest {
     @Test
     public void testGetIssuesByAssignee() throws Exception {
         String userId = "user123";
-        when(jiraGateway.getIssuesByAssignee(userId)).thenReturn(getIssueResponseDto());
+        when(jiraClientImpl.getIssuesByAssignee(userId)).thenReturn(getIssueResponseDto());
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/assignee/{userId}", userId)
                         .accept(MediaType.APPLICATION_JSON))
@@ -97,7 +97,7 @@ class JiraControllerTest {
     @Test
     public void testGetIssuesByStatus() throws Exception {
         String status = "In Progress";
-        when(jiraGateway.getIssuesByStatus(status)).thenReturn(getIssueResponseDto());
+        when(jiraClientImpl.getIssuesByStatus(status)).thenReturn(getIssueResponseDto());
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/status/{status}", status)
                         .accept(MediaType.APPLICATION_JSON))
@@ -106,7 +106,7 @@ class JiraControllerTest {
 
     @Test
     public void testCreateIssue() throws Exception {
-        when(jiraGateway.createIssue(eq(getIssueCreateRequestDto()))).thenReturn(getIssueCreateResponseDto());
+        when(jiraClientImpl.createIssue(eq(getIssueCreateRequestDto()))).thenReturn(getIssueCreateResponseDto());
         String requestBody = """
                 {
                   "fields" : {
@@ -128,7 +128,7 @@ class JiraControllerTest {
     @Test
     public void testEditIssue() throws Exception {
         String issueId = "1";
-        doNothing().when(jiraGateway).editIssue(eq(issueId), eq(getIssueUpdateRequestDto()));
+        doNothing().when(jiraClientImpl).editIssue(eq(issueId), eq(getIssueUpdateRequestDto()));
 
         String requestBody = """
                 {
@@ -148,7 +148,7 @@ class JiraControllerTest {
                         .content(requestBody))
                 .andExpect(status().isNoContent());
 
-        verify(jiraGateway).editIssue(issueId, getIssueUpdateRequestDto());
+        verify(jiraClientImpl).editIssue(issueId, getIssueUpdateRequestDto());
     }
 
     private IssueCreateRequestDto getIssueCreateRequestDto() {

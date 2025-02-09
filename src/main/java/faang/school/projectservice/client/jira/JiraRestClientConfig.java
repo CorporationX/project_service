@@ -1,4 +1,4 @@
-package faang.school.projectservice.client;
+package faang.school.projectservice.client.jira;
 
 import faang.school.projectservice.properties.JiraProperties;
 import lombok.RequiredArgsConstructor;

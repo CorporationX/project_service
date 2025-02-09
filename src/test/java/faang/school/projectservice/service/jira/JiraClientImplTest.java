@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.jira;
 
-import faang.school.projectservice.client.JiraRestClientConfig;
+import faang.school.projectservice.client.jira.JiraClientImpl;
+import faang.school.projectservice.client.jira.JiraRestClientConfig;
 import faang.school.projectservice.dto.jira.request.create.IssueCreateRequestDto;
 import faang.school.projectservice.dto.jira.request.create.IssueFieldsCreateRequestDto;
 import faang.school.projectservice.dto.jira.request.update.IssueFieldsUpdateRequestDto;
@@ -29,9 +30,9 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@RestClientTest(JiraGateway.class)
+@RestClientTest(JiraClientImpl.class)
 @Import(JiraRestClientConfig.class)
-class JiraGatewayTest {
+class JiraClientImplTest {
 
     @MockBean
     private JiraProperties jiraProperties;
@@ -46,7 +47,7 @@ class JiraGatewayTest {
     private MockRestServiceServer mockServer;
 
     @Autowired
-    private JiraGateway jiraService;
+    private JiraClientImpl jiraService;
 
     @BeforeEach
     public void init() {
