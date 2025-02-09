@@ -1,8 +1,8 @@
 package faang.school.projectservice.exceptionhandler;
 
 import faang.school.projectservice.exception.DataAlreadyExistException;
-import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.DataValidateException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,8 +41,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(DataNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlerDataNotFoundException(DataNotFoundException e) {
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlerDataNotFoundException(EntityNotFoundException e) {
         log.error(e.getMessage());
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

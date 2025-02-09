@@ -1,7 +1,6 @@
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataAlreadyExistException;
-import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.filter.ProjectNameFilter;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -12,6 +11,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -161,7 +161,7 @@ public class ProjectServiceTest {
 
         when(projectRepository.findById(10L)).thenReturn(Optional.empty());
 
-        assertThrows(DataNotFoundException.class, () -> projectService.updatedProject(generalDto));
+        assertThrows(EntityNotFoundException.class, () -> projectService.updatedProject(generalDto));
     }
 
     @Test
@@ -277,7 +277,7 @@ public class ProjectServiceTest {
     public void testProjectByIdNotFound() {
         when(projectRepository.findById(30L)).thenReturn(Optional.empty());
 
-        assertThrows(DataNotFoundException.class, () -> projectService.getProjectById(30L));
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(30L));
 
         verify(projectRepository, times(1)).findById(30L);
     }
