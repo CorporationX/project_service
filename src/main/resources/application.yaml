@@ -59,12 +59,6 @@ springdoc:
     path: /swagger-ui
 
 services:
-  s3:
-    endpoint: http://localhost:9000
-    accessKey: user
-    secretKey: password
-    bucketName: projectbucket
-    isMocked: false
   payment-service:
     host: http://localhost
     port: 9080
