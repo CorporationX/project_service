@@ -50,3 +50,8 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+aws:
+  accessKeyId: YOUR_ACCESS_KEY_ID
+  secretKey: YOUR_SECRET_ACCESS_KEY
+  region: YOUR_REGION
