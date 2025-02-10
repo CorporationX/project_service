@@ -65,21 +65,21 @@ public class ProjectController {
 
     @PostMapping("/{projectId}/images")
     public AddImageResponseDto addImageInProjectGallery(@PathVariable Long projectId,
-                                                        @RequestHeader(name = "X-User-Id") Long creatorId,
+                                                        @RequestHeader(name = "x-user-id") Long creatorId,
                                                         @RequestPart("file") MultipartFile file) {
         return projectService.addImageInProjectGallery(projectId, creatorId, file);
     }
 
     @DeleteMapping("/images/{resourceId}")
     public ResponseEntity<Void> deleteImageFromProjectGallery(@PathVariable Long resourceId,
-                                                              @RequestHeader(name = "X-User-Id") Long userId) {
+                                                              @RequestHeader(name = "x-user-id") Long userId) {
         projectService.deleteImageFromProjectGallery(resourceId, userId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{projectId}/images")
     public List<String> getImagesFromProjectGallery(@PathVariable Long projectId,
-                                                    @RequestHeader(name = "X-User-Id") Long userId) {
+                                                    @RequestHeader(name = "x-user-id") Long userId) {
         return projectService.getImagesFromProjectGallery(projectId, userId);
     }
 }
