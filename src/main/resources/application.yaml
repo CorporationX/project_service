@@ -45,6 +45,15 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+google:
+  calendar:
+    settings:
+      calendarId: fcc4660e6d7a24a8ef8ee0f841f3e0acf298d0b1e7c6b92a8bc0c5c3bc5f2a97@group.calendar.google.com
+      zone: Europe/Moscow
+    credentials:
+      filePath: /google-credentials.json
+      tokensPath: tokens
+
 services:
   s3:
     endpoint: http://localhost:9000
