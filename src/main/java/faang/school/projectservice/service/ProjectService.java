@@ -156,7 +156,7 @@ public class ProjectService {
         }
         Project project = getProjectById(projectId);
         String folder = project.getId() + project.getName();
-        Resource resource = s3Service.uploadFile(standardizedCover, folder);
+        Resource resource = S3service.uploadFile(standardizedCover, folder);
         resource.setProject(project);
         project.setCoverImageId(resource.getKey());
 
@@ -166,7 +166,7 @@ public class ProjectService {
 
     public InputStream getCover(long projectId) {
         String key = getProjectById(projectId).getCoverImageId();
-        return s3Service.downloadFile(key);
+        return S3service.downloadFile(key);
     }
 
     @Transactional
@@ -174,7 +174,7 @@ public class ProjectService {
         String key = getProjectById(projectId).getCoverImageId();
         resourceRepository.deleteByKey(key);
         getProjectById(projectId).setCoverImageId(null);
-        s3Service.deleteFile(key);
+        S3service.deleteFile(key);
     }
 
     @SneakyThrows
