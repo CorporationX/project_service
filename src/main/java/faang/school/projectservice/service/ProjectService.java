@@ -1,30 +1,35 @@
 package faang.school.projectservice.service;
 
 
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
-import faang.school.projectservice.dto.project.CreateProjectRequest;
-import faang.school.projectservice.dto.project.DeleteProjectRequest;
-import faang.school.projectservice.dto.project.FilterProjectRequest;
-import faang.school.projectservice.dto.project.ProjectResponse;
-import faang.school.projectservice.dto.project.UpdateProjectRequest;
+import faang.school.projectservice.dto.project.*;
+import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.S3ObjectDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ProjectAlreadyExistsException;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.mapper.ResourceMapper;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.filter.project.ProjectFilter;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.util.FileUtils;
+import faang.school.projectservice.util.PdfGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProjectService {
@@ -33,6 +38,14 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
     private final List<ProjectFilter> projectFilters;
+    private final ResourceRepository resourceRepository;
+    private final S3Service s3service;
+    private final ResourceMapper resourceMapper;
+    private final PdfGenerator pdfGenerator;
+
+    @Value("${services.s3.bucketName}")
+    private String bucketName;
+
 
     public Project getProject(long projectId) {
         return projectRepository.findById(projectId)
@@ -126,4 +139,31 @@ public class ProjectService {
                 )
                 .anyMatch(teamMember -> teamMember.getUserId().equals(userId));
     }
+
+    public ResourceDto createPdfFromProject(Long projectId) {
+
+        Project project = getProject(projectId);
+        List<Team> teams = project.getTeams();
+        List<Task> tasks = project.getTasks();
+
+        var pdfData = pdfGenerator.generateProjectPresentationNew(project, teams, tasks);
+        MultipartFile multipartFile = FileUtils.convertToMultipartFile(pdfData, "project-pdf", ResourceType.PDF.name());
+
+        Resource resource = s3service.uploadFile(multipartFile, "pdf");
+
+        resource = resourceRepository.save(resource);
+        return resourceMapper.toEntity(resource);
+    }
+
+    public S3ObjectDto downloadPdf(Long resourceId) {
+        var resource = resourceRepository.findById(resourceId)
+                .orElseThrow(() -> new EntityNotFoundException("Resources Not found !!!"));
+
+        String fileName = resource.getKey().substring(resource.getKey().lastIndexOf("/") + 1);
+        S3Object object = s3service.getObject(resource.getKey());
+
+        return new S3ObjectDto(fileName, object, ResourceType.PDF.name());
+    }
+
+
 }

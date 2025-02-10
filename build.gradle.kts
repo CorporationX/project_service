@@ -32,6 +32,11 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     /**
+     * Apache PDFBox
+     */
+    implementation("org.apache.pdfbox:pdfbox:2.0.30")
+
+    /**
     * Amazon S3
     */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
