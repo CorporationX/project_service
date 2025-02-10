@@ -47,8 +47,6 @@ public class DonationService {
 
             Donation donation = donationMapper.toEntity(donationDto);
             Donation savedDonation = donationRepository.save(donation);
-            log.info("Донат сохранён: {}", savedDonation);
-
             return donationMapper.toDto(savedDonation);
         } catch (Exception e) {
             throw new PaymentFailedException("Ошибка при обработке платежа", e);

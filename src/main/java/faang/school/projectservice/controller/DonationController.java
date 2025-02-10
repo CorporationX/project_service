@@ -24,7 +24,7 @@ public class DonationController {
     private final DonationService donationService;
     private final UserContext userContext;
 
-    @PostMapping()
+    @PostMapping
     public DonationDto sendDonation(@Valid @RequestBody DonationDto donationDto) {
         return donationService.sendDonation(donationDto);
     }
