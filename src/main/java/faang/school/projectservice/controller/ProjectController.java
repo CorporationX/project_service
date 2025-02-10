@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,23 +63,23 @@ public class ProjectController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/images/{projectId}/{creatorId}")
+    @PostMapping("/{projectId}/images")
     public AddImageResponseDto addImageInProjectGallery(@PathVariable Long projectId,
-                                                        @PathVariable Long creatorId,
+                                                        @RequestHeader(name = "X-User-Id") Long creatorId,
                                                         @RequestPart("file") MultipartFile file) {
         return projectService.addImageInProjectGallery(projectId, creatorId, file);
     }
 
-    @DeleteMapping("/images/{resourceId}/{userId}")
+    @DeleteMapping("/images/{resourceId}")
     public ResponseEntity<Void> deleteImageFromProjectGallery(@PathVariable Long resourceId,
-                                                              @PathVariable Long userId) {
+                                                              @RequestHeader(name = "X-User-Id") Long userId) {
         projectService.deleteImageFromProjectGallery(resourceId, userId);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/images/{projectId}/{userId}")
+    @GetMapping("/{projectId}/images")
     public List<String> getImagesFromProjectGallery(@PathVariable Long projectId,
-                                                         @PathVariable Long userId) {
+                                                    @RequestHeader(name = "X-User-Id") Long userId) {
         return projectService.getImagesFromProjectGallery(projectId, userId);
     }
 }

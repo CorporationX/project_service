@@ -16,9 +16,8 @@ import java.util.NoSuchElementException;
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
-    public TeamMember getTeamMemberById(Long teamMemberId) {
-        return teamMemberRepository.findByUserId(teamMemberId)
-                .orElseThrow(() -> new NoSuchElementException("TeamMember not found"));
+    public TeamMember getTeamMemberByUserAndProjectIds(Long userId, Long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
     }
 
     public List<TeamMember> findAllByIds(List<Long> teamMemberIds) {
