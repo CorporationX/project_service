@@ -22,7 +22,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/projects")
-public class ProjectController {
+public class ProjectControllerRecommendation {
 
     private final ProjectManagementService projectManagementService;
     private final UserContext userContext;

@@ -22,9 +22,9 @@ public class StageUpdateDto {
     @NotNull
     private Long stageId;
     private String stageName;
-    private Project project;
-    private List<StageRoles> stageRoles;
-    private List<Task> tasks;
-    private List<TeamMember> executors;
+    private Long projectId;
+    private List<Long> stageRolesIds;
+    private List<Long> tasksIds;
+    private List<Long> executorsIds;
 }
 

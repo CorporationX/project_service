@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageInvitationDto;
@@ -44,15 +45,15 @@ public class StageService {
     public StageDto createStage(StageDto stageDto) {
 
         stageValidator.validateStageCreation(stageDto);
-        Stage stage = stageMapper.toStage(stageDto);
+        Stage stage = stageMapper.toEntity(stageDto,taskRepository,stageRolesRepository,teamMemberRepository,projectRepository);
         stageRepository.save(stage);
-        return stageMapper.toStageDto(stage);
+        return stageMapper.toDto(stage,taskRepository,stageRolesRepository,teamMemberRepository);
     }
 
     public List<StageDto> getStages(Long projectId) {
         Project project = stageValidator.getValidProject(projectId);
         return project.getStages().stream()
-                .map(stageMapper::toStageDto).toList();
+                .map(stage->stageMapper.toDto(stage,taskRepository,stageRolesRepository,teamMemberRepository)).toList();
     }
 
     public List<StageDto> getActiveStages(long projectId, StageFilterDto stageFilter) {
@@ -63,12 +64,12 @@ public class StageService {
                 .filter(stage -> stageFilters.stream()
                         .filter(filter -> filter.isApplicable(stageFilter))
                         .anyMatch(filter -> filter.filterEntity(stage, stageFilter)))
-                .map(stageMapper::toStageDto).toList();
+                .map(stage->stageMapper.toDto(stage,taskRepository,stageRolesRepository,teamMemberRepository)).toList();
     }
 
-    public void deleteStage(Long stageId) {
+    public void deleteStage(Long stageId, StageDeleteDto stageDeleteDto) {
 
-        stageValidator.checkStageToRemove(stageId);
+        stageValidator.checkStageToRemove(stageId,stageDeleteDto);
 
         Stage stage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException("Этап не найден"));
@@ -105,7 +106,7 @@ public class StageService {
 
         StageDto stageDto = stageMapper.toStageDto(stageUpdateDto);
         stageValidator.checkStageForUpdate(stageId, stageUpdateDto);
-        stageRepository.save(stageMapper.toStage(stageDto));
+        stageRepository.save(stageMapper.toEntity(stageDto,taskRepository,stageRolesRepository,teamMemberRepository,projectRepository));
         return stageMapper.toStageUpdateDto(stageDto);
     }
 

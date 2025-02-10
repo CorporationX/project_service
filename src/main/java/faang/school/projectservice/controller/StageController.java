@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 
+import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageInvitationDto;
@@ -53,8 +54,15 @@ public class StageController {
 
     @DeleteMapping("/{stageId}")
     public void deleteStage(@Valid @PathVariable Long stageId,
-                            @PathVariable Long projectId) {
-        stageService.deleteStage(stageId);
+                            @PathVariable Long projectId,
+                            @RequestParam(required = false) List<Long> taskIds,
+                            @RequestParam(required = false) List<Long> teamMemberIds) {
+        StageDeleteDto stageDeleteDto = StageDeleteDto.builder()
+                .tasksIds(taskIds)
+                .teamMembers(teamMemberIds)
+                .build();
+
+        stageService.deleteStage(stageId,stageDeleteDto);
         log.info("Удален этап {} проекта {}", stageId, projectId);
     }
 

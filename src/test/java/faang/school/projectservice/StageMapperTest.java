@@ -3,46 +3,153 @@ package faang.school.projectservice;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.mapper.StageMapperImpl;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageRolesRepository;
+import faang.school.projectservice.repository.TaskRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static junit.framework.TestCase.assertNotNull;
+import java.util.List;
 
-@SpringBootTest
-@ContextConfiguration
-public class StageMapperTest {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    @Autowired
-    private StageMapper stageMapper;
+@ExtendWith(MockitoExtension.class)
+class StageMapperTest {
 
-    @Test
-    public void testToStage() {
-        StageDto stageDto = new StageDto();
-        Stage stage = stageMapper.toStage(stageDto);
-        assertNotNull(stage);
+    @Mock
+    private TaskRepository taskRepository;
+    @Mock
+    private StageRolesRepository stageRolesRepository;
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
+    @Mock
+    private ProjectRepository projectRepository;
+
+    @InjectMocks
+    private StageMapper stageMapper = new StageMapperImpl();
+
+    private StageDto stageDto;
+    private Stage stage;
+
+    @BeforeEach
+    void setUp() {
+        // Setup test DTO
+        stageDto = StageDto.builder()
+                .taskIds(List.of(1L, 2L))
+                .stageRolesIds(List.of(3L, 4L))
+                .executorsId(List.of(5L, 6L))
+                .projectId(7L)
+                .build();
+
+        // Setup test entity
+        stage = Stage.builder()
+                .tasks(List.of(
+                        Task.builder().id(1L).build(),
+                        Task.builder().id(2L).build()))
+                .stageRoles(List.of(
+                        StageRoles.builder().id(3L).build(),
+                        StageRoles.builder().id(4L).build()))
+                .executors(List.of(
+                        TeamMember.builder().id(5L).build(),
+                        TeamMember.builder().id(6L).build()))
+                .project(Project.builder().id(7L).build())
+                .build();
     }
 
     @Test
-    public void testToStageDto() {
-        Stage stage = new Stage();
-        StageDto stageDto = stageMapper.toStageDto(stage);
-        assertNotNull(stageDto);
+    void testToEntity() {
+        // Mock repository responses
+        Mockito.when(taskRepository.getReferenceById(1L)).thenReturn(stage.getTasks().get(0));
+        Mockito.when(taskRepository.getReferenceById(2L)).thenReturn(stage.getTasks().get(1));
+        Mockito.when(stageRolesRepository.getReferenceById(3L)).thenReturn(stage.getStageRoles().get(0));
+        Mockito.when(stageRolesRepository.getReferenceById(4L)).thenReturn(stage.getStageRoles().get(1));
+        Mockito.when(teamMemberRepository.getReferenceById(5L)).thenReturn(stage.getExecutors().get(0));
+        Mockito.when(teamMemberRepository.getReferenceById(6L)).thenReturn(stage.getExecutors().get(1));
+        Mockito.when(projectRepository.getReferenceById(7L)).thenReturn(stage.getProject());
+
+        // Execute mapping
+        Stage result = stageMapper.toEntity(
+                stageDto,
+                taskRepository,
+                stageRolesRepository,
+                teamMemberRepository,
+                projectRepository
+        );
+
+        // Verify results
+        assertThat(result).isNotNull();
+        assertThat(result.getTasks())
+                .hasSize(2)
+                .extracting(Task::getId)
+                .containsExactly(1L, 2L);
+        assertThat(result.getStageRoles())
+                .hasSize(2)
+                .extracting(StageRoles::getId)
+                .containsExactly(3L, 4L);
+        assertThat(result.getExecutors())
+                .hasSize(2)
+                .extracting(TeamMember::getId)
+                .containsExactly(5L, 6L);
+        assertThat(result.getProject())
+                .isNotNull()
+                .extracting(Project::getId)
+                .isEqualTo(7L);
     }
 
     @Test
-    public void testToStageUpdateDto() {
-        StageDto stageDto = new StageDto();
-        StageUpdateDto stageUpdateDto = stageMapper.toStageUpdateDto(stageDto);
-        assertNotNull(stageUpdateDto);
+    void testToDto() {
+        // Execute mapping
+        StageDto result = stageMapper.toDto(
+                stage,
+                taskRepository,
+                stageRolesRepository,
+                teamMemberRepository
+        );
+
+        // Verify results
+        assertThat(result).isNotNull();
+        assertThat(result.getTaskIds()).containsExactly(1L, 2L);
+        assertThat(result.getStageRolesIds()).containsExactly(3L, 4L);
+        assertThat(result.getExecutorsId()).containsExactly(5L, 6L);
+        assertThat(result.getProjectId()).isEqualTo(7L);
     }
 
     @Test
-    public void testToStageDtoFromUpdateDto() {
-        StageUpdateDto stageUpdateDto = new StageUpdateDto();
-        StageDto stageDto = stageMapper.toStageDto(stageUpdateDto);
-        assertNotNull(stageDto);
+    void testToStageUpdateDto() {
+        StageDto stageDto = StageDto.builder()
+                .stageName("Test Stage")
+                .build();
+
+        StageUpdateDto result = stageMapper.toStageUpdateDto(stageDto);
+
+        assertThat(result)
+                .isNotNull()
+                .extracting(StageUpdateDto::getStageName);
+    }
+
+    @Test
+    void testToStageDto() {
+        StageUpdateDto updateDto = StageUpdateDto.builder()
+                .stageName("Updated Stage")
+                .build();
+
+        StageDto result = stageMapper.toStageDto(updateDto);
+
+        assertThat(result)
+                .isNotNull()
+                .extracting(StageDto::getStageName);
+
     }
 }

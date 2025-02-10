@@ -24,13 +24,13 @@ public class StageDto {
     @NotNull
     private String stageName;
     @NotEmpty(message = "Проект обязателен при создании этапа, не забудьте заполнить его")
-    private Project project;
+    private Long projectId;
     @NotEmpty (message = "Этап проект с незаполненными ролями или участниками")
-    private List<StageRoles> stageRoles;
+    private List<Long> stageRolesIds;
     @NotNull
-    private List<Task> tasks;
+    private List<Long> taskIds;
     @NotEmpty(message = "Этап проект с незаполненными ролями или участниками")
-    private List<TeamMember> executors;
+    private List<Long> executorsId;
 
 }
 
