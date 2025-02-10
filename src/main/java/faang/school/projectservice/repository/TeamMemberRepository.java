@@ -4,7 +4,7 @@ import faang.school.projectservice.model.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     @Query(
@@ -14,5 +14,5 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     )
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
-    Optional<TeamMember> findByUserId(long userId);
+    List<TeamMember> findByUserId(long userId);
 }

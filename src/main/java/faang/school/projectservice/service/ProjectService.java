@@ -113,7 +113,7 @@ public class ProjectService {
         String folder = project.getName() + project.getId();
 
         Resource resource = s3Service.uploadFile(file, folder);
-        TeamMember creatorMember = teamMemberService.getTeamMemberById(creatorId);
+        TeamMember creatorMember = teamMemberService.getTeamMemberByUserAndProjectIds(creatorId, projectId);
         resource.setCreatedBy(creatorMember);
         resource.setUpdatedBy(creatorMember);
         resource.setProject(project);
