@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,13 +49,13 @@ public class ProjectController {
 
     @GetMapping
     public List<ProjectReadDto> getAllProjectsWithFilters(
-            ProjectFilterDto filterDto ) {
+            ProjectFilterDto filterDto) {
         return projectManagementService.getAllProjects(filterDto, userContext.getUserId());
     }
 
     @GetMapping("/{projectId}")
     public ProjectReadDto getProjectById(
-            @PathVariable long projectId ){
+            @PathVariable long projectId) {
         return projectManagementService.getProjectById(projectId, userContext.getUserId());
     }
 

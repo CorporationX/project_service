@@ -26,7 +26,7 @@ import java.util.List;
 public class JiraController {
     private JiraService jiraService;
 
-    @PostMapping("/{projectId}")
+    @PostMapping("/{projectKey}")
     public ResponseEntity<String> createIssue(@PathVariable String projectKey,
                                               @RequestBody IssueDto issueDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -73,7 +73,7 @@ public class JiraController {
     }
 
     @GetMapping("/{issueKey}/comments")
-    public ResponseEntity<List<Comment>> getAllComments(@PathVariable String issueKey){
+    public ResponseEntity<List<Comment>> getAllComments(@PathVariable String issueKey) {
         return ResponseEntity.status(HttpStatus.OK).body(jiraService.getAllComments(issueKey));
     }
 
