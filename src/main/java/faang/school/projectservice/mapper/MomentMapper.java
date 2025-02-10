@@ -14,6 +14,8 @@ import java.util.List;
 )
 public interface MomentMapper {
 
+    @Mapping(target = "createdBy", source = "creatorId")
+    @Mapping(target = "date", expression = "java(java.time.LocalDateTime.now())")
     Moment toEntity(CreateMomentRequest createMomentRequest, List<Project> projects, Long creatorId);
 
     CreateMomentResponse toCreateMomentResponse(Moment moment);
