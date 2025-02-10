@@ -180,7 +180,7 @@ class ProjectServiceTest {
 
         NoSuchElementException noSuchElementException = assertThrows(NoSuchElementException.class,
                 () -> projectService.getProjectById(1L));
-        assertEquals("Project not found", noSuchElementException.getMessage());
+        assertEquals("Project not found by id: 1", noSuchElementException.getMessage());
     }
 
     @Test
@@ -213,7 +213,7 @@ class ProjectServiceTest {
         doReturn(project).when(projectService).getProjectById(projectId);
         doNothing().when(projectGalleryValidator).validateAddingImage(project, creatorId, file);
         when(s3Service.uploadFile(file, "TestProject1")).thenReturn(resource);
-        when(teamMemberService.getTeamMemberById(creatorId)).thenReturn(creator);
+        when(teamMemberService.getTeamMemberByUserAndProjectIds(creatorId, projectId)).thenReturn(creator);
         when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
 
         AddImageResponseDto response = projectService.addImageInProjectGallery(projectId, creatorId, file);

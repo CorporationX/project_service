@@ -72,7 +72,7 @@ public class MeetServiceTest {
     void createMeet_ShouldReturnMeetResponseDto() {
         // Given
         when(auditorAware.getCurrentAuditor()).thenReturn(Optional.of(1L));
-        when(projectService.findEntityById(createMeetDto.getProjectId())).thenReturn(new Project());
+        when(projectService.getProjectById(createMeetDto.getProjectId())).thenReturn(new Project());
         when(meetRepository.save(any(Meet.class))).thenReturn(meet);
 
         // When

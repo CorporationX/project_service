@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +17,11 @@ public class TeamMemberService {
 
     public TeamMember getTeamMemberByUserAndProjectIds(Long userId, Long projectId) {
         return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+    }
+
+    public TeamMember getTeamMemberById(Long teamMemberId) {
+        return teamMemberRepository.findById(teamMemberId)
+                .orElseThrow(() -> new NoSuchElementException("Team member with id " + teamMemberId + " not found"));
     }
 
     public List<TeamMember> findAllByIds(List<Long> teamMemberIds) {

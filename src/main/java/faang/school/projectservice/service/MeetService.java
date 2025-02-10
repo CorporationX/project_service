@@ -33,7 +33,7 @@ public class MeetService {
         userValidator.validateCurrentUserExists();
         Meet meet = meetMapper.fromCreateDto(createMeetDto);
         meet.setCreatorId(auditorAware.getCurrentAuditor().get());
-        meet.setProject(projectService.findEntityById(createMeetDto.getProjectId()));
+        meet.setProject(projectService.getProjectById(createMeetDto.getProjectId()));
         meet.setStatus(MeetStatus.PENDING);
         return meetMapper.toResponseDto(meetRepository.save(meet));
     }
