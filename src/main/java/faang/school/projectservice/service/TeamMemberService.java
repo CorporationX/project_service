@@ -12,9 +12,8 @@ public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
     public TeamMember getTeamMember(long teamMemberId) {
-        TeamMember teamMember = teamMemberRepository.findById(teamMemberId)
+        return teamMemberRepository.findById(teamMemberId)
                 .orElseThrow(() -> new EntityNotFoundException("TeamMember not found"));
-        return teamMember;
     }
 
 }

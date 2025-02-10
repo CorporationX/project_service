@@ -2,6 +2,7 @@ package faang.school.projectservice.unit.stage.service;
 
 import faang.school.projectservice.dto.client.StageInvitationDto;
 import faang.school.projectservice.dto.filterDto.StageInvitationFilterDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.invitation.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;
@@ -29,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -166,7 +166,7 @@ public class StageInvitationServiceTest {
         doThrow(IllegalArgumentException.class)
                 .when(stageInvitationValidator).validateStatusPendingCheck(invitation);
 
-        assertThrows(IllegalArgumentException.class, () -> stageInvitationService.acceptInvitation(invitationId));
+        assertThrows(IllegalArgumentException.class, () -> stageInvitationService.acceptStageInvitation(invitationId));
         verify(stageInvitationRepository, never()).save(any(StageInvitation.class));
     }
 
@@ -180,7 +180,7 @@ public class StageInvitationServiceTest {
         doThrow(IllegalArgumentException.class)
                 .when(stageInvitationValidator).validateStatusPendingCheck(invitation);
 
-        assertThrows(IllegalArgumentException.class, () -> stageInvitationService.acceptInvitation(invitationId));
+        assertThrows(IllegalArgumentException.class, () -> stageInvitationService.acceptStageInvitation(invitationId));
         verify(stageInvitationRepository, never()).save(any(StageInvitation.class));
     }
 
@@ -199,7 +199,7 @@ public class StageInvitationServiceTest {
         when(stageInvitationRepository.getReferenceById(invitationId)).thenReturn(invitation);
         doNothing().when(stageInvitationValidator).validateStatusPendingCheck(stageInvitationCaptor.capture());
 
-        final StageInvitationDto expectedAccept = stageInvitationService.acceptInvitation(invitationId);
+        final StageInvitationDto expectedAccept = stageInvitationService.acceptStageInvitation(invitationId);
 
         verify(stageInvitationRepository, times(1)).getReferenceById(invitationId);
         verify(stageInvitationValidator, times(1)).validateStatusPendingCheck(invitation);
@@ -213,9 +213,10 @@ public class StageInvitationServiceTest {
         Long invitationId = 1L;
         String rejectionReason = " ";
 
-        StageInvitationDto result = stageInvitationService.rejectStageInvitation(invitationId, rejectionReason);
+        DataValidationException result = assertThrows(DataValidationException.class,
+                () -> stageInvitationService.rejectStageInvitation(invitationId, rejectionReason));
 
-        assertNull(result);
+        assertEquals("There must be a reason for rejecting an invitation.", result.getMessage());
         verify(stageInvitationRepository, never()).save(any(StageInvitation.class));
     }
 

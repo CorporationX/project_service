@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.StageInvitationDto;
 import faang.school.projectservice.dto.filterDto.StageInvitationFilterDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.invitation.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -36,16 +37,15 @@ public class StageInvitationService {
 
     public StageInvitationDto createStageInvitationAndGetDto(Stage stage, TeamMember author, TeamMember invited) {
         stageInvitationValidator.validateInvitedForCreate(author.getId(), invited.getId());
-        StageInvitation invitation = new StageInvitation();
-        invitation.setStage(stage);
-        invitation.setAuthor(author);
-        invitation.setInvited(invited);
-        invitation.setStatus(StageInvitationStatus.PENDING);
+
+        StageInvitation invitation = StageInvitation.builder()
+                        .stage(stage).author(author).invited(invited).status(StageInvitationStatus.PENDING).build();
+
         StageInvitation saved = stageInvitationRepository.save(invitation);
         return stageInvitationMapper.toDto(saved);
     }
 
-    public StageInvitationDto acceptInvitation(long invitationId) {
+    public StageInvitationDto acceptStageInvitation(long invitationId) {
         StageInvitation invitation = stageInvitationRepository.getReferenceById(invitationId);
         TeamMember invited = invitation.getInvited();
         stageInvitationValidator.validateStatusPendingCheck(invitation);
@@ -60,7 +60,7 @@ public class StageInvitationService {
 
     public StageInvitationDto rejectStageInvitation(Long id, String rejectionReason) {
         if (rejectionReason.isBlank()) {
-            return null;
+            throw new DataValidationException("There must be a reason for rejecting an invitation.");
         }
         StageInvitation invitation = stageInvitationRepository.getReferenceById(id);
         TeamMember invited = invitation.getInvited();
