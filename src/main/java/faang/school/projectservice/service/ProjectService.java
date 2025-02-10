@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Transactional
 public class ProjectService {
-
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final ResourceRepository resourceRepository;
@@ -95,8 +94,12 @@ public class ProjectService {
     }
 
     public ProjectResponseDto getProjectDtoById(Long id) {
-        Project project = getProjectById(id);
-        return projectMapper.toResponseDto(project);
+        return projectMapper.toResponseDto(getProjectById(id));
+    }
+
+    public Project getProjectById(Long id) {
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Project not found by id: " + id));
     }
 
     public void deleteProjectById(Long id) {
@@ -154,10 +157,5 @@ public class ProjectService {
             }
         }
         return imageUrls;
-    }
-
-    public Project getProjectById(Long id) {
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Project not found"));
     }
 }

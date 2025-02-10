@@ -49,9 +49,11 @@ services:
   payment-service:
     host: http://localhost
     port: 9080
+    path: /api/v1
   user-service:
     host: http://localhost
     port: 8080
+    path: /api/v1
 
 project:
   gallery:

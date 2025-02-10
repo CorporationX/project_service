@@ -45,22 +45,23 @@ class ProjectServiceTest {
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
 
-    @InjectMocks
     @Spy
+    @InjectMocks
     private ProjectService projectService;
 
-    private Project crearteProject;
+    private Project createProject;
     private Project updateProject;
     private ProjectCreateRequestDto createRequestDto;
     private ProjectUpdateRequestDto updateRequestDto;
+    private Project project;
     private MultipartFile file;
 
     @BeforeEach
     void setUp() {
-        crearteProject = new Project();
-        crearteProject.setOwnerId(100L);
-        crearteProject.setName("Test Project");
-        crearteProject.setStatus(ProjectStatus.CREATED);
+        createProject = new Project();
+        createProject.setOwnerId(100L);
+        createProject.setName("Test Project");
+        createProject.setStatus(ProjectStatus.CREATED);
 
         updateProject = new Project();
         updateProject.setId(1L);
@@ -73,19 +74,21 @@ class ProjectServiceTest {
 
         updateRequestDto = new ProjectUpdateRequestDto();
         updateRequestDto.setId(1L);
+
+        project = new Project();
+        project.setId(1L);
     }
 
     @Test
     void createProject_ShouldSaveProjectWhenValidRequest() {
         when(projectRepository.existsByOwnerIdAndName(100L, "Test Project")).thenReturn(false);
 
-        when(projectRepository.save(crearteProject)).thenReturn(crearteProject);
+        when(projectRepository.save(createProject)).thenReturn(createProject);
 
         ProjectCreateResponseDto result = projectService.createProject(createRequestDto);
 
-
-        assertEquals(projectMapper.toCreateResponseDto(crearteProject), result);
-        verify(projectRepository).save(crearteProject);
+        assertEquals(projectMapper.toCreateResponseDto(createProject), result);
+        verify(projectRepository).save(createProject);
     }
 
     @Test
@@ -122,7 +125,7 @@ class ProjectServiceTest {
         Project privateProject = new Project();
         privateProject.setVisibility(ProjectVisibility.PRIVATE);
         privateProject.setOwnerId(userId);
-        List<Project> projects = List.of(crearteProject, privateProject);
+        List<Project> projects = List.of(createProject, privateProject);
         ProjectFilterDto filterDto = new ProjectFilterDto();
 
         when(projectRepository.findAll()).thenReturn(projects);
@@ -135,10 +138,13 @@ class ProjectServiceTest {
 
     @Test
     void getAllVisibleProjects_ShouldNotReturnPrivateProjects() {
+        Project publicProject = new Project();
+        publicProject.setVisibility(ProjectVisibility.PUBLIC);
+        publicProject.setOwnerId(101L);
         Project privateProject = new Project();
         privateProject.setVisibility(ProjectVisibility.PRIVATE);
         privateProject.setOwnerId(101L);
-        List<Project> projects = List.of(crearteProject, privateProject);
+        List<Project> projects = List.of(publicProject, privateProject);
         Long userId = 100L;
         ProjectFilterDto filterDto = new ProjectFilterDto();
 
@@ -152,19 +158,28 @@ class ProjectServiceTest {
 
     @Test
     void getProjectDtoById_ShouldReturnProjectWhenExists() {
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(crearteProject));
+        doReturn(project).when(projectService).getProjectById(1L);
 
         ProjectResponseDto result = projectService.getProjectDtoById(1L);
 
-        assertEquals(projectMapper.toResponseDto(crearteProject), result);
+        assertEquals(projectMapper.toResponseDto(project), result);
     }
 
     @Test
-    void getProjectDtoById_ShouldThrowExceptionWhenNotFound() {
+    void getProjectById_ShouldReturnProjectWhenExists() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        Project result = projectService.getProjectById(1L);
+
+        assertEquals(project, result);
+    }
+
+    @Test
+    void getProjectById_ShouldThrowExceptionWhenNotFound() {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
         NoSuchElementException noSuchElementException = assertThrows(NoSuchElementException.class,
-                () -> projectService.getProjectDtoById(1L));
+                () -> projectService.getProjectById(1L));
         assertEquals("Project not found", noSuchElementException.getMessage());
     }
 
