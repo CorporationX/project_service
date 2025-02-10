@@ -19,6 +19,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -57,6 +59,9 @@ public class JiraServiceTest {
     private String projectKey;
     private String issueKey;
     private Promise promise;
+
+    @Value("${jira.max-results}")
+    private int maxResults;
 
     @BeforeEach
     void setUp() {
@@ -144,13 +149,13 @@ public class JiraServiceTest {
 
         when(searchResult.getIssues()).thenReturn(issues);
         when(searchPromise.claim()).thenReturn(searchResult);
-        when(searchRestClient.searchJql(eq(jql), eq(1000), eq(0), eq(fields))).thenReturn(searchPromise);
+        when(searchRestClient.searchJql(eq(jql), eq(maxResults), eq(0), eq(fields))).thenReturn(searchPromise);
         when(issueMapper.toIterableIssueDto(issues)).thenReturn(issuesDto);
 
         Iterable<IssueDto> result = jiraService.getIssueWithFilter(jql);
 
         assertEquals(issuesDto, result);
-        verify(searchRestClient).searchJql(eq(jql), eq(1000), eq(0), eq(fields));
+        verify(searchRestClient).searchJql(eq(jql), eq(maxResults), eq(0), eq(fields));
         verify(issueMapper).toIterableIssueDto(issues);
     }
 

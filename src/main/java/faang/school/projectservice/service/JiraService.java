@@ -28,7 +28,7 @@ public class JiraService {
     private JiraRestClient jiraRestClient;
     private IssueMapper issueMapper;
 
-    @Value("${jira.maxResults}")
+    @Value("${jira.max-results}")
     private int maxResults;
 
     public String createIssue(String projectKey, IssueDto issueDto) {
