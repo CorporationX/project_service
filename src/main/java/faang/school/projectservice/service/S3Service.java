@@ -28,6 +28,19 @@ public class S3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
+    public void putFileInStore(String key, InputStream stream, ObjectMetadata metadata) {
+        try {
+            s3Client.putObject(bucketName, key, stream, metadata);
+        } catch (Exception e) {
+            log.error("Ошибка при сохранении файла в S3", e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public void putFileInStore(String key, InputStream stream) {
+        putFileInStore(key, stream, null);
+    }
+
     public Resource uploadFile(MultipartFile file, String folder) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());
