@@ -7,7 +7,6 @@ app:
     max_team_avatar_side_length: 512
     max_team_avatar_size_in_mb: 5
 
-
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -61,6 +60,13 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+  minio:
+    endpoint: http://localhost:9000
+    accessKey: user
+    secretKey: password
+    bucketName: project-files
+    isMocked: false
+    default-max-size: 2147483648 #2 GB
   payment-service:
     host: http://localhost
     port: 9080
