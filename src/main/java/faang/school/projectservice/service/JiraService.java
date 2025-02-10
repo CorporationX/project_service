@@ -13,6 +13,7 @@ import faang.school.projectservice.dto.issue.IssueDto;
 import faang.school.projectservice.mapper.IssueMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,9 +25,11 @@ import java.util.stream.StreamSupport;
 @Service
 @RequiredArgsConstructor
 public class JiraService {
-    private static final int MAX_RESULTS = 1000;
     private JiraRestClient jiraRestClient;
     private IssueMapper issueMapper;
+
+    @Value("${jira.maxResults}")
+    private int maxResults;
 
     public String createIssue(String projectKey, IssueDto issueDto) {
         IssueInput issue = new IssueInputBuilder(
@@ -80,7 +83,7 @@ public class JiraService {
 
         Iterable<Issue> result = jiraRestClient
                 .getSearchClient()
-                .searchJql(jqlFilter, MAX_RESULTS, 0, fields)
+                .searchJql(jqlFilter, maxResults, 0, fields)
                 .claim().getIssues();
         issueMapper.toIterableIssueDto(result).forEach(issueDto::add);
         return issueDto;

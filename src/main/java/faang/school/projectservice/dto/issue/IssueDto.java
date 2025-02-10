@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.issue;
 
-import jakarta.validation.constraints.Future;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.joda.time.DateTime;
+
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -31,6 +33,7 @@ public class IssueDto {
     @Min(1)
     private Long typeId;
     @NotNull
-    @Future
-    private DateTime dueDate;
+    @FutureOrPresent
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime dueDate;
 }
