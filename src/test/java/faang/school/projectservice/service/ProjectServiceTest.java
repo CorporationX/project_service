@@ -76,21 +76,6 @@ class ProjectServiceTest {
             .build();
 
     @Test
-    public void shouldSuccessGetProject() {
-        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
-
-        Project result = projectService.getProject(PROJECT_ID);
-        assertEquals(project, result);
-    }
-
-    @Test
-    public void shouldThrowEntityNotFoundExceptionIfProjectNotExists() {
-        when(projectRepository.findById(anyLong())).thenThrow(EntityNotFoundException.class);
-
-        assertThrows(EntityNotFoundException.class, () -> projectService.getProject(PROJECT_ID));
-    }
-
-    @Test
     public void shouldSuccessGetProjects() {
         List<Project> expectedProjects = List.of(project);
         when(projectRepository.findAllById(anyList())).thenReturn(expectedProjects);
@@ -133,6 +118,13 @@ class ProjectServiceTest {
         assertNotNull(expectedDto.createdAt());
         assertNotNull(expectedDto.size());
         assertNotNull(expectedDto.type());
+    }
+
+    @Test
+    void testUploadResourceToGalleryThrowExceptionIfProjectNotExists() {
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> projectService.uploadResourceToGallery(PROJECT_ID, file));
     }
 
     @Test

@@ -46,12 +46,12 @@ public class AmazonS3Service {
     }
 
     private void putObjectToStorage(MultipartFile file, String key) {
-        ObjectMetadata metadata = new ObjectMetadata();
+        var metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(file.getSize());
 
         try {
-            PutObjectRequest request = new PutObjectRequest(bucketName, key, file.getInputStream(), metadata);
+            var request = new PutObjectRequest(bucketName, key, file.getInputStream(), metadata);
             s3Client.putObject(request);
         } catch (IOException | SdkClientException exception) {
             String errorMessage = "Ошибка при отправке файла в хранилище";
