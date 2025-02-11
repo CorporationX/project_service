@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
+import faang.school.projectservice.model.Project;
 
 import java.util.List;
 
@@ -18,4 +19,8 @@ public interface ProjectService {
     List<ProjectResponseDto> findAllByFilter(ProjectFilterDto filter);
 
     ProjectResponseDto update(Long id, ProjectUpdateRequestDto projectDto);
+
+    List<Long> getProjectResourceIds(Long projectId);
+
+    Project getProject(Long projectId);
 }

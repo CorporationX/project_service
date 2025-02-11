@@ -9,6 +9,7 @@ import faang.school.projectservice.filter.SpecificationFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
@@ -82,4 +83,19 @@ public class ProjectServiceImpl implements ProjectService {
                 .reduce((spec1, spec2) -> spec1.and(spec2))
                 .orElse(null);
     }
+
+    @Override
+    public List<Long> getProjectResourceIds(Long projectId) {
+        Project project = getProject(projectId);
+        return project.getResources().stream()
+                .map(Resource::getId)
+                .sorted()
+                .toList();
+    }
+
+    public Project getProject(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Not found project with Id = " + projectId));
+    }
+
 }
