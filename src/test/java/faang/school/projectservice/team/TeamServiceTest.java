@@ -15,6 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -68,13 +71,17 @@ class TeamServiceTest {
     }
 
     @Test
-    void getAvatar_ShouldReturnAvatar_WhenExists() {
+    void getAvatar_ShouldReturnAvatar_WhenExists() throws IOException {
         team.setAvatarKey("avatar-key");
         when(teamRepositoryAdapter.getById(1L)).thenReturn(team);
-        when(minioService.getFile("avatar-key")).thenReturn(new byte[]{1, 2, 3});
+        byte[] expectedAvatarBytes = new byte[]{1, 2, 3};
+        InputStream avatarStream = new ByteArrayInputStream(expectedAvatarBytes);
+        when(minioService.getFile("avatar-key")).thenReturn(avatarStream);
 
-        byte[] avatar = teamService.getAvatar(1L);
-        assertArrayEquals(new byte[]{1, 2, 3}, avatar);
+        InputStream resultStream = teamService.getAvatar(1L);
+        byte[] actualAvatarBytes = resultStream.readAllBytes();
+
+        assertArrayEquals(expectedAvatarBytes, actualAvatarBytes);
     }
 
     @Test

@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.minio.ImageFormat;
-import faang.school.projectservice.config.minio.MinioConfig;
+import faang.school.projectservice.config.minio.MinioProperties;
 import faang.school.projectservice.exception.DataValidateException;
 import faang.school.projectservice.exception.MinioException;
 import io.minio.BucketExistsArgs;
@@ -33,7 +33,7 @@ import java.util.UUID;
 public class MinioService {
 
     private final MinioClient minioClient;
-    private final MinioConfig minioConfig;
+    private final MinioProperties minioConfig;
 
     @Value("${avatar.max-file-size}")
     private long maxFileSize;
@@ -56,23 +56,8 @@ public class MinioService {
         }
     }
 
-    public void ensureBucketExists() {
-        try {
-            boolean bucketExists = minioClient.bucketExists(BucketExistsArgs.builder()
-                    .bucket(minioConfig.getBucketName()).build());
-            if (!bucketExists) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(minioConfig.getBucketName()).build());
-            }
-        } catch (Exception e) {
-            log.error("Error checking/creating bucket: ", e);
-            throw new MinioException("Error checking/creating bucket: " + e.getMessage());
-        }
-    }
-
     public String uploadFile(MultipartFile file) {
         try {
-            ensureBucketExists();
-
             if (file.getSize() > maxFileSize) {
                 throw new DataValidateException("The file exceeds the allowed size");
             }
@@ -104,13 +89,12 @@ public class MinioService {
         }
     }
 
-    public byte[] getFile(String fileKey) {
+    public InputStream getFile(String fileKey) {
         try {
-            GetObjectResponse object = minioClient.getObject(GetObjectArgs.builder()
+            return minioClient.getObject(GetObjectArgs.builder()
                     .bucket(minioConfig.getBucketName())
                     .object(fileKey)
                     .build());
-            return object.readAllBytes();
         } catch (Exception e) {
             throw new MinioException("Error receiving file: " + e.getMessage());
         }

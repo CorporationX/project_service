@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class TeamService {
@@ -18,7 +21,8 @@ public class TeamService {
     @Transactional
     public void uploadAvatar(Long teamId, MultipartFile file, Long userId) {
         Team team = teamRepositoryAdapter.getById(teamId);
-        boolean inTeam = team.getTeamMembers().stream().anyMatch(t -> t.getUserId().equals(userId));
+        boolean inTeam = team.getTeamMembers().stream()
+                .anyMatch(t -> Objects.equals(t.getUserId(), userId));
         if(!inTeam) {
             throw new DataValidateException("You're not in this team");
         }
@@ -26,7 +30,7 @@ public class TeamService {
         team.setAvatarKey(fileKey);
     }
 
-    public byte[] getAvatar(Long teamId) {
+    public InputStream getAvatar(Long teamId) {
         Team team = teamRepositoryAdapter.getById(teamId);
         return minioService.getFile(team.getAvatarKey());
     }

@@ -13,6 +13,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.io.ByteArrayInputStream;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -48,7 +50,7 @@ class TeamControllerTest {
     @Test
     void getAvatar_ShouldReturnAvatarBytes() throws Exception {
         byte[] avatarBytes = new byte[]{1, 2, 3};
-        when(teamService.getAvatar(1L)).thenReturn(avatarBytes);
+        when(teamService.getAvatar(1L)).thenReturn(new ByteArrayInputStream(avatarBytes));
 
         mockMvc.perform(get("/api/v1/team/1/avatar"))
                 .andExpect(status().isOk())

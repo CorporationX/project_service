@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,11 +33,13 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}/avatar")
-    public ResponseEntity<byte[]> getAvatar(@PathVariable Long teamId) {
-        byte[] bytes = teamService.getAvatar(teamId);
+    public ResponseEntity<InputStreamResource> getAvatar(@PathVariable Long teamId) {
+        InputStream inputStream = teamService.getAvatar(teamId);
+        InputStreamResource resource = new InputStreamResource(inputStream);
+        
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(bytes);
+                .body(resource);
     }
 
     @DeleteMapping("/{teamId}/delete/avatar")
