@@ -1,7 +1,6 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.VacancyValidationException;
-import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -17,7 +16,7 @@ public class VacancyValidator {
     private final TeamMemberRepository teamMemberRepository;
 
     public void validateCreatedVacancy(Vacancy vacancy) {
-        if (!checkRoleOfCreatedByUser(vacancy)) {
+        if (!checkRoleOfCreatedBy(vacancy)) {
             throw new VacancyValidationException("Only user with owner or manager role can create vacancy");
         }
     }
@@ -43,7 +42,7 @@ public class VacancyValidator {
         }
     }
 
-    private boolean checkRoleOfCreatedByUser(Vacancy vacancy) {
+    private boolean checkRoleOfCreatedBy(Vacancy vacancy) {
         TeamMember createdBy = teamMemberRepository.findByUserIdAndProjectId(
                 vacancy.getCreatedBy(),
                 vacancy.getProject().getId());
