@@ -8,5 +8,5 @@ import java.util.stream.Stream;
 public interface VacancyFilter {
     boolean isApplicable(VacancyFilterDto filters);
 
-    void apply(Stream<Vacancy> vacancies, VacancyFilterDto filters);
+    Stream<Vacancy> apply(Stream<Vacancy> vacancies, VacancyFilterDto filters);
 }

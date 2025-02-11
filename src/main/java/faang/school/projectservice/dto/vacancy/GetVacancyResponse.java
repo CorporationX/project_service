@@ -25,5 +25,4 @@ public class GetVacancyResponse {
     private WorkSchedule workSchedule;
     private Integer count;
     private List<Long> requiredSkillIds;
-    private String coverImageKey;
 }

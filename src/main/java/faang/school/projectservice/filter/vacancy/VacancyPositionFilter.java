@@ -14,7 +14,7 @@ public class VacancyPositionFilter implements VacancyFilter {
     }
 
     @Override
-    public void apply(Stream<Vacancy> vacancies, VacancyFilterDto filters) {
-        vacancies.filter(vacancy -> vacancy.getPosition() == filters.getPositionPattern());
+    public Stream<Vacancy> apply(Stream<Vacancy> vacancies, VacancyFilterDto filters) {
+        return vacancies.filter(vacancy -> vacancy.getPosition() == filters.getPositionPattern());
     }
 }

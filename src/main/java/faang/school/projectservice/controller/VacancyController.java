@@ -41,11 +41,11 @@ public class VacancyController {
 
     @GetMapping("/{id}")
     public GetVacancyResponse getVacancy(@PathVariable long id) {
-        return vacancyService.getVacancyById(id);
+        return vacancyService.getById(id);
     }
 
     @GetMapping
     public List<GetVacancyResponse> getAllVacancies(VacancyFilterDto filters) {
-        return vacancyService.getAllVacancies(filters);
+        return vacancyService.get(filters);
     }
 }

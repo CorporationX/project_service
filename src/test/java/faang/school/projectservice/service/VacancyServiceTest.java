@@ -121,7 +121,7 @@ public class VacancyServiceTest {
 
         verify(vacancyMapper, times(1)).fromCreateRequest(createRequest);
         verify(vacancyValidator, times(1))
-                .validateCreatedVacancy(vacancyArgumentCaptor.capture());
+                .validateCreatingVacancy(vacancyArgumentCaptor.capture());
         verify(vacancyMapper, times(1)).toCreateResponse(createdVacancy);
 
         assertEquals("Backend-разработчик", createResponse.getName());
@@ -192,7 +192,7 @@ public class VacancyServiceTest {
 
         verify(vacancyMapper, times(1)).fromUpdateRequest(updateRequest);
         verify(vacancyValidator, times(1))
-                .validateUpdatedVacancy(vacancyArgumentCaptor.capture());
+                .validateUpdatingVacancy(vacancyArgumentCaptor.capture());
         verify(vacancyMapper, times(1)).toUpdateResponse(updatedVacancy);
 
         assertEquals(234L, updatedVacancy.getId());
@@ -244,29 +244,29 @@ public class VacancyServiceTest {
     }
 
     @Test
-    public void getVacancyById_ShouldReturnVacancySuccessfully() {
+    public void getVacancyById_ShouldReturnSuccessfully() {
         long id = 333L;
 
         when(vacancyRepository.findById(id))
                 .thenReturn(Optional.of(Vacancy.builder().candidates(new ArrayList<>()).build()));
 
-        vacancyService.getVacancyById(id);
+        vacancyService.getById(id);
 
         verify(vacancyMapper, times(1)).toGetResponse(vacancyArgumentCaptor.capture());
     }
 
     @Test
-    public void getVacancyById_ShouldThrowVacancyExceptionWhenVacancyDoesNotExist() {
+    public void getVacancyById_ShouldThrowVacancyExceptionWhenDoesNotExist() {
         long id = 333L;
 
         when(vacancyRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(VacancyValidationException.class, () -> vacancyService.getVacancyById(333L));
+        assertThrows(VacancyValidationException.class, () -> vacancyService.getById(333L));
     }
 
     @Test
     public void getAll_ShouldReturnAllVacanciesVacanciesSuccessfully() {
-        vacancyService.getAllVacancies(new VacancyFilterDto());
+        vacancyService.get(new VacancyFilterDto());
 
         verify(vacancyRepository, times(1)).findAll();
     }

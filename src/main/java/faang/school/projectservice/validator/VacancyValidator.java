@@ -15,20 +15,16 @@ import org.springframework.stereotype.Component;
 public class VacancyValidator {
     private final TeamMemberRepository teamMemberRepository;
 
-    public void validateCreatedVacancy(Vacancy vacancy) {
+    public void validateCreatingVacancy(Vacancy vacancy) {
         if (!checkRoleOfCreatedBy(vacancy)) {
             throw new VacancyValidationException("Only user with owner or manager role can create vacancy");
         }
     }
 
-    public void validateUpdatedVacancy(Vacancy vacancy) {
+    public void validateUpdatingVacancy(Vacancy vacancy) {
         if (!checkRoleOfUpdatedBy(vacancy)) {
             throw new VacancyValidationException("Only user with owner or manager role can update vacancy");
         }
-
-//        if (!checkCandidatesAreNotTeamMember(vacancy)) {
-//            throw new VacancyValidationException("Candidate is team member");
-//        }
 
         if (vacancy.getStatus() == VacancyStatus.CLOSED) {
             if (!checkCountOfAcceptedCandidates(vacancy)) {
@@ -69,17 +65,6 @@ public class VacancyValidator {
 
         return false;
     }
-
-//    private boolean checkCandidatesAreNotTeamMember(Vacancy vacancy) {
-//        for (Candidate candidate : vacancy.getCandidates()) {
-//            if (teamMemberRepository.findByUserIdAndProjectId(
-//                    candidate.getUserId(), vacancy.getProject().getId()) != null) {
-//                return false;
-//            }
-//        }
-//
-//        return true;
-//    }
 
     private boolean checkCountOfAcceptedCandidates(Vacancy vacancy) {
         return vacancy.getCandidates()

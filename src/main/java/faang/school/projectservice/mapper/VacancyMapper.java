@@ -22,8 +22,6 @@ public interface VacancyMapper {
     @Mapping(source = "project.id", target = "projectId")
     CreateVacancyResponse toCreateResponse(Vacancy vacancy);
 
-//    Vacancy fromUpdateRequest(UpdateVacancyRequest updateRequest);
-
     void update(UpdateVacancyRequest updateRequest, @MappingTarget Vacancy vacancy);
 
     @Mapping(source = "project.id", target = "projectId")
