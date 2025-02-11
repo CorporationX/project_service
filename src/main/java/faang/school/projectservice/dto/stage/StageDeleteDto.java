@@ -16,4 +16,5 @@ public class StageDeleteDto {
     private Long projectId;
     private List<Long> tasksIds;
     private List<Long> teamMembers;
+    private List<Long> executorsId;
 }

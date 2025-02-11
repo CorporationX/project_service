@@ -47,9 +47,9 @@ class StageMapperTest {
     void setUp() {
         // Setup test DTO
         stageDto = StageDto.builder()
-                .taskIds(List.of(1L, 2L))
+                .tasksIds(List.of(1L, 2L))
                 .stageRolesIds(List.of(3L, 4L))
-                .executorsId(List.of(5L, 6L))
+                .executorsIds(List.of(5L, 6L))
                 .projectId(7L)
                 .build();
 
@@ -120,9 +120,9 @@ class StageMapperTest {
 
         // Verify results
         assertThat(result).isNotNull();
-        assertThat(result.getTaskIds()).containsExactly(1L, 2L);
+        assertThat(result.getTasksIds()).containsExactly(1L, 2L);
         assertThat(result.getStageRolesIds()).containsExactly(3L, 4L);
-        assertThat(result.getExecutorsId()).containsExactly(5L, 6L);
+        assertThat(result.getExecutorsIds()).containsExactly(5L, 6L);
         assertThat(result.getProjectId()).isEqualTo(7L);
     }
 

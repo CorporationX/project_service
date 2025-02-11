@@ -13,7 +13,6 @@ import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import org.mapstruct.Context;
-import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -25,17 +24,17 @@ import java.util.List;
 public interface StageMapper {
 
 
-    @Mapping(source = "taskIds", target = "tasks",  qualifiedByName = "taskIdsToTask")
+    @Mapping(source = "tasksIds", target = "tasks",  qualifiedByName = "taskIdsToTask")
     @Mapping(source = "stageRolesIds", target = "stageRoles",  qualifiedByName = "stageRolesIdsToStageRoles")
-    @Mapping(source = "executorsId", target = "executors",  qualifiedByName = "executorsIdToExecutors")
+    @Mapping(source = "executorsIds", target = "executors",  qualifiedByName = "executorsIdToExecutors")
     @Mapping(source = "projectId" , target = "project", qualifiedByName = "projectIdToProject")
     Stage toEntity(StageDto stageDto,
                   @Context TaskRepository taskRepository, @Context StageRolesRepository stageRolesRepository,
                   @Context TeamMemberRepository teamMemberRepository, @Context ProjectRepository projectRepository);
 
-    @Mapping(target= "taskIds", source = "tasks",  qualifiedByName = "taskToTaskIds")
+    @Mapping(target= "tasksIds", source = "tasks",  qualifiedByName = "taskToTaskIds")
     @Mapping(target = "stageRolesIds", source  = "stageRoles",  qualifiedByName = "StageRolesToStageRolesIds")
-    @Mapping(target = "executorsId", source  = "executors",  qualifiedByName = "ExecutorsToExecutorsIds")
+    @Mapping(target = "executorsIds", source  = "executors",  qualifiedByName = "ExecutorsToExecutorsIds")
     @Mapping(target = "projectId" , source  = "project.id")
     StageDto toDto(Stage stage,
                    @Context TaskRepository taskRepository,

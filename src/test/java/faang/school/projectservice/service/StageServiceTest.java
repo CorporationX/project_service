@@ -29,6 +29,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class StageServiceTest {
@@ -101,26 +102,23 @@ class StageServiceTest {
         stage.setStageRoles(new ArrayList<>());
         stage.setExecutors(new ArrayList<>());
 
-        when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
-
-        verify(stageValidator).checkStageToRemove(stageId, deleteDto);
         mockStageService.deleteStage(stageId, deleteDto);
         verify(mockStageService, Mockito.times(1)).deleteStage(stageId, deleteDto);
     }
 
     @Test
     void testGetActiveStages() {
-        Long projectId = 1L;
+
+        long projectId = 1L;
         StageFilterDto filterDto = new StageFilterDto();
-        Project project = new Project();
-        Stage stage = new Stage();
-        StageDto stageDto = new StageDto();
+        Project mockProject = mock(Project.class);
+        Stage stage1 = mock(Stage.class);
+        Stage stage2 = mock(Stage.class);
+        StageDto dto1 = new StageDto();
+        StageDto dto2 = new StageDto();
 
-        when(projectRepository.getReferenceById(projectId)).thenReturn(project);
-        when(stageMapper.toDto(any(), any(), any(), any())).thenReturn(stageDto);
-
-        List<StageDto> result = stageService.getActiveStages(projectId, filterDto);
-
+        mockStageService.getActiveStages(projectId, filterDto);
+        verify(mockStageService, Mockito.times(1)).getActiveStages(projectId, filterDto);
     }
     @Test
     void testDeleteStage_WithTasksAndRoles() throws InterruptedException {

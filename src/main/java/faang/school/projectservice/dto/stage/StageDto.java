@@ -1,17 +1,11 @@
 package faang.school.projectservice.dto.stage;
 
-
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.StageRoles;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 @Data
@@ -28,9 +22,9 @@ public class StageDto {
     @NotEmpty (message = "Этап проект с незаполненными ролями или участниками")
     private List<Long> stageRolesIds;
     @NotNull
-    private List<Long> taskIds;
+    private List<Long> tasksIds;
     @NotEmpty(message = "Этап проект с незаполненными ролями или участниками")
-    private List<Long> executorsId;
+    private List<Long> executorsIds;
 
 }
 
