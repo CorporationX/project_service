@@ -82,7 +82,7 @@ public class StageInvitationServiceTest {
         dto.setAuthorId(1L);
         dto.setInvitedId(2L);
         dto.setStageId(1L);
-        when(stageService.getStage(dto.getStageId()))
+        when(stageService.getStageById(dto.getStageId()))
                 .thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class, () -> stageInvitationService.sendInvitation(dto));
@@ -91,13 +91,12 @@ public class StageInvitationServiceTest {
 
     @Test
     public void sendInvitation_whereTeamMemberNotFound() {
-        final long sameId = 1L;
         StageInvitationDto dto = new StageInvitationDto();
         dto.setAuthorId(1L);
         dto.setInvitedId(2L);
         dto.setStageId(1L);
-        when(stageService.getStage(dto.getStageId())).thenReturn(new Stage());
-        when(teamMemberService.getTeamMember(sameId)).thenThrow(EntityNotFoundException.class);
+        when(stageService.getStageById(dto.getStageId())).thenReturn(new Stage());
+        when(teamMemberService.getTeamMember(dto.getInvitedId())).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class, () -> stageInvitationService.sendInvitation(dto));
     }
@@ -115,20 +114,17 @@ public class StageInvitationServiceTest {
         author.setId(dto.getAuthorId());
         TeamMember invited = new TeamMember();
         invited.setId(dto.getInvitedId());
-        when(stageService.getStage(dto.getStageId())).thenReturn(stage);
-        when(teamMemberService.getTeamMember(dto.getAuthorId())).thenReturn(author);
+        when(stageService.getStageById(dto.getStageId())).thenReturn(stage);
         when(teamMemberService.getTeamMember(dto.getInvitedId())).thenReturn(invited);
-        doReturn(dto).when(spyStageInvitationService).createStageInvitationAndGetDto(stage, author, invited);
+        doReturn(dto).when(spyStageInvitationService).createStageInvitationAndGetDto(stage, dto.getAuthorId(), invited);
 
-        final StageInvitationDto sentInvitation = spyStageInvitationService.sendInvitation(dto);
-
-        verify(stageService, times(1)).getStage(dto.getStageId());
-        verify(teamMemberService, times(1)).getTeamMember(dto.getAuthorId());
-        verify(teamMemberService, times(1)).getTeamMember(dto.getInvitedId());
-        verify(spyStageInvitationService, times(1))
-                .createStageInvitationAndGetDto(stage, author, invited);
+        StageInvitationDto sentInvitation = spyStageInvitationService.sendInvitation(dto);
 
         assertEquals(dto, sentInvitation);
+        verify(stageService, times(1)).getStageById(dto.getStageId());
+        verify(teamMemberService, times(1)).getTeamMember(dto.getInvitedId());
+        verify(spyStageInvitationService, times(1))
+                .createStageInvitationAndGetDto(stage, dto.getAuthorId(), invited);
     }
 
     @Test
@@ -147,13 +143,16 @@ public class StageInvitationServiceTest {
         invitation.setAuthor(author);
         invitation.setInvited(invited);
         invitation.setStatus(StageInvitationStatus.PENDING);
+        when(teamMemberService.getTeamMember(authorId)).thenReturn(author);
         doNothing().when(stageInvitationValidator).validateInvitedForCreate(authorId, invitedId);
         StageInvitationDto expectedStageInvitationDto = stageInvitationService
-                .createStageInvitationAndGetDto(stage, author, invited);
+                .createStageInvitationAndGetDto(stage, authorId, invited);
 
+        assertEquals(expectedStageInvitationDto, stageInvitationMapper.toDto(stageInvitationCaptor.capture()));
+        verify(teamMemberService, times(1)).getTeamMember(authorId);
         verify(stageInvitationValidator, times(1)).validateInvitedForCreate(authorId, invitedId);
         verify(stageInvitationRepository, times(1)).save(stageInvitationCaptor.capture());
-        assertEquals(expectedStageInvitationDto, stageInvitationMapper.toDto(stageInvitationCaptor.capture()));
+
     }
 
     @Test

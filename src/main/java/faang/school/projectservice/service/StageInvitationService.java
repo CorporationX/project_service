@@ -29,17 +29,21 @@ public class StageInvitationService {
     private final List<StageInvitationFilter> invitationFilters;
 
     public StageInvitationDto sendInvitation(StageInvitationDto stageInvitationDto) {
-        Stage stage = stageService.getStage(stageInvitationDto.getStageId());
-        TeamMember author = teamMemberService.getTeamMember(stageInvitationDto.getAuthorId());
+        Stage stage = stageService.getStageById(stageInvitationDto.getStageId());
         TeamMember invited = teamMemberService.getTeamMember(stageInvitationDto.getInvitedId());
-        return createStageInvitationAndGetDto(stage, author, invited);
+        return createStageInvitationAndGetDto(stage, stageInvitationDto.getAuthorId(), invited);
     }
 
-    public StageInvitationDto createStageInvitationAndGetDto(Stage stage, TeamMember author, TeamMember invited) {
+    public StageInvitationDto createStageInvitationAndGetDto(Stage stage, Long authorId, TeamMember invited) {
+        TeamMember author = teamMemberService.getTeamMember(authorId);
         stageInvitationValidator.validateInvitedForCreate(author.getId(), invited.getId());
 
         StageInvitation invitation = StageInvitation.builder()
-                        .stage(stage).author(author).invited(invited).status(StageInvitationStatus.PENDING).build();
+                .stage(stage)
+                .author(author)
+                .invited(invited)
+                .status(StageInvitationStatus.PENDING)
+                .build();
 
         StageInvitation saved = stageInvitationRepository.save(invitation);
         return stageInvitationMapper.toDto(saved);

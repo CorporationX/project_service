@@ -13,6 +13,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,6 @@ public class ProjectService {
         Project project = projectRepository.findById(projectUpdateRequestDto.getId())
                 .orElseThrow(NoSuchElementException::new);
         projectMapper.update(project, projectUpdateRequestDto);
-
         Project savedProject = projectRepository.save(project);
         return projectMapper.toUpdateResponseDto(savedProject);
     }
@@ -81,12 +81,21 @@ public class ProjectService {
     }
 
     public ProjectResponseDto getProjectDtoById(Long id) {
-        Project project = projectRepository.findById(id)
+        return projectMapper.toResponseDto(getProjectById(id));
+    }
+
+    public Project getProjectById(Long id) {
+        return projectRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Project not found"));
-        return projectMapper.toResponseDto(project);
     }
 
     public void deleteProjectById(Long id) {
         projectRepository.deleteById(id);
     }
+
+    public Project findEntityById(long id) {
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Project no found by id: " + id));
+    }
+
 }
