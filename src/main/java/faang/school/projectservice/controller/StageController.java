@@ -34,7 +34,7 @@ import java.util.Set;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/{projectId}/stages")
+@RequestMapping("/v1/{projectId}/stages")
 public class StageController {
 
     private final StageService stageService;
@@ -45,7 +45,7 @@ public class StageController {
         return stageService.createStage(stageDto);
     }
 
-    @GetMapping("/stages")
+    @GetMapping
     public ResponseEntity<List<StageDto>> getStages(@Valid @PathVariable Long projectId,
                                                     @RequestParam(required = false) Set<StageRoles> roles,
                                                     @RequestParam(required = false) TaskStatus taskStatus) {
