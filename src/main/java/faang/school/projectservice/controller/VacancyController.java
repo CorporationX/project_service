@@ -12,36 +12,39 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/vacancies")
 @RequiredArgsConstructor
 public class VacancyController {
     private final VacancyService vacancyService;
 
-    @PostMapping("/vacancies")
-    public CreateVacancyResponse createVacancy(CreateVacancyRequest createRequest) {
+    @PostMapping
+    public CreateVacancyResponse createVacancy(@RequestBody CreateVacancyRequest createRequest) {
         return vacancyService.create(createRequest);
     }
 
-    @PostMapping("/vacancies/{id}")
+    @PostMapping("/{id}")
     public UpdateVacancyResponse updateVacancy(@PathVariable long id, UpdateVacancyRequest updateRequest) {
         return vacancyService.update(updateRequest);
     }
 
-    @DeleteMapping("/vacancies/{id}")
+    @DeleteMapping("/{id}")
     public void deleteVacancy(@PathVariable long id) {
         vacancyService.delete(id);
     }
 
-    @GetMapping("/vacancies/{id}")
+    @GetMapping("/{id}")
     public GetVacancyResponse getVacancy(long id) {
         return vacancyService.getVacancyById(id);
     }
 
-    @GetMapping("/vacancies")
+    @GetMapping
     public List<GetVacancyResponse> getAllVacancies(VacancyFilterDto filters) {
         return vacancyService.getAllVacancies(filters);
     }

@@ -15,7 +15,7 @@ public class UpdateVacancyResponse {
     private String description;
     private TeamRole position;
     private Long projectId;
-    private List<Long> candidateIds;
+    private Long updatedBy;
     private VacancyStatus status;
     private Double salary;
     private WorkSchedule workSchedule;

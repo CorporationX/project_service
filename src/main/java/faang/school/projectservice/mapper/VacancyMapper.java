@@ -9,6 +9,7 @@ import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
@@ -18,21 +19,16 @@ import java.util.List;
 public interface VacancyMapper {
     Vacancy fromCreateRequest(CreateVacancyRequest createRequest);
 
-    Vacancy fromUpdateRequest(UpdateVacancyRequest updateRequest);
-
     @Mapping(source = "project.id", target = "projectId")
     CreateVacancyResponse toCreateResponse(Vacancy vacancy);
 
+//    Vacancy fromUpdateRequest(UpdateVacancyRequest updateRequest);
+
+    void update(UpdateVacancyRequest updateRequest, @MappingTarget Vacancy vacancy);
+
     @Mapping(source = "project.id", target = "projectId")
-    @Mapping(source = "candidates", target = "candidateIds", qualifiedByName = "mapCandidatesToIds")
     UpdateVacancyResponse toUpdateResponse(Vacancy vacancy);
 
     @Mapping(source = "project.id", target = "projectId")
-    @Mapping(source = "candidates", target = "candidateIds", qualifiedByName = "mapCandidatesToIds")
     GetVacancyResponse toGetResponse(Vacancy vacancy);
-
-    @Named("mapCandidatesToIds")
-    default List<Long> mapCandidatesToIds(List<Candidate> candidates) {
-        return candidates.stream().map(Candidate::getId).toList();
-    }
 }

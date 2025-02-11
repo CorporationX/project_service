@@ -16,10 +16,11 @@ public class UpdateVacancyRequest {
     private String description;
     private TeamRole position;
     private Long projectId;
-    private Long userUpdatedBy;
+    private Long updatedBy;
     private VacancyStatus status;
     private Double salary;
     private WorkSchedule workSchedule;
     private Integer count;
+    private List<Long> requiredSkillIds;
     private String coverImageKey;
 }

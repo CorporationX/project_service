@@ -17,7 +17,7 @@ public class VacancyValidator {
     private final TeamMemberRepository teamMemberRepository;
 
     public void validateCreatedVacancy(Vacancy vacancy) {
-        if (!checkRoleOfCreatedBy(vacancy)) {
+        if (!checkRoleOfCreatedByUser(vacancy)) {
             throw new VacancyValidationException("Only user with owner or manager role can create vacancy");
         }
     }
@@ -27,9 +27,9 @@ public class VacancyValidator {
             throw new VacancyValidationException("Only user with owner or manager role can update vacancy");
         }
 
-        if (!checkCandidatesAreNotTeamMember(vacancy)) {
-            throw new VacancyValidationException("Candidate is team member");
-        }
+//        if (!checkCandidatesAreNotTeamMember(vacancy)) {
+//            throw new VacancyValidationException("Candidate is team member");
+//        }
 
         if (vacancy.getStatus() == VacancyStatus.CLOSED) {
             if (!checkCountOfAcceptedCandidates(vacancy)) {
@@ -43,7 +43,7 @@ public class VacancyValidator {
         }
     }
 
-    private boolean checkRoleOfCreatedBy(Vacancy vacancy) {
+    private boolean checkRoleOfCreatedByUser(Vacancy vacancy) {
         TeamMember createdBy = teamMemberRepository.findByUserIdAndProjectId(
                 vacancy.getCreatedBy(),
                 vacancy.getProject().getId());
@@ -71,16 +71,16 @@ public class VacancyValidator {
         return false;
     }
 
-    private boolean checkCandidatesAreNotTeamMember(Vacancy vacancy) {
-        for (Candidate candidate : vacancy.getCandidates()) {
-            if (teamMemberRepository.findByUserIdAndProjectId(
-                    candidate.getUserId(), vacancy.getProject().getId()) != null) {
-                return false;
-            }
-        }
-
-        return true;
-    }
+//    private boolean checkCandidatesAreNotTeamMember(Vacancy vacancy) {
+//        for (Candidate candidate : vacancy.getCandidates()) {
+//            if (teamMemberRepository.findByUserIdAndProjectId(
+//                    candidate.getUserId(), vacancy.getProject().getId()) != null) {
+//                return false;
+//            }
+//        }
+//
+//        return true;
+//    }
 
     private boolean checkCountOfAcceptedCandidates(Vacancy vacancy) {
         return vacancy.getCandidates()

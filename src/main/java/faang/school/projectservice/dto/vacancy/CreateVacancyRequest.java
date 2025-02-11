@@ -15,10 +15,10 @@ public class CreateVacancyRequest {
     private String description;
     private TeamRole position;
     private Long projectId;
-    private VacancyStatus status = VacancyStatus.OPEN;
-    private Long userCreatedBy;
+    private Long createdBy;
     private Double salary;
     private WorkSchedule workSchedule;
     private Integer count;
+    private List<Long> requiredSkillIds;
     private String coverImageKey;
 }

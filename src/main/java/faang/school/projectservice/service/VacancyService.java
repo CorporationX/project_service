@@ -37,50 +37,45 @@ public class VacancyService {
 
     public CreateVacancyResponse create(CreateVacancyRequest createRequest) {
         Vacancy vacancy = vacancyMapper.fromCreateRequest(createRequest);
-        vacancy.setProject(projectRepository.getReferenceById(createRequest.getProjectId()));
+        vacancy.setProject(projectRepository.findById(createRequest.getProjectId())
+                .orElseThrow(() -> new VacancyValidationException("Project with ID " + createRequest.getProjectId() + " not found")));
         vacancyValidator.validateCreatedVacancy(vacancy);
-
         vacancy.setStatus(VacancyStatus.OPEN);
-
         Vacancy createdVacancy = vacancyRepository.save(vacancy);
-
         return vacancyMapper.toCreateResponse(createdVacancy);
     }
 
     public UpdateVacancyResponse update(UpdateVacancyRequest updateRequest) {
-        Vacancy vacancy = vacancyMapper.fromUpdateRequest(updateRequest);
-        vacancy.setProject(projectRepository.getReferenceById(updateRequest.getProjectId()));
-        vacancy.setCandidates(candidateRepository.findAllById(updateRequest.getCandidateIds()));
+        Vacancy vacancy = vacancyRepository.findById(updateRequest.getId())
+                .orElseThrow(() -> new VacancyValidationException("Vacancy with ID " + updateRequest.getId() + " not found"));
+        vacancyMapper.update(updateRequest, vacancy);
         vacancyValidator.validateUpdatedVacancy(vacancy);
-
         Vacancy updatedVacancy = vacancyRepository.save(vacancy);
-
         return vacancyMapper.toUpdateResponse(updatedVacancy);
+
+//        Vacancy vacancy = vacancyMapper.fromUpdateRequest(updateRequest);
+//        vacancy.setProject(projectRepository.getReferenceById(updateRequest.getProjectId()));
+//        vacancyValidator.validateUpdatedVacancy(vacancy);
+//        Vacancy updatedVacancy = vacancyRepository.save(vacancy);
+//        return vacancyMapper.toUpdateResponse(updatedVacancy);
     }
 
     public void delete(long id) {
-        Optional<Vacancy> vacancyOptional = vacancyRepository.findById(id);
-        if (vacancyOptional.isPresent()) {
-            List<Long> candidateIds = vacancyOptional.get()
-                    .getCandidates()
-                    .stream()
-                    .map(Candidate::getId)
-                    .toList();
+        Vacancy vacancy = vacancyRepository.findById(id)
+                .orElseThrow(() -> new VacancyValidationException("Vacancy with ID " + id + " not found"));
 
-            candidateRepository.deleteAllById(candidateIds);
-            vacancyRepository.deleteById(id);
-        } else {
-            throw new VacancyValidationException("There is no vacancy for this ID");
-        }
+        List<Long> candidateIds = vacancy.getCandidates().stream()
+                .map(Candidate::getId)
+                .toList();
+
+//            candidateRepository.deleteAllById(candidateIds);
+        vacancyRepository.deleteById(id);
     }
 
     public GetVacancyResponse getVacancyById(long id) {
-        Optional<Vacancy> vacancyOptional = vacancyRepository.findById(id);
-        if (vacancyOptional.isPresent()) {
-            return vacancyMapper.toGetResponse(vacancyOptional.get());
-        } else {
-            throw new VacancyValidationException("There is no vacancy for this ID");
-        }
+        Vacancy vacancy = vacancyRepository.findById(id)
+                .orElseThrow(() -> new VacancyValidationException("Vacancy with ID " + id + " not found"));
+        return vacancyMapper.toGetResponse(vacancy);
     }
 
     public List<GetVacancyResponse> getAllVacancies(VacancyFilterDto filters) {

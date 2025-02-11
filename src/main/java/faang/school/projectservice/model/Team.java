@@ -38,4 +38,14 @@ public class Team {
 
     @Column(name = "avatar_key")
     private String avatarKey;
+
+    @Override
+    public String toString() {
+        return "Team{" +
+                "id=" + id +
+                ", teamMembers=" + teamMembers +
+                ", project=" + project.getId() +
+                ", avatarKey='" + avatarKey + '\'' +
+                '}';
+    }
 }
