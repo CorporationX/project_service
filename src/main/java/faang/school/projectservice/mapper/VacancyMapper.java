@@ -30,5 +30,13 @@ public interface VacancyMapper {
     UpdateVacancyResponse toUpdateResponse(Vacancy vacancy);
 
     @Mapping(source = "project.id", target = "projectId")
+    @Mapping(source = "candidates", target = "candidateIds", qualifiedByName = "mapCandidatesToIds")
     GetVacancyResponse toGetResponse(Vacancy vacancy);
+
+    @Named("mapCandidatesToIds")
+    default List<Long> mapCandidatesToIds(List<Candidate> candidates) {
+        return candidates.stream()
+                .map(Candidate::getId)
+                .toList();
+    }
 }

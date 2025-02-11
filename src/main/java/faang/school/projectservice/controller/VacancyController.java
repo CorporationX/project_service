@@ -30,7 +30,7 @@ public class VacancyController {
     }
 
     @PostMapping("/{id}")
-    public UpdateVacancyResponse updateVacancy(@PathVariable long id, UpdateVacancyRequest updateRequest) {
+    public UpdateVacancyResponse updateVacancy(@PathVariable long id, @RequestBody UpdateVacancyRequest updateRequest) {
         return vacancyService.update(updateRequest);
     }
 
@@ -40,7 +40,7 @@ public class VacancyController {
     }
 
     @GetMapping("/{id}")
-    public GetVacancyResponse getVacancy(long id) {
+    public GetVacancyResponse getVacancy(@PathVariable long id) {
         return vacancyService.getVacancyById(id);
     }
 
