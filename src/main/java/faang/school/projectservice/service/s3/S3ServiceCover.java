@@ -9,7 +9,6 @@ import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -22,16 +21,12 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 @ConditionalOnProperty(value = "services.s3.isMocked", havingValue = "false")
-
+@RequiredArgsConstructor
 public class S3ServiceCover {
     private final AmazonS3 amazonS3;
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
-
-    public S3ServiceCover(@Qualifier("amazonS3") AmazonS3 amazonS3) {
-        this.amazonS3 = amazonS3;
-    }
 
     public Resource uploadFile(MultipartFile file, String folder) {
         long fileSize = file.getSize();
