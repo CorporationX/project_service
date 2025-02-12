@@ -2,7 +2,6 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.service.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +13,12 @@ public class StageInvitationValidator {
 
         if (authorId == invitedId) {
             throw new IllegalArgumentException(String.format(
-                    "The author of the stage invitation and the person invited to this stage " +
-                            "cannot be the same person. " +
-                            "\n authorId: %d\n invitedId: %d", authorId, invitedId));
+                    """
+                            The author of the stage invitation and the person invited to this stage \
+                            cannot be the same person. \
+
+                             authorId: %d
+                             invitedId: %d""", authorId, invitedId));
         }
     }
 
