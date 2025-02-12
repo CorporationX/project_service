@@ -26,9 +26,10 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class S3Service {
     private final AmazonS3 amazonS3;
-
     @Value("${services.s3.bucketName}")
     private String bucketName;
+    @Value("${project.gallery.image.link_expiration_time}")
+    private long imageLinkExpirationTimeMillis;
 
     public Resource uploadFile(MultipartFile file, String folderName) {
         log.info("Uploading file {}", file.getOriginalFilename());
@@ -69,7 +70,7 @@ public class S3Service {
     public String getFileUrl(String key) {
         try {
             log.info("Getting file {} url", key);
-            Date expiration = new Date(System.currentTimeMillis() + 60 * 1000);
+            Date expiration = new Date(System.currentTimeMillis() + imageLinkExpirationTimeMillis);
 
             GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName,  key)
                     .withMethod(HttpMethod.GET)
