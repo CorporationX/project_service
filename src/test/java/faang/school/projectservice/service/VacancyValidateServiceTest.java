@@ -1,4 +1,4 @@
-package school.faang.project_service.service;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.TeamMember;
@@ -7,7 +7,6 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.VacancyValidatorService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

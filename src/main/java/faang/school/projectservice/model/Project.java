@@ -119,4 +119,7 @@ public class Project {
     @CollectionTable(name = "project_gallery", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "file_key", nullable = false)
     private List<String> galleryFileKeys;
+
+    @Column(name = "google_calendar_id", length = 255)
+    private String googleCalendarId;
 }

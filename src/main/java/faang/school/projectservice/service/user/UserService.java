@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.user;
 
-import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.client.feign.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exception.payment.UserClientException;
 import lombok.RequiredArgsConstructor;

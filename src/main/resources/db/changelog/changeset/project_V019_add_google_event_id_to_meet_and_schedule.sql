@@ -1,0 +1,8 @@
+ALTER TABLE meet
+ADD COLUMN IF NOT EXISTS google_event_id VARCHAR(255);
+
+ALTER TABLE schedule
+ADD COLUMN IF NOT EXISTS google_event_id VARCHAR(255);
+
+ALTER TABLE project
+ADD COLUMN IF NOT EXISTS google_calendar_id VARCHAR(255);

@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.payment;
 
-import faang.school.projectservice.client.PaymentServiceClient;
+import faang.school.projectservice.client.feign.PaymentServiceClient;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;

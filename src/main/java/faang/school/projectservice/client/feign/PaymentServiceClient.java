@@ -1,4 +1,4 @@
-package faang.school.projectservice.client;
+package faang.school.projectservice.client.feign;
 
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;

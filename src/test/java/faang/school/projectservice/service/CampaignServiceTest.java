@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.mapper.campaign.CampaignMapper;
@@ -21,9 +20,15 @@ import java.util.Optional;
 
 import static faang.school.projectservice.model.CampaignStatus.CANCELED;
 import static faang.school.projectservice.model.CampaignStatus.COMPLETED;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CampaignServiceTest {
@@ -36,6 +41,9 @@ public class CampaignServiceTest {
 
     @Mock
     private CampaignMapper campaignMapper;
+
+    @Mock
+    private CampaignValidationService campaignValidationService;
 
     @InjectMocks
     private CampaignService campaignService;

@@ -68,4 +68,7 @@ public class Meet {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "google_event_id", length = 255)
+    private String googleEventId;
 }

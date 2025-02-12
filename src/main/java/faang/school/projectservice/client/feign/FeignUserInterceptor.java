@@ -1,6 +1,6 @@
-package faang.school.projectservice.client;
+package faang.school.projectservice.client.feign;
 
-import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.config.context.user.UserContext;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.RequiredArgsConstructor;

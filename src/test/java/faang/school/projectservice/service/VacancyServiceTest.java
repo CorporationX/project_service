@@ -1,4 +1,4 @@
-package school.faang.project_service.service;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.exseption.VacancyNotFoundException;
 import faang.school.projectservice.model.Candidate;
@@ -9,8 +9,6 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.VacancyService;
-import faang.school.projectservice.service.VacancyValidatorService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

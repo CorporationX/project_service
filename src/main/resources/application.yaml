@@ -36,15 +36,34 @@ calculations_messages_processing:
   enabled: true
 
 services:
-  s3:
+  minio:
     endpoint: http://localhost:9000
-    accessKey: user
-    secretKey: password
-    bucketName: projectbucket
+    access-key: user
+    secret-key: password
+    bucket-name: corpbucket
     isMocked: false
+
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+google:
+  calendar:
+    application-name: "CorporationX Project Service"
+    credentials-json: |
+      {
+        "type": "service_account",
+        "project_id": "corporationx-project-calendar",
+        "private_key_id": "da82468daf58d180393258ea676f496120211486",
+        "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCTKUZQthqAZBf0\nvRsEm7ckK+8gX0Mbo/YveELXvS/D1P7DmW1j68B363h1JJrzg7CEUmkw8QuE0XG5\nuY9sUh6o4whj8cf+YRmjnNEMANlQmzV8qLPOiDYvO1RK1gpDIfB25JlP1L9eb+7Q\niwufr7RdX9CbnlkRRTkNw87SER1Tm/ZDHh5eNr+tQh55qkjd9zeU3c6TjlwTG3go\n3BGSrbJg49lLb5Uq5JwrXueQkCJdAOBGTUB7fOTDcKRQxaFh2/Xyc8oDwoISdyUC\nUTFYqF+qnIJH5rV1fCQg/BmjxMlgXdysgmCdiuws7AbBnbCy5Jv4EFVkSmfpHyM8\nvUWp1J6JAgMBAAECggEACP2okh3OGLIE1KsJD4sD8W3NukiXrQSjcdsDGnMwi+Jj\nfkfNayFoLOtx/JYz8VTGYA845giUD5VMQXCY1qFdxiu4w4JuGZiNHHXkP7t9i3Mw\nHWGhOqkPxmr1h2z0S42zR1BIHZx95KMqEAuuth7iAiJseFWAU5HLHpAr/qGVDRqO\ngUsZIDtkpzIZ6T/5IRp5+NGY63ZWlwWlFMccFvzIb9NxnbzbTeXZ/9LEeSkGYLG6\nE+rKuc+UG9ctY445YTe9AwCFvTaupezZE/d5mJKHDWGxSbCsl+YrRJyDR36ahb5I\nWo9na7UzdU3PuS8/fowLn+05mq2UjAH2y7AIIVfHkQKBgQDJhRMo7MC5k/FuIZd0\nZNjGg6S1L/JwIoEfmnSvV/Llt90k8YBa5hQoSnfGlP4yyGoQ6k15K7rgNg8Mysxc\nbjRDkdFqIq6PdXFTz3uUSmoLqEttyMqpL8sl2hiVTRWpH8c/OClPqU8cbcz/+CfL\nyoLwe1hqbg7bmI80SICeYMMamwKBgQC68hy0yGGB+CXopjX4dteo3VWhog7gFrGc\nr2H1JfVm1coAO1fCqP37UN6rmcer9DsTibjEty/ddeX9IoORMwIWdDp+tpjxjTLk\nU8pCxl8WYWftJsCZ6vs2XOWR5IBzmk2YB6wOdBDmWP+BGM6YEddt2scqIwo9MC2M\nYwyVzpKbqwKBgFBtWBRBSTnHndfCeFvv08SGzbmyhSPT4YznbCJ/C2Y7V3tjF0Mw\nCGN8NQmAdWN3MT3HBVyS42aQrLkCR0Wshhdhnx6o8No4mR5F9KBegqxcYp5SQO/9\nLyrQPHd56GczU6YbmAE/JV/HQsX2GIvxKwkncUYo3q0t2hmXxh1vqO55AoGAYh5C\n3MuzCcERPHtIJmFRrWqF0DC7d/fRPrh6RG2o0FFzFQ4QcLW7oBUA2bX7q4+jFg0Z\nsf2nnKeNj3926FWKSfi03t69hUIjrN0hckyliZyULE9DlUVUlmLJhvoURRh+k0Wr\nk2ZtnEinyb0YaY4rsJe8IqyDajwIG/+8kj/6iMMCgYA+PTn1Oi9oNsOX7/el7D8K\nFZJtTE90a0d5L1ItVSliEsWI55nfzBjlfiMu1PMn/0QPJ4ZnqgYMuXUwZ9WpkmEM\nEyKV5DBa9CXoHn6zBiPgpkiXEIO8hVXfYnvyDIJT7KREO2+w+4WusTb6sr5lVmv7\nlEM9yIfctWlg5wg4F7OEeA==\n-----END PRIVATE KEY-----\n",
+        "client_email": "corporationx-calendar-api-test@corporationx-project-calendar.iam.gserviceaccount.com",
+        "client_id": "113115747044004230600",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/corporationx-calendar-api-test%40corporationx-project-calendar.iam.gserviceaccount.com",
+        "universe_domain": "googleapis.com"
+      }

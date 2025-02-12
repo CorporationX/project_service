@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.donation;
 
-import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.config.context.user.UserContext;
 import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.payment.CampaignNotActiveException;

@@ -7,7 +7,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.config.context.user.UserContext;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

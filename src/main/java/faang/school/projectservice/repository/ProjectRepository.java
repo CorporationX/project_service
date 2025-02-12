@@ -37,5 +37,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("SELECT p FROM Project p WHERE p.parentProject.id = :parentProjectId")
     Page<Project> findByParentProjectId(Long parentProjectId, Pageable pageable);
 
+    @Query("SELECT p FROM Project p WHERE p.googleCalendarId = :googleCalendarId")
+    Project findByGoogleCalendarId(String googleCalendarId);
 }
 

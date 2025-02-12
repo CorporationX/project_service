@@ -1,4 +1,4 @@
-package faang.school.projectservice.config.context;
+package faang.school.projectservice.config.context.user;
 
 import org.springframework.stereotype.Component;
 

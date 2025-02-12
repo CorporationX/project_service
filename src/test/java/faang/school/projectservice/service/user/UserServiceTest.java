@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.user;
 
-import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.client.feign.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exception.payment.UserClientException;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

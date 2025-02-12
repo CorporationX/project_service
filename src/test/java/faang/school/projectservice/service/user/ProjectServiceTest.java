@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.user;
 
+import faang.school.projectservice.model.Meet;
 import com.amazonaws.services.s3.AmazonS3;
 import faang.school.projectservice.config.S3.S3Config;
 import faang.school.projectservice.exception.ImageResizeException;
@@ -8,6 +9,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ImageResizer;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.google.GoogleCalendarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,6 +40,15 @@ class ProjectServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
+    private GoogleCalendarService googleCalendarService;
+
+    @Mock
+    private ProjectScheduleService projectScheduleService;
+
+    @Mock
+    private ProjectMeetService projectMeetService;
 
     @InjectMocks
     private ProjectService projectService;
@@ -74,12 +87,14 @@ class ProjectServiceTest {
     void createProject_ShouldSaveAndReturnProject() {
         when(projectRepository.existsByOwnerIdAndName(project.getOwnerId(), project.getName())).thenReturn(false);
         when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(googleCalendarService.createCalendar(any())).thenReturn(new com.google.api.services.calendar.model.Calendar());
 
         Project result = projectService.createProject(project, project.getOwnerId());
 
         assertNotNull(result);
         assertEquals("Test Project", result.getName());
         verify(projectRepository, times(1)).save(project);
+        verify(googleCalendarService, times(1)).createCalendar(any());
     }
 
     @Test

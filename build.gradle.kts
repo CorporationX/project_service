@@ -11,17 +11,33 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+        name = "atlassian-public"
+        url = uri("https://packages.atlassian.com/maven/repository/public")
+    }
 }
 
 dependencies {
+    /**
+     * Google calendar API
+     */
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.31.0")
+    implementation("com.google.api-client:google-api-client:2.7.2")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev20250115-2.0.0")
     /**
      * Spring boot starters
      */
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-freemarker")
+    implementation("io.vertx:vertx-web-templ-freemarker:4.4.0")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10")
+    implementation("org.springframework.boot:spring-boot-starter-freemarker")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("org.xhtmlrenderer:flying-saucer-pdf-openpdf:9.1.22")
+    implementation("com.github.librepdf:openpdf:1.3.30")
 
     /**
      * Database
@@ -34,6 +50,8 @@ dependencies {
      * Amazon S3
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
+    implementation("org.apache.pdfbox:pdfbox:2.0.27")
+    implementation("io.minio:minio:8.3.4")
 
     /**
      * Utils & Logging
@@ -65,6 +83,16 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.1")
+
+    /**
+     * Jira
+     */
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4") {
+        exclude(group = "org.glassfish.jersey.core", module = "jersey-common")
+    }
+    implementation("com.atlassian.jira:jira-rest-java-client-api:6.0.1")
+    implementation("org.glassfish.jersey.core:jersey-common:2.27")
+    implementation("io.atlassian.fugue:fugue:5.0.2")
     /**
      * ImageResizer
      */
@@ -122,6 +150,11 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
+tasks.test {
+    useJUnitPlatform {
+        excludeTags("integration")
+    }
+}
 
 tasks.withType<Test> {
     useJUnitPlatform()

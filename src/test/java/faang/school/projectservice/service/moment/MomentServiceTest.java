@@ -108,6 +108,7 @@ public class MomentServiceTest {
         List<Long> expectedProjectIds = new ArrayList<>();
         expectedProjectIds.addAll(projectIds);
         expectedProjectIds.add(projectId);
+        expectedProjectIds.addAll(projectIds);
 
         List<Long> mockUserIds = List.of(1L, 2L, 3L, 4L, 5L);
 

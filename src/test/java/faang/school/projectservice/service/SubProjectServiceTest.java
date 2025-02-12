@@ -4,6 +4,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.google.GoogleCalendarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,15 @@ class SubProjectServiceTest {
 
     @Mock
     private ProjectMapper projectMapper;
+
+    @Mock
+    private GoogleCalendarService googleCalendarService;
+
+    @Mock
+    private ProjectScheduleService projectScheduleService;
+
+    @Mock
+    private ProjectMeetService projectMeetService;
 
     @InjectMocks
     private ProjectService projectService;
@@ -73,6 +83,7 @@ class SubProjectServiceTest {
 
         when(projectRepository.findById(parentProject.getId())).thenReturn(Optional.of(parentProject));
         when(projectRepository.save(any(Project.class))).thenReturn(subProject);
+        when(googleCalendarService.createCalendar(any())).thenReturn(new com.google.api.services.calendar.model.Calendar());
 
         Project result = projectService.createSubProject(subProject, 1L);
 

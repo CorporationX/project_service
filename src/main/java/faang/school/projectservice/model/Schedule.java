@@ -47,4 +47,7 @@ public class Schedule {
     @OneToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    @Column(name = "google_event_id", length = 255)
+    private String googleEventId;
 }

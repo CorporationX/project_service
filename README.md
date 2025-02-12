@@ -90,6 +90,21 @@ RESTful приложения калькулятор с единственным 
     получает запросы и отправляет задачи асинхронно выполняться
     в [воркер](src/main/java/faang/school/servicetemplate/service/worker/CalculationWorker.java)
 
+# Интеграция с Jira
+
+Для работы с JIRA API необходимо передавать в заголовках запроса:
+- `x-jira-username` - логин пользователя Jira
+- `x-jira-password` - пароль пользователя Jira или Token
+- `x-jira-base-url` - базовый URL Jira-сервера
+
+Пример запроса через curl:
+```shell
+curl -X GET http://localhost:8080/your-endpoint \
+     -H "x-jira-username: your_jira_login" \
+     -H "x-jira-password: your_jira_password_or_token" \
+     -H "x-jira-base-url: https://your-company.atlassian.net"
+```
+
 # Тесты
 
 Написаны только для единственного REST endpoint'а
