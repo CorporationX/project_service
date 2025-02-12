@@ -31,17 +31,20 @@ public class S3Service {
     private final AmazonS3 s3Client;
     private final String keyPattern = "%s/%s_%s";
 
-    @Value("${services.s3.bucketName}")
+    @Value("${services.minio.bucket-name}")
     private String bucketName;
 
 
     public Resource uploadFile(MultipartFile file, String folder) {
         long fileSize = file.getSize();
+        String fileType = file.getContentType();
+        String fileName = file.getOriginalFilename();
+
         ObjectMetadata objectMetaData = new ObjectMetadata();
         objectMetaData.setContentLength(fileSize);
-        objectMetaData.setContentType(file.getContentType());
+        objectMetaData.setContentType(fileType);
         String key = String.format(keyPattern, folder,
-                UUID.randomUUID(), file.getOriginalFilename());
+                UUID.randomUUID(), fileName);
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
@@ -57,9 +60,9 @@ public class S3Service {
 
         Resource resource = new Resource();
         resource.setKey(key);
-        resource.setName(file.getOriginalFilename());
+        resource.setName(fileName);
         resource.setSize(BigInteger.valueOf(fileSize));
-        resource.setType(ResourceType.getResourceType(file.getContentType()));
+        resource.setType(ResourceType.getResourceType(fileType));
         resource.setStatus(ResourceStatus.ACTIVE);
 
         return resource;

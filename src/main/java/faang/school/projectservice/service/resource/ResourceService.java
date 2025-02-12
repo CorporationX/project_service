@@ -53,7 +53,7 @@ public class ResourceService {
                 fileContentType == ResourceType.OTHER) {
             throw new FileException(INVALID_FILE_EXTENSION);
         }
-        consumeNewStorageSize(project, file.getSize());
+        BigInteger newStorageSize = calculateStorageSize(project, file.getSize());
         String folder = String.format(folderPattern, projectId, project.getName());
 
         Resource resource = s3Service.uploadFile(file, folder);
@@ -64,6 +64,7 @@ public class ResourceService {
         resource.setAllowedRoles(List.copyOf(member.getRoles()));
         resource = resourceRepository.save(resource);
 
+        updateStorageSize(newStorageSize, project);
         return resource;
     }
 
@@ -82,7 +83,7 @@ public class ResourceService {
         validateAccessRights(member, oldResource);
 
         long sizeDifference = file.getSize() - oldResource.getSize().longValue();
-        consumeNewStorageSize(project, sizeDifference);
+        BigInteger newStorageSize = calculateStorageSize(project, sizeDifference);
         String folder = String.format(folderPattern, projectId, project.getName());
 
         s3Service.deleteFile(oldResource.getKey());
@@ -92,6 +93,7 @@ public class ResourceService {
         oldResource.setUpdatedBy(member);
         oldResource = resourceRepository.save(oldResource);
 
+        updateStorageSize(newStorageSize, project);
         return oldResource;
     }
 
@@ -108,7 +110,8 @@ public class ResourceService {
 
         s3Service.deleteFile(resource.getKey());
 
-        consumeNewStorageSize(project, resource.getSize().negate().longValue());
+        BigInteger newStorageSize = calculateStorageSize(project, resource.getSize().negate().longValue());
+        updateStorageSize(newStorageSize, project);
 
         resource.setKey(null);
         resource.setSize(null);
@@ -128,15 +131,17 @@ public class ResourceService {
         return s3Service.downloadFile(resource.getKey());
     }
 
-    private void consumeNewStorageSize(Project project, Long fileSize) {
-        BigInteger newStorageSize = project.getStorageSize()
-                .add(BigInteger.valueOf(fileSize));
+    private BigInteger calculateStorageSize(Project project, Long fileSize) {
+        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(fileSize));
 
         if (newStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
             throw new FileException(String.format(FILE_SIZE_EXCEED_STORAGE_VALUE,
                     newStorageSize, project.getMaxStorageSize()));
         }
+        return newStorageSize;
+    }
 
+    private void updateStorageSize(BigInteger newStorageSize, Project project) {
         project.setStorageSize(newStorageSize);
         projectRepository.save(project);
     }

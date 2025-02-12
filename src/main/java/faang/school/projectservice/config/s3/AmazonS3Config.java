@@ -12,19 +12,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AmazonS3Config {
 
-    @Value("${services.s3.accessKey}")
+    @Value("${services.minio.access-key}")
     private String accessKey;
 
-    @Value("${services.s3.secretKey}")
+    @Value("${services.minio.secret-key}")
     private String secretKey;
 
-    @Value("${services.s3.endpoint}")
+    @Value("${services.minio.endpoint}")
     private String endpoint;
 
-    @Value("${services.s3.region}")
-    private String region;
-
-    @Value("${services.s3.bucketName}")
+    @Value("${services.minio.bucket-name}")
     private String bucketName;
 
     @Bean
@@ -32,7 +29,7 @@ public class AmazonS3Config {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, "ru"))
                 .withPathStyleAccessEnabled(true)
                 .build();
     }
