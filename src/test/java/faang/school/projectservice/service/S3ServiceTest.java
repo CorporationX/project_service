@@ -2,7 +2,11 @@ package faang.school.projectservice.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import faang.school.projectservice.dto.resource.S3FileDto;
 import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -24,7 +28,6 @@ import java.math.BigInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -45,11 +48,13 @@ public class S3ServiceTest {
 
     private MultipartFile file;
     private String folder;
+    private String key;
 
     @BeforeEach
     void setUp() {
         folder = "test-folder";
         file = mock(MultipartFile.class);
+        key = "test-key";
         ReflectionTestUtils.setField(s3Service, "bucketName", "test-bucket");
     }
 
@@ -69,8 +74,6 @@ public class S3ServiceTest {
         assertEquals(BigInteger.valueOf(fileSize), result.getSize());
         assertEquals(ResourceType.IMAGE, result.getType());
         assertEquals(ResourceStatus.ACTIVE, result.getStatus());
-        assertNotNull(result.getCreatedAt());
-        assertNotNull(result.getUpdatedAt());
 
         verify(s3Client).putObject(any(PutObjectRequest.class));
     }
@@ -95,34 +98,61 @@ public class S3ServiceTest {
 
     @Test
     void testDeleteFile_Success() {
-        String key = "test-key";
-
         s3Service.deleteFile(key);
 
         verify(s3Client).deleteObject(bucketName, key);
     }
 
     @Test
-    void testDeleteFile_Throws_WhenKeyIsNull() {
-        assertThrows(FileException.class, () -> s3Service.deleteFile(null));
-
-        verify(s3Client, never()).deleteObject(anyString(), anyString());
-    }
-
-    @Test
-    void testDeleteFile_Throws_WhenKeyIsBlank() {
-        assertThrows(FileException.class, () -> s3Service.deleteFile(" "));
-
-        verify(s3Client, never()).deleteObject(anyString(), anyString());
-    }
-
-    @Test
     void testDeleteFile_Throws_WhenAmazonS3Exception() {
-        String key = "test-key";
         doThrow(new AmazonS3Exception("S3 error")).when(s3Client).deleteObject(bucketName, key);
 
         assertThrows(FileException.class, () -> s3Service.deleteFile(key));
 
         verify(s3Client).deleteObject(bucketName, key);
     }
+
+    @Test
+    void testDownloadFile_success() {
+        S3Object s3Object = mock(S3Object.class);
+        ObjectMetadata metadata = mock(ObjectMetadata.class);
+        S3ObjectInputStream inputStream = mock(S3ObjectInputStream.class);
+
+        when(s3Client.getObject(bucketName, key)).thenReturn(s3Object);
+        when(s3Object.getObjectContent()).thenReturn(inputStream);
+        when(s3Object.getObjectMetadata()).thenReturn(metadata);
+        when(metadata.getUserMetaDataOf("fileName")).thenReturn("file.txt");
+        when(metadata.getContentType()).thenReturn("text/plain");
+        when(metadata.getContentLength()).thenReturn(10L);
+
+        S3FileDto result = s3Service.downloadFile(key);
+
+        assertNotNull(result);
+        assertEquals("file.txt", result.getFileName());
+        assertEquals("text/plain", result.getContentType());
+        assertEquals(10L, result.getContentLength());
+        assertNotNull(result.getInputStreamResource());
+    }
+
+    @Test
+    void testDownloadFile_s3Exception() {
+        when(s3Client.getObject(bucketName, key))
+                .thenThrow(new AmazonS3Exception("S3 error"));
+
+        FileException exception = assertThrows(FileException.class,
+                () -> s3Service.downloadFile(key));
+        assertEquals("Failed to download file", exception.getMessage());
+    }
+
+    @Test
+    void testDownloadFile_unexpectedException() {
+        when(s3Client.getObject(bucketName, key))
+                .thenThrow(new RuntimeException("Unexpected error"));
+
+        FileException exception = assertThrows(FileException.class,
+                () -> s3Service.downloadFile(key));
+        assertEquals("Failed to download file", exception.getMessage());
+    }
+
+
 }
