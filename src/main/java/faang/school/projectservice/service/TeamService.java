@@ -1,9 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.team.TeamMemberDto;
 import faang.school.projectservice.dto.team.TeamMemberFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.MemberAlreadyExistsException;
+import faang.school.projectservice.exception.UserServiceConnectionException;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -18,7 +21,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TeamMemberService {
+public class TeamService {
 
     private final TeamMemberRepository teamMemberRepository;
     private final TeamMemberMapper teamMemberMapper;
@@ -29,7 +32,12 @@ public class TeamMemberService {
 
         TeamMember requester = getRequester(memberDto.teamId(), requesterId, List.of(TeamRole.OWNER, TeamRole.MANAGER));
 
-        userServiceClient.getUser(memberDto.userId());
+        checkUser(memberDto.userId());
+
+        teamMemberRepository.findByUserIdAndTeamId(memberDto.userId(), memberDto.teamId())
+                .ifPresent(member -> {
+                    throw new MemberAlreadyExistsException("Member is already in the team");
+                });
 
         TeamMember newMember = teamMemberMapper.toEntity(memberDto);
         newMember.setTeam(requester.getTeam());
@@ -38,17 +46,39 @@ public class TeamMemberService {
         return teamMemberMapper.toDto(newMember);
     }
 
-    public TeamMemberDto updateMember(Long memberId, TeamMemberDto updatedDto, Long requesterId) {
+    private void checkUser(Long userId) {
+        try {
+            UserDto user = userServiceClient.getUser(userId);
+
+            if (user == null) {
+                throw new EntityNotFoundException("User not found");
+            }
+
+        } catch (UserServiceConnectionException e) {
+            throw new UserServiceConnectionException("User service is not available");
+        }
+    }
+
+    public TeamMemberDto updateMemberName(Long memberId, TeamMemberDto updatedDto) {
+        TeamMember member = teamMemberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+
+        member.setNickname(updatedDto.nickname());
+
+        TeamMember updatedMember = teamMemberRepository.save(member);
+        return teamMemberMapper.toDto(updatedMember);
+    }
+
+    public TeamMemberDto updateMemberRole(Long memberId, TeamMemberDto updatedDto, Long requesterId) {
 
         TeamMember member = teamMemberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("Member not found"));
 
         if (!requesterId.equals(member.getUserId())) {
-            getRequester(updatedDto.teamId(), requesterId, List.of(TeamRole.MANAGER));
+            getRequester(updatedDto.teamId(), requesterId, List.of(TeamRole.TEAMLEAD));
         }
 
-        member.setNickname(updatedDto.nickname());
-        member.setRoles(updatedDto.roles());
+        member.setRoles(List.of(updatedDto.role()));
 
         TeamMember updatedMember = teamMemberRepository.save(member);
         return teamMemberMapper.toDto(updatedMember);

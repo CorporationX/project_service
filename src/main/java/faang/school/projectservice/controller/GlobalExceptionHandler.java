@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(ProjectAlreadyExistsException.class)
+    @ExceptionHandler({ProjectAlreadyExistsException.class, MemberAlreadyExistsException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleProjectAlreadyExistsException(ProjectAlreadyExistsException ex, WebRequest request) {
         return ErrorResponse.builder()
@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler({IllegalArgumentException.class, MeetingOwnershipRequiredException.class,PaymentFailedException.class})
+    @ExceptionHandler({IllegalArgumentException.class, MeetingOwnershipRequiredException.class, PaymentFailedException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
         return ErrorResponse.builder()

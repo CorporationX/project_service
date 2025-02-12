@@ -10,7 +10,7 @@ import java.util.List;
 public record TeamMemberDto(
         Long userId,
         String nickname,
-        List<TeamRole> roles,
+        TeamRole role,
         Long teamId
 ) {
 }
