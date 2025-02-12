@@ -1,8 +1,7 @@
 FROM openjdk:17-jdk-slim-buster
 WORKDIR /app
 
-COPY /build/libs/service.jar build/
+COPY build/libs/service.jar .
 
-WORKDIR /app/build
 EXPOSE 8082
-ENTRYPOINT java -jar service.jar
+ENTRYPOINT ["java", "-jar", "service.jar"]
