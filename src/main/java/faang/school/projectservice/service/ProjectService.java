@@ -137,11 +137,15 @@ public class ProjectService {
             throw new MaxUploadSizeExceededException(file.getSize());
         }
 
-        byte[] resizedImage = null;
+        byte[] resizedImage;
         try {
             resizedImage = imageResizer.resizeImage(file.getBytes(), 1080, 566);
         } catch (IOException e) {
             throw new ImageResizeException("Failed to resize image " + file.getOriginalFilename());
+        }
+
+        if (resizedImage == null) {
+            throw new ImageResizeException("Resized image is null");
         }
 
         String objectName = "project-" + projectId + "-cover.jpg";
@@ -176,6 +180,4 @@ public class ProjectService {
         project.setCoverImageId(null);
         projectRepository.save(project);
     }
-
-
 }
