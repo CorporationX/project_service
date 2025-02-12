@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    jacoco
 }
 
 group = "faang.school"
@@ -44,6 +45,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+    implementation("com.itextpdf:itext7-core:7.2.0")
 
     /**
      * Test containers
@@ -51,6 +53,7 @@ dependencies {
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:minio:1.19.8")
     testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
 
     /**
@@ -65,6 +68,37 @@ dependencies {
      */
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
+}
+
+// JACOCO
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+val includedDirectories = fileTree("build/classes/java/main") {
+    include("faang/school/projectservice/controller/**")
+    include("faang/school/projectservice/service/**")
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    classDirectories.setFrom(includedDirectories)
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.5".toBigDecimal()
+            }
+        }
+    }
+    classDirectories.setFrom(includedDirectories)
+}
+
+tasks.named("check") {
+    dependsOn(tasks.named("jacocoTestCoverageVerification"))
 }
 
 tasks.withType<Test> {
