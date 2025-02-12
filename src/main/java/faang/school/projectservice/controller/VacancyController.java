@@ -22,31 +22,30 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/v1/vacancy")
+@RequestMapping("/api/v1/vacancy/{id}/cover")
 @RequiredArgsConstructor
 @Slf4j
 public class VacancyController {
 
     private static final List<ImageType> IMAGE_TYPES = List.of(ImageType.png, ImageType.jpg);
-    private static final String VACANCY_ID_COVER = "/{id}/cover";
 
     private final VacancyService vacancyService;
     private final UserContext userContext;
 
-    @PostMapping(VACANCY_ID_COVER)
+    @PostMapping
     @Operation(summary = "Add cover to vacancy", description = "Allows you to add cover for vacancy")
     public void addCover(@PathVariable Long id, @RequestBody MultipartFile file) {
         checkContentType(file);
         vacancyService.addCover(id, file);
     }
 
-    @GetMapping(VACANCY_ID_COVER)
+    @GetMapping
     @Operation(summary = "Download cover", description = "Allows you to download cover from vacancy")
     public InputStream getVacancyCover(@PathVariable Long id) {
         return vacancyService.getVacancyCover(id);
     }
 
-    @DeleteMapping(VACANCY_ID_COVER)
+    @DeleteMapping
     @Operation(summary = "Delete vacancy cover", description = "Allows you to delete vacancy cover")
     public void deleteVacancyCover(@PathVariable Long id) {
         vacancyService.deleteVacancyCover(id, userContext.getUserId());
