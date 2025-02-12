@@ -38,7 +38,7 @@ calculations_messages_processing:
   enabled: true
 
 jira:
-  url: https://shakhzodkamolov.atlassian.net/
+  url: https://shakhzodkamolov.atlassian.net/rest/api/2
   username: ${JIRA_USERNAME}
   token: ${JIRA_TOKEN}
 

@@ -1,10 +1,10 @@
-package faang.school.projectservice.client;
+package faang.school.projectservice.config;
 
-import faang.school.projectservice.config.JiraProperties;
 import feign.RequestInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -21,8 +21,8 @@ public class JiraConfig {
             String auth = jiraProperties.getUsername() + ":" + jiraProperties.getToken();
             String encodedAuth = Base64.getEncoder()
                     .encodeToString(auth.getBytes(StandardCharsets.UTF_8));
-            template.header("Authorization", "Basic " + encodedAuth);
-            template.header("Content-Type", "application/json");
+            template.header(HttpHeaders.AUTHORIZATION, "Basic " + encodedAuth);
+            template.header(HttpHeaders.CONTENT_TYPE, "application/json");
         };
     }
 }

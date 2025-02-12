@@ -1,15 +1,12 @@
 package faang.school.projectservice.dto.jira.request;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
 public class JiraIssueRequest {
     private Fields fields;
 
     @Data
-    @RequiredArgsConstructor
     public static class Fields {
         private Project project;
         private String summary;

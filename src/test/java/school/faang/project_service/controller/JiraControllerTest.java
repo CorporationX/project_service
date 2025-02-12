@@ -4,7 +4,7 @@ import faang.school.projectservice.controller.JiraController;
 import faang.school.projectservice.dto.jira.request.JiraIssueRequest;
 import faang.school.projectservice.dto.jira.response.JiraIssueResponse;
 import faang.school.projectservice.dto.jira.response.JiraSearchResponse;
-import faang.school.projectservice.gateway.JiraClientGateway;
+import faang.school.projectservice.gateway.impl.JiraClientGatewayImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,7 @@ class JiraControllerTest {
     public static final String TEST_ISSUE_ID = "TEST-125";
 
     @Mock
-    private JiraClientGateway jiraClientGateway;
+    private JiraClientGatewayImpl jiraClientGateway;
 
     @InjectMocks
     private JiraController jiraController;

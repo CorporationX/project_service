@@ -4,7 +4,7 @@ import faang.school.projectservice.client.JiraClient;
 import faang.school.projectservice.dto.jira.request.JiraIssueRequest;
 import faang.school.projectservice.dto.jira.response.JiraIssueResponse;
 import faang.school.projectservice.dto.jira.response.JiraSearchResponse;
-import faang.school.projectservice.gateway.JiraClientGateway;
+import faang.school.projectservice.gateway.impl.JiraClientGatewayImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +15,8 @@ import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JiraClientGatewayTest {
@@ -25,7 +26,7 @@ class JiraClientGatewayTest {
     private JiraClient jiraClient;
 
     @InjectMocks
-    private JiraClientGateway jiraClientGateway;
+    private JiraClientGatewayImpl jiraClientGateway;
 
     private JiraIssueResponse expectedResponse;
 
@@ -55,6 +56,7 @@ class JiraClientGatewayTest {
 
         verify(jiraClient).updateIssue(TEST_ISSUE_ID, request);
     }
+
     @Test
     void getIssue_ReturnsIssueResponse() {
         when(jiraClient.getIssue(TEST_ISSUE_ID)).thenReturn(ResponseEntity.ok(expectedResponse));

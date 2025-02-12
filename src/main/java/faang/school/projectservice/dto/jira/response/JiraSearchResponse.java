@@ -1,12 +1,10 @@
 package faang.school.projectservice.dto.jira.response;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Data
-@RequiredArgsConstructor
 public class JiraSearchResponse {
     private int total;
     private List<Issue> issues;
