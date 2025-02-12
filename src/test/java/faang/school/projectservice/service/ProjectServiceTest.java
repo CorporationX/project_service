@@ -180,7 +180,7 @@ class ProjectServiceTest {
 
         NoSuchElementException noSuchElementException = assertThrows(NoSuchElementException.class,
                 () -> projectService.getProjectById(1L));
-        assertEquals("Project not found by id: 1", noSuchElementException.getMessage());
+        assertEquals("Project with id 1 not found", noSuchElementException.getMessage());
     }
 
     @Test
