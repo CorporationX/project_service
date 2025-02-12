@@ -15,6 +15,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleRuntimeExceptions(RuntimeException e) {
         return new ErrorResponse(e.getMessage());
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handelIllegalArgumentException(IllegalArgumentException ex) {
