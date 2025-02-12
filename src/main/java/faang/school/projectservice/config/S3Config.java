@@ -21,9 +21,6 @@ public class S3Config {
     @Value("${services.s3.secretKey}")
     private String secretKey;
 
-    @Value("${services.s3.isMocked}")
-    private boolean isMocked;
-
     @Bean(name = "AmazonS3")
     public AmazonS3 amazonS3() {
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
@@ -31,13 +28,9 @@ public class S3Config {
         AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials));
 
-        if (isMocked) {
-            builder.withEndpointConfiguration(new AwsClientBuilder
-                            .EndpointConfiguration(endpoint, "us-east-1"))
-                    .withPathStyleAccessEnabled(true);
-        } else {
-            builder.withRegion("us-east-1");
-        }
+        builder.withEndpointConfiguration(new AwsClientBuilder
+                        .EndpointConfiguration(endpoint, "us-east-1"))
+                .withPathStyleAccessEnabled(true);
 
         return builder.build();
     }
