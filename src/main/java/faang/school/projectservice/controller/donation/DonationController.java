@@ -16,8 +16,8 @@ public class DonationController {
     private final DonationService donationService;
 
     @PostMapping("/donations")
-    public DonationDto sendDonation(@RequestBody DonationDto donation){
-        if (donation == null){
+    public DonationDto sendDonation(@RequestBody DonationDto donation) {
+        if (donation == null) {
             throw new NullPointerException("Donation cannot be empty");
         }
         return donationService.sendDonation(donation);
@@ -25,13 +25,13 @@ public class DonationController {
 
     @GetMapping("/donations/users/{userId}")
     public DonationDto getDonationById(@PathVariable @Positive(message = "Id must be positive") long userId,
-                                       @RequestParam @Positive(message = "Id must be positive") long donationId){
+                                       @RequestParam @Positive(message = "Id must be positive") long donationId) {
         return donationService.getDonation(userId, donationId);
     }
 
     @PostMapping("/donations/users/{userId}/filter")
     public List<DonationDto> getAllDonationsUser(@PathVariable @Positive(message = "Id must be positive") Long userId,
-                                                 @RequestBody(required = false) DonationFilterDto filter){
+                                                 @RequestBody(required = false) DonationFilterDto filter) {
         return donationService.getAllDonationsUser(userId, filter);
     }
 

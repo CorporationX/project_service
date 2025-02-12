@@ -36,10 +36,10 @@ public class DonationService {
     public DonationDto sendDonation(DonationDto donation) {
         userServiceClient.getUser(donation.getUserId());
         //Перевод валюты из donation в campaign
-        try{
+        try {
             campaignRepository.getById(donation.getCampaignId());
-        }catch (NullPointerException e){
-            log.error("Campaign does not exist : {e}",e);
+        } catch (NullPointerException e) {
+            log.error("Campaign does not exist : {e}", e);
         }
         currencyConverter.converter(donation);
 
@@ -51,8 +51,8 @@ public class DonationService {
 
         try {
             paymentServiceClient.sendPayment(paymentRequest);
-        }catch (Exception e){
-            log.error("Donation donation did no send {}",e);
+        } catch (Exception e) {
+            log.error("Donation donation did no send {}", e);
         }
         log.info("Payment number ID: {} sent", donation.getPaymentNumber());
         Donation donationEntity = donationMapper.toEntity(donation);
