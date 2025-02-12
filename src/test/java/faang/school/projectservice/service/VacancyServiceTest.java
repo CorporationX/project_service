@@ -8,13 +8,11 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.VacancyValidationException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
-import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
-import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.VacancyValidator;
@@ -29,7 +27,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,8 +48,6 @@ public class VacancyServiceTest {
     private VacancyRepository vacancyRepository;
     @Mock
     private ProjectRepository projectRepository;
-    @Mock
-    private CandidateRepository candidateRepository;
 
     @Mock
     private VacancyValidator vacancyValidator;
@@ -73,7 +67,6 @@ public class VacancyServiceTest {
         vacancyService = new VacancyService(
                 vacancyRepository,
                 projectRepository,
-                candidateRepository,
                 vacancyFilters,
                 vacancyMapper,
                 vacancyValidator);
@@ -86,16 +79,16 @@ public class VacancyServiceTest {
                 .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
                 .position(TeamRole.DEVELOPER)
                 .projectId(515L)
-                .userCreatedBy(123L)
+                .createdBy(123L)
                 .salary(150000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
-                .requiredSkillIds(List.of(101L, 102L, 103L))
-                .coverImageKey("image")
+                .requiredSkillIds(List.of(101L, 102L))
                 .build();
 
-        when(projectRepository.getReferenceById(createRequest.getProjectId()))
-                .thenReturn(Project.builder().id(515L).build());
+
+        when(projectRepository.findById(createRequest.getProjectId()))
+                .thenReturn(Optional.ofNullable(Project.builder().id(515L).build()));
 
         Vacancy createdVacancy = Vacancy.builder()
                 .id(234L)
@@ -103,16 +96,13 @@ public class VacancyServiceTest {
                 .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
                 .position(TeamRole.DEVELOPER)
                 .project(Project.builder().id(createRequest.getProjectId()).build())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .createdBy(123L)
                 .updatedBy(123L)
                 .status(VacancyStatus.OPEN)
                 .salary(150000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
-                .requiredSkillIds(List.of(101L, 102L, 103L))
-                .coverImageKey("image")
+                .requiredSkillIds(List.of(101L, 102L))
                 .build();
 
         when(vacancyRepository.save(vacancyArgumentCaptor.capture())).thenReturn(createdVacancy);
@@ -130,14 +120,11 @@ public class VacancyServiceTest {
         assertEquals(TeamRole.DEVELOPER, createResponse.getPosition());
         assertEquals(515L, createResponse.getProjectId());
         assertEquals(123L, createResponse.getCreatedBy());
-        assertEquals(123L, createResponse.getUpdatedBy());
         assertEquals(VacancyStatus.OPEN, createResponse.getStatus());
         assertEquals(150000.0, createResponse.getSalary());
         assertEquals(WorkSchedule.FULL_TIME, createResponse.getWorkSchedule());
         assertEquals(1, createResponse.getCount());
-        assertArrayEquals(List.of(101L, 102L, 103L).toArray(),
-                createResponse.getRequiredSkillIds().toArray(new Long[0]));
-        assertEquals("image", createResponse.getCoverImageKey());
+        assertArrayEquals(List.of(101L, 102L).toArray(), createResponse.getRequiredSkillIds().toArray(new Long[0]));
     }
 
     @Test
@@ -148,26 +135,25 @@ public class VacancyServiceTest {
                 .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
                 .position(TeamRole.DEVELOPER)
                 .projectId(515L)
-                .candidateIds(List.of(167L, 180L, 188L, 153L))
-                .userIdUpdatedBy(123L)
+                .updatedBy(123L)
                 .status(VacancyStatus.OPEN)
                 .salary(150000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
-                .requiredSkillIds(List.of(101L, 102L, 103L))
-                .coverImageKey("new_image")
+                .requiredSkillIds(List.of(101L, 102L))
                 .build();
 
-        when(projectRepository.getReferenceById(updateRequest.getProjectId()))
-                .thenReturn(Project.builder().id(515L).build());
+        // vacancy должен быть изменяемым, поэтому builder не использую
+        Vacancy vacancy = new Vacancy();
+        vacancy.setId(234L);
+        vacancy.setName("Backend-разработчик");
+        vacancy.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
+        vacancy.setPosition(TeamRole.DEVELOPER);
+        vacancy.setUpdatedBy(123L);
+        vacancy.setStatus(VacancyStatus.OPEN);
 
-        List<Candidate> candidates = List.of(new Candidate(), new Candidate(), new Candidate(), new Candidate());
-        candidates.get(0).setId(167L);
-        candidates.get(1).setId(180L);
-        candidates.get(2).setId(188L);
-        candidates.get(3).setId(153L);
-
-        when(candidateRepository.findAllById(updateRequest.getCandidateIds())).thenReturn(candidates);
+        when(vacancyRepository.findById(updateRequest.getId()))
+                .thenReturn(Optional.of(vacancy));
 
         Vacancy updatedVacancy = Vacancy.builder()
                 .id(234L)
@@ -175,22 +161,19 @@ public class VacancyServiceTest {
                 .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
                 .position(TeamRole.DEVELOPER)
                 .project(Project.builder().id(515L).build())
-                .candidates(candidates)
-                .createdBy(123L)
                 .updatedBy(123L)
                 .status(VacancyStatus.OPEN)
                 .salary(150000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
-                .requiredSkillIds(List.of(101L, 102L, 103L))
-                .coverImageKey("new_image")
+                .requiredSkillIds(List.of(101L, 102L))
                 .build();
 
         when(vacancyRepository.save(vacancyArgumentCaptor.capture())).thenReturn(updatedVacancy);
 
         final UpdateVacancyResponse updateResponse = vacancyService.update(updateRequest);
 
-        verify(vacancyMapper, times(1)).fromUpdateRequest(updateRequest);
+        verify(vacancyMapper, times(1)).update(updateRequest, vacancy);
         verify(vacancyValidator, times(1))
                 .validateUpdatingVacancy(vacancyArgumentCaptor.capture());
         verify(vacancyMapper, times(1)).toUpdateResponse(updatedVacancy);
@@ -201,45 +184,28 @@ public class VacancyServiceTest {
                 updateResponse.getDescription());
         assertEquals(TeamRole.DEVELOPER, updateResponse.getPosition());
         assertEquals(515L, updateResponse.getProjectId());
-        assertArrayEquals(List.of(167L, 180L, 188L, 153L).toArray(),
-                updateResponse.getCandidateIds().toArray(new Long[0]));
-        assertEquals(123L, updateResponse.getCreatedBy());
+        assertEquals(123L, updateResponse.getUpdatedBy());
         assertEquals(123L, updateResponse.getUpdatedBy());
         assertEquals(VacancyStatus.OPEN, updateResponse.getStatus());
         assertEquals(150000.0, updateResponse.getSalary());
         assertEquals(WorkSchedule.FULL_TIME, updateResponse.getWorkSchedule());
         assertEquals(1, updateResponse.getCount());
-        assertArrayEquals(List.of(101L, 102L, 103L).toArray(),
-                updateResponse.getRequiredSkillIds().toArray(new Long[0]));
-        assertEquals("new_image", updateResponse.getCoverImageKey());
+        assertArrayEquals(List.of(101L, 102L).toArray(), updateResponse.getRequiredSkillIds().toArray(new Long[0]));
     }
 
     @Test
     public void delete_ShouldDeleteSuccessfully() {
         long id = 333L;
-
-        List<Candidate> candidates = List.of(new Candidate(), new Candidate(), new Candidate(), new Candidate());
-        candidates.get(0).setId(167L);
-        candidates.get(1).setId(180L);
-        candidates.get(2).setId(188L);
-        candidates.get(3).setId(153L);
-
-        when(vacancyRepository.findById(id)).thenReturn(Optional.of(Vacancy.builder().candidates(candidates).build()));
-
+        when(vacancyRepository.findById(id))
+                .thenReturn(Optional.of(new Vacancy()));
         vacancyService.delete(id);
-
-        verify(candidateRepository, times(1))
-                .deleteAllById(candidates.stream().map(Candidate::getId).toList());
-
         verify(vacancyRepository, times(1)).deleteById(id);
     }
 
     @Test
     public void delete_ShouldThrowVacancyExceptionWhenVacancyDoesNotExist() {
         long id = 333L;
-
         when(vacancyRepository.findById(id)).thenReturn(Optional.empty());
-
         assertThrows(VacancyValidationException.class, () -> vacancyService.delete(333L));
     }
 
