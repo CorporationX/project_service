@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.impl;
 
+import faang.school.projectservice.adapter.VacancyRepositoryAdapter;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyRequestDto;
@@ -32,6 +33,7 @@ public class VacancyServiceImpl implements VacancyService {
     private final TeamMemberRepository teamMemberRepository;
     private final CandidateRepository candidateRepository;
     private final List<VacancyFilter> filters;
+    private final VacancyRepositoryAdapter vacancyRepositoryAdapter;
 
     @Override
     public List<VacancyDto> getVacanciesByFilter(VacancyFilterDto filter) {
@@ -62,26 +64,23 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public VacancyDto updateVacancy(VacancyRequestDto vacancyDto, Long id) {
-        if (vacancyDto.updatedBy() == null) {
-            throw new DataValidationException("UpdatedBy can't be null in vacancy update request");
-        }
         validateVacancyRequestingUser(vacancyDto, vacancyDto.updatedBy());
-        Vacancy vacancy = vacancyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Vacancy with id " + id + " was not found"));
+
+        Vacancy vacancy = vacancyRepositoryAdapter.findById(id);
         vacancyMapper.update(vacancyDto, vacancy);
+
         setProjectAndCandidates(vacancy, vacancyDto.projectId(), vacancyDto.candidatesIds());
-        if (VacancyStatus.CLOSED.equals(vacancyDto.status())) {
+
+        if (VacancyStatus.CLOSED == vacancyDto.status()) {
             validateCandidatesAreFound(vacancy);
         }
-        vacancyRepository.save(vacancy);
+
+        vacancyRepositoryAdapter.save(vacancy);
         return vacancyMapper.toVacancyDto(vacancy);
     }
 
     @Override
     public void deleteVacancy(Long id) {
-        Vacancy vacancy = vacancyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Vacancy with id " + id + " was not found"));
-        vacancy.getCandidates().clear();
         vacancyRepository.deleteById(id);
     }
 
@@ -96,12 +95,9 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     private TeamMember getTeamMember(long userId, long projectId) {
-        TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-        if (member == null) {
-            throw new EntityNotFoundException("TeamMember with userId " + userId
-                    + " and projectId " + projectId + " was not found");
-        }
-        return member;
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException("TeamMember with userId " + userId
+                        + " and projectId " + projectId + " was not found"));
     }
 
     private void setProjectAndCandidates(Vacancy vacancy, long projectId, List<Long> candidatesIds) {
@@ -119,7 +115,7 @@ public class VacancyServiceImpl implements VacancyService {
         }
         long projectId = vacancy.getProject().getId();
         TeamRole role = vacancy.getPosition();
-        for (var candidate : vacancy.getCandidates()) {
+        for (Candidate candidate : vacancy.getCandidates()) {
             long userId = candidate.getUserId();
             List<TeamRole> roles = getTeamMember(userId, projectId).getRoles();
             if (!roles.contains(role)) {

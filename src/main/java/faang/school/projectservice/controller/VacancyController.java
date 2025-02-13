@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyRequestDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -44,6 +45,9 @@ public class VacancyController {
 
     @PutMapping("/{id}")
     public VacancyDto updateVacancy(@RequestBody @Valid VacancyRequestDto vacancyDto, @PathVariable Long id) {
+        if (vacancyDto.updatedBy() == null) {
+            throw new DataValidationException("UpdatedBy can't be null in vacancy update request");
+        }
         return vacancyService.updateVacancy(vacancyDto, id);
     }
 
