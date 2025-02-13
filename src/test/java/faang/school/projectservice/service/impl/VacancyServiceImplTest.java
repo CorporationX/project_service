@@ -3,7 +3,6 @@ package faang.school.projectservice.service.impl;
 import com.amazonaws.services.s3.AmazonS3;
 import faang.school.projectservice.adapter.VacancyRepositoryAdapter;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.file.FileMultipartFile;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.S3Service;
@@ -16,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -82,11 +82,7 @@ public class VacancyServiceImplTest {
         bufferedImage.flush();
         inputStream = new ByteArrayInputStream(outputStream.toByteArray());
         outputStream.close();
-        file = new FileMultipartFile(IMAGE_NAME,
-                IMAGE_NAME,
-                CONTENT_TYPE,
-                outputStream.toByteArray(),
-                outputStream.toByteArray().length);
+        file = new MockMultipartFile(IMAGE_NAME, IMAGE_NAME, CONTENT_TYPE, outputStream.toByteArray());
         imageProcessor.setCoverMaxSize(COVER_MAX_SIZE);
     }
 

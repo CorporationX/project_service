@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.exception.FileException;
-import faang.school.projectservice.file.FileMultipartFile;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -46,11 +46,7 @@ public class ImageProcessorImplTest {
         bufferedImage.flush();
         inputStream = new ByteArrayInputStream(outputStream.toByteArray());
         outputStream.close();
-        file = new FileMultipartFile(IMAGE_NAME,
-                IMAGE_NAME,
-                CONTENT_TYPE,
-                outputStream.toByteArray(),
-                outputStream.toByteArray().length);
+        file = new MockMultipartFile(IMAGE_NAME, IMAGE_NAME, CONTENT_TYPE, outputStream.toByteArray());
     }
 
     @Test

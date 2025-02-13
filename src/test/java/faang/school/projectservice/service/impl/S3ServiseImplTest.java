@@ -44,7 +44,6 @@ public class S3ServiseImplTest {
     private static final String BUSKET_NAME = "name";
     private static final String NAME = "VACANCY";
 
-    private MultipartFile file;
     private BufferedImage bufferedImage;
     private ByteArrayOutputStream outputStream;
     private InputStream inputStream;
@@ -57,11 +56,6 @@ public class S3ServiseImplTest {
         bufferedImage.flush();
         inputStream = new ByteArrayInputStream(outputStream.toByteArray());
         outputStream.close();
-        file = new FileMultipartFile(IMAGE_NAME,
-                IMAGE_NAME,
-                CONTENT_TYPE,
-                outputStream.toByteArray(),
-                outputStream.toByteArray().length);
         s3Servise.setBucketName(BUSKET_NAME);
     }
 
