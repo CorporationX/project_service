@@ -6,7 +6,9 @@ import faang.school.projectservice.dto.DonationDto;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.mapper.DonationMapper;
+import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,9 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -37,6 +41,9 @@ class DonationServiceImplTest {
 
     @Mock
     private DonationMapper donationMapper;
+
+    @Mock
+    private CampaignRepository campaignRepository;
 
     private Donation donation;
     private DonationDto donationDto;
@@ -59,12 +66,18 @@ class DonationServiceImplTest {
         when(donationRepository.save(donation)).thenReturn(donation);
         when(donationMapper.toDto(donation)).thenReturn(donationDto);
 
+        Campaign campaign = new Campaign();
+        campaign.setId(3L);
+        when(campaignRepository.findById(donationDto.campaignId())).thenReturn(Optional.of(campaign));
+
         DonationDto result = donationService.sendDonation(donationDto);
 
         assertNotNull(result);
         assertEquals(BigDecimal.TEN, result.amount());
+
         verify(paymentServiceClient, times(1)).sendPayment(any(PaymentRequest.class));
     }
+
 
     @Test
     void getDonation_Success() {
