@@ -54,8 +54,8 @@ public class DonationService {
     }
 
     public DonationDto getDonationByUserId(Long donationId, Long userId) {
-        validateId(donationId);
-        validateId(userId);
+        validateId(donationId, "donationId");
+        validateId(userId, "userId");
         Donation donation = donationRepository.findByIdAndUserId(donationId, userId).orElseThrow(
                 () -> new EntityNotFoundException(
                         String.format("Донат c id %d не найден у юзера c id %d", donationId, userId))
@@ -64,11 +64,11 @@ public class DonationService {
     }
 
     public List<DonationDto> getUserDonationsByFilters(DonationFilterDto filter, Long userId) {
-        Stream<Donation> donations = donationRepository.findAllByUserId(userId).stream();
+        List<Donation> donations = donationRepository.findAllByUserId(userId);
 
         return donationFilters.stream()
                 .filter(donationFilter -> donationFilter.isApplicable(filter))
-                .reduce(donations,
+                .reduce(donations.stream(),
                         (donationStream, donationFilter)
                                 -> donationFilter.apply(donationStream, filter),
                         Stream::concat)
@@ -78,9 +78,9 @@ public class DonationService {
                 .toList();
     }
 
-    private void validateId(Long id) {
+    private void validateId(Long id, String paramName) {
         if (id == null) {
-            throw new DataValidationException("ID не может быть null");
+            throw new DataValidationException(String.format("%s не может быть null", paramName));
         }
     }
 }

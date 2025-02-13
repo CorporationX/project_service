@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,7 +62,7 @@ class DonationServiceTest {
 
     @Test
     void testSendingDonation() {
-        DonationDto donationDto = new DonationDto();
+        var donationDto = new DonationDto();
         donationDto.setPaymentNumber(123456789L);
         donationDto.setAmount(BigDecimal.valueOf(100));
         donationDto.setCurrency(Currency.USD);
@@ -91,10 +90,10 @@ class DonationServiceTest {
         DonationDto result = donationService.sendDonation(donationDto);
 
         assertEquals(expectedDonationDto, result);
-        verify(paymentServiceClient, times(1)).sendPayment(paymentRequest);
-        verify(donationMapper, times(1)).toEntity(donationDto);
-        verify(donationRepository, times(1)).save(donation);
-        verify(donationMapper, times(1)).toDto(savedDonation);
+        verify(paymentServiceClient).sendPayment(paymentRequest);
+        verify(donationMapper).toEntity(donationDto);
+        verify(donationRepository).save(donation);
+        verify(donationMapper).toDto(savedDonation);
     }
 
     @Test
@@ -107,7 +106,7 @@ class DonationServiceTest {
         DonationDto result = donationService.getDonationByUserId(donationId, userId);
 
         assertEquals(donationDto, result);
-        verify(donationRepository, times(1)).findByIdAndUserId(donationId, userId);
+        verify(donationRepository).findByIdAndUserId(donationId, userId);
     }
 
     @Test
@@ -125,8 +124,9 @@ class DonationServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(donationDto, result.get(0));
-        verify(donationRepository, times(1)).findAllByUserId(userId);
-        verify(mockFilter, times(1)).isApplicable(filter);
-        verify(mockFilter, times(1)).apply(any(), eq(filter));
-        verify(donationMapper, times(1)).toDto(donation);    }
+        verify(donationRepository).findAllByUserId(userId);
+        verify(mockFilter).isApplicable(filter);
+        verify(mockFilter).apply(any(), eq(filter));
+        verify(donationMapper).toDto(donation);
+    }
 }
