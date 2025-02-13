@@ -85,7 +85,7 @@ public class StageController {
     public ResponseEntity<List<Task>> getStageTasks(@Valid @PathVariable Long projectId,
                                                     @PathVariable Long stageId,
                                                     @RequestParam(required = false) TaskStatus status) {
-        return stageService.getStageTasks(stageId, status);
+        return ResponseEntity.ok(stageService.getStageTasks(stageId, status));
     }
 
     @PutMapping("/{stageId}/participants")

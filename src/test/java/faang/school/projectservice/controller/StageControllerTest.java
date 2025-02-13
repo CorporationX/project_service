@@ -69,7 +69,7 @@ public class StageControllerTest {
 
     @Test
     void getStages_ValidInput_ShouldReturnStages() throws Exception {
-        // Arrange
+
         Long projectId = 1L;
         StageDto stageDto = new StageDto();
         stageDto.setStageId(1L);
@@ -77,7 +77,7 @@ public class StageControllerTest {
 
         when(stageService.getStages(projectId)).thenReturn(List.of(stageDto));
 
-        // Act & Assert
+
         mockMvc.perform(MockMvcRequestBuilders.get("/v1/{projectId}/stages", projectId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -85,7 +85,7 @@ public class StageControllerTest {
 
     @Test
     void testDeleteStage_ValidInput_ShouldReturnNoContent() throws Exception {
-        // Arrange
+
         Long projectId = 1L;
         Long stageId = 1L;
 
@@ -99,7 +99,7 @@ public class StageControllerTest {
 
     @Test
     void testSendStageInvitations_ValidInput_ShouldReturnInvitation() throws Exception {
-        // Arrange
+
         Long projectId = 1L;
         Long stageId = 1L;
         StageInvitationDto stageInvitationDto = new StageInvitationDto();
@@ -107,7 +107,6 @@ public class StageControllerTest {
 
         when(stageService.sendInvitations(anyLong(), any(StageInvitationDto.class))).thenReturn(stageInvitationDto);
 
-        // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.post("/v1/{projectId}/stages/{stageId}/invitations", projectId, stageId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))

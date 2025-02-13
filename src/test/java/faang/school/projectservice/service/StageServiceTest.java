@@ -27,6 +27,8 @@ import java.util.Optional;
 import java.util.Set;
 
 
+import static faang.school.projectservice.model.TaskStatus.CANCELLED;
+import static faang.school.projectservice.model.TaskStatus.DONE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
@@ -156,6 +158,13 @@ class StageServiceTest {
         verify(stageValidator).checkStageForUpdate(stageId, updateDto);
         verify(stageRepository).save(entity);
         assertEquals(updateDto, result);
+    }
+
+    @Test
+    void getStageTasks() {
+        Long stageId = 1L;
+        mockStageService.getStageTasks(stageId, DONE);
+        verify(mockStageService, Mockito.times(1)).getStageTasks(stageId, DONE);
     }
 
 }

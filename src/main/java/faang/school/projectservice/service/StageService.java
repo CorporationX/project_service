@@ -115,8 +115,8 @@ public class StageService {
 
     }
 
-    public ResponseEntity<List<Task>> getStageTasks(Long stageId, TaskStatus status) {
-        return null;
+    public List<Task> getStageTasks(Long stageId, TaskStatus status) {
+        return stageRepository.getReferenceById(stageId).getTasks().stream().toList();
     }
 
     public ResponseEntity<StageUpdateDto> updateStageParticipants(Set<StageUpdateDto> stageUpdateDto) {
