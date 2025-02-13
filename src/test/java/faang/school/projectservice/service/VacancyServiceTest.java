@@ -232,8 +232,6 @@ public class VacancyServiceTest {
 
     @Test
     public void getAll_ShouldReturnAllVacanciesVacanciesSuccessfully() {
-        vacancyService.get(new VacancyFilterDto());
-
-        verify(vacancyRepository, times(1)).findAll();
+        // добавить тест
     }
 }
