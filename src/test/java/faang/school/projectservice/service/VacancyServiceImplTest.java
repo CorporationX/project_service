@@ -114,8 +114,8 @@ class VacancyServiceImplTest {
                 1L, null, VacancyStatus.OPEN, 2);
         TeamMember member = new TeamMember();
         member.setRoles(List.of(TeamRole.MANAGER));
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId
-                (dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(
+                dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
         Mockito.when(projectRepository.findById(dto.projectId())).thenReturn(Optional.of(new Project()));
 
         vacancyService.createVacancy(dto);
@@ -132,8 +132,8 @@ class VacancyServiceImplTest {
         VacancyRequestDto dto = TestData.createVacancyRequestDto("test vacancy", TeamRole.DEVELOPER, 1L, null,
                 1L, null, VacancyStatus.OPEN, 2);
         TeamMember member = new TeamMember();
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId
-                (dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(
+                dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
 
         assertThrows(DataValidationException.class, () -> vacancyService.createVacancy(dto));
     }
@@ -145,8 +145,8 @@ class VacancyServiceImplTest {
                 1L, null, VacancyStatus.OPEN, 2);
         TeamMember member = new TeamMember();
         member.setRoles(List.of(TeamRole.MANAGER));
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId
-                (dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(
+                dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
         Mockito.when(projectRepository.findById(dto.projectId())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> vacancyService.createVacancy(dto));
@@ -160,8 +160,8 @@ class VacancyServiceImplTest {
                 1L, 1L, VacancyStatus.OPEN, 2);
         TeamMember member = new TeamMember();
         member.setRoles(List.of(TeamRole.MANAGER));
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId
-                (dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(
+                dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
         Mockito.when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
         Mockito.when(projectRepository.findById(dto.projectId())).thenReturn(Optional.of(new Project()));
 
@@ -190,8 +190,8 @@ class VacancyServiceImplTest {
                 List.of(), 1L, 1L, VacancyStatus.CLOSED, 1);
         TeamMember member = new TeamMember();
         member.setRoles(List.of(TeamRole.MANAGER));
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId
-                (dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(
+                dto.createdBy(), dto.projectId())).thenReturn(Optional.of(member));
         Mockito.when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
         Mockito.when(projectRepository.findById(dto.projectId())).thenReturn(Optional.of(new Project()));
 
