@@ -6,7 +6,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.s3.S3Service;
 import faang.school.projectservice.service.imageprocessing.ImageProcessingUtils;
-import faang.school.projectservice.validator.project.FileValidator;
+import faang.school.projectservice.validator.project.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class ProjectServiceTest {
     @Mock
     private ProjectMapper projectMapper;
     @Mock
-    private FileValidator validator;
+    private ResourceValidator validator;
     @Mock
     private ImageProcessingUtils imageProcessingUtils;
     @Mock

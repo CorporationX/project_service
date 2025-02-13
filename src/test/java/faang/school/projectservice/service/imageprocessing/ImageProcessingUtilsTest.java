@@ -111,14 +111,12 @@ class ImageProcessingUtilsTest {
 
     @Test
     void testConvertByteToMultipartFile_WhenIOExceptionOccurs_ThrowsFileManagementException() {
-        // Arrange
         byte[] fileBytes = new byte[100];
         String fileName = "test.jpg";
         String contentType = "text/jpeg";
         ImageProcessingUtils imageProcessingUtils = mock(ImageProcessingUtils.class);
         when(imageProcessingUtils.convertByteToMultipartFile(any(), anyString(), anyString()))
                 .thenThrow(new FileManagementException("Simulated IOException"));
-
 
         assertThrows(FileManagementException.class, () -> {
             imageProcessingUtils.convertByteToMultipartFile(fileBytes, fileName, contentType);

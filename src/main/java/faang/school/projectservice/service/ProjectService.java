@@ -6,7 +6,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.s3.S3Service;
 import faang.school.projectservice.service.imageprocessing.ImageProcessingUtils;
-import faang.school.projectservice.validator.project.FileValidator;
+import faang.school.projectservice.validator.project.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
     private final ProjectMapper projectMapper;
-    private final FileValidator validator;
+    private final ResourceValidator validator;
     private final ImageProcessingUtils imageProcessingUtils;
 
     public Project getProject(Long id) {
@@ -44,7 +44,6 @@ public class ProjectService {
         String key = s3Service.uploadFile(folder, resizedImageBytes);
         project.setCoverImageId(key);
         Project updatedProject = projectRepository.save(project);
-        log.info("Обложка успешно добавлена для проекта с id={}", projectId);
         return projectMapper.toDto(updatedProject);
     }
 
@@ -53,7 +52,6 @@ public class ProjectService {
         s3Service.deleteFile(project.getCoverImageId());
         project.setCoverImageId(null);
         Project updatedProject = projectRepository.save(project);
-        log.info("Обложка успешно удалена для проекта с id={}", projectId);
         return projectMapper.toDto(updatedProject);
     }
 

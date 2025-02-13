@@ -5,14 +5,17 @@ import faang.school.projectservice.exception.FileManagementException;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Component
 @RequiredArgsConstructor
@@ -58,14 +61,8 @@ public class ImageProcessingUtils {
     }
 
     public MultipartFile convertByteToMultipartFile(byte[] fileBytes, String fileName, String contentType) {
-        ByteArrayResource resource = new ByteArrayResource(fileBytes);
         try {
-            return new MockMultipartFile(
-                    fileName,
-                    fileName,
-                    contentType,
-                    resource.getInputStream()
-            );
+            return new CustomMultipartFile(fileBytes, fileName, contentType);
         } catch (Exception e) {
             throw new FileManagementException(
                     String.format("Ошибка при преобразовании массива байтов в MultipartFile. " +

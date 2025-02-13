@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Component
 @RequiredArgsConstructor
-public class FileValidator {
+public class ResourceValidator {
     private final ResourceConfig resourceConfig;
 
     public void validateFile(MultipartFile file) {
