@@ -68,11 +68,11 @@ public class VacancyControllerTest {
         CreateVacancyRequest request = CreateVacancyRequest.builder()
                 .name("vacancy")
                 .description("description")
-                .position(TeamRole.DEVELOPER)
-                .projectId(1L)
                 .createdBy(1L)
+                .projectId(1L)
                 .salary(90000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
+                .position(TeamRole.ANALYST)
+                .workSchedule(WorkSchedule.SHIFT_WORK)
                 .count(1)
                 .requiredSkillIds(List.of(1L, 2L))
                 .build();
@@ -80,23 +80,19 @@ public class VacancyControllerTest {
         CreateVacancyResponse response = CreateVacancyResponse.builder()
                 .id(1L)
                 .name("vacancy")
-                .description("description")
-                .position(TeamRole.DEVELOPER)
-                .projectId(1L)
-                .createdBy(1L)
-                .status(VacancyStatus.OPEN)
-                .salary(90000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(1)
-                .requiredSkillIds(List.of(1L, 2L))
                 .build();
+
+        var create = new CreateVacancyRequest();
 
         when(vacancyService.create(request)).thenReturn(response);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String requestBodyJson = objectMapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/vacancies").contentType(MediaType.APPLICATION_JSON).content(requestBodyJson))
+        mockMvc.perform(post("/vacancies")
+                        .header("x-user-id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBodyJson))
                 .andExpect(status().isOk());
     }
 
