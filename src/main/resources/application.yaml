@@ -1,4 +1,7 @@
 spring:
+  profiles:
+    active: local
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres
@@ -50,3 +53,25 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+logging:
+  level:
+    root: debug
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: info
