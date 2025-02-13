@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.CreateSubProjectDto;
-import faang.school.projectservice.dto.client.SubProjectDto;
-import faang.school.projectservice.dto.client.UpdateSubProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.SubProjectService;

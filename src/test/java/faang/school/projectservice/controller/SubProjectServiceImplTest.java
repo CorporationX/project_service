@@ -1,17 +1,17 @@
-package school.faang.project_service.controller;
+package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.CreateSubProjectDto;
-import faang.school.projectservice.dto.client.MomentDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.moment.*;
 import faang.school.projectservice.dto.client.StageDto;
-import faang.school.projectservice.dto.client.SubProjectDto;
-import faang.school.projectservice.dto.client.UpdateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.SubProjectServiceImpl;
+import faang.school.projectservice.service.impl.SubProjectServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,11 +63,10 @@ class SubProjectServiceImplTest {
         subProject.setId(2L);
         subProject.setVisibility(ProjectVisibility.PUBLIC);
 
-        MomentDto momentDto = MomentDto.builder()
-                .id(1L)
-                .name("Last update")
-                .timestamp(LocalDateTime.now())
+        MomentCreateRequestDto momentDto = MomentCreateRequestDto.builder()
+                .date(LocalDateTime.now())
                 .build();
+
 
         createSubProjectDto = CreateSubProjectDto.builder()
                 .parentId(1L)
@@ -80,7 +79,6 @@ class SubProjectServiceImplTest {
                 .subProjectIds(Collections.emptyList())
                 .stageDto(new StageDto(200L, "Development"))
                 .visibility(ProjectVisibility.PUBLIC)
-                .lastUpdate(momentDto)
                 .build();
     }
 

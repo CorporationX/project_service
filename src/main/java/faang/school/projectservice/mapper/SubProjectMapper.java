@@ -1,7 +1,8 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.CreateSubProjectDto;
-import faang.school.projectservice.dto.client.SubProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -23,6 +24,9 @@ public interface SubProjectMapper {
 
     @Mapping(target = "subProjectIds", source = "children", qualifiedByName = "mapChildrenToIds")
     SubProjectDto toProjectResponseDto(Project entity);
+
+    @Mapping(target = "children", ignore = true)
+    Project toProjectEntity(UpdateSubProjectDto dto);
 
     @AfterMapping
     default void afterMapping(CreateSubProjectDto dto, @MappingTarget Project project) {

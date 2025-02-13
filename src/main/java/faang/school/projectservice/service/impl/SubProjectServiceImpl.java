@@ -1,15 +1,19 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.impl;
 
-import faang.school.projectservice.dto.client.CreateSubProjectDto;
-import faang.school.projectservice.dto.client.SubProjectDto;
-import faang.school.projectservice.dto.client.UpdateSubProjectDto;
+import faang.school.projectservice.dto.moment.MomentCreateRequestDto;
+import faang.school.projectservice.dto.moment.MomentUpdateRequestDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.SubProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -76,15 +80,10 @@ public class SubProjectServiceImpl implements SubProjectService {
                         .allMatch(project ->
                                 project.getStatus().equals(ProjectStatus.CANCELLED))) {
 
-            Moment moment = new Moment();
-            moment.getProjects().add(subProject);
-
-            subProject.getTeams().forEach(participant -> moment
-                    .getUserIds()
-                    .add(participant.getId()));
-
-            moment.setName("Выполнены все подпроекты");
-            momentRepository.save(moment);
+            MomentCreateRequestDto moment = MomentCreateRequestDto.builder()
+                    .name("Проект закрыт")
+                    .teamMemberIds(subProject.getTeams().stream().map(Team::getId).toList())
+                    .build();
         }
         if (updateSubProjectDto.visibility().equals(ProjectVisibility.PRIVATE)
                 && subProject.getChildren() != null) {
