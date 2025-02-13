@@ -96,7 +96,7 @@ public class StageInvitationServiceTest {
         dto.setInvitedId(2L);
         dto.setStageId(1L);
         when(stageService.getStageById(dto.getStageId())).thenReturn(new Stage());
-        when(teamMemberService.getTeamMember(dto.getInvitedId())).thenThrow(EntityNotFoundException.class);
+        when(teamMemberService.getTeamMemberById(dto.getInvitedId())).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class, () -> stageInvitationService.sendInvitation(dto));
     }
@@ -115,14 +115,14 @@ public class StageInvitationServiceTest {
         TeamMember invited = new TeamMember();
         invited.setId(dto.getInvitedId());
         when(stageService.getStageById(dto.getStageId())).thenReturn(stage);
-        when(teamMemberService.getTeamMember(dto.getInvitedId())).thenReturn(invited);
+        when(teamMemberService.getTeamMemberById(dto.getInvitedId())).thenReturn(invited);
         doReturn(dto).when(spyStageInvitationService).createStageInvitationAndGetDto(stage, dto.getAuthorId(), invited);
 
         StageInvitationDto sentInvitation = spyStageInvitationService.sendInvitation(dto);
 
         assertEquals(dto, sentInvitation);
         verify(stageService, times(1)).getStageById(dto.getStageId());
-        verify(teamMemberService, times(1)).getTeamMember(dto.getInvitedId());
+        verify(teamMemberService, times(1)).getTeamMemberById(dto.getInvitedId());
         verify(spyStageInvitationService, times(1))
                 .createStageInvitationAndGetDto(stage, dto.getAuthorId(), invited);
     }
@@ -143,13 +143,13 @@ public class StageInvitationServiceTest {
         invitation.setAuthor(author);
         invitation.setInvited(invited);
         invitation.setStatus(StageInvitationStatus.PENDING);
-        when(teamMemberService.getTeamMember(authorId)).thenReturn(author);
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(author);
         doNothing().when(stageInvitationValidator).validateInvitedForCreate(authorId, invitedId);
         StageInvitationDto expectedStageInvitationDto = stageInvitationService
                 .createStageInvitationAndGetDto(stage, authorId, invited);
 
         assertEquals(expectedStageInvitationDto, stageInvitationMapper.toDto(stageInvitationCaptor.capture()));
-        verify(teamMemberService, times(1)).getTeamMember(authorId);
+        verify(teamMemberService, times(1)).getTeamMemberById(authorId);
         verify(stageInvitationValidator, times(1)).validateInvitedForCreate(authorId, invitedId);
         verify(stageInvitationRepository, times(1)).save(stageInvitationCaptor.capture());
 

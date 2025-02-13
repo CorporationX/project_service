@@ -30,12 +30,12 @@ public class StageInvitationService {
 
     public StageInvitationDto sendInvitation(StageInvitationDto stageInvitationDto) {
         Stage stage = stageService.getStageById(stageInvitationDto.getStageId());
-        TeamMember invited = teamMemberService.getTeamMember(stageInvitationDto.getInvitedId());
+        TeamMember invited = teamMemberService.getTeamMemberById(stageInvitationDto.getInvitedId());
         return createStageInvitationAndGetDto(stage, stageInvitationDto.getAuthorId(), invited);
     }
 
     public StageInvitationDto createStageInvitationAndGetDto(Stage stage, Long authorId, TeamMember invited) {
-        TeamMember author = teamMemberService.getTeamMember(authorId);
+        TeamMember author = teamMemberService.getTeamMemberById(authorId);
         stageInvitationValidator.validateInvitedForCreate(author.getId(), invited.getId());
 
         StageInvitation invitation = StageInvitation.builder()
