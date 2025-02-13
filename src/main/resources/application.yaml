@@ -53,3 +53,25 @@ services:
     port: 8080
     path: /users/api/v1
     url: ${services.user-service.host}:${services.user-service.port}${services.user-service.path}
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+logging:
+  level:
+    root: debug
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: info
