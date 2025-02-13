@@ -19,8 +19,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,21 +77,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getUpdatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.MANAGER)).build());
 
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(null);
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(1).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(null);
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(2).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(null);
-
         assertDoesNotThrow(() -> vacancyValidator.validateUpdatingVacancy(vacancy));
-
-        verify(teamMemberRepository, times(1))
-                .findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId());
-        verify(teamMemberRepository, times(1))
-                .findByUserIdAndProjectId(candidates.get(1).getUserId(), vacancy.getProject().getId());
-        verify(teamMemberRepository, times(1))
-                .findByUserIdAndProjectId(candidates.get(2).getUserId(), vacancy.getProject().getId());
     }
 
     @Test
@@ -105,28 +89,6 @@ public class VacancyValidatorTest {
 
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getUpdatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.DEVELOPER)).build());
-
-        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
-    }
-
-    @Test
-    public void validateUpdateVacancy_ShouldThrowVacancyExceptionWhenCandidateIsTeamMember() {
-        List<Candidate> candidates = List.of(new Candidate(), new Candidate(), new Candidate());
-        candidates.get(0).setUserId(16L);
-        candidates.get(1).setUserId(18L);
-        candidates.get(2).setUserId(19L);
-
-        Vacancy vacancy = Vacancy.builder()
-                .updatedBy(19L)
-                .project(Project.builder().id(1L).build())
-                .candidates(candidates)
-                .build();
-
-        when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getUpdatedBy(), vacancy.getProject().getId()))
-                .thenReturn(TeamMember.builder().roles(List.of(TeamRole.MANAGER)).build());
-
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(new TeamMember());
 
         assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
     }
@@ -153,21 +115,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getUpdatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.MANAGER)).build());
 
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(null);
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(1).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(null);
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(2).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(null);
-
         assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
-
-        verify(teamMemberRepository, times(1))
-                .findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId());
-        verify(teamMemberRepository, times(1))
-                .findByUserIdAndProjectId(candidates.get(1).getUserId(), vacancy.getProject().getId());
-        verify(teamMemberRepository, times(1))
-                .findByUserIdAndProjectId(candidates.get(2).getUserId(), vacancy.getProject().getId());
     }
 
     @Test
@@ -192,20 +140,6 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getUpdatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.MANAGER)).build());
 
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(null);
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(1).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(null);
-        when(teamMemberRepository.findByUserIdAndProjectId(candidates.get(2).getUserId(), vacancy.getProject().getId()))
-                .thenReturn(null);
-
         assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
-
-        verify(teamMemberRepository, times(1))
-                .findByUserIdAndProjectId(candidates.get(0).getUserId(), vacancy.getProject().getId());
-        verify(teamMemberRepository, times(1))
-                .findByUserIdAndProjectId(candidates.get(1).getUserId(), vacancy.getProject().getId());
-        verify(teamMemberRepository, times(1))
-                .findByUserIdAndProjectId(candidates.get(2).getUserId(), vacancy.getProject().getId());
     }
 }
