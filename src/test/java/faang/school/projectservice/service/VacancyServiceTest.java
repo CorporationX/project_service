@@ -129,6 +129,15 @@ public class VacancyServiceTest {
 
     @Test
     public void update_ShouldUpdateVacancySuccessfully() {
+        // vacancy должен быть изменяемым, поэтому builder не использую
+        Vacancy vacancy = new Vacancy();
+        vacancy.setId(234L);
+        vacancy.setName("Backend-разработчик");
+        vacancy.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
+        vacancy.setPosition(TeamRole.DEVELOPER);
+        vacancy.setUpdatedBy(123L);
+        vacancy.setStatus(VacancyStatus.OPEN);
+
         UpdateVacancyRequest updateRequest = UpdateVacancyRequest.builder()
                 .id(234L)
                 .name("Backend-разработчик")
@@ -142,15 +151,6 @@ public class VacancyServiceTest {
                 .count(1)
                 .requiredSkillIds(List.of(101L, 102L))
                 .build();
-
-        // vacancy должен быть изменяемым, поэтому builder не использую
-        Vacancy vacancy = new Vacancy();
-        vacancy.setId(234L);
-        vacancy.setName("Backend-разработчик");
-        vacancy.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
-        vacancy.setPosition(TeamRole.DEVELOPER);
-        vacancy.setUpdatedBy(123L);
-        vacancy.setStatus(VacancyStatus.OPEN);
 
         when(vacancyRepository.findById(updateRequest.getId()))
                 .thenReturn(Optional.of(vacancy));
