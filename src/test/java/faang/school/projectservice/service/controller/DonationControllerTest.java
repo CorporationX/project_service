@@ -54,7 +54,11 @@ class DonationControllerTest {
 
         mockMvc.perform(post("/donations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"userId\":1,\"campaignId\":1,\"amount\":100.00,\"currency\":\"USD\",\"paymentNumber\":1}"))
+                        .content("{\"userId\":1," +
+                                "\"campaignId\":1," +
+                                "\"amount\":100.00," +
+                                "\"currency\":\"USD\"," +
+                                "\"paymentNumber\":1}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userId").value(1))
                 .andExpect(jsonPath("$.campaignId").value(1))

@@ -10,6 +10,7 @@ public class UserContext {
     public void setUserId(long userId) {
         userIdHolder.set(userId);
     }
+
     public long getUserId() {
         return userIdHolder.get();
     }
