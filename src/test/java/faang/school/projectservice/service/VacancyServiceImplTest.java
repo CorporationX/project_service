@@ -201,7 +201,6 @@ class VacancyServiceImplTest {
     @Test
     public void testUpdateIfClosedButCandidatesDoNotHaveAssignedRoleFailed() {
         vacancyMapper.setCandidateMapper(candidateMapper);
-        Vacancy vacancy = TestData.createVacancy(1L, "test vacancy", TeamRole.DEVELOPER);
         VacancyRequestDto dto = TestData.createVacancyRequestDto("test vacancy", TeamRole.DEVELOPER, 1L,
                 List.of(1L), 1L, 1L, VacancyStatus.CLOSED, 1);
         TeamMember memberManager = new TeamMember();
@@ -213,6 +212,8 @@ class VacancyServiceImplTest {
         candidate.setUserId(5L);
         TeamMember memberCandidate = new TeamMember();
         memberCandidate.setRoles(List.of(TeamRole.INTERN));
+
+        Vacancy vacancy = TestData.createVacancy(1L, "test vacancy", TeamRole.DEVELOPER);
 
         Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId()))
                 .thenReturn(Optional.of(memberManager));
