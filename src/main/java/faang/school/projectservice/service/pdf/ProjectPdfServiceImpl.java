@@ -2,175 +2,158 @@ package faang.school.projectservice.service.pdf;
 
 
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
+import faang.school.projectservice.dto.project.ProjectTeamMemberDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ProjectPdfServiceImpl implements  ProjectPdfService{
 
+    public static final String DATE_MASK_FORMAT = "yyyy-MM-dd HH:mm";
+    public static final String FONT_REGULAR = "fontRegular";
+    public static final String FONT_BOLD = "fontBold";
+    public static final String FONTS_ARIAL_TTF = "/fonts/arial.ttf";
+    public static final String FONTS_ARIAL_BOLD_TTF = "/fonts/arial-bold.ttf";
+
     @Override
     public InputStream createProjectPresentation(ProjectPresentationDto dto) {
-        return null;
+
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+            Map<String, PDType0Font> fonts = getFonts(document);
+
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+
+                headerDraw(dto, contentStream, fonts);
+                bodyDraw(dto, contentStream, fonts);
+                footerDraw(dto, contentStream, fonts);
+                contentStream.endText();
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            document.save(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+
+        } catch (IOException ex) {
+            throw new RuntimeException("Error creating PDF document", ex);
+        }
     }
 
-//    public InputStream generateProjectPresentation(ProjectPresentationDto dto) {
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//
-////        PdfWriter pdfWriter = new PdfWriter(outputStream);
-////        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-////        pdfDocument.setDefaultPageSize(PageSize.A4);
-////        Document document = new Document(pdfDocument);
-////
-////        createHeader(document, dto);
-////        document.add(addDivider());
-////        createDescription(document, dto.getDescription());
-////        document.add(addDivider());
-////        createAchievements(document, dto.getCompletedTasks());
-////        document.add(addDivider());
-////        createTeamProject(document, dto.getTeams());
-////
-////        document.close();
-//        return new ByteArrayInputStream(outputStream.toByteArray());
-//    }
+    private Map<String, PDType0Font> getFonts(PDDocument document) throws IOException {
 
-//
-//    private void createHeader(Document document, ProjectPresentationDto dto) {
-//        float firstColumnSize = 435;
-//        float secondColumnSize = 285f;
-//        Table table = createTableWithFullWidth(firstColumnSize, secondColumnSize);
-//        table.addCell(createCellWithoutBorder(dto.getTitle()).setBold().setFontSize(24f));
-//        String createdDateFormated = dto.getCreatedDate()
-//                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-//        String participantsCount = String.valueOf(dto.getTeams().stream()
-//                .mapToInt(java.util.List::size)
-//                .sum());
-//        String completedTasksCount = String.valueOf(dto.getCompletedTasks().size());
-//
-//        Table nestedTable = createTableWithFullWidth(secondColumnSize / 2, secondColumnSize / 2);
-//        createRowForHeader(nestedTable, "Created Date", createdDateFormated);
-//        createRowForHeader(nestedTable, "Owner", dto.getOwnerName());
-//        createRowForHeader(nestedTable, "Status", dto.getStatus());
-//        createRowForHeader(nestedTable, "Participants count", participantsCount);
-//        createRowForHeader(nestedTable, "Completed tasks", completedTasksCount);
-//        table.addCell(new Cell().add(nestedTable).setBorder(Border.NO_BORDER));
-//        document.add(table);
-//    }
-//
-//    private void createDescription(Document document, String description) {
-//        Paragraph descriptionTitle = createTitle("Description");
-//        Paragraph descriptionContent = new Paragraph(description);
-//        document.add(descriptionTitle);
-//        document.add(descriptionContent);
-//    }
-//
-//    private void createAchievements(Document document, java.util.List<String> achievements) {
-//        Paragraph achievementTitle = createTitle("Achievements");
-//        List achievementsList = new List()
-//                .setSymbolIndent(12)
-//                .setListSymbol("•");
-//        achievements.forEach(achievementsList::add);
-//        document.add(achievementTitle);
-//        document.add(achievementsList);
-//    }
-//
-//    private void createTeamProject(
-//            Document document,
-//            java.util.List<java.util.List<TeamMemberDto>> teams
-//    ) {
-//        Paragraph teamTitle = new Paragraph("Team project")
-//                .setBold().setFontSize(20f).setMarginBottom(10f);
-//
-//        DeviceRgb lightGray = new DeviceRgb(245, 245, 245);
-//        DeviceRgb white = new DeviceRgb(255, 255, 255);
-//        DeviceRgb currentRowColor = lightGray;
-//
-//        Table table = createTableWithFullWidth(400, 200);
-//
-//        table.addCell(createLeftCellWithBorder("Name", white));
-//        table.addCell(createRightCellWithBorder("Role", white));
-//
-//        for (var team : teams) {
-//            for (var member : team) {
-//                table.addCell(createLeftCellWithBorder(member.getName(), currentRowColor));
-//                table.addCell(createRightCellWithBorder(
-//                        member.getRoles().stream()
-//                                .map(Enum::toString)
-//                                .collect(Collectors.joining(", ")),
-//                        currentRowColor
-//                ));
-//                currentRowColor = currentRowColor == lightGray ? white : lightGray;
-//            }
-//
-//            table.addCell(createTableDivider(currentRowColor));
-//            currentRowColor = currentRowColor == lightGray ? white : lightGray;
-//        }
-//
-//        document.add(teamTitle);
-//        document.add(table);
-//    }
-//
-//    private Cell createTableDivider(Color backgroundColor) {
-//        Border outerBorder = new SolidBorder(new DeviceRgb(236, 236, 236), 1f);
-//        return new Cell(1, 2).add(new Paragraph("\n"))
-//                .setBackgroundColor(backgroundColor)
-//                .setBorder(outerBorder);
-//    }
-//
-//    private Cell createLeftCellWithBorder(String value, Color backgroundColor) {
-//        Border outerBorder = new SolidBorder(new DeviceRgb(236, 236, 236), 1f);
-//        Border innerBorder = new SolidBorder(new DeviceRgb(255, 255, 255), 1f);
-//
-//        return new Cell().add(new Paragraph(value))
-//                .setBorder(outerBorder)
-//                .setBorderRight(innerBorder)
-//                .setPaddingLeft(10f)
-//                .setBackgroundColor(backgroundColor);
-//    }
-//
-//    private Cell createRightCellWithBorder(String value, Color backgroundColor) {
-//        Border outerBorder = new SolidBorder(new DeviceRgb(236, 236, 236), 1f);
-//        Border innerBorder = new SolidBorder(new DeviceRgb(255, 255, 255), 1f);
-//
-//        return new Cell().add(new Paragraph(value))
-//                .setBorder(outerBorder)
-//                .setBorderLeft(innerBorder)
-//                .setPaddingLeft(10f)
-//                .setBackgroundColor(backgroundColor);
-//    }
-//
-//    private Paragraph createTitle(String value) {
-//        return new Paragraph(value)
-//                .setBold().setFontSize(20f).setMarginBottom(10f);
-//    }
-//
-//    private Table addDivider() {
-//        Border border = new SolidBorder(new DeviceGray(0.5f), 1f);
-//        Table divider = createTableWithFullWidth(1);
-//        divider.setMarginTop(20f);
-//        divider.setMarginBottom(20f);
-//        divider.setBorder(border);
-//        return divider;
-//    }
-//
-//    private Cell createCellWithoutBorder(String text) {
-//        return new Cell().add(new Paragraph(text)).setBorder(Border.NO_BORDER);
-//    }
-//
-//    private Table createTableWithFullWidth(float... args) {
-//        return new Table(args).useAllAvailableWidth();
-//    }
-//
-//    private void createRowForHeader(Table table, String key, String value) {
-//        table.addCell(createCellWithoutBorder(key).setBold());
-//        table.addCell(createCellWithoutBorder(value));
-//    }
+        InputStream fontStreamRegular = getClass().getResourceAsStream(FONTS_ARIAL_TTF);
+        InputStream fontStreamBold = getClass().getResourceAsStream(FONTS_ARIAL_BOLD_TTF);
 
+        PDType0Font fontRegular = PDType0Font.load(document, fontStreamRegular);
+        PDType0Font fontBold = PDType0Font.load(document, fontStreamBold);
 
+        Map<String, PDType0Font> mapFonts = new HashMap<>();
+        mapFonts.put(FONT_REGULAR, fontRegular);
+        mapFonts.put(FONT_BOLD, fontBold);
+        return mapFonts;
+    }
+
+    private void bodyDraw(ProjectPresentationDto dto, PDPageContentStream contentStream,
+                          Map<String, PDType0Font> fonts) throws IOException {
+
+        contentStream.setFont(fonts.get(FONT_BOLD), 14);
+        spaceLinesDraw(contentStream);
+        contentStream.showText("Список задач:");
+        contentStream.setFont(fonts.get(FONT_REGULAR), 12);
+        for (String task : dto.completedTasks()) {
+            spaceLinesDraw(contentStream);
+            contentStream.showText("- " + task);
+        }
+
+        contentStream.setFont(fonts.get(FONT_BOLD), 14);
+        spaceLinesDraw(contentStream, 2);
+        contentStream.showText("Команды в проекте:");
+        contentStream.setFont(fonts.get(FONT_REGULAR), 12);
+
+        int teamCount = 1;
+        for (List<ProjectTeamMemberDto> team : dto.teams()) {
+            spaceLinesDraw(contentStream);
+            contentStream.showText("Команда " + teamCount++ + ":");
+            for (ProjectTeamMemberDto member : team) {
+                spaceLinesDraw(contentStream);
+                contentStream.showText("  - " + member.name() + ", Роль в команде: " + member.roles());
+            }
+        }
+    }
+
+    private void spaceLinesDraw(PDPageContentStream contentStream, int countLine) throws IOException {
+
+        for (int i = 0; i < countLine; i++) {
+            contentStream.newLine();
+        }
+    }
+
+    private void spaceLinesDraw(PDPageContentStream contentStream) throws IOException {
+
+        spaceLinesDraw(contentStream, 1);
+    }
+
+    private void footerDraw(ProjectPresentationDto dto, PDPageContentStream contentStream,
+                            Map<String, PDType0Font> fonts) throws IOException {
+
+        spaceLinesDraw(contentStream);
+        contentStream.setFont(fonts.get(FONT_BOLD), 14);
+        spaceLinesDraw(contentStream);
+        contentStream.showText("Статистика:");
+        contentStream.setFont(fonts.get(FONT_REGULAR), 12);
+        spaceLinesDraw(contentStream);
+        contentStream.showText("Всего выполненных заданий: " + dto.completedTasks().size());
+        spaceLinesDraw(contentStream);
+        contentStream.showText("Всего участников проекта: " + dto.teams().stream().mapToInt(List::size).sum());
+    }
+
+    private void headerDraw(ProjectPresentationDto dto, PDPageContentStream contentStream,
+                            Map<String, PDType0Font> fonts) throws IOException {
+
+        contentStream.setLeading(14.5f);
+        contentStream.beginText();
+        contentStream.setFont(fonts.get(FONT_BOLD), 18);
+        contentStream.newLineAtOffset(50, 750);
+        contentStream.showText("Презентация проекта");
+        spaceLinesDraw(contentStream, 2);
+        spaceLinesDraw(contentStream);
+        contentStream.setFont(fonts.get(FONT_REGULAR), 12);
+
+        Map<String, String> projectDetails = getMapHeader(dto);
+        for (Map.Entry<String, String> entry : projectDetails.entrySet()) {
+            contentStream.showText(entry.getKey() + ": " + entry.getValue());
+            contentStream.newLine();
+        }
+    }
+
+    private Map<String, String> getMapHeader(ProjectPresentationDto dto) {
+
+        Map<String, String> projectDetails = new LinkedHashMap<>();
+        projectDetails.put("Название проекта", dto.title());
+        projectDetails.put("Описание проекта", dto.description());
+        projectDetails.put("Дата создания",
+                dto.createdDate().format(DateTimeFormatter.ofPattern(DATE_MASK_FORMAT)));
+        projectDetails.put("Владелец проекта", dto.ownerName());
+        projectDetails.put("Статус проекта", dto.status());
+        return projectDetails;
+    }
 }

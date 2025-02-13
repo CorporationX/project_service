@@ -23,9 +23,9 @@ public class S3ServiceImpl implements S3Service {
     public void putFileInStore(String key, InputStream stream, ObjectMetadata metadata) {
         try {
             s3Client.putObject(bucketName, key, stream, metadata);
-        } catch (Exception e) {
-            log.error("Ошибка при сохранении файла в S3", e);
-            throw new RuntimeException(e.getMessage());
+        } catch (Exception ex) {
+            log.error("Error when saving a file in S3", ex);
+            throw new RuntimeException(ex.getMessage());
         }
     }
 

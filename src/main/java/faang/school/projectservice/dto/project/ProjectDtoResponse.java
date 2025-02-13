@@ -5,14 +5,14 @@ import faang.school.projectservice.model.ProjectVisibility;
 
 import java.time.LocalDateTime;
 
-public record ProjectInfoDto(
+public record ProjectDtoResponse(
+
         long id,
         String name,
         long ownerId,
         long parentProjectId,
-        ProjectStatus projectStatus,
+        ProjectStatus status,
         ProjectVisibility visibility,
         LocalDateTime createdAt,
         LocalDateTime updatedAt) {
 }
-;

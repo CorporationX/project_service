@@ -34,6 +34,12 @@ dependencies {
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
+
+    /**
+     *  Apache PDFBox
+     */
+    implementation("org.apache.pdfbox:pdfbox:2.0.29")
+
     /**
      * Utils & Logging
      */

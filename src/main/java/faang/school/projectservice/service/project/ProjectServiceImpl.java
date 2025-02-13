@@ -1,19 +1,21 @@
 package faang.school.projectservice.service.project;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.config.s3.S3Properties;
 import faang.school.projectservice.dto.client.UserDto;
-import faang.school.projectservice.dto.project.ProjectInfoDto;
+import faang.school.projectservice.dto.project.ProjectDtoResponse;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
-import faang.school.projectservice.dto.project.ProjectTeamMemberDto;
+import faang.school.projectservice.dto.resource.S3ObjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.pdf.ProjectPdfService;
 import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,42 +23,41 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProjectServiceImpl  implements ProjectService{
+public class ProjectServiceImpl implements ProjectService {
+    public static final String PDF_FILE_NAME = "presentation.pdf";
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    private final S3Service S3service;
+    private final S3Service s3Service;
     private final S3Properties s3Properties;
+    private final AmazonS3 s3client;
     private final ProjectPdfService projectPdfService;
     private final UserServiceClient userServiceClient;
     private final UserContext userContext;
+    private final ProjectValidator projectValidator;
 
     @Override
-    public ProjectInfoDto creatingPresentation(long projectId) {
+    public ProjectDtoResponse creatingPresentation(long projectId) {
 
         Project project = getProjectById(projectId);
-
         final long userId = getUserId();
+
+        projectValidator.validateUserId(userId);
+        projectValidator.validateUserIsOwner(userId, project);
+
         UserDto owner = userServiceClient.getUser(userId);
+        ProjectPresentationDto presentationDto = projectMapper.toProjectPresentationDto(project, owner);
 
-        ProjectPresentationDto dto = new ProjectPresentationDto(
-                project.getName(),
-                project.getCreatedAt(),
-                owner.username(),
-                project.getStatus().name(),
-                project.getDescription(),
-                project.getTasks().stream().map(Task::getName).toList(),
-                formatTeams(project.getTeams())
-        );
+        InputStream pdfInputStream = projectPdfService.createProjectPresentation(presentationDto);
+        final String presentationFileKey = String.format("%s_%s_%s_%d", project.getName(), project.getId(),
+                PDF_FILE_NAME,  System.currentTimeMillis());
 
-        InputStream pdfInputStream = projectPdfService.createProjectPresentation(dto);
-        String fileKey = "project/" + project.getId() + "/presentation.pdf";
-        S3service.putFileInStore(fileKey, pdfInputStream);
-        project.setPresentationFileKey(fileKey);
+        s3Service.putFileInStore(presentationFileKey, pdfInputStream);
+
+        project.setPresentationFileKey(presentationFileKey);
         project.setPresentationGeneratedAt(LocalDateTime.now());
         projectRepository.save(project);
         return projectMapper.toDto(project);
@@ -65,33 +66,28 @@ public class ProjectServiceImpl  implements ProjectService{
     @Override
     public String getPresentationFileKey(long projectId) {
         Project project = getProjectById(projectId);
-        return s3Properties.getEndpoint() + "/" + s3Properties.getBucketName() + "/" +
-                project.getPresentationFileKey();
+        return project.getPresentationFileKey();
+    }
+
+    @Override
+    public S3ObjectDto downloadPdf(Long projectId) {
+
+        String presentationFileKey = getPresentationFileKey(projectId);
+        S3Object object = s3client.getObject(s3Properties.getBucketName(), presentationFileKey);
+
+        return new S3ObjectDto(PDF_FILE_NAME, object, ResourceType.PDF.name());
     }
 
     private Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Проект с ID "
-                        + projectId + " не найден"));
-    }
-
-    private List<List<ProjectTeamMemberDto>> formatTeams(List<Team> teams) {
-        return teams.stream()
-                .map(team ->
-                        team.getTeamMembers().stream()
-                                .map(member -> new ProjectTeamMemberDto(
-                                        member.getNickname(),
-                                        member.getRoles()
-                                ))
-                                .toList()
-                )
-                .toList();
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Project with ID %s not found!", projectId)));
     }
 
     private long getUserId() {
 
         final long userId = userContext.getUserId();
-        //likeValidator.validateUserId(userId);
+        projectValidator.validateUserId(userId);
         return userId;
     }
 }
