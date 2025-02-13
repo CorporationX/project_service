@@ -4,7 +4,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.FileException;
-import faang.school.projectservice.file.FileMultipartFile;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
