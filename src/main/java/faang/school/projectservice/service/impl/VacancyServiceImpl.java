@@ -30,8 +30,9 @@ public class VacancyServiceImpl implements VacancyService {
     public void addCover(Long id, MultipartFile file) {
         Vacancy vacancy = vacancyRepositoryAdapter.findById(id);
         String folder = String.format("%s/%d", FOLDER_NAME, id);
-        MultipartFile fileAfterCheck = checkAndConvertFile(file);
-        String coverImageKey = s3Service.uploadFile(fileAfterCheck, folder);
+        InputStream fileAfterResize = checkAndResizeImage(file);
+        String coverImageKey = s3Service.uploadFile(fileAfterResize, file.getOriginalFilename(), file.getContentType(),
+                folder);
         vacancy.setCoverImageKey(coverImageKey);
         vacancyRepositoryAdapter.save(vacancy);
         log.info("Cover of vacancy with id {} has been successfully added", id);
@@ -55,12 +56,10 @@ public class VacancyServiceImpl implements VacancyService {
         log.info("Cover of vacancy with id {} has been successfully deleted", id);
     }
 
-    private MultipartFile checkAndConvertFile(MultipartFile file) {
-        BufferedImage resizeImage = imageProcessor.resizeImage(file);
-        return imageProcessor.convertImageToMultipartFile(resizeImage, file.getName(), file.getOriginalFilename(),
-                file.getContentType());
+    private InputStream checkAndResizeImage(MultipartFile file) {
+        BufferedImage image = imageProcessor.resizeImage(file);
+        return imageProcessor.convertImageToInputStream(image, file.getContentType());
     }
-
 
     private void checkCanDeleteCover(Vacancy vacancy, Long userId) {
         boolean isVacancyOwner = Objects.equals(vacancy.getCreatedBy(), userId);

@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.exception.FileException;
-import faang.school.projectservice.file.FileMultipartFile;
 import faang.school.projectservice.service.ImageProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -14,7 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -52,24 +53,19 @@ public class ImageProcessorImpl implements ImageProcessor {
         return bufferedImage;
     }
 
-    @Override
-    public MultipartFile convertImageToMultipartFile(BufferedImage image, String name, String originalName,
-                                                     String contentType) {
+    public InputStream convertImageToInputStream(BufferedImage image, String contentType) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        String fileType = contentType.substring(contentType.lastIndexOf("/") + 1);
         try {
-            String fileType = contentType.substring(contentType.lastIndexOf("/") + 1);
             ImageIO.write(image, fileType, outputStream);
             outputStream.flush();
+            byte[] imageByte = outputStream.toByteArray();
+            outputStream.close();
+            return new ByteArrayInputStream(imageByte);
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new FileException(e.getMessage());
         }
-        byte[] imageBytes = outputStream.toByteArray();
-        return new FileMultipartFile(name,
-                originalName,
-                contentType,
-                imageBytes,
-                imageBytes.length);
     }
 
     private BufferedImage resizeToNewImage(BufferedImage bufferedImage, int width, int height) {

@@ -18,7 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -40,10 +42,12 @@ public class S3ServiseImplTest {
     private static final String KEY = "KEY";
     private static final int NUMBER_INVOCATION = 1;
     private static final String BUSKET_NAME = "name";
+    private static final String NAME = "VACANCY";
 
     private MultipartFile file;
     private BufferedImage bufferedImage;
     private ByteArrayOutputStream outputStream;
+    private InputStream inputStream;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -51,6 +55,8 @@ public class S3ServiseImplTest {
         bufferedImage = new BufferedImage(WIDTH, HEIGHT, IMAGE_TYPE);
         ImageIO.write(bufferedImage, FORMAT_NAME, outputStream);
         bufferedImage.flush();
+        inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        outputStream.close();
         file = new FileMultipartFile(IMAGE_NAME,
                 IMAGE_NAME,
                 CONTENT_TYPE,
@@ -63,19 +69,19 @@ public class S3ServiseImplTest {
     public void testUploadFileFolderEmpty() {
         Assert.assertThrows(
                 DataValidationException.class,
-                () -> s3Servise.uploadFile(file, ""));
+                () -> s3Servise.uploadFile(inputStream, NAME, CONTENT_TYPE, ""));
     }
 
     @Test
     public void testUploadFileFileEmpty() {
         Assert.assertThrows(
                 FileException.class,
-                () -> s3Servise.uploadFile(null, FOLDER));
+                () -> s3Servise.uploadFile(null, NAME, CONTENT_TYPE, FOLDER));
     }
 
     @Test
     public void testUploadFileSuccess() {
-        String fileName = s3Servise.uploadFile(file, FOLDER);
+        String fileName = s3Servise.uploadFile(inputStream, NAME, CONTENT_TYPE, FOLDER);
         Assert.assertFalse(fileName.isEmpty());
     }
 

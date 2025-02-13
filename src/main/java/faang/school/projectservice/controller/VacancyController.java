@@ -7,14 +7,7 @@ import faang.school.projectservice.service.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -27,7 +20,7 @@ import java.util.Objects;
 @Slf4j
 public class VacancyController {
 
-    private static final List<ImageType> IMAGE_TYPES = List.of(ImageType.png, ImageType.jpg);
+    private static final List<ImageType> IMAGE_TYPES = List.of(ImageType.png, ImageType.jpg, ImageType.jpeg);
 
     private final VacancyService vacancyService;
     private final UserContext userContext;

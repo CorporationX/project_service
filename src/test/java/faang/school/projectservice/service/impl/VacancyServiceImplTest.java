@@ -20,7 +20,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import static org.mockito.Mockito.times;
@@ -59,6 +61,7 @@ public class VacancyServiceImplTest {
     private MultipartFile file;
     private BufferedImage bufferedImage;
     private ByteArrayOutputStream outputStream;
+    private InputStream inputStream;
     private Project project;
 
     @BeforeEach
@@ -77,6 +80,8 @@ public class VacancyServiceImplTest {
         bufferedImage = new BufferedImage(WIDTH, HEIGHT, IMAGE_TYPE);
         ImageIO.write(bufferedImage, FORMAT_NAME, outputStream);
         bufferedImage.flush();
+        inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        outputStream.close();
         file = new FileMultipartFile(IMAGE_NAME,
                 IMAGE_NAME,
                 CONTENT_TYPE,
@@ -90,8 +95,8 @@ public class VacancyServiceImplTest {
         String folder = String.format("%s/%d", "vacancy", VACANCY_ID);
         when(vacancyRepositoryAdapter.findById(VACANCY_ID)).thenReturn(vacancy);
         when(imageProcessor.resizeImage(file)).thenReturn(bufferedImage);
-        when(imageProcessor.convertImageToMultipartFile(bufferedImage, file.getName(), file.getOriginalFilename(),
-                file.getContentType())).thenReturn(file);
+        when(imageProcessor.convertImageToInputStream(bufferedImage,
+                file.getContentType())).thenReturn(inputStream);
         vacancyService.addCover(VACANCY_ID, file);
         Mockito.verify(vacancyRepositoryAdapter, times(NUMBER_INVOCATION)).save(vacancy);
     }

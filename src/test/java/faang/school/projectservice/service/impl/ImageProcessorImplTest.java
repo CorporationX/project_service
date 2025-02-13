@@ -13,7 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @ExtendWith(MockitoExtension.class)
 public class ImageProcessorImplTest {
@@ -33,6 +35,7 @@ public class ImageProcessorImplTest {
     private MultipartFile file;
     private BufferedImage bufferedImage;
     private ByteArrayOutputStream outputStream;
+    private InputStream inputStream;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -41,6 +44,8 @@ public class ImageProcessorImplTest {
         bufferedImage = new BufferedImage(WIDTH, HEIGHT, IMAGE_TYPE);
         ImageIO.write(bufferedImage, FORMAT_NAME, outputStream);
         bufferedImage.flush();
+        inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        outputStream.close();
         file = new FileMultipartFile(IMAGE_NAME,
                 IMAGE_NAME,
                 CONTENT_TYPE,
@@ -64,16 +69,15 @@ public class ImageProcessorImplTest {
 
     @Test
     public void testConvertImageToMultipartFile() throws IOException {
-        MultipartFile fileTest = imageProcessor.convertImageToMultipartFile(bufferedImage, IMAGE_NAME, IMAGE_NAME,
-                CONTENT_TYPE);
-        Assert.assertEquals(file.getSize(), fileTest.getSize());
-        Assert.assertArrayEquals(file.getBytes(), fileTest.getBytes());
+        InputStream fileTest = imageProcessor.convertImageToInputStream(bufferedImage, CONTENT_TYPE);
+        Assert.assertEquals(inputStream.available(), fileTest.available());
+        Assert.assertArrayEquals(inputStream.readAllBytes(), fileTest.readAllBytes());
     }
 
     @Test
-    public void testConvertImageToMultipartFileFailed() throws IOException {
+    public void testConvertImageToInputStream() throws IOException {
         Assert.assertThrows(
                 IllegalArgumentException.class,
-                () -> imageProcessor.convertImageToMultipartFile(null, IMAGE_NAME, IMAGE_NAME, CONTENT_TYPE));
+                () -> imageProcessor.convertImageToInputStream(null, CONTENT_TYPE));
     }
 }

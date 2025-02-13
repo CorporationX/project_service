@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,21 +30,20 @@ public class S3ServiseImpl implements S3Service {
     private String bucketName;
 
     @Override
-    public String uploadFile(MultipartFile file, String folder) {
+    public String uploadFile(InputStream file, String name, String contentType, String folder) {
         checkDataForUpload(file, folder);
-
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.getSize());
-        metadata.setContentType(file.getContentType());
-        String fileName = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
         try {
-            s3Client.putObject(new PutObjectRequest(bucketName, fileName,
-                    file.getInputStream(), metadata));
-            log.info("Object with name {} success downloaded", fileName);
+            metadata.setContentLength(file.available());
         } catch (IOException e) {
-            log.error("Error", e);
-            throw new FileException("Error while downloading file.");
+            log.error("Error while set content length for file with name {}", name);
+            throw new FileException("Error while deleting file");
         }
+        metadata.setContentType(contentType);
+        String fileName = String.format("%s/%d%s", folder, System.currentTimeMillis(), name);
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileName, file, metadata);
+        s3Client.putObject(putObjectRequest);
+        log.info("Object with name {} success downloaded", fileName);
         return fileName;
     }
 
@@ -57,7 +55,7 @@ public class S3ServiseImpl implements S3Service {
             s3Client.deleteObject(bucketName, key);
             log.info("Object with key {} success deleted", key);
         } catch (AmazonS3Exception e) {
-            log.error("Error while deleting file with key{}", key);
+            log.error("Error while deleting file with key {}", key);
             throw new FileException("Error while deleting file");
         }
     }
@@ -69,12 +67,12 @@ public class S3ServiseImpl implements S3Service {
             S3Object s3Object = s3Client.getObject(bucketName, key);
             return s3Object.getObjectContent();
         } catch (AmazonServiceException e) {
-            log.error("Error while downloading file with key{}", key);
+            log.error("Error while downloading file with key {}", key);
             throw new FileException("Error while deleting file");
         }
     }
 
-    private void checkDataForUpload(MultipartFile file, String folder) {
+    private void checkDataForUpload(InputStream file, String folder) {
         if (folder.isBlank() || folder.isEmpty()) {
             log.error("Folder for s3 service is empty.");
             throw new DataValidationException("Folder for s3 service can not be empty.");
