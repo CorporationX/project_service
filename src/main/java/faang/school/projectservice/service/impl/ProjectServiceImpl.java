@@ -1,15 +1,18 @@
 package faang.school.projectservice.service.impl;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
+import faang.school.projectservice.dto.project.ProjectViewProfileEvent;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.SpecificationFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.publisher.ProjectProfileViewPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<SpecificationFilter> specificationFilters;
+    private final ProjectProfileViewPublisher projectProfileViewPublisher;
+    private final UserContext userContext;
 
     @Override
     public ProjectResponseDto save(ProjectCreateRequestDto projectDto) {
@@ -55,11 +60,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponseDto findById(Long id) {
-        Project project = projectRepository.findById(id)
+    public ProjectResponseDto findById(Long projectId) {
+        Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        String.format("#ProjectServiceImpl: project with id:%d has not been found", id)));
-        return projectMapper.toProjectResponseDto(project);
+                        String.format("#ProjectServiceImpl: project with id:%d has not been found", projectId)));
+        ProjectResponseDto projectResponseDto = projectMapper.toProjectResponseDto(project);
+        projectProfileViewPublisher.publish(new ProjectViewProfileEvent(
+                projectId, userContext.getUserId(), LocalDateTime.now()));
+        return projectResponseDto;
     }
 
     @Override
@@ -93,9 +101,9 @@ public class ProjectServiceImpl implements ProjectService {
                 .toList();
     }
 
+    @Override
     public Project getProject(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Not found project with Id = " + projectId));
     }
-
 }

@@ -12,7 +12,7 @@ public interface ProjectService {
 
     ProjectResponseDto save(ProjectCreateRequestDto projectDto);
 
-    ProjectResponseDto findById(Long id);
+    ProjectResponseDto findById(Long projectId);
 
     List<ProjectResponseDto> findAll();
 

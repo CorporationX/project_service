@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
@@ -11,6 +12,7 @@ import faang.school.projectservice.filter.StatusSpecification;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.publisher.ProjectProfileViewPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.impl.ProjectServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -32,15 +34,18 @@ public class ProjectServiceTest {
     private ProjectServiceImpl projectService;
     private ArgumentCaptor<Project> projectCaptor;
     private ProjectCreateRequestDto projectRequest;
+    private ProjectProfileViewPublisher projectProfileViewPublisher;
 
     @BeforeEach
     void init() {
         projectRepository = Mockito.mock(ProjectRepository.class);
         ProjectMapperImpl projectMapper = Mockito.spy(ProjectMapperImpl.class);
+        UserContext userContext = Mockito.spy(UserContext.class);
         NameSpecification nameSpecification = Mockito.spy(NameSpecification.class);
         StatusSpecification statusSpecification = Mockito.spy(StatusSpecification.class);
         List<SpecificationFilter> specificationFilters = List.of(nameSpecification, statusSpecification);
-        projectService = new ProjectServiceImpl(projectRepository, projectMapper, specificationFilters);
+        projectService = new ProjectServiceImpl(
+                projectRepository, projectMapper, specificationFilters, projectProfileViewPublisher, userContext);
 
         projectCaptor = ArgumentCaptor.forClass(Project.class);
 
