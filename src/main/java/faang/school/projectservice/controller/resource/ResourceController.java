@@ -1,8 +1,7 @@
 package faang.school.projectservice.controller.resource;
 
 import faang.school.projectservice.dto.resource.ResourceResultDto;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.service.resource.ResourceService;
+import faang.school.projectservice.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
