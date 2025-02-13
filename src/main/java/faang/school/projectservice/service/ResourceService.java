@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.minio.MinioProperties;
+import faang.school.projectservice.config.AppConfig;
 import faang.school.projectservice.dto.resource.ResourceCreateDto;
 import faang.school.projectservice.dto.resource.ResourceResultDto;
 import faang.school.projectservice.mapper.ResourceMapper;
@@ -13,12 +13,13 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.minio.MinioServiceV2;
+import faang.school.projectservice.service.MinioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.UUID;
@@ -31,8 +32,7 @@ public class ResourceService {
     private final ResourceRepository resourceRepository;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final MinioServiceV2 minioService;
-    private final MinioProperties minioProperties;
+    private final MinioService minioService;
     private final ResourceMapper resourceMapper;
     private final ResourceResultMapper resourceResultMapper;
 
@@ -52,7 +52,7 @@ public class ResourceService {
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
 
         BigInteger maxSize = project.getMaxStorageSize() == null
-                ? BigInteger.valueOf(minioProperties.getDefaultMaxSize())
+                ? BigInteger.valueOf(2L * 1024 * 1024 * 1024)
                 : project.getMaxStorageSize();
         if (currentSize.add(fileSize).compareTo(maxSize) > 0) {
             throw new IllegalArgumentException("Превышен лимит хранилища проекта");
@@ -60,9 +60,9 @@ public class ResourceService {
 
         String key = "project-" + projectId + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
-        String uploadedKey;
         try {
-            uploadedKey = minioService.uploadFile(key, file.getInputStream(), file.getSize(), file.getContentType());
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(file.getBytes());
+            minioService.uploadFile(byteArrayInputStream, key, file.getContentType(), file.getSize());
         } catch (IOException e) {
             throw new RuntimeException("Ошибка при получении потока файла", e);
         } catch (Exception e) {
@@ -71,7 +71,7 @@ public class ResourceService {
 
         ResourceCreateDto dto = new ResourceCreateDto(
                 file.getOriginalFilename(),
-                uploadedKey,
+                key,
                 file.getSize(),
                 file.getContentType(),
                 teamMemberId,
@@ -79,7 +79,6 @@ public class ResourceService {
         );
 
         Resource resource = resourceMapper.toResource(dto);
-
         Resource savedResource = resourceRepository.save(resource);
 
         project.setStorageSize(currentSize.add(fileSize));
@@ -102,7 +101,7 @@ public class ResourceService {
         }
 
         if (resource.getKey() != null) {
-            minioService.deleteFile(resource.getKey());
+            minioService.removeFile(resource.getKey());
         }
 
         Project project = resource.getProject();

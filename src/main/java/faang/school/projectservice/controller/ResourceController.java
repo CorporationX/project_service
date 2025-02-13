@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.resource;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.resource.ResourceResultDto;
 import faang.school.projectservice.service.ResourceService;
