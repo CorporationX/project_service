@@ -20,7 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -32,7 +31,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -90,7 +88,7 @@ public class JiraServiceTest {
         String result = jiraService.createIssue(projectKey, issueDto);
 
         assertEquals(issueKey, result);
-        verify(promise, times(1)).claim();
+        verify(promise).claim();
     }
 
     @Test
@@ -114,7 +112,7 @@ public class JiraServiceTest {
         jiraService.updateIssueStatus(issueKey, statusId);
 
         ArgumentCaptor<TransitionInput> captor = ArgumentCaptor.forClass(TransitionInput.class);
-        verify(jiraRestClient.getIssueClient(), times(1)).transition(eq(issue), captor.capture());
+        verify(jiraRestClient.getIssueClient()).transition(eq(issue), captor.capture());
     }
 
     @Test
@@ -170,7 +168,7 @@ public class JiraServiceTest {
         when(issueRestClient.addComment(any(URI.class), eq(comment))).thenReturn(promiseVoid);
 
         jiraService.addComment(issueKey, commentBody);
-        verify(issueRestClient, times(1)).addComment(eq(issue.getVotesUri()), eq(comment));
+        verify(issueRestClient).addComment(eq(issue.getVotesUri()), eq(comment));
     }
 
     @Test
