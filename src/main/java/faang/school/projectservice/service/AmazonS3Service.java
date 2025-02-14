@@ -1,59 +1,62 @@
 package faang.school.projectservice.service;
 
-import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
-import faang.school.projectservice.exception.NoSuchPhotoException;
-import faang.school.projectservice.exception.S3DeleteException;
-import faang.school.projectservice.exception.UploadException;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import faang.school.projectservice.exception.EntityNotFoundException;
+
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.cfg.beanvalidation.IntegrationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AmazonS3Service {
 
-    private static final Logger log = LoggerFactory.getLogger(AmazonS3Service.class);
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    private final AmazonS3 amazonS3;
+    private final AmazonS3 s3Client;
 
-    public String uploadFile(@NotNull @NotBlank String directory, MultipartFile file) {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(file.getSize());
-        objectMetadata.setContentType(file.getContentType());
-        String key = String.format("%s/%s", directory, System.currentTimeMillis() + file.getName());
-        try {
-            PutObjectRequest putObjectRequest =
-                    new PutObjectRequest(bucketName, key, file.getInputStream(),
-                            objectMetadata);
-            amazonS3.putObject(putObjectRequest);
-        } catch (IOException e) {
-            throw new UploadException("Невозможно загрузить фото");
-        }
+    public String uploadFile(MultipartFile file, String folder) {
+        String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
+        putObjectToStorage(file, key);
+
         return key;
     }
 
-    public void deleteFIle(@NotNull @NotBlank String key) {
-
-        if (!amazonS3.doesObjectExist(bucketName, key)) {
-            throw new NoSuchPhotoException("Фото не найдено");
+    public void deleteFIle(String key) {
+        if (!s3Client.doesObjectExist(bucketName, key)) {
+            throw new EntityNotFoundException(String.format("Файл с ключом %s не найден в хранилище", key));
         }
 
         try {
-            amazonS3.deleteObject(bucketName, key);
-        } catch (AmazonServiceException exception) {
-            log.error("Произошла ошибка: {}", exception.getMessage(), exception);
-            throw new S3DeleteException("Ошибка при удалении файла из S3: " + exception.getMessage());
+            s3Client.deleteObject(bucketName, key);
+        } catch (SdkClientException exception) {
+            String errorMessage = "Ошибка при удалении файла из хранилища";
+            log.error(errorMessage, exception);
+            throw new IntegrationException(errorMessage);
+        }
+    }
+
+    private void putObjectToStorage(MultipartFile file, String key) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(file.getContentType());
+        metadata.setContentLength(file.getSize());
+
+        try {
+            PutObjectRequest request = new PutObjectRequest(bucketName, key, file.getInputStream(), metadata);
+            s3Client.putObject(request);
+        } catch (IOException | SdkClientException exception) {
+            String errorMessage = "Ошибка при отправке файла в хранилище";
+            log.error(errorMessage, exception);
+            throw new IntegrationException(errorMessage);
         }
     }
 }

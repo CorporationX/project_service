@@ -13,14 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class VacancyController {
     private final VacancyService vacancyService;
 
-    @PostMapping("/add/{vacancyId}")
+    @PostMapping("/{vacancyId}/cover")
     @ResponseStatus(HttpStatus.CREATED)
     public VacancyCoverDto addVacancyCover(@PathVariable Long vacancyId,
                                            @RequestParam("file") MultipartFile file) {
         return vacancyService.addVacancyCover(vacancyId, file);
     }
 
-    @DeleteMapping("/delete/{vacancyId}")
+    @DeleteMapping("/{vacancyId}/cover")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public VacancyCoverDto deleteVacancyCover(@PathVariable Long vacancyId) {
         return vacancyService.deleteVacancyCover(vacancyId);
