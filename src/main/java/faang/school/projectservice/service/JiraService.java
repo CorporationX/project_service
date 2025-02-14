@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import com.atlassian.jira.rest.client.api.JiraRestClient;
-import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.domain.Comment;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
@@ -10,6 +9,7 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 import faang.school.projectservice.dto.issue.IssueDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.IssueMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +25,8 @@ import java.util.stream.StreamSupport;
 @Service
 @RequiredArgsConstructor
 public class JiraService {
-    private JiraRestClient jiraRestClient;
-    private IssueMapper issueMapper;
+    private final JiraRestClient jiraRestClient;
+    private final IssueMapper issueMapper;
 
     @Value("${jira.max-results}")
     private int maxResults;
@@ -114,7 +114,7 @@ public class JiraService {
                     .getIssueClient()
                     .getIssue(issueKey)
                     .claim();
-        } catch (RestClientException e) {
+        } catch (EntityNotFoundException e) {
             log.error("Ошибка поиска задачи", e);
             throw e;
         }
