@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.vacancy.CreateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.CreateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +20,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.ArrayList;
 import java.util.List;
 
+
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -65,24 +70,13 @@ public class VacancyControllerTest {
 
     @Test
     public void testCreateVacancy() throws Exception {
-        CreateVacancyRequest request = CreateVacancyRequest.builder()
-                .name("vacancy")
-                .description("description")
-                .createdBy(1L)
-                .projectId(1L)
-                .salary(90000.0)
-                .position(TeamRole.ANALYST)
-                .workSchedule(WorkSchedule.SHIFT_WORK)
-                .count(1)
-                .requiredSkillIds(List.of(1L, 2L))
-                .build();
+        CreateVacancyRequest request = new CreateVacancyRequest();
+        request.setName("vacancy");
 
         CreateVacancyResponse response = CreateVacancyResponse.builder()
                 .id(1L)
                 .name("vacancy")
                 .build();
-
-        var create = new CreateVacancyRequest();
 
         when(vacancyService.create(request)).thenReturn(response);
 
@@ -93,10 +87,60 @@ public class VacancyControllerTest {
                         .header("x-user-id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBodyJson))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("vacancy")));
     }
 
+    @Test
+    public void testUpdateVacancy() throws Exception {
+        UpdateVacancyRequest request = new UpdateVacancyRequest();
+        request.setId(1L);
+        request.setName("name");
 
+        UpdateVacancyResponse response = UpdateVacancyResponse.builder()
+                .id(1L)
+                .name("name")
+                .build();
+
+        when(vacancyService.update(request)).thenReturn(response);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBodyJson = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/vacancies/{id}", 1)
+                        .header("x-user-id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBodyJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("name")));
+    }
+
+    @Test
+    public void testGetAllVacancies() throws Exception {
+        GetVacancyResponse response1 = GetVacancyResponse.builder()
+                .id(1L)
+                .name("vacancy1")
+                .position(TeamRole.DEVELOPER)
+                .build();
+
+        List<GetVacancyResponse> vacancies = new ArrayList<>();
+        vacancies.add(response1);
+
+        VacancyFilterDto filters = new VacancyFilterDto();
+        filters.setPositionPattern(TeamRole.DEVELOPER);
+        filters.setNamePattern("vacancy1");
+
+        when(vacancyService.get(filters)).thenReturn(vacancies);
+
+        mockMvc.perform(get("/vacancies")
+                        .param("positionPattern", "DEVELOPER")
+                        .param("namePattern", "vacancy1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name", is("vacancy1")))
+                .andExpect(jsonPath("$[0].position", is("DEVELOPER")));
+    }
 
 
 }

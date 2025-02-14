@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.vacancy.CreateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.CreateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
-import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.VacancyValidationException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
@@ -74,18 +73,16 @@ public class VacancyServiceTest {
 
     @Test
     public void create_ShouldCreateVacancySuccessfully() {
-        CreateVacancyRequest createRequest = CreateVacancyRequest.builder()
-                .name("Backend-разработчик")
-                .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
-                .position(TeamRole.DEVELOPER)
-                .projectId(515L)
-                .createdBy(123L)
-                .salary(150000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(1)
-                .requiredSkillIds(List.of(101L, 102L))
-                .build();
-
+        CreateVacancyRequest createRequest = new CreateVacancyRequest();
+        createRequest.setName("Backend-разработчик");
+        createRequest.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
+        createRequest.setPosition(TeamRole.DEVELOPER);
+        createRequest.setProjectId(515L);
+        createRequest.setCreatedBy(123L);
+        createRequest.setSalary(150000.0);
+        createRequest.setWorkSchedule(WorkSchedule.FULL_TIME);
+        createRequest.setCount(1);
+        createRequest.setRequiredSkillIds(List.of(101L, 102L));
 
         when(projectRepository.findById(createRequest.getProjectId()))
                 .thenReturn(Optional.ofNullable(Project.builder().id(515L).build()));
@@ -138,19 +135,18 @@ public class VacancyServiceTest {
         vacancy.setUpdatedBy(123L);
         vacancy.setStatus(VacancyStatus.OPEN);
 
-        UpdateVacancyRequest updateRequest = UpdateVacancyRequest.builder()
-                .id(234L)
-                .name("Backend-разработчик")
-                .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
-                .position(TeamRole.DEVELOPER)
-                .projectId(515L)
-                .updatedBy(123L)
-                .status(VacancyStatus.OPEN)
-                .salary(150000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(1)
-                .requiredSkillIds(List.of(101L, 102L))
-                .build();
+        UpdateVacancyRequest updateRequest = new UpdateVacancyRequest();
+        updateRequest.setId(234L);
+        updateRequest.setName("Backend-разработчик");
+        updateRequest.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
+        updateRequest.setPosition(TeamRole.DEVELOPER);
+        updateRequest.setProjectId(515L);
+        updateRequest.setUpdatedBy(123L);
+        updateRequest.setStatus(VacancyStatus.OPEN);
+        updateRequest.setSalary(150000.0);
+        updateRequest.setWorkSchedule(WorkSchedule.FULL_TIME);
+        updateRequest.setCount(1);
+        updateRequest.setRequiredSkillIds(List.of(101L, 102L));
 
         when(vacancyRepository.findById(updateRequest.getId()))
                 .thenReturn(Optional.of(vacancy));
