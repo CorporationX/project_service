@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
-@Component
+@Component("statusStageInvitationFilter")
 public class StatusFilter implements StageInvitationFilter {
     @Override
     public boolean isApplicable(StageInvitationFilterDto filter) {

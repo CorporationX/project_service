@@ -6,6 +6,7 @@ import faang.school.projectservice.mapper.vacancy.VacancyMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.s3.AmazonS3Service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

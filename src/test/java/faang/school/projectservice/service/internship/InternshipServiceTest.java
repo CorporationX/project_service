@@ -4,6 +4,8 @@ import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipEditDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipReadDto;
+import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.TeamMemberService;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.filter.internship.RoleFilter;
@@ -17,8 +19,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.team_member.TeamMemberService;
 import faang.school.projectservice.validator.internship.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -123,7 +123,7 @@ class InternshipServiceTest {
         internship.setMentorId(mentor);
         internship.setInterns(interns);
 
-        Mockito.when(projectService.findById(PROJECT_ID)).thenReturn(project);
+        Mockito.when(projectService.getProject(PROJECT_ID)).thenReturn(project);
         Mockito.when(teamMemberService.findById(MENTOR_ID)).thenReturn(mentor);
         Mockito.when(teamMemberRepository.findAllById(INTERNS_IDS)).thenReturn(interns);
 
@@ -137,7 +137,7 @@ class InternshipServiceTest {
         Mockito.when(internshipRepository.save(internship)).thenReturn(awaitedInternship);
 
         InternshipReadDto result = internshipService.createInternship(internshipDto);
-        Mockito.verify(projectService).findById(PROJECT_ID);
+        Mockito.verify(projectService).getProject(PROJECT_ID);
         Mockito.verify(teamMemberService).findById(MENTOR_ID);
         Mockito.verify(teamMemberRepository).findAllById(INTERNS_IDS);
         assertEquals(awaitedInternshipDto.getProjectId(), result.getProjectId());

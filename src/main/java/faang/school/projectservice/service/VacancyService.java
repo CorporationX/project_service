@@ -8,6 +8,7 @@ import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.multipartfile.CustomMultipartFile;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.s3.AmazonS3Service;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,7 @@ public class VacancyService {
         String key = vacancy.getCoverImageKey();
 
         try {
-            amazonS3Service.deleteFIle(key);
+            amazonS3Service.deleteFile(key);
         } catch (EntityNotFoundException exception) {
             log.error(exception.getMessage());
         } finally {
