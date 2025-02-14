@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.impl;
 
+import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.ProjectRepositoryAdapter;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project getProjectById(long projectId) {
-        return projectRepositoryAdapter.getProjectById(projectId);
+        return projectRepositoryAdapter.findById(projectId);
     }
 }
