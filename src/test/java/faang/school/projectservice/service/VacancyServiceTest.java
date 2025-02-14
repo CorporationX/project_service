@@ -2,8 +2,10 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.CreateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.CreateVacancyResponse;
+import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.VacancyValidationException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
@@ -29,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,9 +60,10 @@ public class VacancyServiceTest {
     @Captor
     private ArgumentCaptor<Vacancy> vacancyArgumentCaptor;
 
+    List<VacancyFilter> vacancyFilters = new ArrayList<>();
+
     @BeforeEach
     void init() {
-        List<VacancyFilter> vacancyFilters = new ArrayList<>();
         vacancyFilters.add(mock(VacancyFilter.class));
         vacancyFilters.add(mock(VacancyFilter.class));
 
@@ -228,6 +232,23 @@ public class VacancyServiceTest {
 
     @Test
     public void getAll_ShouldReturnAllVacanciesVacanciesSuccessfully() {
-        // добавить тест
+        List<Vacancy> vacancies = List.of(
+                Vacancy.builder().id(1L).name("vacancy1").position(TeamRole.DEVELOPER).candidates(List.of()).build(),
+                Vacancy.builder().id(2L).name("vacancy2").position(TeamRole.DEVELOPER).candidates(List.of()).build()
+        );
+
+        VacancyFilterDto filters = new VacancyFilterDto();
+
+        when(vacancyRepository.findAll()).thenReturn(vacancies);
+
+        List<GetVacancyResponse> response = vacancyService.get(filters);
+
+        assertEquals(2, response.size());
+        assertEquals(1L, response.get(0).getId());
+        assertEquals("vacancy1", response.get(0).getName());
+        assertEquals(TeamRole.DEVELOPER, response.get(0).getPosition());
+        assertEquals(2L, response.get(1).getId());
+        assertEquals("vacancy2", response.get(1).getName());
+        assertEquals(TeamRole.DEVELOPER, response.get(1).getPosition());
     }
 }

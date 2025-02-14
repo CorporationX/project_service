@@ -118,29 +118,27 @@ public class VacancyControllerTest {
 
     @Test
     public void testGetAllVacancies() throws Exception {
-        GetVacancyResponse response1 = GetVacancyResponse.builder()
+        GetVacancyResponse response = GetVacancyResponse.builder()
                 .id(1L)
-                .name("vacancy1")
+                .name("vacancy")
                 .position(TeamRole.DEVELOPER)
                 .build();
 
         List<GetVacancyResponse> vacancies = new ArrayList<>();
-        vacancies.add(response1);
+        vacancies.add(response);
 
         VacancyFilterDto filters = new VacancyFilterDto();
         filters.setPositionPattern(TeamRole.DEVELOPER);
-        filters.setNamePattern("vacancy1");
+        filters.setNamePattern("vacancy");
 
         when(vacancyService.get(filters)).thenReturn(vacancies);
 
         mockMvc.perform(get("/vacancies")
                         .param("positionPattern", "DEVELOPER")
-                        .param("namePattern", "vacancy1"))
+                        .param("namePattern", "vacancy"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is("vacancy1")))
+                .andExpect(jsonPath("$[0].name", is("vacancy")))
                 .andExpect(jsonPath("$[0].position", is("DEVELOPER")));
     }
-
-
 }
