@@ -2,10 +2,10 @@ package faang.school.projectservice.exception.handler;
 
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.IntegrationException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
-import org.hibernate.cfg.beanvalidation.IntegrationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
