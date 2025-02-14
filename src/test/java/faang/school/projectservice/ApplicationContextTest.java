@@ -22,7 +22,7 @@ public class ApplicationContextTest {
             .withPassword("test_password");
 
     @Container
-    static final MinIOContainer container = new MinIOContainer("minio/minio:RELEASE.2023-09-04T19-57-37Z")
+    static final MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2023-09-04T19-57-37Z")
             .withUserName("user")
             .withPassword("password");
 
@@ -32,6 +32,10 @@ public class ApplicationContextTest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+
+        registry.add("services.minio.endpoint", minio::getS3URL);
+        registry.add("services.minio.accessKey", minio::getUserName);
+        registry.add("services.minio.secretKey", minio::getPassword);
     }
 
     @Test
