@@ -13,7 +13,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.VacancyValidator;
@@ -33,7 +32,6 @@ import java.util.List;
 import java.util.Optional;
 
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -79,7 +77,6 @@ public class VacancyServiceTest {
     public void create_ShouldCreateVacancySuccessfully() {
         CreateVacancyRequest createRequest = new CreateVacancyRequest();
         createRequest.setName("Backend-разработчик");
-        createRequest.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
         createRequest.setPosition(TeamRole.DEVELOPER);
         createRequest.setProjectId(515L);
 
@@ -89,7 +86,6 @@ public class VacancyServiceTest {
         Vacancy createdVacancy = Vacancy.builder()
                 .id(234L)
                 .name("Backend-разработчик")
-                .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
                 .position(TeamRole.DEVELOPER)
                 .project(Project.builder().id(createRequest.getProjectId()).build())
                 .status(VacancyStatus.OPEN)
@@ -105,8 +101,6 @@ public class VacancyServiceTest {
         verify(vacancyMapper, times(1)).toCreateResponse(createdVacancy);
 
         assertEquals("Backend-разработчик", createResponse.getName());
-        assertEquals("Ищем в команду backend-разработчика на Java с опытом работы от 1 года",
-                createResponse.getDescription());
         assertEquals(TeamRole.DEVELOPER, createResponse.getPosition());
         assertEquals(515L, createResponse.getProjectId());
         assertEquals(VacancyStatus.OPEN, createResponse.getStatus());
@@ -117,14 +111,12 @@ public class VacancyServiceTest {
         Vacancy vacancy = new Vacancy();
         vacancy.setId(234L);
         vacancy.setName("Backend-разработчик");
-        vacancy.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
         vacancy.setPosition(TeamRole.DEVELOPER);
         vacancy.setStatus(VacancyStatus.OPEN);
 
         UpdateVacancyRequest updateRequest = new UpdateVacancyRequest();
         updateRequest.setId(234L);
         updateRequest.setName("Backend-разработчик Junior");
-        updateRequest.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
         updateRequest.setPosition(TeamRole.DEVELOPER);
         updateRequest.setStatus(VacancyStatus.OPEN);
 
@@ -134,7 +126,6 @@ public class VacancyServiceTest {
         Vacancy updatedVacancy = Vacancy.builder()
                 .id(234L)
                 .name("Backend-разработчик Junior")
-                .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
                 .position(TeamRole.DEVELOPER)
                 .status(VacancyStatus.OPEN)
                 .build();
@@ -150,8 +141,6 @@ public class VacancyServiceTest {
 
         assertEquals(234L, updatedVacancy.getId());
         assertEquals("Backend-разработчик Junior", updateResponse.getName());
-        assertEquals("Ищем в команду backend-разработчика на Java с опытом работы от 1 года",
-                updateResponse.getDescription());
         assertEquals(TeamRole.DEVELOPER, updateResponse.getPosition());
         assertEquals(VacancyStatus.OPEN, updateResponse.getStatus());
     }
