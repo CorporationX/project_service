@@ -52,16 +52,10 @@ public class VacancyService {
         UserDto userDto = userService.getUser(vacancy.getProject().getOwnerId());
 
         userService.checkUser(userDto.id());
-
         String key = vacancy.getCoverImageKey();
 
-        try {
-            amazonS3Service.deleteFile(key);
-        } catch (EntityNotFoundException exception) {
-            log.error(exception.getMessage());
-        } finally {
-            vacancy.setCoverImageKey(null);
-        }
+        amazonS3Service.deleteFile(key);
+        vacancy.setCoverImageKey(null);
 
         return vacancyMapper.toCoverDto(vacancy);
     }
