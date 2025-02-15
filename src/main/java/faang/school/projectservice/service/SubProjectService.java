@@ -1,10 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
-import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
+import faang.school.projectservice.dto.subproject.SubProjectResponseDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,9 +11,13 @@ import java.util.List;
 @Component
 public interface SubProjectService {
 
-    SubProjectDto createSubProject(CreateSubProjectDto subProjectDto);
+    SubProjectResponseDto createSubProject(CreateSubProjectDto subProjectDto);
 
-    SubProjectDto updateSubProject(UpdateSubProjectDto updateSubProjectDto);
+    SubProjectResponseDto updateSubProject(Long id, UpdateSubProjectDto updateSubProjectDto);
 
-    List<SubProjectDto> getSubprojects(Project project, String filterName, ProjectStatus filterStatus);
+    SubProjectResponseDto findById(Long id);
+
+    List<SubProjectResponseDto> findAll();
+
+    List<SubProjectResponseDto> findAllByFilter(SubProjectFilterDto filter);
 }

@@ -9,7 +9,6 @@ import java.util.List;
 
 @Builder
 public record UpdateSubProjectDto(
-        Long id,
         List<Long> subProjectIds,
         StageDto stageDto,
         ProjectVisibility visibility,

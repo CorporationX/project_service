@@ -1,27 +1,26 @@
 package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.dto.moment.MomentCreateRequestDto;
-import faang.school.projectservice.dto.moment.MomentUpdateRequestDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
-import faang.school.projectservice.dto.subproject.SubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
+import faang.school.projectservice.dto.subproject.SubProjectResponseDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.SubProjectMapper;
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
-import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.SubProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,10 +29,10 @@ public class SubProjectServiceImpl implements SubProjectService {
 
     private final ProjectRepository projectRepository;
     private final SubProjectMapper subProjectMapper;
-    private final MomentRepository momentRepository;
+    private final List<SubProjectFilter> subProjectFilters;
 
     @Override
-    public SubProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
+    public SubProjectResponseDto createSubProject(CreateSubProjectDto subProjectDto) {
 
         if (subProjectDto.parentId() == null) {
             throw new IllegalArgumentException("Parent id can not be null");
@@ -52,21 +51,21 @@ public class SubProjectServiceImpl implements SubProjectService {
         }
         subProjectToSave.setStatus(ProjectStatus.CREATED);
         Project projectEntity = projectRepository.save(subProjectToSave);
-        return subProjectMapper.toProjectResponseDto(projectEntity);
+        return subProjectMapper.toSubProjectResponseDto(projectEntity);
     }
 
     @Override
-    public SubProjectDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
+    public SubProjectResponseDto updateSubProject(Long id, UpdateSubProjectDto updateSubProjectDto) {
 
         if (updateSubProjectDto == null) {
             throw new IllegalArgumentException("Project to update can not be null");
         }
 
-        if (updateSubProjectDto.id() == null) {
+        if (id == null) {
             throw new IllegalArgumentException("Project to update id can not be null");
         }
 
-        Project subProject = projectRepository.findById(updateSubProjectDto.id()).orElseThrow(() -> new RuntimeException("No project found to update"));
+        Project subProject = projectRepository.findById(id).orElseThrow(() -> new RuntimeException("No project found to update"));
 
         Optional.ofNullable(subProject.getChildren())
                 .ifPresent(children -> children.forEach(project -> {
@@ -80,7 +79,7 @@ public class SubProjectServiceImpl implements SubProjectService {
                         .allMatch(project ->
                                 project.getStatus().equals(ProjectStatus.CANCELLED))) {
 
-            MomentCreateRequestDto moment = MomentCreateRequestDto.builder()
+            MomentCreateRequestDto.builder()
                     .name("Проект закрыт")
                     .teamMemberIds(subProject.getTeams().stream().map(Team::getId).toList())
                     .build();
@@ -92,22 +91,34 @@ public class SubProjectServiceImpl implements SubProjectService {
                 projectRepository.save(child);
             });
         }
-        return subProjectMapper.toProjectResponseDto(subProject);
+        return subProjectMapper.toSubProjectResponseDto(subProject);
+    }
+
+    private Specification<Project> getSubProjectSpecification(SubProjectFilterDto filter) {
+        return subProjectFilters.stream()
+                .filter(spec -> spec.isApplicable(filter))
+                .map(spec -> spec.apply(filter))
+                .reduce(Specification::and)
+                .orElse(null);
     }
 
     @Override
-    public List<SubProjectDto> getSubprojects(Project project, String filterName, ProjectStatus filterStatus) {
-        return project.getChildren().stream()
-                .filter(subproject -> subproject.getVisibility().equals(ProjectVisibility.PUBLIC)
-                        && subproject.getName().contains(filterName)
-                        && subproject.getStatus().equals(filterStatus))
-                .map(subproject -> SubProjectDto.builder()
-                        .id(subproject.getId())
-                        .title(subproject.getName())
-                        .visibility(subproject.getVisibility())
-                        .status(subproject.getStatus())
-                        .subProjectIds(Collections.singletonList(project.getId()))
-                        .build())
-                .collect(Collectors.toList());
+    public List<SubProjectResponseDto> findAllByFilter(SubProjectFilterDto filter) {
+        Specification<Project> spec = getSubProjectSpecification(filter);
+        return subProjectMapper.toSubProjectResponseDtos(projectRepository.findAll(spec));
+    }
+
+    @Override
+    public SubProjectResponseDto findById(Long id) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("#SubProjectServiceImpl: project with id:%d has not been found", id)));
+        return subProjectMapper.toSubProjectResponseDto(project);
+    }
+
+    @Override
+    public List<SubProjectResponseDto> findAll() {
+        List<Project> projects = projectRepository.findAll();
+        return subProjectMapper.toSubProjectResponseDtos(projects);
     }
 }
