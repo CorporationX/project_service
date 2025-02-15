@@ -15,13 +15,16 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.validator.ProjectValidator;
+import faang.school.projectservice.util.ByteArrayMultipartFile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,15 +34,26 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -75,6 +89,15 @@ public class ProjectServiceTest {
 
     @Mock
     private AuditorAwareImpl auditorAware;
+
+    @Mock
+    private MultipartFile multipartFile;
+
+    @Mock
+    private Resource resource;
+
+    @Mock
+    private ResourceRepository resourceRepository;
 
     @InjectMocks
     private ProjectService projectService;
@@ -118,7 +141,7 @@ public class ProjectServiceTest {
         Project subProject = projectMapper.toEntity(createDto);
 
         projectService.create(createDto);
-        verify(projectRepository, Mockito.times(1)).save(subProject);
+        verify(projectRepository, times(1)).save(subProject);
     }
 
     @Test
@@ -131,7 +154,7 @@ public class ProjectServiceTest {
         projectMapper.updateEntityFromDto(updateDto, project);
 
         projectService.update(updateDto);
-        verify(projectRepository, Mockito.times(1)).save(project);
+        verify(projectRepository, times(1)).save(project);
     }
 
     @Test
@@ -224,5 +247,47 @@ public class ProjectServiceTest {
                 expectedUrl,
                 projectService.getPresentationFileKey(projectId)
         );
+    }
+
+    @Test
+    void testAddCover() {
+        Project project = mock(Project.class);
+        doNothing().when(projectValidator).validateUploadCoverLimit(multipartFile);
+        when(projectValidator.validateCoverResolution(multipartFile)).thenReturn(true);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(project.getId()).thenReturn(projectId);
+        when(project.getName()).thenReturn("Project");
+        when(S3service.uploadFile(any(MultipartFile.class), anyString())).thenReturn(resource);
+
+        projectService.addCover(projectId, multipartFile);
+
+        verify(S3service).uploadFile(any(MultipartFile.class), anyString());
+        verify(resourceRepository).save(resource);
+        verify(projectRepository).save(project);
+    }
+
+    @Test
+    void testGetCover() {
+        Project project = mock(Project.class);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(project.getCoverImageId()).thenReturn("test-key");
+        when(S3service.downloadFile("test-key")).thenReturn(mock(InputStream.class));
+
+        InputStream result = projectService.getCover(projectId);
+
+        assertNotNull(result);
+        verify(S3service).downloadFile("test-key");
+    }
+
+    @Test
+    void testDeleteCover() {
+        Project project = mock(Project.class);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(project.getCoverImageId()).thenReturn("test-key");
+
+        projectService.deleteCover(projectId);
+
+        verify(resourceRepository).deleteByKey("test-key");
+        verify(S3service).deleteFile("test-key");
     }
 }

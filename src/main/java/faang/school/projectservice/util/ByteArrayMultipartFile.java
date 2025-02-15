@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.validator;
+package faang.school.projectservice.util;
 
 import org.springframework.web.multipart.MultipartFile;
 

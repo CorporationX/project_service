@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import dev.mccue.imgscalr.Scalr;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.audit.AuditorAwareImpl;
 import faang.school.projectservice.config.s3.S3Properties;
@@ -24,20 +23,14 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
-import faang.school.projectservice.service.validator.ByteArrayMultipartFile;
 import faang.school.projectservice.service.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,12 +50,7 @@ public class ProjectService {
     private final ProjectPdfService projectPdfService;
     private final UserServiceClient userServiceClient;
     private final AuditorAwareImpl auditorAware;
-
-    @Value("${cover.max-image-width}")
-    private int maxWidth;
-
-    @Value("${cover.max-image-height-horizontal}")
-    private int maxHeightHorizontal;
+    private final ProjectImageService projectImageService;
 
     public ProjectReadDto create(SubProjectCreateDto createDto) {
         projectValidator.validateSubProjectCreation(createDto);
@@ -148,15 +136,15 @@ public class ProjectService {
     }
 
     @Transactional
-    public void addCoverToProject(long projectId, MultipartFile cover) {
+    public void addCover(long projectId, MultipartFile cover) {
         projectValidator.validateUploadCoverLimit(cover);
-        MultipartFile standardizedCover = cover;
         if (!projectValidator.validateCoverResolution(cover)) {
-            standardizedCover = resizerCover(cover);
+            cover = projectImageService.getResizedCover(cover);
         }
+
         Project project = getProjectById(projectId);
-        String folder = project.getId() + project.getName();
-        Resource resource = S3service.uploadFile(standardizedCover, folder);
+        String folder = String.format("Проект: %s, id: %d", project.getName(), project.getId());
+        Resource resource = S3service.uploadFile(cover, folder);
         resource.setProject(project);
         project.setCoverImageId(resource.getKey());
 
@@ -175,34 +163,6 @@ public class ProjectService {
         resourceRepository.deleteByKey(key);
         getProjectById(projectId).setCoverImageId(null);
         S3service.deleteFile(key);
-    }
-
-    @SneakyThrows
-    private MultipartFile resizerCover(MultipartFile cover) {
-        BufferedImage image = ImageIO.read(cover.getInputStream());
-        BufferedImage resizerCover = Scalr.resize(
-                image,
-                Scalr.Method.QUALITY,
-                Scalr.Mode.AUTOMATIC,
-                maxWidth,
-                calculateNewHeight(image));
-
-        ByteArrayOutputStream outputImage = new ByteArrayOutputStream();
-        ImageIO.write(resizerCover, "jpg", outputImage);
-        byte[] imageBytes = outputImage.toByteArray();
-
-        return new ByteArrayMultipartFile(imageBytes, cover.getOriginalFilename(), cover.getContentType());
-    }
-
-    private int calculateNewHeight(BufferedImage image) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-
-        if (width > height) {
-            return maxHeightHorizontal;
-        } else {
-            return maxWidth;
-        }
     }
 
     private Project getProjectById(Long projectId) {
@@ -224,5 +184,4 @@ public class ProjectService {
         moments.add(getMomentByName("Выполнены все подпроекты"));
         project.setMoments(moments);
     }
-
 }

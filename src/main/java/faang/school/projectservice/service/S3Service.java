@@ -66,11 +66,21 @@ public class S3Service {
     }
 
     public InputStream downloadFile(String key) {
-        S3Object s3Object = s3Client.getObject(bucketName, key);
-        return s3Object.getObjectContent();
+        try {
+            S3Object s3Object = s3Client.getObject(bucketName, key);
+            return s3Object.getObjectContent();
+        } catch (Exception e) {
+            log.error("Ошибка при сохранении файла: {} в S3", key, e);
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void deleteFile(String key) {
-        s3Client.deleteObject(bucketName, key);
+        try {
+            s3Client.deleteObject(bucketName, key);
+        } catch (Exception e) {
+            log.error("Не удалось удалить файл: {}", key, e);
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

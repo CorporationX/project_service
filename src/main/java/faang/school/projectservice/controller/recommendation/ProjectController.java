@@ -73,7 +73,7 @@ public class ProjectController {
     @PutMapping("/{projectId}/upload/cover")
     public void addCoverToProject(@PathVariable @Min(1) long projectId,
                                   @RequestParam("cover") @NotNull MultipartFile cover) {
-        projectService.addCoverToProject(projectId, cover);
+        projectService.addCover(projectId, cover);
     }
 
     @GetMapping("/{projectId}/cover")
