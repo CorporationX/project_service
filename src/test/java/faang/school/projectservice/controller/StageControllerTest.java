@@ -97,19 +97,4 @@ public class StageControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    void testSendStageInvitations_ValidInput_ShouldReturnInvitation() throws Exception {
-
-        Long projectId = 1L;
-        Long stageId = 1L;
-        StageInvitationDto stageInvitationDto = new StageInvitationDto();
-        stageInvitationDto.setDescription("Join our stage");
-
-        when(stageService.sendInvitations(anyLong(), any(StageInvitationDto.class))).thenReturn(stageInvitationDto);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/v1/{projectId}/stages/{stageId}/invitations", projectId, stageId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
-                .andExpect(status().isOk());
-    }
 }

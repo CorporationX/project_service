@@ -74,13 +74,6 @@ public class StageController {
     }
 
 
-    @PostMapping("/{stageId}/invitations")
-    public ResponseEntity<StageInvitationDto> sendStageInvitations(@Valid @PathVariable Long projectId,
-                                                                   @PathVariable Long stageId,
-                                                                   @RequestBody StageInvitationDto stageInvitationDto) {
-        return ResponseEntity.ok((stageService.sendInvitations(stageId,stageInvitationDto)));
-    }
-
     @GetMapping("/{stageId}/tasks")
     public ResponseEntity<List<Task>> getStageTasks(@Valid @PathVariable Long projectId,
                                                     @PathVariable Long stageId,

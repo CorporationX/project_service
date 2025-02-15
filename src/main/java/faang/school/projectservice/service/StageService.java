@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import com.amazonaws.services.s3.model.Owner;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
@@ -7,14 +8,19 @@ import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.repository.TaskRepository;
@@ -29,6 +35,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -41,19 +49,20 @@ public class StageService {
     private final List<StageFilter> stageFilters;
     private final TeamMemberRepository teamMemberRepository;
     private final StageRolesRepository stageRolesRepository;
+    private final StageInvitationService stageInvitationService;
 
     public StageDto createStage(StageDto stageDto) {
 
         stageValidator.validateStageCreation(stageDto);
-        Stage stage = stageMapper.toEntity(stageDto,taskRepository,stageRolesRepository,teamMemberRepository,projectRepository);
+        Stage stage = stageMapper.toEntity(stageDto, taskRepository, stageRolesRepository, teamMemberRepository, projectRepository);
         stageRepository.save(stage);
-        return stageMapper.toDto(stage,taskRepository,stageRolesRepository,teamMemberRepository);
+        return stageMapper.toDto(stage, taskRepository, stageRolesRepository, teamMemberRepository);
     }
 
     public List<StageDto> getStages(Long projectId) {
         Project project = stageValidator.getValidProject(projectId);
         return project.getStages().stream()
-                .map(stage->stageMapper.toDto(stage,taskRepository,stageRolesRepository,teamMemberRepository)).toList();
+                .map(stage -> stageMapper.toDto(stage, taskRepository, stageRolesRepository, teamMemberRepository)).toList();
     }
 
     public List<StageDto> getActiveStages(long projectId, StageFilterDto stageFilter) {
@@ -64,12 +73,12 @@ public class StageService {
                 .filter(stage -> stageFilters.stream()
                         .filter(filter -> filter.isApplicable(stageFilter))
                         .anyMatch(filter -> filter.filterEntity(stage, stageFilter)))
-                .map(stage->stageMapper.toDto(stage,taskRepository,stageRolesRepository,teamMemberRepository)).toList();
+                .map(stage -> stageMapper.toDto(stage, taskRepository, stageRolesRepository, teamMemberRepository)).toList();
     }
 
     public void deleteStage(Long stageId, StageDeleteDto stageDeleteDto) {
 
-        stageValidator.checkStageToRemove(stageId,stageDeleteDto);
+        stageValidator.checkStageToRemove(stageId, stageDeleteDto);
 
         Stage stage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException("Этап не найден"));
@@ -106,14 +115,37 @@ public class StageService {
 
         StageDto stageDto = stageMapper.toStageDto(stageUpdateDto);
         stageValidator.checkStageForUpdate(stageId, stageUpdateDto);
-        stageRepository.save(stageMapper.toEntity(stageDto,taskRepository,stageRolesRepository,teamMemberRepository,projectRepository));
+        sendInvitations(stageId);
+        stageRepository.save(stageMapper.toEntity(stageDto, taskRepository, stageRolesRepository,
+                teamMemberRepository, projectRepository));
         return stageMapper.toStageUpdateDto(stageDto);
     }
 
-    public StageInvitationDto sendInvitations(Long stageId, StageInvitationDto stageInvitationDto) {
-        return null;
+    public void sendInvitations(Long stageId) {
 
+
+        List<Long> owlersIdsList = getOwnersIds(stageId);
+        List<Long> managerIdsList = getManagerIdsStage(stageId);
+
+        List<Long> mergedList = Stream.concat(owlersIdsList.stream(), managerIdsList.stream()).toList();
+        if (!mergedList.isEmpty()) {
+            mergedList.forEach(
+                    teamMembers -> {
+                        try {
+                            StageInvitationDto stageInvitationDto = StageInvitationDto.builder()
+                                    .invitedId(teamMembers)
+                                    .authorId(stageRepository.getReferenceById(stageId).getProject().getOwnerId())
+                                    .stageId(stageId)
+                                    .build();
+                             stageInvitationService.createStageInvitation(stageInvitationDto);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+            );
+        }
     }
+
 
     public List<Task> getStageTasks(Long stageId, TaskStatus status) {
         return stageRepository.getReferenceById(stageId).getTasks().stream().toList();
@@ -121,5 +153,22 @@ public class StageService {
 
     public ResponseEntity<StageUpdateDto> updateStageParticipants(Set<StageUpdateDto> stageUpdateDto) {
         return null;
+    }
+
+
+    public List<Long> getOwnersIds(Long stageId) {
+        return stageRepository.getReferenceById(stageId)
+                .getExecutors()
+                .stream()
+                .filter(teamRoles -> teamRoles.getRoles().contains(TeamRole.OWNER))
+                .map(TeamMember::getUserId).toList();
+    }
+
+    public List<Long> getManagerIdsStage(Long stageId) {
+        return stageRepository.getReferenceById(stageId)
+                .getExecutors()
+                .stream()
+                .filter(teamRoles -> teamRoles.getRoles().contains(TeamRole.MANAGER))
+                .map(TeamMember::getUserId).toList();
     }
 }

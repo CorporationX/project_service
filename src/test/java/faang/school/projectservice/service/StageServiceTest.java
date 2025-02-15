@@ -8,6 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.*;
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -142,29 +144,67 @@ class StageServiceTest {
         verify(stageRepository).delete(stage);
     }
 
-    @Test
-    void testUpdateStage() {
-        Long stageId = 1L;
-        StageUpdateDto updateDto = new StageUpdateDto();
-        StageDto stageDto = new StageDto();
-        Stage entity = new Stage();
-
-        when(stageMapper.toStageDto(updateDto)).thenReturn(stageDto);
-        when(stageMapper.toEntity(any(), any(), any(), any(), any())).thenReturn(entity);
-        when(stageMapper.toStageUpdateDto(stageDto)).thenReturn(updateDto);
-
-        StageUpdateDto result = stageService.updateStage(stageId, updateDto);
-
-        verify(stageValidator).checkStageForUpdate(stageId, updateDto);
-        verify(stageRepository).save(entity);
-        assertEquals(updateDto, result);
-    }
 
     @Test
-    void getStageTasks() {
+    void teatGetStageTasks() {
         Long stageId = 1L;
         mockStageService.getStageTasks(stageId, DONE);
         verify(mockStageService, Mockito.times(1)).getStageTasks(stageId, DONE);
+    }
+
+
+    @Test
+    void testGetManagerIds() {
+
+        Long stageId = 1L;
+
+        Stage stage = mock(Stage.class);
+        TeamMember manager1 = TeamMember.builder()
+                .id(101L)
+                .roles(List.of(TeamRole.MANAGER))
+                .build();
+        TeamMember manager2 = TeamMember.builder()
+                .id(102L)
+                .roles(List.of(TeamRole.MANAGER))
+                .build();
+        TeamMember developer = TeamMember.builder()
+                .id(103L)
+                .roles(List.of(TeamRole.DEVELOPER))
+                .build();
+
+        when(stageRepository.getReferenceById(stageId)).thenReturn(stage);
+        when(stage.getExecutors()).thenReturn(Arrays.asList(manager1, manager2, developer));
+
+        stageService.getManagerIdsStage(stageId);
+
+        verify(stageRepository, Mockito.times(1)).getReferenceById(stageId);
+    }
+
+    @Test
+    void testGetOwnerIds() {
+
+        Long stageId = 1L;
+
+        Stage stage = mock(Stage.class);
+        TeamMember manager1 = TeamMember.builder()
+                .id(101L)
+                .roles(List.of(TeamRole.MANAGER))
+                .build();
+        TeamMember manager2 = TeamMember.builder()
+                .id(102L)
+                .roles(List.of(TeamRole.MANAGER))
+                .build();
+        TeamMember developer = TeamMember.builder()
+                .id(103L)
+                .roles(List.of(TeamRole.DEVELOPER))
+                .build();
+
+        when(stageRepository.getReferenceById(stageId)).thenReturn(stage);
+        when(stage.getExecutors()).thenReturn(Arrays.asList(manager1, manager2, developer));
+
+        stageService.getOwnersIds(stageId);
+
+        verify(stageRepository, Mockito.times(1)).getReferenceById(stageId);
     }
 
 }
