@@ -6,7 +6,7 @@ import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.exception.VacancyValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
@@ -33,7 +33,7 @@ public class VacancyService {
         Vacancy vacancy = vacancyMapper.fromCreateRequest(createRequest);
 
         vacancy.setProject(projectRepository.findById(createRequest.getProjectId())
-                .orElseThrow(() -> new VacancyValidationException("Project with ID " + createRequest.getProjectId() +
+                .orElseThrow(() -> new DataValidationException("Project with ID " + createRequest.getProjectId() +
                         " not found")));
 
         vacancyValidator.validateCreatingVacancy(vacancy);
@@ -46,7 +46,7 @@ public class VacancyService {
 
     public UpdateVacancyResponse update(UpdateVacancyRequest updateRequest) {
         Vacancy vacancy = vacancyRepository.findById(updateRequest.getId())
-                .orElseThrow(() -> new VacancyValidationException("Vacancy with ID " + updateRequest.getId() +
+                .orElseThrow(() -> new DataValidationException("Vacancy with ID " + updateRequest.getId() +
                         " not found"));
 
         vacancyMapper.update(updateRequest, vacancy);
@@ -60,13 +60,13 @@ public class VacancyService {
 
     public void delete(long id) {
         Vacancy vacancy = vacancyRepository.findById(id)
-                .orElseThrow(() -> new VacancyValidationException("Vacancy with ID " + id + " not found"));
+                .orElseThrow(() -> new DataValidationException("Vacancy with ID " + id + " not found"));
         vacancyRepository.deleteById(id);
     }
 
     public GetVacancyResponse getById(long id) {
         Vacancy vacancy = vacancyRepository.findById(id)
-                .orElseThrow(() -> new VacancyValidationException("Vacancy with ID " + id + " not found"));
+                .orElseThrow(() -> new DataValidationException("Vacancy with ID " + id + " not found"));
         return vacancyMapper.toGetResponse(vacancy);
     }
 

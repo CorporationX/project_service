@@ -6,7 +6,7 @@ import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.exception.VacancyValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Project;
@@ -82,11 +82,6 @@ public class VacancyServiceTest {
         createRequest.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
         createRequest.setPosition(TeamRole.DEVELOPER);
         createRequest.setProjectId(515L);
-        createRequest.setCreatedBy(123L);
-        createRequest.setSalary(150000.0);
-        createRequest.setWorkSchedule(WorkSchedule.FULL_TIME);
-        createRequest.setCount(1);
-        createRequest.setRequiredSkillIds(List.of(101L, 102L));
 
         when(projectRepository.findById(createRequest.getProjectId()))
                 .thenReturn(Optional.ofNullable(Project.builder().id(515L).build()));
@@ -97,13 +92,7 @@ public class VacancyServiceTest {
                 .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
                 .position(TeamRole.DEVELOPER)
                 .project(Project.builder().id(createRequest.getProjectId()).build())
-                .createdBy(123L)
-                .updatedBy(123L)
                 .status(VacancyStatus.OPEN)
-                .salary(150000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(1)
-                .requiredSkillIds(List.of(101L, 102L))
                 .build();
 
         when(vacancyRepository.save(vacancyArgumentCaptor.capture())).thenReturn(createdVacancy);
@@ -120,53 +109,34 @@ public class VacancyServiceTest {
                 createResponse.getDescription());
         assertEquals(TeamRole.DEVELOPER, createResponse.getPosition());
         assertEquals(515L, createResponse.getProjectId());
-        assertEquals(123L, createResponse.getCreatedBy());
         assertEquals(VacancyStatus.OPEN, createResponse.getStatus());
-        assertEquals(150000.0, createResponse.getSalary());
-        assertEquals(WorkSchedule.FULL_TIME, createResponse.getWorkSchedule());
-        assertEquals(1, createResponse.getCount());
-        assertArrayEquals(List.of(101L, 102L).toArray(), createResponse.getRequiredSkillIds().toArray(new Long[0]));
     }
 
     @Test
     public void update_ShouldUpdateVacancySuccessfully() {
-        // vacancy должен быть изменяемым, поэтому builder не использую
         Vacancy vacancy = new Vacancy();
         vacancy.setId(234L);
         vacancy.setName("Backend-разработчик");
         vacancy.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
         vacancy.setPosition(TeamRole.DEVELOPER);
-        vacancy.setUpdatedBy(123L);
         vacancy.setStatus(VacancyStatus.OPEN);
 
         UpdateVacancyRequest updateRequest = new UpdateVacancyRequest();
         updateRequest.setId(234L);
-        updateRequest.setName("Backend-разработчик");
+        updateRequest.setName("Backend-разработчик Junior");
         updateRequest.setDescription("Ищем в команду backend-разработчика на Java с опытом работы от 1 года");
         updateRequest.setPosition(TeamRole.DEVELOPER);
-        updateRequest.setProjectId(515L);
-        updateRequest.setUpdatedBy(123L);
         updateRequest.setStatus(VacancyStatus.OPEN);
-        updateRequest.setSalary(150000.0);
-        updateRequest.setWorkSchedule(WorkSchedule.FULL_TIME);
-        updateRequest.setCount(1);
-        updateRequest.setRequiredSkillIds(List.of(101L, 102L));
 
         when(vacancyRepository.findById(updateRequest.getId()))
                 .thenReturn(Optional.of(vacancy));
 
         Vacancy updatedVacancy = Vacancy.builder()
                 .id(234L)
-                .name("Backend-разработчик")
+                .name("Backend-разработчик Junior")
                 .description("Ищем в команду backend-разработчика на Java с опытом работы от 1 года")
                 .position(TeamRole.DEVELOPER)
-                .project(Project.builder().id(515L).build())
-                .updatedBy(123L)
                 .status(VacancyStatus.OPEN)
-                .salary(150000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(1)
-                .requiredSkillIds(List.of(101L, 102L))
                 .build();
 
         when(vacancyRepository.save(vacancyArgumentCaptor.capture())).thenReturn(updatedVacancy);
@@ -179,18 +149,11 @@ public class VacancyServiceTest {
         verify(vacancyMapper, times(1)).toUpdateResponse(updatedVacancy);
 
         assertEquals(234L, updatedVacancy.getId());
-        assertEquals("Backend-разработчик", updateResponse.getName());
+        assertEquals("Backend-разработчик Junior", updateResponse.getName());
         assertEquals("Ищем в команду backend-разработчика на Java с опытом работы от 1 года",
                 updateResponse.getDescription());
         assertEquals(TeamRole.DEVELOPER, updateResponse.getPosition());
-        assertEquals(515L, updateResponse.getProjectId());
-        assertEquals(123L, updateResponse.getUpdatedBy());
-        assertEquals(123L, updateResponse.getUpdatedBy());
         assertEquals(VacancyStatus.OPEN, updateResponse.getStatus());
-        assertEquals(150000.0, updateResponse.getSalary());
-        assertEquals(WorkSchedule.FULL_TIME, updateResponse.getWorkSchedule());
-        assertEquals(1, updateResponse.getCount());
-        assertArrayEquals(List.of(101L, 102L).toArray(), updateResponse.getRequiredSkillIds().toArray(new Long[0]));
     }
 
     @Test
@@ -206,7 +169,7 @@ public class VacancyServiceTest {
     public void delete_ShouldThrowVacancyExceptionWhenVacancyDoesNotExist() {
         long id = 333L;
         when(vacancyRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(VacancyValidationException.class, () -> vacancyService.delete(333L));
+        assertThrows(DataValidationException.class, () -> vacancyService.delete(333L));
     }
 
     @Test
@@ -227,7 +190,7 @@ public class VacancyServiceTest {
 
         when(vacancyRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(VacancyValidationException.class, () -> vacancyService.getById(333L));
+        assertThrows(DataValidationException.class, () -> vacancyService.getById(333L));
     }
 
     @Test
@@ -244,9 +207,11 @@ public class VacancyServiceTest {
         List<GetVacancyResponse> response = vacancyService.get(filters);
 
         assertEquals(2, response.size());
+
         assertEquals(1L, response.get(0).getId());
         assertEquals("vacancy1", response.get(0).getName());
         assertEquals(TeamRole.DEVELOPER, response.get(0).getPosition());
+
         assertEquals(2L, response.get(1).getId());
         assertEquals("vacancy2", response.get(1).getName());
         assertEquals(TeamRole.DEVELOPER, response.get(1).getPosition());

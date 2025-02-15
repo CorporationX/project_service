@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.exception.VacancyValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
@@ -52,7 +52,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getCreatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.DEVELOPER)).build());
 
-        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateCreatingVacancy(vacancy));
+        assertThrows(DataValidationException.class, () -> vacancyValidator.validateCreatingVacancy(vacancy));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getUpdatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.DEVELOPER)).build());
 
-        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
+        assertThrows(DataValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getUpdatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.MANAGER)).build());
 
-        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
+        assertThrows(DataValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
     }
 
     @Test
@@ -140,6 +140,6 @@ public class VacancyValidatorTest {
         when(teamMemberRepository.findByUserIdAndProjectId(vacancy.getUpdatedBy(), vacancy.getProject().getId()))
                 .thenReturn(TeamMember.builder().roles(List.of(TeamRole.MANAGER)).build());
 
-        assertThrows(VacancyValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
+        assertThrows(DataValidationException.class, () -> vacancyValidator.validateUpdatingVacancy(vacancy));
     }
 }

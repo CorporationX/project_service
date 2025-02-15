@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -108,7 +109,7 @@ public class VacancyControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String requestBodyJson = objectMapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/vacancies/{id}", 1)
+        mockMvc.perform(put("/vacancies/{id}", 1)
                         .header("x-user-id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBodyJson))
