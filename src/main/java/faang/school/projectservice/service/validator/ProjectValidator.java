@@ -3,19 +3,33 @@ package faang.school.projectservice.service.validator;
 import faang.school.projectservice.dto.project.SubProjectCreateDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.InvalidFileException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class ProjectValidator {
     private final ProjectRepository projectRepository;
+
+    @Value("${cover.max-image-size}")
+    private long maxCoverSize;
+
+    @Value("${cover.max-image-width}")
+    private int maxWidth;
+
+    @Value("${cover.max-image-height-horizontal}")
+    private int maxHeightHorizontal;
 
     public void validateSubProjectCreation(SubProjectCreateDto createDto) {
         Project parentProject = projectRepository.findById(createDto.getParentProjectId())
@@ -49,5 +63,30 @@ public class ProjectValidator {
     public boolean isAllSubProjectsCompleted(List<Project> subProjects) {
         return subProjects.stream()
                 .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
+    }
+
+    public void validateUploadCoverLimit(MultipartFile cover) {
+        if (cover.getSize() > maxCoverSize) {
+            throw new InvalidFileException("Файл слишком большой! Максимальный размер файла 5 Мб");
+        }
+    }
+
+    public boolean validateCoverResolution(MultipartFile file) {
+        BufferedImage cover;
+        try {
+            cover = ImageIO.read(file.getInputStream());
+        } catch (Exception e) {
+            throw new InvalidFileException("Ошибка чтения файла: " + file.getOriginalFilename());
+        }
+        int width = cover.getWidth();
+        int height = cover.getHeight();
+
+        if (width == height) {
+            return width <= maxWidth;
+        } else if (width > height) {
+            return width <= maxWidth && height <= maxHeightHorizontal;
+        } else {
+            return false;
+        }
     }
 }

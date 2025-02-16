@@ -17,15 +17,19 @@ import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -39,12 +43,14 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final MomentRepository momentRepository;
     private final ProjectValidator projectValidator;
+    private final ResourceRepository resourceRepository;
     private final List<SubProjectFilter> subProjectFilters;
     private final S3Service S3service;
     private final S3Properties s3Properties;
     private final ProjectPdfService projectPdfService;
     private final UserServiceClient userServiceClient;
     private final AuditorAwareImpl auditorAware;
+    private final ProjectImageService projectImageService;
 
     public ProjectReadDto create(SubProjectCreateDto createDto) {
         projectValidator.validateSubProjectCreation(createDto);
@@ -129,6 +135,36 @@ public class ProjectService {
                 .toList();
     }
 
+    @Transactional
+    public void addCover(long projectId, MultipartFile cover) {
+        projectValidator.validateUploadCoverLimit(cover);
+        if (!projectValidator.validateCoverResolution(cover)) {
+            cover = projectImageService.getResizedCover(cover);
+        }
+
+        Project project = getProjectById(projectId);
+        String folder = String.format("Проект: %s, id: %d", project.getName(), project.getId());
+        Resource resource = S3service.uploadFile(cover, folder);
+        resource.setProject(project);
+        project.setCoverImageId(resource.getKey());
+
+        resourceRepository.save(resource);
+        projectRepository.save(project);
+    }
+
+    public InputStream getCover(long projectId) {
+        String key = getProjectById(projectId).getCoverImageId();
+        return S3service.downloadFile(key);
+    }
+
+    @Transactional
+    public void deleteCover(long projectId) {
+        String key = getProjectById(projectId).getCoverImageId();
+        resourceRepository.deleteByKey(key);
+        getProjectById(projectId).setCoverImageId(null);
+        S3service.deleteFile(key);
+    }
+
     private Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Проект с ID "
@@ -148,5 +184,4 @@ public class ProjectService {
         moments.add(getMomentByName("Выполнены все подпроекты"));
         project.setMoments(moments);
     }
-
 }
