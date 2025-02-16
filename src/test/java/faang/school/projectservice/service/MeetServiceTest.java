@@ -80,20 +80,21 @@ public class MeetServiceTest {
 
     @Test
     public void testUpdateMeet() {
-
-        doNothing().when(meetValidation).meetExists(anyLong());
-        doNothing().when(meetValidation).permissionCheck(1L, 1L);
+        doNothing().when(meetValidation).meetExists(eq(0L));
+        doNothing().when(meetValidation).permissionCheck(eq(0L), isNull());
         when(meetMapper.toEntity(meetDto)).thenReturn(meetEntity);
         when(meetRepository.save(meetEntity)).thenReturn(meetEntity);
         when(meetMapper.toDto(meetEntity)).thenReturn(meetDto);
 
+
         MeetDto result = meetService.updateMeet(meetDto);
 
-        verify(meetValidation, times(1)).meetExists(anyLong());
-        verify(meetValidation, times(1)).permissionCheck(1L, 1L);
+        verify(meetValidation, times(1)).meetExists(eq(0L));
+        verify(meetValidation, times(1)).permissionCheck(eq(0L), isNull());
         verify(meetMapper, times(1)).toEntity(meetDto);
         verify(meetRepository, times(1)).save(meetEntity);
         verify(meetMapper, times(1)).toDto(meetEntity);
+
 
         assertNotNull(result);
     }
