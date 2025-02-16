@@ -67,7 +67,6 @@ public class MeetServiceTest {
         when(meetMapper.toEntity(meetDto)).thenReturn(meetEntity);
         when(meetRepository.save(meetEntity)).thenReturn(meetEntity);
         when(meetMapper.toDto(meetEntity)).thenReturn(meetDto);
-
         MeetDto result = meetService.createMeet(meetDto);
 
         verify(meetValidation, times(1)).validationMeet(meetDto);
