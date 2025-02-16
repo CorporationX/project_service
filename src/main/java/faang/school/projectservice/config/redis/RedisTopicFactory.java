@@ -10,7 +10,7 @@ public class RedisTopicFactory {
     @Value("$spring.data.redis.topic.donation")
     private String donationTopic;
 
-    @Value("$spring.data.redis.channels.team_channel.name")
+    @Value("${spring.data.redis.channels.team_channel.name}")
     private String teamTopic;
 
     @Bean

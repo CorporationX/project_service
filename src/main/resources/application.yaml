@@ -27,14 +27,14 @@ spring:
       host: localhost
       topic:
         donation: donation
-        team: team
       channels:
         calculations_channel:
           name: calculations_channel
         project_view_channel:
           name: project_view
         team_channel:
-          name: team
+          name: team_topic
+
 
   security:
     oauth2:

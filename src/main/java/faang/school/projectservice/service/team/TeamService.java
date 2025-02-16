@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface TeamService {
 
-    TeamDto createTeam(TeamDto teamDto);
+    TeamDto createTeam(Long authorId, TeamDto teamDto);
 
     void deleteMemberByUserId(Long userId);
 
