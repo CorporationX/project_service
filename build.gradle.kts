@@ -52,6 +52,17 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
     /**
+     * Minio
+     */
+    implementation("io.minio:minio:8.5.10")
+
+    /**
+     * image compressor
+     */
+    implementation("net.coobird:thumbnailator:0.4.20")
+
+
+    /**
      * Test containers
      */
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))

@@ -25,6 +25,11 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 server:
   port: 8082
 
@@ -34,6 +39,10 @@ logging:
 
 calculations_messages_processing:
   enabled: true
+
+avatar:
+  max-file-size: 5242880
+  max-image-size: 512
 
 services:
   s3:
