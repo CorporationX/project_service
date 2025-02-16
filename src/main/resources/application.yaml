@@ -44,8 +44,8 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
-    isMocked: false
+    bucketName: corpbucket
+    isMocked: true
   payment-service:
     host: http://localhost
     port: 9080
@@ -54,3 +54,10 @@ services:
     host: http://localhost
     port: 8080
     path: /api/v1
+
+project:
+  gallery:
+    image:
+      link_expiration_time: 60 * 1000
+    max_gallery_size: 50
+    max_image_size_mb: 5
