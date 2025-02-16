@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.recommendation;
 
 import faang.school.projectservice.config.feign.UserContext;
-import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectReadDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.service.ProjectManagementService;
@@ -31,9 +31,9 @@ import java.util.List;
 @RequestMapping("/v1/projects")
 public class ProjectController {
 
+    private final ProjectService projectService;
     private final ProjectManagementService projectManagementService;
     private final UserContext userContext;
-    private final ProjectService projectService;
 
     @PostMapping
     public ProjectReadDto createProject(
@@ -41,7 +41,7 @@ public class ProjectController {
         return projectManagementService.createProject(projectCreateDto, userContext.getUserId());
     }
 
-    @PatchMapping("/{projectId}")
+    @PutMapping("/{projectId}")
     public ProjectReadDto updateProject(
             @Valid @RequestBody ProjectUpdateDto projectUpdateDto,
             @PathVariable long projectId) {
@@ -50,13 +50,13 @@ public class ProjectController {
 
     @GetMapping
     public List<ProjectReadDto> getAllProjectsWithFilters(
-            ProjectFilterDto filterDto ) {
+            ProjectFilterDto filterDto) {
         return projectManagementService.getAllProjects(filterDto, userContext.getUserId());
     }
 
     @GetMapping("/{projectId}")
     public ProjectReadDto getProjectById(
-            @PathVariable long projectId ){
+            @PathVariable long projectId) {
         return projectManagementService.getProjectById(projectId, userContext.getUserId());
     }
 

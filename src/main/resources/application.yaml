@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active: local
-
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres
@@ -60,9 +57,12 @@ services:
   payment-service:
     host: http://localhost
     port: 9080
+    url: ${services.user-service.host}:${services.user-service.port}
   user-service:
     host: http://localhost
     port: 8080
+    path: /users/api/v1
+    url: ${services.user-service.host}:${services.user-service.port}${services.user-service.path}
 
 ---
 
