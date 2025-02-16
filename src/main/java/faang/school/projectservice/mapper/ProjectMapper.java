@@ -19,5 +19,5 @@ public interface ProjectMapper {
     @Mapping(target = "ownerId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "visibility", ignore = true)
-     void updateProject(ProjectDto projectDto, @MappingTarget Project project);
+    void updateProject(ProjectDto projectDto, @MappingTarget Project project);
 }

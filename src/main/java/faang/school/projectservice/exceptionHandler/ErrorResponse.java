@@ -1,4 +1,4 @@
-package faang.school.projectservice.exceptionhandler;
+package faang.school.projectservice.exceptionHandler;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 import faang.school.projectservice.controller.ProjectController;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exceptionhandler.GlobalExceptionHandler;
+import faang.school.projectservice.exceptionHandler.GlobalExceptionHandler;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.BeforeEach;

@@ -12,6 +12,7 @@ public class ProjectRepositoryAdapter {
     private final ProjectRepository projectRepository;
 
     public Project getById(Long id) {
-        return projectRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Project not found with id: " + id));
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found with id: " + id));
     }
 }

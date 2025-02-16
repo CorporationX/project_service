@@ -1,4 +1,4 @@
-package faang.school.projectservice.exceptionhandler;
+package faang.school.projectservice.exceptionHandler;
 
 import faang.school.projectservice.exception.DataAlreadyExistException;
 import faang.school.projectservice.exception.DataValidateException;

@@ -36,7 +36,6 @@ public class Campaign {
 
     @Column(name = "goal")
     private BigDecimal goal;
-
     @Column(name = "amount_raised")
     private BigDecimal amountRaised;
 
