@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.recommendation;
 
 import faang.school.projectservice.config.feign.UserContext;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
