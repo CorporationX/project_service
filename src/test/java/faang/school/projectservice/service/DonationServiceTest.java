@@ -16,7 +16,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -41,22 +40,25 @@ public class DonationServiceTest {
     @Mock
     private CampaignValidator campaignValidator;
     @Mock
+    private CampaignService campaignService;
+    @Mock
     private UserServiceClient userServiceClient;
     @Spy
     private DonationMapperImpl donationMapper;
-    @InjectMocks
     private DonationService donationService;
 
     private DonationFilterDto donationFilterDto;
     private List<DonationFilter> filters;
+    private DonationFilter filter;
 
     @BeforeEach
     void setUp() {
         donationFilterDto = new DonationFilterDto();
         filters = new ArrayList<>();
+        filter = new DonationCurrencyFilter();
 
         donationService = new DonationService(donationRepository, campaignRepository,
-                donationMapper, paymentServiceClient, filters, campaignValidator, userServiceClient);
+                donationMapper, campaignService, paymentServiceClient, filters, campaignValidator, userServiceClient);
     }
 
 
@@ -100,7 +102,7 @@ public class DonationServiceTest {
         Donation donation1 = Donation.builder().currency(Currency.USD).userId(1L).build();
         Donation donation2 = Donation.builder().currency(Currency.EUR).userId(1L).build();
 
-        filters.add(new DonationCurrencyFilter());
+        filters.add(filter);
         donationFilterDto.setCurrency(Currency.EUR);
 
         List<Donation> input = List.of(donation1, donation2);

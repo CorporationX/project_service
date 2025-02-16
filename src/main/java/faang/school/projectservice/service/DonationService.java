@@ -29,6 +29,7 @@ public class DonationService {
     private final DonationRepository donationRepository;
     private final CampaignRepository campaignRepository;
     private final DonationMapper donationMapper;
+    private final CampaignService campaignService;
     private final PaymentServiceClient paymentServiceClient;
     private final List<DonationFilter> donationFilters;
     private final CampaignValidator campaignValidator;
@@ -36,9 +37,7 @@ public class DonationService {
 
     public DonationDto sendDonation(DonationCreateDto donationCreateDto, Long userId) {
         Donation donation = donationMapper.toEntity(donationCreateDto);
-        Campaign campaign = campaignRepository.findById(donationCreateDto.getCampaignId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Campaign not found with id: " + donationCreateDto.getCampaignId()));
+        Campaign campaign = campaignService.findCampaignById(donationCreateDto.getCampaignId());
 
         campaignValidator.validateCampaignStatus(campaign);
 
@@ -48,14 +47,20 @@ public class DonationService {
             throw new DataValidationException("User with id " + userId + " not found");
         }
 
-        paymentServiceClient.sendPayment(new PaymentRequest(
-                donation.getPaymentNumber(),
-                donation.getAmount(),
-                donation.getCurrency()
-        ));
+        long paymentNumber = System.currentTimeMillis() + userId;
+        donation.setPaymentNumber(paymentNumber);
+
+        try {
+            paymentServiceClient.sendPayment(new PaymentRequest(
+                    paymentNumber,
+                    donation.getAmount(),
+                    donation.getCurrency()
+            ));
+        } catch (FeignException e) {
+            throw new DataValidationException("Payment with number " + paymentNumber + " failed");
+        }
 
         donation.setCampaign(campaign);
-        donation.setPaymentNumber(System.currentTimeMillis());
         donation.setDonationTime(LocalDateTime.now());
         donation.setUserId(userId);
 
@@ -67,7 +72,8 @@ public class DonationService {
 
     public DonationDto getDonationByIdAndUserId(Long donationId, Long userId) {
         Donation donation = donationRepository.findByIdAndUserId(donationId, userId)
-                .orElseThrow(() -> new EntityNotFoundException("Donation with id " + donationId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Donation with id " + donationId
+                        + " and user id " + userId + " not found"));
         return donationMapper.toDto(donation);
     }
 

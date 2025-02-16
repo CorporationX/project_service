@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(MockitoExtension.class)
 public class CampaignValidatorTest {
@@ -31,6 +31,6 @@ public class CampaignValidatorTest {
     void testValidateCampaignStatus_Success() {
         Campaign campaign = new Campaign();
         campaign.setStatus(CampaignStatus.ACTIVE);
-        assertTrue(campaignValidator.validateCampaignStatus(campaign));
+        assertDoesNotThrow(() -> campaignValidator.validateCampaignStatus(campaign));
     }
 }

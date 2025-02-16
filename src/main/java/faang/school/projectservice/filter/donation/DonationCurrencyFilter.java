@@ -16,6 +16,6 @@ public class DonationCurrencyFilter implements DonationFilter {
     @Override
     public Stream<Donation> apply(Stream<Donation> donations, DonationFilterDto filters) {
         return donations
-                .filter(donation -> donation.getCurrency().equals(filters.getCurrency()));
+                .filter(donation -> filters.getCurrency().equals(donation.getCurrency()));
     }
 }

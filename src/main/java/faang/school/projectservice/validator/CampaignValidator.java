@@ -9,12 +9,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CampaignValidator {
-
-    public boolean validateCampaignStatus(Campaign campaign) {
+    public void validateCampaignStatus(Campaign campaign) {
         if (campaign.getStatus() != CampaignStatus.ACTIVE) {
             throw new DataValidationException(
                     "Campaign with id " + campaign.getId() + " is not active");
         }
-        return true;
     }
 }
