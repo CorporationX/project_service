@@ -1,27 +1,24 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.dto.resource.ResourceReadDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.s3.S3Service;
-import faang.school.projectservice.service.imageprocessing.ImageProcessingUtils;
-import faang.school.projectservice.validator.project.ResourceValidator;
 import faang.school.projectservice.repository.ResourceRepository;
+import faang.school.projectservice.service.imageprocessing.ImageProcessingUtils;
 import faang.school.projectservice.service.s3.AmazonS3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
-import faang.school.projectservice.validator.resource.ResourceValidator;
+import faang.school.projectservice.validator.project.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,20 +34,25 @@ public class ProjectService {
     private final ResourceValidator resourceValidator;
     private final ProjectValidator projectValidator;
     private final AmazonS3Service amazonS3Client;
+    private final ResourceRepository resourceRepository;
     private final ProjectRepository projectRepository;
-    private final S3Service s3Service;
+    private final ResourceMapper resourceMapper;
     private final ProjectMapper projectMapper;
-    private final ResourceValidator validator;
     private final ImageProcessingUtils imageProcessingUtils;
 
-
+    public Project getProjectById(long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Проект с ID %d не найден", projectId)
+                ));
+    }
 
     public ProjectDto addProjectCover(Long projectId, MultipartFile file) {
         Project project = getProject(projectId);
 
-        validator.validateFile(file);
-        validator.checkFileSize(file.getSize());
-        validator.checkIsFileImage(file);
+        resourceValidator.validateResource(file);
+        resourceValidator.checkFileSize(file.getSize());
+        resourceValidator.checkIsFileImage(file);
 
         MultipartFile resizedImageBytes = imageProcessingUtils.convertByteToMultipartFile(
                 imageProcessingUtils.resizeImage(file),
@@ -59,15 +61,15 @@ public class ProjectService {
         );
 
         String folder = project.getId() + project.getName();
-        String key = s3Service.uploadFile(folder, resizedImageBytes);
+        String key = amazonS3Client.uploadFile(resizedImageBytes, folder);
         project.setCoverImageId(key);
         Project updatedProject = projectRepository.save(project);
         return projectMapper.toDto(updatedProject);
     }
 
     public ProjectDto deleteProjectCover(Long projectId) {
-        Project project = getProjectById(projectId);
-        s3Service.deleteFile(project.getCoverImageId());
+        Project project = getProject(projectId);
+        amazonS3Client.deleteFile(project.getCoverImageId());
         project.setCoverImageId(null);
         Project updatedProject = projectRepository.save(project);
         return projectMapper.toDto(updatedProject);

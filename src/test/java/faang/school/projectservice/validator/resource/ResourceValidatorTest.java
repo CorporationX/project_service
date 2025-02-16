@@ -1,6 +1,8 @@
 package faang.school.projectservice.validator.resource;
 
+import faang.school.projectservice.config.resource.ResourceConfig;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.validator.project.ResourceValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -16,7 +18,10 @@ class ResourceValidatorTest {
     @Mock
     private MultipartFile file;
 
-    private final ResourceValidator resourceValidator = new ResourceValidator();
+    @Mock
+    private ResourceConfig resourceConfig;
+
+    private final ResourceValidator resourceValidator = new ResourceValidator(resourceConfig);
 
     @Test
     void validateResourceThrowExceptionIfFileIsEmpty() {

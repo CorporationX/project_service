@@ -1,21 +1,16 @@
 package faang.school.projectservice.service.imageprocessing;
 
-import faang.school.projectservice.config.amazon.ResourceConfig;
+import faang.school.projectservice.config.resource.ResourceConfig;
 import faang.school.projectservice.exception.FileManagementException;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 @Component
 @RequiredArgsConstructor

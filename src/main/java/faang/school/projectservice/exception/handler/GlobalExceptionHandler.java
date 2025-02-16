@@ -2,20 +2,14 @@ package faang.school.projectservice.exception.handler;
 
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.IntegrationException;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.FileManagementException;
+import faang.school.projectservice.exception.IntegrationException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
-import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -73,8 +67,9 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(FileManagementException.class)
-    public ResponseEntity<String> handleFileManagementException(FileManagementException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    public ErrorResponse handleFileManagementException(FileManagementException e) {
+        return new ErrorResponse(e.getMessage());
     }
 }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.imageprocessing;
 
-import faang.school.projectservice.config.amazon.ResourceConfig;
+import faang.school.projectservice.config.resource.ResourceConfig;
 import faang.school.projectservice.exception.FileManagementException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

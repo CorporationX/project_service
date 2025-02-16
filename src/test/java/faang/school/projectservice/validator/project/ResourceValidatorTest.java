@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.project;
 
-import faang.school.projectservice.config.amazon.ResourceConfig;
+import faang.school.projectservice.config.resource.ResourceConfig;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.FileManagementException;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,18 +33,18 @@ class ResourceValidatorTest {
 
     @Test
     void testValidationWithValidFile() {
-        assertDoesNotThrow(() -> fileValidator.validateFile(file));
+        assertDoesNotThrow(() -> fileValidator.validateResource(file));
     }
 
     @Test
     void testValidationWithNullFile() {
-        assertThrows(DataValidationException.class, () -> fileValidator.validateFile(null));
+        assertThrows(DataValidationException.class, () -> fileValidator.validateResource(null));
     }
 
     @Test
     void testValidationWithEmptyFile() {
         when(file.isEmpty()).thenReturn(true);
-        assertThrows(DataValidationException.class, () -> fileValidator.validateFile(null));
+        assertThrows(DataValidationException.class, () -> fileValidator.validateResource(null));
     }
 
     @Test

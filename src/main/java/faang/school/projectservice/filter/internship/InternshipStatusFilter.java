@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class StatusFilter implements InternshipFilter {
+public class InternshipStatusFilter implements InternshipFilter {
     @Override
     public boolean isApplicable(InternshipFilterDto filter) {
         return (filter.getStatus() != null) && (filter.getStatus().equals(InternshipStatus.IN_PROGRESS)

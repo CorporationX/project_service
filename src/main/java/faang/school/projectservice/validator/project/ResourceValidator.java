@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.project;
 
-import faang.school.projectservice.config.amazon.ResourceConfig;
+import faang.school.projectservice.config.resource.ResourceConfig;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.FileManagementException;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ResourceValidator {
     private final ResourceConfig resourceConfig;
 
-    public void validateFile(MultipartFile file) {
+    public void validateResource(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new DataValidationException("Загрузка невозможна: файл пустой");
         }
