@@ -28,7 +28,7 @@ public class S3Service {
     private final AmazonS3 amazonS3;
     @Value("${services.s3.bucketName}")
     private String bucketName;
-    @Value("${project.gallery.image.link_expiration_time}")
+    @Value("${project.gallery.image.link_expiration_time_ms}")
     private long imageLinkExpirationTimeMillis;
 
     public Resource uploadFile(MultipartFile file, String folderName) {
