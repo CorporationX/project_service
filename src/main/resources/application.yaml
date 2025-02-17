@@ -19,6 +19,8 @@ spring:
         format_sql: true
 
   kafka:
+    topic:
+      fund-raised-event: fund_raised_event
     producer:
       bootstrap-servers: localhost:9092
       acks: all
