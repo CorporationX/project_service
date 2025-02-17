@@ -3,6 +3,7 @@ package faang.school.projectservice.exception.handler;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.IntegrationException;
+import faang.school.projectservice.exception.PaymentFailedException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
@@ -66,10 +67,9 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-
-
+    @ResponseStatus(HttpStatus.PAYMENT_REQUIRED)
     @ExceptionHandler(PaymentFailedException.class)
-    public ResponseEntity<String> handlePaymentFailedException(PaymentFailedException e) {
-        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(e.getMessage());
+    public ErrorResponse handlePaymentFailedException(PaymentFailedException e) {
+        return new ErrorResponse(e.getMessage());
     }
 }

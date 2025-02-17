@@ -54,8 +54,7 @@ public class DonationService {
     }
 
     public DonationDto getDonationByUserId(Long donationId, Long userId) {
-        validateId(donationId, "donationId");
-        validateId(userId, "userId");
+        validateId(donationId, userId);
         Donation donation = donationRepository.findByIdAndUserId(donationId, userId).orElseThrow(
                 () -> new EntityNotFoundException(
                         String.format("Донат c id %d не найден у юзера c id %d", donationId, userId))
@@ -78,9 +77,13 @@ public class DonationService {
                 .toList();
     }
 
-    private void validateId(Long id, String paramName) {
-        if (id == null) {
-            throw new DataValidationException(String.format("%s не может быть null", paramName));
+    private void validateId(Long donationId, Long userId) {
+        if (donationId == null) {
+            throw new DataValidationException("ID доната не может быть null");
+        }
+
+        if (userId == null) {
+            throw new DataValidationException("ID юзера не может быть null");
         }
     }
 }
